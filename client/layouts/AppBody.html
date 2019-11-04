@@ -1,0 +1,16 @@
+<template name="AppBody">
+    <head>
+        <title>UMS Members</title>
+    </head>
+    <body>
+    <header>
+        <ul id="menu">
+            <li><a href="/members">Members</a></li>
+            <li><a href="/payments">Payments</a></li>
+        </ul>
+    </header>
+    <div id="main">
+        {{> Template.dynamic template=main}}
+    </div>
+    </body>
+</template>

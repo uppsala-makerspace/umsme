@@ -1,0 +1,5 @@
+<template name="MembershipView">
+    <h1>Medlemskap för: {{member.name}}</h1>
+    <a href="/membership/{{id}}/edit">Edit</a>
+    {{> quickForm collection=Memberships doc=membership type="update" omitFields="_id" type="readonly"}}
+</template>

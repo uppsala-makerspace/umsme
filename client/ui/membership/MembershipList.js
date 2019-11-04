@@ -1,0 +1,24 @@
+import { Template } from 'meteor/templating';
+import { Memberships } from '../../../collections/memberships.js';
+import { Members } from '../../../collections/members.js';
+import { fields } from '../../../lib/fields';
+import './MembershipList.html';
+
+Template.MembershipList.helpers({
+  settings() {
+    return {
+      collection: Memberships.find({mid: this.member}),
+      rowsPerPage: 10,
+      showFilter: false,
+      fields: fields.membership.filter((field) => field.key !== 'mid').map((field) => {
+        if (field.key === 'start') {
+          field.sortOrder = 0;
+          field.sortDirection ='descending';
+        }
+        return field;
+      }),
+      showNavigation: 'auto',
+      class: "table table-bordered table-hover",
+    }
+  }
+});
