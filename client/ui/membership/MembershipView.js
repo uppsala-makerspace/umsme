@@ -3,27 +3,50 @@ import { Members } from '../../../collections/members.js';
 import {Memberships} from "../../../collections/memberships";
 import './MembershipView.html';
 
-Template.MemberView.onCreated(function() {
+Template.MembershipView.onCreated(function() {
   const self = this;
   self.autorun(function() {
+    self.subscribe('memberships');
     self.subscribe('members');
   });
 });
-Template.MemberView.helpers({
+Template.MembershipView.helpers({
   Members() {
     return Members;
   },
   Memberships() {
     return Memberships;
   },
-  id() {
-    return FlowRouter.getParam('_id');
-  },
   membership() {
-    return Memberships.findOne({'_id.str': FlowRouter.getParam('_id')});
+    const id = FlowRouter.getParam('_id');
+    return Memberships.findOne(id);
   },
   member() {
-    const membership = Memberships.findOne({'_id.str': FlowRouter.getParam('_id')});
-    return Members.findOne({mid: membership.mid});
+    const id = FlowRouter.getParam('_id');
+    const membership = Memberships.findOne(id);
+    return Members.findOne(membership.mid);
+  },
+});
+
+Template.MembershipView.events({
+  'click .deleteMembership': function (event) {
+    if (confirm('Delete this membership record')) {
+      const id = FlowRouter.getParam('_id');
+      const membership = Memberships.findOne(id);
+      const mid = membership.mid;
+      Memberships.remove(id);
+      FlowRouter.go(`/member/${mid}`);
+    }
+  }
+});
+
+AutoForm.hooks({
+  membershipViewForm: {
+    endSubmit: function (doc) {
+      const id = FlowRouter.getParam('_id');
+      const membership = Memberships.findOne(id);
+      const mid = membership.mid;
+      FlowRouter.go(`/member/${mid}`);
+    }
   }
 });

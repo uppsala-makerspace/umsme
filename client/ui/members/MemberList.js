@@ -18,7 +18,7 @@ Template.MemberList.events({
   'click .reactive-table tbody tr': function (event) {
     event.preventDefault();
     var post = this;
-    FlowRouter.go(`/member/${post._id._str}`);
+    FlowRouter.go(`/member/${post._id}`);
     //window.location.href = "/member/"
     //console.log(post.mid);
     // checks if the actual clicked element has the class `delete`

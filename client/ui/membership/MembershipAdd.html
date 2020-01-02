@@ -1,4 +1,4 @@
 <template name="MembershipAdd">
-    <h1>Membership Add</h1>
-    {{> quickForm collection=Memberships doc=draft id="insertMembershipForm" type="insert" validation="keyup"}}
+    <h1>Add membership for member <strong>{{memberName}}</strong></h1>
+    {{> quickForm collection=Memberships id="insertMembershipForm" type="normal" validation="keyup"}}
 </template>

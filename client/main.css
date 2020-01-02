@@ -68,3 +68,12 @@ header {
   background-color:#900;
   text-decoration:none;
 }
+
+.label {
+  font-size: 20px;
+  padding: 5px 10px;
+}
+
+.reactive-table td, a {
+  cursor: pointer;
+}

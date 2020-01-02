@@ -1,8 +1,25 @@
 <template name="MemberView">
-    <h1>Member: {{member.name}}</h1>
+    <h1>Member <strong>{{member.name}}</strong> <small><a class="deleteMember">Delete</a></small></h1>
+    {{#if status.inconsistent}}
+    <div class="alert alert-danger" role="alert">
+        Dates in member profile is not in sync with membership recors. <button class="updateMemberDates">Update!</button>
+    </div>
+    {{else}}
+      {{#if status.member}}<div class="label label-{{status.memberClass}}">Member to: {{memberLastDate}}</div>{{/if}}
+      {{#if status.lab}}<div class="label label-{{status.labClass}}">Labmember to: {{labMemberLastDate}}</div>{{/if}}
+      {{#if status.family}}<div class="label label-default">Familymember</div>{{/if}}
+    {{/if}}
+    <br><br>
+    {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id" type="update" buttonContent="Update"}}
+    {{#if member.infamily}}
+    <h2>Part of family, paying family member is <strong><a href="/member/{{member.infamily}}">{{payingMember.name}}</a></strong> <small><a class="removeFromFamily">Remove from family</a></small></h2>
+    {{/if}}
+    {{#if status.familyPatron}}
+    <h2>Family members <small><a href="/member/{{id}}/add">Add</a></small></h2>
+    {{> FamilyList patron=id}}
+    {{/if}}
+    {{#unless member.infamily}}
     <h2>Memberships <small><a href="/memberships/add?member={{id}}">Add</a></small></h2>
     {{> MembershipList member=id}}
-
-    <h2>Member Profile <small><a href="./{{id}}/edit">Edit</a></small></h2>
-    {{> quickForm collection=Members doc=member id="updateMemberForm" type="update" omitFields="_id" type="readonly"}}
+    {{/unless}}
 </template>

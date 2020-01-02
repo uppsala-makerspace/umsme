@@ -1,12 +1,6 @@
 import "./MembershipAdd";
+import "./MembershipView";
 
-/*FlowRouter.route('/members', {
-  name: 'members',
-  action() {
-    BlazeLayout.render('AppBody', {main: 'MemberList'});
-  }
-});
-*/
 FlowRouter.route('/memberships/add', {
   name: 'addmembership',
   action() {
@@ -14,17 +8,9 @@ FlowRouter.route('/memberships/add', {
   }
 });
 
-/*FlowRouter.route('/membership/:_id', {
+FlowRouter.route('/membership/:_id', {
   name: 'memberview',
   action(params) {
     BlazeLayout.render('AppBody', {main: 'MembershipView'});
   }
 });
-
-/*FlowRouter.route('/member/:_id/edit', {
-  name: 'memberedit',
-  action(params) {
-    BlazeLayout.render('AppBody', {main: 'MemberEdit'});
-  }
-});
-*/

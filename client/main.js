@@ -3,6 +3,8 @@ import "../client/layouts/Home.html";
 import "../client/layouts/Contact.html";
 import "./ui/members/index";
 import "./ui/membership/index";
+import "./ui/family/index";
+import './ui/bank/index';
 
 FlowRouter.route('/', {
   name: 'home',

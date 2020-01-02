@@ -22,3 +22,10 @@ Template.MembershipList.helpers({
     }
   }
 });
+
+Template.MembershipList.events({
+  'click .reactive-table tbody tr': function (event) {
+    event.preventDefault();
+    FlowRouter.go(`/membership/${this._id}`);
+  }
+});

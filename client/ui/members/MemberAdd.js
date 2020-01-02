@@ -8,3 +8,21 @@ Template.MemberAdd.helpers({
     return Members;
   }
 });
+
+AutoForm.hooks({
+  insertMemberForm: {
+    beginSubmit: function() {
+      let id;
+      do {
+        id = "" + Math.floor(Math.random()*100000);
+      } while (Members.findOne({mid: id}) != null);
+      this.insertDoc.mid = id;
+    },
+    onSubmit: function (doc) {
+      Members.insert(doc);
+      this.done();
+      FlowRouter.go('/members');
+      return false;
+    }
+  }
+});
