@@ -2,7 +2,7 @@
     <h1>Member <strong>{{member.name}}</strong> <small><a class="deleteMember">Delete</a></small></h1>
     {{#if status.inconsistent}}
     <div class="alert alert-danger" role="alert">
-        Dates in member profile is not in sync with membership recors. <button class="updateMemberDates">Update!</button>
+        Dates in member profile is not in sync with membership records. <button class="updateMemberDates">Update!</button>
     </div>
     {{else}}
       {{#if status.member}}<div class="label label-{{status.memberClass}}">Member to: {{memberLastDate}}</div>{{/if}}
@@ -15,7 +15,7 @@
     <h2>Part of family, paying family member is <strong><a href="/member/{{member.infamily}}">{{payingMember.name}}</a></strong> <small><a class="removeFromFamily">Remove from family</a></small></h2>
     {{/if}}
     {{#if status.familyPatron}}
-    <h2>Family members <small><a href="/member/{{id}}/add">Add</a></small></h2>
+    <h2>Family members <small><a href="/member/{{id}}/add">Add existing</a> <a href="/members/add?infamily={{id}}">Add new</a></small></h2>
     {{> FamilyList patron=id}}
     {{/if}}
     {{#unless member.infamily}}

@@ -1,5 +1,7 @@
 import { Template } from 'meteor/templating';
-import { Members } from '../../../collections/members.js';
+import { Members } from '/collections/members.js';
+import { updateMember } from '/lib/utils';
+
 
 import './MemberAdd.html';
 
@@ -17,11 +19,22 @@ AutoForm.hooks({
         id = "" + Math.floor(Math.random()*100000);
       } while (Members.findOne({mid: id}) != null);
       this.insertDoc.mid = id;
+      const infamily = FlowRouter.getQueryParam('infamily');
+      if (infamily) {
+        this.insertDoc.infamily = infamily;
+      }
     },
     onSubmit: function (doc) {
-      Members.insert(doc);
+      const id = Members.insert(doc);
+      const mb = Members.findOne(id);
+      updateMember(mb);
       this.done();
-      FlowRouter.go('/members');
+      const infamily = FlowRouter.getQueryParam('infamily');
+      if (infamily) {
+        FlowRouter.go(`/member/${infamily}`);
+      } else {
+        FlowRouter.go('/members');
+      }
       return false;
     }
   }

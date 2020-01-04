@@ -5,6 +5,7 @@ import "./ui/members/index";
 import "./ui/membership/index";
 import "./ui/family/index";
 import './ui/bank/index';
+import './ui/admin/index';
 
 FlowRouter.route('/', {
   name: 'home',

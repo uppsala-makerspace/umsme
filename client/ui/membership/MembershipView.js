@@ -1,6 +1,8 @@
 import { Template } from 'meteor/templating';
-import { Members } from '../../../collections/members.js';
-import {Memberships} from "../../../collections/memberships";
+import { Members } from '/collections/members.js';
+import {Memberships} from "/collections/memberships";
+import { updateMember } from '/lib/utils';
+
 import './MembershipView.html';
 
 Template.MembershipView.onCreated(function() {
@@ -35,6 +37,8 @@ Template.MembershipView.events({
       const membership = Memberships.findOne(id);
       const mid = membership.mid;
       Memberships.remove(id);
+      const mb = Members.findOne(mid);
+      updateMember(mb);
       FlowRouter.go(`/member/${mid}`);
     }
   }
@@ -46,6 +50,8 @@ AutoForm.hooks({
       const id = FlowRouter.getParam('_id');
       const membership = Memberships.findOne(id);
       const mid = membership.mid;
+      const mb = Members.findOne(mid);
+      updateMember(mb);
       FlowRouter.go(`/member/${mid}`);
     }
   }

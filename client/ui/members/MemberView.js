@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { Members } from '../../../collections/members.js';
 import { Memberships } from '../../../collections/memberships.js';
+import { memberStatus, updateMember } from '/lib/utils';
 import './MemberView.html';
 import '../membership/MembershipList';
 import '../family/FamilyList';
@@ -37,60 +38,10 @@ Template.MemberView.events({
     }
   },
   'click .updateMemberDates': function(event) {
-    const id = FlowRouter.getParam('_id');
-    const mb = Members.findOne(id);
-    const { member, lab, family } = dates(mb);
-    const familyNow = family > new Date();
-    const $set = { family: familyNow};
-    const $unset = {};
-    if (member) {
-      $set.member = member;
-    } else {
-      $unset.member = "";
-    }
-    if (lab) {
-      $set.lab = lab;
-    } else {
-      $unset.lab = "";
-    }
-    Members.update(id, {$set, $unset});
+    const mb = Members.findOne(FlowRouter.getParam('_id'));
+    updateMember(mb);
   }
 });
-
-const dates = (mb) => {
-  const mid = mb.infamily || mb._id;
-  let member;
-  let lab;
-  let family;
-  const updateMemberEndDate = (ms) => {
-    if (!member || ms.end > member) {
-      member = ms.end;
-    }
-  };
-  const updateLabEndDate = (ms) => {
-    if (!lab || ms.end > lab) {
-      lab = ms.end;
-    }
-  };
-  Memberships.find({mid}).forEach((ms) => {
-    switch (ms.type) {
-      case 'member':
-        updateMemberEndDate(ms);
-        break;
-      case 'lab':
-        updateLabEndDate(ms);
-        break;
-      case 'labandmember':
-        updateMemberEndDate(ms);
-        updateLabEndDate(ms);
-        break;
-    }
-    if (ms.family && (!family || ms.end > family)) {
-      family = ms.end;
-    }
-  });
-  return { member, lab, family};
-};
 
 const te = (d1, d2) => {
   if (d1 && d2) {
@@ -110,7 +61,7 @@ Template.MemberView.helpers({
   },
   status() {
     const mb = Members.findOne(FlowRouter.getParam('_id'));
-    const { member, lab, family } = dates(mb);
+    const { member, lab, family } = memberStatus(mb);
     const now = new Date();
     const inTwoWeeks = new Date();
     inTwoWeeks.setDate(inTwoWeeks.getDate()+14);
@@ -120,7 +71,7 @@ Template.MemberView.helpers({
     return {
       inconsistent: !te(mb.member, member) || !te(mb.lab, lab) || (mb.family === true) !== familyNow,
       family: familyNow,
-      familyPatron: familyNow && !mb.infamily,
+      familyPatron: mb.family && !mb.infamily,
       lab: mb.lab,
       labClass,
       member: mb.member,
@@ -128,8 +79,7 @@ Template.MemberView.helpers({
     };
   },
   member: function() {
-    const member = Members.findOne(FlowRouter.getParam('_id'));
-    return member;
+    return Members.findOne(FlowRouter.getParam('_id'));
   },
   payingMember: function() {
     const member = Members.findOne(FlowRouter.getParam('_id'));
