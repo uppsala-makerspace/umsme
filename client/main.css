@@ -77,3 +77,7 @@ header {
 .reactive-table td, a {
   cursor: pointer;
 }
+
+#messageTemplateViewForm textarea {
+  min-height: 400px;
+}

@@ -6,6 +6,7 @@ import "./ui/membership/index";
 import "./ui/family/index";
 import './ui/bank/index';
 import './ui/admin/index';
+import './ui/messagetemplate/index';
 
 FlowRouter.route('/', {
   name: 'home',

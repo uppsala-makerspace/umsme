@@ -1,0 +1,4 @@
+<template name="MessageTemplateView">
+    <h1>Message template <small><a class="deleteTemplate">Delete</a></small></h1>
+    {{> quickForm collection=MessageTemplates doc=messageTemplate id="messageTemplateViewForm" omitFields="_id" type="update" buttonContent="Update and go back to templates"}}
+</template>
