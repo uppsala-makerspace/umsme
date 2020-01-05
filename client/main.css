@@ -78,6 +78,7 @@ header {
   cursor: pointer;
 }
 
+#insertTemplateForm textarea,
 #messageTemplateViewForm textarea {
   min-height: 400px;
 }
