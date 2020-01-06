@@ -8,7 +8,7 @@ Template.MessageTemplateList.helpers({
     collection: MessageTemplates,
     rowsPerPage: 10,
     showFilter: true,
-    fields: fields.templates.filter(obj => obj.key !== 'messagetext' && obj.key !== 'subject' && obj.key !== 'created' && obj.key !== 'modified'),
+    fields: fields.template.filter(obj => obj.key !== 'messagetext' && obj.key !== 'subject' && obj.key !== 'created' && obj.key !== 'modified'),
     class: "table table-bordered table-hover",
   }
 });

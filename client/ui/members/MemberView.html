@@ -21,5 +21,8 @@
     {{#unless member.infamily}}
     <h2>Memberships <small><a href="/memberships/add?member={{id}}">Add</a></small></h2>
     {{> MembershipList member=id}}
+    <h2>Messages</h2>
+    {{>ReminderMessage member=id}}
+    {{> MessageList member=id}}
     {{/unless}}
 </template>

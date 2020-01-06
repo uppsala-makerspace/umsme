@@ -13,6 +13,7 @@ AutoForm.hooks({
     beginSubmit: function() {
       this.insertDoc.created = new Date();
       this.insertDoc.modified = new Date();
+      this.insertDoc.deprecated = false;
     },
     onSubmit: function (doc) {
       const id = MessageTemplates.insert(doc);

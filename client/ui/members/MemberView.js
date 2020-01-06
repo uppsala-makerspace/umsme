@@ -1,10 +1,13 @@
 import { Template } from 'meteor/templating';
-import { Members } from '../../../collections/members.js';
-import { Memberships } from '../../../collections/memberships.js';
+import { Members } from '/collections/members';
+import { Memberships } from '/collections/memberships';
+import { Messages } from '/collections/messages';
 import { memberStatus, updateMember } from '/lib/utils';
 import './MemberView.html';
+import '../message/MessageList';
 import '../membership/MembershipList';
 import '../family/FamilyList';
+import '../message/ReminderMessage';
 
 Template.MemberView.onCreated(function() {
   const self = this;
@@ -22,10 +25,11 @@ Template.MemberView.events({
       return;
     }
 
-    if (confirm('Delete this user and all the associated memberships')) {
+    if (confirm('Delete this user and all the associated memberships and messages')) {
       const member = Members.findOne(mid);
 //      Memberships.remove({mid: member._id});  // Only works in trusted mode (when signed in)
       Memberships.find({mid: mid}).forEach((ms) => {Memberships.remove(ms._id);});
+      Messages.find({member: mid}).forEach((mes) => {Messages.remove(mes._id);});
       Members.remove(mid);
       FlowRouter.go('/members');
     }

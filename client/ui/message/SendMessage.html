@@ -1,0 +1,4 @@
+<template name="SendMessage">
+    <h1>Send <strong>{{template.type}}</strong> message to member <strong>{{member.name}}</strong></h1>
+    {{> quickForm collection=Messages doc=message id="insertMessageForm" type="normal" validation="keyup" omitFields="senddate,type"}}
+</template>

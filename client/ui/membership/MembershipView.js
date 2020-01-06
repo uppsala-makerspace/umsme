@@ -2,7 +2,8 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members.js';
 import {Memberships} from "/collections/memberships";
 import { updateMember } from '/lib/utils';
-
+import '../message/InitiateMessage';
+import '../message/MessageList';
 import './MembershipView.html';
 
 Template.MembershipView.onCreated(function() {
@@ -22,6 +23,14 @@ Template.MembershipView.helpers({
   membership() {
     const id = FlowRouter.getParam('_id');
     return Memberships.findOne(id);
+  },
+  membershipId() {
+    return FlowRouter.getParam('_id');
+  },
+  memberId() {
+    const id = FlowRouter.getParam('_id');
+    const membership = Memberships.findOne(id);
+    return membership.mid;
   },
   member() {
     const id = FlowRouter.getParam('_id');

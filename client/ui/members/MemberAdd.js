@@ -33,7 +33,7 @@ AutoForm.hooks({
       if (infamily) {
         FlowRouter.go(`/member/${infamily}`);
       } else {
-        FlowRouter.go('/members');
+        FlowRouter.go(`/member/${id}`);
       }
       return false;
     }
