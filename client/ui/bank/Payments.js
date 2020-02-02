@@ -3,7 +3,8 @@ import './Payments.html';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { fields } from '../../../lib/fields';
 
-Template.Payments.onCreated(function bodyOnCreated() {
+Template.Payments.onCreated(function() {
+  Meteor.subscribe('payments');
   this.state = new ReactiveDict();
   this.state.set('status', 'unknown');
 });

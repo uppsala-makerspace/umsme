@@ -5,6 +5,10 @@ import { updateMember } from '/lib/utils';
 
 import './MemberAdd.html';
 
+Template.MemberAdd.onCreated(() => {
+  Meteor.subscribe('members');
+});
+
 Template.MemberAdd.helpers({
   Members() {
     return Members;

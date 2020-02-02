@@ -4,6 +4,12 @@ import { Memberships } from '/collections/memberships';
 import { MessageTemplates } from '/collections/templates';
 import './InitiateMessage.html';
 
+Template.InitiateMessage.onCreated(function() {
+  Meteor.subscribe('memberships');
+  Meteor.subscribe('members');
+  Meteor.subscribe('templates');
+});
+
 const getTemplate = (mid, msid, type) => {
   const mb = Members.findOne(mid);
   const ms = Memberships.findOne(msid);

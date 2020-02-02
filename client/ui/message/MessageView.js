@@ -1,15 +1,11 @@
 import { Template } from 'meteor/templating';
 import { Members } from '/collections/members';
-import {Messages} from "/collections/messages";
-
+import { Messages } from "/collections/messages";
 import './MessageView.html';
 
 Template.MessageView.onCreated(function() {
-  const self = this;
-  self.autorun(function() {
-    self.subscribe('messages');
-    self.subscribe('members');
-  });
+  Meteor.subscribe('messages');
+  Meteor.subscribe('members');
 });
 Template.MessageView.helpers({
   Messages() {

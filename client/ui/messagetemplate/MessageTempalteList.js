@@ -3,6 +3,10 @@ import { MessageTemplates } from '/collections/templates';
 import { fields } from '../../../lib/fields';
 import './MessageTemplateList.html';
 
+Template.MessageTemplateList.onCreated(function() {
+  Meteor.subscribe('templates');
+});
+
 Template.MessageTemplateList.helpers({
   settings: {
     collection: MessageTemplates,

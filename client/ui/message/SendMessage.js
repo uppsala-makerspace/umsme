@@ -9,11 +9,10 @@ import './SendMessage.html';
 
 
 Template.SendMessage.onCreated(function() {
-  const self = this;
-  self.autorun(function() {
-    self.subscribe('messages');
-    self.subscribe('members');
-  });
+  Meteor.subscribe('members');
+  Meteor.subscribe('templates');
+  Meteor.subscribe('messages');
+  Meteor.subscribe('memberships');
 });
 
 const niceDate = (date) => {

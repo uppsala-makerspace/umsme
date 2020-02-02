@@ -3,6 +3,10 @@ import { Members } from '../../../collections/members.js';
 import { fields } from '../../../lib/fields';
 import './FamilyList.html';
 
+Template.FamilyList.onCreated(function() {
+  Meteor.subscribe('members');
+});
+
 Template.FamilyList.helpers({
   settings() {
     return {

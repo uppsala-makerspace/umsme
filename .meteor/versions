@@ -8,7 +8,6 @@ aldeed:simple-schema@1.5.4
 allow-deny@1.1.0
 anti:i18n@0.4.3
 aslagle:reactive-table@0.8.45
-autopublish@1.0.7
 autoupdate@1.6.0
 babel-compiler@7.4.2
 babel-runtime@1.4.0

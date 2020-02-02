@@ -4,6 +4,10 @@ import { MessageTemplates } from '/collections/templates';
 import { memberStatus } from '/lib/utils';
 import './ReminderMessage.html';
 
+Template.ReminderMessage.onCreated(function() {
+  Meteor.subscribe('templates');
+  Meteor.subscribe('members');
+});
 
 Template.ReminderMessage.events({
   'click .reminderButton':  function (event) {

@@ -4,6 +4,13 @@ import { Memberships } from '/collections/memberships';
 import { fields } from '../../../lib/fields';
 import './PaymentView.html';
 
+
+Template.PaymentView.onCreated(function() {
+  Meteor.subscribe('payments');
+  Meteor.subscribe('members');
+  Meteor.subscribe('memberships');
+});
+
 Template.PaymentView.helpers({
   Payments() {
     return Payments;

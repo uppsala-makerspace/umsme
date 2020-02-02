@@ -4,6 +4,10 @@ import { models } from '../../../lib/models';
 import { fields } from '../../../lib/fields';
 import './MemberList.html';
 
+Template.MemberList.onCreated(() => {
+  Meteor.subscribe('members');
+});
+
 Template.MemberList.helpers({
   settings: {
     collection: Members,

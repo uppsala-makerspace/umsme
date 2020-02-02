@@ -4,6 +4,11 @@ import { fields } from '../../../lib/fields';
 import { updateMember } from '/lib/utils';
 import './ProspectiveFamilyMemberList.html';
 
+
+Template.ProspectiveFamilyMemberList.onCreated(function() {
+  Meteor.subscribe('members');
+});
+
 Template.ProspectiveFamilyMemberList.helpers({
   settings: {
     collection: Members.find({$and: [{infamily: {$exists: false}}, {family: {$eq: false}}]}),

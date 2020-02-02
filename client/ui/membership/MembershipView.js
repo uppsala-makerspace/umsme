@@ -8,11 +8,9 @@ import '../message/MessageList';
 import './MembershipView.html';
 
 Template.MembershipView.onCreated(function() {
-  const self = this;
-  self.autorun(function() {
-    self.subscribe('memberships');
-    self.subscribe('members');
-  });
+  Meteor.subscribe('memberships');
+  Meteor.subscribe('members');
+  Meteor.subscribe('payments');
 });
 Template.MembershipView.helpers({
   Members() {

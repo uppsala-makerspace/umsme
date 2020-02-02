@@ -6,6 +6,12 @@ import { membershipFromPayment } from '/lib/rules';
 import { updateMember } from '/lib/utils';
 import './MembershipAdd.html';
 
+Template.MembershipAdd.onCreated(function() {
+  Meteor.subscribe('memberships');
+  Meteor.subscribe('members');
+  Meteor.subscribe('payments');
+});
+
 Template.MembershipAdd.helpers({
   Memberships() {
     return Memberships;

@@ -4,10 +4,7 @@ import { MessageTemplates } from '/collections/templates';
 import './MessageTemplateView.html';
 
 Template.MembershipView.onCreated(function() {
-  const self = this;
-  self.autorun(function() {
-    self.subscribe('templates');
-  });
+  Meteor.subscribe('templates');
 });
 Template.MessageTemplateView.helpers({
   MessageTemplates() {

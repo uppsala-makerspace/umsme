@@ -10,10 +10,9 @@ import '../family/FamilyList';
 import '../message/ReminderMessage';
 
 Template.MemberView.onCreated(function() {
-  const self = this;
-  self.autorun(function() {
-    self.subscribe('members');
-  });
+  Meteor.subscribe('members');
+  Meteor.subscribe('memberhips');
+  Meteor.subscribe('messages');
 });
 
 Template.MemberView.events({

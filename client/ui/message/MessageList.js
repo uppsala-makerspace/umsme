@@ -1,8 +1,11 @@
 import { Template } from 'meteor/templating';
 import { Messages } from '/collections/messages';
-import { Members } from '/collections/members';
 import { fields } from '/lib/fields';
 import './MessageList.html';
+
+Template.MessageList.onCreated(function() {
+  Meteor.subscribe('messages');
+});
 
 Template.MessageList.helpers({
   settings() {
