@@ -56,6 +56,7 @@ Meteor.methods({
         }
         lock = lock[0];
       }
+      let liability = row[11] != null && row[11] != '';
       const existingmemeber = Members.findOne({ mid: row[1] });
       if (!existingmemeber) {
         try {
@@ -64,6 +65,7 @@ Meteor.methods({
             name: `${row[2]} ${row[3]}`,
             email,
             lock,
+            liability,
             youth: medlem === 'Ungdom',
             family: medlem === 'Familj' || (medlem !== 'Individ' && medlem !== 'Ungdom'),
             type: medlem === 'Ungdom' ? 'youthdiscount' : 'normal'
