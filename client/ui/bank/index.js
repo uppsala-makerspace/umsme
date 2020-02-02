@@ -1,5 +1,5 @@
 import './Payments';
-import './Callback'
+import './PaymentView'
 
 FlowRouter.route('/payments', {
   name: 'payments',
@@ -8,9 +8,9 @@ FlowRouter.route('/payments', {
   }
 });
 
-FlowRouter.route('/callback', {
-  name: 'callback',
+FlowRouter.route('/payment/:_id', {
+  name: 'payment',
   action() {
-    BlazeLayout.render('AppBody', {main: 'Callback'});
+    BlazeLayout.render('AppBody', {main: 'PaymentView'});
   }
 });

@@ -1,4 +1,34 @@
 <template name="Payments">
-    <h1>Bank login</h1>
-    <a href="https://link.tink.com/1.0/authorize/?client_id=b997756027424a90aea7cb03f1bfdf12&redirect_uri=http://localhost:3000/callback&locale=en_US&scope=accounts:read&market=SE&input_provider=swedbank-bankid">Login</a>
+    <h1>Bank synchronization</h1>
+    {{#if currentUser}}
+        <form class="personalnumber">
+            <label>Personal number: </label> <input type="text" name="pnr" placeholder="Personal number" value="{{pnr}}">
+            <button type="submit" class="updatePnr">Update / Save</button>
+        </form>
+      {{#if pnr}}
+
+            <div>
+                <label>Bank signin status: </label> {{status}} <button class="checkBank">check</button>
+            </div>
+            {{#if enablesignin}}
+               <button class="signinbank">Signin</button>
+            {{/if}}
+            {{#if enablesignout}}
+                <button class="signoutbank">Signout</button>
+                <button class="synchronize">Syncronize transactions</button>
+            {{/if}}
+            <ul>
+                {{#each transactions}}
+                {{> transaction}}
+                {{/each}}
+            </ul>
+      {{/if}}
+    <h1>Bank payments</h1>
+    {{> reactiveTable settings=settings}}
+    {{/if}}
+</template>
+
+
+<template name="transaction">
+    <li>{{date}}: {{amount}}</li>
 </template>

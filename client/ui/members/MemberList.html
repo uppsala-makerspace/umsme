@@ -1,5 +1,7 @@
 <template name="MemberList">
     <h1>Member List</h1>
+    {{#if currentUser}}
     <a href="members/add">Add member</a>
     {{> reactiveTable settings=settings}}
+    {{/if}}
 </template>

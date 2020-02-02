@@ -9,7 +9,7 @@ Template.FamilyList.helpers({
       collection: Members.find({infamily: this.patron}),
       rowsPerPage: 10,
       showFilter: false,
-      fields: fields.member,
+      fields: fields.member(),
       showNavigation: 'auto',
       class: "table table-bordered table-hover",
     }

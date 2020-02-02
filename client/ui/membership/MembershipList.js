@@ -10,13 +10,7 @@ Template.MembershipList.helpers({
       collection: Memberships.find({mid: this.member}),
       rowsPerPage: 10,
       showFilter: false,
-      fields: fields.membership.filter((field) => field.key !== 'mid').map((field) => {
-        if (field.key === 'start') {
-          field.sortOrder = 0;
-          field.sortDirection ='descending';
-        }
-        return field;
-      }),
+      fields: fields.membership(),
       showNavigation: 'auto',
       class: "table table-bordered table-hover",
     }

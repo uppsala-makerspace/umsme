@@ -3,6 +3,11 @@
     <a class="deleteMembership">Delete</a>
     {{> quickForm collection=Memberships doc=membership id="membershipViewForm" omitFields="_id" type="update" buttonContent="Update and go back to member"}}
 
+    {{#if payment}}
+    <h2><a href="/payment/{{payment._id}}">Bank payment</a> <small><a class="removePaymentFromMembership">Disconnect</a></small></h2>
+    {{> quickForm collection=Payments doc=payment id="paymentViewForm" omitFields="_id,member" type="readonly"}}
+    {{/if}}
+
     <h2>Messages</h2>
     {{> InitiateMessage member=memberId membership=membershipId }}
     {{> MessageList membership=membershipId}}

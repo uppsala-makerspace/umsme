@@ -9,7 +9,7 @@ Template.MemberList.helpers({
     collection: Members,
     rowsPerPage: 10,
     showFilter: true,
-    fields: fields.member,
+    fields: fields.member(),
     class: "table table-bordered table-hover",
   }
 });

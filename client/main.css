@@ -74,6 +74,10 @@ header {
   padding: 5px 10px;
 }
 
+.labelInHeading {
+  vertical-align: middle;
+}
+
 .reactive-table td, a {
   cursor: pointer;
 }
@@ -83,4 +87,17 @@ header {
 #insertTemplateForm textarea,
 #messageTemplateViewForm textarea {
   min-height: 400px;
+}
+
+.login-buttons-dropdown-align-right {
+  float: right;
+  margin: 10px 20px !important;
+}
+
+.login-buttons-dropdown-align-right a.login-link-text {
+  color: white;
+}
+
+#login-dropdown-list {
+  top: 32px;
 }

@@ -9,7 +9,7 @@ Template.ProspectiveFamilyMemberList.helpers({
     collection: Members.find({$and: [{infamily: {$exists: false}}, {family: {$eq: false}}]}),
     rowsPerPage: 10,
     showFilter: true,
-    fields: fields.member,
+    fields: fields.member(),
     class: "table table-bordered table-hover",
   },
   id() {

@@ -6,6 +6,7 @@ import { Messages } from '/collections/messages';
 import './methods/import';
 import './methods/update';
 import './methods/mail';
+import './methods/bank';
 
 Meteor.startup(() => {
   // code to run on server at startup
