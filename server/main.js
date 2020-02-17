@@ -20,7 +20,7 @@ if (Meteor.isServer) {
       return Members.find();
     }
   });
-  Meteor.publish('memberhips', function() {
+  Meteor.publish('memberships', function() {
     if (this.userId) {
       return Memberships.find();
     }

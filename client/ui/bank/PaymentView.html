@@ -28,7 +28,7 @@
         {{/unless}}
     {{/if}}
     {{#unless member}}
-        <h2>Connect to member</h2>
+        <h2>Connect to member: <small><a href="/members/add?payment={{payment._id}}">Add new</a></small></h2>
         <div class="paymentMembers">
             {{> reactiveTable settings=memberSettings}}
         </div>

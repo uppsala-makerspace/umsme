@@ -95,8 +95,9 @@ AutoForm.hooks({
       Messages.insert(doc);
       this.done();
       const memberId = FlowRouter.getQueryParam('member');
-/*      const mb = Members.findOne(memberId);
-      updateMember(mb);*/
+      if (doc.type === 'reminder') {
+        Members.update(memberId, {$set: {reminder: new Date()}});
+      }
       FlowRouter.go(`/member/${memberId}`);
       return false;
     }

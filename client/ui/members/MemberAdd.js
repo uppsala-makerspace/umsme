@@ -1,5 +1,6 @@
 import { Template } from 'meteor/templating';
 import { Members } from '/collections/members.js';
+import { Payments } from '/collections/payments';
 import { updateMember } from '/lib/utils';
 
 
@@ -7,12 +8,20 @@ import './MemberAdd.html';
 
 Template.MemberAdd.onCreated(() => {
   Meteor.subscribe('members');
+  Meteor.subscribe('payments');
 });
 
 Template.MemberAdd.helpers({
   Members() {
     return Members;
-  }
+  },
+  Payments() {
+    return Payments;
+  },
+  payment() {
+    const paymentId = FlowRouter.getQueryParam('payment');
+    return Payments.findOne(paymentId);
+  },
 });
 
 AutoForm.hooks({
@@ -34,8 +43,12 @@ AutoForm.hooks({
       updateMember(mb);
       this.done();
       const infamily = FlowRouter.getQueryParam('infamily');
+      const paymentId = FlowRouter.getQueryParam('payment');
       if (infamily) {
         FlowRouter.go(`/member/${infamily}`);
+      } else if (paymentId) {
+        Payments.update(paymentId, {$set: {member: id}});
+        FlowRouter.go(`/payment/${paymentId}`);
       } else {
         FlowRouter.go(`/member/${id}`);
       }

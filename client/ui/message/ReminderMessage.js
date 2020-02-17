@@ -3,6 +3,8 @@ import { Members } from '/collections/members';
 import { MessageTemplates } from '/collections/templates';
 import { memberStatus } from '/lib/utils';
 import './ReminderMessage.html';
+import { reminderDays } from '/lib/rules';
+
 
 Template.ReminderMessage.onCreated(function() {
   Meteor.subscribe('templates');
@@ -17,7 +19,7 @@ Template.ReminderMessage.events({
     const membertype = mb.family === true ? 'family' : (mb.youth === true ? 'youth' : 'normal');
     const now = new Date();
     const inTwoWeeks = new Date();
-    inTwoWeeks.setDate(inTwoWeeks.getDate()+14);
+    inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
     const labNow = lab > now;
     const memberNow = member > now;
     if (lab < inTwoWeeks || member < inTwoWeeks) {

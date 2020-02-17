@@ -3,6 +3,8 @@ import { Members } from '/collections/members';
 import { Memberships } from '/collections/memberships';
 import { Messages } from '/collections/messages';
 import { memberStatus, updateMember } from '/lib/utils';
+import { reminderDays, reminderState } from '/lib/rules';
+
 import './MemberView.html';
 import '../message/MessageList';
 import '../membership/MembershipList';
@@ -11,7 +13,7 @@ import '../message/ReminderMessage';
 
 Template.MemberView.onCreated(function() {
   Meteor.subscribe('members');
-  Meteor.subscribe('memberhips');
+  Meteor.subscribe('memberships');
   Meteor.subscribe('messages');
 });
 
@@ -67,7 +69,7 @@ Template.MemberView.helpers({
     const { member, lab, family } = memberStatus(mb);
     const now = new Date();
     const inTwoWeeks = new Date();
-    inTwoWeeks.setDate(inTwoWeeks.getDate()+14);
+    inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
     const familyNow = family > now;
     const labClass = lab > inTwoWeeks ? 'success' : (lab > now ? 'warning' : 'danger');
     const memberClass = member > inTwoWeeks ? 'success' : (member > now ? 'warning' : 'danger');
@@ -79,6 +81,31 @@ Template.MemberView.helpers({
       labClass,
       member: mb.member,
       memberClass
+    };
+  },
+  reminder: function() {
+    const obj = Members.findOne(FlowRouter.getParam('_id'));
+    const {state, date, formatted} = reminderState(obj);
+    let cls = '';
+    let text = '';
+    switch (state) {
+      case 'done':
+        cls = 'success';
+        text = `Reminder sent: ${formatted}`;
+        break;
+      case 'needed':
+        cls = 'danger';
+        text = 'Reminder needed';
+        break;
+      case 'old':
+        cls = 'default';
+        text = `Reminder sent: ${formatted}`;
+        break;
+    }
+    return {
+      visible: !obj.infamily && this.state !== 'none',
+      text,
+      cls,
     };
   },
   member: function() {

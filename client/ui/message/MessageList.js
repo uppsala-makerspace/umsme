@@ -19,8 +19,7 @@ Template.MessageList.helpers({
       collection: Messages.find(selector),
       rowsPerPage: 10,
       showFilter: false,
-      fields: fields.message.filter((field) => (field.key === 'type'
-        || field.key === 'subject' || field.key === 'senddate')),
+      fields: fields.message(),
       showNavigation: 'auto',
       class: "table table-bordered table-hover",
     }
