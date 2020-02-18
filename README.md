@@ -4,9 +4,35 @@
 
     cd umsme
     curl https://install.meteor.com/ | sh
+
+Kopiera settings.json_example till settings.json och anpassa, sen är det bara att köra:
+
     meteor
-    
-    
+
+Användarhantering görs via meteor shell:
+
+    meteor shell
+    // Följande kommandon sker inne i shellet.
+    // Lägg till användare:
+    Accounts.createUser({username: 'john', password: '12345'})
+
+    // Lista användare (notera att utskriften komemr i meteorloggen, inte i shellet):
+    Meteor.users.find().forEach(u => {console.log(u.username);});
+
+    // Ta bort användare:
+    Meteor.users.remove({username: 'john'});
+
+## Integration med Swedbank
+Integration med Swedbank görs via ett separat bibliotek [umsme-bank](https://github.com/uppsala-makerspace/umsme-bank).
+Efter att det installeras bör man ändra i settings.json för att peka ut rooten i REST api:et.
+
+## Maila från systemet
+För att det ska gå att skicka mail måste man sätta miljövariabeln `MAIL_URL`. Det enklaste är att man sätter variabeln i samma kommando som man sätter igång meteor:
+
+    MAIL_URL=smtp://username:password@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false meteor
+
+Where username typically is a full email like `kansliet@uppsalamakerspace.se`.
+
 ## Backup
 
 Vi använder mongodump och mongorestore. Först måste man se till att ha dessa verktyg installerade, via apt blir der:

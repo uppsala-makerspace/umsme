@@ -2,6 +2,8 @@ import { Email } from 'meteor/email'
 
 Meteor.methods({
   'mail': (to, subject, text) => {
-    Email.send({ to, from: "kansliet@uppsalamakerspace.se", subject, text });
+    if (Meteor.userId()) {
+      Email.send({ to, from: Meteor.settings.from, subject, text });
+    }
   },
 });

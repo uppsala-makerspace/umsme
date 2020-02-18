@@ -26,7 +26,7 @@ const extractSessionId = (result) => {
   }
 };
 
-const base = 'http://localhost:8000/';
+const base = Meteor.settings.bankproxy;
 
 const excludeTransactions = (transactions) => transactions.filter(tr =>
   tr.details.transactionType === 'Insättning');
@@ -41,55 +41,68 @@ const extractTransactions = (transactions) => transactions.map(tr => ({
 
 Meteor.methods({
   'setPnr': (pnr) => {
-    Meteor.users.update(Meteor.userId(), { $set: { profile: { pnr } } });
+    if (Meteor.userId()) {
+      Meteor.users.update(Meteor.userId(), { $set: { profile: { pnr } } });
+    }
   },
   'clearSession': () =>  {
-    pnr2sessionID[getPnr()] = undefined;
+    if (Meteor.userId()) {
+      pnr2sessionID[getPnr()] = undefined;
+    }
   },
   'checkBank': () => {
-    const result = HTTP.call('get', `${base}check.php`, addCookie({}));
-    extractSessionId(result);
-    return result.data;
+    if (Meteor.userId()) {
+      const result = HTTP.call('get', `${base}check.php`, addCookie({}));
+      extractSessionId(result);
+      return result.data;
+    }
   },
   'initiateBank': (pnr) => {
-    //const pnr = 197508296618; // Personal identity number (personnummer).
-    const result = HTTP.call('get', `${base}initiate.php?pnr?${pnr}`, addCookie({}));
-    return result.data.status;
+    if (Meteor.userId()) {
+      const result = HTTP.call('get', `${base}initiate.php?pnr?${pnr}`, addCookie({}));
+      return result.data.status;
+    }
   },
   'synchronize': () => {
-    const result = HTTP.call('get', `${base}transactions.php`, addCookie({}));
-    const transactions = extractTransactions(excludeTransactions(result.data.transactions));
-    let added = 0;
-    transactions.forEach((tr, idx) => {
-      if (idx > 10) {
-        return;
-      }
-      const payment = Payments.findOne({hash: tr.hash});
-      if (!payment) {
-        if (tr.type === 'swish') {
-          const result = HTTP.call('get', `${base}transaction.php?id=${tr.id}`, addCookie({}));
-          tr.message = result.data.message;
-          const swd = result.data.swishDetails;
-          tr.clarification = `Payers name: ${swd.payersName} via ${swd.sendersNumber} at ${swd.transactionTime}`;
+    if (Meteor.userId()) {
+      const result = HTTP.call('get', `${base}transactions.php`, addCookie({}));
+      const transactions = extractTransactions(excludeTransactions(result.data.transactions));
+      let added = 0;
+      transactions.forEach((tr, idx) => {
+        if (idx > Meteor.settings.syncNrOfTransactions) {
+          return;
         }
-        // Temporary id, we keep it temporarily to be able to do the detailed transaction lookup above
-        // But we do not store it, since it is unique to each session and worthless in the database
-        delete tr.id;
-        added += 1;
-        Payments.insert(tr);
+        const payment = Payments.findOne({ hash: tr.hash });
+        if (!payment) {
+          if (tr.type === 'swish') {
+            const result = HTTP.call('get', `${base}transaction.php?id=${tr.id}`, addCookie({}));
+            tr.message = result.data.message;
+            const swd = result.data.swishDetails;
+            tr.clarification = `Payers name: ${swd.payersName} via ${swd.sendersNumber} at ${swd.transactionTime}`;
+          }
+          // Temporary id, we keep it temporarily to be able to do the detailed transaction lookup above
+          // But we do not store it, since it is unique to each session and worthless in the database
+          delete tr.id;
+          added += 1;
+          Payments.insert(tr);
+        }
+      });
+      return {
+        added,
+        total: transactions.length - added,
       }
-    });
-    return {
-      added,
-      total: transactions.length - added,
     }
   },
   'transactions': () => {
-    const result = HTTP.call('get', `${base}transactions.php`, addCookie({}));
-    return result.data;
+    if (Meteor.userId()) {
+      const result = HTTP.call('get', `${base}transactions.php`, addCookie({}));
+      return result.data;
+    }
   },
   'transaction': (id) => {
-    const result = HTTP.call('get', `${base}transaction.php?id=${id}`, addCookie({}));
-    return result.data;
+    if (Meteor.userId()) {
+      const result = HTTP.call('get', `${base}transaction.php?id=${id}`, addCookie({}));
+      return result.data;
+    }
   },
 });

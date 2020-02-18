@@ -1,6 +1,8 @@
 <template name="AdminConsole">
-    <h1>Import from CSV file private/members.csv</h1>
-    <button class="importData">Import now!</button>
-    <h1>Update members with correct dates</h1>
-    <button class="updateMembers">Update now!</button>
+    {{#if currentUser}}
+      <h1>Import from CSV file private/members.csv</h1>
+      <button class="importData">Import now!</button>
+      <h1>Update members with correct dates</h1>
+      <button class="updateMembers">Update now!</button>
+    {{/if}}
 </template>

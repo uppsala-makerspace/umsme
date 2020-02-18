@@ -4,8 +4,10 @@ import { Memberships } from '/collections/memberships.js';
 
 Meteor.methods({
   'updateMembers': () => {
-    Members.find().forEach((mb) => {
-      updateMember(mb);
-    });
+    if (Meteor.userId()) {
+      Members.find().forEach((mb) => {
+        updateMember(mb);
+      });
+    }
   },
 });
