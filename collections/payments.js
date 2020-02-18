@@ -4,4 +4,4 @@ import { allow } from './allow';
 
 export const Payments = new Mongo.Collection('payments');
 Payments.attachSchema(schemas.payment);
-allow(Members);
+allow(Payments);

@@ -4,4 +4,4 @@ import { allow } from './allow';
 
 export const MessageTemplates = new Mongo.Collection('templates');
 MessageTemplates.attachSchema(schemas.template);
-allow(Members);
+allow(MessageTemplates);
