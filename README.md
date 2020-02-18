@@ -9,6 +9,7 @@ Kopiera settings.json_example till settings.json och anpassa, sen är det bara a
 
     meteor --settings settings.json
 
+## Användarhantering
 Användarhantering görs via meteor shell:
 
     meteor shell

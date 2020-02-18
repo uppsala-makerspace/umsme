@@ -34,11 +34,11 @@ Meteor.methods({
 
       rows.forEach((row, idx) => {
         // Avoid first row with column headers
-        if (idx === 0) {
+        if (row[0] === "#") {
           return;
         }
         const medlem = row[6];
-        if (medlem !== "Individ" && medlem !== "Familj" && medlem !== "Ungdom") {
+        if (medlem !== "Individ" && medlem !== "Familj" && medlem !== "Ungdom" && medlem !== "") {
           mid2family[row[1]] = medlem;
         }
         let email = row[4] && row[4].indexOf('@') > -1 ? `${row[4]}` : undefined;
@@ -87,8 +87,13 @@ Meteor.methods({
       Object.keys(mid2family).forEach((mid) => {
         const member = Members.findOne({ mid });
         const patron = Members.findOne({ mid: mid2family[mid] });
-        console.log(`Adding family relation from ${member.name} to ${patron.name}`);
-        Members.update(member._id, { $set: { infamily: patron._id } });
+        if (member && patron) {
+          console.log(`Adding family relation from ${member.name} to ${patron.name}`);
+          Members.update(member._id, { $set: { infamily: patron._id } });
+        } else {
+          console.log(`Adding family relation from ${mid} to ${mid2family[mid]}`);
+          console.log('Failed, "from" or "to" member missing!!!!!!!!!!!!!!');
+        }
       })
     }
   }
