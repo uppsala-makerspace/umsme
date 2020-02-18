@@ -57,9 +57,10 @@ Meteor.methods({
       return result.data;
     }
   },
-  'initiateBank': (pnr) => {
+  'initiateBank': () => {
     if (Meteor.userId()) {
-      const result = HTTP.call('get', `${base}initiate.php?pnr?${pnr}`, addCookie({}));
+      const user = Meteor.users.findOne(Meteor.userId());
+      const result = HTTP.call('get', `${base}initiate.php?pnr=${user.profile.pnr}`, addCookie({}));
       return result.data.status;
     }
   },
