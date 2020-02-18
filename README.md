@@ -1,13 +1,13 @@
 # Medlemsadministration
 
-## Installera
+## Installera och köra igång
 
     cd umsme
     curl https://install.meteor.com/ | sh
 
 Kopiera settings.json_example till settings.json och anpassa, sen är det bara att köra:
 
-    meteor
+    meteor --settings settings.json
 
 Användarhantering görs via meteor shell:
 
@@ -27,11 +27,14 @@ Integration med Swedbank görs via ett separat bibliotek [umsme-bank](https://gi
 Efter att det installeras bör man ändra i settings.json för att peka ut rooten i REST api:et.
 
 ## Maila från systemet
-För att det ska gå att skicka mail måste man sätta miljövariabeln `MAIL_URL`. Det enklaste är att man sätter variabeln i samma kommando som man sätter igång meteor:
+För att det ska gå att skicka mail måste man sätta miljövariabeln `MAIL_URL`. Det enklaste är att man sätter variabeln i samma kommando som man sätter igång meteor, så vi modifierar kommandot ovan till att vara:
 
-    MAIL_URL=smtp://username:password@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false meteor
+    MAIL_URL=smtp://username:password@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false meteor --settings settings.json
 
-Where username typically is a full email like `kansliet@uppsalamakerspace.se`.
+Där `username` typiskt är en email som `kansliet@uppsalamakerspace.se`.
+Observera att man kan också slå av mailskickning i settings.json genom följande nyckelvärde:
+
+      "deliverMails": false 
 
 ## Backup
 
