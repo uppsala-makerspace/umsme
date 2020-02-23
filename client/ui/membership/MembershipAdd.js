@@ -49,7 +49,8 @@ AutoForm.hooks({
         insdoc.family = doc.family;
         insdoc.discount = doc.discount;
         insdoc.type = doc.type;
-        insdoc.end = doc.end;
+        insdoc.labend = doc.labend;
+        insdoc.memberend = doc.memberend;
       }
     },
     onSubmit: function (doc) {
