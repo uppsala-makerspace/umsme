@@ -1,0 +1,121 @@
+<template name="MessageTemplateDocumentation">
+    <hr>
+    All variables with the type "date" are expressed as "YYYY-MM-DD", e.g. "2019-12-31".
+    <h2>Common variables - all templates</h2>
+    <table class="table">
+        <thead><tr>
+            <th>Variable</th>
+            <th>Type</th>
+            <th>Explanation</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+            <td>name</td>
+            <td>string</td>
+            <td>The members name</td>
+        </tr>
+        <tr>
+            <td>email</td>
+            <td>string</td>
+            <td>The members email</td>
+        </tr>
+        <tr>
+            <td>family</td>
+            <td>boolean</td>
+            <td>True if the member is part of a family.</td>
+        </tr>
+        <tr>
+            <td>familyMembers</td>
+            <td>string</td>
+            <td>The family members this member is paying for in a comma separated list.</td>
+        </tr>
+        <tr>
+            <td>youth</td>
+            <td>boolean</td>
+            <td>True if the member is below 16.</td>
+        </tr>
+        <tr>
+            <td>liability</td>
+            <td>boolean</td>
+            <td>True if the member has signed the libability contract.</td>
+        </tr>
+        <tr>
+            <td>memberStartDate</td>
+            <td>date</td>
+            <td>The last time (a date) when the member renewed his membership.</td>
+        </tr>
+        <tr>
+            <td>memberEndDate</td>
+            <td>date</td>
+            <td>When the membership will expire.</td>
+        </tr>
+        <tr>
+            <td>labStartDate</td>
+            <td>date</td>
+            <td>The last time (a date) when the member renewed his lab membership.</td>
+        </tr>
+        <tr>
+            <td>labEndDate</td>
+            <td>date</td>
+            <td>When the lab membership will expire.</td>
+        </tr>
+        </tbody>
+    </table>
+    <h2>Specific variables - avalable in welcome and confirmation templates</h2>
+    These variables are available since the message template will be rendered in conjuction with a specific membership / payment, this excludes reminder templates.
+    <table class="table">
+        <thead><tr>
+            <th>Variable</th>
+            <th>Type</th>
+            <th>Explanation</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+            <td>amount</td>
+            <td>integer</td>
+            <td>The amount the member payed.</td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td>member|lab|labandmember</td>
+            <td>Depending on what the </td>
+        </tr>
+        <tr>
+            <td>discount</td>
+            <td>boolean</td>
+            <td>True if the member got a discount.</td>
+        </tr>
+        <tr>
+            <td>startPeriod</td>
+            <td>date</td>
+            <td>Date when the last membership / lab membership started.</td>
+        </tr>
+        <tr>
+            <td>endMemberPeriod</td>
+            <td>date</td>
+            <td>Date when the membership expires, not defined if type is lab.</td>
+        </tr>
+        <tr>
+            <td>endLabPeriod</td>
+            <td>date</td>
+            <td>Date when the lab membership expires, not defined if type is member.</td>
+        </tr>
+        </tbody>
+    </table>
+    <h2>Example - reminder template</h2>
+    <pre>Hej &lt;%= name %&gt;,
+
+Det här är en påminnelse om att förnya ditt medlemskap i Uppsala Makerspace.
+
+Både ditt ordinära medlemskap och ditt labbmedlemskap kommer att gå ut den &lt;%= memberEndDate %&gt;.
+Om du inte förnyar ditt labbmedlemskap genom att betala avgiften, så kommer det automatiskt att avslutas
+och eget tillträde till lokalerna ska upphävas.
+
+Vi hoppas du vill fortsätta vara medlem i vår förening och ser fram emot att möta dig i lokalen.
+
+Din nuvarande medlemsstatus:
+Medlemskapsperiod: &lt;%= memberStartDate %&gt; - &lt;%= memberEndDate %&gt;
+Medlemskapstyp: &lt;% if(family) { %&gt;Familj&lt;% } else { %&gt;Individ&lt;% } %&gt;
+Labbmedlemskapsperiod: &lt;%= labStartDate %&gt; - &lt;%= labEndDate %&gt;
+    </pre>
+</template>

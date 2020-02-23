@@ -61,7 +61,8 @@ Template.SendMessage.helpers({
       data.type = membership.type;
       data.discount = membership.discount;
       data.startPeriod = niceDate(membership.start);
-      data.endPeriod = niceDate(membership.end);
+      data.endMemberPeriod = niceDate(membership.memberend);
+      data.endLabPeriod = niceDate(membership.labend);
     }
     const subjectTemplate = _.template(template.subject);
     const messageTemplate = _.template(template.messagetext);

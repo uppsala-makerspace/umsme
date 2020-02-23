@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { MessageTemplates } from '/collections/templates.js';
 import './MessageTemplateAdd.html';
+import './MessageTemplateDocumentation.html';
 
 Template.MessageTemplateAdd.onCreated(function() {
   Meteor.subscribe('templates');

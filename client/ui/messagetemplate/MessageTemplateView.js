@@ -1,6 +1,6 @@
 import { Template } from 'meteor/templating';
 import { MessageTemplates } from '/collections/templates';
-
+import './MessageTemplateDocumentation.html';
 import './MessageTemplateView.html';
 
 Template.MembershipView.onCreated(function() {
