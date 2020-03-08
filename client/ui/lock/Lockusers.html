@@ -1,0 +1,35 @@
+<template name="Lockusers">
+    <h1>Lock synchronization</h1>
+    <button type="submit" class="syncWithLock">Synchronize</button>
+    <hr>
+    {{#if initialized}}
+      {{#if selected}}
+        <h1>{{selected.name}} <small><a class="backToSearch">Back to search</a></small></h1>
+        {{> quickForm collection=lockusers doc=selected id="lockUserViewForm" omitFields="lockid,name,member" type="readonly"}}
+        {{#if canCreateAccount}}
+           <button class="createAccount">Create lock account</button>
+        {{/if}}
+        {{#if canSetEndDate}}
+           <button class="setEndDate">Set lock end date</button>
+        {{/if}}
+    {{/if}}
+      {{#unless selected}}
+        Filters:
+            {{> FilterCheck name="noaccount" label="No account" checked=""}}
+            {{> FilterCheck name="invited" label="Invited" checked=""}}
+            {{> FilterCheck name="wrong" label="Wrong date" checked="checked"}}
+            {{> FilterCheck name="correct" label="Correct date" checked=""}}
+            {{> FilterCheck name="forever" label="No end date" checked=""}}
+            {{> FilterCheck name="admin" label="Administrators" checked=""}}
+            {{> FilterCheck name="old" label="Expired access" checked=""}}
+            {{> reactiveTable settings=settings}}
+      {{/unless}}
+    {{/if}}
+</template>
+
+<template name="FilterCheck">
+    <span class="{{name}}">
+        <input id="{{name}}" type="checkbox" {{checked}} class="checkInput"/>
+        <label for="{{name}}">{{label}}</label>
+    </span>
+</template>

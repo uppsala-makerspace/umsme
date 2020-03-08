@@ -9,11 +9,19 @@
             <li><a href="/members">Members</a></li>
             <li><a href="/payments">Payments</a></li>
             <li><a href="/templates">Templates</a></li>
+            <li><a href="/lock">Lock</a></li>
             <li><a href="/admin">Admin</a></li>
         </ul>
     </header>
+    {{#if currentUser}}
     <div id="main">
         {{> Template.dynamic template=main}}
     </div>
+    {{/if}}
+    {{#unless currentUser}}
+    <br>
+    <br>
+    <h1>This application requires you to sign in first!</h1>
+    {{/unless}}
     </body>
 </template>

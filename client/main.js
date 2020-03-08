@@ -1,6 +1,6 @@
-import "../client/layouts/AppBody.html";
-import "../client/layouts/Home.html";
-import "../client/layouts/Contact.html";
+import "./layouts/AppBody.html";
+import "./layouts/Home.html";
+import "./layouts/Contact.html";
 import "./ui/members/index";
 import "./ui/membership/index";
 import "./ui/family/index";
@@ -8,6 +8,7 @@ import './ui/bank/index';
 import './ui/admin/index';
 import './ui/messagetemplate/index';
 import './ui/message/index';
+import './ui/lock/index';
 import '/lib/accounts-config';
 
 FlowRouter.route('/', {

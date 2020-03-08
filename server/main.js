@@ -8,6 +8,7 @@ import './methods/import';
 import './methods/update';
 import './methods/mail';
 import './methods/bank';
+import './methods/lock';
 
 Meteor.startup(() => {
   // code to run on server at startup

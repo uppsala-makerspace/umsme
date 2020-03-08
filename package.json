@@ -11,6 +11,7 @@
     "@babel/runtime": "^7.3.4",
     "bcrypt": "^3.0.8",
     "meteor-node-stubs": "^0.4.1",
+    "node-fetch": "^2.6.0",
     "simpl-schema": "^1.5.6",
     "underscore": "^1.9.2"
   },

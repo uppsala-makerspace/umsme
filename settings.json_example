@@ -2,5 +2,9 @@
   "from": "kansliet@uppsalamakerspace.se",
   "bankproxy": "http://localhost:8000/",
   "syncNrOfTransactions": 20,
-  "deliverMails": true
+  "deliverMails": true,
+  "lockUsername": "umsme@uppsalamakerspace.se",
+  "lockPassword": "????",
+  "lockAssumeUser": "lock@uppsalamakerspace.se",
+  "lockName": "UMS ytterdörr"
 }
