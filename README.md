@@ -51,6 +51,13 @@ För att återställa motsvarande backup med mongorestore:
 
     mongorestore -h 127.0.0.1 --port 3001 --drop -d meteor backup/2020-01-30/meteor
 
+### Resetta databasen
+Om du av någon anledning vill börja om från början kan du stänga ner applikationen och sen:
+
+   meteor reset
+   
+Därefter är det bara att starta igen.
+
 ### Backup scripts
 För att förenkla finns det nu två scripts, backup.sh och restore.sh i backup foldern. Backup scriptet tar inget argument då det automatiskt genererar en dump med ett namn som ser ut som ett ISO datum, t.ex. `2020-02-02T12:11`. Restore scriptet tar namnet (ISO datumet) som argument, t.ex.:
 
