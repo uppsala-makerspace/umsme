@@ -8,9 +8,9 @@ import './ui/bank/index';
 import './ui/admin/index';
 import './ui/messagetemplate/index';
 import './ui/message/index';
+import './ui/mail/index';
 import './ui/lock/index';
 import '/lib/accounts-config';
-
 FlowRouter.route('/', {
   name: 'home',
   action() {

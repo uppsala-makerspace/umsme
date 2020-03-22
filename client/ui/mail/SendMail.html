@@ -1,0 +1,7 @@
+<template name="SendMail">
+    <h1>Send mail</h1>
+    {{#if from}}
+      {{> quickForm collection=Mails doc=mail id="insertMailForm" type="normal" validation="keyup" omitFields="senddate,to"}}
+    {{/if}}
+    {{>MessageTemplateDocumentation}}
+</template>

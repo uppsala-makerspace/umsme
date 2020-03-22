@@ -42,9 +42,9 @@ Meteor.methods({
     return { users, calendars, links };
   },
   'lockStatus2': () => {
-    const usersText = Assets.getText('users.json');
-    const calendarText = Assets.getText('calendars.json');
-    const linkText = Assets.getText('links.json');
+    const usersText = Assets.getText('lock_users.json');
+    const calendarText = Assets.getText('lock_calendars.json');
+    const linkText = Assets.getText('lock_links.json');
     return {
       users: JSON.parse(usersText),
       calendars: JSON.parse(calendarText),

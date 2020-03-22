@@ -1,5 +1,5 @@
 {
-  "from": "kansliet@uppsalamakerspace.se",
+  "from": ["kansliet@uppsalamakerspace.se", "no-reply@uppsalamakerspace.se"],
   "bankproxy": "http://localhost:8000/",
   "syncNrOfTransactions": 20,
   "deliverMails": true,
