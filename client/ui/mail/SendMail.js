@@ -72,7 +72,7 @@ AutoForm.hooks({
       // Send message as mail to all matching users.
       const users = Members.find().forEach(member => {
         const status = memberStatus(member);
-        if (check(status, doc.recipients)) {
+        if (member.email && check(status, doc.recipients)) {
           if (!doc.family && member.infamily) {
             return;
           }
@@ -92,7 +92,7 @@ AutoForm.hooks({
             labStartDate: niceDate(status.labStart),
             labEndDate: niceDate(member.lab),
           };
-          Meteor.call('mail', member.email, subjectTemplate(data), messageTemplate(data), doc.from === 'noreply');
+          Meteor.call('mail', member.email, subjectTemplate(data), messageTemplate(data), doc.from);
         }
       });
       Mails.insert(doc);

@@ -14,11 +14,25 @@ Sen fört skapa en build som passar din arkitektur, t.ex:
 
     meteor build ../umsme-build --architecture os.linux.x86_64
 
-Se till att du har node, npm och mongodb installerat i din driftmiljö.
-Packa upp paketet på lämpligt ställe och skapa följande skript:
+Men innan du gör detta se till att du har tre tomma filer: `settings.json`, `users.json` och eventuellt `members.csv` i private katalogen. Detta för att dessa ska finnas i ett index som gör att de går att slå upp i driftmiljön.
 
-    #/bin/sh
-    
+Se till att du har node (version 12), npm och mongodb installerat i din driftmiljö. Packa sen upp paketet på lämpligt ställe, förslagsvis genom att ha ett intialiseringsscript (`install.sh`) som ser ut som:
+
+    #/bin/bash
+    mkdir app
+    rm -rf bundle
+    tar xfz umsme.tar.gz
+    cd bundle/programs/server/assets/
+    rm -rf app
+    ln -s ../../../../app .
+    cd ..
+    npm install
+
+I katalogen app kan du lägga in filerna `settings.json`, `users.json` och `members.csv` utan att de påverkas av att du installerar nya paket.
+
+Skapa sen skriptet `run.sh` som du lägger parallellt med installeringsscriptet: 
+
+    #/bin/sh    
     cd bundle
     PORT=3000 \
     MAIL_URL=smtp://user:password@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false \
@@ -28,11 +42,8 @@ Packa upp paketet på lämpligt ställe och skapa följande skript:
 Se sektionen om maila från systemet nedan om hur `MAIL_URL` ska sättas.
 Katalogen `private` ska ligga under `bundle/server`, den används både för konfiguration (`settings.json`), användarhanteirng (`users.json`) och import av data (`members.csv`). 
 
-Läs mer om driftsättning i allmänhet på:
-https://stackoverflow.com/questions/29050337/running-meteor-shell-on-production-server-deployed-with-meteor-up
-
 ## Användarhantering
-Användarhantering genom en fil `private/user.json` som ser ut som:
+Användarhantering sker genom en fil `private/user.json` som ser ut som:
 
     [
       {username: 'john', password: '12345'}

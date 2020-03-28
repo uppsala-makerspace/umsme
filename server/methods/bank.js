@@ -26,8 +26,6 @@ const extractSessionId = (result) => {
   }
 };
 
-const base = Meteor.settings.bankproxy;
-
 const excludeTransactions = (transactions) => transactions.filter(tr =>
   tr.details.transactionType === 'Insättning');
 
@@ -51,6 +49,7 @@ Meteor.methods({
     }
   },
   'checkBank': () => {
+    const base = Meteor.settings.bankproxy;
     if (Meteor.userId()) {
       const result = HTTP.call('get', `${base}check.php`, addCookie({}));
       extractSessionId(result);
@@ -58,6 +57,7 @@ Meteor.methods({
     }
   },
   'initiateBank': () => {
+    const base = Meteor.settings.bankproxy;
     if (Meteor.userId()) {
       const user = Meteor.users.findOne(Meteor.userId());
       const result = HTTP.call('get', `${base}initiate.php?pnr=${user.profile.pnr}`, addCookie({}));
@@ -65,6 +65,7 @@ Meteor.methods({
     }
   },
   'synchronize': () => {
+    const base = Meteor.settings.bankproxy;
     if (Meteor.userId()) {
       const result = HTTP.call('get', `${base}transactions.php`, addCookie({}));
       const transactions = extractTransactions(excludeTransactions(result.data.transactions));
@@ -95,12 +96,14 @@ Meteor.methods({
     }
   },
   'transactions': () => {
+    const base = Meteor.settings.bankproxy;
     if (Meteor.userId()) {
       const result = HTTP.call('get', `${base}transactions.php`, addCookie({}));
       return result.data;
     }
   },
   'transaction': (id) => {
+    const base = Meteor.settings.bankproxy;
     if (Meteor.userId()) {
       const result = HTTP.call('get', `${base}transaction.php?id=${id}`, addCookie({}));
       return result.data;
