@@ -2,10 +2,9 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members';
 import { Memberships } from '/collections/memberships';
 import { Messages } from '/collections/messages';
-import { memberStatus, updateMember } from '/lib/utils';
-import { reminderDays, reminderState } from '/lib/rules';
 
 import './MemberView.html';
+import './MemberStatus';
 import '../message/MessageList';
 import '../membership/MembershipList';
 import '../family/FamilyList';
@@ -41,21 +40,8 @@ Template.MemberView.events({
       const member = Members.findOne(id);
       Members.update(id, {$unset: {infamily: ""}});
     }
-  },
-  'click .updateMemberDates': function(event) {
-    const mb = Members.findOne(FlowRouter.getParam('_id'));
-    updateMember(mb);
   }
 });
-
-const te = (d1, d2) => {
-  if (d1 && d2) {
-    return d1.getTime() === d2.getTime();
-  } else if (!d1 && !d2) {
-    return true;
-  }
-  return false;
-};
 
 Template.MemberView.helpers({
   Members() {
@@ -64,49 +50,9 @@ Template.MemberView.helpers({
   id() {
     return FlowRouter.getParam('_id');
   },
-  status() {
+  patron: function() {
     const mb = Members.findOne(FlowRouter.getParam('_id'));
-    const { member, lab, family } = memberStatus(mb);
-    const now = new Date();
-    const inTwoWeeks = new Date();
-    inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
-    const familyNow = family > now;
-    const labClass = lab > inTwoWeeks ? 'success' : (lab > now ? 'warning' : 'danger');
-    const memberClass = member > inTwoWeeks ? 'success' : (member > now ? 'warning' : 'danger');
-    return {
-      inconsistent: !te(mb.member, member) || !te(mb.lab, lab) || (mb.family === true) !== familyNow,
-      family: familyNow,
-      familyPatron: mb.family && !mb.infamily,
-      lab: mb.lab,
-      labClass,
-      member: mb.member,
-      memberClass
-    };
-  },
-  reminder: function() {
-    const obj = Members.findOne(FlowRouter.getParam('_id'));
-    const {state, date, formatted} = reminderState(obj);
-    let cls = '';
-    let text = '';
-    switch (state) {
-      case 'done':
-        cls = 'success';
-        text = `Reminder sent: ${formatted}`;
-        break;
-      case 'needed':
-        cls = 'danger';
-        text = 'Reminder needed';
-        break;
-      case 'old':
-        cls = 'default';
-        text = `Reminder sent: ${formatted}`;
-        break;
-    }
-    return {
-      visible: !obj.infamily && this.state !== 'none',
-      text,
-      cls,
-    };
+    return mb && mb.family && !mb.infamily;
   },
   member: function() {
     return Members.findOne(FlowRouter.getParam('_id'));
@@ -114,13 +60,5 @@ Template.MemberView.helpers({
   payingMember: function() {
     const member = Members.findOne(FlowRouter.getParam('_id'));
     return Members.findOne(member.infamily);
-  },
-  memberLastDate: function () {
-    const member = Members.findOne(FlowRouter.getParam('_id'));
-    return moment(member.member).format("YYYY-MM-DD");
-  },
-  labMemberLastDate: function () {
-    const member = Members.findOne(FlowRouter.getParam('_id'));
-    return moment(member.lab).format("YYYY-MM-DD");
   }
 });

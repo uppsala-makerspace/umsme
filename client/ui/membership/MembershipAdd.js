@@ -2,9 +2,11 @@ import { Template } from 'meteor/templating';
 import { Memberships } from '../../../collections/memberships';
 import { Members } from '../../../collections/members';
 import { Payments } from '../../../collections/payments';
-import { membershipFromPayment } from '/lib/rules';
+import { startDateFromAmount, detectPotentialLabPayment, membershipFromPayment } from '/lib/rules';
 import { updateMember } from '/lib/utils';
 import './MembershipAdd.html';
+import '../members/MemberStatus';
+
 
 Template.MembershipAdd.onCreated(function() {
   Meteor.subscribe('memberships');
@@ -16,17 +18,21 @@ Template.MembershipAdd.helpers({
   Memberships() {
     return Memberships;
   },
+  member() {
+    return FlowRouter.getQueryParam('member');
+  },
   memberName() {
     const member = Members.findOne(FlowRouter.getQueryParam('member'));
     return member.name;
   },
   membership() {
+    const member = Members.findOne(FlowRouter.getQueryParam('member'));
     const pid = FlowRouter.getQueryParam('payment');
     if (pid) {
       const payment = Payments.findOne(pid);
       return {
         amount: payment.amount,
-        start: payment.date,
+        start: startDateFromAmount(payment.amount, member, detectPotentialLabPayment(member)),
         pid,
       };
     }
@@ -45,7 +51,7 @@ AutoForm.hooks({
       if (insdoc.start && insdoc.amount) {
         const mb = Members.findOne(memberId);
         const doc = membershipFromPayment(insdoc.start, insdoc.amount,
-          mb.member != null, mb.lab == null);
+          mb.member != null, detectPotentialLabPayment(mb));
         insdoc.family = doc.family;
         insdoc.discount = doc.discount;
         insdoc.type = doc.type;

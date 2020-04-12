@@ -3,9 +3,9 @@ import { membershipFromPayment } from '/lib/rules';
 import { Members } from '/collections/members.js';
 import { Memberships } from '/collections/memberships.js';
 
-const extractPayment = (row, offset, first, alreadyOnlyMember) => {
+const extractPayment = (row, offset, first, potentialLabPayment) => {
   if (row[offset] && row[offset] !== '') {
-    return membershipFromPayment(row[offset], row[offset + 1], first, alreadyOnlyMember);
+    return membershipFromPayment(row[offset], row[offset + 1], first, potentialLabPayment);
   }
 };
 

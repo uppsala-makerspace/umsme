@@ -12,6 +12,12 @@ Template.ReminderMessage.onCreated(function() {
 });
 
 Template.ReminderMessage.events({
+  'click .reminderDoneButton':  function (event) {
+    Members.update(this.member, { $set: { reminder: new Date() } });
+  },
+  'click .reminderNeededButton':  function (event) {
+    Members.update(this.member, { $unset: { reminder: null } });
+  },
   'click .reminderButton':  function (event) {
     event.preventDefault();
     const mb = Members.findOne(this.member);

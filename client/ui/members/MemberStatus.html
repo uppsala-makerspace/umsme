@@ -1,0 +1,16 @@
+<template name="MemberStatus">
+    {{#if status.inconsistent}}
+    <div class="alert alert-danger" role="alert">
+        Dates in member profile is not in sync with membership records. <button class="updateMemberDates">Update!</button>
+    </div>
+    {{else}}
+      {{#if status.member}}<div class="label label-{{status.memberClass}}">Member to: {{memberLastDate}}</div>{{/if}}
+      {{#if status.lab}}<div class="label label-{{status.labClass}}">Labmember to: {{labMemberLastDate}}</div>{{/if}}
+      {{#if reminder.visible}}<div class="label label-{{reminder.cls}}">{{reminder.text}}</div>{{/if}}
+      {{#if status.familyPatron}}
+         <div class="label label-default">Paying familymember</div>
+      {{else if status.family}}
+         <div class="label label-default">Familymember</div>
+      {{/if}}
+    {{/if}}
+</template>

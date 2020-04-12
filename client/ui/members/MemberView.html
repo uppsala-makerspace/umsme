@@ -1,25 +1,12 @@
 <template name="MemberView">
     <h1>Member <strong>{{member.name}}</strong> <small><a class="deleteMember">Delete</a></small></h1>
-    {{#if status.inconsistent}}
-    <div class="alert alert-danger" role="alert">
-        Dates in member profile is not in sync with membership records. <button class="updateMemberDates">Update!</button>
-    </div>
-    {{else}}
-      {{#if status.member}}<div class="label label-{{status.memberClass}}">Member to: {{memberLastDate}}</div>{{/if}}
-      {{#if status.lab}}<div class="label label-{{status.labClass}}">Labmember to: {{labMemberLastDate}}</div>{{/if}}
-      {{#if reminder.visible}}<div class="label label-{{reminder.cls}}">{{reminder.text}}</div>{{/if}}
-      {{#if status.familyPatron}}
-         <div class="label label-default">Paying familymember</div>
-      {{else if status.family}}
-         <div class="label label-default">Familymember</div>
-      {{/if}}
-    {{/if}}
+    {{> MemberStatus member=id}}
     <br><br>
     {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id" type="update" buttonContent="Update"}}
     {{#if member.infamily}}
     <h2>Part of family, paying family member is <strong><a href="/member/{{member.infamily}}">{{payingMember.name}}</a></strong> <small><a class="removeFromFamily">Remove from family</a></small></h2>
     {{/if}}
-    {{#if status.familyPatron}}
+    {{#if patron}}
     <h2>Family members <small><a href="/member/{{id}}/add">Add existing</a> <a href="/members/add?infamily={{id}}">Add new</a></small></h2>
     {{> FamilyList patron=id}}
     {{/if}}
