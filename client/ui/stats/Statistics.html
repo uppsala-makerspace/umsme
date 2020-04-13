@@ -1,0 +1,34 @@
+<template name="Statistics">
+    <h1>Member statistics</h1>
+    <div class="topblock">
+        <div class="filterblock">
+            <h2>Timeperiod filters</h2>
+            <div class="timeinterval_group">
+                <input type="radio" id="time_all" class="timeinterval" name="timeinterval" value="all" checked>
+                <label class="custom-control-label" for="time_all">All time</label>
+            </div>
+            <div class="timeinterval_group">
+                <input type="radio" id="time_year" class="timeinterval" name="timeinterval" value="year">
+                <label class="custom-control-label" for="time_year">Last year</label>
+            </div>
+            <div class="timeinterval_group">
+                <input type="radio" id="time_quarter" class="timeinterval" name="timeinterval" value="quarter">
+                <label class="custom-control-label" for="time_quarter">Last quarter</label>
+            </div>
+            <div class="timeinterval_group">
+                <input type="radio" id="time_month" class="timeinterval" name="timeinterval" value="month">
+                <label class="custom-control-label" for="time_month">Last month</label>
+            </div>
+        </div>
+        <div class="membersblock">
+            <h2>Current member count</h2>
+            <span class="totalmembers">All members:<span id="totalmembers"></span></span>
+            <span class="memberscount">No lab:<span id="nolab"></span></span>
+            <span class="memberscount">Lab:<span id="lab"></span></span>
+            <span class="memberscount">No lab - family:<span id="nolabfamily"></span></span>
+            <span class="memberscount">Lab - family:<span id="labfamily"></span></span>
+        </div>
+    </div>
+    <canvas id="membersPerDay"></canvas>
+    <canvas id="membersPerMonths"></canvas>
+</template>

@@ -10,7 +10,9 @@ import './ui/messagetemplate/index';
 import './ui/message/index';
 import './ui/mail/index';
 import './ui/lock/index';
+import './ui/stats/index';
 import '/lib/accounts-config';
+
 FlowRouter.route('/', {
   name: 'home',
   action() {

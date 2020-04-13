@@ -1,0 +1,45 @@
+.topblock {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+
+.timeinterval_group {
+    font-size: 18px;
+}
+
+.membersblock {
+    width: 400px;
+    display: flex;
+    flex-wrap: wrap;
+}
+.membersblock > span > span {
+    font-weight: bold;
+    margin-left: 10px;
+}
+.totalmembers {
+    font-size: 24px;
+    width: 300px;
+}
+.memberscount {
+    font-size: 18px;
+    width: 180px;
+    padding: 3px 10px 0px;
+}
+
+#nolab {
+    color: rgba(255, 99, 132, 1);
+}
+
+#lab {
+    color: rgba(54, 162, 235, 1);
+}
+
+#nolabfamily {
+    color: rgba(255, 206, 86, 1);
+}
+
+#labfamily {
+    color: rgba(75, 192, 192, 1);
+}
