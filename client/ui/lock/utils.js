@@ -47,25 +47,26 @@ export const updateCollection = (collection, status) => {
   const user2obj = {};
   users.forEach(user => {
     const cal = id2cal[user2cal[user.id]];
-    user2obj[user.username] = {user, cal};
+    user2obj[user.username.toLowerCase()] = {user, cal};
   });
 
   const now = new Date();
   Members.find().forEach((member) => {
     if (member.lab) {
       //&& member.lab > now
+      const lockusername = member.lock ? member.lock.toLowerCase() : undefined;
       const obj = {
         name: member.name,
         member: member._id,
         infamily: member.infamily != null,
         labdate: member.lab,
         email: member.email,
-        lockusername: member.lock,
+        lockusername,
       };
       if (!gotAccess(member, user2obj) && member.lab < now) {
         obj.lockstatus = 'old';
-      } else if (member.lock) {
-        const lobj = user2obj[member.lock];
+      } else if (lockusername) {
+        const lobj = user2obj[lockusername];
         if (lobj) {
           const luser = lobj.user;
           obj.lockid = luser.id;
