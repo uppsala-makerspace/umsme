@@ -1,5 +1,5 @@
 <template name="PaymentView">
-    <h1>Payment <span class="labelInHeading label label-{{status.cls}}">{{status.label}}</span></h1>
+    <h1>Payment <span class="labelInHeading label label-{{status.cls}}">{{status.label}}</span> <small><a class="deletePayment">Delete</a></small></h1>
 
     {{> quickForm collection=Payments doc=payment id="paymentViewForm" omitFields="_id,member,membership,other" type="readonly"}}
 

@@ -79,6 +79,18 @@ Template.PaymentView.helpers({
 });
 
 Template.PaymentView.events({
+  'click .deletePayment': function (event) {
+    const pid = FlowRouter.getParam('_id');
+    const ms = Memberships.findOne({pid});
+    if (ms) {
+      alert('Cannot delete payment as long as it is connected to a membership.');
+      return;
+    }
+    if (confirm('Delete this payment?')) {
+      Payments.remove(pid);
+      FlowRouter.go('/payments');
+    }
+  },
   'click .paymentMembers .reactive-table tbody tr': function (event, instance) {
     event.preventDefault();
     const id = FlowRouter.getParam('_id');
@@ -91,7 +103,7 @@ Template.PaymentView.events({
       if (ms) {
         Memberships.update(ms._id, {$unset: {pid}});
       }
-      Payments.update(pid, {$unset: {member: ""}});
+      Payments.update(pid, {$unset: {member: "", membership: ""}});
     }
   },
   'click .paymentMembership .reactive-table tbody tr': function (event, instance) {
