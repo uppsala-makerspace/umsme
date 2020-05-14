@@ -13,6 +13,7 @@ Template.MemberList.helpers({
     collection: Members,
     rowsPerPage: 10,
     showFilter: true,
+//    multiColumnSort: false,
     fields: fields.member(),
     class: "table table-bordered table-hover",
   }

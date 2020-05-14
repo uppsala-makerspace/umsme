@@ -110,17 +110,25 @@ const getDataSets = (from, to) => {
       plain.push({ value: 1, when: ms.start });
       plain.push({ value: -1, when: ms.memberend });
     }
+    if (!ms.family && ms.type === 'lab') {
+      plain.push({ value: -1, when: ms.start });
+      plain.push({ value: 1, when: ms.labend });
+    }
     if (!ms.family && (ms.type === 'labandmember' || ms.type === 'lab')) {
       labs.push({ value: 1, when: ms.start });
-      labs.push({ value: -1, when: ms.labend });
+      labs.push({ value: -1, when: ms.memberend || ms.labend });
     }
     if (ms.family && ms.type === 'member') {
       family.push({ value: 1, when: ms.start });
       family.push({ value: -1, when: ms.memberend });
     }
+    if (ms.family && ms.type === 'lab') {
+      family.push({ value: -1, when: ms.start });
+      family.push({ value: 1, when: ms.labend });
+    }
     if (ms.family && (ms.type === 'labandmember' || ms.type === 'lab')) {
       familylab.push({ value: 1, when: ms.start });
-      familylab.push({ value: -1, when: ms.labend });
+      familylab.push({ value: -1, when: ms.memberend || ms.labend });
     }
   });
   const { labels, gained, lost } = statsPerMonth(members, from, to);

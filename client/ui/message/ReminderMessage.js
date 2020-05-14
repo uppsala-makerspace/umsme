@@ -25,11 +25,13 @@ Template.ReminderMessage.events({
     const membertype = mb.family === true ? 'family' : (mb.youth === true ? 'youth' : 'normal');
     const now = new Date();
     const inTwoWeeks = new Date();
+    const lastTwoWeeks = new Date();
     inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
-    const labNow = lab > now;
-    const memberNow = member > now;
-    if (lab < inTwoWeeks || member < inTwoWeeks) {
-      const membershiptype = member < inTwoWeeks && lab < inTwoWeeks ? 'labandmember' : (member < inTwoWeeks ? 'member' : 'lab');
+    lastTwoWeeks.setDate(lastTwoWeeks.getDate()-reminderDays);
+    const labReminder = lab < inTwoWeeks && lab > lastTwoWeeks;
+    const memberReminder = member < inTwoWeeks && member > lastTwoWeeks;
+    if (labReminder || memberReminder) {
+      const membershiptype = labReminder && memberReminder ? 'labandmember' : (memberReminder ? 'member' : 'lab');
       let template = MessageTemplates.findOne({ type: 'reminder', membertype, membershiptype, deprecated: false });
       if (!template) {
         template = MessageTemplates.findOne({ type: 'reminder', membershiptype, deprecated: false });
