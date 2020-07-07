@@ -5,6 +5,7 @@ import { MessageTemplates } from '/collections/templates';
 import { Messages } from '/collections/messages';
 import { Payments } from '/collections/payments';
 import { Mails } from '/collections/mails';
+import { Comments} from "/collections/comments";
 import './methods/import';
 import './methods/update';
 import './methods/mail';
@@ -102,6 +103,11 @@ if (Meteor.isServer) {
   Meteor.publish('payments', function() {
     if (this.userId) {
       return Payments.find();
+    }
+  });
+  Meteor.publish('comments', function() {
+    if (this.userId) {
+      return Comments.find();
     }
   });
 }

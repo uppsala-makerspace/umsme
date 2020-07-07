@@ -51,7 +51,7 @@ AutoForm.hooks({
       if (insdoc.start && insdoc.amount) {
         const mb = Members.findOne(memberId);
         const doc = membershipFromPayment(insdoc.start, insdoc.amount,
-          mb.member != null, detectPotentialLabPayment(mb));
+          mb.member == null, detectPotentialLabPayment(mb));
         insdoc.family = doc.family;
         insdoc.discount = doc.discount;
         insdoc.type = doc.type;

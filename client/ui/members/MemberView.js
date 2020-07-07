@@ -2,6 +2,7 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members';
 import { Memberships } from '/collections/memberships';
 import { Messages } from '/collections/messages';
+import '../comment/CommentList';
 
 import './MemberView.html';
 import './MemberStatus';

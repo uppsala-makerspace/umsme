@@ -2,6 +2,7 @@ import { Template } from 'meteor/templating';
 import { MessageTemplates } from '/collections/templates';
 import './MessageTemplateDocumentation.html';
 import './MessageTemplateView.html';
+import '../comment/CommentList';
 
 Template.MembershipView.onCreated(function() {
   Meteor.subscribe('templates');
@@ -9,6 +10,9 @@ Template.MembershipView.onCreated(function() {
 Template.MessageTemplateView.helpers({
   MessageTemplates() {
     return MessageTemplates;
+  },
+  id() {
+    return FlowRouter.getParam('_id');
   },
   messageTemplate() {
     const id = FlowRouter.getParam('_id');

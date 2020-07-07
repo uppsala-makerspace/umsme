@@ -1,0 +1,14 @@
+.mailAddress {
+    padding: 2px 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #eee;
+    margin-right: 6px;
+    line-height: 30px;
+    white-space: nowrap;
+}
+
+.mailAddressGroup {
+    max-height: 200px;
+    overflow-y: auto;
+}

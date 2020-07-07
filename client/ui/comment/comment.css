@@ -1,0 +1,39 @@
+.comment {
+    margin-bottom: 15px;
+}
+.commentDisplay, .commentEdit {
+    border: 1px solid #dddddd;
+    margin-bottom: 5px;
+    padding: 8px;
+}
+
+.comment.editing .editComment,
+.comment.editing .commentDisplay {
+    display: none;
+}
+
+.comment.displaying .saveComment,
+.comment.displaying .cancelEditComment,
+.comment.displaying .commentEdit {
+    display: none;
+}
+
+.commentEdit {
+    display: block;
+    width: 100%;
+    min-height: 200px;
+}
+
+.commentDate {
+    display: inline-block;
+    margin-right: 2em;
+}
+
+.dateLabel {
+    font-weight: bold;
+    margin-right: 1em;
+}
+
+.commentButtons {
+    float: right;
+}

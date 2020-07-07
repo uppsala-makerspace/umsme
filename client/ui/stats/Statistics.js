@@ -70,24 +70,26 @@ const statsPerMonth = (events, from, to) => {
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const years = Object.keys(gained).sort((a,b) => (parseInt(a)<parseInt(b) ? -1 : 1));
   const firstYear = years[0];
-  const firstMonth = Object.keys(gained[firstYear]).sort((a,b) => (parseInt(a)<parseInt(b) ? -1 : 1))[0];
-  const currentYear = years[years.length-1];
-  const currentMonth = new Date().getMonth();
   const labels = [];
   const gainedD = [];
   const lostD = [];
-  const addForMonth = (year, month) => {
-    labels.push(`${year} - ${months[month]}`);
-    gainedD.push((gained[year] || {})[month] || 0);
-    lostD.push(-(lost[year] || {})[month] || 0);
-  }
-  years.forEach((y) => {
-    const mstart = y === firstYear ? firstMonth : 0;
-    const mstop = y === currentYear ? currentMonth + 1 : 12;
-    for (let m = mstart;m<mstop;m++) {
-      addForMonth(y, m);
+  if (firstYear) {
+    const firstMonth = Object.keys(gained[firstYear]).sort((a, b) => (parseInt(a) < parseInt(b) ? -1 : 1))[0];
+    const currentYear = years[years.length - 1];
+    const currentMonth = new Date().getMonth();
+    const addForMonth = (year, month) => {
+      labels.push(`${year} - ${months[month]}`);
+      gainedD.push((gained[year] || {})[month] || 0);
+      lostD.push(-(lost[year] || {})[month] || 0);
     }
-  })
+    years.forEach((y) => {
+      const mstart = y === firstYear ? firstMonth : 0;
+      const mstop = y === currentYear ? currentMonth + 1 : 12;
+      for (let m = mstart; m < mstop; m++) {
+        addForMonth(y, m);
+      }
+    })
+  }
   return {
     labels,
     gained: gainedD,
@@ -137,11 +139,11 @@ const getDataSets = (from, to) => {
   labs = sortAndaccumulate(labs, from, to);
   family = sortAndaccumulate(family, from, to);
   familylab = sortAndaccumulate(familylab, from, to);
-  document.getElementById('totalmembers').innerText = members[members.length-1].y
-  document.getElementById('nolab').innerText = plain[plain.length-1].y
-  document.getElementById('lab').innerText = labs[labs.length-1].y
-  document.getElementById('nolabfamily').innerText = family[family.length-1].y
-  document.getElementById('labfamily').innerText = familylab[familylab.length-1].y
+  document.getElementById('totalmembers').innerText = members.length > 0 ? members[members.length-1].y : '-';
+  document.getElementById('nolab').innerText = plain.length > 0 ? plain[plain.length-1].y : '-';
+  document.getElementById('lab').innerText = labs.length > 0 ? labs[labs.length-1].y : '-';
+  document.getElementById('nolabfamily').innerText = family.length > 0 ? family[family.length-1].y : '-';
+  document.getElementById('labfamily').innerText = familylab.length > 0 ? familylab[familylab.length-1].y : '-';
 
   return {
     graph1: {

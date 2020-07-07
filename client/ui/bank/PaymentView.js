@@ -3,6 +3,8 @@ import { Members } from '/collections/members';
 import { Memberships } from '/collections/memberships';
 import { fields } from '../../../lib/fields';
 import './PaymentView.html';
+import '../comment/CommentList';
+
 
 
 Template.PaymentView.onCreated(function() {
@@ -18,6 +20,9 @@ Template.PaymentView.helpers({
   payment() {
     const id = FlowRouter.getParam('_id');
     return Payments.findOne(id);
+  },
+  id() {
+    return FlowRouter.getParam('_id');
   },
   status() {
     const payment = Payments.findOne(FlowRouter.getParam('_id'));

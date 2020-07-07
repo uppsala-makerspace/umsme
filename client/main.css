@@ -1,4 +1,6 @@
 @import "ui/stats/stats.css";
+@import "ui/comment/comment.css";
+@import "ui/mail/mail.css";
 
 html {
   background: aliceblue;

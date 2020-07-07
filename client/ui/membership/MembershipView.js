@@ -6,6 +6,7 @@ import { updateMember } from '/lib/utils';
 import '../message/InitiateMessage';
 import '../message/MessageList';
 import './MembershipView.html';
+import '../comment/CommentList';
 
 Template.MembershipView.onCreated(function() {
   Meteor.subscribe('memberships');
@@ -28,6 +29,9 @@ Template.MembershipView.helpers({
     if (ms.pid) {
       return Payments.findOne(ms.pid);
     }
+  },
+  id() {
+    return FlowRouter.getParam('_id');
   },
   membership() {
     const id = FlowRouter.getParam('_id');

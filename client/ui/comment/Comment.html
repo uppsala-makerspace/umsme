@@ -1,0 +1,16 @@
+<template name="Comment">
+    <div class="comment {{editingClass}}">
+        <div class="commentDisplay">{{text}}</div>
+        <textarea class="commentEdit">{{text}}</textarea>
+        <div class="commentButtons">
+            <button class="editComment">Edit</button>
+            <button class="saveComment">Save</button>
+            <button class="cancelEditComment">Cancel</button>
+            <button class="deleteComment">Delete</button>
+        </div>
+        <span class="commentDate"><span class="dateLabel">Created:</span><span class="dateValue" title="{{created}}">{{createdShort}}</span></span>
+        {{#if modified}}
+        <span class="commentDate"><span class="dateLabel">Modified:</span><span class="dateValue" title="{{modified}}">{{modifiedShort}}</span></span>
+        {{/if}}
+    </div>
+</template>
