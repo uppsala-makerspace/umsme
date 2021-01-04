@@ -90,7 +90,7 @@ Template.Lockusers.events({
   },
   'click .createAccount': function (event, instance) {
     event.preventDefault();
-    alert("hopp");
+    alert("Inte implementerat ännu");
   },
     /*  'click .signinbank': function(event, instance) {
         Meteor.call('initiateBank', (err, res) => {

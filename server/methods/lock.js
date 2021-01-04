@@ -3,6 +3,7 @@ import {HTTP} from 'meteor/http';
 let credentials;
 let assumeUser;
 let lockid;
+let groupid;
 let authTime;
 let options;
 const authenticate = () => {
@@ -27,6 +28,8 @@ const authenticate = () => {
       };
       const locks = JSON.parse(HTTP.get('https://api.danalock.com/locks/v1?page=0', options).content);
       lockid = locks.find(l => l.name.indexOf(Meteor.settings.lockName) !== -1).id;
+      const groups = JSON.parse(HTTP.get('https://api.danalock.com/groups/v1?page=0', options).content);
+      groupid = groups.find(l => l.name.indexOf(Meteor.settings.groupLockName) !== -1).id;
     } catch (e) {
       console.log(e);
     }
@@ -34,11 +37,33 @@ const authenticate = () => {
 };
 
 Meteor.methods({
+  'lockHistory': () => {
+    authenticate();
+    const afterDate = new Date();
+    afterDate.setMonth(afterDate.getMonth()-6);
+    let isAfter = true;
+    let page = 0;
+    let visits = [];
+    while (isAfter) {
+      console.log(`Fetching page ${page}`);
+      const res = HTTP.get(`https://api.danalock.com/log/v1/lock/${lockid}?page=${page}&perpage=50`, options);
+      page ++;
+      visits = visits.concat(res.data);
+      if (res.data.length === 0) {
+        isAfter = false;
+      } else {
+        const lastDate = new Date(res.data[res.data.length - 1].timestamp);
+        isAfter = lastDate > afterDate;
+      }
+    }
+
+    return visits;
+  },
   'lockStatus': () => {
     authenticate();
     const users = JSON.parse(HTTP.get('https://api.danalock.com/users/v1?page=0', options).content);
     const calendars = JSON.parse(HTTP.get('https://api.danalock.com/links/v1/calendars?page=0', options).content);
-    const links = JSON.parse(HTTP.get('https://api.danalock.com/links/v1/lock_user_links?page=0', options).content);
+    const links = JSON.parse(HTTP.get('https://api.danalock.com/links/v1/group_user_links?page=0', options).content);
     return { users, calendars, links };
   },
   'lockStatus2': () => {
@@ -74,7 +99,8 @@ Meteor.methods({
     const calId = JSON.parse(HTTP.post('https://api.danalock.com/links/v1/calendars', calOptions).content).id;
     const linkOptions = Object.assign({data: {
       "user_id": userid,
-      "lock_id": lockid,
+        "group_id": groupid,
+//      "lock_id": lockid,
       "calendar_id": calId,
       "link_profile": "user"
     }}, options);
@@ -82,3 +108,25 @@ Meteor.methods({
     HTTP.post('https://api.danalock.com/links/v1', linkOptions);
   }
 });
+
+
+/* group_user_links
+ {
+   calendar_id: "calendar-7c786e1ec60a"
+   group_id: "group-53bf19ebcddb"
+   id: "group_user-ddbd0292fea2"
+   link_profile: "user"
+   user_id: "user-ea5a1fcc5fe4"
+ }
+
+   lock_user_links
+ {
+   calendar_id: null
+   id: "lock_user-7724313e6f1e"
+   link_profile: "administrator"
+   lock_id: "lock-fde72d8df2e0"
+   user_id: "user-0366ba845fb5"
+ }
+
+
+   */
