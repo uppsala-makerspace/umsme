@@ -14,7 +14,7 @@
     "meteor-node-stubs": "^0.4.1",
     "node-fetch": "^2.6.0",
     "simpl-schema": "^1.5.7",
-    "underscore": "^1.9.2"
+    "underscore": "^1.12.1"
   },
   "meteor": {
     "mainModule": {
