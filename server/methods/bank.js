@@ -60,8 +60,8 @@ Meteor.methods({
     const base = Meteor.settings.bankproxy;
     if (Meteor.userId()) {
       const user = Meteor.users.findOne(Meteor.userId());
-      const result = HTTP.call('get', `${base}initiate.php?pnr=${user.profile.pnr}`, addCookie({}));
-      return result.data.status;
+      const result = HTTP.call('get', `${base}initiate.php?pnr=${user.profile.pnr}&base64=true`, addCookie({}));
+      return result.content;
     }
   },
   'synchronize': () => {

@@ -8,7 +8,10 @@
       {{#if pnr}}
 
             <div>
-                <label>Bank signin status: </label> {{status}} <button class="checkBank">check</button>
+                <label>Bank signin status: </label> {{status}}
+            {{#if qr}}
+                <img src="{{image}}"/>
+            {{/if}}
             </div>
             {{#if enablesignin}}
                <button class="signinbank">Signin</button>

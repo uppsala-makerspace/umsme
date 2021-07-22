@@ -15,6 +15,12 @@ Template.MemberView.onCreated(function() {
   Meteor.subscribe('members');
   Meteor.subscribe('memberships');
   Meteor.subscribe('messages');
+  this.state = new ReactiveDict();
+  this.state.set('settings', {});
+  Meteor.call('settings', (err, res) => {
+    this.state.set('settings', res);
+  });
+
 });
 
 Template.MemberView.events({
@@ -50,6 +56,11 @@ Template.MemberView.helpers({
   },
   id() {
     return FlowRouter.getParam('_id');
+  },
+  publicMemberPage() {
+    const id = FlowRouter.getParam('_id');
+    const settings = Template.instance().state.get('settings');
+    return (settings.checkPath || "../check/") + id;
   },
   patron: function() {
     const mb = Members.findOne(FlowRouter.getParam('_id'));

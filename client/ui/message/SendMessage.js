@@ -2,11 +2,8 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members';
 import { MessageTemplates } from '/collections/templates';
 import { Messages } from '/collections/messages';
-import { Memberships } from "/collections/memberships";
-import { _ } from 'underscore';
-import { memberStatus } from '/lib/utils';
+import { messageData } from "/lib/message";
 import './SendMessage.html';
-
 
 Template.SendMessage.onCreated(function() {
   Meteor.subscribe('members');
@@ -37,40 +34,7 @@ Template.SendMessage.helpers({
     const memberId = FlowRouter.getQueryParam('member');
     const templateId = FlowRouter.getQueryParam('template');
     const membershipId = FlowRouter.getQueryParam('membership');
-    let familyMembers = [];
-    Members.find({infamily: memberId}).forEach((m) => familyMembers.push(m.name));
-    familyMembers = familyMembers.join(', ');
-    const member = Members.findOne(memberId);
-    const status = memberStatus(member);
-    const template = MessageTemplates.findOne(templateId);
-    const data = {
-      name: member.name,
-      email: member.email,
-      family: member.family === true,
-      familyMembers,
-      youth: member.youth === true,
-      liability: member.liability === true,
-      memberStartDate: niceDate(status.memberStart),
-      memberEndDate: niceDate(member.member),
-      labStartDate: niceDate(status.labStart),
-      labEndDate: niceDate(member.lab),
-    };
-    if (membershipId) {
-      const membership = Memberships.findOne(membershipId);
-      data.amount = membership.amount;
-      data.type = membership.type;
-      data.discount = membership.discount;
-      data.startPeriod = niceDate(membership.start);
-      data.endMemberPeriod = niceDate(membership.memberend);
-      data.endLabPeriod = niceDate(membership.labend);
-    }
-    const subjectTemplate = _.template(template.subject);
-    const messageTemplate = _.template(template.messagetext);
-    return {
-      to: member.email,
-      subject: subjectTemplate(data),
-      messagetext: messageTemplate(data),
-    }
+    return messageData(memberId, templateId, membershipId);
   }
 });
 

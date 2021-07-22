@@ -11,6 +11,8 @@ import './methods/update';
 import './methods/mail';
 import './methods/bank';
 import './methods/lock';
+import './methods/check';
+import './methods/settings';
 
 Meteor.startup(() => {
   // code to run on server at startup

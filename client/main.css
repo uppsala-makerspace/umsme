@@ -1,6 +1,7 @@
 @import "ui/stats/stats.css";
 @import "ui/comment/comment.css";
 @import "ui/mail/mail.css";
+@import "ui/check/check.css";
 
 html {
   background: aliceblue;
@@ -9,6 +10,14 @@ html {
 }
 body {
   background: aliceblue;
+}
+
+.publicPage {
+  position: fixed;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  background: white;
 }
 #main {
   background: white;

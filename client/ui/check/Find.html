@@ -1,0 +1,26 @@
+<template name="Find">
+    <h1>Find out your membership status</h1>
+    <div class="findMemberWrapper">
+        <form class="memberForm findMemberForm">
+            <div>
+                <h2>Check your status page</h2>
+                <p>For security reasons you have to know both your email and member id.</p>
+                <div><label>Email:</label><input id="email" type="email" name="email" placeholder="Your email"/></div>
+                <div><label>Member id:</label><input id="number" type="number" name="number" placeholder="1234"/></div>
+            </div>
+            <button disabled name="button" class="btn btn-primary findMember" type="submit">Go to status page!</button>
+        </form>
+        <div class="orMemberBox">&gt;&gt; Or, if you don't know your member id &lt;&lt;</div>
+        <form class="memberForm mailMemberForm">
+            <div>
+                <h2>Mail me membership status</h2>
+                <p>The mail will contain your membership status, your member id and a direct link to the status page for future reference.</p>
+                <div><label>Email:</label><input id="email" type="email" name="email" placeholder="Your email"/></div>
+                {{#if mailSent}}
+                <div>An email was sent to: <strong>{{mailSent}}</strong> if a matching member could be found.</div>
+                {{/if}}
+            </div>
+            <button disabled name="button" class="btn btn-primary findMember" type="submit">Mail me status!</button>
+        </form>
+    </div>
+</template>

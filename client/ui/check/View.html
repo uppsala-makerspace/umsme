@@ -1,0 +1,45 @@
+<template name="View">
+    {{#if checked}}
+        {{#if member}}
+            <h1>Name: <strong>{{info.name}}</strong></h1>
+            Member id: <strong>{{info.id}}</strong>
+            <hr>
+            <div class="checkMember">
+                {{#if memberNow}}
+                    <div class="current">
+                        <h2>Member</h2>
+                        Member until <strong>{{info.member}}</strong>
+                    </div>
+                {{/if}}
+                {{#unless memberNow}}
+                    <div class="passed">
+                        <h2>No membership</h2>
+                        Membership ended <strong>{{info.member}}</strong>
+                    </div>
+                {{/unless}}
+                {{#if labMemberNow}}
+                    <div class="current">
+                        <h2>Lab access</h2>
+                        Access until <strong>{{info.lab}}</strong>
+                    </div>
+                {{/if}}
+                {{#unless labMemberNow}}
+                    <div class="passed">
+                        <h2>No lab access</h2>
+                        Access ended <strong>{{info.lab}}</strong>
+                    </div>
+                {{/unless}}
+            </div>
+        {{/if}}
+        {{#unless member}}
+            <div class="checkMember">
+                <div class="passed">
+                    <h2>No member with this id</h2>
+                    <p>I am sorry, this link does not correspond to a member.
+                        Either your link is old or you did not provide an email and member id that corresponds to a member in Uppsala Makerspace.</p>
+                    <p>You can go back <a href="{{embeddPath}}" target="_top">to the member search page</a> and try again.</p>
+                </div>
+            </div>
+        {{/unless}}
+    {{/if}}
+</template>

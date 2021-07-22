@@ -1,7 +1,9 @@
 <template name="MemberView">
     <h1>Member <strong>{{member.name}}</strong> <small><a class="deleteMember">Delete</a></small></h1>
     {{> MemberStatus member=id}}
-    <br><br>
+    <div class="publicMemberPage">
+        <a href="{{publicMemberPage}}">Public member page for {{member.name}}</a>
+    </div>
     {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id" type="update" buttonContent="Update"}}
     {{#if member.infamily}}
     <h2>Part of family, paying family member is <strong><a href="/member/{{member.infamily}}">{{payingMember.name}}</a></strong> <small><a class="removeFromFamily">Remove from family</a></small></h2>
