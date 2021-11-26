@@ -46,7 +46,7 @@ Katalogen `private` ska ligga under `bundle/server`, den används både för kon
 Användarhantering sker genom en fil `private/user.json` som ser ut som:
 
     [
-      {username: 'john', password: '12345'}
+       {"username": "john", "password": "12345"}
     ]
 
 Om du tar bort användare från denna fil kommer de tas bort från databasen, det är också möjligt att ändra lösen genom att ändra i denna fil.
