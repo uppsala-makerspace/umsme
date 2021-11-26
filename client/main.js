@@ -12,6 +12,7 @@ import './ui/mail/index';
 import './ui/lock/index';
 import './ui/stats/index';
 import './ui/door/index';
+import './ui/lockuserhistory/index';
 import '/lib/accounts-config';
 import './ui/check/index';
 
