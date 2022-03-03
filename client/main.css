@@ -2,6 +2,7 @@
 @import "ui/comment/comment.css";
 @import "ui/mail/mail.css";
 @import "ui/check/check.css";
+@import "ui/storage/storage.css";
 
 html {
   background: aliceblue;

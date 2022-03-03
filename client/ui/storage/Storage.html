@@ -1,0 +1,29 @@
+<template name="Storage">
+    <h1>Storage boxes status</h1>
+    {{#each wall in walls}}
+        <h2>Wall {{wall.nr}}</h2>
+        <div class="storageWall">
+            {{#each shelf in wall.shelves}}
+                <div class="storageShelf">
+                    <div class="storageColumn">
+                        {{#each box in shelf.col1}}
+                            <div title="{{box.tooltip}}" class="storagebox {{box.class}}">{{box.nr}}</div>
+                        {{/each}}
+                    </div>
+                    <div class="storageColumn">
+                        {{#each box in shelf.col2}}
+                            <div title="{{box.tooltip}}" class="storagebox {{box.class}}">{{box.nr}}</div>
+                        {{/each}}
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+    {{/each}}
+    <h1>Förteckning</h1>
+    <ul class="storageList">
+        {{#each box in boxes}}
+            <li class="storagebox {{box.class}}">{{box.nr}} - {{#if box.occupied}}{{box.tooltip}}{{/if}}</li>
+        {{/each}}
+    </ul>
+
+</template>

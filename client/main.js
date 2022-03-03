@@ -14,6 +14,7 @@ import './ui/stats/index';
 import './ui/door/index';
 import '/lib/accounts-config';
 import './ui/check/index';
+import './ui/storage';
 
 FlowRouter.route('/', {
   name: 'home',

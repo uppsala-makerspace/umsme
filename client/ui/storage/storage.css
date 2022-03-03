@@ -1,0 +1,50 @@
+div.storagebox {
+    width: 40px;
+    height: 30px;
+    background: white;
+    margin: 3px;
+    border: 2px solid black;
+    text-align: center;
+    padding-top: 2px;
+}
+
+ul.storageList {
+    list-style: none;
+    padding-left: 0;
+}
+li.storagebox {
+    background: white;
+    margin-bottom: 3px;
+    padding: 2px 6px;
+    border: 2px solid black;
+}
+li.storagebox.occupied,
+.storagebox.occupied {
+    background: #faf138;
+}
+
+li.storagebox.overdue,
+.storagebox.overdue {
+    background: #ffb368;
+}
+
+li.storagebox.error,
+.storagebox.error {
+    background: #d20000;
+}
+
+.storageColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+.storageShelf {
+    display: flex;
+    flex-direction: row;
+    padding-right: 10px;
+}
+
+.storageWall {
+    display: flex;
+    flex-direction: row;
+}
