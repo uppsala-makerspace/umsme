@@ -1,5 +1,6 @@
 import { Template } from 'meteor/templating';
 import { Mails } from "/collections/mails";
+import { Comments } from '/collections/comments';
 import './MailView.html';
 import './Recipients';
 import '../comment/CommentList';
@@ -23,5 +24,17 @@ Template.MailView.helpers({
   },
   id() {
     return FlowRouter.getParam('_id');
+  }
+});
+
+Template.MailView.events({
+  'click .deleteMail': function (event) {
+    const mid = FlowRouter.getParam('_id');
+    if (confirm('Delete this mail')) {
+      Comments.find({about: mid}).forEach((comm) => {Comments.remove(comm._id);});
+      const member = Mails.findOne(mid);
+      Mails.remove(mid);
+      FlowRouter.go('/mail');
+    }
   }
 });

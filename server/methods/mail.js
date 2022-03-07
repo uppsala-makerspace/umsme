@@ -6,10 +6,17 @@ import { messageData } from "/lib/message";
 
 Meteor.methods({
   'mail': (to, subject, text, from) => {
-    if (Meteor.userId() && Meteor.settings.deliverMails) {
-      const f = Meteor.settings.from;
-      Email.send({ to, from: from ? from :  (Array.isArray(f) ? f[0] : f), subject, text });
+    if (!Meteor.userId()) {
+      console.log(`No user logged in, cannot send mail to ${to}`);
+      return;
     }
+    if (!Meteor.settings.deliverMails) {
+      console.log(`Flag deliverMail in settings not set, cannot send mail to ${to}`);
+      return;
+    }
+    const f = Meteor.settings.from;
+    Email.send({ to, from: from ? from :  (Array.isArray(f) ? f[0] : f), subject, text });
+    console.log(`Sent mail to ${to}`);
   },
   'mailAboutMemberShip': (email) => {
     const mb = Members.findOne({email: email});

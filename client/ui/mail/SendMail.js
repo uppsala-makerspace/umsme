@@ -41,15 +41,20 @@ let rememberState;
 let family;
 let recip;
 
+const noFrom = 'You must provide a from address!';
+const noSubject = 'You must provide a message subject!';
+const noText = 'You must provide some message text!';
+
 Template.SendMail.onCreated(function() {
   Meteor.subscribe('members');
   Meteor.subscribe('memberships');
   Meteor.subscribe('mails');
   this.state = new ReactiveDict();
   rememberState = this.state;
-  this.state.set('from', false);
+  this.state.set('fromOptions', false);
+  this.state.set('message', noFrom);
   models.getFromOptions(() => {
-    this.state.set('from', true);
+    this.state.set('fromOptions', true);
   });
 });
 
@@ -65,7 +70,6 @@ Template.SendMail.helpers({
     return Mails;
   },
   mail() {
-    const state = Template.instance().state;
     return {
       recipients: 'members'
     };
@@ -80,9 +84,17 @@ Template.SendMail.helpers({
     }
     return state.get('to');
   },
-  from() {
+  fromOptions() {
     const state = Template.instance().state;
-    return state.get('from');
+    return state.get('fromOptions');
+  },
+  message() {
+    const state = Template.instance().state;
+    return state.get('message');
+  },
+  dontclose() {
+    const state = Template.instance().state;
+    return state.get('dontclose');
   }
 });
 
@@ -108,6 +120,16 @@ const check = (status, recipients) => {
 AutoForm.hooks({
   insertMailForm: {
     formToDoc: function(doc) {
+      if (!doc.from) {
+        rememberState.set('message', noFrom);
+      } else if (!doc.subject) {
+        rememberState.set('message', noSubject);
+      } else if (!doc.template) {
+        rememberState.set('message', noText);
+      } else {
+        rememberState.set('message', '');
+      }
+
       if (doc.recipients != recip || doc.family != family) {
         family = doc.family;
         recip = doc.recipients;
@@ -122,6 +144,10 @@ AutoForm.hooks({
       insdoc.to = [];
       family = undefined;
       recip = undefined;
+      const message = rememberState.get('message');
+      if (message !== '') {
+        alert(message);
+      }
     },
     onSubmit: function (doc) {
       this.event.preventDefault();
@@ -129,16 +155,30 @@ AutoForm.hooks({
       const messageTemplate = _.template(doc.template);
 
       const recipients = getRecipients(doc.recipients, doc.family);
-      doc.to = recipients.map(d => d.to);
+      doc.to = [];
+      doc.failed = [];
 
-      if (confirm(`Send to ${doc.to.length} recipients`)) {
-        recipients.forEach((data) => {
-          Meteor.call('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from);
+      if (confirm(`Send to ${recipients.length} recipients`)) {
+        recipients.forEach((data, idx) => {
+          rememberState.set('dontclose', `Sending mail number ${idx+1} of ${recipients.length} to ${data.email}`);
+          try {
+            Meteor.call('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from);
+            doc.to.push(data.to);
+            console.log(`Sending to ${data.to}`);
+          } catch(e) {
+            console.log(`Failed sending to ${data.to}`);
+            console.log(e);
+            doc.failed.push(data.to);
+          }
         });
 
+        rememberState.set('dontclose', 'Done sending mails! Going back to list in 3 seconds.');
         Mails.insert(doc);
         this.done();
-        FlowRouter.go(`/mail`);
+        setTimeout(() => {
+          rememberState.set('dontclose', '');
+          FlowRouter.go(`/mail`);
+        }, 3000)
       }
     }
   }

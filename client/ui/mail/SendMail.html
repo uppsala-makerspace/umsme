@@ -1,27 +1,40 @@
 <template name="SendMail">
     <h1>Send mail</h1>
     {{#if Template.subscriptionsReady}}
-    {{#if from}}
-    {{#autoForm collection=Mails doc=mail id="insertMailForm" type="normal" validation="keyup"}}
-    <fieldset>
-        {{> afQuickField name="from"}}
-        {{> afQuickField name="recipients"}}
-        {{> afQuickField name="family"}}
-        <div class="form-group">
-            <label class="control-label">To ({{to.length}})</label>
-            {{>Recipients value=to}}
-        </div>
-        {{> afQuickField name="subject"}}
-        {{> afQuickField name="template"}}
-        <div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <button type="reset" class="btn btn-default">Reset</button>
-        </div>
-    </fieldset>
-    {{/autoForm}}
-    {{/if}}
+        {{#if fromOptions}}
+            {{#autoForm collection=Mails doc=mail id="insertMailForm" type="normal" validation="keyup"}}
+                <fieldset>
+                    {{> afQuickField name="from"}}
+                    {{> afQuickField name="recipients"}}
+                    {{> afQuickField name="family"}}
+                    <div class="form-group">
+                        <label class="control-label">To ({{to.length}})</label>
+                        {{>Recipients value=to}}
+                    </div>
+                    {{> afQuickField name="subject"}}
+                    {{> afQuickField name="template"}}
+                    <div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-default">Reset</button>
+                    </div>
+                </fieldset>
+            {{/autoForm}}
+        {{/if}}
     {{else}}
-    Loading...
+        Loading...
     {{/if}}
+    <p>
+    {{#if message}}
+        <div class="alert alert-warning" style="margin-top: 10px" role="alert">
+            {{message}}
+        </div>
+    {{/if}}
+    {{#if dontclose}}
+        <div class="alert alert-warning" style="margin-top: 10px" role="alert">
+            <h2>Don't close or move away, sending mails!</h2>
+            <strong>{{dontclose}}</strong>
+        </div>
+    {{/if}}
+    </p>
     {{>MessageTemplateDocumentation}}
 </template>
