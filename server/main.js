@@ -6,6 +6,7 @@ import { Messages } from '/collections/messages';
 import { Payments } from '/collections/payments';
 import { Mails } from '/collections/mails';
 import { Comments} from "/collections/comments";
+import { Unlocks } from '/collections/unlocks';
 import './methods/import';
 import './methods/update';
 import './methods/mail';
@@ -13,6 +14,7 @@ import './methods/bank';
 import './methods/lock';
 import './methods/check';
 import './methods/settings';
+import './cronjob/syncAndMailUnlocks';
 
 Meteor.startup(() => {
   // code to run on server at startup
@@ -112,4 +114,10 @@ if (Meteor.isServer) {
       return Comments.find();
     }
   });
+  Meteor.publish('unlocks', function() {
+    if (this.userId) {
+      return Unlocks.find();
+    }
+  });
 }
+

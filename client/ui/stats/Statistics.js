@@ -54,6 +54,7 @@ const statsPerMonth = (events, from, to) => {
   const periods = extractPeriods(events);
   const gained = {};
   const lost = {};
+  const renewed = {};
   const add = (idx, year, month) => {
     const yobj = idx[year] = idx[year] || {};
     yobj[month] = yobj[month] ? yobj[month] + 1 : 1;
@@ -66,6 +67,11 @@ const statsPerMonth = (events, from, to) => {
       add(lost, p.end.getFullYear(), p.end.getMonth());
     }
   });
+  events.forEach((ev) => {
+    if ((!from || ev.when > from) && (!to || ev.when < to) && !ev.joined && ev.value === 1) {
+      add(renewed, ev.when.getFullYear(), ev.when.getMonth());
+    }
+  });
 
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const years = Object.keys(gained).sort((a,b) => (parseInt(a)<parseInt(b) ? -1 : 1));
@@ -73,12 +79,14 @@ const statsPerMonth = (events, from, to) => {
   const labels = [];
   const gainedD = [];
   const lostD = [];
+  const renewedD = [];
   if (firstYear) {
     const firstMonth = Object.keys(gained[firstYear]).sort((a, b) => (parseInt(a) < parseInt(b) ? -1 : 1))[0];
     const currentYear = years[years.length - 1];
     const currentMonth = new Date().getMonth();
     const addForMonth = (year, month) => {
       labels.push(`${year} - ${months[month]}`);
+      renewedD.push((renewed[year] || {})[month] || 0);
       gainedD.push((gained[year] || {})[month] || 0);
       lostD.push(-(lost[year] || {})[month] || 0);
     }
@@ -93,7 +101,8 @@ const statsPerMonth = (events, from, to) => {
   return {
     labels,
     gained: gainedD,
-    lost: lostD
+    lost: lostD,
+    renewed: renewedD
   }
 };
 const getDataSets = (from, to) => {
@@ -102,9 +111,17 @@ const getDataSets = (from, to) => {
   let labs = [];
   let family = [];
   let familylab = [];
+  const member2Join = {};
+  Memberships.find().forEach((ms) => {
+    const oldMs = member2Join[ms.mid];
+    if (!oldMs || ms.start < oldMs.start) {
+      member2Join[ms.mid] = ms;
+    }
+  });
   Memberships.find().forEach((ms) => {
     if (ms.type === 'member' || ms.type === 'labandmember') {
-      members.push({ value: 1, when: ms.start, member: ms.mid });
+      const joined = member2Join[ms.mid]._id === ms._id;
+      members.push({ value: 1, when: ms.start, joined, member: ms.mid });
       members.push({ value: -1, when: ms.memberend, member: ms.mid });
     }
 
@@ -133,7 +150,7 @@ const getDataSets = (from, to) => {
       familylab.push({ value: -1, when: ms.memberend || ms.labend });
     }
   });
-  const { labels, gained, lost } = statsPerMonth(members, from, to);
+  const { labels, gained, lost, renewed } = statsPerMonth(members, from, to);
   members = sortAndaccumulate(members, from, to);
   plain = sortAndaccumulate(plain, from, to);
   labs = sortAndaccumulate(labs, from, to);
@@ -197,6 +214,14 @@ const getDataSets = (from, to) => {
     graph2: {
       labels,
       datasets: [
+        {
+          label: 'Members renewing',
+          borderWidth: 2,
+          data: renewed,
+          borderColor: 'rgb(0,0,0)',
+          backgroundColor: 'rgb(133,133,133)',
+          fill: true,
+        },
         {
           label: 'Gained members',
           borderWidth: 2,

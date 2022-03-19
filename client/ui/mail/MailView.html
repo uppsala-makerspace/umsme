@@ -1,5 +1,5 @@
 <template name="MailView">
-    <h1>Sent mail</h1>
+    <h1>Sent mail <small><a class="deleteMail">Delete</a></small></h1>
     {{> quickForm collection=Mails doc=mail id="mailForm" omitFields="_id" type="readonly" buttonContent="Go back to mail list"}}
     {{>CommentList about=id}}
 </template>
