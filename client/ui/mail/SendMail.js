@@ -149,7 +149,7 @@ AutoForm.hooks({
         alert(message);
       }
     },
-    onSubmit: function (doc) {
+    onSubmit: async function (doc) {
       this.event.preventDefault();
       const subjectTemplate = _.template(doc.subject);
       const messageTemplate = _.template(doc.template);
@@ -159,7 +159,24 @@ AutoForm.hooks({
       doc.failed = [];
 
       if (confirm(`Send to ${recipients.length} recipients`)) {
-        recipients.forEach((data, idx) => {
+        for (let i = 0; i < recipients.length; i++) {
+          const data = recipients[i];
+          rememberState.set('dontclose', `Sending mail number ${i + 1} of ${recipients.length} to ${data.email}`);
+          await new Promise((success) => {
+            Meteor.call('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from, (err, res) => {
+              if (err) {
+                console.log(`Failed sending to ${data.to}`);
+                console.log(e);
+                doc.failed.push(data.to);
+              } else {
+                doc.to.push(data.to);
+                console.log(`Sending to ${data.to}`);
+              }
+              success();
+            });
+          });
+        }
+/*        recipients.forEach((data, idx) => {
           rememberState.set('dontclose', `Sending mail number ${idx+1} of ${recipients.length} to ${data.email}`);
           try {
             Meteor.call('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from);
@@ -170,7 +187,7 @@ AutoForm.hooks({
             console.log(e);
             doc.failed.push(data.to);
           }
-        });
+        });*/
 
         rememberState.set('dontclose', 'Done sending mails! Going back to list in 3 seconds.');
         Mails.insert(doc);
