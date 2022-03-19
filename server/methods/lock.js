@@ -1,4 +1,6 @@
 import {HTTP} from 'meteor/http';
+import { Unlocks } from '/collections/unlocks';
+import { Email } from 'meteor/email'
 
 let credentials;
 let assumeUser;
@@ -36,7 +38,48 @@ const authenticate = () => {
   }
 };
 
+const synkaUnlocks = () => {
+  const res = HTTP.get(`https://api.danalock.com/log/v1/lock/${lockid}?page=0&perpage=50`, options);
+  let importedCount = 0;
+  res.data.forEach((event) => {
+    const timestamp = new Date(event.timestamp);
+    const unlock = Unlocks.findOne({ timestamp });
+    if (!unlock) {
+      const colonlocation = event.username.lastIndexOf(':')
+      const username = colonlocation === -1 ? event.username : event.username.substr(0, colonlocation + 1);
+      Unlocks.insert({timestamp: timestamp, username: username, user: event.user});
+      importedCount += 1;
+    }
+  });
+  return importedCount;
+};
+
 Meteor.methods({
+  'syncLockHistory': () => {
+    authenticate();
+    return synkaUnlocks();
+  },
+  'syncAndMailLockHistory': () => {
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized');
+    }
+    authenticate();
+    synkaUnlocks();
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setHours(-25);
+    const unlocks = Unlocks.find({
+      'timestamp': {
+        $gte: yesterday,
+        $lt: today
+      }
+    }).fetch();
+
+    const log = unlocks.map(t => `${t.timestamp.toISOString()} ${t.user}`).join("\n");
+    const message = `${unlocks.length} låsöppningar av ytterdörren från ${yesterday.toISOString()} till ${today.toISOString()}\n\n${log}`;
+    Email.send({ to: 'mpalmer@gmail.com', from: 'ums@uppsalamakerspace.se', subject: 'Låsöppningar UMS', text: message });
+    return message;
+  },
   'lockHistory': () => {
     authenticate();
     const afterDate = new Date();
