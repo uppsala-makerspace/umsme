@@ -1,5 +1,9 @@
 <template name="Storage">
     <h1>Storage boxes status</h1>
+    <table class="table">
+        <thead><tr><th>Boxes in use</th><th>Overdue boxes</th><th>Unknown</th><th>Free positions</th></tr></thead>
+        <tbody><tr><td>{{status.boxes}}</td><td>{{status.overdue}}</td><td>{{status.unknown}}</td><td>{{status.free}}</td></tr></tbody>
+    </table>
     {{#each wall in walls}}
         <h2>Wall {{wall.nr}}</h2>
         <div class="storageWall">
@@ -7,23 +11,51 @@
                 <div class="storageShelf">
                     <div class="storageColumn">
                         {{#each box in shelf.col1}}
-                            <div title="{{box.tooltip}}" class="storagebox {{box.class}}">{{box.nr}}</div>
+                            <div title="{{box.tooltip}} - {{box.comment}}" class="storagebox {{box.class}}">{{box.nr}}</div>
                         {{/each}}
                     </div>
                     <div class="storageColumn">
                         {{#each box in shelf.col2}}
-                            <div title="{{box.tooltip}}" class="storagebox {{box.class}}">{{box.nr}}</div>
+                            <div title="{{box.tooltip}} - {{box.comment}}" class="storagebox {{box.class}}">{{box.nr}}</div>
                         {{/each}}
                     </div>
                 </div>
             {{/each}}
         </div>
     {{/each}}
-    <h1>Förteckning</h1>
-    <ul class="storageList">
+    <h2>Position / box details</h2>
+    <table class="table storageList">
+        <thead><tr><th>#</th><th>Name & date</th><td class="boxComment">Comment</td></tr></thead>
+        <tbody>
         {{#each box in boxes}}
-            <li class="storagebox {{box.class}}">{{box.nr}} - {{#if box.occupied}}{{box.tooltip}}{{/if}}</li>
+            {{#if boxEquals box.nr}}
+                <tr class="storagebox {{box.class}}"><td>{{box.nr}}</td>
+                    <td>
+                        <select id="memberselect">
+                            {{#if memberEquals ""}}
+                                <option value="" selected>None</option>
+                            {{else}}
+                                <option value="">None</option>
+                            {{/if}}
+                            {{#each member in members}}
+                                {{#if memberEquals member._id}}
+                                    <option value={{member._id}} selected>{{member.name}}</option>
+                                {{else}}
+                                    <option value={{member._id}}>{{member.name}}</option>
+                                {{/if}}
+                            {{/each}}
+                        </select>
+                    </td>
+                    <td><textarea class="boxComment">{{comment box.nr}}</textarea></td>
+                    <td><button class="doneBox" data-box="{{box.nr}}">Done</button></td>
+                </tr>
+            {{else}}
+                <tr class="storagebox {{box.class}}"><td>{{box.nr}}</td><td>{{#if box.occupied}}{{box.tooltip}}{{/if}}</td><td>{{comment box.nr}}</td><td><button class="editBox" data-box="{{box.nr}}">Edit</button></td></tr>
+            {{/if}}
         {{/each}}
-    </ul>
+        </tbody>
+    </table>
+</template>
 
+<template name="boxDropdown">
 </template>

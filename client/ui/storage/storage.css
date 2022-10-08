@@ -18,9 +18,15 @@ li.storagebox {
     padding: 2px 6px;
     border: 2px solid black;
 }
+
+li.storagebox.comment,
+.storagebox.comment {
+    background: #ffea47;
+}
+
 li.storagebox.occupied,
 .storagebox.occupied {
-    background: #faf138;
+    background: #aee581;
 }
 
 li.storagebox.overdue,
@@ -47,4 +53,8 @@ li.storagebox.error,
 .storageWall {
     display: flex;
     flex-direction: row;
+}
+
+.boxComment {
+    width: 50%;
 }

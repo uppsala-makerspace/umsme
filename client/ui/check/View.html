@@ -29,6 +29,14 @@
                         Access ended <strong>{{info.lab}}</strong>
                     </div>
                 {{/unless}}
+                {{#if labMemberNow}}
+                    <h2>Storage</h2>
+                    <label>Storage box number:</label>
+                    <p style="padding-top: 0px">
+                    <input id="storageInput" type="number" min="1" max="204" pattern="\d*" value="{{info.storage}}" />
+                    <button class="updateStorage">Update</button>
+                    </p>
+                {{/if}}
             </div>
         {{/if}}
         {{#unless member}}

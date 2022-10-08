@@ -96,4 +96,14 @@ Template.DoorStats.events({
       }
     });
   },
+  'click .syncDoor': function (event, instance) {
+    console.log("Clicked");
+    Meteor.call('mailLockHistory', (err, res) => {
+      if (err) {
+        document.getElementById('lockResults').innerHTML = err.error;
+      } else {
+        document.getElementById('lockResults').innerHTML = res;
+      }
+    });
+  },
 });

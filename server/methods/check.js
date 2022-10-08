@@ -24,7 +24,8 @@ Meteor.methods({
           member: moment(member.member).format("YYYY-MM-DD"),
           lab: moment(member.lab).format("YYYY-MM-DD"),
           family: member.family,
-          id: member.mid
+          id: member.mid,
+          storage: member.storage
         },
       };
     } else {
@@ -34,4 +35,28 @@ Meteor.methods({
       }
     }
   },
+  'storage': (id, box) => {
+    const member = Members.findOne(id);
+    if (parseInt(box, 10) != box) {
+      return "invalid";
+    }
+    if (member) {
+      if (box && box !== "") {
+        if (member.storage == box) {
+          return "current"
+        }
+        const memberForBox = Members.findOne({storage: parseInt(box, 10)});
+        console.log(memberForBox ? `Found the member ${memberForBox.name} with the same box name` : 'no member for that box');
+        if (memberForBox) {
+          return "busy";
+        }
+        Members.update(id, {"$set": { storage: parseInt(box, 10)} });
+        return "updated";
+      } else {
+        Members.update(id, {"$unset": { storage: ""} });
+        return "cleared";
+      }
+    }
+    return false;
+  }
 });
