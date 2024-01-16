@@ -29,13 +29,21 @@ const extractSessionId = (result) => {
 const excludeTransactions = (transactions) => transactions.filter(tr =>
   tr.details.transactionType === 'Insättning');
 
-const extractTransactions = (transactions) => transactions.map(tr => ({
-  id: tr.details.id,
-  hash: `${tr.amount}${tr.date}${tr.accountingBalance.amount}`.replace(/[\s-\.,]/g, ''),
-  type: tr.details.category === 'SWISH' ? 'swish' : 'bankgiro',
-  amount: parseFloat(tr.amount.replace(/\s/g, '')),
-  date: new Date(tr.date),
-}));
+const extractTransactions = (transactions) => transactions.map(tr => {
+  let hash = `${tr.amount}${tr.date}${tr.accountingBalance.amount}`.replace(/[\s-\.,]/g, '');
+  if (Meteor.settings.newBankHashDate
+    && new Date(tr.date) > new Date(Meteor.settings.newBankHashDate)
+    && tr.details.category === "SWISH") {
+    hash = `${tr.amount}${tr.date}${tr.details.bankReference}`.replace(/[\s-\.,]/g, '');
+  }
+  return {
+    id: tr.details.id,
+    hash,
+    type: tr.details.category === 'SWISH' ? 'swish' : 'bankgiro',
+    amount: parseFloat(tr.amount.replace(/\s/g, '')),
+    date: new Date(tr.date),
+  };
+});
 
 Meteor.methods({
   'setPnr': (pnr) => {
