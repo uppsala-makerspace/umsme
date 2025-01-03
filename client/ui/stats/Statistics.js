@@ -1,116 +1,16 @@
 import { Template } from 'meteor/templating';
 import Chart from 'chart.js/dist/Chart';
 import { Memberships } from '/collections/memberships.js';
+import { Members } from '/collections/members.js';
 import './Statistics.html';
+import { statsPerMonth, sortAndaccumulate } from './utils';
 
-const datesAreOnSameDay = (first, second) =>
-  first && second &&
-  first.getFullYear() === second.getFullYear() &&
-  first.getMonth() === second.getMonth() &&
-  first.getDate() === second.getDate();
-const sortAndaccumulate = (arr, from, to) => {
-  arr.sort((a, b) => {
-    return a.when < b.when ? -1 : 1;
-  });
-  const now = new Date();
-  let last;
-  arr = arr.filter((m) => {
-    if (m.when > now) {
-      return false;
-    }
-    if (last) {
-      if (datesAreOnSameDay(last.when, m.when)) {
-        last.value += m.value;
-        return false;
-      }
-    }
-    last = m;
-    return true;
-  });
-
-  let accumulate = 0;
-  return arr.map((ev) => {
-    accumulate += ev.value;
-    return {x: ev.when, y: accumulate};
-  }).filter(pair => ((from == null && pair.x < to) || (pair.x > from && pair.x < to)));
-};
-
-const extractPeriods = (events) => {
-  const periods = {};
-  events.forEach((ev) => {
-    const obj = periods[ev.member] || {};
-    if (ev.value === 1 && (!obj.start || obj.when < obj.start)) {
-      obj.start = ev.when;
-      periods[ev.member] = obj;
-    } else if (ev.value === -1 && (!obj.end || obj.when > obj.end)) {
-      obj.end = ev.when;
-      periods[ev.member] = obj;
-    }
-  });
-  return periods;
-};
-
-const statsPerMonth = (events, from, to) => {
-  const periods = extractPeriods(events);
-  const gained = {};
-  const lost = {};
-  const renewed = {};
-  const add = (idx, year, month) => {
-    const yobj = idx[year] = idx[year] || {};
-    yobj[month] = yobj[month] ? yobj[month] + 1 : 1;
-  };
-  Object.values(periods).forEach((p) => {
-    if (p.start > from && p.start < to) {
-      add(gained, p.start.getFullYear(), p.start.getMonth());
-    }
-    if (p.end && p.end > from && p.end < to) {
-      add(lost, p.end.getFullYear(), p.end.getMonth());
-    }
-  });
-  events.forEach((ev) => {
-    if ((!from || ev.when > from) && (!to || ev.when < to) && !ev.joined && ev.value === 1) {
-      add(renewed, ev.when.getFullYear(), ev.when.getMonth());
-    }
-  });
-
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const years = Object.keys(gained).sort((a,b) => (parseInt(a)<parseInt(b) ? -1 : 1));
-  const firstYear = years[0];
-  const labels = [];
-  const gainedD = [];
-  const lostD = [];
-  const renewedD = [];
-  if (firstYear) {
-    const firstMonth = Object.keys(gained[firstYear]).sort((a, b) => (parseInt(a) < parseInt(b) ? -1 : 1))[0];
-    const currentYear = years[years.length - 1];
-    const currentMonth = new Date().getMonth();
-    const addForMonth = (year, month) => {
-      labels.push(`${year} - ${months[month]}`);
-      renewedD.push((renewed[year] || {})[month] || 0);
-      gainedD.push((gained[year] || {})[month] || 0);
-      lostD.push(-(lost[year] || {})[month] || 0);
-    }
-    years.forEach((y) => {
-      const mstart = y === firstYear ? firstMonth : 0;
-      const mstop = y === currentYear ? currentMonth + 1 : 12;
-      for (let m = mstart; m < mstop; m++) {
-        addForMonth(y, m);
-      }
-    })
-  }
-  return {
-    labels,
-    gained: gainedD,
-    lost: lostD,
-    renewed: renewedD
-  }
-};
 const getDataSets = (from, to) => {
   let members = [];
-  let plain = [];
-  let labs = [];
+  let individual = [];
+  let indiviudalLab = [];
   let family = [];
-  let familylab = [];
+  let familyLab = [];
   const member2Join = {};
   Memberships.find().forEach((ms) => {
     const oldMs = member2Join[ms.mid];
@@ -119,48 +19,64 @@ const getDataSets = (from, to) => {
     }
   });
   Memberships.find().forEach((ms) => {
+    // All memberships, including both individuals and family, independent if they are lab or not.
+    // Members part of a family are not counted as they don't have connected membership objects (as they do not pay).
     if (ms.type === 'member' || ms.type === 'labandmember') {
       const joined = member2Join[ms.mid]._id === ms._id;
       members.push({ value: 1, when: ms.start, joined, member: ms.mid });
       members.push({ value: -1, when: ms.memberend, member: ms.mid });
     }
 
+    // Individual membership payment
     if (!ms.family && ms.type === 'member') {
-      plain.push({ value: 1, when: ms.start });
-      plain.push({ value: -1, when: ms.memberend });
+      individual.push({ value: 1, when: ms.start });
+      individual.push({ value: -1, when: ms.memberend });
     }
+    // Individual membership AND lab payment
+    if (!ms.family && ms.type === 'labandmember') {
+      indiviudalLab.push({ value: 1, when: ms.start });
+      indiviudalLab.push({ value: -1, when: ms.memberend || ms.labend });
+    }
+    // Individual lab "upgrade" payment
     if (!ms.family && ms.type === 'lab') {
-      plain.push({ value: -1, when: ms.start });
-      plain.push({ value: 1, when: ms.labend });
+      indiviudalLab.push({ value: 1, when: ms.start });
+      indiviudalLab.push({ value: -1, when: ms.memberend || ms.labend });
+      // Below is because when someone "upgrades" to lab, we need to subtract them from the individual membership graph.
+      individual.push({ value: -1, when: ms.start });
+      individual.push({ value: 1, when: ms.labend });
     }
-    if (!ms.family && (ms.type === 'labandmember' || ms.type === 'lab')) {
-      labs.push({ value: 1, when: ms.start });
-      labs.push({ value: -1, when: ms.memberend || ms.labend });
-    }
+
+    // Family membership payment
     if (ms.family && ms.type === 'member') {
       family.push({ value: 1, when: ms.start });
       family.push({ value: -1, when: ms.memberend });
     }
+    // Family membership AND lab payment
+    if (ms.family && ms.type === 'labandmember') {
+      familyLab.push({ value: 1, when: ms.start });
+      familyLab.push({ value: -1, when: ms.memberend || ms.labend });
+    }
+    // Family lab "upgrade" payment
     if (ms.family && ms.type === 'lab') {
+      familyLab.push({ value: 1, when: ms.start });
+      familyLab.push({ value: -1, when: ms.memberend || ms.labend });
+      // Below is because when a family "upgrades" to lab, we need to subtract them from the family membership graph.
       family.push({ value: -1, when: ms.start });
       family.push({ value: 1, when: ms.labend });
     }
-    if (ms.family && (ms.type === 'labandmember' || ms.type === 'lab')) {
-      familylab.push({ value: 1, when: ms.start });
-      familylab.push({ value: -1, when: ms.memberend || ms.labend });
-    }
   });
-  const { labels, gained, lost, renewed } = statsPerMonth(members, from, to);
   members = sortAndaccumulate(members, from, to);
-  plain = sortAndaccumulate(plain, from, to);
-  labs = sortAndaccumulate(labs, from, to);
+  individual = sortAndaccumulate(individual, from, to);
+  indiviudalLab = sortAndaccumulate(indiviudalLab, from, to);
   family = sortAndaccumulate(family, from, to);
-  familylab = sortAndaccumulate(familylab, from, to);
+  familyLab = sortAndaccumulate(familyLab, from, to);
   document.getElementById('totalmembers').innerText = members.length > 0 ? members[members.length-1].y : '-';
-  document.getElementById('nolab').innerText = plain.length > 0 ? plain[plain.length-1].y : '-';
-  document.getElementById('lab').innerText = labs.length > 0 ? labs[labs.length-1].y : '-';
+  document.getElementById('nolab').innerText = individual.length > 0 ? individual[individual.length-1].y : '-';
+  document.getElementById('lab').innerText = indiviudalLab.length > 0 ? indiviudalLab[indiviudalLab.length-1].y : '-';
   document.getElementById('nolabfamily').innerText = family.length > 0 ? family[family.length-1].y : '-';
-  document.getElementById('labfamily').innerText = familylab.length > 0 ? familylab[familylab.length-1].y : '-';
+  document.getElementById('labfamily').innerText = familyLab.length > 0 ? familyLab[familyLab.length-1].y : '-';
+
+  const { labels, joined, left, churn, renewed, rejoined, disappeared, renewTime, renewLabels, memberAge, memberAgeLeft, memberAgeLabels, index } = statsPerMonth(Memberships, members, from, to);
 
   return {
     graph1: {
@@ -177,7 +93,7 @@ const getDataSets = (from, to) => {
           label: 'No lab',
           borderWidth: 2,
           cubicInterpolationMode: 'monotone',
-          data: plain,
+          data: individual,
           borderColor: 'rgba(255, 99, 132)',
           fill: false,
           steppedLine: 'before',
@@ -186,7 +102,7 @@ const getDataSets = (from, to) => {
           label: 'Lab',
           borderWidth: 2,
           cubicInterpolationMode: 'monotone',
-          data: labs,
+          data: indiviudalLab,
           borderColor: 'rgba(54, 162, 235)',
           fill: false,
           steppedLine: 'before',
@@ -204,7 +120,7 @@ const getDataSets = (from, to) => {
           label: 'Lab - family',
           borderWidth: 2,
           cubicInterpolationMode: 'monotone',
-          data: familylab,
+          data: familyLab,
           borderColor: 'rgba(75, 192, 192)',
           fill: false,
           steppedLine: 'before',
@@ -223,9 +139,25 @@ const getDataSets = (from, to) => {
           fill: true,
         },
         {
+          label: 'Members pausing',
+          borderWidth: 2,
+          data: disappeared,
+          borderColor: 'rgb(255,156,0)',
+          backgroundColor: 'rgb(255,201,129)',
+          fill: true,
+        },
+        {
+          label: 'Members rejoining',
+          borderWidth: 2,
+          data: rejoined,
+          borderColor: 'rgb(41,148,0)',
+          backgroundColor: 'rgb(138,210,122)',
+          fill: true,
+        },
+        {
           label: 'Gained members',
           borderWidth: 2,
-          data: gained,
+          data: joined,
           borderColor: 'rgba(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           fill: true,
@@ -233,24 +165,96 @@ const getDataSets = (from, to) => {
         {
           label: 'Lost members',
           borderWidth: 2,
-          data: lost,
+          data: left,
           borderColor: 'rgba(255, 99, 132)',
           backgroundColor: 'rgba(255, 99, 132, 0.2)',
           fill: true,
         }
       ]
-    }
+    },
+    graph3: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Percentage of lost members (churn)',
+          borderWidth: 2,
+          data: churn,
+          borderColor: 'rgba(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          fill: true,
+        },
+      ]
+    },
+    graph4: {
+      labels: renewLabels,
+      datasets: [
+        {
+          label: 'Time it takes for members to renew',
+          borderWidth: 2,
+          data: renewTime,
+          borderColor: 'rgb(0,0,0)',
+          backgroundColor: 'rgb(133,133,133)',
+          fill: true,
+        },
+      ]
+    },
+    graph5: {
+      labels: memberAgeLabels,
+      datasets: [
+        {
+          label: 'Number of years current members have been active',
+          borderWidth: 2,
+          data: memberAge,
+          borderColor: 'rgb(41,148,0)',
+          backgroundColor: 'rgb(138,210,122)',
+          fill: true,
+        },
+        {
+          label: 'Number of years members that has left has been active',
+          borderWidth: 2,
+          data: memberAgeLeft,
+          borderColor: 'rgb(252,0,0)',
+          backgroundColor: 'rgb(242,215,202)',
+          fill: true,
+        },
+      ]
+    },
+    index
   };
 };
 
 let mychart1;
 let mychart2;
-const redrawGraphs = (from, to) => {
+let mychart3;
+let mychart4;
+let mychart5;
+const redrawGraphs = (from, to, state) => {
   if (mychart1) {
     mychart1.destroy();
     mychart2.destroy();
   }
-  const {graph1, graph2} = getDataSets(from, to);
+  const {graph1, graph2, graph3, graph4, graph5, index} = getDataSets(from, to);
+  //  this.state.set('editBox', '');
+
+  const mid2name = {};
+  Members.find().forEach((m) => {
+    mid2name[m._id] = m.name;
+  });
+
+  const memberList = [];
+  Object.keys(index).forEach(key => {
+    const obj = index[key];
+    const no = {
+      years: obj.years,
+      name: mid2name[key],
+      statusClass: obj.left ? 'memberLeft' : 'memberCurrent',
+      left: obj.left ? obj.left.toISOString().substring(0,10) : ''
+    };
+    memberList.push(no);
+  });
+  memberList.sort((a, b) => (a.years === b.years ? 0 : (a.years < b.years ? 1 : -1)));
+  state.set('members', memberList);
+
   mychart1 = new Chart('membersPerDay', {
     type: 'line',
     data: graph1,
@@ -293,29 +297,85 @@ const redrawGraphs = (from, to) => {
       }
     }
   });
+  mychart3 = new Chart('churn', {
+    type: 'bar',
+    data: graph3,
+    options: {
+      responsive: true,
+      scales: {
+        xAxes: [{
+          stacked: true,
+        }],
+        yAxes: [{
+          stacked: true,
+          ticks: {
+            beginAtZero: true
+          }
+        }],
+      }
+    }
+  });
+  mychart4 = new Chart('renewTime', {
+    type: 'bar',
+    data: graph4,
+    options: {
+      responsive: true,
+      scales: {
+        xAxes: [{
+          stacked: true,
+        }],
+        yAxes: [{
+          stacked: true,
+          ticks: {
+            beginAtZero: true
+          }
+        }],
+      }
+    }
+  });
+  mychart5 = new Chart('memberAge', {
+    type: 'bar',
+    data: graph5,
+    options: {
+      responsive: true,
+      scales: {
+        xAxes: [{
+          stacked: true,
+        }],
+        yAxes: [{
+          stacked: true,
+          ticks: {
+            beginAtZero: true
+          }
+        }],
+      }
+    }
+  });
 };
 
-const redrawGraphFor = (interval) => {
+const redrawGraphFor = (interval, state) => {
   interval = interval || 'all';
   const now = new Date();
   switch (interval) {
     case 'all':
-      redrawGraphs(null, now);
+      redrawGraphs(null, now, state);
       break;
     case 'year':
-      redrawGraphs(new Date().setFullYear(now.getFullYear()-1), now);
+      redrawGraphs(new Date().setFullYear(now.getFullYear()-1), now, state);
       break;
     case 'quarter':
-      redrawGraphs(new Date().setMonth(now.getMonth()-3), now);
+      redrawGraphs(new Date().setMonth(now.getMonth()-3), now, state);
       break;
     case 'month':
-      redrawGraphs(new Date().setMonth(now.getMonth()-1), now);
+      redrawGraphs(new Date().setMonth(now.getMonth()-1), now, state);
       break;
   }
 };
 
 Template.Statistics.onCreated(function() {
   this.subscribe('memberships');
+  this.subscribe('members');
+  this.state = new ReactiveDict();
 });
 
 Template.Statistics.onRendered(function () {
@@ -324,15 +384,25 @@ Template.Statistics.onRendered(function () {
     if (!this.subscriptionsReady()) {
       return;
     }
+
+    const redraw = () =>
+      redrawGraphFor(undefined, this.state);
+
     // Need defer or setTimeout(0) or afterFlush to wait until after rendering is done
-    Meteor.defer(redrawGraphFor);
+    Meteor.defer(redraw);
   });
 });
 
 Template.Statistics.events({
   'change .timeinterval': function (event, instance) {
     if (event.target.checked) {
-      redrawGraphFor(event.target.value);
+      redrawGraphFor(event.target.value, instance.state);
     }
+  }
+});
+
+Template.Statistics.helpers({
+  users: () => {
+    return Template.instance().state.get('members');
   }
 });

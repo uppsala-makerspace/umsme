@@ -31,4 +31,20 @@
     </div>
     <canvas id="membersPerDay"></canvas>
     <canvas id="membersPerMonths"></canvas>
+    <canvas id="churn"></canvas>
+    <canvas id="renewTime"></canvas>
+    <canvas id="memberAge"></canvas>
+    <hr>
+    <table class="table memberList">
+        <thead><tr><th>Name</th><td>Years</td><td>Left</td></tr></thead>
+        <tbody>
+        {{#each user in users}}
+        <tr class="{{user.statusClass}}">
+            <td>{{user.name}}</td>
+            <td>{{user.years}}</td>
+            <td>{{user.left}}</td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
 </template>

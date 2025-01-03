@@ -43,3 +43,10 @@
 #labfamily {
     color: rgba(75, 192, 192, 1);
 }
+
+.memberLeft td {
+    background: #ffdada;
+}
+.memberCurrent td {
+    background: #d6ffd6;
+}

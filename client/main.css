@@ -103,6 +103,13 @@ header {
   min-height: 400px;
 }
 
+#messageViewForm textarea[data-schema-key="sms"],
+#insertMessageForm textarea[data-schema-key="sms"],
+#insertTemplateForm textarea[data-schema-key="sms"],
+#messageTemplateViewForm textarea[data-schema-key="sms"] {
+  min-height: 50px;
+}
+
 .login-buttons-dropdown-align-right {
   float: right;
   margin: 10px 20px !important;

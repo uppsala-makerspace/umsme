@@ -1,9 +1,11 @@
 import './DoorStats.html';
+import { Unlocks } from '/collections/unlocks.js';
+import { Members } from '/collections/members.js';
 import Chart from 'chart.js/dist/Chart';
 
 Template.DoorStats.onCreated(function() {
+  Meteor.subscribe('unlocks');
 });
-
 
 Template.DoorStats.helpers({
 });
@@ -42,19 +44,24 @@ const draw = (data) => {
   });
 };
 
-const calc = (history) => {
+const unlocksPerUser = (history) => {
   const users = {};
   history.forEach((h) => {
-    let user = users[h.user];
+    let user = users[h.username];
     if (!user) {
       user = [];
-      users[h.user] = user;
+      users[h.username] = user;
     }
     user.push(h);
   });
-  let zero = 113, five = 0, ten = 0, twenty = 0, fifty = 0, more = 0;
-  Object.keys(users).forEach((user) => {
-    const visits = users[user].length;
+  return users;
+};
+
+const calc = (users) => {
+  const usernames = Object.keys(users);
+  let zero = usernames.length, five = 0, ten = 0, twenty = 0, fifty = 0, more = 0;
+  usernames.forEach((username) => {
+    const visits = users[username].length;
     zero--;
     if (visits <= 5) {
       five++;
@@ -91,7 +98,8 @@ Template.DoorStats.events({
       if (err) {
         instance.state.set('data', 'error: ' + err.error);
       } else {
-        const data = calc(res);
+        const users = unlocksPerUser(res);
+        const data = calc(users);
         draw(data);
       }
     });
@@ -105,5 +113,24 @@ Template.DoorStats.events({
         document.getElementById('lockResults').innerHTML = res;
       }
     });
+  },
+  'click .unlocks': function (event, instance) {
+    console.log("Clicked unlock");
+
+    const users = {};
+    Unlocks.find().forEach(unlock => {
+      let username = unlock.username;
+      if (username.endsWith(':')) {
+        username = username.substring(0, username.length - 1);
+      }
+      let user = users[username];
+      if (!user) {
+        user = [];
+        users[username] = user;
+      }
+      user.push(unlock);
+    });
+    const data = calc(users);
+    draw(data);
   },
 });

@@ -89,6 +89,12 @@ Meteor.methods({
             tr.message = result.data.message;
             const swd = result.data.swishDetails;
             tr.clarification = `Payers name: ${swd.payersName} via ${swd.sendersNumber} at ${swd.transactionTime}`;
+            if (swd.sendersNumber) {
+              tr.mobile = swd.sendersNumber;
+            }
+            if (swd.payersName) {
+              tr.name = swd.payersName;
+            }
           }
           // Temporary id, we keep it temporarily to be able to do the detailed transaction lookup above
           // But we do not store it, since it is unique to each session and worthless in the database

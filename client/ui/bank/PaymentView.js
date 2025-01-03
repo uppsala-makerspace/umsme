@@ -78,6 +78,7 @@ Template.PaymentView.helpers({
     collection: Members,
     rowsPerPage: 10,
     showFilter: true,
+    filter: "Matthias",
     fields: fields.member(),
     class: "table table-bordered table-hover",
   },
@@ -100,6 +101,12 @@ Template.PaymentView.events({
     event.preventDefault();
     const id = FlowRouter.getParam('_id');
     Payments.update(id, {$set: {member: this._id}});
+    // Update the mobile number if it is set.
+    const payment = Payments.findOne(id);
+    const member = Members.findOne(this._id);
+    if (payment.mobile && !member.mobile) {
+      Members.update(this._id, {$set: {mobile: payment.mobile}});
+    }
   },
   'click .removeMemberFromPayment': function (event) {
     if (confirm('Remove this member from the payment, the member will remain in the list.')) {
