@@ -1,7 +1,6 @@
 import { Template } from 'meteor/templating';
 import Chart from 'chart.js/dist/Chart';
 import { Memberships } from '/collections/memberships.js';
-import { Members } from '/collections/members.js';
 import './Statistics.html';
 import { statsPerMonth, sortAndaccumulate } from './utils';
 
@@ -228,32 +227,12 @@ let mychart2;
 let mychart3;
 let mychart4;
 let mychart5;
-const redrawGraphs = (from, to, state) => {
+const redrawGraphs = (from, to) => {
   if (mychart1) {
     mychart1.destroy();
     mychart2.destroy();
   }
-  const {graph1, graph2, graph3, graph4, graph5, index} = getDataSets(from, to);
-  //  this.state.set('editBox', '');
-
-  const mid2name = {};
-  Members.find().forEach((m) => {
-    mid2name[m._id] = m.name;
-  });
-
-  const memberList = [];
-  Object.keys(index).forEach(key => {
-    const obj = index[key];
-    const no = {
-      years: obj.years,
-      name: mid2name[key],
-      statusClass: obj.left ? 'memberLeft' : 'memberCurrent',
-      left: obj.left ? obj.left.toISOString().substring(0,10) : ''
-    };
-    memberList.push(no);
-  });
-  memberList.sort((a, b) => (a.years === b.years ? 0 : (a.years < b.years ? 1 : -1)));
-  state.set('members', memberList);
+  const {graph1, graph2, graph3, graph4, graph5} = getDataSets(from, to);
 
   mychart1 = new Chart('membersPerDay', {
     type: 'line',
@@ -353,21 +332,21 @@ const redrawGraphs = (from, to, state) => {
   });
 };
 
-const redrawGraphFor = (interval, state) => {
+const redrawGraphFor = (interval) => {
   interval = interval || 'all';
   const now = new Date();
   switch (interval) {
     case 'all':
-      redrawGraphs(null, now, state);
+      redrawGraphs(null, now);
       break;
     case 'year':
-      redrawGraphs(new Date().setFullYear(now.getFullYear()-1), now, state);
+      redrawGraphs(new Date().setFullYear(now.getFullYear()-1), now);
       break;
     case 'quarter':
-      redrawGraphs(new Date().setMonth(now.getMonth()-3), now, state);
+      redrawGraphs(new Date().setMonth(now.getMonth()-3), now);
       break;
     case 'month':
-      redrawGraphs(new Date().setMonth(now.getMonth()-1), now, state);
+      redrawGraphs(new Date().setMonth(now.getMonth()-1), now);
       break;
   }
 };
@@ -375,7 +354,6 @@ const redrawGraphFor = (interval, state) => {
 Template.Statistics.onCreated(function() {
   this.subscribe('memberships');
   this.subscribe('members');
-  this.state = new ReactiveDict();
 });
 
 Template.Statistics.onRendered(function () {
@@ -385,24 +363,15 @@ Template.Statistics.onRendered(function () {
       return;
     }
 
-    const redraw = () =>
-      redrawGraphFor(undefined, this.state);
-
     // Need defer or setTimeout(0) or afterFlush to wait until after rendering is done
-    Meteor.defer(redraw);
+    Meteor.defer(redrawGraphFor);
   });
 });
 
 Template.Statistics.events({
-  'change .timeinterval': function (event, instance) {
+  'change .timeinterval': function (event) {
     if (event.target.checked) {
-      redrawGraphFor(event.target.value, instance.state);
+      redrawGraphFor(event.target.value);
     }
-  }
-});
-
-Template.Statistics.helpers({
-  users: () => {
-    return Template.instance().state.get('members');
   }
 });

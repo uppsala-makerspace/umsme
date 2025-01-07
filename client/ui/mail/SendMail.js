@@ -80,6 +80,8 @@ Template.SendMail.helpers({
       family = false;
       recip = 'members';
       const recipients = getRecipients('members', false);
+      console.log(JSON.stringify(recipients.map(r => r.name), undefined, '  '));
+
       state.set('to', recipients.map(d => d.to));
     }
     return state.get('to');
