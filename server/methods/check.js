@@ -25,7 +25,8 @@ Meteor.methods({
           lab: moment(member.lab).format("YYYY-MM-DD"),
           family: member.family,
           id: member.mid,
-          storage: member.storage
+          storage: member.storage,
+          storagequeue: member.storagequeue ? true : undefined
         },
       };
     } else {
@@ -35,7 +36,17 @@ Meteor.methods({
       }
     }
   },
-  'storage': (id, box) => {
+  'queue': (id, queue) => {
+    console.log("Queue called "+ typeof queue);
+    const member = Members.findOne(id);
+    console.log("For member "+ member._id);
+    if (typeof queue !== 'boolean') {
+      return false;
+    }
+    Members.update(id, {"$set": { storagequeue: queue} });
+    return true;
+  },
+/*  'storage': (id, box) => {
     const member = Members.findOne(id);
     if (parseInt(box, 10) != box) {
       return "invalid";
@@ -58,5 +69,5 @@ Meteor.methods({
       }
     }
     return false;
-  }
+  }*/
 });

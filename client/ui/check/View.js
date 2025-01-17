@@ -1,17 +1,21 @@
 import './View.html';
 
+const updateInfo = (state) => {
+  const mid = FlowRouter.getParam('_id');
+  Meteor.call('check', mid, (err, res) => {
+    state.set('checked', true);
+    state.set('member', res.member);
+    state.set('info', res.info);
+  });
+};
+
 Template.View.onCreated(function() {
   this.state = new ReactiveDict();
   this.state.set('checked', false);
   this.state.set('member', false);
   this.state.set('info', {});
   this.state.set('settings', {});
-  const mid = FlowRouter.getParam('_id');
-  Meteor.call('check', mid, (err, res) => {
-    this.state.set('checked', true);
-    this.state.set('member', res.member);
-    this.state.set('info', res.info);
-  });
+  updateInfo(this.state);
   Meteor.call('settings', (err, res) => {
     this.state.set('settings', res);
   });
@@ -47,20 +51,16 @@ Template.View.helpers({
 });
 
 Template.View.events({
-  'click .updateStorage': function (event, instance) {
-    const newNumber = document.getElementById('storageInput').value;
+  'click .addToStorageQueue': function (event, instance) {
     const mid = FlowRouter.getParam('_id');
-    Meteor.call('storage', mid, newNumber, (err, res) => {
-      debugger;
-      if (res === 'current') {
-        alert("This is already your storage number");
-      } else if (res === 'updated') {
-        alert(`Your storage box number was updated to ${newNumber}`);
-      } else if (res === 'busy') {
-        alert(`The storage box number you suggested is already occupied according to the records. If this is wrong, please notify us in the slack channel #storage and we will correct it.`);
-      } else if (res === "invalid") {
-        alert('You need to provide an integer');
-      }
+    Meteor.call('queue', mid, true, (err, res) => {
+      updateInfo(instance.state);
+    });
+  },
+  'click .removeFromStorageQueue': function (event, instance) {
+    const mid = FlowRouter.getParam('_id');
+    Meteor.call('queue', mid, false, (err, res) => {
+      updateInfo(instance.state);
     });
   }
 });

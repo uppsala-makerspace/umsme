@@ -30,11 +30,19 @@
                     </div>
                 {{/unless}}
                 {{#if labMemberNow}}
-                    <h2>Storage</h2>
-                    <label>Storage box number:</label>
-                    <p style="padding-top: 0px">
-                    <input id="storageInput" type="number" min="1" max="204" pattern="\d*" value="{{info.storage}}" />
-                    <button class="updateStorage">Update</button>
+                    <h2>Storage box</h2>
+                    {{#if info.storage}}
+                    <label>Storage box number: {{info.storage}}</label>
+                {{/if}}
+                {{#unless info.storage}}
+                    <span>In queue for a personal storage box:&nbsp;
+                    {{#if info.storagequeue}}✅ &nbsp; &nbsp; &nbsp;<button class="removeFromStorageQueue">Remove me from queue</button>
+                    {{/if}}
+                    {{#unless info.storagequeue}}❌ &nbsp; &nbsp; &nbsp;<button class="addToStorageQueue">Add me to queue</button>{{/unless}}
+                    </span>
+                {{/unless}}
+                <p style="padding-top: 0px">
+
                     </p>
                 {{/if}}
             </div>
