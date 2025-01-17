@@ -73,6 +73,10 @@ const load = (state, memberfilter = 'active') => {
     const obj = index[key];
     const days = Math.floor((now - obj.joined.getTime())/1000/3600/24);
     const member = id2member[key];
+    if (!member.member) {
+      // Weird case with date not being synchronized between member and membership
+      return;
+    }
     if (member.infamily) {return;}
     const isActive = member.member.getTime() > now;
     const no = {
