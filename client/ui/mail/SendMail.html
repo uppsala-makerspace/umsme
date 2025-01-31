@@ -8,8 +8,12 @@
                     {{> afQuickField name="recipients"}}
                     {{> afQuickField name="family"}}
                     <div class="form-group">
-                        <label class="control-label">To ({{to.length}})</label>
-                        {{>Recipients value=to}}
+                        <label class="control-label">To ({{to.length}})</label> <a class="btn btn-primary switchManualTo" href="#" role="button">edit</a>
+                        {{#if tomanual}}
+                          <br><textarea id="manualSendList" class="mailSendList" value="{{tosrc}}"></textarea>
+                        {{else}}
+                          {{>Recipients value=to}}
+                        {{/if}}
                     </div>
                     {{> afQuickField name="subject"}}
                     {{> afQuickField name="template"}}

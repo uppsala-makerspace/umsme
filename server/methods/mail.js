@@ -15,8 +15,14 @@ Meteor.methods({
       return;
     }
     const f = Meteor.settings.from;
-    Email.send({ to, from: from ? from :  (Array.isArray(f) ? f[0] : f), subject, text });
-    console.log(`Sent mail to ${to}`);
+    try {
+      Email.send({ to, from: from ? from :  (Array.isArray(f) ? f[0] : f), subject, text });
+      console.log(`Sent mail to ${to}`);
+    } catch(e) {
+      const mesg = 'Failed sending mail '+e;
+      console.log(mesg);
+      throw new Meteor.Error(mesg);
+    }
   },
   'mailAboutMemberShip': (email) => {
     const mb = Members.findOne({email: email});

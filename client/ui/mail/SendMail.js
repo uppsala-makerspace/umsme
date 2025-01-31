@@ -52,6 +52,7 @@ Template.SendMail.onCreated(function() {
   this.state = new ReactiveDict();
   rememberState = this.state;
   this.state.set('fromOptions', false);
+  this.state.set('tomanual', false);
   this.state.set('message', noFrom);
   models.getFromOptions(() => {
     this.state.set('fromOptions', true);
@@ -73,6 +74,15 @@ Template.SendMail.helpers({
     return {
       recipients: 'members'
     };
+  },
+  tomanual() {
+    const state = Template.instance().state;
+    return state.get('tomanual');
+  },
+  tosrc() {
+    const state = Template.instance().state;
+    const recipients = getRecipients('members', false);
+    return recipients.map(d => d.to).join(',');
   },
   to() {
     const state = Template.instance().state;
@@ -119,6 +129,12 @@ const check = (status, recipients) => {
   }
 };
 
+Template.SendMail.events({
+  'click .switchManualTo': function (event, instance) {
+    instance.state.set('tomanual', true);
+  }
+});
+
 AutoForm.hooks({
   insertMailForm: {
     formToDoc: function(doc) {
@@ -135,8 +151,13 @@ AutoForm.hooks({
       if (doc.recipients != recip || doc.family != family) {
         family = doc.family;
         recip = doc.recipients;
-        const recipients = getRecipients(doc.recipients, doc.family);
-        rememberState.set('to', recipients.map(d => d.to));
+        if (rememberState.get('tomanual')) {
+          const recipientList = document.getElementById('manualSendList').value.split(',');
+          rememberState.set('to', recipientList);
+        } else {
+          const recipients = getRecipients(doc.recipients, doc.family);
+          rememberState.set('to', recipients.map(d => d.to));
+        }
       }
       return doc;
     },
@@ -156,7 +177,26 @@ AutoForm.hooks({
       const subjectTemplate = _.template(doc.subject);
       const messageTemplate = _.template(doc.template);
 
-      const recipients = getRecipients(doc.recipients, doc.family);
+      let recipients = getRecipients(doc.recipients, doc.family);
+      // If manual, split and loop through all recipients and identify original recipient object
+      if (rememberState.get('tomanual')) {
+        const recipientList = `${document.getElementById('manualSendList').value},`.split('>,');
+        const to2recipient = {};
+        recipients.forEach(r => {
+          to2recipient[r.to.substring(0, r.to.length-1)] = r;
+        });
+        const rec2 = [];
+        recipientList.forEach(r => {
+          if (r != "") {
+            const robj = to2recipient[r.trim()];
+            if (robj) {
+              rec2.push(robj);
+            }
+          }
+        });
+        recipients = rec2;
+      }
+      debugger;
       doc.to = [];
       doc.failed = [];
 
@@ -168,7 +208,7 @@ AutoForm.hooks({
             Meteor.call('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from, (err, res) => {
               if (err) {
                 console.log(`Failed sending to ${data.to}`);
-                console.log(e);
+                console.log(err);
                 doc.failed.push(data.to);
               } else {
                 doc.to.push(data.to);

@@ -12,3 +12,8 @@
     max-height: 200px;
     overflow-y: auto;
 }
+
+.mailSendList {
+    width: 100%;
+    height: 40em;
+}
