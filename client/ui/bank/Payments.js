@@ -46,7 +46,7 @@ Template.Payments.helpers({
   },
   settings: {
     collection: Payments,
-    rowsPerPage: 10,
+    rowsPerPage: 50,
     showFilter: true,
     fields: fields.payment(),
     class: "table table-bordered table-hover",
@@ -109,7 +109,9 @@ Template.Payments.events({
     Meteor.call('setPnr', pnr);
   },
   'click .reactive-table tbody tr': function (event) {
-    event.preventDefault();
-    FlowRouter.go(`/payment/${this._id}`);
+    if (event.target.nodeName !== 'A') {
+      event.preventDefault();
+      FlowRouter.go(`/payment/${this._id}`);
+    }
   }
 });
