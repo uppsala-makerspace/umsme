@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { Accounts } from "meteor/accounts-base";
 import { Members } from '/collections/members';
 import { Memberships } from '/collections/memberships';
 import { MessageTemplates } from '/collections/templates';
@@ -18,6 +19,16 @@ Meteor.startup(() => {
   // code to run on server at startup
 
     if (Meteor.isServer) {
+      try {
+        console.log("Admin1");
+        Accounts.createUser({username: 'admin', password: Meteor.settings?.adminpassword || 'adminadmin'});
+        console.log("Admin2");
+      } catch (e) {
+        console.log("Admin3");
+        Accounts.setPassword('admin', Meteor.settings?.adminpassword || 'adminadmin');
+      }
+
+
         // This code only runs on the server
       Meteor.publish('members', function () {
         if (this.userId) {
