@@ -4,6 +4,6 @@ import './Recipients.html';
 AutoForm.addInputType('recipients', {
   template: 'Recipients',
   valueOut: function(doc) {
-    return ['hepp'];
+    return [];
   }
 })

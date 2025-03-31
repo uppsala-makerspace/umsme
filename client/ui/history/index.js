@@ -1,8 +1,9 @@
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './History';
 
 FlowRouter.route('/history', {
   name: 'history',
   action() {
-    BlazeLayout.render('AppBody', {main: 'History'});
+    this.render('AppBody', {main: 'History'});
   }
 });

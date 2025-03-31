@@ -1,11 +1,9 @@
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Payments } from '/collections/payments';
 import { Members } from '/collections/members';
 import { Memberships } from '/collections/memberships';
-import { fields } from '../../../lib/fields';
 import './PaymentView.html';
 import '../comment/CommentList';
-
-
 
 Template.PaymentView.onCreated(function() {
   Meteor.subscribe('payments');
@@ -40,10 +38,12 @@ Template.PaymentView.helpers({
       cls
     }
   },
-  member() {
+  async member() {
     const id = FlowRouter.getParam('_id');
     const payment = Payments.findOne(id);
-    return Members.findOne(payment.member);
+    if (payment) {
+      return Members.findOne(payment.member);
+    }
   },
   Memberships() {
     return Memberships;
@@ -54,7 +54,7 @@ Template.PaymentView.helpers({
     //const payment = Payments.findOne(id);
     //return Members.findOne(payment.membership);
   },
-  membershipSettings: function() {
+/*  membershipSettings: function() {
     const pid = FlowRouter.getParam('_id');
     const payment = Payments.findOne(pid);
     return {
@@ -81,7 +81,7 @@ Template.PaymentView.helpers({
     filter: "Matthias",
     fields: fields.member(),
     class: "table table-bordered table-hover",
-  },
+  },*/
 });
 
 Template.PaymentView.events({
@@ -97,15 +97,19 @@ Template.PaymentView.events({
       FlowRouter.go('/payments');
     }
   },
-  'click .paymentMembers .reactive-table tbody tr': function (event, instance) {
+  'click .memberList tbody tr': async function (event, instance) {
     event.preventDefault();
+    const dataTable = $(event.target).closest('table').DataTable();
+    const rowData = dataTable.row(event.currentTarget).data();
+    if (!rowData) return; // Won't be data if a placeholder row is clicked
+
     const id = FlowRouter.getParam('_id');
-    Payments.update(id, {$set: {member: this._id}});
+    Payments.updateAsync(id, {$set: {member: rowData._id}});
     // Update the mobile number if it is set.
-    const payment = Payments.findOne(id);
-    const member = Members.findOne(this._id);
+    const payment = await Payments.findOneAsync(id);
+    const member = Members.findOneAsync(rowData._id);
     if (payment.mobile && !member.mobile) {
-      Members.update(this._id, {$set: {mobile: payment.mobile}});
+      Members.updateAsync(rowData._id, {$set: {mobile: payment.mobile}});
     }
   },
   'click .removeMemberFromPayment': function (event) {
@@ -118,18 +122,21 @@ Template.PaymentView.events({
       Payments.update(pid, {$unset: {member: "", membership: ""}});
     }
   },
-  'click .paymentMembership .reactive-table tbody tr': function (event, instance) {
+/*  'click .memberList tbody tr': function (event, instance) {
     event.preventDefault();
+    const dataTable = $(event.target).closest('table').DataTable();
+    const rowData = dataTable.row(event.currentTarget).data();
+    if (!rowData) return; // Won't be data if a placeholder row is clicked
     const pid = FlowRouter.getParam('_id');
-    Memberships.update(this._id, {$set: {pid}});
-    Payments.update(pid, {$set: {membership: this._id}});
-  },
+    Memberships.updateAsync(rowData._id, {$set: {pid}});
+    Payments.updateAsync(pid, {$set: {membership: rowData._id}});
+  },*/
   'click .removePaymentFromMembership': function (event) {
     if (confirm('Disconnect the membership from the payment, the membership will remain and still be connected to the member.')) {
       const pid = FlowRouter.getParam('_id');
       const ms = Memberships.findOne({pid});
-      Payments.update(pid, {$unset: {membership: ''}});
-      Memberships.update(ms._id, {$unset: {pid}});
+      Payments.updateAsync(pid, {$unset: {membership: ''}});
+      Memberships.updateAsync(ms._id, {$unset: {pid}});
     }
   },
   'click .notAMembershipPayment': function (event) {

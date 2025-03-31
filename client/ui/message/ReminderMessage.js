@@ -2,9 +2,9 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members';
 import { MessageTemplates } from '/collections/templates';
 import { memberStatus } from '/lib/utils';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './ReminderMessage.html';
 import { reminderDays } from '/lib/rules';
-
 
 Template.ReminderMessage.onCreated(function() {
   Meteor.subscribe('templates');

@@ -2,7 +2,7 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members.js';
 import { Payments } from '/collections/payments';
 import { updateMember } from '/lib/utils';
-
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 
 import './MemberAdd.html';
 

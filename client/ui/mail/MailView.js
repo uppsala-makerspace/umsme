@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Mails } from "/collections/mails";
 import { Comments } from '/collections/comments';
 import './MailView.html';

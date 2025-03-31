@@ -2,7 +2,9 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members.js';
 import { Memberships } from "/collections/memberships";
 import { Payments } from "/collections/payments";
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { updateMember } from '/lib/utils';
+import 'meteor/aldeed:autoform/static'
 import '../message/InitiateMessage';
 import '../message/MessageList';
 import './MembershipView.html';
@@ -26,7 +28,7 @@ Template.MembershipView.helpers({
   payment() {
     const id = FlowRouter.getParam('_id');
     const ms = Memberships.findOne(id);
-    if (ms.pid) {
+    if (ms?.pid) {
       return Payments.findOne(ms.pid);
     }
   },
@@ -43,12 +45,14 @@ Template.MembershipView.helpers({
   memberId() {
     const id = FlowRouter.getParam('_id');
     const membership = Memberships.findOne(id);
-    return membership.mid;
+    return membership?.mid;
   },
   member() {
     const id = FlowRouter.getParam('_id');
     const membership = Memberships.findOne(id);
-    return Members.findOne(membership.mid);
+    if (membership) {
+      return Members.findOne(membership.mid);
+    }
   },
 });
 
@@ -82,6 +86,9 @@ AutoForm.hooks({
     endSubmit: function (doc) {
       const id = FlowRouter.getParam('_id');
       const membership = Memberships.findOne(id);
+      if (!membership) {
+        return;
+      }
       const mid = membership.mid;
       const mb = Members.findOne(mid);
       updateMember(mb);

@@ -1,6 +1,5 @@
 import { Template } from 'meteor/templating';
-import { Members } from '../../../collections/members.js';
-import { fields } from '../../../lib/fields';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './FamilyList.html';
 
 Template.FamilyList.onCreated(function() {
@@ -8,21 +7,17 @@ Template.FamilyList.onCreated(function() {
 });
 
 Template.FamilyList.helpers({
-  settings() {
-    return {
-      collection: Members.find({infamily: this.patron}),
-      rowsPerPage: 10,
-      showFilter: false,
-      fields: fields.member(),
-      showNavigation: 'auto',
-      class: "table table-bordered table-hover",
-    }
+  selector() {
+    return {infamily: this.patron};
   }
 });
 
 Template.FamilyList.events({
-  'click .reactive-table tbody tr': function (event) {
+  'click .familyList tbody tr': function (event) {
     event.preventDefault();
-    FlowRouter.go(`/member/${this._id}`);
+    var dataTable = $(event.target).closest('table').DataTable();
+    var rowData = dataTable.row(event.currentTarget).data();
+    if (!rowData) return; // Won't be data if a placeholder row is clicked
+    FlowRouter.go(`/member/${rowData._id}`);
   }
 });

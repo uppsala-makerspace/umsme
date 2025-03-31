@@ -1,5 +1,6 @@
 import { Template } from 'meteor/templating';
-import Chart from 'chart.js/dist/Chart';
+import Chart from 'chart.js/auto';
+import 'chartjs-adapter-moment';
 import { Memberships } from '/collections/memberships.js';
 import './Statistics.html';
 import { statsPerMonth, sortAndaccumulate } from './utils';
@@ -240,21 +241,21 @@ const redrawGraphs = (from, to) => {
     options: {
       responsive: true,
       scales: {
-        yAxes: [{
+        y: {
           stacked: false,
           ticks: {
             beginAtZero: true,
             stepSize: 1
           },
-        }],
-        xAxes: [{
+        },
+        x: {
           type: 'time',
           time: {
             displayFormats: {
               quarter: 'MMM YYYY'
             }
           }
-        }]
+        }
       }
     }
   });
@@ -264,15 +265,15 @@ const redrawGraphs = (from, to) => {
     options: {
       responsive: true,
       scales: {
-        xAxes: [{
+        x: {
           stacked: true,
-        }],
-        yAxes: [{
+        },
+        y: {
           stacked: true,
           ticks: {
             beginAtZero: true
           }
-        }],
+        },
       }
     }
   });
@@ -282,15 +283,15 @@ const redrawGraphs = (from, to) => {
     options: {
       responsive: true,
       scales: {
-        xAxes: [{
+        x: {
           stacked: true,
-        }],
-        yAxes: [{
+        },
+        y: {
           stacked: true,
           ticks: {
             beginAtZero: true
           }
-        }],
+        },
       }
     }
   });
@@ -300,15 +301,15 @@ const redrawGraphs = (from, to) => {
     options: {
       responsive: true,
       scales: {
-        xAxes: [{
+        x: {
           stacked: true,
-        }],
-        yAxes: [{
+        },
+        y: {
           stacked: true,
           ticks: {
             beginAtZero: true
           }
-        }],
+        },
       }
     }
   });
@@ -318,15 +319,15 @@ const redrawGraphs = (from, to) => {
     options: {
       responsive: true,
       scales: {
-        xAxes: [{
+        x: {
           stacked: true,
-        }],
-        yAxes: [{
+        },
+        y: {
           stacked: true,
           ticks: {
             beginAtZero: true
           }
-        }],
+        },
       }
     }
   });

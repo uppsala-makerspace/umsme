@@ -122,3 +122,7 @@ header {
 #login-dropdown-list {
   top: 32px;
 }
+
+.table-hover>tbody>tr:hover {
+  cursor: pointer;
+}

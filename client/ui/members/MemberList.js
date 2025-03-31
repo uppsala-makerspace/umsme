@@ -1,30 +1,21 @@
 import { Template } from 'meteor/templating';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Members } from '../../../collections/members.js';
-import { models } from '../../../lib/models';
-import { fields } from '../../../lib/fields';
 import './MemberList.html';
+import '../../../lib/tabular/members';
 
 Template.MemberList.onCreated(() => {
   Meteor.subscribe('members');
 });
 
 Template.MemberList.helpers({
-  settings: {
-    collection: Members,
-    rowsPerPage: 10,
-    showFilter: true,
-//    multiColumnSort: false,
-    fields: fields.member(),
-    class: "table table-bordered table-hover",
-  }
 });
 
 const forceDownload = (rows, filename) => {
-  let csvContent = "data:text/csv;charset=utf-8,"
+  const csvContent = "data:text/csv;charset=utf-8,"
     + rows.map(e => e.join(",")).join("\n");
-
-  var encodedUri = encodeURI(csvContent);
-  var link = document.createElement("a");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
   link.setAttribute("download", filename);
   document.body.appendChild(link); // Required for FF
@@ -35,16 +26,12 @@ const forceDownload = (rows, filename) => {
 const toDate = d => (d ? d.toISOString().substr(0, 10) : '');
 
 Template.MemberList.events({
-  'click .reactive-table tbody tr': function (event) {
+  'click .memberList tbody tr': function (event) {
     event.preventDefault();
-    var post = this;
-    FlowRouter.go(`/member/${post._id}`);
-    //window.location.href = "/member/"
-    //console.log(post.mid);
-    // checks if the actual clicked element has the class `delete`
-/*    if (event.target.className == "delete") {
-      Posts.remove(post._id)
-    }*/
+    const dataTable = $(event.target).closest('table').DataTable();
+    const rowData = dataTable.row(event.currentTarget).data();
+    if (!rowData) return; // Won't be data if a placeholder row is clicked
+    FlowRouter.go(`/member/${rowData._id}`);
   },
   'click .downloadCurrent': function () {
     const today = new Date();

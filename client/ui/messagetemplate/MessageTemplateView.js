@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { MessageTemplates } from '/collections/templates';
 import './MessageTemplateDocumentation.html';
 import './MessageTemplateView.html';

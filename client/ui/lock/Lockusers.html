@@ -2,34 +2,46 @@
     <h1>Lock synchronization</h1>
     <button type="submit" class="syncWithLock">Synchronize</button>
     <hr>
-    {{#if initialized}}
-      {{#if selected}}
-        <h1>{{selected.name}} <small><a class="backToSearch">Back to search</a></small></h1>
-        {{> quickForm collection=lockusers doc=selected id="lockUserViewForm" omitFields="lockid,name,member" type="readonly"}}
-        {{#if canCreateAccount}}
-           <button class="createAccount">Create lock account</button>
-        {{/if}}
-        {{#if canSetEndDate}}
-           <button class="setEndDate">Set lock end date</button>
-        {{/if}}
-    {{/if}}
-      {{#unless selected}}
         Filters:
-            {{> FilterCheck name="noaccount" label="No account" checked=""}}
-            {{> FilterCheck name="invited" label="Invited" checked=""}}
-            {{> FilterCheck name="wrong" label="Wrong date" checked="checked"}}
-            {{> FilterCheck name="correct" label="Correct date" checked=""}}
-            {{> FilterCheck name="forever" label="No end date" checked=""}}
-            {{> FilterCheck name="admin" label="Administrators" checked=""}}
-            {{> FilterCheck name="old" label="Expired access" checked=""}}
-            {{> reactiveTable settings=settings}}
-      {{/unless}}
-    {{/if}}
+    {{> FilterCheck name="wrong" label="Wrong date" }}
+    {{> FilterCheck name="stale" label="Stale (Needs synchronization)" }}
+    {{> FilterCheck name="noaccount" label="No account" }}
+    {{> FilterCheck name="invited" label="Invited" }}
+    {{> FilterCheck name="correct" label="Correct date" }}
+    {{> FilterCheck name="forever" label="No end date" }}
+    {{> FilterCheck name="admin" label="Administrators" }}
+    {{> FilterCheck name="old" label="Expired access" }}
+    <table class="table table-hover table-striped table-bordered table-condensed locktable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <td>Email</td>
+            <td>Lock user id</td>
+            <td>Lab end date</td>
+            <td>Lock end date</td>
+            <td>Status</td>
+            <td>Fix</td>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each lock in lockusers}}
+        <tr data-memberid="{{lock.member}}">
+            <td><a href="/member/{{lock.member}}">{{lock.name}}</a></td>
+            <td>{{lock.email}}</td>
+            <td>{{lock.lockid}}</td>
+            <td>{{lock.labdate}}</td>
+            <td>{{lock.lockaccess}}</td>
+            <td>{{lock.lockstatus}}</td>
+            <td>{{#if lock.fix }}<button class="fixButton">Fix it</button>{{/if}}</td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
 </template>
 
 <template name="FilterCheck">
     <span class="{{name}}">
-        <input id="{{name}}" type="checkbox" {{checked}} class="checkInput"/>
+        <input id="{{name}}" type="checkbox" {{checked}} class="checkInput"/>&nbsp;
         <label for="{{name}}">{{label}}</label>
-    </span>
+    </span>&nbsp;&nbsp;
 </template>

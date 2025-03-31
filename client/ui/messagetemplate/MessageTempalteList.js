@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
-import { MessageTemplates } from '/collections/templates';
-import { fields } from '../../../lib/fields';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import '../../../lib/tabular/messageTemplates';
+
 import './MessageTemplateList.html';
 
 Template.MessageTemplateList.onCreated(function() {
@@ -8,19 +9,14 @@ Template.MessageTemplateList.onCreated(function() {
 });
 
 Template.MessageTemplateList.helpers({
-  settings: {
-    collection: MessageTemplates,
-    rowsPerPage: 10,
-    showFilter: true,
-    fields: fields.template.filter(obj => obj.key !== 'messagetext' && obj.key !== 'subject' && obj.key !== 'created' && obj.key !== 'modified'),
-    class: "table table-bordered table-hover",
-  }
 });
 
 Template.MessageTemplateList.events({
-  'click .reactive-table tbody tr': function (event) {
+  'click .messageTemplateList tbody tr': function (event) {
     event.preventDefault();
-    var post = this;
-    FlowRouter.go(`/template/${post._id}`);
+    var dataTable = $(event.target).closest('table').DataTable();
+    var rowData = dataTable.row(event.currentTarget).data();
+    if (!rowData) return; // Won't be data if a placeholder row is clicked
+    FlowRouter.go(`/template/${rowData._id}`);
   }
 });

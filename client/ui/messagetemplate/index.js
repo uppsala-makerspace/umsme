@@ -1,3 +1,4 @@
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import "./MessageTempalteList";
 import "./MessageTemplateAdd";
 import "./MessageTemplateView";
@@ -5,20 +6,20 @@ import "./MessageTemplateView";
 FlowRouter.route('/templates', {
   name: 'templates',
   action() {
-    BlazeLayout.render('AppBody', {main: 'MessageTemplateList'});
+    this.render('AppBody', {main: 'MessageTemplateList'});
   }
 });
 
 FlowRouter.route('/templates/add', {
   name: 'addtemplate',
   action() {
-    BlazeLayout.render('AppBody', {main: 'MessageTemplateAdd'});
+    this.render('AppBody', {main: 'MessageTemplateAdd'});
   }
 });
 
 FlowRouter.route('/template/:_id', {
   name: 'templateview',
-  action(params) {
-    BlazeLayout.render('AppBody', {main: 'MessageTemplateView'});
+  action() {
+    this.render('AppBody', {main: 'MessageTemplateView'});
   }
 });

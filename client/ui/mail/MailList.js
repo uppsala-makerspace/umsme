@@ -1,6 +1,6 @@
 import { Template } from 'meteor/templating';
-import { Mails } from '/collections/mails';
-import { fields } from '/lib/fields';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import '../../../lib/tabular/mails';
 import './MailList.html';
 
 Template.MailList.onCreated(function() {
@@ -8,18 +8,14 @@ Template.MailList.onCreated(function() {
 });
 
 Template.MailList.helpers({
-  settings: {
-    collection: Mails,
-    rowsPerPage: 10,
-    showFilter: true,
-    fields: fields.mail(),
-    class: "table table-bordered table-hover",
-  }
 });
 
 Template.MailList.events({
-  'click .reactive-table tbody tr': function (event) {
+  'click .memberList tbody tr': function (event) {
     event.preventDefault();
-    FlowRouter.go(`/mail/${this._id}`);
+    var dataTable = $(event.target).closest('table').DataTable();
+    var rowData = dataTable.row(event.currentTarget).data();
+    if (!rowData) return; // Won't be data if a placeholder row is clicked
+    FlowRouter.go(`/mail/${rowData._id}`);
   }
 });

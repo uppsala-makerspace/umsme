@@ -6,7 +6,6 @@
             <button type="submit" class="updatePnr">Update / Save</button>
         </form>
       {{#if pnr}}
-
             <div>
                 <label>Bank signin status: </label> {{status}}
             {{#if qr}}
@@ -27,7 +26,7 @@
             </ul>
       {{/if}}
     <h1>Bank payments</h1>
-    {{> reactiveTable settings=settings}}
+    {{> tabular table=TabularTables.Payments class="table table-hover table-striped table-bordered table-condensed paymentList"}}
     {{/if}}
 </template>
 

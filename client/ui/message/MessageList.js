@@ -1,34 +1,30 @@
 import { Template } from 'meteor/templating';
-import { Messages } from '/collections/messages';
-import { fields } from '/lib/fields';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './MessageList.html';
+import '../../../lib/tabular/messages';
 
 Template.MessageList.onCreated(function() {
   Meteor.subscribe('messages');
 });
 
 Template.MessageList.helpers({
-  settings() {
+  selector() {
     const selector = {};
     if (this.membership) {
       selector.membership = this.membership;
     } else {
       selector.member = this.member;
     }
-    return {
-      collection: Messages.find(selector),
-      rowsPerPage: 10,
-      showFilter: false,
-      fields: fields.message(),
-      showNavigation: 'auto',
-      class: "table table-bordered table-hover",
-    }
-  }
+    return selector;
+  },
 });
 
 Template.MessageList.events({
-  'click .reactive-table tbody tr': function (event) {
+  'click .messageList tbody tr': function (event) {
     event.preventDefault();
-    FlowRouter.go(`/message/${this._id}`);
+    var dataTable = $(event.target).closest('table').DataTable();
+    var rowData = dataTable.row(event.currentTarget).data();
+    if (!rowData) return; // Won't be data if a placeholder row is clicked
+    FlowRouter.go(`/message/${rowData._id}`);
   }
 });

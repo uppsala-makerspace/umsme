@@ -22,7 +22,8 @@
             {{#unless membership}}
                 <h2>Connect to membership <small><a class="newMembership">New</a></small></h2>
                 <div class="paymentMembership">
-                    {{> reactiveTable settings=membershipSettings}}
+                    <strong>Here be unicorns!</strong>
+                    <!--{{> reactiveTable settings=membershipSettings}}-->
                 </div>
             {{/unless}}
         {{/unless}}
@@ -30,7 +31,7 @@
     {{#unless member}}
         <h2>Connect to member: <small><a href="/members/add?payment={{payment._id}}">Add new</a></small></h2>
         <div class="paymentMembers">
-            {{> reactiveTable settings=memberSettings}}
+            {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed memberList"}}
         </div>
     {{/unless}}
     {{>CommentList about=id}}

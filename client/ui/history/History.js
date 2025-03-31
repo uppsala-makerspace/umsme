@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import { ReactiveDict } from 'meteor/reactive-dict';
 import { Memberships } from '/collections/memberships.js';
 import { Members } from '/collections/members.js';
 import './History.html';

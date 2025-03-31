@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { Members } from '/collections/members';
 import { Messages } from "/collections/messages";
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './MessageView.html';
 
 Template.MessageView.onCreated(function() {
@@ -15,10 +16,12 @@ Template.MessageView.helpers({
     const id = FlowRouter.getParam('_id');
     return Messages.findOne(id);
   },
-  member() {
+  async member() {
     const id = FlowRouter.getParam('_id');
-    const message = Messages.findOne(id);
-    return Members.findOne(message.member);
+    const message = await Messages.findOneAsync(id);
+    if (message) {
+      return Members.findOne(message.member);
+    }
   },
 });
 

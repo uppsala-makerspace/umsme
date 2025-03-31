@@ -3,37 +3,38 @@ import { Members } from '/collections/members.js';
 import { MessageTemplates } from '/collections/templates';
 import { messageData } from "/lib/message";
 
-
 Meteor.methods({
-  'mail': (to, subject, text, from) => {
+  mail(to, subject, text, from) {
     if (!Meteor.userId()) {
-      console.log(`No user logged in, cannot send mail to ${to}`);
-      return;
-    }
-    if (!Meteor.settings.deliverMails) {
-      console.log(`Flag deliverMail in settings not set, cannot send mail to ${to}`);
-      return;
-    }
-    const f = Meteor.settings.from;
-    try {
-      Email.send({ to, from: from ? from :  (Array.isArray(f) ? f[0] : f), subject, text });
-      console.log(`Sent mail to ${to}`);
-    } catch(e) {
-      const mesg = 'Failed sending mail '+e;
+      const mesg = `No user logged in, cannot send mail to ${to}`;
       console.log(mesg);
       throw new Meteor.Error(mesg);
     }
+    if (!Meteor.settings.deliverMails) {
+      const mesg = `Flag deliverMail in settings not set, cannot send mail to ${to}`;
+//      console.log(mesg);
+      throw new Meteor.Error(mesg);
+    }
+    let f = Meteor.settings.from;
+    return Email.sendAsync({ to, from: from ? from :  (Array.isArray(f) ? f[0] : f), subject, text })
+      .then(() => {
+        console.log(`Sent mail to ${to}`);
+      })
+      .catch(err => {
+        const mesg = 'Failed sending mail: ' + err;
+        console.log(mesg);
+        throw new Meteor.Error(mesg);
+      });
   },
-  'mailAboutMemberShip': (email) => {
-    const mb = Members.findOne({email: email});
-    const template = MessageTemplates.findOne({ type: 'status', deprecated: false });
+  async mailAboutMemberShip(email) {
+    const mb = await Members.findOneAsync({email: email});
+    const template = await MessageTemplates.findOneAsync({ type: 'status', deprecated: false });
 
     if (mb && template) {
       const data = messageData(mb._id, template._id);
       console.log(data.messagetext);
       const from = Meteor.settings.noreply || "no-reply@uppsalamakerspace.se";
-      Email.send({ to: email, from, subject: data.subject, text: data.messagetext});
-      return true;
+      return Email.sendAsync({ to: email, from, subject: data.subject, text: data.messagetext});
     }
     if (mb) {
       console.log("Missing status template");
@@ -41,7 +42,7 @@ Meteor.methods({
       console.log(`No member discovered for email ${email}`);
     }
   },
-  'fromOptions': () => {
+  fromOptions() {
     const f = Meteor.settings.from;
     return (Array.isArray(f) ? f : [f]).map((email) => ({ label: email, value: email }));
   }

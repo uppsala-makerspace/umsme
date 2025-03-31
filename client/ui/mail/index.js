@@ -1,3 +1,4 @@
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './MailList';
 import './SendMail';
 import './MailView';
@@ -5,20 +6,20 @@ import './MailView';
 FlowRouter.route('/mail', {
   name: 'mails',
   action() {
-    BlazeLayout.render('AppBody', {main: 'MailList'});
+    this.render('AppBody', {main: 'MailList'});
   }
 });
 
 FlowRouter.route('/mail/send', {
   name: 'sendmail',
   action() {
-    BlazeLayout.render('AppBody', {main: 'SendMail'});
+    this.render('AppBody', {main: 'SendMail'});
   }
 });
 
 FlowRouter.route('/mail/:_id', {
   name: 'mailview',
   action(params) {
-    BlazeLayout.render('AppBody', {main: 'MailView'});
+    this.render('AppBody', {main: 'MailView'});
   }
 });

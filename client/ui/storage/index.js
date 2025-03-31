@@ -1,9 +1,10 @@
 import "./Storage";
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 
 FlowRouter.route('/storage', {
   name: 'storage',
   action() {
-    BlazeLayout.render('AppBody', {main: 'Storage'});
+    this.render('AppBody', {main: 'Storage'});
   }
 });
 

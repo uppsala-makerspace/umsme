@@ -1,10 +1,11 @@
 import { Template } from 'meteor/templating';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { ReactiveDict } from 'meteor/reactive-dict';
 import { Members } from '/collections/members';
-import { Memberships } from '/collections/memberships';
 import { Mails } from '/collections/mails';
 import { models} from "/lib/models";
 import { memberStatus } from '/lib/utils';
-import { _ } from 'underscore';
+import { template } from 'underscore';
 import './SendMail.html';
 import './Recipients';
 
@@ -174,8 +175,8 @@ AutoForm.hooks({
     },
     onSubmit: async function (doc) {
       this.event.preventDefault();
-      const subjectTemplate = _.template(doc.subject);
-      const messageTemplate = _.template(doc.template);
+      const subjectTemplate = template(doc.subject);
+      const messageTemplate = template(doc.template);
 
       let recipients = getRecipients(doc.recipients, doc.family);
       // If manual, split and loop through all recipients and identify original recipient object
@@ -196,7 +197,6 @@ AutoForm.hooks({
         });
         recipients = rec2;
       }
-      debugger;
       doc.to = [];
       doc.failed = [];
 
@@ -204,32 +204,16 @@ AutoForm.hooks({
         for (let i = 0; i < recipients.length; i++) {
           const data = recipients[i];
           rememberState.set('dontclose', `Sending mail number ${i + 1} of ${recipients.length} to ${data.email}`);
-          await new Promise((success) => {
-            Meteor.call('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from, (err, res) => {
-              if (err) {
-                console.log(`Failed sending to ${data.to}`);
-                console.log(err);
-                doc.failed.push(data.to);
-              } else {
-                doc.to.push(data.to);
-                console.log(`Sending to ${data.to}`);
-              }
-              success();
-            });
+
+          await Meteor.callAsync('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from)
+            .then(() => {
+              doc.to.push(data.to);
+              console.log(`Sending to ${data.to}`);
+            }).catch((err) => {
+            console.log(`Failed sending to "${data.to}" due to: ${err}`);
+            doc.failed.push(data.to);
           });
         }
-/*        recipients.forEach((data, idx) => {
-          rememberState.set('dontclose', `Sending mail number ${idx+1} of ${recipients.length} to ${data.email}`);
-          try {
-            Meteor.call('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from);
-            doc.to.push(data.to);
-            console.log(`Sending to ${data.to}`);
-          } catch(e) {
-            console.log(`Failed sending to ${data.to}`);
-            console.log(e);
-            doc.failed.push(data.to);
-          }
-        });*/
 
         rememberState.set('dontclose', 'Done sending mails! Going back to list in 3 seconds.');
         Mails.insert(doc);

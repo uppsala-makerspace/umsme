@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Members } from '/collections/members';
 import { MessageTemplates } from '/collections/templates';
 import { Messages } from '/collections/messages';
@@ -30,7 +31,7 @@ Template.SendMessage.helpers({
     const templateId = FlowRouter.getQueryParam('template');
     return MessageTemplates.findOne(templateId);
   },
-  message() {
+  async messageAsync() {
     const memberId = FlowRouter.getQueryParam('member');
     const templateId = FlowRouter.getQueryParam('template');
     const membershipId = FlowRouter.getQueryParam('membership');
@@ -56,14 +57,18 @@ AutoForm.hooks({
     },
     onSubmit: function (doc) {
       // Send message as mail.
-      Meteor.call('mail', doc.to, doc.subject, doc.messagetext);
-      Messages.insert(doc);
-      this.done();
       const memberId = FlowRouter.getQueryParam('member');
-      if (doc.type === 'reminder') {
-        Members.update(memberId, {$set: {reminder: new Date()}});
-      }
-      FlowRouter.go(`/member/${memberId}`);
+      Meteor.callAsync('mail', doc.to, doc.subject, doc.messagetext).then(() => {
+        Messages.insert(doc);
+        this.done();
+        if (doc.type === 'reminder') {
+          Members.update(memberId, {$set: {reminder: new Date()}});
+        }
+        FlowRouter.go(`/member/${memberId}`);
+      }).catch((err) => {
+        alert(`Could not send email: ${err}`);
+        FlowRouter.go(`/member/${memberId}`);
+      })
       return false;
     }
   }

@@ -1,8 +1,9 @@
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './DoorStats';
 
 FlowRouter.route('/door', {
   name: 'door',
   action() {
-    BlazeLayout.render('AppBody', {main: 'DoorStats'});
+    this.render('AppBody', {main: 'DoorStats'});
   }
 });

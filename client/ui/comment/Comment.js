@@ -1,5 +1,6 @@
 import { Template } from 'meteor/templating';
 import { Comments } from '/collections/comments';
+import { ReactiveDict } from 'meteor/reactive-dict';
 import './Comment.html';
 
 Template.Comment.onCreated(function() {

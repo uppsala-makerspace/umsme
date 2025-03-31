@@ -1,124 +1,73 @@
-import './Lockusers.html';
-import { updateCollection} from './utils';
-import { ReactiveDict } from 'meteor/reactive-dict';
-import { fields } from '/lib/fields';
-import { schemas} from '/lib/schemas';
-import { Members} from '/collections/members';
 import { Session } from 'meteor/session';
+import './Lockusers.html';
+import { getMemberLockDates } from './utils';
 
 Template.Lockusers.onCreated(function() {
   Meteor.subscribe('members');
-  this.state = new ReactiveDict();
-  this.state.set('initialized', false);
+  Session.set('lockIncludeFilter', {
+    wrong: true,
+    stale: true
+  });
+  Session.set('lockusers', []);
 });
 
 Template.Lockusers.helpers({
-  initialized() {
-    return Template.instance().state.get('initialized');
-  },
   lockusers() {
-    return Template.instance().collection;
-  },
-  settings() {
-    const instance = Template.instance();
-    return {
-      collection: instance.collection,
-      rowsPerPage: 10,
-      showFilter: true,
-      fields: fields.lockusers(),
-      class: "table table-bordered table-hover",
-      filters: ['noaccount', 'invited', 'wrong', 'correct', 'forever', 'admin', 'old'],
-      filterOperator: '$or'
-    };
-  },
-  selected() {
-    const member = Template.instance().state.get('selected');
-    if (member && member != '') {
-      return Template.instance().collection.findOne({member});
-    }
-  },
-  canSetEndDate() {
-    const member = Template.instance().state.get('selected');
-    if (member && member != '') {
-      const lockuser = Template.instance().collection.findOne({member});
-      return lockuser && (lockuser.lockstatus === 'wrong' || lockuser.lockstatus === 'forever');
-    }
-  },
-  canCreateAccount() {
-    const member = Template.instance().state.get('selected');
-    if (member && member != '') {
-      const lockuser = Template.instance().collection.findOne({member});
-      return lockuser && (lockuser.lockstatus === 'noaccount');
-    }
+    const include = Session.get('lockIncludeFilter');
+    const lockusers = Session.get('lockusers');
+    const filteredlockusers = lockusers.filter((row) => {
+      return include[row.lockstatus] === true;
+    });
+    return filteredlockusers;
   }
 });
 
 Template.Lockusers.events({
-  'click .syncWithLock': function (event, instance) {
-    const lockusers =  new Mongo.Collection(null);
-    lockusers.attachSchema(schemas.lockusers);
-    instance.collection = lockusers;
-    Meteor.call('lockStatus', (err, res) => {
-      instance.lockdata = res;
-      updateCollection(lockusers, res);
-      instance.state.set('initialized', true);
-    });
+  'click .syncWithLock': async function (event, instance) {
+    try {
+      instance.lockdata = await Meteor.callAsync('lockStatus');
+      const lockusers = await getMemberLockDates(instance.lockdata);
+      Session.set('lockusers', lockusers);
+    } catch(err) {
+      console.log(err);
+    }
   },
-  'click .reactive-table tbody tr': function (event, instance) {
+  'click .fixButton': async function (event, instance) {
     event.preventDefault();
-    instance.state.set('selected', this.member);
-  },
-  'click .backToSearch': function (event, instance) {
-    event.preventDefault();
-    instance.state.set('selected', '');
-  },
-  'click .setEndDate': function (event, instance) {
-    event.preventDefault();
-    const member = instance.state.get('selected');
-    const lockuser = instance.collection.findOne({member});
+    var data = $(event.target).closest('tr').data();
+    if (!data || !data.memberid) return; // Won't be data if a placeholder row is clicked
+    const lockusers = Session.get('lockusers');
+    const lockuser = lockusers.find(r => r.member === data.memberid);
+    delete lockuser.fix;
+    lockuser.lockstatus = 'stale';
+    Session.set('lockusers', lockusers.slice(0));
+
+    // Update Danalock
     const link = instance.lockdata.links.find(link => link.user_id === lockuser.lockid);
     if (link) {
       const cal = instance.lockdata.calendars.find(cal => cal.id === link.calendar_id);
-      Meteor.call('setCalenderEndDate', cal, lockuser.labdate.toISOString(), link, function(event, instance) {
-        // refresh
-      });
+      await Meteor.callAsync('setCalenderEndDate', cal, new Date(lockuser.labdate).toISOString(), link);
     } else {
-      Meteor.call('createCalendarEndDate', lockuser.lockid, lockuser.labdate.toISOString(), function(event, instance) {
-        // refresh
-      });
+      await Meteor.callAsync('createCalendarEndDate', lockuser.lockid, new Date(lockuser.labdate).toISOString());
     }
   },
-  'click .createAccount': function (event, instance) {
-    event.preventDefault();
-    alert("Inte implementerat ännu");
-  },
-    /*  'click .signinbank': function(event, instance) {
-        Meteor.call('initiateBank', (err, res) => {
-          if (err) {
-            instance.state.set('status', 'error: ' + err.error);
-          } else {
-            instance.state.set('status', res.status);
-          }
-        });
-      },*/
 });
 
-Template.FilterCheck.created = function () {
-  this.filter = new ReactiveTable.Filter(this.data.name, ['lockstatus']);
-  const checked = Session.get("filterCheck"+this.data.name);
-  if (this.data.checked) {
-    this.filter.set(this.data.name)
-  } else {
-    this.filter.set('bad');
+Template.FilterCheck.helpers({
+  checked() {
+    const include = Session.get('lockIncludeFilter');
+    return include[this.name] ? 'checked' : '';
   }
-};
+});
 
 Template.FilterCheck.events({
   'change .checkInput': function (event, instance) {
+    const include = Object.assign({}, Session.get('lockIncludeFilter'));
     if (event.target.checked) {
-      instance.filter.set(instance.data.name);
+      include[this.name] = true;
     } else {
-      instance.filter.set('bad');
+      delete include[this.name];
     }
+    Session.set('lockIncludeFilter', include);
   }
 });

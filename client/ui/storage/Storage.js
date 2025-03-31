@@ -1,6 +1,7 @@
 import './Storage.html';
 import { Members } from '../../../collections/members.js';
 import { Comments } from '../../../collections/comments.js';
+import { ReactiveDict } from 'meteor/reactive-dict';
 
 Template.Storage.onCreated(() => {
   Meteor.subscribe('members');
@@ -50,7 +51,6 @@ Template.Storage.onCreated(function() {
   this.state = new ReactiveDict();
   this.state.set('editBox', '');
   this.state.set('editBoxMember', '');
-//  this.state.set('comments', getComments());
 });
 
 Template.Storage.helpers({

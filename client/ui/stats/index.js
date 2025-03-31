@@ -1,8 +1,9 @@
 import './Statistics';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 
 FlowRouter.route('/stats', {
   name: 'statistics',
   action() {
-    BlazeLayout.render('AppBody', {main: 'Statistics'});
+    this.render('AppBody', {main: 'Statistics'});
   }
 });

@@ -143,7 +143,7 @@ export const statsPerMonth = (Memberships, members, from, to) => {
     obj.rejoined.forEach(d => incrementYearMonth(rejoined, d));
     obj.renewTime.forEach(t => {
       const chunk = Math.ceil(t / 1000 / 3600 / 24 / 7);
-      console.log(`Weeks before renewing: ${chunk}`);
+//      console.log(`Weeks before renewing: ${chunk}`);
       renewTime[chunk+40] += 1
     });
   });

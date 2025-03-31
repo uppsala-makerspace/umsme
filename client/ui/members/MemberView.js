@@ -2,8 +2,10 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members';
 import { Memberships } from '/collections/memberships';
 import { Messages } from '/collections/messages';
-import '../comment/CommentList';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import 'meteor/aldeed:autoform/static'
 
+import '../comment/CommentList';
 import './MemberView.html';
 import './MemberStatus';
 import '../message/MessageList';
@@ -15,12 +17,6 @@ Template.MemberView.onCreated(function() {
   Meteor.subscribe('members');
   Meteor.subscribe('memberships');
   Meteor.subscribe('messages');
-  this.state = new ReactiveDict();
-  this.state.set('settings', {});
-  Meteor.call('settings', (err, res) => {
-    this.state.set('settings', res);
-  });
-
 });
 
 Template.MemberView.events({
@@ -59,8 +55,7 @@ Template.MemberView.helpers({
   },
   publicMemberPage() {
     const id = FlowRouter.getParam('_id');
-    const settings = Template.instance().state.get('settings');
-    return (settings.checkPath || "../check/") + id;
+    return (Meteor.settings.public.checkPath || "../check/") + id;
   },
   patron: function() {
     const mb = Members.findOne(FlowRouter.getParam('_id'));

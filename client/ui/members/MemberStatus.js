@@ -2,6 +2,7 @@ import { Template } from 'meteor/templating';
 import { Members } from '/collections/members';
 import { memberStatus, updateMember } from '/lib/utils';
 import { reminderDays, reminderState } from '/lib/rules';
+import moment from 'moment';
 import './MemberStatus.html';
 
 Template.MemberStatus.onCreated(function() {
@@ -27,6 +28,9 @@ const te = (d1, d2) => {
 Template.MemberStatus.helpers({
   status() {
     const mb = Members.findOne(this.member);
+    if (!mb) {
+      return {};
+    }
     const { member, lab, family } = memberStatus(mb);
     const now = new Date();
     const inTwoWeeks = new Date();
@@ -46,6 +50,9 @@ Template.MemberStatus.helpers({
   },
   reminder: function() {
     const obj = Members.findOne(this.member);
+    if (!obj) {
+      return {};
+    }
     const {state, date, formatted} = reminderState(obj);
     let cls = '';
     let text = '';

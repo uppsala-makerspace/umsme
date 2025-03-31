@@ -1,5 +1,5 @@
 <template name="MessageTemplateList">
     <h1>Template List</h1>
     <a href="templates/add">Add template</a>
-    {{> reactiveTable settings=settings}}
+    {{> tabular table=TabularTables.MessageTemplates class="table table-hover table-striped table-bordered table-condensed messageTemplateList"}}
 </template>

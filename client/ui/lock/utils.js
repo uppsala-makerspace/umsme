@@ -1,5 +1,5 @@
 import { Members} from "/collections/members";
-import get from "@babel/runtime/helpers/esm/get";
+import moment from 'moment';
 
 const sameDay = (d1, d2) => {
   return d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate() && d1.getFullYear() === d2.getFullYear();
@@ -13,8 +13,8 @@ const getEndDate = (cal) => {
 };
 
 const gotAccess = (member, user2obj) => {
-  if (member.lab && user2obj[member.lab]) {
-    const obj = user2obj[member.lab];
+  if (member.lab && user2obj[member.lock]) {
+    const obj = user2obj[member.lock];
     if (obj.user.role === 'administrator') {
       return true;
     }
@@ -30,8 +30,9 @@ const gotAccess = (member, user2obj) => {
   return false;
 };
 
-export const updateCollection = (collection, status) => {
+export const getMemberLockDates = async (status) => {
   const {users, links, calendars} = status;
+  const result = [];
   const user2cal = {};
   const id2cal = {};
   const admins = {};
@@ -51,7 +52,7 @@ export const updateCollection = (collection, status) => {
   });
 
   const now = new Date();
-  Members.find().forEach((member) => {
+  await Members.find().forEachAsync((member) => {
     if (member.lab) {
       //&& member.lab > now
       const lockusername = member.lock ? member.lock.toLowerCase() : undefined;
@@ -59,7 +60,7 @@ export const updateCollection = (collection, status) => {
         name: member.name,
         member: member._id,
         infamily: member.infamily != null,
-        labdate: member.lab,
+        labdate: moment(member.lab).format("YYYY-MM-DD"),
         email: member.email,
         lockusername,
       };
@@ -75,14 +76,16 @@ export const updateCollection = (collection, status) => {
           } else {
             if (!lobj.cal) {
               obj.lockstatus = 'wrong';
+              obj.fix = true;
             } else {
               const lockdate = getEndDate(lobj.cal);
               if (lockdate) {
-                obj.lockaccess = lockdate;
+                obj.lockaccess = moment(lockdate).format("YYYY-MM-DD");
                 if (sameDay(lockdate, member.lab)) {
                   obj.lockstatus = 'correct';
                 } else {
                   obj.lockstatus = 'wrong';
+                  obj.fix = true;
                 }
               } else {
                 obj.lockstatus = 'forever';
@@ -95,7 +98,8 @@ export const updateCollection = (collection, status) => {
       } else {
         obj.lockstatus = 'noaccount';
       }
-      collection.insert(obj);
+      result.push(obj);
     }
   });
+  return result;
 };
