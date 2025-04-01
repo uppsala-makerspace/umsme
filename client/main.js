@@ -15,6 +15,7 @@ import './ui/admin';
 import './ui/bank';
 import './layouts/AppBody.html';
 import './layouts/Home.html';
+import './ui/reactlogin';
 import { Accounts } from 'meteor/accounts-base';
 import { AutoFormThemeBootstrap3 } from 'meteor/communitypackages:autoform-bootstrap3/static';
 AutoFormThemeBootstrap3.load();

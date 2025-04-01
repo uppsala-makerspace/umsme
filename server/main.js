@@ -21,8 +21,10 @@ Meteor.startup(() => {
     if (Meteor.isServer) {
       try {
         console.log("Admin1");
+        if(!Accounts.findUserByUsername('admin')) {
         Accounts.createUser({username: 'admin', password: Meteor.settings?.adminpassword || 'adminadmin'});
         console.log("Admin2");
+        }
       } catch (e) {
         console.log("Admin3");
         Accounts.setPassword('admin', Meteor.settings?.adminpassword || 'adminadmin');
