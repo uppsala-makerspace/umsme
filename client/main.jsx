@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom'; // Byt tillbaka till ReactDOM om du vill
 import { Meteor } from 'meteor/meteor';
-import App from './ui/App';
+import App from '../imports/layouts/App';
 import './main.html';
 import { createRoot } from 'react-dom/client';
 
