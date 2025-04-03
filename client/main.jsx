@@ -18,6 +18,6 @@ Meteor.startup(() => {
     return;
   }
 
-  const root = createRoot(container); // ✅ Korrekt sätt i React 18+
+  const root = createRoot(container); 
   root.render(<App />);
 });
