@@ -34,3 +34,4 @@ momentjs:moment
 email
 fetch
 session
+chatra:synced-cron

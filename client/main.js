@@ -13,6 +13,8 @@ import './ui/lock';
 import './ui/history';
 import './ui/admin';
 import './ui/bank';
+import './ui/door';
+import './ui/check';
 import './layouts/AppBody.html';
 import './layouts/Home.html';
 import { Accounts } from 'meteor/accounts-base';

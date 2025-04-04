@@ -8,10 +8,12 @@ import { Payments } from '/collections/payments';
 import { Mails } from '/collections/mails';
 import { Comments} from "/collections/comments";
 import { Unlocks } from '/collections/unlocks';
+import './cronjob/syncAndMailUnlocks';
 
 import './methods/mail';
 import './methods/lock';
 import './methods/bank';
+import './methods/check';
 
 import '../lib/tabular/index';
 

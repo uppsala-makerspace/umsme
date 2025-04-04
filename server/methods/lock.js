@@ -25,7 +25,7 @@ const logResponse = (response) => {
  *
  * @return {Promise<void>}
  */
-const authenticate = async () => {
+export const authenticate = async () => {
   if (!authTime || (new Date().getTime() - authTime.getTime()) > 3600000) {
     authTime = new Date();
     const params = {
@@ -81,7 +81,7 @@ const authenticate = async () => {
   }
 };
 
-const syncUnlocks = async () => {
+export const syncUnlocks = async () => {
   const lockLogRequest = await fetch(`https://api.danalock.com/log/v1/lock/${lockid}?page=0&perpage=50`, {headers});
   const lockLog = await lockLogRequest.json();
   let importedCount = 0;

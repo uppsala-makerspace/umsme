@@ -20,6 +20,7 @@ boilerplate-generator@2.0.0
 caching-compiler@2.0.1
 caching-html-compiler@2.0.0
 callback-hook@1.6.0
+chatra:synced-cron@1.0.0
 check@1.4.4
 communitypackages:autoform-bootstrap3@2.0.0
 core-runtime@1.0.0

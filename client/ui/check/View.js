@@ -1,3 +1,5 @@
+import { ReactiveDict } from 'meteor/reactive-dict';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './View.html';
 
 const updateInfo = (state) => {
@@ -14,12 +16,7 @@ Template.View.onCreated(function() {
   this.state.set('checked', false);
   this.state.set('member', false);
   this.state.set('info', {});
-  this.state.set('settings', {});
   updateInfo(this.state);
-  Meteor.call('settings', (err, res) => {
-    this.state.set('settings', res);
-  });
-
   this.state.set('status', 'unknown');
 });
 
@@ -41,8 +38,7 @@ Template.View.helpers({
   },
 
   embeddPath() {
-    const settings = Template.instance().state.get('settings');
-    return settings.checkPath || "../check";
+    return Meteor.settings.public.checkPath || "../check";
   },
 
   info() {
@@ -51,16 +47,14 @@ Template.View.helpers({
 });
 
 Template.View.events({
-  'click .addToStorageQueue': function (event, instance) {
+  'click .addToStorageQueue': async function (event, instance) {
     const mid = FlowRouter.getParam('_id');
-    Meteor.call('queue', mid, true, (err, res) => {
-      updateInfo(instance.state);
-    });
+    await Meteor.callAsync('queue', mid, true);
+    updateInfo(instance.state);
   },
-  'click .removeFromStorageQueue': function (event, instance) {
+  'click .removeFromStorageQueue': async function (event, instance) {
     const mid = FlowRouter.getParam('_id');
-    Meteor.call('queue', mid, false, (err, res) => {
-      updateInfo(instance.state);
-    });
+    await Meteor.callAsync('queue', mid, false);
+    updateInfo(instance.state);
   }
 });
