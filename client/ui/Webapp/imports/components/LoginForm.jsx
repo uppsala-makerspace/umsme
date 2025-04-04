@@ -20,6 +20,10 @@ export const LoginForm = () => {
     Meteor.loginWithPassword(username, password);
   };
 
+  const toRegister = () => {
+    navigate('/register'); // Redirect to the login page
+}
+
   return (
     <form onSubmit={submit} className="login-form">
     <div>
@@ -48,6 +52,7 @@ export const LoginForm = () => {
 
     <div>
         <button type="submit">Log In</button>
+        <button onClick={() => toRegister()}>Back to register</button>
     </div>
     </form>
 );
