@@ -51,37 +51,12 @@ Template.PaymentView.helpers({
   membership() {
     const id = FlowRouter.getParam('_id');
     return Memberships.findOne({pid: id});
-    //const payment = Payments.findOne(id);
-    //return Members.findOne(payment.membership);
   },
-/*  membershipSettings: function() {
+  membershipSelector() {
     const pid = FlowRouter.getParam('_id');
     const payment = Payments.findOne(pid);
-    return {
-      collection:  Memberships.find({mid: payment.member, pid: {$exists: false}}),
-      rowsPerPage: 30,
-      showFilter: false,
-      fields: fields.membership({
-        filter: ['mid', 'pid'],
-        enhance: [
-          {
-            key: 'start',
-            sortOrder: 0,
-            sortDirection: 'descending',
-          }
-        ]
-      }),
-      class: "table table-bordered table-hover",
-    }
-  },
-  memberSettings: {
-    collection: Members,
-    rowsPerPage: 10,
-    showFilter: true,
-    filter: "Matthias",
-    fields: fields.member(),
-    class: "table table-bordered table-hover",
-  },*/
+    return {$and: [{mid: payment.member, pid: {$exists: false}}]};
+  }
 });
 
 Template.PaymentView.events({
@@ -122,15 +97,16 @@ Template.PaymentView.events({
       Payments.update(pid, {$unset: {member: "", membership: ""}});
     }
   },
-/*  'click .memberList tbody tr': function (event, instance) {
+  'click .membershipList tbody tr': function (event, instance) {
     event.preventDefault();
     const dataTable = $(event.target).closest('table').DataTable();
     const rowData = dataTable.row(event.currentTarget).data();
     if (!rowData) return; // Won't be data if a placeholder row is clicked
+
     const pid = FlowRouter.getParam('_id');
-    Memberships.updateAsync(rowData._id, {$set: {pid}});
-    Payments.updateAsync(pid, {$set: {membership: rowData._id}});
-  },*/
+    Memberships.update(rowData._id, {$set: {pid}});
+    Payments.update(pid, {$set: {membership: rowData._id}});
+  },
   'click .removePaymentFromMembership': function (event) {
     if (confirm('Disconnect the membership from the payment, the membership will remain and still be connected to the member.')) {
       const pid = FlowRouter.getParam('_id');

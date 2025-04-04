@@ -12,17 +12,6 @@ Template.MembershipList.onCreated(function() {
 Template.MembershipList.helpers({
   selector() {
     return {mid: this.member};
-  },
-
-  settings() {
-    return {
-      collection: Memberships.find({mid: this.member}),
-      rowsPerPage: 10,
-      showFilter: false,
-      fields: fields.membership(),
-      showNavigation: 'auto',
-      class: "table table-bordered table-hover",
-    }
   }
 });
 
