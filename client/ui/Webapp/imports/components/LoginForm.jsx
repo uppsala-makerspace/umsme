@@ -1,13 +1,22 @@
 import { Meteor } from "meteor/meteor";
-import React, { useState } from "react";
+import { useTracker } from "meteor/react-meteor-data";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const user = useTracker(() => Meteor.user());
+
+  useEffect(() => {
+    if (user) {
+      navigate("/loggedIn"); // Navigera till en annan route om användaren är inloggad
+    }
+  }, [user, navigate]);
 
   const submit = (e) => {
     e.preventDefault();
-
     Meteor.loginWithPassword(username, password);
   };
 

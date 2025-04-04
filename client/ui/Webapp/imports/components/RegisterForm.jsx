@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Members } from '/collections/members.js';
+import { useNavigate } from 'react-router-dom';
 
 export const RegisterForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const navigate = useNavigate();
+    
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -18,6 +20,7 @@ export const RegisterForm = () => {
                 } else {
                     console.log('User registered successfully!');
                     // Optionally redirect or show a success message
+                    navigate('/loggedIn'); // Redirect to the login page
                 }
             });
         }
@@ -27,7 +30,13 @@ export const RegisterForm = () => {
         }     
     };
 
+    const toLogIn = () => {
+        navigate('/login'); // Redirect to the login page
+    }
+
     return (
+        <>
+        <p> Om du har ett konto så ska du logga in med samma mejl som du använt</p>
         <form onSubmit={handleSubmit}>
             <div>
                 <label htmlFor="username">Username:</label>
@@ -60,7 +69,9 @@ export const RegisterForm = () => {
                 />
             </div>
             <button type="submit">Register</button>
+            <button onClick={() => toLogIn()}>Back to Login</button>
         </form>
+        </>
     );
 };
 
