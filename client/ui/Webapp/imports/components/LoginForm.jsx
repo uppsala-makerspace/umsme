@@ -26,7 +26,8 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={submit} className="login-form">
-    <div>
+      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
+    <div className="form-group">
         <label htmlFor="username">Username</label>
 
         <input
@@ -38,7 +39,7 @@ export const LoginForm = () => {
         />
     </div>
 
-    <div>
+    <div className="form-group">
         <label htmlFor="password">Password</label>
 
         <input
@@ -51,7 +52,7 @@ export const LoginForm = () => {
     </div>
 
     <div>
-        <button type="submit">Log In</button>
+        <button type="submit" className="form-button">Log In</button>
         <button onClick={() => toRegister()}>Back to register</button>
     </div>
     </form>

@@ -20,6 +20,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^6.30.0",
+    "ui": "^0.2.4",
     "underscore": "^1.13.7"
   },
   "meteor": {
