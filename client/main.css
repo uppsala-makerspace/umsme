@@ -4,13 +4,15 @@
 @import "ui/check/check.css";
 @import "ui/storage/storage.css";
 
-html {
-  background: aliceblue;
-  width: 100%;
+html, body {
+  margin: 0;
+  padding: 0;
   height: 100%;
+  background: #F3F1F1;
+  
 }
 body {
-  background: aliceblue;
+  background: #F3F1F1;
 }
 
 .publicPage {
@@ -21,13 +23,13 @@ body {
   background: white;
 }
 #main {
-  background: white;
-  padding: 10px;
+  background: #F3F1F1;
   font-family: sans-serif;
-  width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 30px;
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2%;
+  
 }
 
 .members thead th {
@@ -110,17 +112,141 @@ header {
   min-height: 50px;
 }
 
+
+@media (max-width: 768px) {
+  #main {
+    padding: 10px;
+  }
+
+  .form-button {
+    font-size: 16px;
+    padding: 12 px 20px; 
+  }
+
+  .language-switcher {
+    font-size: 12px; /* Minska textstorleken för språkväxlaren */
+    padding: 5px 10px; /* Mindre padding */
+  }
+  
+}
+
+.language-switcher {
+  display: flex;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 10px 15px;
+  color: black;
+  cursor: pointer;
+  font-size: 14px;
+  border: none;
+  background: none;
+}
+
+.language-switcher .language {
+  color: gray;  
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.language-switcher .language.active{
+color:black;
+  font-weight: bold;
+}
+.language-switcher .language:hover {
+  color: black;
+}
+
+.language-switcher .divider {
+  width: 1px;
+  height: 20px;
+  background-color: #000000;
+  margin: 0 10px;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background-color: #000000; 
+  margin: 0 10px;
+}
+
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px; 
+  
+}
+
+
+
+.login-logo {
+  display: block;
+  margin: 0 auto 20px;
+  max-width: 150px;
+  height: auto;
+}
+
+.form-group {
+  width: 100%;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input {
+  background-color: #F3F1F1;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+/* Stil för knappen */
+.form-button {
+  width: 100%;
+  padding: 10px;
+  background-color:#5FC86F;
+  color:  #F3F1F1;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  
+}
+
+.form-button:hover {
+  background-color: #096817;
+}
+
 .login-buttons-dropdown-align-right {
   float: right;
   margin: 10px 20px !important;
 }
 
 .login-buttons-dropdown-align-right a.login-link-text {
-  color: white;
+  color:  #F3F1F1;
 }
 
 #login-dropdown-list {
   top: 32px;
+}
+
+img {
+  max-width: 100%; /* Gör att bilden aldrig blir bredare än sin container */
+  height: auto; /* Bevarar bildens proportioner */
 }
 
 .table-hover>tbody>tr:hover {
