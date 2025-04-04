@@ -1,10 +1,15 @@
 {
+  "adminpassword": "CHANGEME",
   "from": ["kansliet@uppsalamakerspace.se", "no-reply@uppsalamakerspace.se"],
-  "bankproxy": "http://localhost:8000/",
+  "noreply": "no-reply@uppsalamakerspace.se",
+  "bankproxy": "https://uppsalamakerspace.se/bank/",
   "syncNrOfTransactions": 20,
   "deliverMails": true,
   "lockUsername": "umsme@uppsalamakerspace.se",
   "lockPassword": "????",
   "lockAssumeUser": "lock@uppsalamakerspace.se",
-  "lockName": "UMS ytterdörr"
+  "groupLockName": "UMSLockGroup",
+    "public": {
+      "checkPath": "http://example.com#"
+    }
 }

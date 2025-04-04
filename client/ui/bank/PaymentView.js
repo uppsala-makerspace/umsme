@@ -26,12 +26,14 @@ Template.PaymentView.helpers({
     const payment = Payments.findOne(FlowRouter.getParam('_id'));
     let label = 'Untreated';
     let cls = 'danger';
-    if (payment.membership) {
-      label = 'Treated';
-      cls = 'success';
-    } else if (payment.other) {
-      label = 'Other';
-      cls = 'warning';
+    if (payment) {
+      if (payment.membership) {
+        label = 'Treated';
+        cls = 'success';
+      } else if (payment.other) {
+        label = 'Other';
+        cls = 'warning';
+      }
     }
     return {
       label,
