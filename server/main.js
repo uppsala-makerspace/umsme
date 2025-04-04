@@ -15,61 +15,54 @@ import './methods/bank';
 
 import '../lib/tabular/index';
 
-Meteor.startup(() => {
-  // code to run on server at startup
+Meteor.startup(async () => {
+  const adminUser = await Accounts.findUserByUsername('admin');
+  if (adminUser) {
+    await Accounts.setPasswordAsync(adminUser._id, Meteor.settings?.adminpassword || 'adminadmin');
+  } else {
+    await Accounts.createUserAsync({username: 'admin', password: Meteor.settings?.adminpassword || 'adminadmin'});
+  }
 
-    if (Meteor.isServer) {
-      try {
-        console.log("Admin1");
-        Accounts.createUser({username: 'admin', password: Meteor.settings?.adminpassword || 'adminadmin'});
-        console.log("Admin2");
-      } catch (e) {
-        console.log("Admin3");
-        Accounts.setPassword('admin', Meteor.settings?.adminpassword || 'adminadmin');
-      }
-
-
-        // This code only runs on the server
-      Meteor.publish('members', function () {
-        if (this.userId) {
-          return Members.find();
-        }
-      });
-
-      Meteor.publish('memberships', function () {
-        if (this.userId) {
-          return Memberships.find();
-        }
-      });
-      Meteor.publish('templates', function () {
-        if (this.userId) {
-          return MessageTemplates.find();
-        }
-      });
-      Meteor.publish('messages', function () {
-        if (this.userId) {
-          return Messages.find();
-        }
-        });
-      Meteor.publish('mails', function () {
-        if (this.userId) {
-          return Mails.find();
-        }
-      });
-      Meteor.publish('payments', function () {
-        if (this.userId) {
-          return Payments.find();
-        }
-      });
-      Meteor.publish('comments', function () {
-        if (this.userId) {
-          return Comments.find();
-        }
-      });
-      Meteor.publish('unlocks', function () {
-        if (this.userId) {
-          return Unlocks.find();
-        }
-        });
+  // This code only runs on the server
+  Meteor.publish('members', function () {
+    if (this.userId) {
+      return Members.find();
     }
+  });
+
+  Meteor.publish('memberships', function () {
+    if (this.userId) {
+      return Memberships.find();
+    }
+  });
+  Meteor.publish('templates', function () {
+    if (this.userId) {
+      return MessageTemplates.find();
+    }
+  });
+  Meteor.publish('messages', function () {
+    if (this.userId) {
+      return Messages.find();
+    }
+  });
+  Meteor.publish('mails', function () {
+    if (this.userId) {
+      return Mails.find();
+    }
+  });
+  Meteor.publish('payments', function () {
+    if (this.userId) {
+      return Payments.find();
+    }
+  });
+  Meteor.publish('comments', function () {
+    if (this.userId) {
+      return Comments.find();
+    }
+  });
+  Meteor.publish('unlocks', function () {
+    if (this.userId) {
+      return Unlocks.find();
+    }
+  });
 });
