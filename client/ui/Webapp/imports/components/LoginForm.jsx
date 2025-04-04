@@ -2,6 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
+import "../Appmain.css";
 
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
