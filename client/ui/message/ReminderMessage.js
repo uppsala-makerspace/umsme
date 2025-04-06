@@ -18,10 +18,10 @@ Template.ReminderMessage.events({
   'click .reminderNeededButton':  function (event) {
     Members.update(this.member, { $unset: { reminder: null } });
   },
-  'click .reminderButton':  function (event) {
+  'click .reminderButton':  async function (event) {
     event.preventDefault();
-    const mb = Members.findOne(this.member);
-    const { member, lab, family } = memberStatus(mb);
+    const mb = await Members.findOneAsync(this.member);
+    const { member, lab, family } = await memberStatus(mb);
     const membertype = mb.family === true ? 'family' : (mb.youth === true ? 'youth' : 'normal');
     const now = new Date();
     const inTwoWeeks = new Date();
@@ -32,9 +32,9 @@ Template.ReminderMessage.events({
     const memberReminder = member < inTwoWeeks && member > lastTwoWeeks;
     if (labReminder || memberReminder) {
       const membershiptype = labReminder && memberReminder ? 'labandmember' : (memberReminder ? 'member' : 'lab');
-      let template = MessageTemplates.findOne({ type: 'reminder', membertype, membershiptype, deprecated: false });
+      let template = await MessageTemplates.findOneAsync({ type: 'reminder', membertype, membershiptype, deprecated: false });
       if (!template) {
-        template = MessageTemplates.findOne({ type: 'reminder', membershiptype, deprecated: false });
+        template = await MessageTemplates.findOneAsync({ type: 'reminder', membershiptype, deprecated: false });
       }
       if (template) {
         FlowRouter.go(`/message/send?member=${this.member}&template=${template._id}`);

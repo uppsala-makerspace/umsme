@@ -9,16 +9,18 @@ import { template } from 'underscore';
 import './SendMail.html';
 import './Recipients';
 
-const getRecipients = function(reciever, family) {
+const getRecipients = async function(reciever, family) {
   const arr = [];
-  Members.find().forEach(member => {
-    const status = memberStatus(member);
+  const  members = await Members.find().fetchAsync();
+  for (let i=0;i<members.length;i++) {
+    const member = members[i];
+    const status = await memberStatus(member);
     if (member.email && check(status, reciever)) {
       if (!family && member.infamily) {
-        return;
+        continue;
       }
       let familyMembers = [];
-      Members.find({ infamily: member._id }).forEach((m) => familyMembers.push(m.name));
+      await Members.find({infamily: member._id}).forEachAsync((m) => familyMembers.push(m.name));
       familyMembers = familyMembers.join(', ');
       arr.push({
         to: `${member.name} <${member.email}>`,
@@ -34,7 +36,7 @@ const getRecipients = function(reciever, family) {
         labEndDate: niceDate(member.lab),
       });
     }
-  });
+  }
   return arr;
 }
 
@@ -80,17 +82,17 @@ Template.SendMail.helpers({
     const state = Template.instance().state;
     return state.get('tomanual');
   },
-  tosrc() {
+  async tosrcAsync() {
     const state = Template.instance().state;
-    const recipients = getRecipients('members', false);
+    const recipients = await getRecipients('members', false);
     return recipients.map(d => d.to).join(',');
   },
-  to() {
+  async toAsync() {
     const state = Template.instance().state;
     if (!state.get('to')) {
       family = false;
       recip = 'members';
-      const recipients = getRecipients('members', false);
+      const recipients = await getRecipients('members', false);
       console.log(JSON.stringify(recipients.map(r => r.name), undefined, '  '));
 
       state.set('to', recipients.map(d => d.to));
@@ -138,7 +140,7 @@ Template.SendMail.events({
 
 AutoForm.hooks({
   insertMailForm: {
-    formToDoc: function(doc) {
+    formToDoc: async function(doc) {
       if (!doc.from) {
         rememberState.set('message', noFrom);
       } else if (!doc.subject) {
@@ -156,7 +158,7 @@ AutoForm.hooks({
           const recipientList = document.getElementById('manualSendList').value.split(',');
           rememberState.set('to', recipientList);
         } else {
-          const recipients = getRecipients(doc.recipients, doc.family);
+          const recipients = await getRecipients(doc.recipients, doc.family);
           rememberState.set('to', recipients.map(d => d.to));
         }
       }

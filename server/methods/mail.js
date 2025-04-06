@@ -12,7 +12,6 @@ Meteor.methods({
     }
     if (!Meteor.settings.deliverMails) {
       const mesg = `Flag deliverMail in settings not set, cannot send mail to ${to}`;
-//      console.log(mesg);
       throw new Meteor.Error(mesg);
     }
     let f = Meteor.settings.from;
