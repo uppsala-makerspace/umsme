@@ -14,6 +14,7 @@ import './methods/mail';
 import './methods/lock';
 import './methods/bank';
 import './methods/check';
+import './methods/update';
 
 import '../lib/tabular/index';
 
