@@ -30,8 +30,9 @@ Meteor.methods({
     const mb = await Members.findOneAsync({email: email});
     const template = await MessageTemplates.findOneAsync({ type: 'status', deprecated: false });
 
+    console.log("Hepp");
     if (mb && template) {
-      const data = messageData(mb._id, template._id);
+      const data = await messageData(mb._id, template._id);
       console.log(data.messagetext);
       const from = Meteor.settings.noreply || "no-reply@uppsalamakerspace.se";
       return Email.sendAsync({ to: email, from, subject: data.subject, text: data.messagetext});

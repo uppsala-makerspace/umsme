@@ -1,7 +1,5 @@
 import { Template } from 'meteor/templating';
-import { Memberships } from '../../../collections/memberships.js';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import { fields } from '../../../lib/fields';
 import './MembershipList.html';
 import '../../../lib/tabular/memberships';
 
@@ -12,17 +10,6 @@ Template.MembershipList.onCreated(function() {
 Template.MembershipList.helpers({
   selector() {
     return {mid: this.member};
-  },
-
-  settings() {
-    return {
-      collection: Memberships.find({mid: this.member}),
-      rowsPerPage: 10,
-      showFilter: false,
-      fields: fields.membership(),
-      showNavigation: 'auto',
-      class: "table table-bordered table-hover",
-    }
   }
 });
 

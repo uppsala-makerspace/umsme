@@ -1,7 +1,9 @@
 import './DoorStats.html';
 import { Unlocks } from '/collections/unlocks.js';
 import { Members } from '/collections/members.js';
-import Chart from 'chart.js/dist/Chart';
+import Chart from 'chart.js/auto';
+import 'chartjs-adapter-moment';
+
 
 Template.DoorStats.onCreated(function() {
   Meteor.subscribe('unlocks');
