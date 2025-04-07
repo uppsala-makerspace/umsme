@@ -34,7 +34,7 @@ Template.MemberView.events({
       Memberships.find({mid: mid}).forEach((ms) => {Memberships.remove(ms._id);});
       Messages.find({member: mid}).forEach((mes) => {Messages.remove(mes._id);});
       Members.remove(mid);
-      FlowRouter.go('/members');
+      FlowRouter.go('/admin/members');
     }
   },
   'click .removeFromFamily': function (event) {

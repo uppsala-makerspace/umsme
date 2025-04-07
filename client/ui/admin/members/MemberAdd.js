@@ -63,12 +63,12 @@ AutoForm.hooks({
       const infamily = FlowRouter.getQueryParam('infamily');
       const paymentId = FlowRouter.getQueryParam('payment');
       if (infamily) {
-        FlowRouter.go(`/member/${infamily}`);
+        FlowRouter.go(`/admin/member/${infamily}`);
       } else if (paymentId) {
         Payments.update(paymentId, {$set: {member: id}});
-        FlowRouter.go(`/payment/${paymentId}`);
+        FlowRouter.go(`/admin/payment/${paymentId}`);
       } else {
-        FlowRouter.go(`/member/${id}`);
+        FlowRouter.go(`/admin/member/${id}`);
       }
       return false;
     }

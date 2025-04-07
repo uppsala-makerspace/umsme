@@ -1,108 +1,105 @@
 .umsapp html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: #F3F1F1;
-  overflow-x: hidden;
-  width: 100%;
-
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #F3F1F1;
+    overflow-x: hidden;
+    width: 100%;
 }
+
 .umsapp body {
-  background: #F3F1F1;
+    background: #F3F1F1;
 }
 
 .umsapp #main {
-  background: #F3F1F1;
-  font-family: sans-serif;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2%;
-  
+    background: #F3F1F1;
+    font-family: sans-serif;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2%;
 }
 
 .umsapp * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
+
 .umsapp img {
-  max-width: 100%; 
-  height: auto; 
+    max-width: 100%;
+    height: auto;
 }
 
 
 .umsapp .login-form {
-  display: flex;
-  margin: 0 auto !important;
-  flex-direction: column; 
-  align-items: center; 
-  width: 100%; 
-  max-width: 400px; 
-
-  padding: 2%; 
+    display: flex;
+    margin: 0 auto !important;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    padding: 2%;
 }
 
 .umsapp.login-form input,
 .umsapp .login-form button {
-  width: 100%; 
-  max-width: 100%; 
-  margin: 10px 0; 
-  padding: 10px; 
-  font-size: 16px; 
-  box-sizing: border-box; 
+    width: 100%;
+    max-width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
 .umsapp .form-button {
-  width: 100%;
-  padding: 10px;
-  background-color:#5FC86F;
-  color:  #F3F1F1;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  
+    width: 100%;
+    padding: 10px;
+    background-color: #5FC86F;
+    color: #F3F1F1;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
 }
-  
 
 
 .umsapp .login-logo {
-  display: block;
-  margin: 0 auto 20px;
-  max-width: 150px;
-  height: auto;
+    display: block;
+    margin: 0 auto 20px;
+    max-width: 150px;
+    height: auto;
 }
 
 .umsapp .form-group {
-  width: 100%;
-  margin-bottom: 15px;
-  text-align: center;
+    width: 100%;
+    margin-bottom: 15px;
+    text-align: center;
 }
 
 .umsapp .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
 .umsapp .form-group input {
-  background-color: #F3F1F1;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #000000;
-  border-radius: 4px;
-  font-size: 16px;
+    background-color: #F3F1F1;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    font-size: 16px;
 }
 
 
 .umsapp .form-button:hover {
-  background-color: #096817;
+    background-color: #096817;
 }
 
 @media (max-width: 768px) {
-  .umsapp .login-form input,
-  .umsapp .login-form button {
-    width: 90%; /* Anpassar bredden för mobiler */
-    margin: 5px auto; /* Mindre mellanrum på små skärmar */
-    
-  }
+    .umsapp .login-form input,
+    .umsapp .login-form button {
+        width: 90%; /* Anpassar bredden för mobiler */
+        margin: 5px auto; /* Mindre mellanrum på små skärmar */
+
+    }
 }

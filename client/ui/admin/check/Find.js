@@ -25,7 +25,7 @@ Template.Find.events({
         const url = checkPath + res;
         top.window.location.href = url;
       } else {
-        FlowRouter.go(`/check/${res}`);
+        FlowRouter.go(`/admin/check/${res}`);
       }
     } catch(err) {
       alert("Wrong combination of email and member id");

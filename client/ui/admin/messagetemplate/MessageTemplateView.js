@@ -26,7 +26,7 @@ Template.MessageTemplateView.events({
     if (confirm('Delete this message template')) {
       const id = FlowRouter.getParam('_id');
       MessageTemplates.remove(id);
-      FlowRouter.go(`/templates`);
+      FlowRouter.go(`/admin/templates`);
     }
   }
 });
@@ -38,7 +38,7 @@ AutoForm.hooks({
     },
 
     endSubmit: function (doc) {
-      FlowRouter.go('/templates');
+      FlowRouter.go('/admin/templates');
     }
   }
 });

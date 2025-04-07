@@ -222,7 +222,7 @@ AutoForm.hooks({
         this.done();
         setTimeout(() => {
           rememberState.set('dontclose', '');
-          FlowRouter.go(`/mail`);
+          FlowRouter.go(`/admin/mail`);
         }, 3000)
       }
     }

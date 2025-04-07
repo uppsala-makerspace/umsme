@@ -105,7 +105,7 @@ Template.Payments.events({
       const dataTable = $(event.target).closest('table').DataTable();
       const rowData = dataTable.row(event.currentTarget).data();
       if (!rowData) return; // Won't be data if a placeholder row is clicked
-      FlowRouter.go(`/payment/${rowData._id}`);
+      FlowRouter.go(`/admin/payment/${rowData._id}`);
     }
   }
 });

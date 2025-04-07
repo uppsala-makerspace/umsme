@@ -3,6 +3,8 @@ import React, {useState} from 'react';
 import './main.html';
 import { createRoot } from 'react-dom/client';
 import '/client/ui/admin';
+import './imports/Appmain.css';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 
 let _uiComponent;
 let _setUIComponent;
@@ -10,6 +12,11 @@ export default (uiName, uiComponent) => {
   _uiComponent = uiComponent;
   if (_setUIComponent) {
     _setUIComponent(uiName);
+  }
+  const Blaze = Package.blaze.Blaze;
+  const r = FlowRouter.Renderer;
+  if (r.old?.layout?.view) {
+    Blaze.remove(r.old.layout.view);
   }
 };
 

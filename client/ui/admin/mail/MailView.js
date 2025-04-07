@@ -35,7 +35,7 @@ Template.MailView.events({
       Comments.find({about: mid}).forEach((comm) => {Comments.remove(comm._id);});
       const member = Mails.findOne(mid);
       Mails.remove(mid);
-      FlowRouter.go('/mail');
+      FlowRouter.go('/admin/mail');
     }
   }
 });

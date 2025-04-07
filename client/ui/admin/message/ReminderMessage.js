@@ -37,7 +37,7 @@ Template.ReminderMessage.events({
         template = await MessageTemplates.findOneAsync({ type: 'reminder', membershiptype, deprecated: false });
       }
       if (template) {
-        FlowRouter.go(`/message/send?member=${this.member}&template=${template._id}`);
+        FlowRouter.go(`/admin/message/send?member=${this.member}&template=${template._id}`);
       } else {
         alert(`No non-deprecated template of type "reminder" with member type "${membertype}" and membership type "${membershiptype}" found.`);
       }

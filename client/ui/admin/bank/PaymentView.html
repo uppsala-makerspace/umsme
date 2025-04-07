@@ -12,11 +12,11 @@
 
     {{#if member}}
         <h2>Connected to member:
-        <strong><a href="/member/{{member._id}}">{{member.name}}</a></strong> <small><a class="removeMemberFromPayment">Disconnect member</a></small></h2>
+        <strong><a href="/admin/member/{{member._id}}">{{member.name}}</a></strong> <small><a class="removeMemberFromPayment">Disconnect member</a></small></h2>
 
         {{#unless payment.other}}
             {{#if membership}}
-                <h2><strong><a href="/membership/{{membership._id}}">Connected membership</a></strong> <small><a class="removePaymentFromMembership">Disconnect</a></small></h2>
+                <h2><strong><a href="/admin/membership/{{membership._id}}">Connected membership</a></strong> <small><a class="removePaymentFromMembership">Disconnect</a></small></h2>
                 {{> quickForm collection=Memberships doc=membership id="membershipViewForm" omitFields="_id,member" type="readonly"}}
             {{/if}}
             {{#unless membership}}
@@ -28,7 +28,7 @@
         {{/unless}}
     {{/if}}
     {{#unless member}}
-        <h2>Connect to member: <small><a href="/members/add?payment={{payment._id}}">Add new</a></small></h2>
+        <h2>Connect to member: <small><a href="/admin/members/add?payment={{payment._id}}">Add new</a></small></h2>
         <div class="paymentMembers">
             {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed memberList"}}
         </div>
