@@ -64,10 +64,10 @@ AutoForm.hooks({
         if (doc.type === 'reminder') {
           Members.update(memberId, {$set: {reminder: new Date()}});
         }
-        FlowRouter.go(`/member/${memberId}`);
+        FlowRouter.go(`/admin/member/${memberId}`);
       }).catch((err) => {
         alert(`Could not send email: ${err}`);
-        FlowRouter.go(`/member/${memberId}`);
+        FlowRouter.go(`/admin/member/${memberId}`);
       })
       return false;
     }

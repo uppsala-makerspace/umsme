@@ -1,4 +1,4 @@
 <template name="MessageView">
-    <h1>Message sent to <strong><a href="/member/{{member._id}}">{{member.name}}</a></strong></h1>
+    <h1>Message sent to <strong><a href="/admin/member/{{member._id}}">{{member.name}}</a></strong></h1>
     {{> quickForm collection=Messages doc=message id="messageViewForm" omitFields="_id" type="readonly" buttonContent="Go back to member"}}
 </template>

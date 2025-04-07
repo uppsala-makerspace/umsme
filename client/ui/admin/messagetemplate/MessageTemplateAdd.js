@@ -24,7 +24,7 @@ AutoForm.hooks({
     onSubmit: function (doc) {
       const id = MessageTemplates.insert(doc);
       this.done();
-      FlowRouter.go('/templates');
+      FlowRouter.go('/admin/templates');
       return false;
     }
   }
