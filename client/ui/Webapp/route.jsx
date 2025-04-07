@@ -2,7 +2,6 @@ import { Meteor } from 'meteor/meteor';
 import React, {useState} from 'react';
 import './main.html';
 import { createRoot } from 'react-dom/client';
-import '/client/ui/admin';
 import './imports/Appmain.css';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 

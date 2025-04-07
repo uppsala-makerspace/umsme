@@ -2,7 +2,6 @@ import { Meteor } from "meteor/meteor";
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import "../Appmain.css";
 
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
