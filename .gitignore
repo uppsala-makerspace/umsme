@@ -4,3 +4,4 @@ node_modules/
 backup/*
 settings.json
 private
+.DS_Store

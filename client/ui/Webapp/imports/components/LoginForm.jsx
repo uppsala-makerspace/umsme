@@ -2,7 +2,9 @@ import { Meteor } from "meteor/meteor";
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
+import { GoogleButton } from "./GoogleButton";
 import "../Appmain.css";
+import { G } from "chart.js/dist/chunks/helpers.segment";
 
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -25,6 +27,8 @@ export const LoginForm = () => {
   }
 
   return (
+    <>
+    <GoogleButton />
     <form onSubmit={submit} className="login-form">
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
       <div className="form-group">
@@ -56,5 +60,6 @@ export const LoginForm = () => {
         <button onClick={() => toRegister()}>Back to register</button>
       </div>
     </form>
+    </>
   );
 };

@@ -36,3 +36,6 @@ fetch
 session
 react-meteor-data
 chatra:synced-cron
+accounts-base
+accounts-google
+service-configuration

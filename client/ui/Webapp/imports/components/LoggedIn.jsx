@@ -17,9 +17,12 @@ export const LoggedIn = () => {
       <h1>Welcome Back!</h1>
       <p>You are successfully logged in.</p>
 
-      <div className='user' onClick={logout}>
+      <div className='user'>
         {user.username}
       </div>
+      <button onClick={logout}>
+        Logout
+      </button>
     </div>
   );
 };
