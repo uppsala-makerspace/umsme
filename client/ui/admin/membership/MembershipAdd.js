@@ -1,7 +1,7 @@
 import { Template } from 'meteor/templating';
-import { Memberships } from '../../../collections/memberships';
-import { Members } from '../../../collections/members';
-import { Payments } from '../../../collections/payments';
+import { Memberships } from '/collections/memberships';
+import { Members } from '/collections/members';
+import { Payments } from '/collections/payments';
 import { startDateFromAmount, detectPotentialLabPayment, membershipFromPayment } from '/lib/rules';
 import { updateMember } from '/lib/utils';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';

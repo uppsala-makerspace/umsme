@@ -1,7 +1,7 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './MessageList.html';
-import '../../../lib/tabular/messages';
+import '/lib/tabular/messages';
 
 Template.MessageList.onCreated(function() {
   Meteor.subscribe('messages');

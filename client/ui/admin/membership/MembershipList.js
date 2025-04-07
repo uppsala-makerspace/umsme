@@ -1,7 +1,7 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './MembershipList.html';
-import '../../../lib/tabular/memberships';
+import '/lib/tabular/memberships';
 
 Template.MembershipList.onCreated(function() {
   Meteor.subscribe('memberships');

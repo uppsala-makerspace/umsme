@@ -21,6 +21,7 @@ Template.MemberView.onCreated(function() {
 
 Template.MemberView.events({
   'click .deleteMember': function (event) {
+    debugger;
     const mid = FlowRouter.getParam('_id');
     const infamily = Members.findOne({infamily: mid});
     if (infamily) {
@@ -30,7 +31,6 @@ Template.MemberView.events({
 
     if (confirm('Delete this user and all the associated memberships and messages')) {
       const member = Members.findOne(mid);
-//      Memberships.remove({mid: member._id});  // Only works in trusted mode (when signed in)
       Memberships.find({mid: mid}).forEach((ms) => {Memberships.remove(ms._id);});
       Messages.find({member: mid}).forEach((mes) => {Messages.remove(mes._id);});
       Members.remove(mid);

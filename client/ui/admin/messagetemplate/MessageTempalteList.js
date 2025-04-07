@@ -1,6 +1,6 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import '../../../lib/tabular/messageTemplates';
+import '/lib/tabular/messageTemplates';
 
 import './MessageTemplateList.html';
 

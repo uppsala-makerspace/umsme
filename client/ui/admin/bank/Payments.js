@@ -1,7 +1,7 @@
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './Payments.html';
 import { ReactiveDict } from 'meteor/reactive-dict';
-import '../../../lib/tabular/payments';
+import '/lib/tabular/payments';
 
 
 Template.Payments.onCreated(function() {

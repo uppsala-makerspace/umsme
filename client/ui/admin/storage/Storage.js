@@ -1,6 +1,6 @@
 import './Storage.html';
-import { Members } from '../../../collections/members.js';
-import { Comments } from '../../../collections/comments.js';
+import { Members } from '/collections/members.js';
+import { Comments } from '/collections/comments.js';
 import { ReactiveDict } from 'meteor/reactive-dict';
 
 Template.Storage.onCreated(() => {

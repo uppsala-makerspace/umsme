@@ -1,6 +1,6 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import { Members } from '../../../collections/members.js';
+import { Members } from '/collections/members.js';
 import { updateMember } from '/lib/utils';
 import './ProspectiveFamilyMemberList.html';
 

@@ -1,6 +1,6 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import '../../../lib/tabular/mails';
+import '/lib/tabular/mails';
 import './MailList.html';
 
 Template.MailList.onCreated(function() {

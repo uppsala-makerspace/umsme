@@ -1,8 +1,8 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import { Members } from '../../../collections/members.js';
+import { Members } from '/collections/members';
 import './MemberList.html';
-import '../../../lib/tabular/members';
+import '/lib/tabular/members';
 
 Template.MemberList.onCreated(() => {
   Meteor.subscribe('members');
@@ -31,7 +31,7 @@ Template.MemberList.events({
     const dataTable = $(event.target).closest('table').DataTable();
     const rowData = dataTable.row(event.currentTarget).data();
     if (!rowData) return; // Won't be data if a placeholder row is clicked
-    FlowRouter.go(`/member/${rowData._id}`);
+    FlowRouter.go(`/admin/member/${rowData._id}`);
   },
   'click .downloadCurrent': function () {
     const today = new Date();
