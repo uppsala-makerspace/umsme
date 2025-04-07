@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 
 export const RegisterForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const navigate = useNavigate();
-    
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -20,7 +18,7 @@ export const RegisterForm = () => {
                 } else {
                     console.log('User registered successfully!');
                     // Optionally redirect or show a success message
-                    navigate('/loggedIn'); // Redirect to the login page
+                    FlowRouter.go('/loggedIn'); // Redirect to the login page
                 }
             });
         }
@@ -31,7 +29,7 @@ export const RegisterForm = () => {
     };
 
     const toLogIn = () => {
-        navigate('/login'); // Redirect to the login page
+        FlowRouter.go('/login'); // Redirect to the login page
     }
 
     return (

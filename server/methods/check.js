@@ -1,12 +1,10 @@
 import { Members } from '/collections/members.js';
-import { Memberships } from '/collections/memberships.js';
-import {Meteor} from "meteor/meteor";
+import { Meteor } from "meteor/meteor";
 
 Meteor.methods({
-  'findMemberId': (mail, mid) => {
-//    const member = Members.findOne({email: 'mpalmer@gmail.com'});
+  'findMemberId': async (mail, mid) => {
     console.log("Checking for "+ mail+ " and " + mid);
-    const member = Members.findOne({email: mail});
+    const member = await Members.findOneAsync({email: mail});
     if (member) {
       console.log("Found member "+ member.name);
     }
@@ -14,8 +12,8 @@ Meteor.methods({
       return member._id;
     }
   },
-  'check': (id) => {
-    const member = Members.findOne(id);
+  'check': async (id) => {
+    const member = await Members.findOneAsync(id);
     if (member) {
       return {
         member: member != null,
@@ -36,38 +34,14 @@ Meteor.methods({
       }
     }
   },
-  'queue': (id, queue) => {
+  'queue': async (id, queue) => {
     console.log("Queue called "+ typeof queue);
-    const member = Members.findOne(id);
+    const member = await Members.findOneAsync(id);
     console.log("For member "+ member._id);
     if (typeof queue !== 'boolean') {
       return false;
     }
-    Members.update(id, {"$set": { storagequeue: queue} });
+    await Members.updateAsync(id, {"$set": { storagequeue: queue} });
     return true;
-  },
-/*  'storage': (id, box) => {
-    const member = Members.findOne(id);
-    if (parseInt(box, 10) != box) {
-      return "invalid";
-    }
-    if (member) {
-      if (box && box !== "") {
-        if (member.storage == box) {
-          return "current"
-        }
-        const memberForBox = Members.findOne({storage: parseInt(box, 10)});
-        console.log(memberForBox ? `Found the member ${memberForBox.name} with the same box name` : 'no member for that box');
-        if (memberForBox) {
-          return "busy";
-        }
-        Members.update(id, {"$set": { storage: parseInt(box, 10)} });
-        return "updated";
-      } else {
-        Members.update(id, {"$unset": { storage: ""} });
-        return "cleared";
-      }
-    }
-    return false;
-  }*/
+  }
 });
