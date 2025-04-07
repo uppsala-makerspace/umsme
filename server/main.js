@@ -15,15 +15,20 @@ import './methods/lock';
 import './methods/bank';
 import './methods/check';
 import './methods/update';
-
 import '../lib/tabular/index';
 
+process.env.MAIL_URL = "smtp://makupp30%40gmail.com:qlrlilvzxpnfjtut@smtp.gmail.com:587/";
+
 Meteor.startup(async () => {
+  Accounts.config({
+    sendVerificationEmail: true
+  });
+  
   const adminUser = await Accounts.findUserByUsername('admin');
   if (adminUser) {
     await Accounts.setPasswordAsync(adminUser._id, Meteor.settings?.adminpassword || 'adminadmin');
   } else {
-    await Accounts.createUserAsync({username: 'admin', password: Meteor.settings?.adminpassword || 'adminadmin'});
+    await Accounts.createUserAsync({username: 'admin', password: Meteor.settings?.adminpassword || 'adminadmin', email: 'josefsson7.hj@gmail.com'});
   }
 
   // This code only runs on the server
