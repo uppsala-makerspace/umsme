@@ -4,24 +4,24 @@ import { LanguageSwitcher } from './langueSwitcher';
 
 export const RegisterForm = () => {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
         console.log('Username:', username);
         console.log('Password:', password);
-        // Add your registration logic here
+        console.log('Email:', email);
         if (password === confirmPassword){
-            Accounts.createUser({ username, password }, (err) => {
-                if (err) {
-                    console.error('Registration error:', err);
-                } else {
-                    console.log('User registered successfully!');
-                    // Optionally redirect or show a success message
-                    FlowRouter.go('/loggedIn'); // Redirect to the login page
-                }
+            Accounts.createUser({ username, password, email }, (err) => {
+                FlowRouter.go('/waitForEmailVerification'); 
             });
+            
         }
         else {
             console.error('Passwords do not match');
@@ -48,6 +48,16 @@ export const RegisterForm = () => {
                     onChange={(e) => setUsername(e.target.value)}
                     required
                 />
+            </div>
+            <div>
+                <label htmlFor="email">Email:</label>
+                <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    />
             </div>
             <div className="form-group">
                 <label htmlFor="password">Password:</label>

@@ -67,9 +67,9 @@ AutoForm.hooks({
         if (pid) {
           // DOES NOT WORK, WHY NOT?
           Payments.update(pid, {$set: {membership: id}});
-          FlowRouter.go(`/payment/${pid}`);
+          FlowRouter.go(`/admin/payment/${pid}`);
         } else {
-          FlowRouter.go(`/member/${memberId}`);
+          FlowRouter.go(`/admin/member/${memberId}`);
         }
       });
       this.done();

@@ -25,6 +25,6 @@ Template.MessageList.events({
     var dataTable = $(event.target).closest('table').DataTable();
     var rowData = dataTable.row(event.currentTarget).data();
     if (!rowData) return; // Won't be data if a placeholder row is clicked
-    FlowRouter.go(`/message/${rowData._id}`);
+    FlowRouter.go(`/admin/message/${rowData._id}`);
   }
 });

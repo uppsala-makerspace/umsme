@@ -8,17 +8,30 @@ import { LanguageSwitcher } from './langueSwitcher';
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const user = useTracker(() => Meteor.user());
 
   useEffect(() => {
     if (user) {
-      FlowRouter.go("/loggedIn"); // Navigera till en annan route om användaren är inloggad
+      // Om användaren är inloggad men e-posten inte är verifierad, logga ut
+      if (user.emails && user.emails.length > 0 && !user.emails[0].verified) {
+        alert('Please verify your email before logging in.');
+        Meteor.logout(); // Logga ut om e-posten inte är verifierad
+        FlowRouter.go("/login"); // Skicka tillbaka till login-sidan
+      } else {
+        FlowRouter.go("/loggedIn"); // Navigera till annan route om e-posten är verifierad
+      }
     }
   }, [user]);
 
   const submit = (e) => {
     e.preventDefault();
-    Meteor.loginWithPassword(username, password);
+    Meteor.loginWithPassword(email, password, (err) => {
+      if (err) {
+        console.error('Login failed:', err);
+        alert('Invalid credentials or email not verified');
+      }
+    });
   };
 
   const toRegister = () => {
@@ -30,15 +43,14 @@ export const LoginForm = () => {
       <LanguageSwitcher />
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
       <div className="form-group">
-        <label htmlFor="username">Username</label>
-
+        <label htmlFor="email">Email:</label>
         <input
-          type="text"
-          placeholder="Username"
-          name="username"
-          required
-          onChange={(e) => setUsername(e.target.value)}
-        />
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    />
       </div>
 
       <div className="form-group">
@@ -53,10 +65,25 @@ export const LoginForm = () => {
         />
       </div>
 
-      <div>
-        <button type="submit" className="form-button">Log In</button>
+      <div className="form-group">
+        <button type="submit" className="form-button">Log in</button>
         <button onClick={() => toRegister()}>Back to register</button>
       </div>
+
+      <div className="form-group">
+      <button onClick={() => toRegister()}>
+        <img src="/images/GoogleLogo.png" alt="icon" className="button-icon" />
+      Continue with Google</button>
+      </div>
+
+      <div className="form-group">
+      
+      <button onClick={() => toRegister()}>
+      <img src="/images/FacebookLogo.png" alt="icon" className="button-icon" />
+      Continue with Facebook
+      </button>
+      </div>
+
     </form>
   );
 };

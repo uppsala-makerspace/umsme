@@ -29,7 +29,7 @@ Template.MessageView.events({
   'click .gobacktoMember': function (event) {
     const id = FlowRouter.getParam('_id');
     const message = Messages.findOne(id);
-    FlowRouter.go(`/member/${message.mid}`);
+    FlowRouter.go(`/admin/member/${message.mid}`);
   }
 });
 
@@ -39,7 +39,7 @@ AutoForm.hooks({
       debugger;
       const id = FlowRouter.getParam('_id');
       const message = Messages.findOne(id);
-      FlowRouter.go(`/member/${message.mid}`);
+      FlowRouter.go(`/admin/member/${message.mid}`);
     }
   }
 });

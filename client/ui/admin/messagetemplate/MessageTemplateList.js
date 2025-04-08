@@ -17,6 +17,6 @@ Template.MessageTemplateList.events({
     var dataTable = $(event.target).closest('table').DataTable();
     var rowData = dataTable.row(event.currentTarget).data();
     if (!rowData) return; // Won't be data if a placeholder row is clicked
-    FlowRouter.go(`/template/${rowData._id}`);
+    FlowRouter.go(`/admin/template/${rowData._id}`);
   }
 });

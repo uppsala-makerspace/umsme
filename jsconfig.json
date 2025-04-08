@@ -203,6 +203,16 @@
       "meteor/react-meteor-data": [
         "/Users/dennis/.meteor/packages/react-meteor-data/3.0.3/web.browser/index.js",
         "/Users/dennis/.meteor/packages/react-meteor-data/3.0.3/web.browser/suspense/index.js"
+      ],
+      "meteor/chatra:synced-cron": [
+        "/Users/dennis/.meteor/packages/chatra_synced-cron/1.0.0/web.browser/synced-cron-server.js"
+      ],
+      "meteor/accounts-base": [
+        "/Users/dennis/.meteor/packages/accounts-base/3.0.4/web.browser/client_main.js",
+        "/Users/dennis/.meteor/packages/accounts-base/3.0.4/web.browser/accounts_client.js",
+        "/Users/dennis/.meteor/packages/accounts-base/3.0.4/web.browser/accounts_common.js",
+        "/Users/dennis/.meteor/packages/accounts-base/3.0.4/web.browser/accounts_server.js",
+        "/Users/dennis/.meteor/packages/accounts-base/3.0.4/web.browser/server_main.js"
       ]
     }
   },

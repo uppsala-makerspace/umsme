@@ -1,16 +1,26 @@
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './Payments';
-import './PaymentView'
 
-FlowRouter.route('/payments', {
+FlowRouter.route('/admin/payments', {
   name: 'payments',
+  waitOn() {
+    return [
+      import('../main'),
+      import('./Payments')
+    ]
+  },
   action() {
     this.render('AppBody', {main: 'Payments'});
   }
 });
 
-FlowRouter.route('/payment/:_id', {
+FlowRouter.route('/admin/payment/:_id', {
   name: 'payment',
+  waitOn() {
+    return [
+      import('../main'),
+      import('./PaymentView')
+    ]
+  },
   action() {
     this.render('AppBody', {main: 'PaymentView'});
   }

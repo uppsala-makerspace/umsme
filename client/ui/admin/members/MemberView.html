@@ -6,14 +6,14 @@
     </div>
     {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id" type="update" buttonContent="Update"}}
     {{#if member.infamily}}
-    <h2>Part of family, paying family member is <strong><a href="/member/{{member.infamily}}">{{payingMember.name}}</a></strong> <small><a class="removeFromFamily">Remove from family</a></small></h2>
+    <h2>Part of family, paying family member is <strong><a href="/admin/member/{{member.infamily}}">{{payingMember.name}}</a></strong> <small><a class="removeFromFamily">Remove from family</a></small></h2>
     {{/if}}
     {{#if patron}}
-    <h2>Family members <small><a href="/member/{{id}}/add">Add existing</a> <a href="/members/add?infamily={{id}}">Add new</a></small></h2>
+    <h2>Family members <small><a href="/admin/member/{{id}}/add">Add existing</a> <a href="/admin/members/add?infamily={{id}}">Add new</a></small></h2>
     {{> FamilyList patron=id}}
     {{/if}}
     {{#unless member.infamily}}
-    <h2>Memberships <small><a href="/memberships/add?member={{id}}">Add</a></small></h2>
+    <h2>Memberships <small><a href="/admin/memberships/add?member={{id}}">Add</a></small></h2>
     {{> MembershipList member=id}}
     <h2>Messages</h2>
     {{>ReminderMessage member=id}}

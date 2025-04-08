@@ -1,8 +1,13 @@
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "./ProspectiveFamilyMemberList";
 
-FlowRouter.route('/member/:_id/add', {
+FlowRouter.route('/admin/member/:_id/add', {
   name: 'familymemberadd',
+  waitOn() {
+    return [
+      import('../main'),
+      import('./ProspectiveFamilyMemberList')
+    ]
+  },
   action() {
     this.render('AppBody', {main: 'ProspectiveFamilyMemberList'});
   }

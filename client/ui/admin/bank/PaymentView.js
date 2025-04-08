@@ -71,7 +71,7 @@ Template.PaymentView.events({
     }
     if (confirm('Delete this payment?')) {
       Payments.remove(pid);
-      FlowRouter.go('/payments');
+      FlowRouter.go('/admin/payments');
     }
   },
   'click .memberList tbody tr': async function (event, instance) {
@@ -128,6 +128,6 @@ Template.PaymentView.events({
   'click .newMembership': function (event) {
     const pid = FlowRouter.getParam('_id');
     const payment = Payments.findOne(pid);
-    FlowRouter.go(`/memberships/add?payment=${pid}&member=${payment.member}`);
+    FlowRouter.go(`/admin/memberships/add?payment=${pid}&member=${payment.member}`);
   },
 });
