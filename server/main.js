@@ -28,7 +28,7 @@ Meteor.startup(async () => {
   if (adminUser) {
     await Accounts.setPasswordAsync(adminUser._id, Meteor.settings?.adminpassword || 'adminadmin');
   } else {
-    await Accounts.createUserAsync({username: 'admin', password: Meteor.settings?.adminpassword || 'adminadmin', email: 'josefsson7.hj@gmail.com'});
+    await Accounts.createUserAsync({username: 'admin', password: Meteor.settings?.adminpassword || 'adminadmin'});
   }
 
   // This code only runs on the server
