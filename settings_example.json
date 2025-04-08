@@ -11,5 +11,14 @@
   "groupLockName": "UMSLockGroup",
     "public": {
       "checkPath": "http://example.com#"
-    }
+    },
+
+  "serviceConfigurations": {
+      "google": {
+        "clientId": "placeholder-for-ID",
+        "secret": "placeholder-for-secret",
+        "loginStyle": "popup"
+      }
+    },
+    "env": "development"
 }

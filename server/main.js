@@ -73,4 +73,13 @@ Meteor.startup(async () => {
       return Unlocks.find();
     }
   });
+
+   await ServiceConfiguration.configurations.upsertAsync(
+    {service: 'google'},
+    {
+      $set: {
+        ...Meteor.settings.serviceConfigurations.google,
+      },
+    },
+  );
 });
