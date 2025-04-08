@@ -34,9 +34,13 @@ export const RegisterForm = () => {
 
     return (
         <>
-        <p> Om du har ett konto så ska du logga in med samma mejl som du använt</p>
-        <form onSubmit={handleSubmit}>
-            <div>
+        
+       
+        <form onSubmit={handleSubmit}className="login-form">
+        <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
+        <p> If you are a member, you should create your account using the same email address that is registered with your membership.</p>
+            <div className="form-group">
+                
                 <label htmlFor="username">Username:</label>
                 <input
                     type="text"
@@ -46,7 +50,7 @@ export const RegisterForm = () => {
                     required
                 />
             </div>
-            <div>
+            <div className="form-group">
                 <label htmlFor="email">Email:</label>
                 <input
                     type="email"
@@ -76,7 +80,7 @@ export const RegisterForm = () => {
                     required
                 />
             </div>
-            <button type="submit">Register</button>
+            <button type="submit" className="form-button">Register</button>
             <button onClick={() => toLogIn()}>Back to Login</button>
         </form>
         </>
