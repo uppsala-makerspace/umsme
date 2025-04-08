@@ -68,7 +68,7 @@ Template.MembershipView.events({
       Memberships.remove(id);
       const mb = Members.findOne(mid);
       updateMember(mb);
-      FlowRouter.go(`/member/${mid}`);
+      FlowRouter.go(`/admin/member/${mid}`);
     }
   },
   'click .removePaymentFromMembership': function (event) {
@@ -92,7 +92,7 @@ AutoForm.hooks({
       const mid = membership.mid;
       const mb = Members.findOne(mid);
       updateMember(mb);
-      FlowRouter.go(`/member/${mid}`);
+      FlowRouter.go(`/admin/member/${mid}`);
     }
   }
 });

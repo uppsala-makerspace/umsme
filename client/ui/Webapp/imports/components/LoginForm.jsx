@@ -2,7 +2,6 @@ import { Meteor } from "meteor/meteor";
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import "../Appmain.css";
 
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -13,7 +12,7 @@ export const LoginForm = () => {
   useEffect(() => {
     if (user) {
       // Om användaren är inloggad men e-posten inte är verifierad, logga ut
-      if (!user.emails[0].verified) {
+      if (user.emails && user.emails.length > 0 && !user.emails[0].verified) {
         alert('Please verify your email before logging in.');
         Meteor.logout(); // Logga ut om e-posten inte är verifierad
         FlowRouter.go("/login"); // Skicka tillbaka till login-sidan

@@ -1,6 +1,6 @@
-import 'meteor/aldeed:collection2/static';
 import { Mongo } from 'meteor/mongo';
-import { schemas } from '../lib/schemas';
+import 'meteor/aldeed:collection2/static';
+import { schemas } from '/lib/schemas';
 import { allow } from './allow';
 
 export const Members = new Mongo.Collection('members');

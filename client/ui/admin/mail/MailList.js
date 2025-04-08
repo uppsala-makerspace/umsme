@@ -16,6 +16,6 @@ Template.MailList.events({
     var dataTable = $(event.target).closest('table').DataTable();
     var rowData = dataTable.row(event.currentTarget).data();
     if (!rowData) return; // Won't be data if a placeholder row is clicked
-    FlowRouter.go(`/mail/${rowData._id}`);
+    FlowRouter.go(`/admin/mail/${rowData._id}`);
   }
 });

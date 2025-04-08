@@ -31,11 +31,11 @@ Template.InitiateMessage.events({
   'click .welcomeButton':  function (event) {
     event.preventDefault();
     const template  = getTemplate(this.member, this.membership, 'welcome');
-    template && FlowRouter.go(`/message/send?member=${this.member}&template=${template._id}&membership=${this.membership}`);
+    template && FlowRouter.go(`/admin/message/send?member=${this.member}&template=${template._id}&membership=${this.membership}`);
   },
   'click .confirmButton':  function (event) {
     event.preventDefault();
     const template = getTemplate(this.member, this.membership, 'confirmation');
-    template && FlowRouter.go(`/message/send?member=${this.member}&template=${template._id}&membership=${this.membership}`);
+    template && FlowRouter.go(`/admin/message/send?member=${this.member}&template=${template._id}&membership=${this.membership}`);
   },
 });

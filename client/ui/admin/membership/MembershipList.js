@@ -19,6 +19,6 @@ Template.MembershipList.events({
     var dataTable = $(event.target).closest('table').DataTable();
     var rowData = dataTable.row(event.currentTarget).data();
     if (!rowData) return; // Won't be data if a placeholder row is clicked
-    FlowRouter.go(`/membership/${rowData._id}`);
+    FlowRouter.go(`/admin/membership/${rowData._id}`);
   }
 });

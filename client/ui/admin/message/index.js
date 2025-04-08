@@ -1,16 +1,26 @@
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "./SendMessage";
-import "./MessageView";
 
-FlowRouter.route('/message/send', {
+FlowRouter.route('/admin/message/send', {
   name: 'sendmessage',
+  waitOn() {
+    return [
+      import('../main'),
+      import('./SendMessage')
+    ];
+  },
   action() {
     this.render('AppBody', {main: 'SendMessage'});
   }
 });
 
-FlowRouter.route('/message/:_id', {
+FlowRouter.route('/admin/message/:_id', {
   name: 'messageview',
+  waitOn() {
+    return [
+      import('../main'),
+      import('./MessageView')
+    ];
+  },
   action() {
     this.render('AppBody', {main: 'MessageView'});
   }
