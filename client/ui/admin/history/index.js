@@ -1,8 +1,13 @@
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './History';
 
-FlowRouter.route('/history', {
+FlowRouter.route('/admin/history', {
   name: 'history',
+  waitOn() {
+    return [
+      import('../main'),
+      import('./History')
+    ]
+  },
   action() {
     this.render('AppBody', {main: 'History'});
   }

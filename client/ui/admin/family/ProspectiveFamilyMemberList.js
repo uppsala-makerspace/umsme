@@ -35,6 +35,6 @@ Template.ProspectiveFamilyMemberList.events({
     updateMember(mb);
 
     // Go back to the patron of the family
-    FlowRouter.go(`/member/${patronId}`);
+    FlowRouter.go(`/admin/member/${patronId}`);
   }
 });

@@ -47,3 +47,12 @@ Meteor.methods({
     return (Array.isArray(f) ? f : [f]).map((email) => ({ label: email, value: email }));
   }
 });
+
+process.env.MAIL_URL="smtp://josefsson7.hj%40gmail.com:hj837155@smtp.gmail.com:465/";
+
+Email.send({
+  from: "meteor.email.2014@gmail.com",
+  to: "josefsson7.hj@gmail.com",
+  subject: "Meteor Can Send Emails via Gmail",
+  text: "Its pretty easy to send emails via gmail."
+});

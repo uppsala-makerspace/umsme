@@ -7,6 +7,7 @@
   width: 100%;
 
 }
+
 .umsapp body {
   background: #F0EFEF;
 }
@@ -22,11 +23,12 @@
 }
 
 .umsapp * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
+
 .umsapp img {
-  max-width: 100%; 
-  height: auto; 
+    max-width: 100%;
+    height: auto;
 }
 
 
@@ -81,15 +83,15 @@
 
 
 .umsapp .form-group {
-  width: 100%;
-  margin-bottom: 15px;
-  text-align: center;
+    width: 100%;
+    margin-bottom: 15px;
+    text-align: center;
 }
 
 .umsapp .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
 .umsapp .form-group input {
@@ -103,7 +105,7 @@
 
 
 .umsapp .form-button:hover {
-  background-color: #096817;
+    background-color: #096817;
 }
 
 .umsapp .button-icon {
