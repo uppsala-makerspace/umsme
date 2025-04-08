@@ -3,6 +3,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import "../Appmain.css";
+import { LanguageSwitcher } from './langueSwitcher';
 
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -26,6 +27,7 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={submit} className="login-form">
+      <LanguageSwitcher />
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
       <div className="form-group">
         <label htmlFor="username">Username</label>

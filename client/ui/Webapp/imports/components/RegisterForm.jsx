@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { LanguageSwitcher } from './langueSwitcher';
 
 export const RegisterForm = () => {
     const [username, setUsername] = useState('');
@@ -34,9 +35,11 @@ export const RegisterForm = () => {
 
     return (
         <>
-        <p> Om du har ett konto så ska du logga in med samma mejl som du använt</p>
-        <form onSubmit={handleSubmit}>
-            <div>
+        <LanguageSwitcher />
+        <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
+        <p style={{ textAlign: "center" }}> Om du har ett konto så ska du logga in med samma mejl som du använt</p>
+        <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
                 <label htmlFor="username">Username:</label>
                 <input
                     type="text"
@@ -46,7 +49,7 @@ export const RegisterForm = () => {
                     required
                 />
             </div>
-            <div>
+            <div className="form-group">
                 <label htmlFor="password">Password:</label>
                 <input
                     type="password"
@@ -56,7 +59,7 @@ export const RegisterForm = () => {
                     required
                 />
             </div>
-            <div>
+            <div className="form-group">
                 <label htmlFor="confirm-password">Confirm Password:</label>
                 <input
                     type="password"
@@ -66,7 +69,7 @@ export const RegisterForm = () => {
                     required
                 />
             </div>
-            <button type="submit">Register</button>
+            <button type="submit" className="form-button">Register</button>
             <button onClick={() => toLogIn()}>Back to Login</button>
         </form>
         </>
