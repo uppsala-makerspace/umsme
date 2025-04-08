@@ -51,10 +51,25 @@ export const LoginForm = () => {
         />
       </div>
 
-      <div>
-        <button type="submit" className="form-button">Log In</button>
+      <div className="form-group">
+        <button type="submit" className="form-button">Log in</button>
         <button onClick={() => toRegister()}>Back to register</button>
       </div>
+
+      <div className="form-group">
+      <button onClick={() => toRegister()}>
+        <img src="/images/GoogleLogo.png" alt="icon" className="button-icon" />
+      Continue with Google</button>
+      </div>
+
+      <div className="form-group">
+      
+      <button onClick={() => toRegister()}>
+      <img src="/images/FacebookLogo.png" alt="icon" className="button-icon" />
+      Continue with Facebook
+      </button>
+      </div>
+
     </form>
   );
 };

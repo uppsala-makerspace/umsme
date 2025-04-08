@@ -2,17 +2,17 @@
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #F3F1F1;
+  background: #F0EFEF;
   overflow-x: hidden;
   width: 100%;
 
 }
 .umsapp body {
-  background: #F3F1F1;
+  background: #F0EFEF;
 }
 
 .umsapp #main {
-  background: #F3F1F1;
+  background: #F0EFEF;
   font-family: sans-serif;
   width: 100%;
   max-width: 1200px;
@@ -37,12 +37,15 @@
   align-items: center; 
   width: 100%; 
   max-width: 400px; 
-
   padding: 2%; 
+  
+  
+  
 }
 
-.umsapp.login-form input,
+.umsapp .login-form input,
 .umsapp .login-form button {
+  
   width: 100%; 
   max-width: 100%; 
   margin: 10px 0; 
@@ -54,23 +57,28 @@
 .umsapp .form-button {
   width: 100%;
   padding: 10px;
-  background-color:#5FC86F;
-  color:  #F3F1F1;
+  color:  #F0EFEF;
+  justify-content: center;
   border: none;
   border-radius: 4px;
   font-size: 16px;
+  background-color:#5FC86F;
   cursor: pointer;
   
 }
-  
-
 
 .umsapp .login-logo {
   display: block;
-  margin: 0 auto 20px;
-  max-width: 150px;
+  max-width: 250px;
   height: auto;
+  width: 100%;
+  margin-top: 40px;
+  margin-right: auto;
+  margin-bottom: 80px;
+  margin-left: auto;
+  
 }
+
 
 .umsapp .form-group {
   width: 100%;
@@ -85,7 +93,7 @@
 }
 
 .umsapp .form-group input {
-  background-color: #F3F1F1;
+  background-color: #F0EFEF;
   width: 100%;
   padding: 10px;
   border: 1px solid #000000;
@@ -98,7 +106,15 @@
   background-color: #096817;
 }
 
-@media (max-width: 768px) {
+.umsapp .button-icon {
+  width: 25px;
+  height: 25px;
+  margin-right: 8px;
+  vertical-align: middle
+ 
+}
+
+  @media (max-width: 768px) {
   .umsapp .login-form input,
   .umsapp .login-form button {
     width: 90%; /* Anpassar bredden för mobiler */
