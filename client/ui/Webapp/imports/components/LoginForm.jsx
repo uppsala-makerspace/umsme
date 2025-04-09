@@ -8,6 +8,9 @@ import { LanguageSwitcher } from './langueSwitcher';
 import { FacebookButton } from "./FacebookButton";
 import { F } from "chart.js/dist/chunks/helpers.segment";
 import { useTranslation } from "react-i18next";
+import { LogRegSwitcher } from "./LogRegSwitcher";
+
+
 
 export const LoginForm = () => {
   const { t, i18n } = useTranslation();
@@ -15,6 +18,8 @@ export const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const user = useTracker(() => Meteor.user());
+  const [formType, setFormType] = useState('login');
+
 
   useEffect(() => {
     
@@ -53,6 +58,11 @@ export const LoginForm = () => {
     <form onSubmit={submit} className="login-form">
 
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
+      
+      <LogRegSwitcher setFormType={setFormType} onClick={() => toRegister()} />
+
+     
+ 
       <div className="form-group">
         <label htmlFor="email">{t('email')}</label>
         <input
@@ -77,10 +87,10 @@ export const LoginForm = () => {
         />
       </div>
 
-      <div>
-        <button type="submit" className="form-button">{t('login')}</button>
-        <button onClick={() => toRegister()}>{t('register')}</button>
-      </div>
+      <div className="form-group">
+  <button type="submit" className="form-button">{t('login')}</button>
+</div>
+
 
       <div className="form-group">
         <GoogleButton />
