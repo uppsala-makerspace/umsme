@@ -5,6 +5,7 @@ import { RegisterForm } from './imports/components/RegisterForm';
 import { LoggedIn } from './imports/components/LoggedIn';
 import { WaitForEmailVerification } from './imports/components/WaitForEmailVerification';
 import './imports/i18n'; // Detta ser till att i18n är initialiserad när appen startar
+import { LoggedInAsMember } from './imports/components/LoggedInAsMembers';
 
 
 FlowRouter.route('/', {
@@ -39,5 +40,11 @@ FlowRouter.route('/login', {
 FlowRouter.route('/loggedIn',{
   action(){
     route('loggedIn', LoggedIn);
+  }
+});
+
+FlowRouter.route('/LoggedInAsMember', {
+  action() {
+    route('LoggedInAsMember', LoggedInAsMember);
   }
 });
