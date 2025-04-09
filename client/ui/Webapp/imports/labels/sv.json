@@ -1,6 +1,11 @@
 {
     "greeting": "Hej",
     "switchButton": "Byt till engelska",
-    "register": "Registrera"
+    "register": "Registrera",
+    "login": "Logga in",
+    "logout": "Logga ut",
+    "email": "E-post",
+    "password": "Lösenord",
+    "exEmail": "exempel@ex.com"
   }
   

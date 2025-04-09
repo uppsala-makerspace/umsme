@@ -51,14 +51,13 @@ export const LoginForm = () => {
     <>
     <LanguageSwitcher />
     <form onSubmit={submit} className="login-form">
-      <LanguageSwitcher/>
 
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
       <div className="form-group">
-        <label htmlFor="email">Email:</label>
+        <label htmlFor="email">{t('email')}</label>
         <input
             type="email"
-            placeholder="Email"
+            placeholder={t('exEmail')}
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -67,11 +66,11 @@ export const LoginForm = () => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">{t('password')}</label>
 
         <input
             type="password"
-            placeholder="Password"
+            placeholder={t('password')}
             name="password"
             required
             onChange={(e) => setPassword(e.target.value)}
@@ -79,7 +78,7 @@ export const LoginForm = () => {
       </div>
 
       <div>
-        <button type="submit" className="form-button">Log In</button>
+        <button type="submit" className="form-button">{t('login')}</button>
         <button onClick={() => toRegister()}>{t('register')}</button>
       </div>
 

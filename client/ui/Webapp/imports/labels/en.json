@@ -1,6 +1,11 @@
 {
     "greeting": "Hello",
     "switchButton": "Switch to Swedish",
-    "register": "Register"
+    "register": "Register",
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "exEmail": "example@ex.com"
   }
   
