@@ -21,12 +21,6 @@ export const LoggedIn = () => {
 
   const email = user?.emails?.[0]?.address || "Ingen e-postadress hittades";
 
-  const isMember = useTracker(() => {
-    
-    if (!email || email === "Ingen e-postadress hittades") return false;
-    const member = Members.findOne({ Email: email });
-    return !!member;
-  }, [email]);
 
   const isEmailInMembers = members.some((member) => member.email === email);
 
