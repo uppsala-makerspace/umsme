@@ -117,14 +117,14 @@
 }
 
 
-.language-switcher {
+.umsapp .language-switcher {
   font-size: 12px; 
   padding: 5px 10px; 
 }
 
 
 
-.language-switcher {
+.umsapp .language-switcher {
 display: flex;
 position: absolute;
 top: 10px;
@@ -138,14 +138,14 @@ background: none;
 }
 
 
-.language-switcher .language {
+.umsapp .language-switcher .language {
 color: gray; 
 cursor: pointer;
 font-weight: normal;
 }
 
 
-.language-switcher .language.active{
+.umsapp .language-switcher .language.active{
 color:black;
 font-weight: bold;
 }
@@ -154,7 +154,7 @@ color: black;
 }
 
 
-.language-switcher .divider {
+.umsapp .language-switcher .divider {
 width: 1px;
 height: 20px;
 background-color: #000000;
@@ -162,12 +162,42 @@ margin: 0 10px;
 }
 
 
-.divider {
+.umsapp .divider {
 width: 1px;
 height: 20px;
 background-color: #000000;
 margin: 0 10px;
 }
+
+.umsapp .logreg-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.umsapp .logreg-switcher .divider {
+  width: 1px;
+  height: 20px;
+  background-color: #ccc;
+  margin: 0 10px;
+}
+
+.umsapp .logreg-switcher span {
+  color: gray;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.umsapp .logreg-switcher span.active {
+  color: black;
+  font-weight: bold;
+}
+
 
 
   @media (max-width: 768px) {

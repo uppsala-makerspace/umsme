@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { LanguageSwitcher } from './langueSwitcher';
+import { LogRegSwitcher } from './LogRegSwitcher';
 
 export const RegisterForm = () => {
     const [username, setUsername] = useState('');
@@ -81,6 +82,7 @@ export const RegisterForm = () => {
             </div>
             <button type="submit" className="form-button">Register</button>
             <button onClick={() => toLogIn()}>Back to Login</button>
+            
         </form>
         </>
     );
