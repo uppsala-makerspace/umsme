@@ -2,11 +2,13 @@
   "compilerOptions": {
     "checkJs": true,
     "allowJs": true,
+    "resolveJsonModule": true,
     "jsx": "react",
     "baseUrl": ".",
     "paths": {
       "/*": [
         "./*"
+       
       ],
       "meteor/reactive-var": [
         "/Users/dennis/.meteor/packages/reactive-var/1.0.13/web.browser/reactive-var.js"
