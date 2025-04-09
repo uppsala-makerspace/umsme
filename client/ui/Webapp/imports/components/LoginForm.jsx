@@ -2,13 +2,14 @@ import { Meteor } from "meteor/meteor";
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import { LanguageSwitcher } from "./langueSwitcher";
-import { useTranslation } from 'react-i18next';
-
-
+import { GoogleButton } from "./GoogleButton";
+import "../Appmain.css";
+import { LanguageSwitcher } from './langueSwitcher';
+import { FacebookButton } from "./FacebookButton";
+import { F } from "chart.js/dist/chunks/helpers.segment";
+import { useTranslation } from "react-i18next";
 
 export const LoginForm = () => {
-
   const { t, i18n } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -47,6 +48,8 @@ export const LoginForm = () => {
   console.log('Current language:', i18n.language);
 
   return (
+    <>
+    <LanguageSwitcher />
     <form onSubmit={submit} className="login-form">
       <LanguageSwitcher/>
 
@@ -54,23 +57,24 @@ export const LoginForm = () => {
       <div className="form-group">
         <label htmlFor="email">Email:</label>
         <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    />
+            type="email"
+            placeholder="Email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            />
       </div>
 
       <div className="form-group">
         <label htmlFor="password">Password</label>
 
         <input
-          type="password"
-          placeholder="Password"
-          name="password"
-          required
-          onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            placeholder="Password"
+            name="password"
+            required
+            onChange={(e) => setPassword(e.target.value)}
         />
       </div>
 
@@ -78,6 +82,16 @@ export const LoginForm = () => {
         <button type="submit" className="form-button">Log In</button>
         <button onClick={() => toRegister()}>{t('register')}</button>
       </div>
+
+      <div className="form-group">
+        <GoogleButton />
+      </div>
+
+      <div className="form-group">
+        <FacebookButton />
+      </div>
+
     </form>
+    </>
   );
 };

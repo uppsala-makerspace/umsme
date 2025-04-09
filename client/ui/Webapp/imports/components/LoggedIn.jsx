@@ -62,6 +62,12 @@ export const LoggedIn = () => {
       ) : (
         <p>Du är inte medlem. Kontakta oss för att bli medlem.</p>
       )}
+      <div className='user'>
+        {name}
+      </div>
+      <button onClick={logout}>
+        Logout
+      </button>
     </div>
     
   );

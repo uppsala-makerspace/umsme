@@ -107,3 +107,9 @@ För att förenkla finns det nu två scripts, backup.sh och restore.sh i backup 
 Förslagsvis kör man backup scriptet en gång per natt. Då backuppens storlek är approximativt 1kb per medlem, så är storleken på dumpen liten. Ett år av dumpar för 200 medlemmar blir då cirka 70MB, dvs. att rensa dumpar pga diskutrymme är inte nödvändigt. Eventuellt blir det mer med många skickade meddelanden. Detta bör undersökas efter ett år.
 
 Notera även här att namnet på databasen är namngiven till `umsme`, i en default (icke driftsatt) meteor miljö är namnet istället `meteor`.
+
+
+
+### Settings_example.json
+
+För att köra projektet så måste du ha en settings.json-fil som ser ut som settings_example-filen fast med riktiga värden på API-tokens. Kör scriptet meteor --settings settings.json för att köra igång appen med stöd för inloggning via google/facebook etc 
