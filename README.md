@@ -112,4 +112,4 @@ Notera även här att namnet på databasen är namngiven till `umsme`, i en defa
 
 ### Settings_example.json
 
-För att köra projektet så måste du ha en settings.json-fil som ser ut som settings_example-filen fast med riktiga värden på API-tokens. Kör scriptet meteor settings.json för att köra igång appen med stöd för inloggning via google/facebook etc 
+För att köra projektet så måste du ha en settings.json-fil som ser ut som settings_example-filen fast med riktiga värden på API-tokens. Kör scriptet meteor --settings settings.json för att köra igång appen med stöd för inloggning via google/facebook etc 

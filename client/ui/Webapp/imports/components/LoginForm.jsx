@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { GoogleButton } from "./GoogleButton";
 import "../Appmain.css";
 import { LanguageSwitcher } from './langueSwitcher';
-import { G } from "chart.js/dist/chunks/helpers.segment";
+import { FacebookButton } from "./FacebookButton";
 
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -43,6 +43,7 @@ export const LoginForm = () => {
   return (
     <>
     <GoogleButton />
+    <FacebookButton />
     <form onSubmit={submit} className="login-form">
       <LanguageSwitcher />
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>

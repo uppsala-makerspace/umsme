@@ -82,4 +82,13 @@ Meteor.startup(async () => {
       },
     },
   );
+
+  await ServiceConfiguration.configurations.upsertAsync(
+    {service: 'facebook'},
+    {
+      $set: {
+        ...Meteor.settings.serviceConfigurations.facebook,
+      },
+    },
+  );
 });
