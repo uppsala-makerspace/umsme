@@ -51,10 +51,11 @@ export const LoginForm = () => {
     <>
     <LanguageSwitcher />
     <form onSubmit={submit} className="login-form">
-      <LanguageSwitcher/>
+      
 
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
       <div className="form-group">
+      <button onClick={() => toRegister()}>{t('register')}</button>
         <label htmlFor="email">Email:</label>
         <input
             type="email"
@@ -80,7 +81,7 @@ export const LoginForm = () => {
 
       <div>
         <button type="submit" className="form-button">Log In</button>
-        <button onClick={() => toRegister()}>{t('register')}</button>
+        
       </div>
 
       <div className="form-group">

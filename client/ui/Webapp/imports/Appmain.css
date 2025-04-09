@@ -116,6 +116,60 @@
  
 }
 
+
+.language-switcher {
+  font-size: 12px; 
+  padding: 5px 10px; 
+}
+
+
+
+.language-switcher {
+display: flex;
+position: absolute;
+top: 10px;
+left: 10px;
+padding: 10px 15px;
+color: black;
+cursor: pointer;
+font-size: 14px;
+border: none;
+background: none;
+}
+
+
+.language-switcher .language {
+color: gray; 
+cursor: pointer;
+font-weight: normal;
+}
+
+
+.language-switcher .language.active{
+color:black;
+font-weight: bold;
+}
+.language-switcher .language:hover {
+color: black;
+}
+
+
+.language-switcher .divider {
+width: 1px;
+height: 20px;
+background-color: #000000;
+margin: 0 10px;
+}
+
+
+.divider {
+width: 1px;
+height: 20px;
+background-color: #000000;
+margin: 0 10px;
+}
+
+
   @media (max-width: 768px) {
   .umsapp .login-form input,
   .umsapp .login-form button {
@@ -124,3 +178,4 @@
     
   }
 }
+
