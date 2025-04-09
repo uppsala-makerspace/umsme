@@ -20,8 +20,12 @@ export const RegisterForm = () => {
         console.log('Email:', email);
         if (password === confirmPassword){
             Accounts.createUser({ username, password, email }, (err) => {
-                FlowRouter.go('/waitForEmailVerification'); 
+                
             });
+            setTimeout(() => {
+                FlowRouter.go('/waitForEmailVerification'); 
+            }, 1000); // Simulate a delay for user registration
+           
             
         }
         else {

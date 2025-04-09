@@ -7,16 +7,28 @@ import { useTracker } from 'meteor/react-meteor-data';
 import React, { useState, useEffect } from "react";
 
 
-Template.AdminConsole.onCreated(function() {
-  Meteor.subscribe('members');
-});
 
 export const LoggedIn = () => {
-
   const user = useTracker(() => Meteor.user());
-  const loggingIn = useTracker(() => Meteor.loggingIn());
-  const [isMember, setIsMember] = useState(false);
 
+  const { members, isLoading } = useTracker(() => {
+    const handle = Meteor.subscribe('members');
+    return {
+      members: Members.find().fetch(),
+      isLoading: !handle.ready(),
+    };
+  });
+
+  const email = user?.emails?.[0]?.address || "Ingen e-postadress hittades";
+
+  const isMember = useTracker(() => {
+    
+    if (!email || email === "Ingen e-postadress hittades") return false;
+    const member = Members.findOne({ Email: email });
+    return !!member;
+  }, [email]);
+
+  const isEmailInMembers = members.some((member) => member.email === email);
 
 
   const logout = () => {
@@ -24,52 +36,30 @@ export const LoggedIn = () => {
       if (err) {
         console.error('Logout error:', err);
       } else {
-        FlowRouter.go('/login'); // Redirect to the login page
+        FlowRouter.go('/login');
       }
     });
   };
-  
-  const name = user?.username || "Laddar användarnamn...";
 
-  //kolla genom att matcha mejladresser om user är med i members
-  const email = user?.emails?.[0]?.address || "Ingen e-postadress hittades";
-  useEffect(() => {
-    if (email !== "Ingen e-postadress hittades") {
-      const member = Members.findOne({ Email: email });
-      console.log("Medlem:", member);
-      if (member) {
-        console.log("Personen är medlem:", member);
-        setIsMember(true);
-      } else {
-        console.log("Personen är inte medlem.");
-        setIsMember(false);
-      }
-    }
-  }, [email]); // Kör endast när email hämtas ("ändras")
-
+  if (isLoading) {
+    return <div>Loading members, take a moment to relax...</div>;
+  }
 
   return (
     <div>
       <h1>Welcome Back!</h1>
       <p>You are successfully logged in.</p>
       <p>Din e-postadress: {email}</p>
-
-      <div className='user' onClick={logout}>
-        {name}
-      </div>
-      {isMember ? (
-        <p>Du är medlem. Välkommen till medlemssektionen!</p>
-      ) : (
-        <p>Du är inte medlem. Kontakta oss för att bli medlem.</p>
-      )}
-      <div className='user'>
-        {name}
-      </div>
+      <p>{isEmailInMembers ? "Din e-postadress finns bland medlemmarna!" : "Din e-postadress finns inte bland medlemmarna."}</p>
+      <h2>Här är alla medlemmar lol:</h2>
+      <ul>
+        {members.map((member) => (
+          <li key={member._id}>{member.name} - {member.email}</li>
+        ))}
+      </ul>
       <button onClick={logout}>
         Logout
       </button>
     </div>
-    
   );
 };
-
