@@ -30,6 +30,7 @@ export const FacebookButton = () => {
 }
 return (
     <button disabled={isDisabled} onClick={handleClick}>
+        <img src="/images/FacebookLogo.png" alt="icon" className="button-icon" />
       {buttonText}
     </button>
 )

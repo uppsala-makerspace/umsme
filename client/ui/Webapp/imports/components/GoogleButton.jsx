@@ -31,6 +31,7 @@ export const GoogleButton = () =>{
 
 return (
     <button disabled={isDisabled} onClick={handleClick}>
+      <img src="/images/GoogleLogo.png" alt="icon" className="button-icon" />
       {buttonText}
     </button>
   );

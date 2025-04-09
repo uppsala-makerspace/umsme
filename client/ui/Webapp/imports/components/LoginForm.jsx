@@ -6,9 +6,9 @@ import { GoogleButton } from "./GoogleButton";
 import "../Appmain.css";
 import { LanguageSwitcher } from './langueSwitcher';
 import { FacebookButton } from "./FacebookButton";
+import { F } from "chart.js/dist/chunks/helpers.segment";
 
 export const LoginForm = () => {
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const user = useTracker(() => Meteor.user());
@@ -42,31 +42,30 @@ export const LoginForm = () => {
 
   return (
     <>
-    <GoogleButton />
-    <FacebookButton />
+    <LanguageSwitcher />
     <form onSubmit={submit} className="login-form">
-      <LanguageSwitcher />
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
       <div className="form-group">
         <label htmlFor="email">Email:</label>
         <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    />
+            type="email"
+            placeholder="Email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            />
       </div>
 
       <div className="form-group">
         <label htmlFor="password">Password</label>
 
         <input
-          type="password"
-          placeholder="Password"
-          name="password"
-          required
-          onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            placeholder="Password"
+            name="password"
+            required
+            onChange={(e) => setPassword(e.target.value)}
         />
       </div>
 
@@ -76,17 +75,11 @@ export const LoginForm = () => {
       </div>
 
       <div className="form-group">
-      <button onClick={() => toRegister()}>
-        <img src="/images/GoogleLogo.png" alt="icon" className="button-icon" />
-      Continue with Google</button>
+        <GoogleButton />
       </div>
 
       <div className="form-group">
-      
-      <button onClick={() => toRegister()}>
-      <img src="/images/FacebookLogo.png" alt="icon" className="button-icon" />
-      Continue with Facebook
-      </button>
+        <FacebookButton />
       </div>
 
     </form>
