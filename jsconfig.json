@@ -221,6 +221,10 @@
       "meteor/service-configuration": [
         "/Users/ivareriksson/.meteor/packages/service-configuration/1.3.5/web.browser/service_configuration_common.js",
         "/Users/ivareriksson/.meteor/packages/service-configuration/1.3.5/web.browser/service_configuration_server.js"
+      ],
+      "meteor/accounts-facebook": [
+        "/Users/ivareriksson/.meteor/packages/accounts-facebook/1.3.4/web.browser/notice.js",
+        "/Users/ivareriksson/.meteor/packages/accounts-facebook/1.3.4/web.browser/facebook.js"
       ]
     }
   },
