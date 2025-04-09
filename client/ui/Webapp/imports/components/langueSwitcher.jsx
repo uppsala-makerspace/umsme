@@ -1,10 +1,22 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-export const LanguageSwitcher = () => { 
-return (    
-    <button className="language-switcher">
-        <span className="language active">SV</span>
+export const LanguageSwitcher = () => {
+  const { t, i18n } = useTranslation();
+
+  const handleLanguageSwitch = () => {
+    const newLang = i18n.language === 'en' ? 'sv' : 'en';
+    i18n.changeLanguage(newLang);
+  };
+
+  return (
+      <button className="language-switcher" onClick={handleLanguageSwitch}> 
+        <span className={i18n.language === 'sv' ? 'language active' : 'language'}>SV</span>            
             <div className="divider"></div>
-        <span className="language active">ENG</span>
-    </button>
-    )}
+        <span className={i18n.language === 'en' ? 'language active' : 'language'}>ENG</span>
+      </button>
+      
+  );
+};
+
+

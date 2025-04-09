@@ -56,6 +56,7 @@ AutoForm.hooks({
       }
     },
     onSubmit: function (doc) {
+      console.log('Submitted document:', doc);
       const id = Members.insert(doc);
       const mb = Members.findOne(id);
       updateMember(mb);

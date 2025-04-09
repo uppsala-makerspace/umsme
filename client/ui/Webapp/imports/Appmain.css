@@ -103,3 +103,45 @@
 
     }
 }
+
+Dennis Neuman
+.umsapp .language-switcher {
+  display: flex;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 10px 15px;
+  color: black;
+  cursor: pointer;
+  font-size: 14px;
+  border: none;
+  background: none;
+}
+
+.umsapp .language-switcher .language {
+  color: gray;  
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.umsapp .language-switcher .language.active{
+color:black;
+  font-weight: bold;
+}
+.umsapp .language-switcher .language:hover {
+  color: black;
+}
+
+.umsapp .language-switcher .divider {
+  width: 1px;
+  height: 20px;
+  background-color: #000000;
+  margin: 0 10px;
+}
+
+.umsapp .divider {
+  width: 1px;
+  height: 20px;
+  background-color: #000000; 
+  margin: 0 10px;
+}
