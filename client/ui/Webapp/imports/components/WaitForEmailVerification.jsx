@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import React, { useState } from "react";
+import { FlowRouter } from "meteor/ostrio:flow-router-extra";
+
 
 export const WaitForEmailVerification = () => {
-    const user = Meteor.user();
+  const user = Meteor.user();
 
-    const toLogIn = () => {
-        FlowRouter.go('/login');
-    }
+  const toLogIn = () => {
+    FlowRouter.go("/login");
+  };
 
   return (
     <div className="wait-for-verification">
@@ -14,4 +15,4 @@ export const WaitForEmailVerification = () => {
       <button onClick={() => toLogIn()}>Back to Login</button>
     </div>
   );
-}
+};

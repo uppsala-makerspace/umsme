@@ -23,7 +23,9 @@ export const RegisterForm = () => {
     console.log("Password:", password);
     console.log("Email:", email);
     if (password === confirmPassword) {
-      Accounts.createUser({ username, password, email }, (err) => {});
+      Accounts.createUser({ password, email }, (err) => {
+        console.log("User created");
+      });
       setTimeout(() => {
         FlowRouter.go("/waitForEmailVerification");
       }, 1000); // Simulate a delay for user registration
@@ -49,6 +51,10 @@ export const RegisterForm = () => {
           onClick={() => toLogIn()}
         />
 
+        <p className="text-container">
+          If you are a member, you should create your account using the same
+          email address that is registered with your membership.
+        </p>
         <div className="form-group">
           <label htmlFor="email">{t("email")}</label>
           <input
