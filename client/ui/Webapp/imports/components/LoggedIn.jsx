@@ -13,6 +13,8 @@ export const LoggedIn = () => {
 
   const { members, isLoading } = useTracker(() => {
     const handle = Meteor.subscribe('members');
+
+    
     return {
       members: Members.find().fetch(),
       isLoading: !handle.ready(),

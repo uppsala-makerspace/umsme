@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 
+
 export const WaitForEmailVerification = () => {
     const user = Meteor.user();
 

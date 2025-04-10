@@ -21,7 +21,7 @@ export const GoogleButton = () =>{
             if (err) {
                 console.error("Google login failed", err);
             } else {
-                console.log("Google login successful");
+                const user = Meteor.user();
                 FlowRouter.go("/loggedIn"); 
             }
 

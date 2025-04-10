@@ -1,4 +1,4 @@
-import React from "react";
+import React, { use } from "react";
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { useTracker } from "meteor/react-meteor-data";
 
@@ -17,11 +17,11 @@ export const FacebookButton = () => {
 
     const handleClick = () => {
         Meteor.loginWithFacebook({}, (err) => {
-            Meteor.logout();
             if (err) {
                 console.error("Facebook login failed", err);
             } else {
                 console.log("Facebook login successful");
+                const user = Meteor.user();
                 FlowRouter.go("/loggedIn"); 
             }
 
