@@ -45,11 +45,19 @@ export const LoggedIn = () => {
     members.find((member) => member.email === email) || null;
 
   const currentMembership =
-    memberships.find((membership) => membership.mid === currentMember._id) ||
-    null;
+  currentMember
+  ? memberships.find((membership) => membership.mid === currentMember._id) || null
+  : null;
 
   console.log("all Memberships:", Memberships.find().fetch());
   console.log("all members:", members);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("handleSubmit");
+    FlowRouter.go("HandleMembership");
+
+  }
 
   const logout = () => {
     Meteor.logout((err) => {
@@ -80,7 +88,7 @@ export const LoggedIn = () => {
 
   return (
     <>
-      <form className="login-form">
+      <form className="login-form" >
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
         <LanguageSwitcher />
         <div>
@@ -94,17 +102,12 @@ export const LoggedIn = () => {
             the payment, you'll get instant access to the space.
           </p>
         </div>
-        <button type="submit" className="form-button">
+        <button type="submit" className="form-button" onClick={handleSubmit}>
           Become a member
         </button>
-        <p>Din e-postadress: {email}</p>
       </form>
-      <div>
-        <h1>Welcome Back!</h1>
-        <p>You are successfully logged in.</p>
-        <p>Din e-postadress: {email}</p>
-        <button onClick={logout}>Logout</button>
-      </div>
+      <p>Din e-postadress: {email}</p>
+      <button onClick={logout}>Logout</button>
     </>
   );
 };
