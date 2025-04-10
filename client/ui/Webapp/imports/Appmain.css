@@ -219,8 +219,7 @@ margin: 0 10px;
     margin: 5px auto; 
     
   }
-  .umsapp .text-container,
-  .umsapp .text-h3{
+  .umsapp .text-container {
     width: 90%; 
     margin: 5px auto; 
     margin-bottom: 20px;    
