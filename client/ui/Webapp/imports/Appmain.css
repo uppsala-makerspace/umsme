@@ -1,72 +1,69 @@
-.umsapp html, body {
+.umsapp html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #F0EFEF;
+  background: #f0efef;
   overflow-x: hidden;
   width: 100%;
-
 }
 
 .umsapp body {
-  background: #F0EFEF;
+  background: #f0efef;
 }
 
 .umsapp #main {
-  background: #F0EFEF;
+  background: #f0efef;
   font-family: sans-serif;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2%;
-  
+}
+
+.umsapp {
+  font-family: "DM Mono", monospace;
 }
 
 .umsapp * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .umsapp img {
-    max-width: 100%;
-    height: auto;
+  max-width: 100%;
+  height: auto;
 }
-
 
 .umsapp .login-form {
   display: flex;
   margin: 0 auto !important;
-  flex-direction: column; 
-  align-items: center; 
-  width: 100%; 
-  max-width: 400px; 
-  padding: 2%; 
-  
-  
-  
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  padding: 2%;
 }
 
 .umsapp .login-form input,
 .umsapp .login-form button {
-  
-  width: 100%; 
-  max-width: 100%; 
-  margin: 10px 0; 
-  padding: 10px; 
-  font-size: 16px; 
-  box-sizing: border-box; 
+  width: 100%;
+  max-width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 16px;
+  box-sizing: border-box;
 }
 
 .umsapp .form-button {
   width: 100%;
   padding: 10px;
-  color:  #F0EFEF;
+  color: #f0efef;
   justify-content: center;
   border: none;
   border-radius: 4px;
   font-size: 16px;
-  background-color:#5FC86F;
+  background-color: #5fc86f;
   cursor: pointer;
-  
 }
 
 .umsapp .login-logo {
@@ -78,24 +75,22 @@
   margin-right: auto;
   margin-bottom: 80px;
   margin-left: auto;
-  
 }
 
-
 .umsapp .form-group {
-    width: 100%;
-    margin-bottom: 15px;
-    text-align: center;
+  width: 100%;
+  margin-bottom: 15px;
+  text-align: center;
 }
 
 .umsapp .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
 .umsapp .form-group input {
-  background-color: #F0EFEF;
+  background-color: #f0efef;
   width: 100%;
   padding: 10px;
   border: 1px solid #000000;
@@ -103,70 +98,70 @@
   font-size: 16px;
 }
 
-
 .umsapp .form-button:hover {
-    background-color: #096817;
+  background-color: #096817;
 }
 
 .umsapp .button-icon {
   width: 25px;
   height: 25px;
   margin-right: 8px;
-  vertical-align: middle
- 
+  vertical-align: middle;
 }
-
 
 .umsapp .language-switcher {
-  font-size: 12px; 
-  padding: 5px 10px; 
+  position: fixed;
+  font-size: 12px;
+  padding: 5px 10px;
 }
 
-
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Gör att body och html täcker hela höjden */
+  background-color: #f0efef; /* Bakgrundsfärg */
+}
 
 .umsapp .language-switcher {
-display: flex;
-position: absolute;
-top: 10px;
-left: 10px;
-padding: 10px 15px;
-color: black;
-cursor: pointer;
-font-size: 14px;
-border: none;
-background: none;
+  display: flex;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 10px 15px;
+  color: black;
+  cursor: pointer;
+  font-size: 14px;
+  border: none;
+  background: none;
 }
-
 
 .umsapp .language-switcher .language {
-color: gray; 
-cursor: pointer;
-font-weight: normal;
+  color: gray;
+  cursor: pointer;
+  font-weight: normal;
 }
 
-
-.umsapp .language-switcher .language.active{
-color:black;
-font-weight: bold;
+.umsapp .language-switcher .language.active {
+  color: black;
+  font-weight: bold;
 }
 .language-switcher .language:hover {
-color: black;
+  color: black;
 }
-
 
 .umsapp .language-switcher .divider {
-width: 1px;
-height: 20px;
-background-color: #000000;
-margin: 0 10px;
+  width: 1px;
+  height: 20px;
+  background-color: #000000;
+  margin: 0 10px;
 }
 
-
 .umsapp .divider {
-width: 1px;
-height: 20px;
-background-color: #000000;
-margin: 0 10px;
+  width: 1px;
+  height: 20px;
+  background-color: #000000;
+  margin: 0 10px;
 }
 
 .umsapp .logreg-switcher {
@@ -194,9 +189,19 @@ margin: 0 10px;
 
 .umsapp .logreg-switcher span.active {
   color: black;
-  
 }
-.umsapp .text-container{
+
+.umsapp .membershipsContainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 40px;
+  padding: 10px;
+  margin: 50px;
+  align-items: center;
+  justify-content: center;
+}
+
+.umsapp .text-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -210,8 +215,42 @@ margin: 0 10px;
   justify-content: center;
   text-align: center;
 }
+.umsapp .membershipsContainer p {
+  max-width: 450px;
+}
+.umsapp .membership {
+  padding: 5px;
+  margin: 10px;
+}
 
-  @media (max-width: 768px) {
+.umsapp .price {
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
+  margin-top: 0px;
+  padding-top: 0px;
+}
+
+.umsapp .addMembership {
+  width: 80px;
+  height: 30px;
+  color: #f0efef;
+  justify-content: center;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px;
+  background-color: #5fc86f;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.umsapp .addMembership:hover {
+  background-color: #096817;
+}
+
+@media (max-width: 768px) {
   .umsapp .login-form input,
   .umsapp .login-form button
   {
@@ -225,4 +264,3 @@ margin: 0 10px;
     margin-bottom: 20px;    
   }
 }
-

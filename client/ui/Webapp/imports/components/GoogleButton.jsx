@@ -1,5 +1,6 @@
 import React from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
+import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
 
@@ -15,14 +16,14 @@ export const GoogleButton = () => {
 
   const loading = false;
   const isDisabled = loading || !configurationExists();
-  const buttonText = isDisabled ? "Please wait" : t("logginGoogle");
+  const buttonText = isDisabled ? "Please wait" : "Continue with Google";
 
   const handleClick = () => {
     Meteor.loginWithGoogle({}, (err) => {
       if (err) {
         console.error("Google login failed", err);
       } else {
-        console.log("Google login successful");
+        const user = Meteor.user();
         FlowRouter.go("/loggedIn");
       }
     });

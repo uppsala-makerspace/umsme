@@ -20,8 +20,39 @@ import '../lib/tabular/index';
 process.env.MAIL_URL = "smtp://makupp30%40gmail.com:qlrlilvzxpnfjtut@smtp.gmail.com:587/";
 
 Meteor.startup(async () => {
+  
   Accounts.config({
-    sendVerificationEmail: true
+    sendVerificationEmail: true,
+  });
+
+  Accounts.onLogin(async function (loginInfo) {
+    const userId = loginInfo.user._id;
+    const googleEmail = loginInfo.user.services.google?.email;
+    const facebookEmail = loginInfo.user.services.facebook?.email;
+  
+    if (googleEmail) {
+      try {
+        await Meteor.users.updateAsync(userId, {
+          $set: {
+            "emails": [{ address: googleEmail, verified: true }] 
+          }
+        });
+      } catch (error) {
+        console.error("Error updating user:", error);
+      }
+    }
+    if (facebookEmail) {
+      console.log(userId, facebookEmail);
+      try {
+        await Meteor.users.updateAsync(userId, {
+          $set: {
+            "emails": [{ address: facebookEmail, verified: true }] 
+          }
+        });
+      } catch (error) {
+        console.error("Error updating user:", error);
+      }
+    }
   });
   
   const adminUser = await Accounts.findUserByUsername('admin');

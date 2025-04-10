@@ -3,6 +3,7 @@ import route from "/client/ui/Webapp/route";
 import { LoginForm } from './imports/components/LoginForm';
 import { RegisterForm } from './imports/components/RegisterForm';
 import { LoggedIn } from './imports/components/LoggedIn';
+import { HandleMembership } from './imports/components/HandleMembership';
 import { WaitForEmailVerification } from './imports/components/WaitForEmailVerification';
 import './imports/i18n'; // Detta ser till att i18n är initialiserad när appen startar
 import { LoggedInAsMember } from './imports/components/LoggedInAsMembers';
@@ -30,6 +31,11 @@ FlowRouter.route('/WaitForEmailVerification', {
   }
 });
 
+FlowRouter.route('/HandleMembership', {
+  action() {
+    route('HandleMembership', HandleMembership);
+  }
+});
 
 FlowRouter.route('/login', {
   action() {

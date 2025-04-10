@@ -2,11 +2,21 @@ import React, { useState } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { LogRegSwitcher } from "./LogRegSwitcher";
+import React, { useState } from "react";
+import { FlowRouter } from "meteor/ostrio:flow-router-extra";
+import { LanguageSwitcher } from "./langueSwitcher";
+import { LogRegSwitcher } from "./LogRegSwitcher";
 import { useTranslation } from "react-i18next";
 
 export const RegisterForm = () => {
   const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formType, setFormType] = useState("register");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,6 +46,9 @@ export const RegisterForm = () => {
   const toLogIn = () => {
     FlowRouter.go("/login"); // Redirect to the login page
   };
+  const toLogIn = () => {
+    FlowRouter.go("/login"); // Redirect to the login page
+  };
 
   return (
     <>
@@ -53,7 +66,10 @@ export const RegisterForm = () => {
         <div className="form-group">
           <label htmlFor="email">{t("email")}</label>
           <input
+          <label htmlFor="email">{t("email")}</label>
+          <input
             type="email"
+            placeholder={t("exEmail")}
             placeholder={t("exEmail")}
             id="email"
             value={email}
