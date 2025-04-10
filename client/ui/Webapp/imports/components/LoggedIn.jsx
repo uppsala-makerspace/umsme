@@ -45,6 +45,9 @@ export const LoggedIn = () => {
       <p>You are successfully logged in.</p>
       <p>Din e-postadress: {email}</p>
       <p>{isEmailInMembers ? FlowRouter.go('/loggedInAsMember') : "Din e-postadress finns inte bland medlemmarna."}</p>
+      <button onClick={() => FlowRouter.go('/HandleMembership')}>
+      Bli Medlem
+      </button>
       <h2>Här är alla medlemmar lol:</h2>
       <ul>
         {members.map((member) => (
