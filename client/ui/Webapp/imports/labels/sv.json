@@ -1,11 +1,15 @@
 {
     "greeting": "Hej",
     "switchButton": "Byt till engelska",
-    "register": "Registrera",
+    "register": "Skapa konto",
     "login": "Logga in",
     "logout": "Logga ut",
     "email": "E-post",
     "password": "Lösenord",
-    "exEmail": "exempel@ex.com"
+    "passwordConfirm": "Bekräfta lösenord",
+    "exEmail": "exempel@ex.com",
+    "logginGoogle": "Fortsätt med Google",
+    "logginFacebook": "Fortsätt med Facebook",
+    "registerText": "Om du är medlem ska du skapa ditt konto med samma e-postadress som finns registrerad på ditt medlemskap."
   }
   

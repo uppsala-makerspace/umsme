@@ -6,6 +6,12 @@
     "logout": "Logout",
     "email": "Email",
     "password": "Password",
-    "exEmail": "example@ex.com"
+    "passwordConfirm": "Confirm Password",
+    "exEmail": "example@ex.com",
+    "logginGoogle": "Continue with Google",
+    "logginFacebook": "Continue with Facebook",
+    "registerText": "If you are a member, you should create your account using the same email address that is registered with your membership."
+   
+    
   }
   

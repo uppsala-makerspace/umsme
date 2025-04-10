@@ -23,9 +23,7 @@ export const RegisterForm = () => {
     console.log("Password:", password);
     console.log("Email:", email);
     if (password === confirmPassword) {
-      Accounts.createUser({ password, email }, (err) => {
-        console.log("User created");
-      });
+      Accounts.createUser({ username, password, email }, (err) => {});
       setTimeout(() => {
         FlowRouter.go("/waitForEmailVerification");
       }, 1000); // Simulate a delay for user registration
@@ -51,10 +49,7 @@ export const RegisterForm = () => {
           onClick={() => toLogIn()}
         />
 
-        <p className="text-container">
-          If you are a member, you should create your account using the same
-          email address that is registered with your membership.
-        </p>
+        <p className="text-container">{t("registerText")}</p>
         <div className="form-group">
           <label htmlFor="email">{t("email")}</label>
           <input
@@ -68,7 +63,7 @@ export const RegisterForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">{t("password")}</label>
           <input
             type="password"
             id="password"
@@ -78,7 +73,7 @@ export const RegisterForm = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="confirm-password">Confirm Password</label>
+          <label htmlFor="password">{t("passwordConfirm")}</label>
           <input
             type="password"
             id="confirm-password"
@@ -88,7 +83,7 @@ export const RegisterForm = () => {
           />
         </div>
         <button type="submit" className="form-button">
-          Register
+          {t("register")}
         </button>
       </form>
     </>
