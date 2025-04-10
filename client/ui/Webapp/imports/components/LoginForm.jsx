@@ -59,7 +59,8 @@ export const LoginForm = () => {
 
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
       
-      <LogRegSwitcher setFormType={setFormType} onClick={() => toRegister()} />
+    
+      <LogRegSwitcher setFormType={setFormType} formType={formType} onClick={() => toRegister()} />
 
      
  

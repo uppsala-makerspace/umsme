@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { LanguageSwitcher } from './langueSwitcher';
 import { LogRegSwitcher } from './LogRegSwitcher';
+import { useTranslation } from "react-i18next";
 
 export const RegisterForm = () => {
+    const { t, i18n } = useTranslation();
+
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [formType, setFormType] = useState('register');
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -42,31 +46,28 @@ export const RegisterForm = () => {
     return (
         <>
         <LanguageSwitcher />
-        <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
-        <p style={{ textAlign: "center" }}> Om du har ett konto så ska du logga in med samma mejl som du använt</p>
+        
         <form onSubmit={handleSubmit} className="login-form">
+        <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
+        <LogRegSwitcher setFormType={setFormType} formType={formType} onClick={() => toLogIn()} />
+        
+        <p className="text-container">
+  If you are a member, you should create your account using the same email address that is registered with your membership.
+</p>
+        <div className="form-group">
+        <label htmlFor="email">{t('email')}</label>
+        <input
+            type="email"
+            placeholder={t('exEmail')}
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            />
+      </div>
+          
             <div className="form-group">
-                <label htmlFor="username">Username:</label>
-                <input
-                    type="text"
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
-            </div>
-            <div>
-                <label htmlFor="email">Email:</label>
-                <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    />
-            </div>
-            <div className="form-group">
-                <label htmlFor="password">Password:</label>
+                <label htmlFor="password">Password</label>
                 <input
                     type="password"
                     id="password"
@@ -76,7 +77,7 @@ export const RegisterForm = () => {
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="confirm-password">Confirm Password:</label>
+                <label htmlFor="confirm-password">Confirm Password</label>
                 <input
                     type="password"
                     id="confirm-password"
@@ -86,7 +87,7 @@ export const RegisterForm = () => {
                 />
             </div>
             <button type="submit" className="form-button">Register</button>
-            <button onClick={() => toLogIn()}>Back to Login</button>
+            
             
         </form>
         </>
