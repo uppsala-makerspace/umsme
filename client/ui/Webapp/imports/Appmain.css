@@ -203,16 +203,27 @@ margin: 0 10px;
   justify-content: center;
   margin-top: 20px;
   text-align: center;
+  margin-bottom: 15px;
 }
 
+.umsapp .text-h3{
+  justify-content: center;
+  text-align: center;
+}
 
   @media (max-width: 768px) {
   .umsapp .login-form input,
-  .umsapp .login-form button,
-  .umsapp .text-container {
-    width: 90%; /* Anpassar bredden för mobiler */
-    margin: 5px auto; /* Mindre mellanrum på små skärmar */
+  .umsapp .login-form button
+  {
+    width: 90%; 
+    margin: 5px auto; 
     
+  }
+  .umsapp .text-container,
+  .umsapp .text-h3{
+    width: 90%; 
+    margin: 5px auto; 
+    margin-bottom: 20px;    
   }
 }
 
