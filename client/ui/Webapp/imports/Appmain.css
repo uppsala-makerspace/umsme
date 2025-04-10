@@ -189,13 +189,12 @@ margin: 0 10px;
 
 .umsapp .logreg-switcher span {
   color: gray;
-  font-weight: normal;
   cursor: pointer;
 }
 
 .umsapp .logreg-switcher span.active {
   color: black;
-  font-weight: bold;
+  
 }
 
 
