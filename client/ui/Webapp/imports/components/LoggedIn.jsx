@@ -1,10 +1,12 @@
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Template } from 'meteor/templating';
 import { Members } from '/collections/members.js';
-import { Payments } from '/collections/payments';
 import { updateMember } from '/lib/utils';
 import { useTracker } from 'meteor/react-meteor-data';
 import React, { useState, useEffect } from "react";
+import { Memberships } from '/collections/memberships';
+import { Payments } from "/collections/payments";
+
 
 
 
@@ -13,6 +15,9 @@ export const LoggedIn = () => {
 
   const { members, isLoading } = useTracker(() => {
     const handle = Meteor.subscribe('members');
+    Meteor.subscribe('memberships');
+    Meteor.subscribe('payments');
+
     return {
       members: Members.find().fetch(),
       isLoading: !handle.ready(),
@@ -23,6 +28,10 @@ export const LoggedIn = () => {
 
 
   const isEmailInMembers = members.some((member) => member.email === email);
+  
+
+  console.log('all Memberships:', Memberships.find().fetch());
+  console.log('all members:', members);
 
 
   const logout = () => {
@@ -47,8 +56,26 @@ export const LoggedIn = () => {
       <p>{isEmailInMembers ? FlowRouter.go('/loggedInAsMember') : "Din e-postadress finns inte bland medlemmarna."}</p>
       <h2>Här är alla medlemmar lol:</h2>
       <ul>
-        {members.map((member) => (
-          <li key={member._id}>{member.name} - {member.email}</li>
+        {members.map((member) => {
+          const memberMemberships = Memberships.find({ mid: member._id }).fetch();
+            return (
+            <React.Fragment key={member._id}>
+              <li>
+              {member.name} - {member.email} - 
+              {memberMemberships.map((membership) => (
+                <span key={membership._id}>
+                {membership.type} - {membership.description} - 
+                Slutdatum: {membership.memberend ? new Date(membership.memberend).toLocaleDateString() : 'Ingen slutdatum'}
+                </span>
+              ))}
+              </li>
+            </React.Fragment>
+            );
+        })}
+        <h2>Här är alla medlemskap:</h2>
+        {Memberships.find().fetch().map((membership) => (
+          <li key={membership._id}>{membership.type} - {membership.description} - 
+          Slutdatum: {membership.memberend ? new Date(membership.memberend).toLocaleDateString() : 'Ingen slutdatum'}</li>
         ))}
       </ul>
       <button onClick={logout}>
