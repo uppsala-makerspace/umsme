@@ -196,12 +196,20 @@ margin: 0 10px;
   color: black;
   
 }
-
+.umsapp .text-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  text-align: center;
+}
 
 
   @media (max-width: 768px) {
   .umsapp .login-form input,
-  .umsapp .login-form button {
+  .umsapp .login-form button,
+  .umsapp .text-container {
     width: 90%; /* Anpassar bredden för mobiler */
     margin: 5px auto; /* Mindre mellanrum på små skärmar */
     

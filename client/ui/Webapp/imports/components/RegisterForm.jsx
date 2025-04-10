@@ -46,11 +46,13 @@ export const RegisterForm = () => {
         <>
         <LanguageSwitcher />
         
-        
         <form onSubmit={handleSubmit} className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo"/>
         <LogRegSwitcher setFormType={setFormType} formType={formType} onClick={() => toLogIn()} />
-
+        
+        <p className="text-container">
+  If you are a member, you should create your account using the same email address that is registered with your membership.
+</p>
         <div className="form-group">
         <label htmlFor="email">{t('email')}</label>
         <input
