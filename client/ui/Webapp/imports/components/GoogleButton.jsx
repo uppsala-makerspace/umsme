@@ -1,6 +1,5 @@
 import React from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
 
