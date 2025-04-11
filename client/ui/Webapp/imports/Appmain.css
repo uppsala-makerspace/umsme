@@ -121,8 +121,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%; /* Gör att body och html täcker hela höjden */
-  background-color: #f0efef; /* Bakgrundsfärg */
+  height: 100%;
+  background-color: #f0efef;
 }
 
 .umsapp .language-switcher {
