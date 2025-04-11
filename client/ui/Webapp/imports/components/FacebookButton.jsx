@@ -12,11 +12,6 @@ export const FacebookButton = () => {
       service: "facebook",
     });
   };
-  const configurationExists = () => {
-    return ServiceConfiguration.configurations.findOne({
-      service: "facebook",
-    });
-  };
 
   const loading = false;
   const isDisabled = loading || !configurationExists();
@@ -35,15 +30,9 @@ export const FacebookButton = () => {
     });
   };
   return (
-  };
-  return (
     <button disabled={isDisabled} onClick={handleClick}>
-      <img src="/images/FacebookLogo.png" alt="icon" className="button-icon" />
       <img src="/images/FacebookLogo.png" alt="icon" className="button-icon" />
       {buttonText}
     </button>
-  );
-};
-
   );
 };
