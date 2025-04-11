@@ -318,7 +318,8 @@ body {
 
 @media (max-width: 768px) {
   .umsapp .login-form input,
-  .umsapp .login-form button
+  .umsapp .login-form button,
+  .umsapp .text-area
   {
     width: 90%; 
     margin: 5px auto; 
