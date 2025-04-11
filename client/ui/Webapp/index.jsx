@@ -1,56 +1,70 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import route from "/client/ui/Webapp/route";
-import { LoginForm } from './imports/components/LoginForm';
-import { RegisterForm } from './imports/components/RegisterForm';
-import { LoggedIn } from './imports/components/LoggedIn';
-import { HandleMembership } from './imports/components/HandleMembership';
-import { WaitForEmailVerification } from './imports/components/WaitForEmailVerification';
-import './imports/i18n'; // Detta ser till att i18n är initialiserad när appen startar
-import { LoggedInAsMember } from './imports/components/LoggedInAsMembers';
+import { LoginForm } from "./imports/components/LoginForm";
+import { RegisterForm } from "./imports/components/RegisterForm";
+import { LoggedIn } from "./imports/components/LoggedIn";
+import { HandleMembership } from "./imports/components/HandleMembership";
+import { WaitForEmailVerification } from "./imports/components/WaitForEmailVerification";
+import "./imports/i18n"; // Detta ser till att i18n är initialiserad när appen startar
+import { LoggedInAsMember } from "./imports/components/LoggedInAsMembers";
 
-
-FlowRouter.route('/', {
-  name: 'webbapp',
+// We only allow login and register pages to be accessed when not logged in.
+FlowRouter.triggers.enter([
+  (context, redirect) => {
+    if (
+      !Meteor.userId() &&
+      context.path !== "/login" &&
+      context.path !== "/register" &&
+      context.path !== "/webapp"
+    ) {
+      redirect("/login");
+    }
+  },
+]);
+FlowRouter.route("/", {
+  name: "webbapp",
   /*  action() {
     route('start', () => <div>Here be dragons</div>);
   },*/
-  triggersEnter: [(context, redirect) => {
-    redirect('/login');
-  }]
+  triggersEnter: [
+    (context, redirect) => {
+      redirect("/login");
+    },
+  ],
 });
 
-FlowRouter.route('/register', {
+FlowRouter.route("/register", {
   action() {
-    route('register', RegisterForm);
-  }
+    route("register", RegisterForm);
+  },
 });
 
-FlowRouter.route('/WaitForEmailVerification', {
+FlowRouter.route("/WaitForEmailVerification", {
   action() {
-    route('WaitForEmailVerification', WaitForEmailVerification);
-  }
+    route("WaitForEmailVerification", WaitForEmailVerification);
+  },
 });
 
-FlowRouter.route('/HandleMembership', {
+FlowRouter.route("/HandleMembership", {
   action() {
-    route('HandleMembership', HandleMembership);
-  }
+    route("HandleMembership", HandleMembership);
+  },
 });
 
-FlowRouter.route('/login', {
+FlowRouter.route("/login", {
   action() {
-    route('login', LoginForm);
-  }
+    route("login", LoginForm);
+  },
 });
 
-FlowRouter.route('/loggedIn',{
-  action(){
-    route('loggedIn', LoggedIn);
-  }
-});
-
-FlowRouter.route('/LoggedInAsMember', {
+FlowRouter.route("/loggedIn", {
   action() {
-    route('LoggedInAsMember', LoggedInAsMember);
-  }
+    route("loggedIn", LoggedIn);
+  },
+});
+
+FlowRouter.route("/LoggedInAsMember", {
+  action() {
+    route("LoggedInAsMember", LoggedInAsMember);
+  },
 });
