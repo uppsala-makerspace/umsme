@@ -5,7 +5,7 @@ import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
 
-export const accounts = () => {
+export const calendar = () => {
   const user = Meteor.userId();
   return (
     <div>
@@ -13,7 +13,7 @@ export const accounts = () => {
         <LanguageSwitcher />
         <HamburgerMenu />
       </div>
-      <div className="login-form">Ditt konto</div>
+      <div className="login-form">Kalender</div>
     </div>
   );
 };

@@ -7,6 +7,8 @@ import { HandleMembership } from "./imports/components/HandleMembership";
 import { WaitForEmailVerification } from "./imports/components/WaitForEmailVerification";
 import "./imports/i18n"; // Detta ser till att i18n är initialiserad när appen startar
 import { LoggedInAsMember } from "./imports/components/LoggedInAsMembers";
+import { accounts } from "./imports/components/accounts";
+import { calendar } from "./imports/components/calendar";
 
 // We only allow login and register pages to be accessed when not logged in.
 FlowRouter.triggers.enter([
@@ -66,5 +68,17 @@ FlowRouter.route("/loggedIn", {
 FlowRouter.route("/LoggedInAsMember", {
   action() {
     route("LoggedInAsMember", LoggedInAsMember);
+  },
+});
+
+FlowRouter.route("/accounts", {
+  action() {
+    route("accounts", accounts);
+  },
+});
+
+FlowRouter.route("/calendar", {
+  action() {
+    route("calendar", calendar);
   },
 });

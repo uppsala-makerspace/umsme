@@ -8,10 +8,6 @@ export const HamburgerMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  const toAccounts = () => {
-    FlowRouter.go("/accounts");
-  };
-
   return (
     <>
       <nav className={`nav-bar ${isOpen ? "menu-open" : ""}`}>
@@ -29,13 +25,13 @@ export const HamburgerMenu = () => {
             <a href="/keys">Nycklar</a>
           </li>
           <li>
-            <button onClick={toAccounts}></button>
+            <a href="/accounts">Ditt konto</a>{" "}
           </li>
           <li>
             <a href="/memberships">Medlemskap</a>
           </li>
           <li>
-            <a href="/calender">Kalender</a>
+            <a href="/calendar">Kalender</a>
           </li>
           <li>
             <a href="/contact">Kontakta oss</a>
