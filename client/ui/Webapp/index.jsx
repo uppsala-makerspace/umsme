@@ -21,6 +21,7 @@ FlowRouter.triggers.enter([
     }
   },
 ]);
+
 FlowRouter.route("/", {
   name: "webbapp",
   /*  action() {
