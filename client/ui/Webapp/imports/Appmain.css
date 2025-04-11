@@ -64,6 +64,7 @@ body {
   font-size: 16px;
   background-color: #5fc86f;
   cursor: pointer;
+  font-family: "DM Mono", monospace;
 }
 
 .umsapp .login-logo {
@@ -135,6 +136,7 @@ body {
   font-size: 14px;
   border: none;
   background: none;
+  font-family: "DM Mono", monospace;
 }
 
 .umsapp .language-switcher .language {
@@ -174,6 +176,7 @@ body {
   border: none;
   cursor: pointer;
   font-size: 16px;
+  font-family: "DM Mono", monospace;
 }
 
 .umsapp .logreg-switcher .divider {
@@ -467,7 +470,8 @@ body {
 
 @media (max-width: 768px) {
   .umsapp .login-form input,
-  .umsapp .login-form button {
+  .umsapp .login-form button,
+  .umsapp .text-area {
     width: 90%;
     margin: 5px auto;
   }
