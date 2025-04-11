@@ -14,8 +14,7 @@ FlowRouter.triggers.enter([
     if (
       !Meteor.userId() &&
       context.path !== "/login" &&
-      context.path !== "/register" &&
-      context.path !== "/webapp"
+      context.path !== "/register"
     ) {
       redirect("/login");
     }
