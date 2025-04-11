@@ -44,10 +44,10 @@ export const LoggedIn = () => {
   const currentMember =
     members.find((member) => member.email === email) || null;
 
-  const currentMembership =
-  currentMember
-  ? memberships.find((membership) => membership.mid === currentMember._id) || null
-  : null;
+  const currentMembership = currentMember
+    ? memberships.find((membership) => membership.mid === currentMember._id) ||
+      null
+    : null;
 
   console.log("all Memberships:", Memberships.find().fetch());
   console.log("all members:", members);
@@ -56,8 +56,7 @@ export const LoggedIn = () => {
     e.preventDefault();
     console.log("handleSubmit");
     FlowRouter.go("HandleMembership");
-
-  }
+  };
 
   const logout = () => {
     Meteor.logout((err) => {
@@ -88,7 +87,7 @@ export const LoggedIn = () => {
 
   return (
     <>
-      <form className="login-form" >
+      <form className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
         <LanguageSwitcher />
         <div>
