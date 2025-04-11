@@ -6,8 +6,10 @@ import { updateMember } from "/lib/utils";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "./langueSwitcher";
+import { useTranslation } from "react-i18next";
 
 export const HandleMembership = () => {
+  const { t, i18n } = useTranslation();
   const user = useTracker(() => Meteor.user());
 
   const { members, isLoading } = useTracker(() => {
@@ -32,55 +34,39 @@ export const HandleMembership = () => {
       <LanguageSwitcher />
       <div className="membershipsContainer">
         <div>
-          <h1>Våra Medlemsskap:</h1>
-          <p>
-            På Uppsala Makerspace vill vi att skapande ska vara tillgängligt för
-            alla, oavsett ekonomi. Därför vill vi hålla priserna för medlemskap
-            så låga som möjligt. Det innebär att vi alla måste hjälpas åt med
-            det arbete som krävs för att vår förening ska må bra.
-          </p>
+          <h1>{t("memberships")}</h1>
+          <p>{t("membershipsText")}</p>
           <br />
 
           <div className="membership">
-            <h2>Medlemsskap Bas</h2>
-            <p>
-              Med vårt basmedlemskap är du välkommen att nyttja vårt makerspace
-              under våra öppna kvällar samt på lördagskurserna.
-            </p>
+            <h2>{t("memberBase")}</h2>
+            <p>{t("memberBasetext")}</p>
             <div className="price">
-              <h2>200 kr/år</h2>
+              <h2>{t("priceBas")}</h2>
               <button className="addMembership" onClick={() => {}}>
-                Välj
+                {t("choose")}
               </button>
             </div>
           </div>
 
           <div className="membership">
-            <h2>Labbmedlem Individ</h2>
-            <p>
-              Med ett labbmedlemskap får du tillgång till Makerspace 24/7. Du
-              får också en förvaringslåda att ha saker i så du slipper ta dem
-              fram och tillbaka.
-            </p>
+            <h2>{t("memberIndivdual")}</h2>
+            <p>{t("memberIndivdualText")}</p>
             <div className="price">
-              <h2>1200 kr/år</h2>
+              <h2>{t("priceLab")}</h2>
               <button className="addMembership" onClick={() => {}}>
-                Välj
+                {t("choose")}
               </button>
             </div>
           </div>
 
           <div className="membership">
-            <h2>Labbmedlem Familj</h2>
-            <p>
-              Med ett labbmedlemskap för familjen får du tillgång till
-              Makerspace 24/7 för upp till 4 personer som är skrivna på samma
-              adress.
-            </p>
+            <h2>{t("memberFamily")}</h2>
+            <p>{t("memberFamilyText")}</p>
             <div className="price">
-              <h2>2000 kr/år</h2>
+              <h2>{t("memberFamilyPrice")}</h2>
               <button className="addMembership" onClick={() => {}}>
-                Välj
+                {t("choose")}
               </button>
             </div>
           </div>

@@ -7,8 +7,10 @@ import React, { useState, useEffect } from "react";
 import { Memberships } from "/collections/memberships";
 import { Payments } from "/collections/payments";
 import { LanguageSwitcher } from "./langueSwitcher";
+import { useTranslation } from "react-i18next";
 
 export const LoggedIn = () => {
+  const { t, i18n } = useTranslation();
   const user = useTracker(() => Meteor.user());
 
   const { members, isLoadingMembers } = useTracker(() => {
@@ -44,10 +46,10 @@ export const LoggedIn = () => {
   const currentMember =
     members.find((member) => member.email === email) || null;
 
-  const currentMembership =
-  currentMember
-  ? memberships.find((membership) => membership.mid === currentMember._id) || null
-  : null;
+  const currentMembership = currentMember
+    ? memberships.find((membership) => membership.mid === currentMember._id) ||
+      null
+    : null;
 
   console.log("all Memberships:", Memberships.find().fetch());
   console.log("all members:", members);
@@ -56,8 +58,7 @@ export const LoggedIn = () => {
     e.preventDefault();
     console.log("handleSubmit");
     FlowRouter.go("HandleMembership");
-
-  }
+  };
 
   const logout = () => {
     Meteor.logout((err) => {
@@ -88,22 +89,16 @@ export const LoggedIn = () => {
 
   return (
     <>
-      <form className="login-form" >
+      <form className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
         <LanguageSwitcher />
         <div>
-          <h3 className="text-h3"> Welcome!</h3>
-          <p className="text-container">
-            We couldn't find an active membership linked to your email.
-          </p>
-          <p className="text-container">
-            If you wish to become a member, it's easy to do right here in the
-            app. Just choose the membership you're interested in and complete
-            the payment, you'll get instant access to the space.
-          </p>
+          <h3 className="text-h3"> {t("welcome")}</h3>
+          <p className="text-container">{t("noMembertext1")}</p>
+          <p className="text-container">{t("noMembertext2")}</p>
         </div>
         <button type="submit" className="form-button" onClick={handleSubmit}>
-          Become a member
+          {t("becomeMember")}
         </button>
       </form>
       <p>Din e-postadress: {email}</p>
