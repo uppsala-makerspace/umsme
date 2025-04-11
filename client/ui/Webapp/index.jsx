@@ -9,6 +9,7 @@ import "./imports/i18n"; // Detta ser till att i18n är initialiserad när appen
 import { LoggedInAsMember } from "./imports/components/LoggedInAsMembers";
 import { accounts } from "./imports/components/accounts";
 import { calendar } from "./imports/components/calendar";
+import { contact } from "./imports/components/Contact/contact";
 
 // We only allow login and register pages to be accessed when not logged in.
 FlowRouter.triggers.enter([
@@ -18,7 +19,7 @@ FlowRouter.triggers.enter([
       context.path !== "/login" &&
       context.path !== "/register" &&
       !context.path.startsWith("/admin") &&
-      context.path !== "/WaitForEmailVerification"
+      context.path !== "/waitForEmailVerification"
     ) {
       redirect("/login");
     }
@@ -83,4 +84,10 @@ FlowRouter.route("/calendar", {
   action() {
     route("calendar", calendar);
   },
+});
+
+FlowRouter.route("/contact", {
+  action() {
+    route("contact", contact);
+  }
 });
