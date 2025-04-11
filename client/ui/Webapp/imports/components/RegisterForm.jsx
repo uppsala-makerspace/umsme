@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 export const RegisterForm = () => {
   const { t, i18n } = useTranslation();
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,7 +83,7 @@ export const RegisterForm = () => {
           />
         </div>
         <button type="submit" className="form-button">
-          Register
+          {t("register")}
         </button>
       </form>
     </>

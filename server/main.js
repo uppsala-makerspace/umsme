@@ -42,7 +42,6 @@ Meteor.startup(async () => {
       }
     }
     if (facebookEmail) {
-      console.log(userId, facebookEmail);
       try {
         await Meteor.users.updateAsync(userId, {
           $set: {

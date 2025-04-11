@@ -211,6 +211,66 @@ body {
   margin-bottom: 15px;
 }
 
+.umsapp .login-form button.round-button{
+  border-radius: 50%;
+  font-style: bold;
+  width: 30%;
+  height: 100px;
+  font-size: 20px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  cursor: pointer;
+}
+
+.umsapp .nav-bar{
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 100;
+  cursor: pointer;
+}
+.umsapp .nav-bar.menu-open {
+  background-color: white;
+  margin-left: 1em;
+  width: 30vw;
+  height: 75vh;
+  border: 1px solid grey;
+}
+
+.umsapp .hamburger-menu{
+  position: absolute;
+  right: 10px;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+
+}
+.umsapp .hamburger-menu.open {
+  background-color: white;
+}
+
+.umsapp .links{
+  display: none;
+}
+.umsapp .links.show{
+  display: block;
+  text-align: right;
+  list-style: none;
+}
+
+.umsapp .links li{
+  font-size: 30px;
+  font-style: bold;
+  margin: 1em;
+  margin-top: 1.5em;
+  cursor: pointer;
+
+}
+.umsapp .links a{
+  text-decoration: none;
+  color: black;
+}
+
 .umsapp .text-h3{
   justify-content: center;
   text-align: center;
@@ -263,4 +323,10 @@ body {
     margin: 5px auto; 
     margin-bottom: 20px;    
   }
+  .umsapp .nav-bar.menu-open {
+    height: 75vh;
+    width: 70vw;
+
+  }
+  
 }
