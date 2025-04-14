@@ -51,6 +51,13 @@ export const LoggedIn = () => {
       null
     : null;
 
+  if (currentMember.infamily) {
+    const familyHead = members.find((m) => m._id === currentMember.infamily);
+    if (familyHead.lab >= new Date()) {
+      FlowRouter.go("LoggedInAsMember");
+    }
+  }
+
   console.log("all Memberships:", Memberships.find().fetch());
   console.log("all members:", members);
 
