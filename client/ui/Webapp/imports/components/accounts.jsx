@@ -58,7 +58,7 @@ export const accounts = () => {
   let family = [];
   if (isFamilyMember) {
     if (currentMember.infamily) {
-      // Find familyHead
+      // Find familyHead, ie. the member who has paid
       family = members.filter(
         (member) =>
           member._id === currentMember.infamily ||
