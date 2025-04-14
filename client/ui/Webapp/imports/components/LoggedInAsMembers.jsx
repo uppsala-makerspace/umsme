@@ -15,6 +15,15 @@ export const LoggedInAsMember = () => {
     });
   };
 
+  const toAdmin = () => {
+    const user = Meteor.user();
+    if (user.profile?.admin) {
+      FlowRouter.go("/admin");
+    } else {
+      console.log("Not an admin");
+    }
+  }
+
   return (
     <>
       <LanguageSwitcher />
@@ -27,6 +36,9 @@ export const LoggedInAsMember = () => {
         <p>Du är inloggad som medlem.</p>
         <button onClick={logout}>Logga ut</button>
       </div>
+      <button onClick={toAdmin}>
+        Go to admin
+      </button>
     </>
   );
 };

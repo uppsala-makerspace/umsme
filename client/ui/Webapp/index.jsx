@@ -18,7 +18,7 @@ FlowRouter.triggers.enter([
       !Meteor.userId() &&
       context.path !== "/login" &&
       context.path !== "/register" &&
-      !context.path.startsWith("/admin") &&
+      context.path !== "/admin" &&
       context.path !== "/waitForEmailVerification"
     ) {
       redirect("/login");
@@ -91,3 +91,4 @@ FlowRouter.route("/contact", {
     route("contact", contact);
   }
 });
+

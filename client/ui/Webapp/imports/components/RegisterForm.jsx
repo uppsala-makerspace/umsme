@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 export const RegisterForm = () => {
   const { t, i18n } = useTranslation();
 
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,11 +18,10 @@ export const RegisterForm = () => {
       alert("Passwords do not match");
       return;
     }
-    console.log("Username:", username);
     console.log("Password:", password);
     console.log("Email:", email);
     if (password === confirmPassword) {
-      Accounts.createUser({ username, password, email }, (err) => {});
+      Accounts.createUser({password, email }, (err) => {});
       setTimeout(() => {
         FlowRouter.go("/waitForEmailVerification");
       }, 1000); // Simulate a delay for user registration

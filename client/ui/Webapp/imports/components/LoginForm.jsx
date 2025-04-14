@@ -12,11 +12,11 @@ import { LogRegSwitcher } from "./LogRegSwitcher";
 
 export const LoginForm = () => {
   const { t, i18n } = useTranslation();
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const user = useTracker(() => Meteor.user());
   const [formType, setFormType] = useState("login");
+  
 
   useEffect(() => {
     if (user) {
