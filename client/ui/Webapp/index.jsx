@@ -7,6 +7,8 @@ import { HandleMembership } from "./imports/components/HandleMembership";
 import { WaitForEmailVerification } from "./imports/components/WaitForEmailVerification";
 import "./imports/i18n"; // Detta ser till att i18n är initialiserad när appen startar
 import { LoggedInAsMember } from "./imports/components/LoggedInAsMembers";
+import { MembershipAgreement } from "./imports/components/MembershipAgreement";
+import { Payment } from "./imports/components/Payment";
 import { accounts } from "./imports/components/accounts";
 import { calendar } from "./imports/components/calendar";
 import { contact } from "./imports/components/Contact/contact";
@@ -74,6 +76,18 @@ FlowRouter.route("/LoggedInAsMember", {
   },
 });
 
+FlowRouter.route("/MembershipAgreement", {
+  action() {
+    route("MembershipAgreement", MembershipAgreement);
+  },
+});
+
+FlowRouter.route("/Payment", {
+  action() {
+    route("Payment", Payment);
+  },
+});
+
 FlowRouter.route("/accounts", {
   action() {
     route("accounts", accounts);
@@ -89,6 +103,6 @@ FlowRouter.route("/calendar", {
 FlowRouter.route("/contact", {
   action() {
     route("contact", contact);
-  }
+  },
 });
 

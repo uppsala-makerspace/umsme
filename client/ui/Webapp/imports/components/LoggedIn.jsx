@@ -7,8 +7,10 @@ import React, { useState, useEffect } from "react";
 import { Memberships } from "/collections/memberships";
 import { Payments } from "/collections/payments";
 import { LanguageSwitcher } from "./langueSwitcher";
+import { useTranslation } from "react-i18next";
 
 export const LoggedIn = () => {
+  const { t, i18n } = useTranslation();
   const user = useTracker(() => Meteor.user());
 
   const { members, isLoadingMembers } = useTracker(() => {
@@ -49,6 +51,13 @@ export const LoggedIn = () => {
     ? memberships.find((membership) => membership.mid === currentMember._id) ||
       null
     : null;
+
+  if ( currentMember && currentMember.infamily) {
+    const familyHead = members.find((m) => m._id === currentMember.infamily);
+    if (familyHead.lab >= new Date()) {
+      FlowRouter.go("LoggedInAsMember");
+    }
+  }
 
   console.log("all Memberships:", Memberships.find().fetch());
   console.log("all members:", members);
@@ -102,18 +111,12 @@ export const LoggedIn = () => {
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
         <LanguageSwitcher />
         <div>
-          <h3 className="text-h3"> Welcome!</h3>
-          <p className="text-container">
-            We couldn't find an active membership linked to your email.
-          </p>
-          <p className="text-container">
-            If you wish to become a member, it's easy to do right here in the
-            app. Just choose the membership you're interested in and complete
-            the payment, you'll get instant access to the space.
-          </p>
+          <h3 className="text-h3"> {t("welcome")}</h3>
+          <p className="text-container">{t("noMembertext1")}</p>
+          <p className="text-container">{t("noMembertext2")}</p>
         </div>
         <button type="submit" className="form-button" onClick={handleSubmit}>
-          Become a member
+          {t("becomeMember")}
         </button>
         <button onClick={toAdmin}>
           Go to admin-page
