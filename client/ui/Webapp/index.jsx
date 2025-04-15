@@ -16,14 +16,31 @@ import { contact } from "./imports/components/Contact/contact";
 // We only allow login and register pages to be accessed when not logged in.
 FlowRouter.triggers.enter([
   (context, redirect) => {
-    if (
-      !Meteor.userId() &&
-      context.path !== "/login" &&
-      context.path !== "/register" &&
-      context.path !== "/admin" &&
-      context.path !== "/waitForEmailVerification"
-    ) {
-      redirect("/login");
+    // Kontrollera om användaren är inloggad
+    const user = Meteor.user();
+
+    // Om användaren inte är inloggad eller om e-posten inte är verifierad
+    if (user) {
+      if (
+        !user.emails[0].verified &&
+        context.path !== "/waitForEmailVerification" &&
+        context.path !== "/login" &&
+        context.path !== "/register" &&
+        context.path !== "/admin"
+      ) {
+        // Omdirigera användaren till en väntesida om e-posten inte är verifierad
+        redirect("/waitForEmailVerification");
+      }
+    } else {
+      // Om användaren inte är inloggad, omdirigera till login-sidan
+      if (
+        context.path !== "/login" &&
+        context.path !== "/register" &&
+        context.path !== "/admin" &&
+        context.path !== "/waitForEmailVerification"
+      ) {
+        redirect("/login");
+      }
     }
   },
 ]);
@@ -105,4 +122,3 @@ FlowRouter.route("/contact", {
     route("contact", contact);
   },
 });
-
