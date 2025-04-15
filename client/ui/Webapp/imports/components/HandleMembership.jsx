@@ -7,6 +7,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { useTranslation } from "react-i18next";
+import { FiLogOut } from "react-icons/fi";
 
 export const HandleMembership = () => {
   const { t, i18n } = useTranslation();
@@ -100,7 +101,11 @@ export const HandleMembership = () => {
               </button>
             </div>
           </div>
-          <button onClick={logout}>Logout</button>
+
+          <button className="logout-button" onClick={logout}>
+            <FiLogOut className="logout-icon" />
+            {t("logout")}
+          </button>
         </div>
       </div>
     </div>

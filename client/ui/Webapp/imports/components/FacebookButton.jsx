@@ -18,11 +18,14 @@ export const FacebookButton = () => {
   const buttonText = isDisabled ? "Please wait" : t("logginFacebook");
 
   const handleClick = () => {
-    Meteor.loginWithFacebook({}, (err) => {
+    Meteor.loginWithGoogle({}, (err) => {
       if (err) {
-        console.error("Facebook login failed", err);
+        if (err instanceof Meteor.Error && err.reason === "Det finns redan ett konto kopplat till den här adressen. Logga in med det kontot istället.") {
+          alert("Facebook-verifiering har lagts till på ditt befintliga konto. Testa att logga in med facebook igen så kommer det fungera!")
+        } else {
+          alert("Inloggningen misslyckades.");
+        }
       } else {
-        console.log("Facebook login successful");
         FlowRouter.go("/loggedIn");
       }
     });

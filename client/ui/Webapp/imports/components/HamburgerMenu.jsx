@@ -22,6 +22,9 @@ export const HamburgerMenu = () => {
         )}
         <ul className={`links ${isOpen ? "show" : ""}`}>
           <li>
+            <a href="/LoggedInAsMember">Start</a>
+          </li>
+          <li>
             <a href="/keys">Nycklar</a>
           </li>
           <li>

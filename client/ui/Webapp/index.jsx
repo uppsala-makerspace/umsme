@@ -12,18 +12,42 @@ import { Payment } from "./imports/components/Payment";
 import { accounts } from "./imports/components/accounts";
 import { calendar } from "./imports/components/calendar";
 import { contact } from "./imports/components/Contact/contact";
+import { ForgotPassword } from "./imports/components/ForgotPassword";
+import { ResetPassword } from "./imports/components/ResetPassword";
 
 // We only allow login and register pages to be accessed when not logged in.
 FlowRouter.triggers.enter([
   (context, redirect) => {
-    if (
-      !Meteor.userId() &&
-      context.path !== "/login" &&
-      context.path !== "/register" &&
-      !context.path.startsWith("/admin") &&
-      context.path !== "/waitForEmailVerification"
-    ) {
-      redirect("/login");
+    // Kontrollera om användaren är inloggad
+    const user = Meteor.user();
+
+    // Om användaren inte är inloggad eller om e-posten inte är verifierad
+    if (user) {
+      if (
+        !user.emails[0].verified &&
+        context.path !== "/waitForEmailVerification" &&
+        context.path !== "/login" &&
+        context.path !== "/register" &&
+        context.path !== "/admin" &&
+        context.path !== "/ForgotPassword" &&
+        context.path !== "/ResetPassword"
+      ) {
+        // Omdirigera användaren till en väntesida om e-posten inte är verifierad
+        redirect("/waitForEmailVerification");
+      }
+    } else {
+      // Om användaren inte är inloggad, omdirigera till login-sidan
+      if (
+        !Meteor.userId() &&
+        context.path !== "/login" &&
+        context.path !== "/register" &&
+        context.path !== "/admin" &&
+        context.path !== "/waitForEmailVerification" &&
+        context.path !== "/ForgotPassword" &&
+        context.path !== "/ResetPassword"
+      ) {
+        redirect("/login");
+      }
     }
   },
 ]);
@@ -97,6 +121,18 @@ FlowRouter.route("/accounts", {
 FlowRouter.route("/calendar", {
   action() {
     route("calendar", calendar);
+  },
+});
+
+FlowRouter.route("/ForgotPassword", {
+  action() {
+    route("ForgotPassword", ForgotPassword);
+  },
+});
+
+FlowRouter.route("/ResetPassword", {
+  action() {
+    route("ResetPassword", ResetPassword);
   },
 });
 

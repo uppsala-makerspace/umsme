@@ -14,6 +14,7 @@ export const LoggedIn = () => {
   const user = useTracker(() => Meteor.user());
 
   const { members, isLoadingMembers } = useTracker(() => {
+
     const handle = Meteor.subscribe("members");
     Meteor.subscribe("payments");
 
@@ -51,6 +52,13 @@ export const LoggedIn = () => {
       null
     : null;
 
+  if ( currentMember && currentMember.infamily) {
+    const familyHead = members.find((m) => m._id === currentMember.infamily);
+    if (familyHead.lab >= new Date()) {
+      FlowRouter.go("LoggedInAsMember");
+    }
+  }
+
   console.log("all Memberships:", Memberships.find().fetch());
   console.log("all members:", members);
 
@@ -69,6 +77,16 @@ export const LoggedIn = () => {
       }
     });
   };
+  const toAdmin = (e) => {
+    e.preventDefault();
+    const user = Meteor.user();
+    if (user.profile?.admin) {
+      FlowRouter.go("/admin");
+    }
+    else {
+      alert("Du är inte admin");
+    }
+}
 
   let message;
   if (!isEmailInMembers) {
@@ -99,6 +117,9 @@ export const LoggedIn = () => {
         </div>
         <button type="submit" className="form-button" onClick={handleSubmit}>
           {t("becomeMember")}
+        </button>
+        <button onClick={toAdmin}>
+          Go to admin-page
         </button>
       </form>
       <p>Din e-postadress: {email}</p>

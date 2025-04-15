@@ -38,13 +38,40 @@ export const accounts = () => {
   const currentMember =
     members.find((member) => member.email === email) || null;
 
-  const currentMembership = currentMember
-    ? memberships.find((membership) => membership.mid === currentMember._id) ||
-      null
-    : null;
+  let currentMembership = memberships.find((m) => m.mid === currentMember._id);
+
+  if (!currentMembership && currentMember.infamily) {
+    const familyHead = members.find((m) => m._id === currentMember.infamily);
+    currentMembership = memberships.find((m) => m.mid === familyHead?._id);
+  }
 
   const isLabMember = currentMember.lab >= new Date();
-  const isFamilyMember = currentMember.family;
+
+  let isFamilyMember = true;
+  if (
+    !currentMember.infamily &&
+    !members.some((m) => m.infamily === currentMember._id)
+  ) {
+    isFamilyMember = false;
+  }
+
+  let family = [];
+  if (isFamilyMember) {
+    if (currentMember.infamily) {
+      // Find familyHead, ie. the member who has paid
+      family = members.filter(
+        (member) =>
+          member._id === currentMember.infamily ||
+          member.infamily === currentMember.infamily
+      );
+    } else {
+      // Find non-paying family members
+      family = members.filter(
+        (member) => member.infamily === currentMember._id
+      );
+      family.push(currentMember);
+    }
+  }
 
   let membershipMessage;
   if (isLabMember && isFamilyMember) {
@@ -90,7 +117,19 @@ export const accounts = () => {
           Slutdatum:{new Date(currentMembership.memberend).toLocaleDateString()}
         </div>
       </div>
-      <div className="login-form">{isFamilyMember ? "Family:" : ""}</div>
+      <div className="login-form">
+        {isFamilyMember ? (
+          <>
+            Familjemedlemmar (upp till 4):
+            <br /> ------------------------
+            <br />
+            {family.map((member) => member.email).join(", ")} <br />
+            ----------------
+          </>
+        ) : (
+          ""
+        )}
+      </div>
       <button onClick={logout}>Logga ut</button>
     </>
   );
