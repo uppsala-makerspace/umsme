@@ -468,6 +468,20 @@ body {
   background-color: #096817;
 }
 
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 8px; 
+}
+
+
+.logout-icon {
+  vertical-align: middle;
+  font-size: 1.2em; 
+}
+
+
 @media (max-width: 768px) {
   .umsapp .login-form input,
   .umsapp .login-form button,
