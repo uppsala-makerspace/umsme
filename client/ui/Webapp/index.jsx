@@ -23,7 +23,10 @@ FlowRouter.triggers.enter([
     if (user) {
       if (
         !user.emails[0].verified &&
-        context.path !== "/waitForEmailVerification"
+        context.path !== "/waitForEmailVerification" &&
+        context.path !== "/login" &&
+        context.path !== "/register" &&
+        context.path !== "/admin"
       ) {
         // Omdirigera användaren till en väntesida om e-posten inte är verifierad
         redirect("/waitForEmailVerification");

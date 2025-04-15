@@ -63,28 +63,9 @@ Meteor.methods({
     }));
   },
 
-  "users.sendVerificationEmail"() {
-    console.log("Anrop från:", this.userId);
-
-    if (!this.userId) {
-      throw new Meteor.Error("not-authorized", "Du är inte inloggad.");
-    }
-
-    const user = Meteor.users.findOne(this.userId);
-    const email = user?.emails?.[0];
-
-    if (!email) {
-      throw new Meteor.Error("no-email", "Användaren har ingen e-postadress.");
-    }
-
-    if (email.verified) {
-      throw new Meteor.Error(
-        "already-verified",
-        "E-postadressen är redan verifierad."
-      );
-    }
-
-    Accounts.sendVerificationEmail(this.userId);
+  sendVerificationEmail() {
+    if (!this.userId) throw new Meteor.Error("not-authorized");
+    return Accounts.sendVerificationEmail(this.userId);
   },
 });
 
