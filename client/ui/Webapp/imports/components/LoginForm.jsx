@@ -16,7 +16,6 @@ export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const user = useTracker(() => Meteor.user());
   const [formType, setFormType] = useState("login");
-  const [isVerified, setIsVerified] = useState(true);
 
   useEffect(() => {
     if (user) {
@@ -26,9 +25,7 @@ export const LoginForm = () => {
         FlowRouter.go("/waitForEmailVerification");
 
         Meteor.logout(); // Logga ut användaren
-        setIsVerified(false); // Sätt isVerified till false
       } else {
-        setIsVerified(true); // Sätt isVerified till true
         FlowRouter.go("/loggedIn"); // Navigera till annan route om e-posten är verifierad
       }
     }
@@ -90,14 +87,6 @@ export const LoginForm = () => {
           />
         </div>
 
-        {!isVerified && (
-          <div className="form-group">
-            <button type="button" onClick={sendVerificationEmail}>
-              Send New verification e-mail
-            </button>
-          </div>
-        )}
-
         <div className="form-group">
           <button type="submit" className="form-button">
             {t("login")}
@@ -111,6 +100,9 @@ export const LoginForm = () => {
         <div className="form-group">
           <FacebookButton />
         </div>
+        <p>
+          <a href="/ForgotPassword">Glömt lösenord?</a>
+        </p>
       </form>
     </>
   );
