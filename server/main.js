@@ -8,6 +8,7 @@ import { Payments } from '/collections/payments';
 import { Mails } from '/collections/mails';
 import { Comments} from "/collections/comments";
 import { Unlocks } from '/collections/unlocks';
+import '/collections/users';
 import './cronjob/syncAndMailUnlocks';
 
 import './methods/mail';
@@ -104,7 +105,13 @@ Meteor.startup(async () => {
     }
   });
 
-   await ServiceConfiguration.configurations.upsertAsync(
+  Meteor.publish('users', function () {
+    if (this.userId) {
+      return Meteor.users.find();
+    }
+  });
+
+  await ServiceConfiguration.configurations.upsertAsync(
     {service: 'google'},
     {
       $set: {

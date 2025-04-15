@@ -1,0 +1,5 @@
+<template name="UserView">
+    <h1>User <small><a class="deleteUser">Delete</a></small></h1>
+    {{> quickForm collection=Users schema=userSchema doc=user id="userForm" omitFields="_id" type="update" buttonContent="Update user"}}
+    {{>CommentList about=id}}
+</template>

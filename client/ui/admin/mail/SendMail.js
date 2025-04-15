@@ -3,7 +3,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Members } from '/collections/members';
 import { Mails } from '/collections/mails';
-import { models} from "/lib/models";
+import { getFromOptions, models} from "/lib/models";
 import { memberStatus } from '/lib/utils';
 import { template } from 'underscore';
 import './SendMail.html';
@@ -57,7 +57,7 @@ Template.SendMail.onCreated(function() {
   this.state.set('fromOptions', false);
   this.state.set('tomanual', false);
   this.state.set('message', noFrom);
-  models.getFromOptions(() => {
+  getFromOptions(() => {
     this.state.set('fromOptions', true);
   });
 });

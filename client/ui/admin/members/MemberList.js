@@ -6,6 +6,7 @@ import '/lib/tabular/members';
 
 Template.MemberList.onCreated(() => {
   Meteor.subscribe('members');
+  Meteor.subscribe('users');
 });
 
 Template.MemberList.helpers({

@@ -13,6 +13,7 @@ import './door';
 import './check';
 import './admin';
 import './bank';
+import './users';
 
 FlowRouter.route('/admin', {
   name: 'admin_home',
