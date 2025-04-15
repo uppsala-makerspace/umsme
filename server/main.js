@@ -53,10 +53,47 @@ const updateAdminStatus = async (userId, isAdmin) => {
   }
 }
 
-Accounts.onCreateUser((options, user) => {
+const checkForDuplicateGoogleUser = async (user) => {
+  const googleEmail = user.services?.google?.email;
+  if (!googleEmail) return;
+
+  const existingUser = await Meteor.users.findOneAsync({ 'emails.address': googleEmail });
+  if (existingUser) {
+    await Meteor.users.updateAsync(existingUser._id, {
+      $set: {
+        'services.google': user.services?.google,
+      },
+    });
+
+    throw new Meteor.Error('account-merge', 'Det finns redan ett konto kopplat till den här adressen. Logga in med det kontot istället.');
+  }
+};
+
+const checkForDuplicateFacebookUser = async (user) => {
+  const facebookEmail = user.services?.facebook?.email;
+  if (!facebookEmail) return;
+
+  const existingUser = await Meteor.users.findOneAsync({ 'emails.address': facebookEmail });
+  if (existingUser) {
+    await Meteor.users.updateAsync(existingUser._id, {
+      $set: {
+        'services.facebook': user.services?.facebook,
+      },
+    });
+
+    throw new Meteor.Error('account-merge', 'Det finns redan ett konto kopplat till den här adressen. Logga in med det kontot istället.');
+  }
+};
+
+
+Accounts.onCreateUser(async (options, user) => {
   user.profile = options.profile || {};
   const email = user.emails?.[0]?.address;
   const isAdmin = email && adminEmails.includes(email);
+
+  await checkForDuplicateFacebookUser(user)
+  await checkForDuplicateGoogleUser(user)
+
   updateAdminStatus(user._id, isAdmin);
 
   return user;

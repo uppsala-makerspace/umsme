@@ -20,9 +20,12 @@ export const GoogleButton = () => {
   const handleClick = () => {
     Meteor.loginWithGoogle({}, (err) => {
       if (err) {
-        console.error("Google login failed", err);
+        if (err instanceof Meteor.Error && err.reason === "Det finns redan ett konto kopplat till den här adressen. Logga in med det kontot istället.") {
+          alert("Google-verifiering har lagts till på ditt befintliga konto. Testa att logga in med google igen så kommer det fungera!")
+        } else {
+          alert("Inloggningen misslyckades.");
+        }
       } else {
-        const user = Meteor.user();
         FlowRouter.go("/loggedIn");
       }
     });
