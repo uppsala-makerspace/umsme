@@ -15,6 +15,7 @@
     "bootstrap": "3.4.1",
     "chart.js": "^4.4.8",
     "chartjs-adapter-moment": "^1.0.1",
+    "classnames": "^2.5.1",
     "datatables.net-bs": "^2.2.2",
     "i18next": "^24.2.3",
     "jquery": "^3.7.1",

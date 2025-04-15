@@ -16,16 +16,19 @@ export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const user = useTracker(() => Meteor.user());
   const [formType, setFormType] = useState("login");
-  
+  const [isVerified, setIsVerified] = useState(true);
 
   useEffect(() => {
     if (user) {
-      // Om användaren är inloggad men e-posten inte är verifierad, logga ut
+      // Om användaren är inloggad men e-posten inte är verifierad:
       if (user.emails && user.emails.length > 0 && !user.emails[0].verified) {
         alert("Please verify your email before logging in.");
-        Meteor.logout(); // Logga ut om e-posten inte är verifierad
-        FlowRouter.go("/login"); // Skicka tillbaka till login-sidan
+        FlowRouter.go("/waitForEmailVerification");
+
+        Meteor.logout(); // Logga ut användaren
+        setIsVerified(false); // Sätt isVerified till false
       } else {
+        setIsVerified(true); // Sätt isVerified till true
         FlowRouter.go("/loggedIn"); // Navigera till annan route om e-posten är verifierad
       }
     }
@@ -36,7 +39,11 @@ export const LoginForm = () => {
     Meteor.loginWithPassword(email, password, (err) => {
       if (err) {
         console.error("Login failed:", err);
-        alert("Invalid credentials or email not verified");
+        alert(
+          "Login failed. Please check that your email and password are correct."
+        );
+      } else {
+        FlowRouter.go("/loggedIn");
       }
     });
   };
@@ -82,6 +89,14 @@ export const LoginForm = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+
+        {!isVerified && (
+          <div className="form-group">
+            <button type="button" onClick={sendVerificationEmail}>
+              Send New verification e-mail
+            </button>
+          </div>
+        )}
 
         <div className="form-group">
           <button type="submit" className="form-button">
