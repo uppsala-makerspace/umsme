@@ -95,6 +95,10 @@ const checkForDuplicateFacebookUser = async (user) => {
   }
 };
 
+Accounts.urls.resetPassword = (token) => {
+  return Meteor.absoluteUrl(`reset-password/${token}`);
+};
+
 Accounts.onCreateUser(async (options, user) => {
   user.profile = options.profile || {};
   const email = user.emails?.[0]?.address;
