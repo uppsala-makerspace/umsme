@@ -1,6 +1,6 @@
 import 'datatables.net-bs/css/dataTables.bootstrap.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import '../../layouts/AppBody.html';
+import '../../layouts/AppBody';
 import './main.css';
 import { Accounts } from 'meteor/accounts-base';
 import 'meteor/aldeed:autoform/static';

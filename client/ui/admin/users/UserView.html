@@ -1,5 +1,15 @@
 <template name="UserView">
     <h1>User <small><a class="deleteUser">Delete</a></small></h1>
     {{> quickForm collection=Users schema=userSchema doc=user id="userForm" omitFields="_id" type="update" buttonContent="Update user"}}
+    {{#if isNotAdminUser}}
+      {{#let admin=adminAsync}}
+        {{#if admin}}
+          <button class="removeFromAdminGroup">Remove from admin group</button>
+        {{/if}}
+      {{#unless admin}}
+      <button class="addToAdminGroup">Add to admin group</button>
+      {{/unless}}
+      {{/let}}
+    {{/if}}
     {{>CommentList about=id}}
 </template>

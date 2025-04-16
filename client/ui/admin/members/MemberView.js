@@ -21,7 +21,6 @@ Template.MemberView.onCreated(function() {
 
 Template.MemberView.events({
   'click .deleteMember': function (event) {
-    debugger;
     const mid = FlowRouter.getParam('_id');
     const infamily = Members.findOne({infamily: mid});
     if (infamily) {
