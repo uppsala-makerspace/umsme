@@ -24,7 +24,7 @@ FlowRouter.triggers.enter([
     if (user) {
       // Kontrollera om e-posten är verifierad
       if (
-        !user.emails[0].verified &&
+        !user?.emails?.[0]?.verified &&
         ![
           "/waitForEmailVerification",
           "/login",
