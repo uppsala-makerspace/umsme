@@ -16,15 +16,15 @@ export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const user = useTracker(() => Meteor.user());
   const [formType, setFormType] = useState("login");
-  
 
   useEffect(() => {
     if (user) {
-      // Om användaren är inloggad men e-posten inte är verifierad, logga ut
+      // Om användaren är inloggad men e-posten inte är verifierad:
       if (user.emails && user.emails.length > 0 && !user.emails[0].verified) {
         alert("Please verify your email before logging in.");
-        Meteor.logout(); // Logga ut om e-posten inte är verifierad
-        FlowRouter.go("/login"); // Skicka tillbaka till login-sidan
+        FlowRouter.go("/waitForEmailVerification");
+
+        Meteor.logout(); // Logga ut användaren
       } else {
         FlowRouter.go("/loggedIn"); // Navigera till annan route om e-posten är verifierad
       }
@@ -36,7 +36,11 @@ export const LoginForm = () => {
     Meteor.loginWithPassword(email, password, (err) => {
       if (err) {
         console.error("Login failed:", err);
-        alert("Invalid credentials or email not verified");
+        alert(
+          "Login failed. Please check that your email and password are correct."
+        );
+      } else {
+        FlowRouter.go("/loggedIn");
       }
     });
   };
@@ -96,6 +100,9 @@ export const LoginForm = () => {
         <div className="form-group">
           <FacebookButton />
         </div>
+        <p>
+          <a href="/ForgotPassword">Glömt lösenord?</a>
+        </p>
       </form>
     </>
   );
