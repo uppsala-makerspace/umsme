@@ -26,7 +26,8 @@ const adminEmails = [
   "ivareriks+555@gmail.com",
   "ivareriks+666@gmail.com",
   "ivareriks+777@gmail.com",
-  "ivareriks+888@gmail.com"
+  "ivareriks+888@gmail.com",
+  "dennisneuman00+16@gmail.com"
 ]
 
 const updateEmails = async (userId, email) => {
