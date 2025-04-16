@@ -18,6 +18,7 @@ import "./methods/bank";
 import "./methods/check";
 import "./methods/update";
 import "./methods/admin";
+import "./methods/umsapp";
 import "/lib/tabular/index";
 
 process.env.MAIL_URL =

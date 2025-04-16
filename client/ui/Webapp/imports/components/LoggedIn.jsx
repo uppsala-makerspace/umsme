@@ -1,11 +1,6 @@
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { Template } from "meteor/templating";
-import { Members } from "/collections/members.js";
-import { updateMember } from "/lib/utils";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import { Memberships } from "/collections/memberships";
-import { Payments } from "/collections/payments";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { useTranslation } from "react-i18next";
 
@@ -13,7 +8,21 @@ export const LoggedIn = () => {
   const { t, i18n } = useTranslation();
   const user = useTracker(() => Meteor.user());
 
-  const { members, isLoadingMembers } = useTracker(() => {
+  const [member, setMember] = useState({});
+  const [memberships, setMemberships] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(async () => {
+    if (user) {
+      const {member: m, memberships: ms} = await Meteor.callAsync('findInfoForUser');
+      setIsLoading(false);
+      if (m) {
+        setMember(m);
+        setMemberships(ms);
+      }
+    }
+  }, [user]);
+
+/*  const { members, isLoadingMembers } = useTracker(() => {
 
     const handle = Meteor.subscribe("members");
     Meteor.subscribe("payments");
@@ -31,36 +40,37 @@ export const LoggedIn = () => {
       isMembershipsLoading: !handle.ready(),
     };
   });
+ */
 
-  if (isMembershipsLoading) {
-    return <div>Loading memberships...</div>;
-  }
-
-  if (isLoadingMembers) {
-    return <div>Loading members, take a moment to relax...</div>;
+  if (isLoading) {
+    return <div>Loading member information...</div>;
   }
 
   const email = user?.emails?.[0]?.address || "Ingen e-postadress hittades";
 
-  const isEmailInMembers = members.some((member) => member.email === email);
+/*  const isEmailInMembers = members.some((member) => member.email === email);
 
-  const currentMember =
+  const member =
     members.find((member) => member.email === email) || null;
 
-  const currentMembership = currentMember
-    ? memberships.find((membership) => membership.mid === currentMember._id) ||
+  const membership = member
+    ? memberships.find((membership) => membership.mid === member._id) ||
       null
     : null;
 
-  if ( currentMember && currentMember.infamily) {
-    const familyHead = members.find((m) => m._id === currentMember.infamily);
+  if ( member && member.infamily) {
+    const familyHead = members.find((m) => m._id === member.infamily);
     if (familyHead.lab >= new Date()) {
       FlowRouter.go("LoggedInAsMember");
     }
-  }
+  }*/
 
-  console.log("all Memberships:", Memberships.find().fetch());
-  console.log("all members:", members);
+  // Not correct, sort and find the correct latest membership.
+  const currentMembership = memberships.length > 0 ? memberships[0] : null;
+
+
+//  console.log("all Memberships:", Memberships.find().fetch());
+//  console.log("all members:", members);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -89,18 +99,12 @@ export const LoggedIn = () => {
 }
 
   let message;
-  if (!isEmailInMembers) {
+  if (!member) {
     message = "Du är inte medlem.";
-  } else if (
-    !memberships.some((membership) => membership.mid === currentMember._id)
-  ) {
+  } else if (memberships.length === 0) {
     message = "Du är medlem men har inget medlemsskap.";
-  } else if (
-    !currentMembership.memberend ||
-    currentMembership.memberend < new Date()
-  ) {
-    message =
-      "Ditt medlemsskap har löpt ut, du lär ju skaffa ett nyt :))))))).";
+  } else if (!currentMembership.memberend || currentMembership.memberend < new Date()) {
+    message = "Ditt medlemsskap har löpt ut, du lär ju skaffa ett nyt :))))))).";
   } else {
     FlowRouter.go("LoggedInAsMember");
   }
