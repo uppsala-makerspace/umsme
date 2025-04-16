@@ -12,39 +12,45 @@ import { Payment } from "./imports/components/Payment";
 import { accounts } from "./imports/components/accounts";
 import { calendar } from "./imports/components/calendar";
 import { contact } from "./imports/components/Contact/contact";
-import { ForgotPassword } from "./imports/components/ForgotPassword";
-import { ResetPassword } from "./imports/components/ResetPassword";
+import { ForgotPassword } from "./imports/components/ForgotPassword.jsx";
+import { ResetPassword } from "./imports/components/ResetPassword.jsx";
+import React from "react";
 
-// We only allow login and register pages to be accessed when not logged in.
 FlowRouter.triggers.enter([
   (context, redirect) => {
-    // Kontrollera om användaren är inloggad
     const user = Meteor.user();
 
-    // Om användaren inte är inloggad eller om e-posten inte är verifierad
+    // Om användaren är inloggad
     if (user) {
-      if (user.emails && !user.emails[0]?.verified &&
-        context.path !== "/waitForEmailVerification" &&
-        context.path !== "/login" &&
-        context.path !== "/register" &&
-        context.path !== "/admin" &&
-        context.path !== "/ForgotPassword" &&
-        context.path !== "/ResetPassword"
+      // Kontrollera om e-posten är verifierad
+      if (
+        !user.emails[0].verified &&
+        ![
+          "/waitForEmailVerification",
+          "/login",
+          "/register",
+          "/admin",
+          "/ForgotPassword",
+          "/reset-password",
+        ].some((path) => context.path.startsWith(path))
       ) {
-        // Omdirigera användaren till en väntesida om e-posten inte är verifierad
+        // Omdirigera till väntesidan om e-posten inte är verifierad
         redirect("/waitForEmailVerification");
       }
     } else {
-      // Om användaren inte är inloggad, omdirigera till login-sidan
+      // Om användaren inte är inloggad
       if (
         !Meteor.userId() &&
-        context.path !== "/login" &&
-        context.path !== "/register" &&
-        context.path !== "/admin" &&
-        context.path !== "/waitForEmailVerification" &&
-        context.path !== "/ForgotPassword" &&
-        context.path !== "/ResetPassword"
+        ![
+          "/login",
+          "/register",
+          "/admin",
+          "/waitForEmailVerification",
+          "/ForgotPassword",
+          "/reset-password",
+        ].some((path) => context.path.startsWith(path))
       ) {
+        // Omdirigera till login-sidan
         redirect("/login");
       }
     }
@@ -129,9 +135,11 @@ FlowRouter.route("/ForgotPassword", {
   },
 });
 
-FlowRouter.route("/ResetPassword", {
-  action() {
-    route("ResetPassword", ResetPassword);
+FlowRouter.route("/reset-password/:token", {
+  name: "resetPassword",
+  action(params) {
+    console.log("Token:", params.token);
+    route("ResetPassword", () => <ResetPassword token={params.token} />);
   },
 });
 

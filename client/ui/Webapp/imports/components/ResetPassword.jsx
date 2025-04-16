@@ -1,39 +1,45 @@
-// ResetPassword.jsx
-import React, { useState } from "react";
 import { Accounts } from "meteor/accounts-base";
+import React, { useState } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 
 export const ResetPassword = ({ token }) => {
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [confirm, setConfirm] = useState("");
 
-  const handleReset = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (password !== confirm) {
+      alert("Lösenorden matchar inte");
+      return;
+    }
 
     Accounts.resetPassword(token, password, (err) => {
       if (err) {
-        setMessage("Misslyckades: " + err);
+        alert("Fel: " + err);
       } else {
-        setMessage("Lösenordet har återställts!");
-        FlowRouter.go("/loggedIn");
+        alert("Lösenordet är återställt!");
+        FlowRouter.go("/login");
       }
     });
   };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <h2>Återställ lösenord</h2>
-      <form onSubmit={handleReset}>
-        <input
-          type="password"
-          placeholder="Nytt lösenord"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Spara</button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
+      <input
+        type="password"
+        placeholder="Nytt lösenord"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Bekräfta lösenord"
+        value={confirm}
+        onChange={(e) => setConfirm(e.target.value)}
+      />
+      <button type="submit">Återställ</button>
+    </form>
   );
 };
