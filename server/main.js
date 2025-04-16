@@ -1,16 +1,16 @@
-import { Meteor } from 'meteor/meteor';
-import { Accounts } from 'meteor/accounts-base';
-import { Roles } from 'meteor/roles';
-import { Members } from '/collections/members';
-import { Memberships } from '/collections/memberships';
-import { MessageTemplates } from '/collections/templates';
-import { Messages } from '/collections/messages';
-import { Payments } from '/collections/payments';
-import { Mails } from '/collections/mails';
-import { Comments} from "/collections/comments";
-import { Unlocks } from '/collections/unlocks';
-import '/collections/users';
-import './cronjob/syncAndMailUnlocks';
+import { Meteor } from "meteor/meteor";
+import { Accounts } from "meteor/accounts-base";
+import { Roles } from "meteor/roles";
+import { Members } from "/collections/members";
+import { Memberships } from "/collections/memberships";
+import { MessageTemplates } from "/collections/templates";
+import { Messages } from "/collections/messages";
+import { Payments } from "/collections/payments";
+import { Mails } from "/collections/mails";
+import { Comments } from "/collections/comments";
+import { Unlocks } from "/collections/unlocks";
+import "/collections/users";
+import "./cronjob/syncAndMailUnlocks";
 
 import "./methods/mail";
 import "./methods/lock";
@@ -94,7 +94,6 @@ Accounts.onLogin(async function (loginInfo) {
   const email = loginInfo.user.emails?.[0]?.address;
 
   if (email && loginInfo.user.emails[0].verified) {
-    console.log("E-postadressen är redan verifierad.");
     return; // Avsluta callbacken
   }
 
@@ -143,15 +142,18 @@ Meteor.startup(async () => {
     });
     adminUser = await Accounts.findUserByUsername("admin");
   }
-  await Roles.createRoleAsync("admin", {unlessExists: true});
+  await Roles.createRoleAsync("admin", { unlessExists: true });
   await Roles.addUsersToRolesAsync(adminUser._id, "admin", null);
 
-
-  const createAuthFuncFor = (col) => async function() {
-    if (this.userId && await Roles.userIsInRoleAsync(this.userId, 'admin')) {
-      return col.find();
-    }
-  };
+  const createAuthFuncFor = (col) =>
+    async function () {
+      if (
+        this.userId &&
+        (await Roles.userIsInRoleAsync(this.userId, "admin"))
+      ) {
+        return col.find();
+      }
+    };
   Meteor.publish("members", createAuthFuncFor(Members));
   Meteor.publish("memberships", createAuthFuncFor(Memberships));
   Meteor.publish("templates", createAuthFuncFor(MessageTemplates));
@@ -160,7 +162,7 @@ Meteor.startup(async () => {
   Meteor.publish("payments", createAuthFuncFor(Payments));
   Meteor.publish("comments", createAuthFuncFor(Comments));
   Meteor.publish("unlocks", createAuthFuncFor(Unlocks));
-  Meteor.publish('users', createAuthFuncFor(Meteor.users));
+  Meteor.publish("users", createAuthFuncFor(Meteor.users));
   Meteor.publish(null, createAuthFuncFor(Meteor.roleAssignment));
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
 
