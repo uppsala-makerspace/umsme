@@ -11,15 +11,24 @@ export const LoggedIn = () => {
   const [member, setMember] = useState({});
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [family, setFamily] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       if (user) {
         try {
-          const { member: m, memberships: ms } = await Meteor.callAsync(
-            "findInfoForUser"
-          );
+          const {
+            member: m,
+            memberships: ms,
+            familyHeadMs: fm,
+          } = await Meteor.callAsync("findInfoForUser");
+          console.log("memberships:", ms);
+          console.log("memberrrr:", m);
+          console.log("familyhead membership", fm);
           setIsLoading(false);
+          if (fm[0].memberend >= new Date()) {
+            FlowRouter.go("LoggedInAsMember");
+          }
 
           if (m && ms[0].memberend >= new Date()) {
             if (FlowRouter.current().route.name !== "LoggedInAsMember") {

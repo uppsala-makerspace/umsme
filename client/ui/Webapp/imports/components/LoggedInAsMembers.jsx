@@ -8,9 +8,10 @@ import { useTracker } from "meteor/react-meteor-data";
 
 export const LoggedInAsMember = () => {
   const user = useTracker(() => Meteor.user());
-  const [member, setMember] = useState({});
+  const [memberLab, setMemberLab] = useState({});
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [member, setMember] = useState({});
 
   useEffect(() => {
     if (!user?._id) return;
@@ -23,12 +24,13 @@ export const LoggedInAsMember = () => {
           setIsLoading(false);
 
           if (m) {
-            setMember(m);
+            setMemberLab(m.lab);
             setMemberships(ms);
+            setMember(m);
           } else {
             // Om användaren inte är medlem
             console.log("Användaren är inte medlem.");
-            setMember(null);
+            setMemberLab(null);
             setMemberships([]);
           }
         } catch (error) {
@@ -40,10 +42,14 @@ export const LoggedInAsMember = () => {
     fetchData();
   }, [user?._id]);
 
-  console.log("hej dåre");
-  console.log("member:", member);
   console.log("memberships:", memberships);
-  console.log("member.lab:", member);
+  console.log("member.lab:", memberLab);
+  if (memberLab instanceof Date) {
+    console.log("Det är ett Date-objekt");
+  } else {
+    console.log("Det är inte ett Date-objekt");
+  }
+  console.log("member:", member);
 
   const logout = () => {
     Meteor.logout((err) => {
@@ -55,41 +61,23 @@ export const LoggedInAsMember = () => {
     });
   };
 
-  /*const { memberships, isMembershipsLoading } = useTracker(() => {
-    const handle = Meteor.subscribe("memberships");
-    return {
-      memberships: Memberships.find().fetch(),
-      isMembershipsLoading: !handle.ready(),
-    };
-  });
-
-  const { members, isLoadingMembers } = useTracker(() => {
-    const handle = Meteor.subscribe("members");
-    return {
-      members: Members.find().fetch(),
-      isLoadingMembers: !handle.ready(),
-    };
-  });*/
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  const email = user?.emails?.[0]?.address || "Ingen e-postadress hittades";
+  const msPerDay = 1000 * 60 * 60 * 24;
 
   const today = new Date();
 
-  //I dont know if this is a problem but as you see I round down the date
-  //Will memberships always run untill 02 am?
-
-  //const daysLeftOfLab = Math.floor(
-  //(member.lab - today.getTime()) / (1000 * 60 * 60 * 24)
-  //);
-
-  //console.log("curretnMember.lab:", currentMember.lab);
-  //console.log("today:", today);
-  //console.log("today.getTime():", today.getTime());
-  // console.log("daysLeftOfLab:", daysLeftOfLab);
+  let daysLeftOfLab = null;
+  if (memberLab instanceof Date && !isNaN(memberLab.getTime())) {
+    console.log("Det är ett giltigt Date-objekt");
+    daysLeftOfLab = Math.floor(
+      (memberLab.getTime() - today.getTime()) / msPerDay
+    );
+  } else {
+    console.log("Det är inte ett giltigt Date-objekt");
+  }
 
   const goToHandleMembership = () => {
     FlowRouter.go("HandleMembership");
@@ -103,14 +91,19 @@ export const LoggedInAsMember = () => {
         <button className="round-button">M</button>
         <h3>Hejsan!</h3>
         <p>Du är inloggad som medlem.</p>
-        {7 < 8 && (
-          <div>
-            <p>Psst - ditt labbmedlemskap behöver förnyas inom {4} dagar!</p>
-            <button className="form-button" onClick={goToHandleMembership}>
-              Förnya medlemsskap
-            </button>
-          </div>
-        )}
+        {typeof daysLeftOfLab === "number" &&
+          daysLeftOfLab >= 0 &&
+          daysLeftOfLab < 8 && (
+            <div>
+              <p>
+                Psst - ditt labbmedlemskap behöver förnyas inom {daysLeftOfLab}{" "}
+                dagar!
+              </p>
+              <button className="form-button" onClick={goToHandleMembership}>
+                Förnya medlemsskap
+              </button>
+            </div>
+          )}
         <button onClick={logout}>Logga ut</button>
       </div>
     </>
