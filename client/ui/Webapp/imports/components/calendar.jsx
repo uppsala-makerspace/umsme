@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
+import { t } from "i18next";
 
 export const calendar = () => {
   const user = Meteor.userId();
@@ -13,7 +14,7 @@ export const calendar = () => {
         <LanguageSwitcher />
         <HamburgerMenu />
       </div>
-      <div className="login-form">Kalender</div>
+      <div className="login-form">{t("calender")}</div>
     </div>
   );
 };

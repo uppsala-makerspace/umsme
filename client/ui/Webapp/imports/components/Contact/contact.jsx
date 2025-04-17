@@ -4,6 +4,7 @@ import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "../langueSwitcher";
 import { HamburgerMenu } from "../HamburgerMenu";
 import { useState } from "react";
+import {t} from "i18next";
 import "./contacts.css";
 
 
@@ -41,27 +42,27 @@ export const contact = () => {
         <LanguageSwitcher />
         <HamburgerMenu />
         <div className="login-form">
-            <h1>Kontakta oss</h1>
+            <h1>{t("contactUs")}</h1>
             <form onSubmit={handleSubmit}> 
                 <div>
-                    <label htmlFor="name">Namn</label>
+                    <label htmlFor="name">{t("Name")}</label>
                     <input type="text" id="name" name="name" required />
                 </div>
                 <div>
-                    <label htmlFor="email">E-post</label>
+                    <label htmlFor="email">{t("email")}</label>
                     <input type="email" id="email" name="email" required />
                 </div>
                 <div>
-                    <label htmlFor="message">Meddelande</label>
+                    <label htmlFor="message">{t("Message")}</label>
                     <textarea id="message" name="message" required className="text-area"></textarea>
                 </div>
-                <button type="submit" className="submit-button">Skicka</button>
+                <button type="submit" className="submit-button">{t("Send")}</button>
             </form>
             {result==="Form Submitted Successfully" && (
-              <p className="form-submitted">Formuläret skickat!</p>)}
+              <p className="form-submitted">{t("SentForm")}</p>)}
 
-            <p>Du kan också skriva direkt i slack:</p>
-            <a href="https://app.slack.com/client/T29LX7K7C/C29LE8ZTQ"> Klicka för att komma till slack</a>
+            <p>{t("WriteSlack")}</p>
+            <a href="https://app.slack.com/client/T29LX7K7C/C29LE8ZTQ"> {t("PressSlack")}</a>
 
         </div>
         </>

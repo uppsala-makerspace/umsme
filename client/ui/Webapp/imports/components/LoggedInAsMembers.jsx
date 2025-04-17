@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
-import { Members } from "/collections/members.js";
-import { Memberships } from "/collections/memberships";
+import {t} from "i18next";
 import { useTracker } from "meteor/react-meteor-data";
 
 export const LoggedInAsMember = () => {
@@ -89,22 +88,22 @@ export const LoggedInAsMember = () => {
       <HamburgerMenu />
       <div className="login-form">
         <button className="round-button">M</button>
-        <h3>Hejsan!</h3>
-        <p>Du är inloggad som medlem.</p>
+        <h3>{t("greeting2")}</h3>
+        <p>{t("LoggedInAsMember")}</p>
         {typeof daysLeftOfLab === "number" &&
           daysLeftOfLab >= 0 &&
           daysLeftOfLab < 8 && (
             <div>
               <p>
-                Psst - ditt labbmedlemskap behöver förnyas inom {daysLeftOfLab}{" "}
-                dagar!
+                {t("AlertEndDate")}{daysLeftOfLab}{" "}
+                {t("days")}
               </p>
               <button className="form-button" onClick={goToHandleMembership}>
-                Förnya medlemsskap
+                {t("RenewMembership")}
               </button>
             </div>
           )}
-        <button onClick={logout}>Logga ut</button>
+        <button onClick={logout}>{t("logout")}</button>
       </div>
     </>
   );
