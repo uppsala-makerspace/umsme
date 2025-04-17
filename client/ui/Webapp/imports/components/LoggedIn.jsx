@@ -14,8 +14,9 @@ export const LoggedIn = () => {
   const [family, setFamily] = useState([]);
 
   useEffect(() => {
+    if (!user?._id) return;
     const fetchData = async () => {
-      if (user) {
+      if (user._id) {
         try {
           const {
             member: m,
@@ -38,18 +39,15 @@ export const LoggedIn = () => {
           } else {
             // Om användaren inte är medlem
             console.log("Användaren är inte medlem.");
-            setMember(null);
-            setMemberships([]);
           }
         } catch (error) {
           console.error("Error fetching data:", error);
         }
-      } else {
       }
     };
 
     fetchData();
-  }, [user]);
+  }, [user._id]);
 
   if (isLoading) {
     return <div>Loading member information...</div>;
