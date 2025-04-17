@@ -217,13 +217,16 @@ body {
 
 .umsapp .login-form button.round-button {
   border-radius: 50%;
-  font-style: bold;
-  width: 30%;
-  height: 100px;
-  font-size: 20px;
+  width: 40%;
+  height: 120px;
   margin-top: 50px;
   margin-bottom: 50px;
   cursor: pointer;
+  background-image: url(/icons/icon-512x512.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: none;
 }
 
 .umsapp .nav-bar {
