@@ -9,86 +9,63 @@ import { Memberships } from "/collections/memberships";
 
 export const accounts = () => {
   const user = useTracker(() => Meteor.user());
+  const [member, setMember] = useState(null);
+  const [memberships, setMemberships] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [familyMembers, setFamilyMembers] = useState([]);
 
-  const { memberships, isMembershipsLoading } = useTracker(() => {
-    const handle = Meteor.subscribe("memberships");
-    return {
-      memberships: Memberships.find().fetch(),
-      isMembershipsLoading: !handle.ready(),
+  useEffect(() => {
+    if (!user?._id) return;
+    const fetchData = async () => {
+      if (user) {
+        try {
+          const {
+            member: m,
+            memberships: ms,
+            familyMembers: fm,
+          } = await Meteor.callAsync("findInfoForUser");
+          setIsLoading(false);
+
+          if (m) {
+            setMember(m);
+            setMemberships(ms);
+            setFamilyMembers(fm);
+          } else {
+            // Om användaren inte är medlem
+            console.log("Användaren är inte medlem.");
+            setMember(null);
+            setMemberships([]);
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
     };
-  });
 
-  const { members, isLoadingMembers } = useTracker(() => {
-    const handle = Meteor.subscribe("members");
-    return {
-      members: Members.find().fetch(),
-      isLoadingMembers: !handle.ready(),
-    };
-  });
+    fetchData();
+  }, [user?._id]);
 
-  if (isMembershipsLoading) {
-    return <div>Loading memberships...</div>;
-  }
+  console.log("membership", memberships);
+  console.log("currentMember", member);
+  console.log("familj", familyMembers);
 
-  if (isLoadingMembers) {
-    return <div>Loading members, take a moment to relax...</div>;
-  }
-  const email = user?.emails?.[0]?.address || "Ingen e-postadress hittades";
-
-  const currentMember =
-    members.find((member) => member.email === email) || null;
-
-  let currentMembership = memberships.find((m) => m.mid === currentMember._id);
-
-  if (!currentMembership && currentMember.infamily) {
-    const familyHead = members.find((m) => m._id === currentMember.infamily);
-    currentMembership = memberships.find((m) => m.mid === familyHead?._id);
-  }
-
-  const isLabMember = currentMember.lab >= new Date();
-
-  let isFamilyMember = true;
-  if (
-    !currentMember.infamily &&
-    !members.some((m) => m.infamily === currentMember._id)
-  ) {
-    isFamilyMember = false;
-  }
-
-  let family = [];
-  if (isFamilyMember) {
-    if (currentMember.infamily) {
-      // Find familyHead, ie. the member who has paid
-      family = members.filter(
-        (member) =>
-          member._id === currentMember.infamily ||
-          member.infamily === currentMember.infamily
-      );
-    } else {
-      // Find non-paying family members
-      family = members.filter(
-        (member) => member.infamily === currentMember._id
-      );
-      family.push(currentMember);
+  const membershipType = () => {
+    if (memberships?.[0]?.amount >= 2000) {
+      return "Labbmedlem Familj";
     }
-  }
+    if (memberships?.[0]?.amount === 1200) {
+      return "Labbmedlem";
+    }
+    if (memberships?.[0]?.amount === 200) {
+      return "Medlemskap Bas";
+    }
+  };
 
-  let membershipMessage;
-  if (isLabMember && isFamilyMember) {
-    membershipMessage = "Labbmedlem familj";
-  } else if (isLabMember) {
-    membershipMessage = "Labbmedlem";
-  } else {
-    membershipMessage = "Medlem";
-  }
-
-  console.log("currentMember", currentMember);
-  console.log("currentMembership", currentMembership);
-  console.log("lab:", currentMember.lab);
-  console.log("new Date():", new Date());
-  console.log("isLabMember?", isLabMember);
-  console.log("isFamilyMember?", isFamilyMember);
-  console.log("currentMembership.start:", currentMembership.start);
+  const isFamilyMember = () => {
+    if (membershipType() === "Labbmedlem Familj") {
+      return true;
+    }
+  };
 
   const logout = () => {
     Meteor.logout((err) => {
@@ -102,33 +79,31 @@ export const accounts = () => {
 
   return (
     <>
-      <div>
+      <div className="login-form">
         <div>
           <LanguageSwitcher />
           <HamburgerMenu />
         </div>
-        <div className="login-form">{currentMember.name}</div>
-        <div className="login-form">Mitt konto</div>
-        <div className="login-form">Ditt medlemsskap: {membershipMessage}</div>
-        <div className="login-form">
-          Medlem sedan: {new Date(currentMembership.start).toLocaleDateString()}
+        <h1> Mitt konto</h1>
+        <div> {member?.name}</div>
+        <div>Ditt medlemsskap: {membershipType()}</div>
+        <div>
+          Medlem sedan:{" "}
+          {memberships?.[memberships.length - 1]?.start.toLocaleDateString() ||
+            "–"}
         </div>
-        <div className="login-form">
-          Slutdatum:{new Date(currentMembership.memberend).toLocaleDateString()}
+        <div>
+          Slutdatum: {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
         </div>
-      </div>
-      <div className="login-form">
-        {isFamilyMember ? (
-          <>
-            Familjemedlemmar (upp till 4):
-            <br /> ------------------------
-            <br />
-            {family.map((member) => member.email).join(", ")} <br />
-            ----------------
-          </>
-        ) : (
-          ""
-        )}
+        <div>
+          {isFamilyMember() ? (
+            <div>
+              <div>Familjemedlemmar: (upp till 4)</div>
+            </div>
+          ) : (
+            <div></div>
+          )}
+        </div>
       </div>
       <button onClick={logout}>Logga ut</button>
     </>
