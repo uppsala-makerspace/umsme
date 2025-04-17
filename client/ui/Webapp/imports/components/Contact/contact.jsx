@@ -4,12 +4,13 @@ import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "../langueSwitcher";
 import { HamburgerMenu } from "../HamburgerMenu";
 import { useState } from "react";
-import {t} from "i18next";
+import { useTranslation } from "react-i18next";
 import "./contacts.css";
 
 
 export const contact = () => {
     const user = Meteor.userId();
+    const { t, i18n } = useTranslation();
 
     const [result, setResult] = React.useState("");
 

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
-import {t} from "i18next";
+import { useTranslation } from "react-i18next";
 import { useTracker } from "meteor/react-meteor-data";
 
 export const LoggedInAsMember = () => {
   const user = useTracker(() => Meteor.user());
+  const { t, i18n } = useTranslation();
   const [memberLab, setMemberLab] = useState({});
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
