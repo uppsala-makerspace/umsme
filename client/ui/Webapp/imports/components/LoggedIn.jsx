@@ -10,7 +10,7 @@ export const LoggedIn = () => {
 
   const [member, setMember] = useState({});
   const [memberships, setMemberships] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [family, setFamily] = useState([]);
 
   useEffect(() => {

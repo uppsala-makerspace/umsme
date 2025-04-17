@@ -26,9 +26,6 @@ Meteor.methods({
     const familyHeadMs = await Memberships.find({
       mid: member.infamily,
     }).fetchAsync();
-    const familyChildren = await Members.find({
-      infamily: member._id,
-    }).fetchAsync();
     const familyId = member.infamily || member._id;
     const familyMembers = await Members.find({
       $or: [
