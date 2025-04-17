@@ -18,44 +18,51 @@ import React from "react";
 
 FlowRouter.triggers.enter([
   (context, redirect) => {
-    const user = Meteor.user();
-
-    // Om användaren är inloggad
-    if (user) {
-      // Kontrollera om e-posten är verifierad
-      if (
-        !user?.emails?.[0]?.verified &&
-        ![
-          "/waitForEmailVerification",
-          "/login",
-          "/register",
-          "/admin",
-          "/ForgotPassword",
-          "/reset-password",
-        ].some((path) => context.path.startsWith(path))
-      ) {
-        // Omdirigera till väntesidan om e-posten inte är verifierad
-        redirect("/waitForEmailVerification");
-      }
-    } else {
-      // Om användaren inte är inloggad
-      if (
-        !Meteor.userId() &&
-        ![
-          "/login",
-          "/register",
-          "/admin",
-          "/waitForEmailVerification",
-          "/ForgotPassword",
-          "/reset-password",
-        ].some((path) => context.path.startsWith(path))
-      ) {
-        // Omdirigera till login-sidan
-        redirect("/login");
-      }
-    }
+    handleRouteProtection(context, redirect);
   },
 ]);
+
+const handleRouteProtection = async (context, redirect) => {
+  const path = context.path;
+  const user = Meteor.user();
+
+  // Tillåt vissa offentliga sidor
+  const publicPaths = [
+    "/login",
+    "/register",
+    "/admin",
+    "/waitForEmailVerification",
+    "/ForgotPassword",
+    "/reset-password",
+  ];
+  const isPublic = publicPaths.some((publicPath) =>
+    path.startsWith(publicPath)
+  );
+
+  if (!user && !isPublic) {
+    return redirect("/login");
+  }
+
+  if (user && path.startsWith("/LoggedInAsMember")) {
+    try {
+      const {
+        member: m,
+        memberships: ms,
+        familyHeadMs: fmh,
+      } = await Meteor.callAsync("findInfoForUser");
+
+      const isMemberValid = m && ms[0]?.memberend >= new Date();
+      const isFamilyHeadValid = m && fmh[0]?.memberend >= new Date();
+
+      if (!isMemberValid && !isFamilyHeadValid) {
+        return redirect("/loggedIn");
+      }
+    } catch (error) {
+      console.error("Fel vid medlemskapskontroll:", error);
+      redirect("/login");
+    }
+  }
+};
 
 FlowRouter.route("/", {
   name: "webbapp",
@@ -81,7 +88,7 @@ FlowRouter.route("/WaitForEmailVerification", {
   },
 });
 
-FlowRouter.route("/HandleMembership", {
+FlowRouter.route("/LoggedInAsMember/HandleMembership", {
   action() {
     route("HandleMembership", HandleMembership);
   },
@@ -117,13 +124,13 @@ FlowRouter.route("/Payment", {
   },
 });
 
-FlowRouter.route("/accounts", {
+FlowRouter.route("/LoggedInAsMember/accounts", {
   action() {
     route("accounts", accounts);
   },
 });
 
-FlowRouter.route("/calendar", {
+FlowRouter.route("/LoggedInAsMember/calendar", {
   action() {
     route("calendar", calendar);
   },
@@ -143,7 +150,7 @@ FlowRouter.route("/reset-password/:token", {
   },
 });
 
-FlowRouter.route("/contact", {
+FlowRouter.route("/LoggedInAsMember/contact", {
   action() {
     route("contact", contact);
   },

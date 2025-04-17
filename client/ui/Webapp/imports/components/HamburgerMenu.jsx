@@ -25,19 +25,19 @@ export const HamburgerMenu = () => {
             <a href="/LoggedInAsMember">Start</a>
           </li>
           <li>
-            <a href="/keys">Nycklar</a>
+            <a href="/LoggedInAsMember/keys">Nycklar</a>
           </li>
           <li>
-            <a href="/accounts">Ditt konto</a>{" "}
+            <a href="/LoggedInAsMember/accounts">Ditt konto</a>{" "}
           </li>
           <li>
-            <a href="/memberships">Medlemskap</a>
+            <a href="/LoggedInAsMember/memberships">Medlemskap</a>
           </li>
           <li>
-            <a href="/calendar">Kalender</a>
+            <a href="/LoggedInAsMember/calendar">Kalender</a>
           </li>
           <li>
-            <a href="/contact">Kontakta oss</a>
+            <a href="/LoggedInAsMember/contact">Kontakta oss</a>
           </li>
         </ul>
       </nav>
