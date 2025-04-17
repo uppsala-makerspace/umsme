@@ -12,26 +12,21 @@ export const LoggedInAsMember = () => {
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [member, setMember] = useState({});
-  const [family, setFamily] = useState([]);
 
   useEffect(() => {
     if (!user?._id) return;
     const fetchData = async () => {
       if (user) {
         try {
-          const {
-            member: m,
-            memberships: ms,
-            familyMembers: fm,
-          } = await Meteor.callAsync("findInfoForUser");
+          const { member: m, memberships: ms } = await Meteor.callAsync(
+            "findInfoForUser"
+          );
           setIsLoading(false);
 
           if (m) {
             setMemberLab(m.lab);
             setMemberships(ms);
             setMember(m);
-            const names = fm.map((member) => member.name);
-            setFamily(names);
           } else {
             // Om användaren inte är medlem
             console.log("Användaren är inte medlem.");
@@ -109,7 +104,6 @@ export const LoggedInAsMember = () => {
               </button>
             </div>
           )}
-        <p>{family.join(", ")}</p>
 
         <button onClick={logout}>Logga ut</button>
       </div>
