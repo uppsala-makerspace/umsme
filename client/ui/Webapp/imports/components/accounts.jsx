@@ -4,11 +4,11 @@ import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
-import { Members } from "/collections/members.js";
-import { Memberships } from "/collections/memberships";
+import { useTranslation } from "react-i18next";
 
 export const accounts = () => {
   const user = useTracker(() => Meteor.user());
+  const { t, i18n } = useTranslation();
   const [member, setMember] = useState(null);
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +25,6 @@ export const accounts = () => {
             familyMembers: fm,
           } = await Meteor.callAsync("findInfoForUser");
           setIsLoading(false);
-          console.log("fm:", fm);
 
           if (m) {
             setMember(m);
@@ -81,34 +80,39 @@ export const accounts = () => {
 
   return (
     <>
+      <LanguageSwitcher />
+      <HamburgerMenu />
       <div className="login-form">
-        <div>
-          <LanguageSwitcher />
-          <HamburgerMenu />
-        </div>
-        <h1> Mitt konto</h1>
+        <h1> {t("MyAccount")}</h1>
         <div> {member?.name}</div>
-        <div>Ditt medlemsskap: {membershipType()}</div>
         <div>
-          Medlem sedan:{" "}
+          {t("TypeOfMembership")} {membershipType()}
+        </div>
+        <div>
+          {t("MemberSince")}{" "}
           {memberships?.[memberships.length - 1]?.start.toLocaleDateString() ||
             "–"}
         </div>
         <div>
-          Slutdatum: {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
+          {t("EndDate")}{" "}
+          {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
         </div>
         <div>
           {isFamilyMember() ? (
             <div>
-              <div>Familjemedlemmar: (upp till 4)</div>
+              <div>{t("FamilyMembers")}</div>
+              <ul>
+                {family.map((email, index) => (
+                  <li key={index}>{email}</li>
+                ))}
+              </ul>
             </div>
           ) : (
             <div></div>
           )}
         </div>
       </div>
-      <p>{family.join(", ")}</p>
-      <button onClick={logout}>Logga ut</button>
+      <button onClick={logout}>{t("logout")}</button>
     </>
   );
 };

@@ -1,5 +1,6 @@
 {
   "greeting": "Hej",
+  "greeting2": "Hejsan!",
   "welcome": "Välkommen!",
   "switchButton": "Byt till engelska",
   "register": "Skapa konto",
@@ -34,5 +35,22 @@
   "AgreementInfo": "Alla våra medlemmar behöver ta del av och signera vår ansvarsförbindelse.",
   "CloseToAgree": "Du har nu läst hela ansvarsförbindelsen",
   "Close": "Stäng",
-  "Pay": "Betala"
+  "Pay": "Betala",
+  "MyAccount": "Mitt konto",
+  "MemberSince": "Medlem sedan:",
+  "EndDate": "Slutdatum:",
+  "TypeOfMembership": "Typ av medlemskap:",
+  "FamilyMembers": "Familjemedlemmar: (upp till 4)",
+  "RenewMembership": "Förnya medlemskap",
+  "AlertEndDate": "Psst - ditt labbmedlemskap behöver förnyas inom ",
+  "days": " dagar!",
+  "LoggedInAsMember": "Du är inloggad som medlem.",
+  "calender": "Kalender",
+  "contactUs": "Kontakta oss",
+  "Name": "Namn",
+  "Message": "Meddelande",
+  "Send": "Skicka",
+  "SentForm": "Formuläret skickat!",
+  "WriteSlack": "Du kan också skriva till oss på Slack:",
+  "PressSlack": "Tryck här för att komma till vår Slack-kanal."
 }
