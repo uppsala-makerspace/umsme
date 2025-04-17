@@ -20,13 +20,14 @@ export const LoggedIn = () => {
           const {
             member: m,
             memberships: ms,
-            familyHeadMs: fm,
+            familyHeadMs: fmh,
           } = await Meteor.callAsync("findInfoForUser");
           console.log("memberships:", ms);
           console.log("memberrrr:", m);
-          console.log("familyhead membership", fm);
+          console.log("familyhead membership", fmh);
           setIsLoading(false);
-          if (fm[0].memberend >= new Date()) {
+          if (fmh[0].memberend >= new Date()) {
+            //If the paying member of the fmaily has an active family membership, the children may also access the LoggedInAsMember page
             FlowRouter.go("LoggedInAsMember");
           }
 

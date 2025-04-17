@@ -11,7 +11,7 @@ export const accounts = () => {
   const [member, setMember] = useState(null);
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [familyMembers, setFamilyMembers] = useState([]);
+  const [family, setFamily] = useState([]);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -28,7 +28,8 @@ export const accounts = () => {
           if (m) {
             setMember(m);
             setMemberships(ms);
-            setFamilyMembers(fm);
+            const email = fm.map((member) => member.email);
+            setFamily(email);
           } else {
             // Om användaren inte är medlem
             console.log("Användaren är inte medlem.");
@@ -46,7 +47,7 @@ export const accounts = () => {
 
   console.log("membership", memberships);
   console.log("currentMember", member);
-  console.log("familj", familyMembers);
+  console.log("familj", family);
 
   const membershipType = () => {
     if (memberships?.[0]?.amount >= 2000) {
@@ -104,6 +105,7 @@ export const accounts = () => {
           )}
         </div>
       </div>
+      <p>{family.join(", ")}</p>
       <button onClick={logout}>{t("logout")}</button>
     </>
   );
