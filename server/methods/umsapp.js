@@ -23,19 +23,19 @@ Meteor.methods({
     const memberships = await Memberships.find({
       mid: member._id,
     }).fetchAsync();
-    const familyHeadMs = await Memberships.find({
-      mid: member.infamily,
-    }).fetchAsync();
+    memberships.sort((m1, m2) => m1.memberend > m2.memberend ? -1 : 1);
+    let familyHead;
+    if (member.infamily) {
+      familyHead = await Memberships.findOneAsync({mid: member.infamily});
+    }
     const familyId = member.infamily || member._id;
     const familyMembers = await Members.find({
       $or: [
         { infamily: familyId }, // barn i familjen
-        { _id: familyId }, // familjehuvudet
+        { _id: familyId }, // familjehuvude<<<<<t
       ],
     }).fetchAsync();
 
-    console.log("family:", familyHeadMs);
-    console.log("member:", member);
-    return { member, memberships, familyHeadMs, familyMembers };
+    return { member, memberships, familyHead, familyMembers };
   },
 });

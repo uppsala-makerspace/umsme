@@ -48,11 +48,11 @@ const handleRouteProtection = async (context, redirect) => {
       const {
         member: m,
         memberships: ms,
-        familyHeadMs: fmh,
+        familyHead: fmh,
       } = await Meteor.callAsync("findInfoForUser");
 
       const isMemberValid = m && ms[0]?.memberend >= new Date();
-      const isFamilyHeadValid = m && fmh[0]?.memberend >= new Date();
+      const isFamilyHeadValid = m && fmh?.memberend >= new Date();
 
       if (!isMemberValid && !isFamilyHeadValid) {
         return redirect("/loggedIn");
