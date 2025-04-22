@@ -485,6 +485,25 @@ body {
 }
 
 
+
+/* början av accounts */
+
+.umsapp .login-form button.round-prof {
+  border-radius: 50%;
+  width: 40%; /* Bredden är 40% av förälderelementet */
+  aspect-ratio: 1 / 1; /* Gör höjden lika med bredden */
+  margin-top: 50px;
+  margin-bottom: 50px;
+  cursor: pointer;
+  background-image: url(/icons/emptyprofilepic.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-color: white;
+  border: none;
+}
+/* slutet av accounts */
+
 @media (max-width: 768px) {
   .umsapp .login-form input,
   .umsapp .login-form button,

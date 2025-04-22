@@ -82,12 +82,24 @@ export const accounts = () => {
     <>
       <LanguageSwitcher />
       <HamburgerMenu />
+
       <div className="login-form">
+        <button className="round-prof"></button>
+        <a href="/profile" className="profile-link">
+          {t("ViewProfile")}
+        </a>
+        <button className="login-form"> {member?.name}</button>
+
         <h1> {t("MyAccount")}</h1>
-        <div> {member?.name}</div>
+
         <div>
           {t("TypeOfMembership")} {membershipType()}
         </div>
+
+        <div>
+          {t("MemberID")} {member?.mid || "–"}
+        </div>
+        <br />
         <div>
           {t("MemberSince")}{" "}
           {memberships?.[memberships.length - 1]?.start.toLocaleDateString() ||
@@ -97,6 +109,8 @@ export const accounts = () => {
           {t("EndDate")}{" "}
           {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
         </div>
+        <br />
+
         <div>
           {isFamilyMember() ? (
             <div>
