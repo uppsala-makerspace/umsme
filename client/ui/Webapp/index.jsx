@@ -26,7 +26,7 @@ const handleRouteProtection = async (context, redirect) => {
   const path = context.path;
   const user = Meteor.user();
 
-  // Tillåt vissa offentliga sidor
+  // Tillåt vissa offentliga sidor, La till LoggedInAsMember för kastades fram och tillbaka för mycket som det var nu
   const publicPaths = [
     "/login",
     "/register",
@@ -39,7 +39,7 @@ const handleRouteProtection = async (context, redirect) => {
     path.startsWith(publicPath)
   );
 
-  if (!user && !isPublic) {
+  if (!user && !isPublic && !Meteor.loggingIn()) {
     return redirect("/login");
   }
 
@@ -48,11 +48,11 @@ const handleRouteProtection = async (context, redirect) => {
       const {
         member: m,
         memberships: ms,
-        familyHeadMs: fmh,
+        familyHead: fmh,
       } = await Meteor.callAsync("findInfoForUser");
 
       const isMemberValid = m && ms[0]?.memberend >= new Date();
-      const isFamilyHeadValid = m && fmh[0]?.memberend >= new Date();
+      const isFamilyHeadValid = m && fmh?.memberend >= new Date();
 
       if (!isMemberValid && !isFamilyHeadValid) {
         return redirect("/loggedIn");
@@ -88,7 +88,7 @@ FlowRouter.route("/WaitForEmailVerification", {
   },
 });
 
-FlowRouter.route("/LoggedInAsMember/HandleMembership", {
+FlowRouter.route("/HandleMembership", {
   action() {
     route("HandleMembership", HandleMembership);
   },

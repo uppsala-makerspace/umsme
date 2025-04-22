@@ -61,9 +61,10 @@ export const contact = () => {
             </form>
             {result==="Form Submitted Successfully" && (
               <p className="form-submitted">{t("SentForm")}</p>)}
-
-            <p>{t("WriteSlack")}</p>
-            <a href="https://app.slack.com/client/T29LX7K7C/C29LE8ZTQ"> {t("PressSlack")}</a>
+            <div className="Slack">
+              <p>{t("WriteSlack")}</p>
+              <a href="https://app.slack.com/client/T29LX7K7C/C29LE8ZTQ"> {t("PressSlack")}</a>
+            </div>
 
         </div>
         </>

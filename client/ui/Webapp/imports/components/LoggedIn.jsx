@@ -14,19 +14,20 @@ export const LoggedIn = () => {
   const [family, setFamily] = useState([]);
 
   useEffect(() => {
+    if (!user?._id) return;
     const fetchData = async () => {
-      if (user) {
+      if (user._id) {
         try {
           const {
             member: m,
             memberships: ms,
-            familyHeadMs: fmh,
+            familyHead: fmh,
           } = await Meteor.callAsync("findInfoForUser");
           console.log("memberships:", ms);
           console.log("memberrrr:", m);
-          console.log("familyhead membership", fmh);
+          console.log("familyhead", fmh);
           setIsLoading(false);
-          if (fmh[0].memberend >= new Date()) {
+          if (fmh && fmh.memberend >= new Date()) {
             //If the paying member of the fmaily has an active family membership, the children may also access the LoggedInAsMember page
             FlowRouter.go("LoggedInAsMember");
           }
@@ -38,18 +39,15 @@ export const LoggedIn = () => {
           } else {
             // Om användaren inte är medlem
             console.log("Användaren är inte medlem.");
-            setMember(null);
-            setMemberships([]);
           }
         } catch (error) {
           console.error("Error fetching data:", error);
         }
-      } else {
       }
     };
 
     fetchData();
-  }, [user]);
+  }, [user._id]);
 
   if (isLoading) {
     return <div>Loading member information...</div>;
