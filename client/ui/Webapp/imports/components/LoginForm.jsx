@@ -101,7 +101,7 @@ export const LoginForm = () => {
           <FacebookButton />
         </div>
         <p>
-          <a href="/forgot-password">Glömt lösenord?</a>
+          <a href="/ForgotPassword">Glömt lösenord?</a>
         </p>
       </form>
     </>
