@@ -1,6 +1,9 @@
 import { Meteor } from "meteor/meteor";
 import { Members } from "/collections/members";
 import { Memberships } from "/collections/memberships";
+import { v4 as uuidv4 } from 'uuid';
+import {swishClient} from '../swish-client.js';
+import axios from 'axios';
 
 const findMemberForUser = async () => {
   if (Meteor.userId()) {
@@ -33,9 +36,29 @@ Meteor.methods({
         { _id: familyId }, // familjehuvudet
       ],
     }).fetchAsync();
-
-    console.log("family:", familyHeadMs);
-    console.log("member:", member);
     return { member, memberships, familyHeadMs, familyMembers };
   },
+
+  async 'swish.createTestPayment'(price) {
+    const instructionId = uuidv4().replace(/-/g, '').toUpperCase()
+
+    const data = {
+      payeePaymentReference: '0123456789',
+      callbackUrl: 'https://98d8-2a00-801-797-a774-9872-da91-ddbc-b667.ngrok-free.app/swish/callback',
+      payeeAlias: '', // testnummer från cert
+      currency: 'SEK',
+      payerAlias: '', // ett fiktivt mobilnummer
+      amount: price.toString(),
+      message: 'Testbetalning via Meteor',
+    };
+
+    const v2url = `https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/${instructionId}`;
+    const v1url = `https://mss.cpc.getswish.net/swish-cpcapi/api/v1/paymentrequests/${instructionId}`;
+    
+    await swishClient.put(v2url, data);
+    await new Promise(resolve => setTimeout(resolve, 4000)); //Wait so payment-status is PAID, will handle this differntely later 
+    const response = await swishClient.get(v1url);
+    return response.data.status;
+  }
 });
+

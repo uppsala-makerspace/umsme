@@ -20,6 +20,8 @@ import "./methods/update";
 import "./methods/admin";
 import "./methods/umsapp";
 import "/lib/tabular/index";
+import "./methods/swish";
+
 
 process.env.MAIL_URL =
   "smtp://makupp30%40gmail.com:qlrlilvzxpnfjtut@smtp.gmail.com:587/";

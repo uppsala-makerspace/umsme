@@ -22,17 +22,33 @@ export const Payment = () => {
   if (!membership) {
     return <div>Laddar...</div>;
   }
+  const handlePayment = (price) =>{
+    const price1 = price.match(/^\d+/)?.[0];
+    Meteor.call("swish.createTestPayment", price1, (err, res) => {
+      if (err) {
+        alert("Fel: " + err.reason);
+      } else {
+        console.log("Swish-response:", res);
+        if (res === "PAID"){
+          //Lägg in logik för att skapa en member/membership
+        }
+      }
+    })
+
+  }
 
   return (
-    <div>
-      <LanguageSwitcher />
+    <>
+    <LanguageSwitcher />
+    <div className="login-form">
       <h1>Betalning</h1>
       <h2>{membership.name}</h2>
       <p>{membership.description}</p>
       <h3>{membership.price}</h3>
-      <button onClick={() => console.log("Betalning genomförd!")}>
+      <button onClick={() => handlePayment(membership.price)}>
         Slutför betalning
       </button>
     </div>
+    </>
   );
 };
