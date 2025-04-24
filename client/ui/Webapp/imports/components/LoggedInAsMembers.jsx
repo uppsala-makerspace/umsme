@@ -93,13 +93,28 @@ export const LoggedInAsMember = () => {
           daysLeftOfLab >= 0 &&
           daysLeftOfLab < 8 && (
             <div>
-              <p>
-                {t("AlertEndDate")}{daysLeftOfLab}{" "}
-                {t("days")}
+              <p
+                style={{
+                  textAlign: "center", // <-- detta överskriver all CSS
+                }}
+              >
+                {t("AlertEndDate")}
+                {daysLeftOfLab} {t("days")}
               </p>
-              <button className="form-button" onClick={goToHandleMembership}>
+
+              <button
+                className="login-form"
+                style={{
+                  color: "#f0efef",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: "#5FC86F", // <-- detta överskriver all CSS
+                }}
+                onClick={goToHandleMembership}
+              >
                 {t("RenewMembership")}
               </button>
+              <br />
             </div>
           )}
         <button onClick={logout}>{t("logout")}</button>

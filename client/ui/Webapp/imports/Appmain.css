@@ -42,6 +42,7 @@ body {
   width: 100%;
   max-width: 400px;
   padding: 2%;
+
 }
 
 .umsapp .login-form input,
@@ -517,7 +518,38 @@ body {
   background-size: contain;
   background-color: white;
   border: none;
+  
+
+  
 }
+
+.vertical-divider {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  border-bottom: 1px dashed #aaa; 
+  
+}
+
+
+
+.umsapp .left-text {
+  
+  align-self: flex-start; /* Flyttar texten till vänster inom wrappern */
+  text-align: left;
+}
+.umsapp .profile-link {
+  color:blue;
+
+  
+  
+}
+
+
+
+
 /* slutet av accounts */
 
 @media (max-width: 768px) {

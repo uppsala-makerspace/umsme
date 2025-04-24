@@ -33,6 +33,7 @@ export const accounts = () => {
             setFamily(email);
           } else {
             // Om användaren inte är medlem
+
             console.log("Användaren är inte medlem.");
             setMember(null);
             setMemberships([]);
@@ -84,42 +85,56 @@ export const accounts = () => {
       <HamburgerMenu />
 
       <div className="login-form">
-        <button className="round-prof"></button>
-        <a href="/profile" className="profile-link">
-          {t("ViewProfile")}
-        </a>
+        <button className="round-prof">
+          <a href="/profile" className="profile-link">
+            {t("AddPic")}
+          </a>
+        </button>
+
         <button className="login-form"> {member?.name}</button>
 
-        <h1> {t("MyAccount")}</h1>
+        <h1 className="left-text"> {t("MyAccount")}</h1>
 
-        <div>
+        <div className="left-text">
           {t("TypeOfMembership")} {membershipType()}
         </div>
 
-        <div>
+        <div className="left-text">
           {t("MemberID")} {member?.mid || "–"}
         </div>
         <br />
-        <div>
+        <div className="left-text">
           {t("MemberSince")}{" "}
           {memberships?.[memberships.length - 1]?.start.toLocaleDateString() ||
             "–"}
         </div>
-        <div>
+        <div className="left-text">
           {t("EndDate")}{" "}
           {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
         </div>
+
         <br />
 
-        <div>
+        <div className="left-text">
           {isFamilyMember() ? (
             <div>
               <div>{t("FamilyMembers")}</div>
-              <ul>
+
+              <div className="vertical-divider">
                 {family.map((email, index) => (
-                  <li key={index}>{email}</li>
+                  <div key={index} className="family-row">
+                    <span className="family-email">{email}</span>
+                    <a href="/profile" className="remove-link">
+                      {t("Remove")}
+                    </a>
+                  </div>
                 ))}
-              </ul>
+              </div>
+
+              <br />
+              <a href="/profile" className="profile-link">
+                {t("AddNew")}
+              </a>
             </div>
           ) : (
             <div></div>
