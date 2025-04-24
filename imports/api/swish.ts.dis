@@ -1,0 +1,58 @@
+import fs from "fs";
+import https from "https";
+import fetch from "node-fetch";
+import { Meteor } from "meteor/meteor";
+import { WebApp } from "meteor/webapp";
+import bodyParser from "body-parser";
+import type { IncomingMessage, ServerResponse } from "http";
+
+// Lägg till body-parser först
+WebApp.connectHandlers.use(bodyParser.json());
+
+// Lyssna på Swish-callback
+WebApp.connectHandlers.use(
+  "/swishcallback",
+  (req: IncomingMessage & { body?: any }, res: ServerResponse) => {
+    console.log("📩 Swish-callback mottaget!");
+    console.log("🧾 Innehåll:", JSON.stringify(req.body, null, 2));
+
+    res.writeHead(200);
+    res.end("Callback mottaget");
+  }
+);
+
+Meteor.methods({
+  async createSwishPayment(instructionUUID: string, paymentData: any) {
+    this.unblock();
+
+    try {
+      const httpsAgent = new https.Agent({
+        cert: fs.readFileSync(Assets.absoluteFilePath("swishcert.pem")),
+        key: fs.readFileSync(Assets.absoluteFilePath("swishkey.key")),
+        ca: fs.readFileSync(Assets.absoluteFilePath("swishTls.pem")),
+        secureProtocol: "TLSv1_2_method",
+      });
+
+      const url = `https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/${instructionUUID}`;
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(paymentData),
+        agent: httpsAgent,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Meteor.Error(`Swish error: ${response.status}`, errorText);
+      }
+
+      const text = await response.text();
+      console.log("🔍 Rått svar:", text);
+      return text || "No content";
+    } catch (err: any) {
+      console.error("💥 Fel i createSwishPayment:", err);
+      throw new Meteor.Error("swish-fel", "Internt serverfel", err.message);
+    }
+  },
+});

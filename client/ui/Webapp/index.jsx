@@ -88,7 +88,7 @@ FlowRouter.route("/WaitForEmailVerification", {
   },
 });
 
-FlowRouter.route("/HandleMembership", {
+FlowRouter.route("/LoggedInAsMember/HandleMembership", {
   action() {
     route("HandleMembership", HandleMembership);
   },

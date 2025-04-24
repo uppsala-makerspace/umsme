@@ -73,6 +73,7 @@ mongo@2.1.0
 mongo-decimal@0.2.0
 mongo-dev-server@1.1.1
 mongo-id@1.0.9
+npm-bcrypt@0.9.4
 npm-mongo@6.10.2
 oauth@3.0.1
 oauth2@1.3.3
