@@ -155,11 +155,16 @@ Meteor.methods({
       memberend: Match.Maybe(Date),
       labend: Match.Maybe(Date),
     });
+
     if (!membershipData.memberend) {
       const end = new Date(membershipData.start);
-      end.setFullYear(end.getFullYear() + 1);
+      end.setFullYear(end.getFullYear() + 7);
       membershipData.memberend = end;
     }
+    /*
+    const otherDate = new Date();
+    otherDate.setDate(otherDate.getDate() + 5);
+    membershipData.memberend = otherDate;*/
 
     console.log("📌 Skapar membership:", membershipData);
 
