@@ -60,7 +60,7 @@ export const LoggedIn = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    FlowRouter.go("LoggedInAsMember/HandleMembership");
+    FlowRouter.go("/LoggedInAsMember/HandleMembership");
   };
 
   const logout = () => {

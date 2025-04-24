@@ -81,7 +81,7 @@ export const LoggedInAsMember = () => {
   console.log("daysLeftOfLab:", daysLeftOfLab);
 
   const goToHandleMembership = () => {
-    FlowRouter.go("LoggedInAsMember/HandleMembership");
+    FlowRouter.go("/LoggedInAsMember/HandleMembership");
   };
 
   return (
@@ -89,20 +89,39 @@ export const LoggedInAsMember = () => {
       <LanguageSwitcher />
       <HamburgerMenu />
       <div className="login-form">
-        <button className="round-button">M</button>
-        <h3>{t("greeting2")}</h3>
-        <p>{t("LoggedInAsMember")}</p>
+        <button  onClick={() => FlowRouter.go("/LoggedInAsMember/keys")} className="round-button">M</button>
+        <p style={{marginTop: "10px"}}>{t("greeting2")}</p>
+        <p style={{marginTop: "0"}}> {t("PressToOpen")}</p>
         {typeof daysLeftOfLab === "number" &&
           daysLeftOfLab >= 0 &&
           daysLeftOfLab < 8 && (
             <div>
+<<<<<<< HEAD
               <p>
+=======
+              <p
+                style={{
+                  textAlign: "center", // <-- detta överskriver all CSS
+                }}
+              >
+>>>>>>> f81dcb713335ba9827706463c4051829216fb722
                 {t("AlertEndDate")}
                 {daysLeftOfLab} {t("days")}
               </p>
-              <button className="form-button" onClick={goToHandleMembership}>
+
+              <button
+                className="login-form"
+                style={{
+                  color: "#f0efef",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: "#5FC86F", // <-- detta överskriver all CSS
+                }}
+                onClick={goToHandleMembership}
+              >
                 {t("RenewMembership")}
               </button>
+              <br />
             </div>
           )}
         <button onClick={logout}>{t("logout")}</button>

@@ -15,6 +15,7 @@ import { contact } from "./imports/components/Contact/contact";
 import { ForgotPassword } from "./imports/components/ForgotPassword.jsx";
 import { ResetPassword } from "./imports/components/ResetPassword.jsx";
 import React from "react";
+import { UnlockDoors } from "./imports/components/UnlockDoors";
 
 FlowRouter.triggers.enter([
   (context, redirect) => {
@@ -155,3 +156,9 @@ FlowRouter.route("/LoggedInAsMember/contact", {
     route("contact", contact);
   },
 });
+
+FlowRouter.route("/LoggedInAsMember/keys",{
+  action() {
+    route("UnlockDoors", UnlockDoors)
+  }
+})

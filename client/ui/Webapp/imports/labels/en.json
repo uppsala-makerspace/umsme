@@ -52,5 +52,14 @@
   "Send": "Send",
   "SentForm": "Form sent!",
   "WriteSlack": "You can also write to us on Slack:",
-  "PressSlack": "Click here to go to our Slack channel."
+  "PressSlack": "Click here to go to our Slack channel.",
+  "AddPic":"Add profile picture",
+  "AddNew":"Add new",
+  "Remove":"Remove",
+  "PressToOpen": "Press to open",
+  "openDoor": "Open",
+  "isOpening": "Opening...",
+  "outerDoor": "Outer Door",
+  "upperFloor": "Upper Floor",
+  "lowerFloor": "Lower Floor"
 }
