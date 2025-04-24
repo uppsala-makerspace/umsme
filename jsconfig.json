@@ -6,9 +6,7 @@
     "jsx": "react",
     "baseUrl": ".",
     "paths": {
-      "/*": [
-        "./*"
-      ],
+      "/*": ["./*"],
       "meteor/reactive-var": [
         "/Users/ivareriksson/.meteor/packages/reactive-var/1.0.13/web.browser/reactive-var.js"
       ],
@@ -236,13 +234,9 @@
       ]
     }
   },
+  "typeRoots": ["./node_modules/@types", "./types"],
   "typeAcquisition": {
-    "include": [
-      "meteor"
-    ]
+    "include": ["meteor"]
   },
-  "exclude": [
-    "node_modules",
-    ".meteor"
-  ]
+  "exclude": ["node_modules", ".meteor"]
 }
