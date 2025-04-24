@@ -1,0 +1,9 @@
+import { WebApp } from "meteor/webapp";
+import bodyParser from "body-parser";
+
+WebApp.connectHandlers.use(bodyParser.json());
+WebApp.connectHandlers.use("/swishcallback", (req: any, res) => {
+  console.log("📩 Swish-callback mottaget:", req.body);
+  res.writeHead(200);
+  res.end("Callback mottaget");
+});

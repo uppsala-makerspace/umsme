@@ -31,7 +31,7 @@ export const HamburgerMenu = () => {
             <a href="/LoggedInAsMember/accounts">Ditt konto</a>{" "}
           </li>
           <li>
-            <a href="/LoggedInAsMember/memberships">Medlemskap</a>
+            <a href="/LoggedInAsMember/HandleMembership">Medlemskap</a>
           </li>
           <li>
             <a href="/LoggedInAsMember/calendar">Kalender</a>

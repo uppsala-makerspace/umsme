@@ -41,3 +41,4 @@ accounts-google
 service-configuration
 accounts-facebook
 roles
+npm-bcrypt

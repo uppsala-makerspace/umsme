@@ -47,7 +47,7 @@ export const LoggedIn = () => {
     };
 
     fetchData();
-  }, [user._id]);
+  }, [user?._id]);
 
   if (isLoading) {
     return <div>Loading member information...</div>;
