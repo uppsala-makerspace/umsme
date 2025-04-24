@@ -55,8 +55,6 @@ body {
 }
 
 .umsapp .form-button {
-  width: 100%;
-  padding: 10px;
   color: #f0efef;
   justify-content: center;
   border: none;
@@ -220,13 +218,31 @@ body {
   width: 40%;
   height: 120px;
   margin-top: 50px;
-  margin-bottom: 50px;
   cursor: pointer;
   background-image: url(/icons/icon-512x512.png);
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
   border: none;
+}
+
+/* Door css for /keys */
+
+.umsapp .login-form .door-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.umsapp .login-form button.door-button{
+  border-radius: 50%;
+  width: 40%;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  border-style: 1px dashed black;
+  cursor: pointer;
+
 }
 
 .umsapp .nav-bar {

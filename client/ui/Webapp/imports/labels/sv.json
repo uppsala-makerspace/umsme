@@ -52,5 +52,11 @@
   "Send": "Skicka",
   "SentForm": "Formuläret skickat!",
   "WriteSlack": "Du kan också skriva till oss på Slack:",
-  "PressSlack": "Tryck här för att komma till vår Slack-kanal."
+  "PressSlack": "Tryck här för att komma till vår Slack-kanal.",
+  "PressToOpen": "Tryck för att öppna",
+  "openDoor": "Öppna",
+  "isOpening": "Öppnas...",
+  "outerDoor": "Yttre Dörr",
+  "upperFloor": "Övre Plan",
+  "lowerFloor": "Nedre Plan"
 }
