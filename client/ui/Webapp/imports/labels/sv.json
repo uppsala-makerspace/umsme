@@ -52,5 +52,8 @@
   "Send": "Skicka",
   "SentForm": "Formuläret skickat!",
   "WriteSlack": "Du kan också skriva till oss på Slack:",
-  "PressSlack": "Tryck här för att komma till vår Slack-kanal."
+  "PressSlack": "Tryck här för att komma till vår Slack-kanal.",
+  "AddPic":"Lägg till profilbild",
+  "AddNew":"Lägg till ny",
+  "Remove":"Ta bort"
 }
