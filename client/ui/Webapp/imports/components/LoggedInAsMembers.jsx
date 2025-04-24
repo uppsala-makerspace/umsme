@@ -78,7 +78,7 @@ export const LoggedInAsMember = () => {
   }
 
   const goToHandleMembership = () => {
-    FlowRouter.go("HandleMembership");
+    FlowRouter.go("/LoggedInAsMember/HandleMembership");
   };
 
   return (
