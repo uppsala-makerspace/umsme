@@ -96,15 +96,11 @@ export const LoggedInAsMember = () => {
           daysLeftOfLab >= 0 &&
           daysLeftOfLab < 8 && (
             <div>
-<<<<<<< HEAD
-              <p>
-=======
               <p
                 style={{
                   textAlign: "center", // <-- detta överskriver all CSS
                 }}
               >
->>>>>>> f81dcb713335ba9827706463c4051829216fb722
                 {t("AlertEndDate")}
                 {daysLeftOfLab} {t("days")}
               </p>
