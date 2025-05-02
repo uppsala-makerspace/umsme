@@ -45,7 +45,6 @@ const extractTransactions = (transactions) => transactions.map(tr => {
 
 Meteor.methods({
   'setPnr': async (pnr) => {
-    console.log("hepp1");
     if (Meteor.userId()) {
       Meteor.users.updateAsync(Meteor.userId(), { $set: { profile: { pnr } } });
     }

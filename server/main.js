@@ -12,6 +12,7 @@ import { Unlocks } from "/collections/unlocks";
 import "/collections/users";
 import "./cronjob/syncAndMailUnlocks";
 
+import "./api";
 import "./methods/mail";
 import "./methods/lock";
 import "./methods/bank";

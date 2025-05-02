@@ -34,12 +34,11 @@ Meteor.methods({
     if (member.infamily) {
       familyHead = await Memberships.findOneAsync({ mid: member.infamily });
     }
-    console.log("memberships:", memberships);
     const familyId = member.infamily || member._id;
     const familyMembers = await Members.find({
       $or: [
         { infamily: familyId }, // barn i familjen
-        { _id: familyId }, // familjehuvude<<<<<t
+        { _id: familyId }, // familjehuvudet
       ],
     }).fetchAsync();
     return { member, memberships, familyHead, familyMembers };
