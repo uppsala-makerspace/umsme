@@ -85,12 +85,27 @@ export const LoggedIn = () => {
         <LanguageSwitcher />
         <div>
           <h3 className="text-h3"> {t("welcome")}</h3>
-          <p className="text-container">{t("noMembertext1")}</p>
-          <p className="text-container">{t("noMembertext2")}</p>
+          {member ? (
+            <>
+              <p className="text-container">{t("noMembershiptext1")}</p>
+              <p className="text-container">{t("noMembershiptext2")}</p>
+            </>
+          ) : (
+            <>
+              <p className="text-container">{t("noMembertext1")}</p>
+              <p className="text-container">{t("noMembertext2")}</p>
+            </>
+          )}
         </div>
-        <button type="submit" className="form-button" onClick={handleSubmit}>
-          {t("becomeMember")}
-        </button>
+        {member ? (
+          <button type="submit" className="form-button" onClick={handleSubmit}>
+            {t("getMembership")}
+          </button>
+        ) : (
+          <button type="submit" className="form-button" onClick={handleSubmit}>
+            {t("becomeMember")}
+          </button>
+        )}
       </form>
       <p>Din e-postadress: {email}</p>
       <button onClick={logout}>Logout</button>
