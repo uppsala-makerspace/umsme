@@ -89,9 +89,14 @@ export const LoggedInAsMember = () => {
       <LanguageSwitcher />
       <HamburgerMenu />
       <div className="login-form">
-        <button  onClick={() => FlowRouter.go("/LoggedInAsMember/keys")} className="round-button">M</button>
-        <p style={{marginTop: "10px"}}>{t("greeting2")}</p>
-        <p style={{marginTop: "0"}}> {t("PressToOpen")}</p>
+        <button
+          onClick={() => FlowRouter.go("/LoggedInAsMember/keys")}
+          className="round-button"
+        >
+          M
+        </button>
+        <p style={{ marginTop: "10px" }}>{t("greeting2")}</p>
+        <p style={{ marginTop: "0" }}> {t("PressToOpen")}</p>
         {typeof daysLeftOfLab === "number" &&
           daysLeftOfLab >= 0 &&
           daysLeftOfLab < 8 && (

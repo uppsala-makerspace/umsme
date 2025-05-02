@@ -13,9 +13,18 @@ export const WaitForEmailVerification = () => {
   useEffect(() => {
     if (user) {
       // Om användaren är inloggad men e-posten inte är verifierad:
-      if (user.emails[0].verified) {
-        FlowRouter.go("/loggedIn"); // Navigera till annan route om e-posten är verifierad
-      }
+      Meteor.call(
+        "createMemberFromPending",
+        user.emails[0].address,
+        (err, res) => {
+          if (err) {
+            console.error("❌ Kunde inte skapa medlem från pending:", err);
+          } else {
+            console.log("✅ Medlem skapad:", res);
+            FlowRouter.go("/loggedIn");
+          }
+        }
+      );
     }
   }, [user]);
 

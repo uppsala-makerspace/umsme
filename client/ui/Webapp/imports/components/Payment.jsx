@@ -13,6 +13,7 @@ export const Payment = () => {
 
   const [membershipType, setMembershipType] = useState(null);
   const [paymentApproved, setPaymentApproved] = useState(false);
+  const [member_Id, setMember_Id] = useState({});
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -22,6 +23,24 @@ export const Payment = () => {
       FlowRouter.go("/HandleMembership");
     }
   }, []);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    const fetchData = async () => {
+      if (user._id) {
+        try {
+          const { member: m } = await Meteor.callAsync("findInfoForUser");
+          console.log("memberrrr:", m);
+          // setIsLoading(false);
+          setMember_Id(m._id);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [user?._id]);
 
   if (!membershipType) {
     return <div>Laddar...</div>;
