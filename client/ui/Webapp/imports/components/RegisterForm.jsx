@@ -25,7 +25,11 @@ export const RegisterForm = () => {
 
     Accounts.createUser({ email, password }, (err) => {
       if (err) {
-        alert("Kunde inte skapa konto: " + err);
+        if (err instanceof Meteor.Error && err.reason === "account-merge") {
+          alert("E-postadressen är redan registrerad. Försök logga in.");
+        } else {
+          alert("Kunde inte skapa konto: " + err.message);
+        }
       } else {
         // Spara till PendingMembers
         Meteor.call(
@@ -38,18 +42,12 @@ export const RegisterForm = () => {
           },
           (err) => {
             if (err) {
-              if (err.error === "already-pending") {
-                alert(
-                  "En registrering med denna e-postadress väntar redan på verifiering."
-                );
-              }
-              console.error("❌ Kunde inte spara pendingMember:", err);
+              console.error("Kunde inte spara pendingMember:", err);
             } else {
-              console.log("✅ pendingMember sparad");
+              console.log("pendingMember sparad");
             }
           }
         );
-
         FlowRouter.go("/waitForEmailVerification");
       }
     });

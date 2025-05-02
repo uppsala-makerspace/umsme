@@ -8,7 +8,7 @@ export const LoggedIn = () => {
   const { t, i18n } = useTranslation();
   const user = useTracker(() => Meteor.user());
 
-  const [member, setMember] = useState({});
+  const [member, setMember] = useState(false);
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [family, setFamily] = useState([]);
@@ -27,18 +27,19 @@ export const LoggedIn = () => {
           console.log("memberrrr:", m);
           console.log("familyhead", fmh);
           setIsLoading(false);
-          if (fmh && fmh.memberend >= new Date()) {
-            //If the paying member of the fmaily has an active family membership, the children may also access the LoggedInAsMember page
-            FlowRouter.go("LoggedInAsMember");
-          }
-
-          if (m && ms[0].memberend >= new Date()) {
-            if (FlowRouter.current().route.name !== "LoggedInAsMember") {
+          console.log("m:", m);
+          if (m) {
+            setMember(true);
+            if (fmh && fmh.memberend >= new Date()) {
+              //If the paying member of the fmaily has an active family membership, the children may also access the LoggedInAsMember page
               FlowRouter.go("LoggedInAsMember");
             }
-          } else {
-            // Om användaren inte är medlem
-            console.log("Användaren är inte medlem.");
+
+            if (m && ms[0].memberend >= new Date()) {
+              if (FlowRouter.current().route.name !== "LoggedInAsMember") {
+                FlowRouter.go("LoggedInAsMember");
+              }
+            }
           }
         } catch (error) {
           console.error("Error fetching data:", error);
@@ -60,7 +61,11 @@ export const LoggedIn = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    FlowRouter.go("/LoggedInAsMember/HandleMembership");
+    if (member) {
+      FlowRouter.go("/LoggedInAsMember/HandleMembership");
+    } else {
+      FlowRouter.go("/createMember");
+    }
   };
 
   const logout = () => {

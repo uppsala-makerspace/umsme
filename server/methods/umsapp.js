@@ -27,6 +27,12 @@ Meteor.methods({
   },
   findInfoForUser: async () => {
     const member = await findMemberForUser();
+    if (!member) {
+      throw new Meteor.Error(
+        "not-found",
+        "Ingen medlem hittades för användaren"
+      );
+    }
     const memberships = await Memberships.find({
       mid: member._id,
     }).fetchAsync();
