@@ -1,18 +1,38 @@
 import { WebApp } from "meteor/webapp";
+import bodyParser from "body-parser";
+import { initiatedPayments } from "/collections/initiatedPayments";
+import { Payments } from "/collections/payments";
 
-WebApp.handlers.use(WebApp.express.json());
-WebApp.handlers.use("/swishCallback", (req, res, next) => {
+
+
+WebApp.handlers.use(bodyParser.json());
+WebApp.handlers.use("/swish/callback", (req, res, next) => {
   if (req.method !== 'POST') {
     res.writeHead(405);
     res.end('Only POST is supported!');
     return;
   }
   const obj = req.body;
-  console.log(typeof obj);
   if (obj && typeof obj === 'object') {
     res.writeHead(200);
     if (obj.status === 'PAID') {
-      res.end('Success!');
+      initiatedPayments.findOneAsync({ swishID: obj.id }).then(async initiated => {
+        if (!initiated) {
+          res.writeHead(404);
+          res.end('Payment not found!');
+          return;
+        }
+        res.end('Success!');
+        console.log("Payment received");
+        initiatedPayments.updateAsync(
+          { swishID: obj.id }, 
+          { $set: { status: "PAID" , createdAt: obj.datePaid}}
+        );
+      }).catch(err => {
+        console.error(err);
+        res.writeHead(500);
+        res.end('Internal Server Error');
+      });
     } else {
       res.end('Failure!');
     }

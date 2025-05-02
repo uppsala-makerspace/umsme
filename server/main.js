@@ -9,6 +9,7 @@ import { Payments } from "/collections/payments";
 import { Mails } from "/collections/mails";
 import { Comments } from "/collections/comments";
 import { Unlocks } from "/collections/unlocks";
+import { initiatedPayments } from "/collections/initiatedPayments";
 import "/collections/users";
 import "./cronjob/syncAndMailUnlocks";
 
@@ -167,6 +168,7 @@ Meteor.startup(async () => {
   Meteor.publish("users", createAuthFuncFor(Meteor.users));
   Meteor.publish(null, createAuthFuncFor(Meteor.roleAssignment));
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
+  Meteor.publish("initiatedPayments", createAuthFuncFor(initiatedPayments))
 
   await ServiceConfiguration.configurations.upsertAsync(
     { service: "google" },
