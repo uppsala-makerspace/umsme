@@ -13,6 +13,7 @@ export const Payment = () => {
 
   const [membershipType, setMembershipType] = useState(null);
   const [paymentApproved, setPaymentApproved] = useState(false);
+  const [member_Id, setMember_Id] = useState({});
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -22,6 +23,24 @@ export const Payment = () => {
       FlowRouter.go("/HandleMembership");
     }
   }, []);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    const fetchData = async () => {
+      if (user._id) {
+        try {
+          const { member: m } = await Meteor.callAsync("findInfoForUser");
+          console.log("memberrrr:", m);
+          // setIsLoading(false);
+          setMember_Id(m._id);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [user?._id]);
 
   if (!membershipType) {
     return <div>Laddar...</div>;
@@ -35,63 +54,41 @@ export const Payment = () => {
         console.log("Swish-response:", res);
         if (res === "PAID") {
           Meteor.call(
-            "addMember",
+            "addMembership",
             {
-              name: "should be name",
-              email:
-                user?.emails?.[0]?.address || "Ingen e-postadress hittades",
-              youth: true,
-              mobile: "0701234567",
+              mid: member_Id, // this ID connects member to membership
+              amount: 1200,
+              start: new Date(),
+              type: "member", // eller "lab", "labandmember"
+              discount: false,
+              family: false,
             },
-            (err, member) => {
+            (err, membership) => {
               if (err) {
-                console.error("❌ Kunde inte skapa medlem:", err);
+                console.error("❌ Kunde inte skapa membership:", err);
               } else {
-                console.log("✅ Medlem skapad:", member);
-                console.log("Medlem._id:", member._id);
-
+                console.log("✅ Membership skapad:", membership);
                 Meteor.call(
-                  "addMembership",
+                  "addPayment",
                   {
-                    mid: member._id, // this ID connects member to membership
-                    amount: 1200,
-                    start: new Date(),
-                    type: "member", // eller "lab", "labandmember"
-                    discount: false,
-                    family: false,
+                    type: "swish",
+                    amount: price1,
+                    date: new Date(),
+                    message: "Swishbetalning för membership",
+                    name: "should be name",
+                    mobile: "0701234567",
+                    member: member_Id, // this ID connects payment to member
+                    membership: membership.mid, // this ID connects payment to membership
                   },
-                  (err, membership) => {
+                  (err, paymentData) => {
                     if (err) {
-                      console.error("❌ Kunde inte skapa membership:", err);
-                    } else {
-                      console.log("✅ Membership skapad:", membership);
-                      Meteor.call(
-                        "addPayment",
-                        {
-                          type: "swish",
-                          amount: price1,
-                          date: new Date(),
-                          message: "Swishbetalning för membership",
-                          name: "should be name",
-                          mobile: "0701234567",
-                          member: member._id,
-                          membership: membership.mid, // this ID connects payment to membership
-                        },
-                        (err, paymentData) => {
-                          if (err) {
-                            console.error(
-                              "❌ Gick ej att lägga till betalning:",
-                              err
-                            );
-                          } else {
-                            console.log(
-                              "✅ Betalning tillagd med ID:",
-                              paymentData
-                            );
-                            setPaymentApproved(true);
-                          }
-                        }
+                      console.error(
+                        "❌ Gick ej att lägga till betalning:",
+                        err
                       );
+                    } else {
+                      console.log("✅ Betalning tillagd med ID:", paymentData);
+                      setPaymentApproved(true);
                     }
                   }
                 );

@@ -7,6 +7,7 @@ import axios from "axios";
 import { Payments } from "/collections/payments";
 import { check, Match } from "meteor/check";
 import { Random } from "meteor/random";
+import { PendingMembers } from "/collections/PendingMembers.js";
 
 const findMemberForUser = async () => {
   if (Meteor.userId()) {
@@ -49,7 +50,7 @@ Meteor.methods({
 
     const data = {
       payeePaymentReference: "0123456789",
-      callbackUrl: "https://e42e-130-243-238-253.ngrok-free.app/swish/callback",
+      callbackUrl: "https://bd61-31-209-40-149.ngrok-free.app/swish/callback",
       payeeAlias: "9871065216", // testnummer från filen aliases
       currency: "SEK",
       payerAlias: "46464646464", // testnummer från filen aliases
@@ -64,6 +65,59 @@ Meteor.methods({
     await new Promise((resolve) => setTimeout(resolve, 4000)); //Wait so payment-status is PAID, will handle this differntely later, see other solution in swish.ts.dis
     const response = await swishClient.get(v1url);
     return response.data.status;
+  },
+
+  async savePendingMember(data) {
+    check(data, {
+      name: String,
+      email: String,
+      mobile: String,
+      youth: Boolean,
+    });
+
+    const existing = await PendingMembers.findOneAsync({ email: data.email });
+    if (existing) {
+      throw new Meteor.Error(
+        "already-pending",
+        "E-postadressen är redan registrerad."
+      );
+    }
+
+    console.log("Sparar PendingMember:", data);
+    return PendingMembers.insertAsync(data);
+  },
+  async createMemberFromPending() {
+    if (!this.userId) throw new Meteor.Error("not-authorized");
+
+    const user = await Meteor.userAsync();
+    const email = user?.emails?.[0]?.address;
+    const verified = user?.emails?.[0]?.verified;
+
+    if (!email || !verified)
+      throw new Meteor.Error("not-verified", "E-post är inte verifierad");
+
+    const pending = await PendingMembers.findOneAsync({ email });
+    if (!pending)
+      throw new Meteor.Error("not-found", "Ingen pending member hittad");
+
+    //i think this is unnecessary, but just in case
+    const existing = await Members.findOneAsync({ email });
+    if (existing) return { _id: existing._id, mid: existing.mid };
+
+    const mid = Random.id(10);
+
+    const member = {
+      name: pending.name,
+      email: pending.email,
+      mobile: pending.mobile,
+      youth: pending.youth,
+      mid,
+    };
+
+    const memberId = await Members.insertAsync(member);
+    await PendingMembers.removeAsync({ _id: pending._id });
+
+    return { _id: memberId, mid };
   },
 
   addPayment(paymentData) {
@@ -94,59 +148,20 @@ Meteor.methods({
         date: new Date(), // Se till att nödvändiga fält finns
         hash,
       });
-      console.log("✅ Payment inserted with ID:", id);
+      console.log("Payment inserted with ID:", id);
       return paymentData;
     } catch (error) {
-      console.error("❌ Failed to insert payment:", error);
+      console.error("Failed to insert payment:", error);
       throw new Meteor.Error("insert-failed", "Could not insert payment");
     }
   },
-  async addMember(memberData) {
-    try {
-      check(memberData, {
-        name: String,
-        email: Match.Maybe(String),
-        youth: Match.Maybe(Boolean),
-        liability: Match.Maybe(Boolean),
-        mobile: Match.Maybe(String),
-        infamily: Match.Maybe(String),
-        storage: Match.Maybe(Number),
-        storagequeue: Match.Maybe(Boolean),
-      });
-      if (memberData.email) {
-        const existing = await Members.findOneAsync({
-          email: memberData.email,
-        });
-        if (existing) {
-          console.log("⚠️ Medlem med denna e-post finns redan:", existing);
-          return { _id: existing._id, mid: existing.mid };
-        }
-      }
-      const mid = Random.id(10);
 
-      const newMember = {
-        ...memberData,
-        mid,
-      };
-
-      console.log("👉 Lägger till medlem:", newMember);
-
-      const memberId = await Members.insertAsync(newMember);
-      return { _id: memberId, mid };
-    } catch (err) {
-      console.error("❌ Fel i addMember:", err);
-      throw new Meteor.Error(
-        "member-fel",
-        "Kunde inte skapa medlem",
-        err.message
-      );
-    }
-  },
   async addMembership(membershipData) {
     check(membershipData, {
       mid: String,
       pid: Match.Maybe(String),
       amount: Match.Maybe(Number),
+
       start: Date,
       type: String,
       discount: Match.Maybe(Boolean),
@@ -157,15 +172,11 @@ Meteor.methods({
 
     if (!membershipData.memberend) {
       const end = new Date(membershipData.start);
-      end.setFullYear(end.getFullYear() + 7);
+      end.setFullYear(end.getFullYear() + 1);
       membershipData.memberend = end;
     }
-    /*
-    const otherDate = new Date();
-    otherDate.setDate(otherDate.getDate() + 5);
-    membershipData.memberend = otherDate;*/
 
-    console.log("📌 Skapar membership:", membershipData);
+    console.log(" Skapar membership:", membershipData);
 
     const membershipId = await Memberships.insertAsync(membershipData);
 
