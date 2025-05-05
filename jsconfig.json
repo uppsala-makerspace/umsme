@@ -233,6 +233,9 @@
         "/Users/dennis/.meteor/packages/roles/1.0.1/web.browser/client/debug.js",
         "/Users/dennis/.meteor/packages/roles/1.0.1/web.browser/client/uiHelpers.js",
         "/Users/dennis/.meteor/packages/roles/1.0.1/web.browser/roles_server.js"
+      ],
+      "meteor/npm-bcrypt": [
+        "/Users/dennis/.meteor/packages/npm-bcrypt/0.9.4/web.browser/wrapper.js"
       ]
     }
   },
