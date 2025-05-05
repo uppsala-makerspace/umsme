@@ -1,7 +1,4 @@
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { Template } from "meteor/templating";
-import { Members } from "/collections/members.js";
-import { Payments } from "/collections/payments";
 import { updateMember } from "/lib/utils";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
@@ -14,6 +11,8 @@ export const Payment = () => {
   const [membershipType, setMembershipType] = useState(null);
   const [paymentApproved, setPaymentApproved] = useState(false);
   const [member_Id, setMember_Id] = useState({});
+  const [qrSrc, showQrSrc] = useState(null);
+  const [swishId, setSwishId] = useState(null);
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -45,22 +44,35 @@ export const Payment = () => {
   if (!membershipType) {
     return <div>Laddar...</div>;
   }
-  const handlePayment = (price) => {
+  const handlePayment = async (price) => {
     const price1 = price.match(/^\d+/)?.[0];
     Meteor.call("swish.createTestPayment", price1, (err, res) => {
       if (err) {
-        alert("Fel: " + err.reason);
+        console.error("Error:", err);
       } else {
-        console.log("Initiated payment with Id:", res);
-        Meteor.call("getPaymentStatusAndInsertMembership", res, (err, status) => {
-          if(err){
-            console.error(err)
+        console.log("Got token:", res.paymentrequesttoken);
+        setSwishId(res.instructionId);
+        Meteor.call("getQrCode", res.paymentrequesttoken, (err, qrUrl) => {
+          if (err) {
+            console.error("Error:", err);
+          } else {
+            console.log(qrUrl);
+            showQrSrc(qrUrl);
           }
-          else{
-            console.log("PaymentStatus", status)
-            setPaymentApproved(true);
-          }
-        })
+        });
+      }
+    });
+  };
+
+  const checkIfapproved = async () => {
+    Meteor.call("getPaymentStatusAndInsertMembership", swishId, (err, res) => {
+      console.log(res);
+      if (err) {
+        console.error("Error:", err);
+      } else {
+        if (res === "PAID") {
+          FlowRouter.go("LoggedInAsMember");
+        }
       }
     });
   };
@@ -70,24 +82,35 @@ export const Payment = () => {
     FlowRouter.go("/LoggedIn");
   };
 
-  return !paymentApproved ? (
+  return (
     <>
       <LanguageSwitcher />
       <div className="login-form">
-        <h1>Betalning</h1>
-        <h2>{membershipType.name}</h2>
-        <p>{membershipType.description}</p>
-        <h3>{membershipType.price}</h3>
-        <button onClick={() => handlePayment(membershipType.price)}>
-          Slutför betalning
-        </button>
+        {paymentApproved ? (
+          <div style={{ marginTop: 20 }}>
+            <h3>Betalning godkänd!</h3>
+            <p>Tack för din betalning.</p>
+          </div>
+        ) : qrSrc ? (
+          <div style={{ marginTop: 20 }}>
+            <h3>Scanna QR med Swish</h3>
+            <img src={qrSrc} alt="Swish QR Code" width={300} height={300} />
+            <button onClick={checkIfapproved} style={{ marginTop: 10 }}>
+              Check Payment Status
+            </button>
+          </div>
+        ) : (
+          <>
+            <h1>Betalning</h1>
+            <h2>{membershipType.name}</h2>
+            <p>{membershipType.description}</p>
+            <h3>{membershipType.price}</h3>
+            <button onClick={() => handlePayment(membershipType.price)}>
+              Slutför betalning
+            </button>
+          </>
+        )}
       </div>
     </>
-  ) : (
-    <div>
-      <h1>Betalning godkänd!</h1>
-      <p>Tack för din betalning.</p>
-      <button onClick={toLoggedin}>Log in</button>
-    </div>
   );
 };

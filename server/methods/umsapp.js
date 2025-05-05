@@ -3,7 +3,7 @@ import { Members } from "/collections/members";
 import { Memberships } from "/collections/memberships";
 import { v4 as uuidv4 } from "uuid";
 import { swishClient } from "../swish-client.js";
-import axios from "axios";
+import { Buffer } from "buffer";
 import { Payments } from "/collections/payments";
 import { check, Match } from "meteor/check";
 import { Random } from "meteor/random";
@@ -55,20 +55,6 @@ Meteor.methods({
   async "swish.createTestPayment"(price) {
     const instructionId = uuidv4().replace(/-/g, "").toUpperCase();
 
-    const data = {
-      payeePaymentReference: "0123456789",
-      callbackUrl: "https://50f4-31-209-41-143.ngrok-free.app/swish/callback",
-      payeeAlias: "9871065216", // testnummer från filen aliases
-      currency: "SEK",
-      payerAlias: "46464646464", // testnummer från filen aliases
-      amount: price.toString(),
-      message: "Testbetalning via Meteor",
-    };
-
-    const v2url = `https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/${instructionId}`;
-
-    await swishClient.put(v2url, data);
-
     const member = await findMemberForUser();
     if (!member) {
       throw new Meteor.Error("member-not-found", "Ingen medlem hittades.");
@@ -79,18 +65,70 @@ Meteor.methods({
       status: "INITIATED",
       amount: price,
       createdAt: new Date(),
+    });
 
-    })
-    return instructionId;
+    const data = {
+      //payeePaymentReference: "0123456789",
+      callbackUrl: "https://50f4-31-209-41-143.ngrok-free.app/swish/callback",
+      payeeAlias: "9871065216", // testnummer från filen aliases
+      currency: "SEK",
+      //payerAlias: "46464646464", // testnummer från filen aliases
+      amount: price.toString(),
+      message: "Testbetalning via Meteor",
+    };
+
+    //const v2url = `https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/${instructionId}`;
+
+    //await swishClient.put(v2url, data);
+    try {
+      const response = await swishClient.put(
+        `https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/${instructionId}`,
+        data
+      );
+
+      if (response.status === 201) {
+        const { paymentrequesttoken } = response.headers;
+        return { paymentrequesttoken, instructionId };
+      } else {
+        throw new Meteor.Error("payment-failed", "Did not get 201 status");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  async getQrCode(token) {
+    console.log(token);
+    const data = {
+      token,
+      size: 300,
+      format: "png",
+      border: "0",
+    };
+    try {
+      const response = await swishClient.post(
+        "https://mpc.getswish.net/qrg-swish/api/v1/commerce",
+        data,
+        { responseType: "arraybuffer" }
+      );
+      if (response.status === 200) {
+        const base64 = Buffer.from(response.data, "binary").toString("base64");
+        return `data:image/png;base64,${base64}`;
+      }
+    } catch (error) {
+      console.error(error);
+    }
   },
 
   async getPaymentStatusAndInsertMembership(instructionId) {
     check(instructionId, String);
-    const maxRetries = 30;
+    const maxRetries = 50;
     const delay = 1000;
-  
+
     for (let i = 0; i < maxRetries; i++) {
-      const payment = await initiatedPayments.findOneAsync({ swishID: instructionId });
+      const payment = await initiatedPayments.findOneAsync({
+        swishID: instructionId,
+      });
 
       if (!payment) {
         throw new Meteor.Error("not-found", "Betalningen hittades inte");
@@ -101,13 +139,13 @@ Meteor.methods({
         await Meteor.callAsync("addMembership", {
           mid: member._id,
           amount: Number(payment.amount),
-          start: payment.createdAt, 
+          start: payment.createdAt,
           type: "member",
           discount: false,
-          family: false
-        })
-        const membership = await Meteor.call("findMembershipsForUser")
-        console.log("Membership:", membership)
+          family: false,
+        });
+        const membership = await Meteor.call("findMembershipsForUser");
+        console.log("Membership:", membership);
         await Meteor.callAsync("addPayment", {
           type: "swish",
           amount: Number(payment.amount),
@@ -115,14 +153,17 @@ Meteor.methods({
           name: member.name,
           mobile: member.mobile,
           member: member._id,
-          membership: membership[0]?.mid
-        })
+          membership: membership[0]?.mid,
+        });
         return payment.status; // Returnera status om den är PAID
       }
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
-    throw new Meteor.Error("timeout", "Betalningsstatusen är fortfarande inte PAID efter 30 sekunder");
+    throw new Meteor.Error(
+      "timeout",
+      "Betalningsstatusen är fortfarande inte PAID efter 30 sekunder"
+    );
   },
 
   async savePendingMember(data) {
@@ -132,7 +173,6 @@ Meteor.methods({
       mobile: String,
       youth: Boolean,
     });
-
     const existing = await PendingMembers.findOneAsync({ email: data.email });
     if (existing) {
       throw new Meteor.Error(
