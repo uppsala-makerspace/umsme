@@ -8,6 +8,7 @@ import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { useTranslation } from "react-i18next";
 import { FiLogOut } from "react-icons/fi";
+import { HamburgerMenu } from "./HamburgerMenu";
 
 export const HandleMembership = () => {
   const { t, i18n } = useTranslation();
@@ -33,6 +34,7 @@ export const HandleMembership = () => {
   return (
     <div>
       <LanguageSwitcher />
+      <HamburgerMenu />
       <div className="membershipsContainer">
         <div>
           <h1>{t("memberships")}</h1>
