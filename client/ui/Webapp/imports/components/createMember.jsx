@@ -100,7 +100,11 @@ export const createMember = () => {
           </label>
         </div>
 
-        <button type="submit" className="form-button">
+        <button
+          type="button"
+          className="form-button"
+          onClick={() => FlowRouter.go("/LoggedInAsMember/HandleMembership")}
+        >
           {t("register")}
         </button>
       </form>
