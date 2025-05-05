@@ -46,20 +46,13 @@ export const Payment = () => {
   }
   const handlePayment = async (price) => {
     const price1 = price.match(/^\d+/)?.[0];
-    Meteor.call("swish.createTestPayment", price1, (err, res) => {
+    Meteor.call("swish.createTestPayment", price1, async (err, res) => {
       if (err) {
         console.error("Error:", err);
       } else {
         console.log("Got token:", res.paymentrequesttoken);
         setSwishId(res.instructionId);
-        Meteor.call("getQrCode", res.paymentrequesttoken, (err, qrUrl) => {
-          if (err) {
-            console.error("Error:", err);
-          } else {
-            console.log(qrUrl);
-            showQrSrc(qrUrl);
-          }
-        });
+        await tryOpenSwishOrGenerateQrcode(res.paymentrequesttoken);
       }
     });
   };
@@ -78,8 +71,22 @@ export const Payment = () => {
   };
   console.log("Membership:", membershipType);
 
-  const toLoggedin = () => {
-    FlowRouter.go("/LoggedIn");
+  const tryOpenSwishOrGenerateQrcode = (token) => {
+    const swishUrl = `swish://paymentrequest?token=${token}&callbackurl=https://50f4-31-209-41-143.ngrok-free.app/Payment`; //Annan callback senare
+    const now = Date.now();
+    window.location.href = swishUrl;
+    setTimeout(() => {
+      if (Date.now() - now < 2100) {
+        Meteor.call("getQrCode", token, (err, qrUrl) => {
+          if (err) {
+            console.error("Error:", err);
+          } else {
+            console.log(qrUrl);
+            showQrSrc(qrUrl);
+          }
+        });
+      }
+    }, 2000);
   };
 
   return (
