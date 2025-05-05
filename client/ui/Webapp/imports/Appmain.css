@@ -126,7 +126,7 @@ body {
 
 .umsapp .language-switcher {
   display: flex;
-  position: absolute;
+  /*position: absolute;*/
   top: 10px;
   left: 10px;
   padding: 10px 15px;
@@ -523,14 +523,24 @@ body {
   
 }
 
-.vertical-divider {
-  display: flex;
+.umsapp .vertical-divider {
   justify-content: space-between;
   align-items: center;
   width: 100%;
   padding: 8px 0;
   border-bottom: 1px dashed #aaa; 
   
+}
+
+.umsapp .family-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.umsapp .family-email,
+.umsapp .remove-link {
+  font-size: 0.875rem;
 }
 
 

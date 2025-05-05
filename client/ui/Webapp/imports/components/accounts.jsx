@@ -53,20 +53,8 @@ export const accounts = () => {
   console.log("currentMember", member);
   console.log("familj", family);
 
-  const membershipType = () => {
-    if (memberships?.[0]?.amount >= 2000) {
-      return "Labbmedlem Familj";
-    }
-    if (memberships?.[0]?.amount === 1200) {
-      return "Labbmedlem";
-    }
-    if (memberships?.[0]?.amount === 200) {
-      return "Medlemskap Bas";
-    }
-  };
-
   const isFamilyMember = () => {
-    if (membershipType() === "Labbmedlem Familj") {
+    if (memberships?.[0]?.family) {
       return true;
     }
   };
@@ -83,6 +71,18 @@ export const accounts = () => {
         FlowRouter.go("/login");
       }
     });
+  };
+
+  const membershipType = () => {
+    if (memberships?.[0]?.family === true) {
+      return t("memberFamily");
+    }
+    if (memberships?.[0]?.amount >= 1200) {
+      return t("memberIndivdual");
+    }
+    if (memberships?.[0]?.amount <= 1200) {
+      return t("memberBase");
+    }
   };
 
   return (

@@ -117,7 +117,6 @@ Meteor.methods({
   },
 
   async getQrCode(token) {
-    console.log(token);
     const data = {
       token,
       size: 300,
@@ -164,7 +163,6 @@ Meteor.methods({
           family: false,
         });
         const membership = await Meteor.call("findMembershipsForUser");
-        console.log("Membership:", membership);
         await Meteor.callAsync("addPayment", {
           type: "swish",
           amount: Number(payment.amount),
@@ -174,6 +172,7 @@ Meteor.methods({
           member: member._id,
           membership: membership[0]?.mid,
         });
+        console.log(payment.status);
         return payment.status; // Returnera status om den är PAID
       }
       await new Promise((resolve) => setTimeout(resolve, delay));
@@ -181,7 +180,7 @@ Meteor.methods({
 
     throw new Meteor.Error(
       "timeout",
-      "Betalningsstatusen är fortfarande inte PAID efter 30 sekunder"
+      "Betalningsstatusen är fortfarande inte PAID efter 50 sekunder"
     );
   },
 
@@ -243,8 +242,6 @@ Meteor.methods({
   },
 
   addPayment(paymentData) {
-    console.log("👉 Trying to insert payment:", paymentData);
-
     check(paymentData, {
       type: String,
       amount: Match.OneOf(String, Number),
@@ -270,7 +267,6 @@ Meteor.methods({
         date: new Date(), // Se till att nödvändiga fält finns
         hash,
       });
-      console.log("Payment inserted with ID:", id);
       return paymentData;
     } catch (error) {
       console.error("Failed to insert payment:", error);
@@ -298,8 +294,6 @@ Meteor.methods({
       end.setDate(end.getDate() + 7);
       membershipData.memberend = end;
     }
-
-    console.log(" Skapar membership:", membershipData);
 
     const membershipId = await Memberships.insertAsync(membershipData);
 

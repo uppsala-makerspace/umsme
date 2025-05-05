@@ -141,8 +141,10 @@ export const LoggedIn = () => {
           </button>
         )}
       </form>
-      <p>Din e-postadress: {email}</p>
-      <button onClick={logout}>Logout</button>
+      <p>
+        {t("yourMail")} {email}
+      </p>
+      <button onClick={logout}>{t("logout")}</button>
     </>
   );
 };
