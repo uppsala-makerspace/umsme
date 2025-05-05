@@ -41,9 +41,9 @@ export const createMember = () => {
       user.emails[0].address,
       (err, res) => {
         if (err) {
-          console.error("❌ Kunde inte skapa medlem från pending:", err);
+          console.error(" Kunde inte skapa medlem från pending:", err);
         } else {
-          console.log("✅ Medlem skapad:", res);
+          console.log(" Medlem skapad:", res);
           FlowRouter.go("/loggedIn");
         }
       }
@@ -64,11 +64,11 @@ export const createMember = () => {
         <p className="text-container">{t("registerText")}</p>
 
         <div className="form-group">
-          <label htmlFor="name">{t("name")}</label>
+          <label htmlFor="name">{t("Name")}</label>
           <input
             type="text"
             id="name"
-            placeholder="För- och efternamn"
+            placeholder={t("names")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={nameMaxLength}
@@ -77,7 +77,7 @@ export const createMember = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="mobile">{t("mobile")}</label>
+          <label htmlFor="mobile">{t("number")}</label>
           <input
             type="tel"
             id="mobile"
@@ -96,7 +96,7 @@ export const createMember = () => {
               checked={youth}
               onChange={() => setYouth(!youth)}
             />
-            Ungdom (under 26 år)
+            {t("youth")}
           </label>
         </div>
 
