@@ -5,6 +5,7 @@ import { LogRegSwitcher } from "./LogRegSwitcher";
 import { useTranslation } from "react-i18next";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
+import { models } from "/lib/models"; // to access maxlengths for name and mobile dynamically
 
 export const createMember = () => {
   const user = useTracker(() => Meteor.user(), []);
@@ -13,6 +14,9 @@ export const createMember = () => {
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [youth, setYouth] = useState(false);
+
+  const nameMaxLength = models.member.name.max;
+  const mobileMaxLength = models.member.mobile.max;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -67,6 +71,7 @@ export const createMember = () => {
             placeholder="För- och efternamn"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            maxLength={nameMaxLength}
             required
           />
         </div>
@@ -79,6 +84,7 @@ export const createMember = () => {
             placeholder="0701234567"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
+            maxLength={mobileMaxLength}
             required
           />
         </div>
