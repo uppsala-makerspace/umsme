@@ -103,7 +103,8 @@ export const LoggedInAsMember = () => {
             <div>
               <p
                 style={{
-                  textAlign: "center", // <-- detta överskriver all CSS
+                  // <-- detta överskriver all CSS
+                  textAlign: "center",
                 }}
               >
                 {t("AlertEndDate")}
@@ -116,7 +117,7 @@ export const LoggedInAsMember = () => {
                   color: "#f0efef",
                   border: "none",
                   cursor: "pointer",
-                  backgroundColor: "#5FC86F", // <-- detta överskriver all CSS
+                  backgroundColor: "#5FC86F",
                 }}
                 onClick={goToHandleMembership}
               >
@@ -125,7 +126,14 @@ export const LoggedInAsMember = () => {
               <br />
             </div>
           )}
-        <button onClick={logout}>{t("logout")}</button>
+        <button
+          style={{
+            boxSizing: "border-box",
+          }}
+          onClick={logout}
+        >
+          {t("logout")}
+        </button>
       </div>
     </>
   );
