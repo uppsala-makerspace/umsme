@@ -18,7 +18,7 @@ export const FacebookButton = () => {
   const buttonText = isDisabled ? "Please wait" : t("logginFacebook");
 
   const handleClick = () => {
-    Meteor.loginWithGoogle({}, (err) => {
+    Meteor.loginWithFacebook({}, (err) => {
       if (err) {
         if (err instanceof Meteor.Error && err.reason === "Det finns redan ett konto kopplat till den här adressen. Logga in med det kontot istället.") {
           alert("Facebook-verifiering har lagts till på ditt befintliga konto. Testa att logga in med facebook igen så kommer det fungera!")

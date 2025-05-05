@@ -3,7 +3,7 @@ import { updateMember } from "/lib/utils";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "./langueSwitcher";
-import { result } from "underscore";
+import { useTranslation } from "react-i18next";
 
 export const Payment = () => {
   const user = useTracker(() => Meteor.user());
@@ -13,6 +13,7 @@ export const Payment = () => {
   const [member_Id, setMember_Id] = useState({});
   const [qrSrc, showQrSrc] = useState(null);
   const [swishId, setSwishId] = useState(null);
+  const { t} = useTranslation();
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -95,25 +96,25 @@ export const Payment = () => {
       <div className="login-form">
         {paymentApproved ? (
           <div style={{ marginTop: 20 }}>
-            <h3>Betalning godkänd!</h3>
-            <p>Tack för din betalning.</p>
+            <h3>{t("paymentApproved")}</h3>
+            <p>{t("ThankPayment")}</p>
           </div>
         ) : qrSrc ? (
           <div style={{ marginTop: 20 }}>
-            <h3>Scanna QR med Swish</h3>
+            <h3>{t("ScanQrCode")}</h3>
             <img src={qrSrc} alt="Swish QR Code" width={300} height={300} />
             <button onClick={checkIfapproved} style={{ marginTop: 10 }}>
-              Check Payment Status
+              {t("CheckPayment")}
             </button>
           </div>
         ) : (
           <>
-            <h1>Betalning</h1>
+            <h1>{t("Payment")}</h1>
             <h2>{membershipType.name}</h2>
             <p>{membershipType.description}</p>
             <h3>{membershipType.price}</h3>
             <button onClick={() => handlePayment(membershipType.price)}>
-              Slutför betalning
+              {t("FinishPayment")}
             </button>
           </>
         )}

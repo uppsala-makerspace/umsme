@@ -12,10 +12,10 @@
   "exEmail": "example@ex.com",
   "logginGoogle": "Continue with Google",
   "logginFacebook": "Continue with Facebook",
-  "registerText": "If you are a member, you should create your account using the same email address that is registered with your membership.",
+  "registerText": "Please fill in in the information below",
   "noMembershiptext1": "We couldn't find an active membership linked to your email.",
   "noMembershiptext2": "If you wish to activate a membership, it's easy to do right here in the app. Just choose the membership you're interested in and complete the payment, you'll get instant access to the space.",
-  "noMembertext1": "We are missing some information.",
+  "noMembertext1": "We are missing some information about your membership.",
   "noMembertext2": "Please press the button below to see what is missing.",
   "becomeMember": "Become a member",
   "getMembership": "Get Membership",
@@ -64,5 +64,11 @@
   "isOpening": "Opening...",
   "outerDoor": "Outer Door",
   "upperFloor": "Upper Floor",
-  "lowerFloor": "Lower Floor"
+  "lowerFloor": "Lower Floor",
+  "paymentApproved": "Payment Approved!",
+  "ThankPayment": "Thanks for your payment.",
+  "ScanQrCode": "Scan the QR-code to pay",
+  "CheckPayment": "Click to check your payment",
+  "Payment": "Payment",
+  "FinishPayment": "Complete Payment"
 }
