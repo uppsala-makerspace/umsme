@@ -64,5 +64,9 @@
   "isOpening": "Opening...",
   "outerDoor": "Outer Door",
   "upperFloor": "Upper Floor",
-  "lowerFloor": "Lower Floor"
+  "lowerFloor": "Lower Floor",
+  "youth": "Youth (under 26 years of age)",
+  "names": "First and last name",
+  "number": "Phone number",
+  "yourMail": "Your e-mail: "
 }
