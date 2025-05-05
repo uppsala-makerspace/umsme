@@ -12,6 +12,7 @@ export const LoggedInAsMember = () => {
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [member, setMember] = useState({});
+  const [memberend, setMemberEnd] = useState({});
 
   useEffect(() => {
     if (!user?._id) return;
@@ -27,6 +28,7 @@ export const LoggedInAsMember = () => {
             setMemberLab(m.lab);
             setMemberships(ms);
             setMember(m);
+            setMemberEnd(ms[0].memberend);
           } else {
             // Om användaren inte är medlem
             console.log("Användaren är inte medlem.");
@@ -68,14 +70,15 @@ export const LoggedInAsMember = () => {
   const today = new Date();
 
   let daysLeftOfLab = null;
-  if (memberLab instanceof Date && !isNaN(memberLab.getTime())) {
+  if (memberend instanceof Date && !isNaN(memberend.getTime())) {
     console.log("Det är ett giltigt Date-objekt");
     daysLeftOfLab = Math.floor(
-      (memberLab.getTime() - today.getTime()) / msPerDay
+      (memberend.getTime() - today.getTime()) / msPerDay
     );
   } else {
     console.log("Det är inte ett giltigt Date-objekt");
   }
+  console.log("daysLeftOfLab:", daysLeftOfLab);
 
   const goToHandleMembership = () => {
     FlowRouter.go("/LoggedInAsMember/HandleMembership");

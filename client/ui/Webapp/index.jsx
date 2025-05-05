@@ -16,6 +16,7 @@ import { ForgotPassword } from "./imports/components/ForgotPassword.jsx";
 import { ResetPassword } from "./imports/components/ResetPassword.jsx";
 import React from "react";
 import { UnlockDoors } from "./imports/components/UnlockDoors";
+import { createMember } from "./imports/components/createMember.jsx";
 
 FlowRouter.triggers.enter([
   (context, redirect) => {
@@ -35,6 +36,7 @@ const handleRouteProtection = async (context, redirect) => {
     "/waitForEmailVerification",
     "/ForgotPassword",
     "/reset-password",
+    "/createMember", //ta bort härifrån senare
   ];
   const isPublic = publicPaths.some((publicPath) =>
     path.startsWith(publicPath)
@@ -101,6 +103,12 @@ FlowRouter.route("/login", {
   },
 });
 
+FlowRouter.route("/createMember", {
+  action() {
+    route("createMember", createMember);
+  },
+});
+
 FlowRouter.route("/loggedIn", {
   action() {
     route("loggedIn", LoggedIn);
@@ -157,8 +165,8 @@ FlowRouter.route("/LoggedInAsMember/contact", {
   },
 });
 
-FlowRouter.route("/LoggedInAsMember/keys",{
+FlowRouter.route("/LoggedInAsMember/keys", {
   action() {
-    route("UnlockDoors", UnlockDoors)
-  }
-})
+    route("UnlockDoors", UnlockDoors);
+  },
+});

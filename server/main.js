@@ -9,9 +9,11 @@ import { Payments } from "/collections/payments";
 import { Mails } from "/collections/mails";
 import { Comments } from "/collections/comments";
 import { Unlocks } from "/collections/unlocks";
+import { initiatedPayments } from "/collections/initiatedPayments";
 import "/collections/users";
 import "./cronjob/syncAndMailUnlocks";
 
+import "./api";
 import "./methods/mail";
 import "./methods/lock";
 import "./methods/bank";
@@ -78,6 +80,24 @@ const checkForDuplicateFacebookUser = async (user) => {
   }
 };
 
+const checkForDuplicateUser = async (user) => {
+  const email = user.emails?.[0]?.address;
+  if (email) {
+    const existingUser = await Meteor.users.findOneAsync({
+      "emails.address": email,
+    });
+
+    if (existingUser) {
+      throw new Meteor.Error(
+        "account-merge",
+        "Det finns redan ett konto med den här e-postadressen. Logga in istället."
+      );
+    }
+  }
+
+  return user;
+};
+
 Accounts.urls.resetPassword = (token) => {
   return Meteor.absoluteUrl(`reset-password/${token}`);
 };
@@ -85,6 +105,7 @@ Accounts.urls.resetPassword = (token) => {
 Accounts.onCreateUser(async (options, user) => {
   await checkForDuplicateFacebookUser(user);
   await checkForDuplicateGoogleUser(user);
+  await checkForDuplicateUser(user);
   return user;
 });
 
@@ -166,6 +187,7 @@ Meteor.startup(async () => {
   Meteor.publish("users", createAuthFuncFor(Meteor.users));
   Meteor.publish(null, createAuthFuncFor(Meteor.roleAssignment));
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
+  Meteor.publish("initiatedPayments", createAuthFuncFor(initiatedPayments))
 
   await ServiceConfiguration.configurations.upsertAsync(
     { service: "google" },

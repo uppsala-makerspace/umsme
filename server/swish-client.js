@@ -2,7 +2,7 @@ import https from "https";
 import axios from "axios";
 import fs from "fs";
 
-const agent = new https.Agent({
+export const agent = new https.Agent({
   cert: fs.readFileSync(Assets.absoluteFilePath("cert.pem")),
   key: fs.readFileSync(Assets.absoluteFilePath("key.pem")),
   ca: fs.readFileSync(Assets.absoluteFilePath("ca.pem")),
