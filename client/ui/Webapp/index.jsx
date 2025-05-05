@@ -17,6 +17,7 @@ import { ResetPassword } from "./imports/components/ResetPassword.jsx";
 import React from "react";
 import { UnlockDoors } from "./imports/components/UnlockDoors";
 import { createMember } from "./imports/components/createMember.jsx";
+import { AddFamilyMember } from "./imports/components/addFamilyMember";
 
 FlowRouter.triggers.enter([
   (context, redirect) => {
@@ -106,6 +107,12 @@ FlowRouter.route("/login", {
 FlowRouter.route("/createMember", {
   action() {
     route("createMember", createMember);
+  },
+});
+
+FlowRouter.route("/addFamilyMember", {
+  action() {
+    route("addFamilyMember", AddFamilyMember);
   },
 });
 

@@ -28,6 +28,7 @@ Meteor.methods({
   },
   findInfoForUser: async () => {
     const member = await findMemberForUser();
+
     if (!member) {
       throw new Meteor.Error(
         "not-found",
@@ -39,8 +40,16 @@ Meteor.methods({
     }).fetchAsync();
     memberships.sort((m1, m2) => (m1.memberend > m2.memberend ? -1 : 1));
     let familyHead;
+    console.log("member.infamily, ", member.infamily);
     if (member.infamily) {
-      familyHead = await Memberships.findOneAsync({ mid: member.infamily });
+      familyHead = await Members.findOneAsync({ mid: member.infamily });
+      console.log("familyHead", familyHead);
+    }
+    let familyHeadMembership;
+    if (familyHead) {
+      familyHeadMembership = await Memberships.findOneAsync({
+        mid: familyHead._id,
+      });
     }
     const familyId = member.infamily || member._id;
     const familyMembers = await Members.find({
@@ -49,7 +58,17 @@ Meteor.methods({
         { _id: familyId }, // familjehuvudet
       ],
     }).fetchAsync();
-    return { member, memberships, familyHead, familyMembers };
+    return { member, memberships, familyHeadMembership, familyMembers };
+  },
+
+  findPendingMemberForUser: async () => {
+    if (Meteor.userId()) {
+      const user = await Meteor.userAsync();
+      const email = user?.emails?.[0]?.address;
+      const pendingMember = await PendingMembers.findOneAsync({ email });
+      return !!pendingMember;
+    }
+    return false;
   },
 
   async "swish.createTestPayment"(price) {
@@ -69,7 +88,7 @@ Meteor.methods({
 
     const data = {
       //payeePaymentReference: "0123456789",
-      callbackUrl: "https://50f4-31-209-41-143.ngrok-free.app/swish/callback",
+      callbackUrl: "https://1cfc-130-243-208-90.ngrok-free.app/swish/callback",
       payeeAlias: "9871065216", // testnummer från filen aliases
       currency: "SEK",
       //payerAlias: "46464646464", // testnummer från filen aliases
@@ -167,11 +186,14 @@ Meteor.methods({
   },
 
   async savePendingMember(data) {
+    console.log("Sparar pendingMember, server side", data);
     check(data, {
       name: String,
       email: String,
       mobile: String,
       youth: Boolean,
+      mid: Match.Optional(String),
+      infamily: Match.Optional(String),
     });
     const existing = await PendingMembers.findOneAsync({ email: data.email });
     if (existing) {
@@ -185,6 +207,7 @@ Meteor.methods({
     return PendingMembers.insertAsync(data);
   },
   async createMemberFromPending() {
+    console.log("Skapar medlem från pending, serve side");
     if (!this.userId) throw new Meteor.Error("not-authorized");
 
     const user = await Meteor.userAsync();
@@ -202,20 +225,21 @@ Meteor.methods({
     const existing = await Members.findOneAsync({ email });
     if (existing) return { _id: existing._id, mid: existing.mid };
 
-    const mid = Random.id(10);
+    const mid_new = Random.id(10);
 
     const member = {
       name: pending.name,
       email: pending.email,
       mobile: pending.mobile,
       youth: pending.youth,
-      mid,
+      mid: pending.mid || mid_new,
+      infamily: pending.infamily,
     };
 
     const memberId = await Members.insertAsync(member);
     await PendingMembers.removeAsync({ _id: pending._id });
 
-    return { _id: memberId, mid };
+    return { mid: memberId };
   },
 
   addPayment(paymentData) {

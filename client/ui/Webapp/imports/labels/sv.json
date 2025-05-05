@@ -53,13 +53,14 @@
   "SentForm": "Formuläret skickat!",
   "WriteSlack": "Du kan också skriva till oss på Slack:",
   "PressSlack": "Tryck här för att komma till vår Slack-kanal.",
-  "AddPic":"Lägg till profilbild",
-  "AddNew":"Lägg till ny",
-  "Remove":"Ta bort",
+  "AddPic": "Lägg till profilbild",
+  "AddNew": "Lägg till ny",
+  "Remove": "Ta bort",
   "PressToOpen": "Tryck för att öppna",
   "openDoor": "Öppna",
   "isOpening": "Öppnas...",
   "outerDoor": "Yttre Dörr",
   "upperFloor": "Övre Plan",
-  "lowerFloor": "Nedre Plan"
+  "lowerFloor": "Nedre Plan",
+  "registerFamilyMember": "Registrera familjemedlem"
 }
