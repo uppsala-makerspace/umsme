@@ -3,6 +3,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { useTranslation } from "react-i18next";
+import { PendingMembers } from "/collections/PendingMembers.js";
 
 export const LoggedIn = () => {
   const { t, i18n } = useTranslation();
@@ -13,6 +14,8 @@ export const LoggedIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [family, setFamily] = useState([]);
 
+  const email = user?.emails?.[0]?.address || "Ingen e-postadress hittades";
+
   useEffect(() => {
     if (!user?._id) return;
     const fetchData = async () => {
@@ -21,16 +24,18 @@ export const LoggedIn = () => {
           const {
             member: m,
             memberships: ms,
-            familyHead: fmh,
+            familyHeadMembership: fhm,
           } = await Meteor.callAsync("findInfoForUser");
           console.log("memberships:", ms);
           console.log("memberrrr:", m);
-          console.log("familyhead", fmh);
+          console.log("familyhead", fhm);
           setIsLoading(false);
           console.log("m:", m);
           if (m) {
+            console.log("Användaren är medlem.");
             setMember(true);
-            if (fmh && fmh.memberend >= new Date()) {
+            if (fhm && fhm.memberend >= new Date()) {
+              console.log("fhm.memberend:", fhm.memberend);
               //If the paying member of the fmaily has an active family membership, the children may also access the LoggedInAsMember page
               FlowRouter.go("LoggedInAsMember");
             }
@@ -50,11 +55,40 @@ export const LoggedIn = () => {
     fetchData();
   }, [user?._id]);
 
+  useEffect(() => {
+    const checkPending = async () => {
+      try {
+        const isPending = await Meteor.callAsync("findPendingMemberForUser");
+        if (isPending) {
+          console.log("✅ Användaren finns i pendingMembers.");
+          // Exempel: redirecta om du vill
+          // FlowRouter.go("/waitingApproval");
+          Meteor.call(
+            "createMemberFromPending",
+            user.emails[0].address,
+            (err, res) => {
+              if (err) {
+                console.error("❌ Kunde inte skapa medlem från pending:", err);
+              } else {
+                console.log("✅ Medlem skapad:", res);
+                // FlowRouter.go("/loggedInAsMember");
+              }
+            }
+          );
+        } else {
+          console.log("❌ Användaren finns inte i pendingMembers.");
+        }
+      } catch (error) {
+        console.error("🚨 Fel vid anrop till findPendingMemberForUser:", error);
+      }
+    };
+
+    checkPending();
+  }, []);
+
   if (isLoading) {
     return <div>Loading member information...</div>;
   }
-
-  const email = user?.emails?.[0]?.address || "Ingen e-postadress hittades";
 
   // Not correct, sort and find the correct latest membership.
   const currentMembership = memberships.length > 0 ? memberships[0] : null;

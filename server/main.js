@@ -193,7 +193,8 @@ Meteor.startup(async () => {
     { service: "google" },
     {
       $set: {
-        ...Meteor.settings.serviceConfigurations.google,
+        //...Meteor.settings.serviceConfigurations.google,
+        // detta ska tillbaka sen på något sätt så att det går att logga in med google
       },
     }
   );
@@ -202,7 +203,8 @@ Meteor.startup(async () => {
     { service: "facebook" },
     {
       $set: {
-        ...Meteor.settings.serviceConfigurations.facebook,
+        //...Meteor.settings.serviceConfigurations.facebook,
+        // detta ska tillbaka sen på något sätt så att det går att logga in med facebook
       },
     }
   );

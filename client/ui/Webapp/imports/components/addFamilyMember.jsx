@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { LogRegSwitcher } from "./LogRegSwitcher";
@@ -6,45 +6,60 @@ import { useTranslation } from "react-i18next";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { models } from "/lib/models"; // to access maxlengths for name and mobile dynamically
+import { HamburgerMenu } from "./HamburgerMenu";
 
-export const createMember = () => {
+export const AddFamilyMember = () => {
   const user = useTracker(() => Meteor.user(), []);
 
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [youth, setYouth] = useState(false);
+  const [email, setEmail] = useState("");
+  const [member, setMember] = useState(null);
 
   const nameMaxLength = models.member.name.max;
   const mobileMaxLength = models.member.mobile.max;
+
+  useEffect(() => {
+    if (!user?._id) return;
+    const fetchData = async () => {
+      if (user) {
+        try {
+          const { member: m } = await Meteor.callAsync("findInfoForUser");
+
+          if (m) {
+            setMember(m);
+          } else {
+            // Om användaren inte är medlem
+
+            setMember(null);
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [user?._id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     Meteor.call(
       "savePendingMember",
       {
-        email: user.emails[0].address,
+        email,
         name,
         mobile,
         youth,
+        infamily: member.mid, // Set member.mid to the current member's infamily, note that infamily is an ID
       },
       (err) => {
         if (err) {
           console.error("Kunde inte spara pendingMember:", err);
         } else {
           console.log("pendingMember sparad");
-        }
-      }
-    );
-    Meteor.call(
-      "createMemberFromPending",
-      user.emails[0].address,
-      (err, res) => {
-        if (err) {
-          console.error(" Kunde inte skapa medlem från pending:", err);
-        } else {
-          console.log(" Medlem skapad:", res);
-          FlowRouter.go("/loggedIn");
         }
       }
     );
@@ -58,26 +73,38 @@ export const createMember = () => {
   return (
     <>
       <LanguageSwitcher />
+      <HamburgerMenu />
       <form onSubmit={handleSubmit} className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
 
-        <p className="text-container">{t("registerText")}</p>
+        <p className="text-container">{t("registerFamilyMember")}</p>
 
         <div className="form-group">
-          <label htmlFor="name">{t("Name")}</label>
+          <label htmlFor="name">{t("name")}</label>
           <input
             type="text"
             id="name"
-            placeholder={t("names")}
+            placeholder="För- och efternamn"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={nameMaxLength}
             required
           />
         </div>
+        <div className="form-group">
+          <label htmlFor="email">{t("email")}</label>
+          <input
+            type="email"
+            id="email"
+            placeholder={t("exEmail")}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
         <div className="form-group">
-          <label htmlFor="mobile">{t("number")}</label>
+          <label htmlFor="mobile">{t("mobile")}</label>
           <input
             type="tel"
             id="mobile"
@@ -96,15 +123,11 @@ export const createMember = () => {
               checked={youth}
               onChange={() => setYouth(!youth)}
             />
-            {t("youth")}
+            Ungdom (under 26 år)
           </label>
         </div>
 
-        <button
-          type="button"
-          className="form-button"
-          onClick={() => FlowRouter.go("/LoggedInAsMember/HandleMembership")}
-        >
+        <button type="submit" className="form-button">
           {t("register")}
         </button>
       </form>
