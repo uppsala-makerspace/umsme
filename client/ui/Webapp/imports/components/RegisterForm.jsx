@@ -32,6 +32,7 @@ export const RegisterForm = () => {
         }
       } else {
         // Spara till PendingMembers
+        /*
         Meteor.call(
           "savePendingMember",
           {
@@ -47,7 +48,7 @@ export const RegisterForm = () => {
               console.log("pendingMember sparad");
             }
           }
-        );
+        ); */
         FlowRouter.go("/waitForEmailVerification");
       }
     });
@@ -68,7 +69,7 @@ export const RegisterForm = () => {
           onClick={toLogIn}
         />
         <p className="text-container">{t("registerText")}</p>
-
+        {/*
         <div className="form-group">
           <label htmlFor="name">{t("name")}</label>
           <input
@@ -103,7 +104,7 @@ export const RegisterForm = () => {
             Ungdom (under 26 år)
           </label>
         </div>
-
+*/}
         <div className="form-group">
           <label htmlFor="email">{t("email")}</label>
           <input
