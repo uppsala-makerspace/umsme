@@ -13,7 +13,7 @@ export const Payment = () => {
   const [member_Id, setMember_Id] = useState({});
   const [qrSrc, showQrSrc] = useState(null);
   const [swishId, setSwishId] = useState(null);
-  const { t} = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -102,7 +102,13 @@ export const Payment = () => {
         ) : qrSrc ? (
           <div style={{ marginTop: 20 }}>
             <h3>{t("ScanQrCode")}</h3>
-            <img src={qrSrc} alt="Swish QR Code" width={300} height={300} />
+            <img
+              src={qrSrc}
+              alt="Swish QR Code"
+              width={300}
+              height={300}
+              className="swish-qr"
+            />
             <button onClick={checkIfapproved} style={{ marginTop: 10 }}>
               {t("CheckPayment")}
             </button>

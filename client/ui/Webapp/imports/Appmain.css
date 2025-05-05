@@ -42,7 +42,6 @@ body {
   width: 100%;
   max-width: 400px;
   padding: 2%;
-
 }
 
 .umsapp .login-form input,
@@ -229,21 +228,20 @@ body {
 
 /* Door css for /keys */
 
-.umsapp .login-form .door-container{
+.umsapp .login-form .door-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
 }
 
-.umsapp .login-form button.door-button{
+.umsapp .login-form button.door-button {
   border-radius: 50%;
   width: 40%;
   aspect-ratio: 1 / 1;
   cursor: pointer;
   border-style: 1px dashed black;
   cursor: pointer;
-
 }
 
 .umsapp .nav-bar {
@@ -437,6 +435,12 @@ body {
   z-index: 1000;
 }
 
+.umsapp .swish-qr {
+  background-color: white;
+  padding: 1em;
+  border-radius: 50px;
+}
+
 .umsapp .AgreementContent {
   background: white;
   padding: 20px;
@@ -488,20 +492,16 @@ body {
   background-color: #096817;
 }
 
-
 .logout-button {
   display: flex;
   align-items: center;
-  gap: 8px; 
+  gap: 8px;
 }
-
 
 .logout-icon {
   vertical-align: middle;
-  font-size: 1.2em; 
+  font-size: 1.2em;
 }
-
-
 
 /* början av accounts */
 
@@ -518,9 +518,6 @@ body {
   background-size: contain;
   background-color: white;
   border: none;
-  
-
-  
 }
 
 .umsapp .vertical-divider {
@@ -528,8 +525,7 @@ body {
   align-items: center;
   width: 100%;
   padding: 8px 0;
-  border-bottom: 1px dashed #aaa; 
-  
+  border-bottom: 1px dashed #aaa;
 }
 
 .umsapp .family-row {
@@ -543,22 +539,13 @@ body {
   font-size: 0.875rem;
 }
 
-
-
 .umsapp .left-text {
-  
   align-self: flex-start; /* Flyttar texten till vänster inom wrappern */
   text-align: left;
 }
 .umsapp .profile-link {
-  color:blue;
-
-  
-  
+  color: blue;
 }
-
-
-
 
 /* slutet av accounts */
 
