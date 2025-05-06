@@ -13,7 +13,7 @@ export const Payment = () => {
   const [member_Id, setMember_Id] = useState({});
   const [qrSrc, showQrSrc] = useState(null);
   const [swishId, setSwishId] = useState(null);
-  const { t} = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -23,6 +23,8 @@ export const Payment = () => {
       FlowRouter.go("/HandleMembership");
     }
   }, []);
+
+  console.log("MembershipType:", membershipType);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -59,16 +61,21 @@ export const Payment = () => {
   };
 
   const checkIfapproved = async () => {
-    Meteor.call("getPaymentStatusAndInsertMembership", swishId, (err, res) => {
-      console.log(res);
-      if (err) {
-        console.error("Error:", err);
-      } else {
-        if (res === "PAID") {
-          FlowRouter.go("LoggedInAsMember");
+    Meteor.call(
+      "getPaymentStatusAndInsertMembership",
+      swishId,
+      membershipType.name,
+      (err, res) => {
+        console.log(res);
+        if (err) {
+          console.error("Error:", err);
+        } else {
+          if (res === "PAID") {
+            FlowRouter.go("LoggedInAsMember");
+          }
         }
       }
-    });
+    );
   };
   console.log("Membership:", membershipType);
 
@@ -101,7 +108,13 @@ export const Payment = () => {
         ) : qrSrc ? (
           <div style={{ marginTop: 20 }}>
             <h3>{t("ScanQrCode")}</h3>
-            <img src={qrSrc} alt="Swish QR Code" width={300} height={300} />
+            <img
+              src={qrSrc}
+              alt="Swish QR Code"
+              width={300}
+              height={300}
+              className="swish-qr"
+            />
             <button onClick={checkIfapproved} style={{ marginTop: 10 }}>
               {t("CheckPayment")}
             </button>

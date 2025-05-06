@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "./langueSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
+import { AddFamilyMember } from "./addFamilyMember";
 import { useTranslation } from "react-i18next";
 
 export const accounts = () => {
@@ -13,6 +14,8 @@ export const accounts = () => {
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [family, setFamily] = useState([]);
+  const [addingFamilyMember, setAddingFamilyMember] = useState(false);
+  const [isFamilyHead, setisFamilyHead] = useState(false);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -47,6 +50,14 @@ export const accounts = () => {
     fetchData();
   }, [user?._id]);
 
+  useEffect(() => {
+    if (memberships?.[0]?.type === "Family lab member") {
+      setisFamilyHead(true);
+    } else {
+      setisFamilyHead(false);
+    }
+  }, [memberships]);
+
   console.log("membership", memberships);
   console.log("currentMember", member);
   console.log("familj", family);
@@ -55,6 +66,10 @@ export const accounts = () => {
     if (memberships?.[0]?.family) {
       return true;
     }
+  };
+
+  const openFamilyForm = () => {
+    FlowRouter.go("/addFamilyMember");
   };
 
   const logout = () => {
@@ -67,8 +82,8 @@ export const accounts = () => {
     });
   };
 
-  const membershipType = () => {
-    if (memberships?.[0]?.family === true) {
+  const membershipTypeName = () => {
+    if (memberships?.[0]?.type === "Family lab member") {
       return t("memberFamily");
     }
     if (memberships?.[0]?.amount >= 1200) {
@@ -79,41 +94,46 @@ export const accounts = () => {
     }
   };
 
+  //const member_family = member.family;
   return (
     <>
       <LanguageSwitcher />
       <HamburgerMenu />
+      <div>
+        <div className="login-form">
+          <button className="round-prof">
+            <a href="/profile" className="profile-link">
+              {t("AddPic")}
+            </a>
+          </button>
 
-      <div className="login-form">
-        <button className="round-prof">
-          <a href="/profile" className="profile-link">
-            {t("AddPic")}
-          </a>
-        </button>
+          <button className="login-form"> {member?.name}</button>
 
-        <button className="login-form"> {member?.name}</button>
+          <h1 className="left-text"> {t("MyAccount")}</h1>
 
-        <h1 className="left-text"> {t("MyAccount")}</h1>
+          {/*  {member_family ? <span>{t("FamilyMember")}</span> : null} */}
 
-        <div className="left-text">
-          {t("TypeOfMembership")} {membershipType()}
+          <div className="left-text">
+            {t("TypeOfMembership")} {membershipTypeName()}
+          </div>
+
+          <div className="left-text">
+            {t("MemberID")} {member?.mid || "–"}
+          </div>
+          <br />
+          <div className="left-text">
+            {t("MemberSince")}{" "}
+            {memberships?.[
+              memberships.length - 1
+            ]?.start.toLocaleDateString() || "–"}
+          </div>
+          <div className="left-text">
+            {t("EndDate")}{" "}
+            {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
+          </div>
+
+          <br />
         </div>
-
-        <div className="left-text">
-          {t("MemberID")} {member?.mid || "–"}
-        </div>
-        <br />
-        <div className="left-text">
-          {t("MemberSince")}{" "}
-          {memberships?.[memberships.length - 1]?.start.toLocaleDateString() ||
-            "–"}
-        </div>
-        <div className="left-text">
-          {t("EndDate")}{" "}
-          {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
-        </div>
-
-        <br />
 
         <div className="left-text">
           {isFamilyMember() ? (
@@ -132,16 +152,22 @@ export const accounts = () => {
               </div>
 
               <br />
-              <a href="/profile" className="profile-link">
-                {t("AddNew")}
-              </a>
+            </div>
+          ) : (
+            <div></div>
+          )}
+          {isFamilyHead ? (
+            <div>
+              <button className="form-button" onClick={openFamilyForm}>
+                {t("AddFamilyMember")}
+              </button>
             </div>
           ) : (
             <div></div>
           )}
         </div>
+        <button onClick={logout}>{t("logout")}</button>
       </div>
-      <button onClick={logout}>{t("logout")}</button>
     </>
   );
 };

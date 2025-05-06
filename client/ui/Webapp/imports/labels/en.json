@@ -65,10 +65,16 @@
   "outerDoor": "Outer Door",
   "upperFloor": "Upper Floor",
   "lowerFloor": "Lower Floor",
+  "registerFamilyMember": "Register family member",
+  "youth": "Youth (under 26 years of age)",
+  "names": "First and last name",
+  "number": "Phone number",
+  "yourMail": "Your e-mail: ",
   "paymentApproved": "Payment Approved!",
   "ThankPayment": "Thanks for your payment.",
   "ScanQrCode": "Scan the QR-code to pay",
   "CheckPayment": "Click to check your payment",
   "Payment": "Payment",
-  "FinishPayment": "Complete Payment"
+  "FinishPayment": "Complete Payment",
+  "FamilyMember": "You are part of a family membership"
 }
