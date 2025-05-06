@@ -97,6 +97,12 @@ FlowRouter.route("/LoggedInAsMember/HandleMembership", {
   },
 });
 
+FlowRouter.route("/HandleMembership", {
+  action() {
+    route("HandleMembership", HandleMembership);
+  }
+})
+
 FlowRouter.route("/login", {
   action() {
     route("login", LoginForm);

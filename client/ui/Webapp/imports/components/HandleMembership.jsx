@@ -31,10 +31,11 @@ export const HandleMembership = () => {
       }
     });
   };
+  
   return (
     <div>
+      {FlowRouter.current().path.endsWith("/LoggedInAsMember/HandleMembership") && <HamburgerMenu />}
       <LanguageSwitcher />
-      <HamburgerMenu />
       <div className="membershipsContainer">
         <div>
           <h1>{t("memberships")}</h1>
