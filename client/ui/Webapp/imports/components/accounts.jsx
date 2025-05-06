@@ -31,6 +31,7 @@ export const accounts = () => {
 
           if (m) {
             setMember(m);
+            console.log("m:", m);
             setMemberships(ms);
             const email = fm.map((member) => member.email);
             setFamily(email);
@@ -61,12 +62,6 @@ export const accounts = () => {
   console.log("membership", memberships);
   console.log("currentMember", member);
   console.log("familj", family);
-
-  const isFamilyMember = () => {
-    if (memberships?.[0]?.family) {
-      return true;
-    }
-  };
 
   const openFamilyForm = () => {
     FlowRouter.go("/addFamilyMember");
@@ -136,7 +131,7 @@ export const accounts = () => {
         </div>
 
         <div className="left-text">
-          {isFamilyMember() ? (
+          {family.length > 1 ? (
             <div>
               <div>{t("FamilyMembers")}</div>
 
@@ -144,9 +139,11 @@ export const accounts = () => {
                 {family.map((email, index) => (
                   <div key={index} className="family-row">
                     <span className="family-email">{email}</span>
-                    <a href="/profile" className="remove-link">
-                      {t("Remove")}
-                    </a>
+                    {isFamilyHead && (
+                      <a href="/profile" className="remove-link">
+                        {t("Remove")}
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>
