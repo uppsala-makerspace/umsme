@@ -17,6 +17,7 @@ export const accounts = () => {
   const [addingFamilyMember, setAddingFamilyMember] = useState(false);
   const [isFamilyHead, setisFamilyHead] = useState(false);
   const [isInFamily, setIsInFamily] = useState(false);
+  const [familySize, setFamilySize] = useState(0);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -29,6 +30,8 @@ export const accounts = () => {
             familyMembers: fm,
           } = await Meteor.callAsync("findInfoForUser");
           setIsLoading(false);
+          setFamilySize(fm.length);
+          console.log("familysize:", fm.length);
 
           if (m) {
             setMember(m);
@@ -54,7 +57,7 @@ export const accounts = () => {
 
   useEffect(() => {
     if (member && member.infamily) {
-      console.log("▶️ Medlem är i familj med ID:", member.infamily);
+      console.log("Medlem är i familj med ID:", member.infamily);
       setIsInFamily(true);
     }
   }, [member]);
@@ -162,7 +165,7 @@ export const accounts = () => {
           ) : (
             <div></div>
           )}
-          {isFamilyHead ? (
+          {isFamilyHead && familySize < 4 ? (
             <div>
               <button className="form-button" onClick={openFamilyForm}>
                 {t("AddFamilyMember")}
