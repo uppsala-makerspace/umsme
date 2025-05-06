@@ -16,6 +16,7 @@ export const AddFamilyMember = () => {
   const [youth, setYouth] = useState(false);
   const [email, setEmail] = useState("");
   const [member, setMember] = useState(null);
+  const [familySize, setFamilySize] = useState(0);
 
   const nameMaxLength = models.member.name.max;
   const mobileMaxLength = models.member.mobile.max;
@@ -25,7 +26,12 @@ export const AddFamilyMember = () => {
     const fetchData = async () => {
       if (user) {
         try {
-          const { member: m } = await Meteor.callAsync("findInfoForUser");
+          const { member: m, familyMembers: fm } = await Meteor.callAsync(
+            "findInfoForUser"
+          );
+          console.log("familyMembers:", fm);
+          console.log("family size:", fm.length);
+          setFamilySize(fm.length);
 
           if (m) {
             setMember(m);
@@ -45,6 +51,12 @@ export const AddFamilyMember = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (familySize > 3) {
+      alert(
+        "Du kan inte lägga till fler än 5 familjemedlemmar, make this a label."
+      );
+      return;
+    }
     Meteor.call(
       "savePendingMember",
       {

@@ -17,6 +17,8 @@ export const accounts = () => {
   const [family, setFamily] = useState([]);
   const [addingFamilyMember, setAddingFamilyMember] = useState(false);
   const [isFamilyHead, setisFamilyHead] = useState(false);
+  const [isInFamily, setIsInFamily] = useState(false);
+  const [familySize, setFamilySize] = useState(0);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -29,9 +31,12 @@ export const accounts = () => {
             familyMembers: fm,
           } = await Meteor.callAsync("findInfoForUser");
           setIsLoading(false);
+          setFamilySize(fm.length);
+          console.log("familysize:", fm.length);
 
           if (m) {
             setMember(m);
+            console.log("m:", m);
             setMemberships(ms);
             const email = fm.map((member) => member.email);
             setFamily(email);
@@ -52,6 +57,13 @@ export const accounts = () => {
   }, [user?._id]);
 
   useEffect(() => {
+    if (member && member.infamily) {
+      console.log("Medlem är i familj med ID:", member.infamily);
+      setIsInFamily(true);
+    }
+  }, [member]);
+
+  useEffect(() => {
     if (memberships?.[0]?.type === "Family lab member") {
       setisFamilyHead(true);
     } else {
@@ -62,12 +74,6 @@ export const accounts = () => {
   console.log("membership", memberships);
   console.log("currentMember", member);
   console.log("familj", family);
-
-  const isFamilyMember = () => {
-    if (memberships?.[0]?.family) {
-      return true;
-    }
-  };
 
   const openFamilyForm = () => {
     FlowRouter.go("/addFamilyMember");
@@ -115,7 +121,8 @@ export const accounts = () => {
           {/*  {member_family ? <span>{t("FamilyMember")}</span> : null} */}
 
           <div className="left-text">
-            {t("TypeOfMembership")} {membershipTypeName()}
+            {t("TypeOfMembership")}{" "}
+            {isInFamily ? t("memberFamily") : membershipTypeName()}
           </div>
 
           <div className="left-text">
@@ -137,7 +144,7 @@ export const accounts = () => {
         </div>
 
         <div className="left-text">
-          {isFamilyMember() ? (
+          {family.length > 1 ? (
             <div>
               <div>{t("FamilyMembers")}</div>
 
@@ -145,9 +152,11 @@ export const accounts = () => {
                 {family.map((email, index) => (
                   <div key={index} className="family-row">
                     <span className="family-email">{email}</span>
-                    <a href="/profile" className="remove-link">
-                      {t("Remove")}
-                    </a>
+                    {isFamilyHead && (
+                      <a href="/profile" className="remove-link">
+                        {t("Remove")}
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>
@@ -157,7 +166,7 @@ export const accounts = () => {
           ) : (
             <div></div>
           )}
-          {isFamilyHead ? (
+          {isFamilyHead && familySize < 4 ? (
             <div>
               <button className="form-button" onClick={openFamilyForm}>
                 {t("AddFamilyMember")}
