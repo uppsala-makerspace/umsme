@@ -96,7 +96,7 @@ export const LoggedIn = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (member) {
-      FlowRouter.go("/LoggedInAsMember/HandleMembership");
+      FlowRouter.go("HandleMembership");
     } else {
       FlowRouter.go("/createMember");
     }

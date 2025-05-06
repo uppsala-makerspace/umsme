@@ -84,12 +84,11 @@ export const Payment = () => {
     const now = Date.now();
     window.location.href = swishUrl;
     setTimeout(() => {
-      if (Date.now() - now < 2100) {
+      if (Date.now() - now < 3100) {
         Meteor.call("getQrCode", token, (err, qrUrl) => {
           if (err) {
             console.error("Error:", err);
           } else {
-            console.log(qrUrl);
             showQrSrc(qrUrl);
           }
         });
