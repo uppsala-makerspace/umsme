@@ -27,6 +27,7 @@ export const createMember = () => {
         name,
         mobile,
         youth,
+        family: false,
       },
       (err) => {
         if (err) {
@@ -49,6 +50,7 @@ export const createMember = () => {
       }
     );
     // FlowRouter.go("/LoggedIn");
+    FlowRouter.go("/LoggedInAsMember/HandleMembership");
   };
 
   const toLogIn = () => {
@@ -100,11 +102,7 @@ export const createMember = () => {
           </label>
         </div>
 
-        <button
-          type="button"
-          className="form-button"
-          onClick={() => FlowRouter.go("/LoggedInAsMember/HandleMembership")}
-        >
+        <button type="submit" className="form-button">
           {t("register")}
         </button>
       </form>

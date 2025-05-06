@@ -24,6 +24,8 @@ export const Payment = () => {
     }
   }, []);
 
+  console.log("MembershipType:", membershipType);
+
   useEffect(() => {
     if (!user?._id) return;
     const fetchData = async () => {
@@ -59,16 +61,21 @@ export const Payment = () => {
   };
 
   const checkIfapproved = async () => {
-    Meteor.call("getPaymentStatusAndInsertMembership", swishId, (err, res) => {
-      console.log(res);
-      if (err) {
-        console.error("Error:", err);
-      } else {
-        if (res === "PAID") {
-          FlowRouter.go("LoggedInAsMember");
+    Meteor.call(
+      "getPaymentStatusAndInsertMembership",
+      swishId,
+      membershipType.name,
+      (err, res) => {
+        console.log(res);
+        if (err) {
+          console.error("Error:", err);
+        } else {
+          if (res === "PAID") {
+            FlowRouter.go("LoggedInAsMember");
+          }
         }
       }
-    });
+    );
   };
   console.log("Membership:", membershipType);
 
@@ -77,12 +84,11 @@ export const Payment = () => {
     const now = Date.now();
     window.location.href = swishUrl;
     setTimeout(() => {
-      if (Date.now() - now < 2100) {
+      if (Date.now() - now < 3100) {
         Meteor.call("getQrCode", token, (err, qrUrl) => {
           if (err) {
             console.error("Error:", err);
           } else {
-            console.log(qrUrl);
             showQrSrc(qrUrl);
           }
         });

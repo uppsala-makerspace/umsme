@@ -88,7 +88,7 @@ Meteor.methods({
 
     const data = {
       //payeePaymentReference: "0123456789",
-      callbackUrl: "https://1cfc-130-243-208-90.ngrok-free.app/swish/callback",
+      callbackUrl: "https://1047-130-243-208-90.ngrok-free.app/swish/callback",
       payeeAlias: "9871065216", // testnummer från filen aliases
       currency: "SEK",
       //payerAlias: "46464646464", // testnummer från filen aliases
@@ -138,7 +138,7 @@ Meteor.methods({
     }
   },
 
-  async getPaymentStatusAndInsertMembership(instructionId) {
+  async getPaymentStatusAndInsertMembership(instructionId, membershipType) {
     check(instructionId, String);
     const maxRetries = 50;
     const delay = 1000;
@@ -158,7 +158,7 @@ Meteor.methods({
           mid: member._id,
           amount: Number(payment.amount),
           start: payment.createdAt,
-          type: "member",
+          type: membershipType,
           discount: false,
           family: false,
         });
@@ -193,6 +193,7 @@ Meteor.methods({
       youth: Boolean,
       mid: Match.Optional(String),
       infamily: Match.Optional(String),
+      family: Match.Optional(Boolean),
     });
     const existing = await PendingMembers.findOneAsync({ email: data.email });
     if (existing) {
@@ -231,8 +232,9 @@ Meteor.methods({
       email: pending.email,
       mobile: pending.mobile,
       youth: pending.youth,
-      mid: pending.mid || mid_new,
+      mid: pending.mid || mid_new, //TODO this is unnecessary i am pretty sure
       infamily: pending.infamily,
+      family: pending.family,
     };
 
     const memberId = await Members.insertAsync(member);
@@ -275,6 +277,7 @@ Meteor.methods({
   },
 
   async addMembership(membershipData) {
+    console.log("Lägger till medlemskap, server side", membershipData);
     check(membershipData, {
       mid: String,
       pid: Match.Maybe(String),

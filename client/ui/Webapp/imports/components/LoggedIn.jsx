@@ -71,7 +71,7 @@ export const LoggedIn = () => {
                 console.error("❌ Kunde inte skapa medlem från pending:", err);
               } else {
                 console.log("✅ Medlem skapad:", res);
-                // FlowRouter.go("/loggedInAsMember");
+                FlowRouter.go("/loggedInAsMember");
               }
             }
           );
@@ -96,7 +96,7 @@ export const LoggedIn = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (member) {
-      FlowRouter.go("/LoggedInAsMember/HandleMembership");
+      FlowRouter.go("HandleMembership");
     } else {
       FlowRouter.go("/createMember");
     }

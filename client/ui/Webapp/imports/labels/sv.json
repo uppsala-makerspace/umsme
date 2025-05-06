@@ -75,5 +75,6 @@
   "ScanQrCode": "Skanna Qr-koden för att betala",
   "CheckPayment": "Klicka för att kolla betalningen",
   "Payment": "Betalning",
-  "FinishPayment": "Slutför Betalning"
+  "FinishPayment": "Slutför Betalning",
+  "FamilyMember": "Du är en del av ett familjemedlemskap"
 }
