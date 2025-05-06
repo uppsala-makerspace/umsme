@@ -1,60 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { LanguageSwitcher } from "./langueSwitcher";
-import { LogRegSwitcher } from "./LogRegSwitcher";
+import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { models } from "/lib/models"; // to access maxlengths for name and mobile dynamically
-import { HamburgerMenu } from "./HamburgerMenu";
 
-export const AddFamilyMember = () => {
+export const createMember = () => {
   const user = useTracker(() => Meteor.user(), []);
 
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [youth, setYouth] = useState(false);
-  const [email, setEmail] = useState("");
-  const [member, setMember] = useState(null);
 
   const nameMaxLength = models.member.name.max;
   const mobileMaxLength = models.member.mobile.max;
-
-  useEffect(() => {
-    if (!user?._id) return;
-    const fetchData = async () => {
-      if (user) {
-        try {
-          const { member: m } = await Meteor.callAsync("findInfoForUser");
-
-          if (m) {
-            setMember(m);
-          } else {
-            // Om användaren inte är medlem
-
-            setMember(null);
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      }
-    };
-
-    fetchData();
-  }, [user?._id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     Meteor.call(
       "savePendingMember",
       {
-        email,
+        email: user.emails[0].address,
         name,
         mobile,
         youth,
-        infamily: member.mid, // Set member.mid to the current member's infamily, note that infamily is an ID
-        family: true,
+        family: false,
       },
       (err) => {
         if (err) {
@@ -64,7 +36,20 @@ export const AddFamilyMember = () => {
         }
       }
     );
+    Meteor.call(
+      "createMemberFromPending",
+      user.emails[0].address,
+      (err, res) => {
+        if (err) {
+          console.error(" Kunde inte skapa medlem från pending:", err);
+        } else {
+          console.log(" Medlem skapad:", res);
+          FlowRouter.go("/loggedIn");
+        }
+      }
+    );
     // FlowRouter.go("/LoggedIn");
+    FlowRouter.go("/LoggedInAsMember/HandleMembership");
   };
 
   const toLogIn = () => {
@@ -74,38 +59,26 @@ export const AddFamilyMember = () => {
   return (
     <>
       <LanguageSwitcher />
-      <HamburgerMenu />
       <form onSubmit={handleSubmit} className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
 
-        <p className="text-container">{t("registerFamilyMember")}</p>
+        <p className="text-container">{t("registerText")}</p>
 
         <div className="form-group">
-          <label htmlFor="name">{t("name")}</label>
+          <label htmlFor="name">{t("Name")}</label>
           <input
             type="text"
             id="name"
-            placeholder="För- och efternamn"
+            placeholder={t("names")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={nameMaxLength}
             required
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="email">{t("email")}</label>
-          <input
-            type="email"
-            id="email"
-            placeholder={t("exEmail")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
 
         <div className="form-group">
-          <label htmlFor="mobile">{t("mobile")}</label>
+          <label htmlFor="mobile">{t("number")}</label>
           <input
             type="tel"
             id="mobile"
@@ -124,7 +97,7 @@ export const AddFamilyMember = () => {
               checked={youth}
               onChange={() => setYouth(!youth)}
             />
-            Ungdom (under 26 år)
+            {t("youth")}
           </label>
         </div>
 

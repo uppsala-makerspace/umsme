@@ -1,0 +1,42 @@
+.umsapp .login-form button.round-prof {
+    border-radius: 50%;
+    width: 40%; /* Bredden är 40% av förälderelementet */
+    aspect-ratio: 1 / 1; /* Gör höjden lika med bredden */
+    margin-top: 50px;
+    margin-bottom: 50px;
+    cursor: pointer;
+    background-image: url(/icons/emptyprofilepic.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-color: white;
+    border: none;
+  }
+
+  .umsapp .profile-link {
+    color: blue;
+  }
+
+  .umsapp .left-text {
+    align-self: flex-start; /* Flyttar texten till vänster inom wrappern */
+    text-align: left;
+  }
+
+  .umsapp .vertical-divider {
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 8px 0;
+    border-bottom: 1px dashed #aaa;
+  }
+
+  .umsapp .family-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  
+  .umsapp .family-email,
+  .umsapp .remove-link {
+    font-size: 0.875rem;
+  }

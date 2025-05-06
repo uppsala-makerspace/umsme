@@ -2,8 +2,9 @@ import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { updateMember } from "/lib/utils";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import { LanguageSwitcher } from "./langueSwitcher";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
+import './payment.css'
 
 export const Payment = () => {
   const user = useTracker(() => Meteor.user());

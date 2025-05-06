@@ -2,10 +2,11 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { LanguageSwitcher } from "./langueSwitcher";
-import { HamburgerMenu } from "./HamburgerMenu";
-import { AddFamilyMember } from "./addFamilyMember";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
+import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import { AddFamilyMember } from "../addFamilyMember";
 import { useTranslation } from "react-i18next";
+import "./acounts.css";
 
 export const accounts = () => {
   const user = useTracker(() => Meteor.user());

@@ -1,23 +1,23 @@
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import route from "/client/ui/Webapp/route";
-import { LoginForm } from "./imports/components/LoginForm";
-import { RegisterForm } from "./imports/components/RegisterForm";
-import { LoggedIn } from "./imports/components/LoggedIn";
-import { HandleMembership } from "./imports/components/HandleMembership";
-import { WaitForEmailVerification } from "./imports/components/WaitForEmailVerification";
+import { LoginForm } from "./imports/pages/LoginForm";
+import { RegisterForm } from "./imports/pages/RegisterForm";
+import { LoggedIn } from "./imports/pages/LoggedIn";
+import { HandleMembership } from "./imports/pages/HandleMemberships/HandleMembership.jsx";
+import { WaitForEmailVerification } from "./imports/pages/WaitForEmailVerification";
 import "./imports/i18n"; // Detta ser till att i18n är initialiserad när appen startar
-import { LoggedInAsMember } from "./imports/components/LoggedInAsMembers";
-import { MembershipAgreement } from "./imports/components/MembershipAgreement";
-import { Payment } from "./imports/components/Payment";
-import { accounts } from "./imports/components/accounts";
-import { calendar } from "./imports/components/calendar";
-import { contact } from "./imports/components/Contact/contact";
-import { ForgotPassword } from "./imports/components/ForgotPassword.jsx";
-import { ResetPassword } from "./imports/components/ResetPassword.jsx";
+import { LoggedInAsMember } from "./imports/pages/LoggedInAsMembers";
+import { MembershipAgreement } from "./imports/pages/MembershipAgreement/MembershipAgreement.jsx";
+import { Payment } from "./imports/pages/Payment/Payment.jsx";
+import { accounts } from "./imports/pages/acounts/accounts";
+import { calendar } from "./imports/pages/Calendar/calendar";
+import { contact } from "./imports/pages/Contact/contact";
+import { ForgotPassword } from "./imports/pages/ForgotPassword.jsx";
+import { ResetPassword } from "./imports/pages/ResetPassword.jsx";
 import React from "react";
-import { UnlockDoors } from "./imports/components/UnlockDoors";
-import { createMember } from "./imports/components/createMember.jsx";
-import { AddFamilyMember } from "./imports/components/addFamilyMember";
+import { UnlockDoors } from "./imports/pages/Unlock/UnlockDoors.jsx";
+import { createMember } from "./imports/pages/createMember.jsx";
+import { AddFamilyMember } from "./imports/pages/addFamilyMember";
 
 FlowRouter.triggers.enter([
   (context, redirect) => {
@@ -29,7 +29,6 @@ const handleRouteProtection = async (context, redirect) => {
   const path = context.path;
   const user = Meteor.user();
 
-  // Tillåt vissa offentliga sidor, La till LoggedInAsMember för kastades fram och tillbaka för mycket som det var nu
   const publicPaths = [
     "/login",
     "/register",

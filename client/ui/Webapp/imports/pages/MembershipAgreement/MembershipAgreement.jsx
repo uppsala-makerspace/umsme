@@ -5,8 +5,9 @@ import { Payments } from "/collections/payments";
 import { updateMember } from "/lib/utils";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import { LanguageSwitcher } from "./langueSwitcher";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
+import './MembershipAgreement.css';
 
 export const MembershipAgreement = () => {
   const [membership, setMembership] = useState(null);

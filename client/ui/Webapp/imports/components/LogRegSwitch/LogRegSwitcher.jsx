@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import './LogRegSwitch.css';
 
 export const LogRegSwitcher = ({ setFormType, formType, onClick }) => {
   const { t } = useTranslation();
