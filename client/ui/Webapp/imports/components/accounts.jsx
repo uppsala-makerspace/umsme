@@ -16,6 +16,7 @@ export const accounts = () => {
   const [family, setFamily] = useState([]);
   const [addingFamilyMember, setAddingFamilyMember] = useState(false);
   const [isFamilyHead, setisFamilyHead] = useState(false);
+  const [isInFamily, setIsInFamily] = useState(false);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -50,6 +51,13 @@ export const accounts = () => {
 
     fetchData();
   }, [user?._id]);
+
+  useEffect(() => {
+    if (member && member.infamily) {
+      console.log("▶️ Medlem är i familj med ID:", member.infamily);
+      setIsInFamily(true);
+    }
+  }, [member]);
 
   useEffect(() => {
     if (memberships?.[0]?.type === "Family lab member") {
@@ -109,7 +117,8 @@ export const accounts = () => {
           {/*  {member_family ? <span>{t("FamilyMember")}</span> : null} */}
 
           <div className="left-text">
-            {t("TypeOfMembership")} {membershipTypeName()}
+            {t("TypeOfMembership")}{" "}
+            {isInFamily ? t("memberFamily") : membershipTypeName()}
           </div>
 
           <div className="left-text">
