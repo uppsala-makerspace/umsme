@@ -15,6 +15,7 @@ export const accounts = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [family, setFamily] = useState([]);
   const [addingFamilyMember, setAddingFamilyMember] = useState(false);
+  const [isFamilyHead, setisFamilyHead] = useState(false);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -49,6 +50,14 @@ export const accounts = () => {
     fetchData();
   }, [user?._id]);
 
+  useEffect(() => {
+    if (memberships?.[0]?.type === "Family lab member") {
+      setisFamilyHead(true);
+    } else {
+      setisFamilyHead(false);
+    }
+  }, [memberships]);
+
   console.log("membership", memberships);
   console.log("currentMember", member);
   console.log("familj", family);
@@ -73,8 +82,8 @@ export const accounts = () => {
     });
   };
 
-  const membershipType = () => {
-    if (memberships?.[0]?.family === true) {
+  const membershipTypeName = () => {
+    if (memberships?.[0]?.type === "Family lab member") {
       return t("memberFamily");
     }
     if (memberships?.[0]?.amount >= 1200) {
@@ -85,6 +94,7 @@ export const accounts = () => {
     }
   };
 
+  //const member_family = member.family;
   return (
     <>
       <LanguageSwitcher />
@@ -101,8 +111,10 @@ export const accounts = () => {
 
           <h1 className="left-text"> {t("MyAccount")}</h1>
 
+          {/*  {member_family ? <span>{t("FamilyMember")}</span> : null} */}
+
           <div className="left-text">
-            {t("TypeOfMembership")} {membershipType()}
+            {t("TypeOfMembership")} {membershipTypeName()}
           </div>
 
           <div className="left-text">
@@ -140,7 +152,15 @@ export const accounts = () => {
               </div>
 
               <br />
-              <button onClick={openFamilyForm}>{t("AddMember")}</button>
+            </div>
+          ) : (
+            <div></div>
+          )}
+          {isFamilyHead ? (
+            <div>
+              <button className="form-button" onClick={openFamilyForm}>
+                {t("AddFamilyMember")}
+              </button>
             </div>
           ) : (
             <div></div>

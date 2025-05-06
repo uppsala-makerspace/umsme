@@ -75,5 +75,6 @@
   "ScanQrCode": "Scan the QR-code to pay",
   "CheckPayment": "Click to check your payment",
   "Payment": "Payment",
-  "FinishPayment": "Complete Payment"
+  "FinishPayment": "Complete Payment",
+  "FamilyMember": "You are part of a family membership"
 }
