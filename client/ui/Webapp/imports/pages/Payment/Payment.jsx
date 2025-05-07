@@ -4,7 +4,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
-import './payment.css'
+import "./payment.css";
 
 export const Payment = () => {
   const user = useTracker(() => Meteor.user());
@@ -100,7 +100,15 @@ export const Payment = () => {
   return (
     <>
       <LanguageSwitcher />
-      <div className="login-form">
+      <div
+        style={{
+          marginTop: 20,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className="payment-container"
+      >
         {paymentApproved ? (
           <div style={{ marginTop: 20 }}>
             <h3>{t("paymentApproved")}</h3>
@@ -108,7 +116,7 @@ export const Payment = () => {
           </div>
         ) : qrSrc ? (
           <div style={{ marginTop: 20 }}>
-            <h3>{t("ScanQrCode")}</h3>
+            <h3 className="scanQRh3">{t("ScanQrCode")} </h3>
             <img
               src={qrSrc}
               alt="Swish QR Code"
@@ -116,7 +124,11 @@ export const Payment = () => {
               height={300}
               className="swish-qr"
             />
-            <button onClick={checkIfapproved} style={{ marginTop: 10 }}>
+            <button
+              onClick={checkIfapproved}
+              style={{ marginTop: 10 }}
+              className="finishButton"
+            >
               {t("CheckPayment")}
             </button>
           </div>
@@ -126,7 +138,10 @@ export const Payment = () => {
             <h2>{membershipType.name}</h2>
             <p>{membershipType.description}</p>
             <h3>{membershipType.price}</h3>
-            <button onClick={() => handlePayment(membershipType.price)}>
+            <button
+              onClick={() => handlePayment(membershipType.price)}
+              className="finishButton"
+            >
               {t("FinishPayment")}
             </button>
           </>

@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap");
+
 .umsapp html,
 body {
   margin: 0;
@@ -6,6 +8,7 @@ body {
   background: #f0efef;
   overflow-x: hidden;
   width: 100%;
+  font-family: "DM Mono", monospace;
 }
 
 .umsapp body {
@@ -288,8 +291,6 @@ body {
   align-items: center;
   z-index: 1000;
 }
-
-
 
 .umsapp .AgreementContent {
   background: white;
