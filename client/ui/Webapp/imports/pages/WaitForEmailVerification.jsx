@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { useTracker } from "meteor/react-meteor-data";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher";
 
 export const WaitForEmailVerification = () => {
   const user = useTracker(() => Meteor.user(), []);
+  const { t, i18n } = useTranslation();
   const toLogIn = () => {
     Meteor.logout(() => {
       FlowRouter.go("/login");
@@ -20,22 +23,25 @@ export const WaitForEmailVerification = () => {
   }, [user]);
 
   return (
-    <div>
-      <h1>Vänligen verifiera din e-postadress</h1>
+    <>
+    <LanguageSwitcher />
+    <h1 style={{textAlign: "center"}}>{t("PleaseVerify")}</h1>
+    <div className="login-form">
+    <div className="form-group">
+        <button
+          className="form-button"
+          onClick={() => Meteor.call("sendVerificationEmail")}
+        >
+          {t("SendNewVerification")}
+        </button>
+      </div>
 
       <div className="form-group">
         <button className="button" onClick={() => toLogIn()}>
-          Back to Login
-        </button>
-      </div>
-      <div className="form-group">
-        <button
-          className="button"
-          onClick={() => Meteor.call("sendVerificationEmail")}
-        >
-          Skicka nytt verifieringsmail
+          {t("BackToLogin")}
         </button>
       </div>
     </div>
+    </>
   );
 };

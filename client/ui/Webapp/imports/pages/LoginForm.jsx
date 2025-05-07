@@ -86,7 +86,9 @@ export const LoginForm = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
+        <p>
+        <a href="/ForgotPassword" style={{ fontSize: "0.9em", marginTop: "-3px" }}>{t("ForgotPassword")}</a>
+        </p>
         <div className="form-group">
           <button type="submit" className="form-button">
             {t("login")}
@@ -100,9 +102,6 @@ export const LoginForm = () => {
         <div className="form-group">
           <FacebookButton />
         </div>
-        <p>
-          <a href="/ForgotPassword">Glömt lösenord?</a>
-        </p>
       </form>
     </>
   );

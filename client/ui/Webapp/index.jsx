@@ -12,6 +12,7 @@ import { Payment } from "./imports/pages/Payment/Payment.jsx";
 import { accounts } from "./imports/pages/acounts/accounts";
 import { calendar } from "./imports/pages/Calendar/calendar";
 import { contact } from "./imports/pages/Contact/contact";
+import { kiosk } from "./imports/pages/Kiosk/kiosks.jsx";
 import { ForgotPassword } from "./imports/pages/ForgotPassword.jsx";
 import { ResetPassword } from "./imports/pages/ResetPassword.jsx";
 import React from "react";
@@ -100,8 +101,8 @@ FlowRouter.route("/LoggedInAsMember/HandleMembership", {
 FlowRouter.route("/HandleMembership", {
   action() {
     route("HandleMembership", HandleMembership);
-  }
-})
+  },
+});
 
 FlowRouter.route("/login", {
   action() {
@@ -180,5 +181,11 @@ FlowRouter.route("/LoggedInAsMember/contact", {
 FlowRouter.route("/LoggedInAsMember/keys", {
   action() {
     route("UnlockDoors", UnlockDoors);
+  },
+});
+
+FlowRouter.route("/LoggedInAsMember/kiosk", {
+  action() {
+    route("kiosk", kiosk);
   },
 });
