@@ -141,40 +141,40 @@ export const accounts = () => {
           </div>
 
           <br />
-        </div>
 
-        <div className="left-text">
-          {family.length > 1 ? (
-            <div>
-              <div>{t("FamilyMembers")}</div>
+          <div className="left-text">
+            {family.length > 1 ? (
+              <div>
+                <div>{t("FamilyMembers")}</div>
 
-              <div className="vertical-divider">
-                {family.map((email, index) => (
-                  <div key={index} className="family-row">
-                    <span className="family-email">{email}</span>
-                    {isFamilyHead && (
-                      <a href="/profile" className="remove-link">
-                        {t("Remove")}
-                      </a>
-                    )}
-                  </div>
-                ))}
+                <div className="vertical-divider">
+                  {family.map((email, index) => (
+                    <div key={index} className="family-row">
+                      <span className="family-email">{email}</span>
+                      {isFamilyHead && (
+                        <a href="/profile" className="remove-link">
+                          {t("Remove")}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <br />
               </div>
-
-              <br />
-            </div>
-          ) : (
-            <div></div>
-          )}
-          {isFamilyHead && familySize < 4 ? (
-            <div>
-              <button className="form-button" onClick={openFamilyForm}>
-                {t("AddFamilyMember")}
-              </button>
-            </div>
-          ) : (
-            <div></div>
-          )}
+            ) : (
+              <div></div>
+            )}
+            {isFamilyHead && familySize < 4 ? (
+              <div>
+                <button className="form-button" onClick={openFamilyForm}>
+                  {t("AddFamilyMember")}
+                </button>
+              </div>
+            ) : (
+              <div></div>
+            )}
+          </div>
         </div>
         <button onClick={logout}>{t("logout")}</button>
       </div>

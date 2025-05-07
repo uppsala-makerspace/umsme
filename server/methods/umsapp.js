@@ -154,14 +154,18 @@ Meteor.methods({
 
       if (payment.status === "PAID") {
         const member = await findMemberForUser();
-        await Meteor.callAsync("addMembership", {
-          mid: member._id,
-          amount: Number(payment.amount),
-          start: payment.createdAt,
-          type: membershipType,
-          discount: false,
-          family: false,
-        });
+        await Meteor.callAsync(
+          "addMembership",
+          {
+            mid: member._id,
+            amount: Number(payment.amount),
+            start: payment.createdAt,
+            type: membershipType,
+            discount: false,
+            family: false,
+          },
+          instructionId
+        );
         const membership = await Meteor.call("findMembershipsForUser");
         await Meteor.callAsync("addPayment", {
           type: "swish",
@@ -203,6 +207,38 @@ Meteor.methods({
       );
     }
 
+    //if infamily: check if membershiptype is lab family and that the family is not already full
+    if (data.infamily) {
+      const memberships = await Meteor.callAsync("findMembershipsForUser");
+
+      const hasLabFamilyMembership = memberships.some(
+        (membership) => membership.type === "Family lab member"
+      );
+
+      if (!hasLabFamilyMembership) {
+        throw new Meteor.Error(
+          "no-lab-family-membership",
+          "Användaren har inget medlemskap av typen 'Family lab family'."
+        );
+      }
+      const existingFamilyMembers = await PendingMembers.find({
+        infamily: data.infamily,
+      }).countAsync();
+
+      const confirmedFamilyMembers = await Members.find({
+        infamily: data.infamily,
+      }).countAsync();
+
+      const total = existingFamilyMembers + confirmedFamilyMembers;
+
+      if (total >= 3) {
+        throw new Meteor.Error(
+          "family-limit-reached",
+          "Denna familj har redan tre medlemmar registrerade."
+        );
+      }
+    }
+
     console.log("Sparar PendingMember:", data);
     return PendingMembers.insertAsync(data);
   },
@@ -221,7 +257,6 @@ Meteor.methods({
     if (!pending)
       throw new Meteor.Error("not-found", "Ingen pending member hittad");
 
-    //i think this is unnecessary, but just in case
     const existing = await Members.findOneAsync({ email });
     if (existing) return { _id: existing._id, mid: existing.mid };
 
@@ -276,33 +311,45 @@ Meteor.methods({
     }
   },
 
-  async addMembership(membershipData) {
-    console.log("Lägger till medlemskap, server side", membershipData);
-    check(membershipData, {
-      mid: String,
-      pid: Match.Maybe(String),
-      amount: Match.Maybe(Number),
-
-      start: Date,
-      type: String,
-      discount: Match.Maybe(Boolean),
-      family: Match.Maybe(Boolean),
-      memberend: Match.Maybe(Date),
-      labend: Match.Maybe(Date),
+  async addMembership(membershipData, instructionId) {
+    const payment = await initiatedPayments.findOneAsync({
+      swishID: instructionId,
     });
-
-    if (!membershipData.memberend) {
-      const end = new Date(membershipData.start);
-      end.setFullYear(end.getFullYear() + 1);
-      end.setDate(end.getDate() + 7);
-      membershipData.memberend = end;
+    if (!payment) {
+      throw new Meteor.Error("not-found", "Betalningen hittades inte");
     }
+    if (payment.status === "PAID") {
+      console.log("Lägger till medlemskap, server side", membershipData);
+      check(membershipData, {
+        mid: String,
+        pid: Match.Maybe(String),
+        amount: Match.Maybe(Number),
 
-    const membershipId = await Memberships.insertAsync(membershipData);
+        start: Date,
+        type: String,
+        discount: Match.Maybe(Boolean),
+        family: Match.Maybe(Boolean),
+        memberend: Match.Maybe(Date),
+        labend: Match.Maybe(Date),
+      });
 
-    return {
-      id: membershipId,
-      mid: membershipData.mid,
-    };
+      if (!membershipData.memberend) {
+        const end = new Date(membershipData.start);
+        end.setFullYear(end.getFullYear() + 1);
+        end.setDate(end.getDate() + 7);
+        membershipData.memberend = end;
+      }
+
+      const membershipId = await Memberships.insertAsync(membershipData);
+
+      return {
+        id: membershipId,
+        mid: membershipData.mid,
+      };
+    } else if (payment.status === "INITIATED") {
+      throw new Meteor.Error("not-paid", "Betalningen är inte genomförd än");
+    } else {
+      throw new Meteor.Error("payment-failed", "Betalningen misslyckades");
+    }
   },
 });
