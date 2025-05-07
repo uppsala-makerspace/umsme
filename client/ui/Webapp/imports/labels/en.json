@@ -8,7 +8,9 @@
   "logout": "Logout",
   "email": "Email",
   "password": "Password",
-  "passwordConfirm": "Confirm Password",
+  "passwordConfirm": "Confirm password",
+  "passwordConfirmNew" : "Confirm new password",
+  "newPassword": "New password",
   "exEmail": "example@ex.com",
   "logginGoogle": "Continue with Google",
   "logginFacebook": "Continue with Facebook",
@@ -82,5 +84,9 @@
   "SendLink": "Send verification link",
   "YourEmail": "Your email",
   "CouldNotFind": "Could not send email: ",
-  "SentResetEmail": "Sent reset email to: "
+  "SentResetEmail": "Sent reset email to: ",
+  "ResetPassword": "Reset Password",
+  "PasswordNoMatch": "The passwords do not match!",
+  "SomethingWentWrong": "Something went wrong, please try again. ",
+  "PasswordReseted": "Password has been reset"
 }
