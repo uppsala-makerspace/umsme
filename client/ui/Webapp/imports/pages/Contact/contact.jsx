@@ -1,8 +1,8 @@
 import React from "react";
 import { Meteor } from "meteor/meteor";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { LanguageSwitcher } from "../langueSwitcher";
-import { HamburgerMenu } from "../HamburgerMenu";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
+import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./contacts.css";

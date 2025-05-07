@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
+import "./Hamburger.css";
 
 export const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);

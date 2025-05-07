@@ -5,10 +5,11 @@ import { Payments } from "/collections/payments";
 import { updateMember } from "/lib/utils";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import { LanguageSwitcher } from "./langueSwitcher";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
 import { FiLogOut } from "react-icons/fi";
-import { HamburgerMenu } from "./HamburgerMenu";
+import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import './handleMembership.css';
 
 export const HandleMembership = () => {
   const { t, i18n } = useTranslation();

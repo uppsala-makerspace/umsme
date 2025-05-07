@@ -2,13 +2,13 @@ import { Meteor } from "meteor/meteor";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import { GoogleButton } from "./GoogleButton";
+import { GoogleButton } from "../components/GoogleButton";
 import "../Appmain.css";
-import { LanguageSwitcher } from "./langueSwitcher";
-import { FacebookButton } from "./FacebookButton";
+import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher";
+import { FacebookButton } from "../components/FacebookButton";
 import { F } from "chart.js/dist/chunks/helpers.segment";
 import { useTranslation } from "react-i18next";
-import { LogRegSwitcher } from "./LogRegSwitcher";
+import { LogRegSwitcher } from "../components/LogRegSwitch/LogRegSwitcher";
 
 export const LoginForm = () => {
   const { t, i18n } = useTranslation();

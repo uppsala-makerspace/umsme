@@ -2,10 +2,11 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { LanguageSwitcher } from "./langueSwitcher";
-import { HamburgerMenu } from "./HamburgerMenu";
-import { AddFamilyMember } from "./addFamilyMember";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
+import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import { AddFamilyMember } from "../addFamilyMember";
 import { useTranslation } from "react-i18next";
+import "./acounts.css";
 
 export const accounts = () => {
   const user = useTracker(() => Meteor.user());
@@ -140,40 +141,40 @@ export const accounts = () => {
           </div>
 
           <br />
-        </div>
 
-        <div className="left-text">
-          {family.length > 1 ? (
-            <div>
-              <div>{t("FamilyMembers")}</div>
+          <div className="left-text">
+            {family.length > 1 ? (
+              <div>
+                <div>{t("FamilyMembers")}</div>
 
-              <div className="vertical-divider">
-                {family.map((email, index) => (
-                  <div key={index} className="family-row">
-                    <span className="family-email">{email}</span>
-                    {isFamilyHead && (
-                      <a href="/profile" className="remove-link">
-                        {t("Remove")}
-                      </a>
-                    )}
-                  </div>
-                ))}
+                <div className="vertical-divider">
+                  {family.map((email, index) => (
+                    <div key={index} className="family-row">
+                      <span className="family-email">{email}</span>
+                      {isFamilyHead && (
+                        <a href="/profile" className="remove-link">
+                          {t("Remove")}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <br />
               </div>
-
-              <br />
-            </div>
-          ) : (
-            <div></div>
-          )}
-          {isFamilyHead && familySize < 4 ? (
-            <div>
-              <button className="form-button" onClick={openFamilyForm}>
-                {t("AddFamilyMember")}
-              </button>
-            </div>
-          ) : (
-            <div></div>
-          )}
+            ) : (
+              <div></div>
+            )}
+            {isFamilyHead && familySize < 4 ? (
+              <div>
+                <button className="form-button" onClick={openFamilyForm}>
+                  {t("AddFamilyMember")}
+                </button>
+              </div>
+            ) : (
+              <div></div>
+            )}
+          </div>
         </div>
         <button onClick={logout}>{t("logout")}</button>
       </div>

@@ -1,0 +1,8 @@
+.umsapp .login-form button.door-button {
+    border-radius: 50%;
+    width: 40%;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    border-style: 1px dashed black;
+    cursor: pointer;
+  }

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { LanguageSwitcher } from "./langueSwitcher";
-import { LogRegSwitcher } from "./LogRegSwitcher";
+import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
