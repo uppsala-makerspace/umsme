@@ -198,7 +198,6 @@ Meteor.methods({
       mid: Match.Optional(String),
       infamily: Match.Optional(String),
       family: Match.Optional(Boolean),
-      //add option to include family head membership
     });
     const existing = await PendingMembers.findOneAsync({ email: data.email });
     if (existing) {
@@ -208,9 +207,20 @@ Meteor.methods({
       );
     }
 
-    // code to make sure that the family does not have more than 3 children, avoiding infinite families
-    // we should also check if the person adding the family should be authorized to do this, in the event that infamily is included
+    //if infamily: check if membershiptype is lab family and that the family is not already full
     if (data.infamily) {
+      const memberships = await Meteor.callAsync("findMembershipsForUser");
+
+      const hasLabFamilyMembership = memberships.some(
+        (membership) => membership.type === "Family lab member"
+      );
+
+      if (!hasLabFamilyMembership) {
+        throw new Meteor.Error(
+          "no-lab-family-membership",
+          "Användaren har inget medlemskap av typen 'Family lab family'."
+        );
+      }
       const existingFamilyMembers = await PendingMembers.find({
         infamily: data.infamily,
       }).countAsync();
