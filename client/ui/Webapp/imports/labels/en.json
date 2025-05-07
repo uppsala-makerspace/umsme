@@ -88,5 +88,8 @@
   "ResetPassword": "Reset Password",
   "PasswordNoMatch": "The passwords do not match!",
   "SomethingWentWrong": "Something went wrong, please try again. ",
-  "PasswordReseted": "Password has been reset"
+  "PasswordReseted": "Password has been reset",
+  "SendNewVerification": "Send new verification link",
+  "BackToLogin": "Back to login",
+  "PleaseVerify": "Please verify your email address"
 }

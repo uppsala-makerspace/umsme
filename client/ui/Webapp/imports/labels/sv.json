@@ -88,5 +88,8 @@
   "ResetPassword": "Återställ lösenord",
   "PasswordNoMatch": "Lösenorden matchar inte!",
   "SomethingWentWrong": "Något gick fel, försök igen. ",
-  "PasswordReseted": "Lösenordet har återställts"
+  "PasswordReseted": "Lösenordet har återställts",
+  "SendNewVerification": "Skicka ny verifieringslänk",
+  "BackToLogin": "Tillbaka till inloggning",
+  "PleaseVerify": "Vänligen verifiera din e-postadress"
 }
