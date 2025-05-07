@@ -9,6 +9,8 @@
   "email": "E-post",
   "password": "Lösenord",
   "passwordConfirm": "Bekräfta lösenord",
+  "passwordConfirmNew": "Bekräfta nytt lösenord",
+  "newPassword": "Nytt lösenord",
   "exEmail": "exempel@ex.com",
   "logginGoogle": "Fortsätt med Google",
   "logginFacebook": "Fortsätt med Facebook",
@@ -76,5 +78,15 @@
   "CheckPayment": "Klicka för att kolla betalningen",
   "Payment": "Betalning",
   "FinishPayment": "Slutför Betalning",
-  "FamilyMember": "Du är en del av ett familjemedlemskap"
+  "FamilyMember": "Du är en del av ett familjemedlemskap",
+  "ForgotPassword": "Glömt lösenord?",
+  "FillInEmail": "Fyll i din e-postadress för att återställa ditt lösenord",
+  "SendLink": "Skicka verifieringslänk",
+  "YourEmail": "Din e-postadress",
+  "CouldNotFind": "Kunde inte skicka e-post: ",
+  "SentResetEmail": "Återställningsmejl är skickat till: ",
+  "ResetPassword": "Återställ lösenord",
+  "PasswordNoMatch": "Lösenorden matchar inte!",
+  "SomethingWentWrong": "Något gick fel, försök igen. ",
+  "PasswordReseted": "Lösenordet har återställts"
 }
