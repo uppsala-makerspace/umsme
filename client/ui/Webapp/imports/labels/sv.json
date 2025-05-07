@@ -76,5 +76,22 @@
   "CheckPayment": "Klicka för att kolla betalningen",
   "Payment": "Betalning",
   "FinishPayment": "Slutför Betalning",
-  "FamilyMember": "Du är en del av ett familjemedlemskap"
+  "FamilyMember": "Du är en del av ett familjemedlemskap",
+  "Soda": "Läsk",
+  "keys": "Nycklar",
+  "Membership": "Medlemskap",
+   "myAccount": "Mitt konto",
+   "Calender": "Kalender",
+   "Products": "Produkter",
+  "addToCart": "Lägg i varukorg",
+   "yourCartIsEmpty": "Din varukorg är tom",
+   "cart": "Varukorg",
+   "remove": "Ta bort",
+   "total": "Totalt",
+    "ProteinBar": "Proteinbar",
+    "IceCream": "Glass",
+    "removeOne": "Ta bort en"
+
+   
+  
 }

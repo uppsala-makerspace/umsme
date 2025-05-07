@@ -76,5 +76,23 @@
   "CheckPayment": "Click to check your payment",
   "Payment": "Payment",
   "FinishPayment": "Complete Payment",
-  "FamilyMember": "You are part of a family membership"
+  "FamilyMember": "You are part of a family membership",
+  "Soda": "Soda",
+  "keys": "Keys",
+  "Membership": "Membership",
+  "myAccount": "My Account",
+  "Calender": "Calendar",
+  "Products": "Products",
+  "addToCart": "Add to cart",
+  "yourCartIsEmpty": "Your cart is empty",
+  "cart": "Cart",
+  "remove": "Remove",
+  "total": "Total",
+  "ProteinBar": "Protein Bar",
+  "IceCream": "Ice Cream",
+  "removeOne": "Remove one"
+  
+  
+
+  
 }
