@@ -92,9 +92,7 @@ export const LoggedInAsMember = () => {
         <button
           onClick={() => FlowRouter.go("/LoggedInAsMember/keys")}
           className="round-button"
-        >
-          M
-        </button>
+        ></button>
         <p style={{ marginTop: "10px" }}>{t("greeting2")}</p>
         <p style={{ marginTop: "0" }}> {t("PressToOpen")}</p>
         {typeof daysLeftOfLab === "number" &&

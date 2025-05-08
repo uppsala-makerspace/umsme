@@ -66,7 +66,10 @@ export const kiosk = () => {
             <div key={product.id} className="product">
               <span>{t(product.nameKey)}</span>
               <span>{product.price} SEK</span>
-              <button onClick={() => addToCart(product)}>
+              <button
+                className="form-button white"
+                onClick={() => addToCart(product)}
+              >
                 {t("addToCart")}
               </button>
             </div>
@@ -84,7 +87,10 @@ export const kiosk = () => {
                   {t(item.nameKey)} x{item.quantity}
                 </span>
                 <span>{item.price * item.quantity} SEK</span>
-                <button onClick={() => removeFromCart(item.id)}>
+                <button
+                  className="form-button white"
+                  onClick={() => removeFromCart(item.id)}
+                >
                   {t("removeOne")}
                 </button>
               </div>

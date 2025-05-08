@@ -39,7 +39,7 @@ export const WaitForEmailVerification = () => {
         </div>
 
         <div className="form-group">
-          <button className="button" onClick={() => toLogIn()}>
+          <button className="form-button white" onClick={() => toLogIn()}>
             {t("BackToLogin")}
           </button>
         </div>
