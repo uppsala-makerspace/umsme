@@ -1,9 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap");
+
+.umsapp .payment-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8em;
+  max-width: 300px;
+  font-family: DM Mono, monospace;
+  margin: 0 auto;
+}
+
+.umsapp .payment-container p {
+  display: block;
+  max-width: 300px;
+  overflow: hidden;
+  text-align: left;
+}
 .umsapp .swish-qr {
+  display: block;
   background-color: white;
   padding: 0.9em;
   border: solid;
   border-radius: 57px;
   border-color: #5fc86f;
   border-width: 7.5px;
-  }
-  
+}
+
+.umsapp .finishButton {
+  display: block;
+  color: #f0efef;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #5fc86f;
+  cursor: pointer;
+  font-family: "DM Mono", monospace;
+  width: 300px;
+  height: 40px;
+  overflow: hidden;
+}
+
+.umsapp .scanQRh3 {
+  text-align: center;
+  font-family: "DM Mono", monospace;
+}
