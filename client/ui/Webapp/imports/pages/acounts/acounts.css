@@ -22,6 +22,11 @@
     text-align: left;
   }
 
+  .umsapp .middle-text {
+    
+    text-align: middle;
+  }
+
   .umsapp .vertical-divider {
     justify-content: space-between;
     align-items: center;
@@ -39,4 +44,15 @@
   .umsapp .family-email,
   .umsapp .remove-link {
     font-size: 0.875rem;
+  }
+
+  .logout-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .logout-icon {
+    vertical-align: middle;
+    font-size: 1.2em;
   }

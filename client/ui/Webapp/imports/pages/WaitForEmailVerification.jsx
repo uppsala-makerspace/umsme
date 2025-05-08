@@ -24,24 +24,26 @@ export const WaitForEmailVerification = () => {
 
   return (
     <>
-    <LanguageSwitcher />
-    <h1 style={{textAlign: "center"}}>{t("PleaseVerify")}</h1>
-    <div className="login-form">
-    <div className="form-group">
-        <button
-          className="form-button"
-          onClick={() => Meteor.call("sendVerificationEmail")}
-        >
-          {t("SendNewVerification")}
-        </button>
-      </div>
+      <LanguageSwitcher />
+      <br></br>
+      <br></br>
+      <h1 style={{ textAlign: "center" }}>{t("PleaseVerify")}</h1>
+      <div className="login-form">
+        <div className="form-group">
+          <button
+            className="form-button"
+            onClick={() => Meteor.call("sendVerificationEmail")}
+          >
+            {t("SendNewVerification")}
+          </button>
+        </div>
 
-      <div className="form-group">
-        <button className="button" onClick={() => toLogIn()}>
-          {t("BackToLogin")}
-        </button>
+        <div className="form-group">
+          <button className="button" onClick={() => toLogIn()}>
+            {t("BackToLogin")}
+          </button>
+        </div>
       </div>
-    </div>
     </>
   );
 };

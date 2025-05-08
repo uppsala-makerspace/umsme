@@ -116,33 +116,33 @@ export const accounts = () => {
 
           <button className="login-form"> {member?.name}</button>
 
-          <h1 className="left-text"> {t("MyAccount")}</h1>
+          <h1 className="middle-text"> {t("MyAccount")}</h1>
 
           {/*  {member_family ? <span>{t("FamilyMember")}</span> : null} */}
 
-          <div className="left-text">
+          <div className="middle-text">
             {t("TypeOfMembership")}{" "}
             {isInFamily ? t("memberFamily") : membershipTypeName()}
           </div>
 
-          <div className="left-text">
+          <div className="middle-text">
             {t("MemberID")} {member?.mid || "–"}
           </div>
           <br />
-          <div className="left-text">
+          <div className="middle-text">
             {t("MemberSince")}{" "}
             {memberships?.[
               memberships.length - 1
             ]?.start.toLocaleDateString() || "–"}
           </div>
-          <div className="left-text">
+          <div className="middle-text">
             {t("EndDate")}{" "}
             {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
           </div>
 
           <br />
 
-          <div className="left-text">
+          <div className="middle-text">
             {family.length > 1 ? (
               <div>
                 <div>{t("FamilyMembers")}</div>
