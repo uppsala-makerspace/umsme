@@ -19,7 +19,7 @@ import React from "react";
 import { UnlockDoors } from "./imports/pages/Unlock/UnlockDoors.jsx";
 import { createMember } from "./imports/pages/createMember.jsx";
 import { AddFamilyMember } from "./imports/pages/addFamilyMember";
-import { Confirmation } from "./imports/pages/Confirmation/Confirmation";
+import { Confirmation } from "./imports/pages/Confirmation/Confirmation.jsx";
 
 FlowRouter.triggers.enter([
   (context, redirect) => {
