@@ -31,6 +31,7 @@ export const ResetPassword = ({ token }) => {
   return (
     <>
       <LanguageSwitcher />
+      <br></br>
       <div className="login-form">
         <form onSubmit={handleSubmit}>
           <h2>{t("ResetPassword")}</h2>

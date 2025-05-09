@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap");
+
 .umsapp html,
 body {
   margin: 0;
@@ -6,6 +8,7 @@ body {
   background: #f0efef;
   overflow-x: hidden;
   width: 100%;
+  font-family: "DM Mono", monospace;
 }
 
 .umsapp body {
@@ -289,8 +292,6 @@ body {
   z-index: 1000;
 }
 
-
-
 .umsapp .AgreementContent {
   background: white;
   padding: 20px;
@@ -352,6 +353,58 @@ body {
   vertical-align: middle;
   font-size: 1.2em;
 }
+
+.umsapp .form-button.white {
+  background-color: #f0efef;
+  color: #000000;
+  border: 1px solid black;
+  
+}
+
+
+.umsapp .social-button {
+  all: unset; /* SUPERVIKTIGT, detta tar bort iOS/Safari/Chromes standardstil */
+  width: 100%;
+  background-color: #f0efef;
+  border: 1px solid black;
+  border-radius: 6px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-family: "DM Mono", monospace;
+  color: black;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+
+
+.umsapp .social-button:disabled {
+  background-color: #f0efef;
+  color: #f0efef;
+  border: 1px solid #ccc;
+  cursor: not-allowed;
+}
+
+
+.umsapp .forgot-password-page form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.umsapp .forgot-password-page form input,
+.umsapp .forgot-password-page form button {
+  width: 90%;
+  max-width: 400px;
+  margin: 10px 0;
+}
+
 
 @media (max-width: 768px) {
   .umsapp .login-form input,

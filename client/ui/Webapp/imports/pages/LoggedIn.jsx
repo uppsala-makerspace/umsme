@@ -5,6 +5,7 @@ import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher"
 import { useTranslation } from "react-i18next";
 import { PendingMembers } from "/collections/PendingMembers.js";
 import PushSetup from "../components/pushSetup";
+import { FiAlignCenter } from "react-icons/fi";
 
 export const LoggedIn = () => {
   const { t, i18n } = useTranslation();
@@ -144,7 +145,7 @@ export const LoggedIn = () => {
           </button>
         )}
       </form>
-      <p>
+      <p style={{ textAlign: "center" }}>
         {t("yourMail")} {email}
       </p>
       <button
@@ -154,7 +155,9 @@ export const LoggedIn = () => {
       >
         Skicka testnotis
       </button>
-      <button onClick={logout}>{t("logout")}</button>
+      <button className="logout-button" onClick={logout}>
+        {t("logout")}
+      </button>
     </>
   );
 };

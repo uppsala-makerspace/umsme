@@ -33,10 +33,10 @@
   "memberFamily": "Family lab member",
   "memberFamilyText": "With a Family Lab Membership, up to four people registered at the same address get 24/7 access to the Makerspace.",
   "memberFamilyPrice": "2000 SEK/year",
-  "OurMemberships": "Our Memberships",
-  "MembershipAgreement": "Membership Agreement",
-  "IAgree": "I have read and promise to follow the Membership Agreement.",
-  "AgreementButton": "Read The Membership Agreement",
+  "OurMemberships": "Our memberships",
+  "MembershipAgreement": "Membership agreement",
+  "IAgree": "I have read and promise to follow the membership agreement.",
+  "AgreementButton": "Read the membership agreement",
   "AgreementInfo": "All of our members must read and promise to follow our Membership Agreement.",
   "CloseToAgree": "You have now read the entire Agreement",
   "Close": "Close",
@@ -79,7 +79,8 @@
   "Payment": "Payment",
   "FinishPayment": "Complete Payment",
   "FamilyMember": "You are part of a family membership",
-  "ForgotPassword": "Forgot Password?",
+
+"ForgotPassword": "Forgot Password?",
   "FillInEmail": "Fill in your email in order to reset your password",
   "SendLink": "Send verification link",
   "YourEmail": "Your email",
@@ -91,5 +92,21 @@
   "PasswordReseted": "Password has been reset",
   "SendNewVerification": "Send new verification link",
   "BackToLogin": "Back to login",
-  "PleaseVerify": "Please verify your email address"
+  "PleaseVerify": "Please verify your email address",
+
+"Soda": "Soda",
+  "keys": "Keys",
+  "Membership": "Membership",
+  "myAccount": "My Account",
+  "Calender": "Calendar",
+  "Products": "Products",
+  "addToCart": "Add to cart",
+  "yourCartIsEmpty": "Your cart is empty",
+  "cart": "Cart",
+  "remove": "Remove",
+  "total": "Total",
+  "ProteinBar": "Protein Bar",
+  "IceCream": "Ice Cream",
+  "removeOne": "Remove one"
+
 }

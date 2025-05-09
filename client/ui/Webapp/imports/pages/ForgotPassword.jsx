@@ -24,10 +24,11 @@ export const ForgotPassword = () => {
 
   return (
     <>
-    <LanguageSwitcher />
-      <div className="login-form">
+      <LanguageSwitcher />
+      <br></br>
+      <div className="login-form forgot-password-page">
         <h2>{t("ForgotPassword")}</h2>
-        <p>{t("FillInEmail")}</p>
+        <p style={{ textAlign: "center" }}>{t("FillInEmail")}</p>
         <form onSubmit={handleForgotPassword}>
           <input
             type="email"
@@ -36,7 +37,9 @@ export const ForgotPassword = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <button className="form-button" type="submit">{t("SendLink")}</button>
+          <button className="form-button" type="submit">
+            {t("SendLink")}
+          </button>
         </form>
         {message && <p>{message}</p>}
       </div>

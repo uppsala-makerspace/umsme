@@ -20,8 +20,14 @@ export const FacebookButton = () => {
   const handleClick = () => {
     Meteor.loginWithFacebook({}, (err) => {
       if (err) {
-        if (err instanceof Meteor.Error && err.reason === "Det finns redan ett konto kopplat till den här adressen. Logga in med det kontot istället.") {
-          alert("Facebook-verifiering har lagts till på ditt befintliga konto. Testa att logga in med facebook igen så kommer det fungera!")
+        if (
+          err instanceof Meteor.Error &&
+          err.reason ===
+            "Det finns redan ett konto kopplat till den här adressen. Logga in med det kontot istället."
+        ) {
+          alert(
+            "Facebook-verifiering har lagts till på ditt befintliga konto. Testa att logga in med facebook igen så kommer det fungera!"
+          );
         } else {
           alert("Inloggningen misslyckades.");
         }
@@ -31,7 +37,11 @@ export const FacebookButton = () => {
     });
   };
   return (
-    <button disabled={isDisabled} onClick={handleClick}>
+    <button
+      className="social-button"
+      disabled={isDisabled}
+      onClick={handleClick}
+    >
       <img src="/images/FacebookLogo.png" alt="icon" className="button-icon" />
       {buttonText}
     </button>
