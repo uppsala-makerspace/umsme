@@ -9,7 +9,7 @@
   "email": "Email",
   "password": "Password",
   "passwordConfirm": "Confirm password",
-  "passwordConfirmNew" : "Confirm new password",
+  "passwordConfirmNew": "Confirm new password",
   "newPassword": "New password",
   "exEmail": "example@ex.com",
   "logginGoogle": "Continue with Google",
@@ -80,7 +80,7 @@
   "FinishPayment": "Complete Payment",
   "FamilyMember": "You are part of a family membership",
 
-"ForgotPassword": "Forgot Password?",
+  "ForgotPassword": "Forgot Password?",
   "FillInEmail": "Fill in your email in order to reset your password",
   "SendLink": "Send verification link",
   "YourEmail": "Your email",
@@ -94,7 +94,7 @@
   "BackToLogin": "Back to login",
   "PleaseVerify": "Please verify your email address",
 
-"Soda": "Soda",
+  "Soda": "Soda",
   "keys": "Keys",
   "Membership": "Membership",
   "myAccount": "My Account",
@@ -107,6 +107,9 @@
   "total": "Total",
   "ProteinBar": "Protein Bar",
   "IceCream": "Ice Cream",
-  "removeOne": "Remove one"
-
+  "removeOne": "Remove one",
+  "ThankYou": "Thank you and welcome!",
+  "MembershipRegistered": "Your membership is now registered. If you purchased a lab membership, your keys will be activated immediately, and you will have access to our facilities.",
+  "MembershipDetails": "Your membership number: 1003347\nMember until: 2026-04-04",
+  "BackToStart": "Back to start"
 }

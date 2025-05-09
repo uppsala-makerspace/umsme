@@ -19,6 +19,7 @@ import React from "react";
 import { UnlockDoors } from "./imports/pages/Unlock/UnlockDoors.jsx";
 import { createMember } from "./imports/pages/createMember.jsx";
 import { AddFamilyMember } from "./imports/pages/addFamilyMember";
+import { Confirmation } from "./imports/pages/Confirmation/Confirmation";
 
 FlowRouter.triggers.enter([
   (context, redirect) => {
@@ -161,6 +162,12 @@ FlowRouter.route("/LoggedInAsMember/calendar", {
 FlowRouter.route("/ForgotPassword", {
   action() {
     route("ForgotPassword", ForgotPassword);
+  },
+});
+
+FlowRouter.route("/Confirmation", {
+  action() {
+    route("Confirmation", Confirmation);
   },
 });
 

@@ -72,7 +72,7 @@ export const Payment = () => {
           console.error("Error:", err);
         } else {
           if (res === "PAID") {
-            FlowRouter.go("LoggedInAsMember");
+            FlowRouter.go("/Confirmation");
           }
         }
       }
