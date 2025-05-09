@@ -4,6 +4,7 @@ import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher"
 import { HamburgerMenu } from "../components/HamburgerMenu/HamburgerMenu";
 import { useTranslation } from "react-i18next";
 import { useTracker } from "meteor/react-meteor-data";
+import { LogoutButton } from "../components/LogoutButton/LogoutButtons.jsx";
 
 export const LoggedInAsMember = () => {
   const user = useTracker(() => Meteor.user());
@@ -121,17 +122,9 @@ export const LoggedInAsMember = () => {
               >
                 {t("RenewMembership")}
               </button>
-              <br />
             </div>
           )}
-        <button
-          style={{
-            boxSizing: "border-box",
-          }}
-          onClick={logout}
-        >
-          {t("logout")}
-        </button>
+        <LogoutButton onClick={logout} />
       </div>
     </>
   );

@@ -1,0 +1,26 @@
+.umsapp .logout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #f0efef; /* samma som övriga knappar */
+  color: black;
+  border: 1px solid black; /* svart ram */
+  border-radius: 4px;
+  font-family: "DM Mono", monospace;
+  font-size: 16px;
+  padding: 10px;
+  width: 100%;
+  max-width: 400px;
+  margin: 10px 0;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.umsapp .logout-button:hover {
+  background-color: #e0e0e0; /* lite mörkare grå vid hover */
+}
+
+.umsapp .logout-icon {
+  stroke: black;
+}
