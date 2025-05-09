@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
 import { PendingMembers } from "/collections/PendingMembers.js";
+import PushSetup from "../components/pushSetup";
 
 export const LoggedIn = () => {
   const { t, i18n } = useTranslation();
@@ -117,6 +118,8 @@ export const LoggedIn = () => {
       <form className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
         <LanguageSwitcher />
+        <PushSetup />
+
         <div>
           <h3 className="text-h3"> {t("welcome")}</h3>
           {member ? (
@@ -144,6 +147,13 @@ export const LoggedIn = () => {
       <p>
         {t("yourMail")} {email}
       </p>
+      <button
+        onClick={() =>
+          Meteor.callAsync("sendPush", "Hej!", "Det här är en testnotis")
+        }
+      >
+        Skicka testnotis
+      </button>
       <button onClick={logout}>{t("logout")}</button>
     </>
   );

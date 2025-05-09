@@ -87,7 +87,12 @@ export const LoginForm = () => {
           />
         </div>
         <p>
-        <a href="/ForgotPassword" style={{ fontSize: "0.9em", marginTop: "-3px" }}>{t("ForgotPassword")}</a>
+          <a
+            href="/ForgotPassword"
+            style={{ fontSize: "0.9em", marginTop: "-3px" }}
+          >
+            {t("ForgotPassword")}
+          </a>
         </p>
         <div className="form-group">
           <button type="submit" className="form-button">
