@@ -7,6 +7,8 @@ import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
 import { AddFamilyMember } from "../addFamilyMember";
 import { useTranslation } from "react-i18next";
 import "./acounts.css";
+//import "../../components/LogoutButton/LogoutButtons.css";
+import { LogoutButton } from "../../components/LogoutButton/LogoutButtons.jsx";
 
 export const accounts = () => {
   const user = useTracker(() => Meteor.user());
@@ -175,8 +177,8 @@ export const accounts = () => {
               <div></div>
             )}
           </div>
+          <LogoutButton onClick={logout} />
         </div>
-        <button onClick={logout}>{t("logout")}</button>
       </div>
     </>
   );

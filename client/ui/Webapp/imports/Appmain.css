@@ -343,16 +343,10 @@ body {
   background-color: #096817;
 }
 
-.logout-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-.logout-icon {
-  vertical-align: middle;
-  font-size: 1.2em;
-}
+
+
+
 
 .umsapp .form-button.white {
   background-color: #f0efef;
@@ -360,6 +354,9 @@ body {
   border: 1px solid black;
   
 }
+
+
+
 
 
 .umsapp .social-button {

@@ -9,7 +9,8 @@ import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitch
 import { useTranslation } from "react-i18next";
 import { FiLogOut } from "react-icons/fi";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
-import './handleMembership.css';
+import "./handleMembership.css";
+import { LogoutButton } from "../../components/LogoutButton/LogoutButtons.jsx";
 
 export const HandleMembership = () => {
   const { t, i18n } = useTranslation();
@@ -32,10 +33,12 @@ export const HandleMembership = () => {
       }
     });
   };
-  
+
   return (
     <div>
-      {FlowRouter.current().path.endsWith("/LoggedInAsMember/HandleMembership") && <HamburgerMenu />}
+      {FlowRouter.current().path.endsWith(
+        "/LoggedInAsMember/HandleMembership"
+      ) && <HamburgerMenu />}
       <LanguageSwitcher />
       <div className="membershipsContainer">
         <div>
@@ -106,10 +109,7 @@ export const HandleMembership = () => {
             </div>
           </div>
 
-          <button className="logout-button" onClick={logout}>
-            <FiLogOut className="logout-icon" />
-            {t("logout")}
-          </button>
+          <LogoutButton onClick={logout} />
         </div>
       </div>
     </div>
