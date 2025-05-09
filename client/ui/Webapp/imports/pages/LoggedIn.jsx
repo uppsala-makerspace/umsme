@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { PendingMembers } from "/collections/PendingMembers.js";
 import PushSetup from "../components/pushSetup";
 import { FiAlignCenter } from "react-icons/fi";
+import { LogoutButton } from "../components/LogoutButton/LogoutButtons.jsx";
 
 export const LoggedIn = () => {
   const { t, i18n } = useTranslation();
@@ -116,11 +117,10 @@ export const LoggedIn = () => {
 
   return (
     <>
-      <form className="login-form">
-        <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
-        <LanguageSwitcher />
+      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
+      <LanguageSwitcher />
+      <div className="login-form">
         <PushSetup />
-
         <div>
           <h3 className="text-h3"> {t("welcome")}</h3>
           {member ? (
@@ -144,20 +144,20 @@ export const LoggedIn = () => {
             {t("becomeMember")}
           </button>
         )}
-      </form>
-      <p style={{ textAlign: "center" }}>
-        {t("yourMail")} {email}
-      </p>
-      <button
-        onClick={() =>
-          Meteor.callAsync("sendPush", "Hej!", "Det här är en testnotis")
-        }
-      >
-        Skicka testnotis
-      </button>
-      <button className="logout-button" onClick={logout}>
-        {t("logout")}
-      </button>
+
+        <p style={{ textAlign: "center" }}>
+          {t("yourMail")} {email}
+        </p>
+        <button
+          onClick={() =>
+            Meteor.callAsync("sendPush", "Hej!", "Det här är en testnotis")
+          }
+        >
+          Skicka testnotis
+        </button>
+
+        <LogoutButton onClick={logout} />
+      </div>
     </>
   );
 };
