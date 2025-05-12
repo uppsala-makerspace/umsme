@@ -2,7 +2,12 @@
 
 import { Meteor } from "meteor/meteor";
 import { PushSubs } from "/collections/pushSubs";
+import { Members } from "/collections/members";
+import { Memberships } from "/collections/memberships";
+
 import webpush from "web-push";
+
+const daysLeftWhenNotified = 20;
 
 Meteor.startup(() => {
   webpush.setVapidDetails(
@@ -13,9 +18,64 @@ Meteor.startup(() => {
 });
 
 Meteor.methods({
-  async savePushSubscription(sub) {
-    console.log("🔔 Mottar subscription från klient:", sub);
+  async notifyExpiringMemberships() {
+    const today = new Date();
+    const deadline = new Date();
+    deadline.setDate(today.getDate() + daysLeftWhenNotified);
+    console.log("Deadline för notifiering:", deadline);
 
+    const allSubs = await PushSubs.find({}).fetch();
+
+    for await (const sub of allSubs) {
+      const userId = sub.userId;
+      const user = await Meteor.users.findOneAsync({ _id: userId });
+      const email = user?.emails?.[0]?.address;
+
+      let member;
+      if (user?.emails?.[0]?.verified) {
+        member = Members.findOneAsync({ email });
+      }
+      if (!member) continue; // meber is a promise here so it is always true. Await doesnt work for some reason :(
+      const memberships = await Memberships.find({
+        mid: member._id,
+      }).fetchAsync();
+
+      if (!Array.isArray(memberships)) continue;
+
+      const hasExpiring = memberships.some((m) => {
+        if (!m.memberend) return false;
+        const endDate = new Date(m.memberend);
+        return (
+          endDate.getFullYear() === deadline.getFullYear() &&
+          endDate.getMonth() === deadline.getMonth() &&
+          endDate.getDate() === deadline.getDate()
+        );
+      });
+      if (!hasExpiring) continue;
+
+      const payload = JSON.stringify({
+        title: "⏳ Medlemskap löper ut om " + daysLeftWhenNotified + " dagar",
+        body: "Förnya gärna för att behålla ditt medlemskap!",
+      });
+
+      await webpush
+        .sendNotification(
+          {
+            endpoint: sub.endpoint,
+            expirationTime: sub.expirationTime,
+            keys: {
+              p256dh: sub.keys.p256dh,
+              auth: sub.keys.auth,
+            },
+          },
+          payload
+        )
+        .then(() => console.log("Push skickad till", sub.userId))
+        .catch((err) => console.error(" Push-fel till", sub.userId, err));
+    }
+  },
+
+  async savePushSubscription(sub) {
     try {
       if (!sub?.endpoint)
         throw new Meteor.Error("invalid-sub", "Subscription saknar endpoint");
@@ -24,25 +84,19 @@ Meteor.methods({
 
       if (!existing) {
         await PushSubs.insertAsync(sub);
-        console.log("✅ Subscription sparad för userID:", sub.userId);
       } else {
-        console.log("ℹ️ Subscription fanns redan.");
       }
     } catch (err) {
-      console.error("❌ Fel i savePushSubscription:", err);
       throw new Meteor.Error("save-failed", err.message);
     }
   },
 
   sendPush(title, body) {
-    console.log("serever::: Skickar push-notis:", title, body);
     const payload = JSON.stringify({ title, body });
 
     const allSubs = PushSubs.find().fetch();
-    console.log("🧾 Antal prenumerationer:", allSubs.length);
 
     PushSubs.find().forEach((doc) => {
-      console.log("in for each loop");
       const sub = {
         endpoint: doc.endpoint,
         expirationTime: doc.expirationTime,
@@ -56,7 +110,7 @@ Meteor.methods({
       webpush
         .sendNotification(sub, payload)
         .then(() => {
-          console.log("✅ Push skickad till:", sub.endpoint);
+          console.log("Push skickad till:", sub.endpoint);
         })
         .catch((err) => {
           console.error("❌ Push-fel till:", sub.endpoint);

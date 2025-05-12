@@ -12,6 +12,7 @@ import { Unlocks } from "/collections/unlocks";
 import { initiatedPayments } from "/collections/initiatedPayments";
 import "/collections/users";
 import "./cronjob/syncAndMailUnlocks";
+import "./cronjob/notifyExpiring";
 import "./api/pushMethods.js";
 
 import "./api";
