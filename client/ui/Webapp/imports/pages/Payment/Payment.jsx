@@ -99,7 +99,7 @@ export const Payment = () => {
         } else {
           if (res === true) {
             clearInterval(intervalId);
-            FlowRouter.go("LoggedInAsMember");
+            FlowRouter.go("/Confirmation");
           }
         }
       }
