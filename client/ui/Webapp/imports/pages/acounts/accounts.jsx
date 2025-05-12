@@ -37,7 +37,7 @@ export const accounts = () => {
           setIsLoading(false);
           setFamilySize(fm.length);
           console.log("familysize:", fm.length);
-          if(fmh.mid === m._id){
+          if(fmh && fmh.mid === m._id){
             setisFamilyHead(true);
             console.log("isFamilyHead", isFamilyHead);
           }
