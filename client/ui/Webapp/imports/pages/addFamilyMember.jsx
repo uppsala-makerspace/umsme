@@ -75,7 +75,7 @@ export const AddFamilyMember = () => {
         }
       }
     );
-    // FlowRouter.go("/LoggedIn");
+    FlowRouter.go("/LoggedInAsMember/accounts");
   };
 
   const toLogIn = () => {

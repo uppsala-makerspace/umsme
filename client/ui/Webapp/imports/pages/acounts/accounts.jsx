@@ -19,6 +19,7 @@ export const accounts = () => {
   const [family, setFamily] = useState([]);
   const [addingFamilyMember, setAddingFamilyMember] = useState(false);
   const [isFamilyHead, setisFamilyHead] = useState(false);
+  const [familyHeadMembership, setFamilyHeadMembership] = useState(null);
   const [isInFamily, setIsInFamily] = useState(false);
   const [familySize, setFamilySize] = useState(0);
 
@@ -31,10 +32,15 @@ export const accounts = () => {
             member: m,
             memberships: ms,
             familyMembers: fm,
+            familyHeadMembership: fmh,
           } = await Meteor.callAsync("findInfoForUser");
           setIsLoading(false);
           setFamilySize(fm.length);
           console.log("familysize:", fm.length);
+          if(fmh.mid === m._id){
+            setisFamilyHead(true);
+            console.log("isFamilyHead", isFamilyHead);
+          }
 
           if (m) {
             setMember(m);
@@ -65,14 +71,6 @@ export const accounts = () => {
     }
   }, [member]);
 
-  useEffect(() => {
-    if (memberships?.[0]?.type === "Family lab member") {
-      setisFamilyHead(true);
-    } else {
-      setisFamilyHead(false);
-    }
-  }, [memberships]);
-
   console.log("membership", memberships);
   console.log("currentMember", member);
   console.log("familj", family);
@@ -92,13 +90,13 @@ export const accounts = () => {
   };
 
   const membershipTypeName = () => {
-    if (memberships?.[0]?.type === "Family lab member") {
+    if (memberships?.[0]?.family === true) {
       return t("memberFamily");
     }
-    if (memberships?.[0]?.amount >= 1200) {
+    if (memberships?.[0]?.type === "labandmember") {
       return t("memberIndivdual");
     }
-    if (memberships?.[0]?.amount <= 1200) {
+    if (memberships?.[0]?.type === "member") {
       return t("memberBase");
     }
   };
