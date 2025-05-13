@@ -2,11 +2,15 @@ import { WebApp } from "meteor/webapp";
 import bodyParser from "body-parser";
 import { initiatedPayments } from "/collections/initiatedPayments";
 import { Payments } from "/collections/payments";
+import { Members } from "/collections/members";
+import { Memberships } from "/collections/memberships";
+import {detectPotentialLabPayment,membershipFromPayment} from "/lib/rules";
+import { v4 as uuidv4 } from 'uuid';
 
 
 
 WebApp.handlers.use(bodyParser.json());
-WebApp.handlers.use("/swish/callback", (req, res, next) => {
+WebApp.handlers.use("/swish/callback", async (req, res, next) => {
   if (req.method !== 'POST') {
     res.writeHead(405);
     res.end('Only POST is supported!');
@@ -15,7 +19,8 @@ WebApp.handlers.use("/swish/callback", (req, res, next) => {
   const obj = req.body;
   if (obj && typeof obj === 'object') {
     if (obj.status === 'PAID') {
-      initiatedPayments.findOneAsync({ swishID: obj.id }).then(async initiated => {
+      try {
+      const initiated = await initiatedPayments.findOneAsync({ swishID: obj.id });
         if (!initiated) {
           res.writeHead(404);
           res.end('Payment not found!');
@@ -25,15 +30,26 @@ WebApp.handlers.use("/swish/callback", (req, res, next) => {
           { swishID: obj.id }, 
           { $set: { status: "PAID" , createdAt: obj.datePaid}}
         );
+        const member = await Members.findOneAsync(initiated.member);
+        const payment = await addPayment( {
+          type: "swish",
+          amount: Number(initiated.amount),
+          date: initiated.createdAt,
+          name: member.name,
+          mobile: member.mobile,
+          member: member._id,
+        })
+        await addMembership(payment, member);
+
         res.writeHead(200);
         res.end('Success!');
         return;
-      }).catch(err => {
+      } catch(err) {
         console.error(err);
         res.writeHead(500);
         res.end('Internal Server Error');
         return;
-      });
+      }
     } else {
       res.end('Failure!');
       return;
@@ -44,6 +60,42 @@ WebApp.handlers.use("/swish/callback", (req, res, next) => {
     return;
   }
 });
+
+const addPayment = async (paymentData) => {
+    const hash = uuidv4().replace(/-/g, "").substring(0, 40);
+    const id = Payments.insertAsync({
+      ...paymentData,
+      date: new Date(),
+      hash,
+    });
+    return paymentData;
+};
+const addMembership = async (payment, member) => {
+  const doc = membershipFromPayment(payment.date, payment.amount, true, detectPotentialLabPayment(member));
+  const membershipData = {
+    mid: payment.member,
+    pid: payment._id,
+    type: doc.type,
+    family: doc.family,
+    discount: doc.discount,
+    labend: doc.labend,
+    memberend: doc.memberend,
+    amount: payment.amount,
+    start: new Date(),
+  };
+  const membershipId = await Memberships.insertAsync(membershipData);
+  if (membershipData.family) {
+    await Members.updateAsync(
+      { _id: member._id },
+      { $set: { family: true } }
+    );
+  }
+
+  return {
+    id: membershipId,
+    mid: membershipData.mid,
+  };
+  }
 
 /*
 // Exmples belof from: https://developer.swish.nu/documentation/guides/create-a-payment-request#if-the-payment-is-successful

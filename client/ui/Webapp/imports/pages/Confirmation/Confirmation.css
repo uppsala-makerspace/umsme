@@ -1,0 +1,36 @@
+.confirmation-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  height: 100vh;
+  background-color: #f0efef;
+  font-family: "DM Mono", monospace;
+}
+
+.confirmation-container h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.confirmation-container p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.confirmation-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #5fc86f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: "DM Mono", monospace;
+}
+
+.confirmation-button:hover {
+  background-color: #096817;
+}

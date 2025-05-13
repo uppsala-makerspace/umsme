@@ -89,16 +89,79 @@ export const HandleMembership = () => {
           </div>
 
           <div className="membership">
+            <h2>{t("labMemberFamily")}</h2>
+            <p>{t("labMemberFamilyText")}</p>
+            <div className="price">
+              <h2>{t("labMemberFamilyPrice")}</h2>
+              <button
+                className="addMembership"
+                onClick={() => {
+                  Session.set("selectedMembership", {
+                    name: t("labMemberFamily"),
+                    price: t("labMemberFamilyPrice"),
+                    description: t("labMemberFamilyText"),
+                  });
+                  FlowRouter.go("/MembershipAgreement");
+                }}
+              >
+                {t("choose")}
+              </button>
+            </div>
+          </div>
+
+          <div className="membership">
+            <h2>{t("memberDiscounted")}</h2>
+            <p>{t("memberDiscountedText")}</p>
+            <div className="price">
+              <h2>{t("priceDiscounted")}</h2>
+              <button
+                className="addMembership"
+                onClick={() => {
+                  Session.set("selectedMembership", {
+                    name: t("memberDiscounted"),
+                    price: t("priceDiscounted"),
+                    description: t("memberDiscountedText"),
+                  });
+                  FlowRouter.go("/MembershipAgreement");
+                }}
+              >
+                {t("choose")}
+              </button>
+            </div>
+          </div>
+
+          <div className="membership">
+            <h2>{t("memberDiscountedLab")}</h2>
+            <p>{t("memberDiscountedLabText")}</p>
+            <div className="price">
+              <h2>{t("priceDiscountedLab")}</h2>
+              <button
+                className="addMembership"
+                onClick={() => {
+                  Session.set("selectedMembership", {
+                    name: t("memberDiscountedLab"),
+                    price: t("priceDiscountedLab"),
+                    description: t("memberDiscountedLabText"),
+                  });
+                  FlowRouter.go("/MembershipAgreement");
+                }}
+              >
+                {t("choose")}
+              </button>
+            </div>
+          </div>
+
+          <div className="membership">
             <h2>{t("memberFamily")}</h2>
             <p>{t("memberFamilyText")}</p>
             <div className="price">
-              <h2>{t("memberFamilyPrice")}</h2>
+              <h2>{t("priceFamily")}</h2>
               <button
                 className="addMembership"
                 onClick={() => {
                   Session.set("selectedMembership", {
                     name: t("memberFamily"),
-                    price: t("memberFamilyPrice"),
+                    price: t("priceFamily"),
                     description: t("memberFamilyText"),
                   });
                   FlowRouter.go("/MembershipAgreement");
@@ -109,6 +172,26 @@ export const HandleMembership = () => {
             </div>
           </div>
 
+          <div className="membership">
+            <h2>{t("memberQuarterlyLab")}</h2>
+            <p>{t("memberQuarterlyLabText")}</p>
+            <div className="price">
+              <h2>{t("priceQuarterlyLab")}</h2>
+              <button
+                className="addMembership"
+                onClick={() => {
+                  Session.set("selectedMembership", {
+                    name: t("memberQuarterlyLab"),
+                    price: t("priceQuarterlyLab"),
+                    description: t("memberQuarterlyLabText"),
+                  });
+                  FlowRouter.go("/MembershipAgreement");
+                }}
+              >
+                {t("choose")}
+              </button>
+            </div>
+          </div>
           <LogoutButton onClick={logout} />
         </div>
       </div>
