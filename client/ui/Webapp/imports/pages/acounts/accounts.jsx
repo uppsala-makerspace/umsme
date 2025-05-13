@@ -37,7 +37,7 @@ export const accounts = () => {
           setIsLoading(false);
           setFamilySize(fm.length);
           console.log("familysize:", fm.length);
-          if(fmh && fmh.mid === m._id){
+          if (fmh && fmh.mid === m._id) {
             setisFamilyHead(true);
             console.log("isFamilyHead", isFamilyHead);
           }
@@ -94,6 +94,8 @@ export const accounts = () => {
       return t("memberFamily");
     }
     if (memberships?.[0]?.type === "labandmember") {
+      //for old members we did this was callled "Individual lab member", this new name wont work for them
+
       return t("memberIndivdual");
     }
     if (memberships?.[0]?.type === "member") {

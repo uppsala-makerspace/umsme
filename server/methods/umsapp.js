@@ -52,7 +52,7 @@ Meteor.methods({
         mid: familyHead._id,
       });
     }
-    console.log("familyHeadMembership",familyHeadMembership)
+    console.log("familyHeadMembership", familyHeadMembership);
     const familyId = member.infamily || member.mid;
     const familyMembers = await Members.find({
       $or: [
@@ -92,12 +92,7 @@ Meteor.methods({
 
     const data = {
       //payeePaymentReference: "0123456789",
-<<<<<<< HEAD
       callbackUrl: "https://70dd-2-66-54-185.ngrok-free.app/swish/callback",
-=======
-      callbackUrl:
-        "https://3ddb-2a00-801-7ae-b2e3-4dd4-3d8c-3a8-dc53.ngrok-free.app/swish/callback",
->>>>>>> 90a8b760006b3e2023da50344b0e703b4dcf68a0
       payeeAlias: "9871065216", // testnummer från filen aliases
       currency: "SEK",
       //payerAlias: "46464646464", // testnummer från filen aliases
@@ -147,7 +142,8 @@ Meteor.methods({
     }
   },
 
-  async getPaymentStatus(instructionId) { //denna ska anropas av gränssnittet i payment
+  async getPaymentStatus(instructionId) {
+    //denna ska anropas av gränssnittet i payment
     check(instructionId, String);
     const payment = await initiatedPayments.findOneAsync({
       swishID: instructionId,
@@ -156,7 +152,7 @@ Meteor.methods({
       throw new Meteor.Error("payment-not-found", "Ingen betalning hittades.");
     }
     if (payment.status === "PAID") {
-      return true; 
+      return true;
     }
   },
 
