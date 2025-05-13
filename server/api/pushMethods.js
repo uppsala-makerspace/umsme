@@ -35,7 +35,7 @@ Meteor.methods({
       if (user?.emails?.[0]?.verified) {
         member = Members.findOneAsync({ email });
       }
-      if (!member) continue; // meber is a promise here so it is always true. Await doesnt work for some reason :(
+      if (!member) continue; // meber is a promise here so it is always true. I get problems with Await when finding members for some reason :(
       const memberships = await Memberships.find({
         mid: member._id,
       }).fetchAsync();
