@@ -16,6 +16,7 @@ export const Payment = () => {
   const [swishId, setSwishId] = useState(null);
   const { t } = useTranslation();
   const [swishDevice, setSwishDevice] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -63,6 +64,7 @@ export const Payment = () => {
         }
         else{
           await generateQrCode(res.paymentrequesttoken);
+          setIsLoading(true);
         }
         const id = setInterval(() => {
           checkIfapproved(res.instructionId);
@@ -128,13 +130,12 @@ export const Payment = () => {
               height={300}
               className="swish-qr"
             />
-            <button
-              onClick={checkIfapproved}
-              style={{ marginTop: 10 }}
-              className="finishButton"
-            >
-              {t("CheckPayment")}
-            </button>
+          <button
+            className="finishButton"
+            disabled={isLoading}
+          >
+            {isLoading ? <div className="loader"></div> : t("CheckPayment")}
+          </button>
           </div>
         ) : (
           <>
