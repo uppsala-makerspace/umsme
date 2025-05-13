@@ -144,6 +144,7 @@ export const LoggedIn = () => {
             {t("becomeMember")}
           </button>
         )}
+        <br />
 
         <p style={{ textAlign: "center" }}>
           {t("yourMail")} {email}
@@ -157,7 +158,6 @@ export const LoggedIn = () => {
           Skicka testnotis
         </button>
         */}
-
         <LogoutButton onClick={logout} />
       </div>
     </>
