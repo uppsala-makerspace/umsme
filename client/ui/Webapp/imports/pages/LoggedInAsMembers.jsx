@@ -45,6 +45,7 @@ export const LoggedInAsMember = () => {
 
   console.log("memberships:", memberships);
   console.log("member.lab:", memberLab);
+  console.log("user._id:", user?._id);
   if (memberLab instanceof Date) {
     console.log("Det är ett Date-objekt");
   } else {

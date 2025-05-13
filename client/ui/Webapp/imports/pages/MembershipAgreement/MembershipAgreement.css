@@ -1,148 +1,148 @@
 .umsapp .AgreementHolder {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    text-align: left;
-  }
-  
-  .umsapp .Agreementholder .BackButton {
-    background: none;
-    background-color: transparent !important;
-    color: black;
-  }
-  .umsapp .AgreementButton {
-    border-radius: 50%;
-    background-color: #5fc86f;
-    color: white;
-  }
-  
-  .umsapp .AgreementButton:hover {
-    background-color: #096817;
-  }
-  .umsapp .pay-button {
-    background-color: #cccccc; /* Grå färg för inaktiverad knapp */
-    cursor: not-allowed;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    color: white;
-    width: 100%;
-  }
-  
-  .umsapp .pay-button.hover-enabled {
-    background-color: #5fc86f;
-    cursor: pointer;
-  }
-  
-  .umsapp .pay-button.hover-enabled:hover {
-    background-color: #096817;
-  }
-  .umsapp .MembershipAgreementModal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  .umsapp .AgreementContent {
-    background: white;
-    padding: 20px;
-    width: 80%;
-    max-height: 80%;
-    overflow-y: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  .umsapp .AgreementContent h2 {
-    margin-top: 0;
-  }
-  
-  .umsapp .AgreementContent button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #5fc86f;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .umsapp .AgreementContent button:hover {
-    background-color: #096817;
-  }
-  
-  .umsapp .AgreementContent p:last-of-type {
-    margin-top: 10px;
-  }
-  .umsapp .AgreementHolder h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-  
-  .umsapp .AgreementHolder h2 {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-  
-  .umsapp .AgreementHolder p {
-    font-size: 16px;
-    margin-bottom: 20px;
-  }
-  
-  .umsapp .AgreementHolder label {
-    color: gray;
-  }
-  
-  .umsapp .AgreementHolder input[type="checkbox"]:not(:disabled) + label {
-    color: black;
-  }
-  
-  .umsapp .AgreementHolder button {
-    margin-top: 30px;
-    margin-bottom: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .umsapp .AgreementHolder button:last-of-type {
-    width: 100%;
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #5fc86f;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .umsapp .AgreementHolder button:last-of-type:active:hover {
-    background-color: #096817;
-  }
-  
-  .umsapp .AgreementHolder button:last-of-type:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-  
-  .umsapp .AgreementHolder button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-  
-  .umsapp .AgreementHolder button:disabled:hover {
-    background-color: #cccccc;
-  }
-  
-  .umsapp .AgreementHolder input[type="checkbox"] {
-    margin-right: 10px;
-  }
-  .umsapp .BackButton:hover {
-    text-decoration: underline; /* Understrykning vid hover */
-  }  
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: left;
+}
+
+.umsapp .Agreementholder .BackButton {
+  background: none;
+  background-color: transparent !important;
+  color: black;
+}
+.umsapp .AgreementButton {
+  border-radius: 50%;
+  background-color: #5fc86f;
+  color: white;
+}
+
+.umsapp .AgreementButton:hover {
+  background-color: #096817;
+}
+.umsapp .pay-button {
+  background-color: #cccccc; /* Grå färg för inaktiverad knapp */
+  cursor: not-allowed;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  color: white;
+  width: 100%;
+}
+
+.umsapp .pay-button.hover-enabled {
+  background-color: #5fc86f;
+  cursor: pointer;
+}
+
+.umsapp .pay-button.hover-enabled:hover {
+  background-color: #096817;
+}
+.umsapp .MembershipAgreementModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.umsapp .AgreementContent {
+  background: white;
+  padding: 20px;
+  width: 80%;
+  max-height: 80%;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.umsapp .AgreementContent h2 {
+  margin-top: 0;
+}
+
+.umsapp .AgreementContent button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #5fc86f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.umsapp .AgreementContent button:hover {
+  background-color: #096817;
+}
+
+.umsapp .AgreementContent p:last-of-type {
+  margin-top: 10px;
+}
+.umsapp .AgreementHolder h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.umsapp .AgreementHolder h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.umsapp .AgreementHolder p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.umsapp .AgreementHolder label {
+  color: gray;
+}
+
+.umsapp .AgreementHolder input[type="checkbox"]:not(:disabled) + label {
+  color: black;
+}
+
+.umsapp .AgreementHolder button {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.umsapp .AgreementHolder button:last-of-type {
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #5fc86f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.umsapp .AgreementHolder button:last-of-type:active:hover {
+  background-color: #096817;
+}
+
+.umsapp .AgreementHolder button:last-of-type:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.umsapp .AgreementHolder button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.umsapp .AgreementHolder button:disabled:hover {
+  background-color: #cccccc;
+}
+
+.umsapp .AgreementHolder input[type="checkbox"] {
+  margin-right: 10px;
+}
+.umsapp .BackButton:hover {
+  text-decoration: underline; /* Understrykning vid hover */
+}  
