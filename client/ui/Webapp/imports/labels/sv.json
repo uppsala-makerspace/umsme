@@ -105,6 +105,7 @@
     "PasswordReseted": "Lösenordet har återställts",
     "SendNewVerification": "Skicka ny verifieringslänk",
     "BackToLogin": "Tillbaka till inloggning",
-    "PleaseVerify": "Vänligen verifiera din e-postadress"
+    "PleaseVerify": "Vänligen verifiera din e-postadress",
+    "AddFamilyMember": "Lägg till familjemedlem"
 
 }

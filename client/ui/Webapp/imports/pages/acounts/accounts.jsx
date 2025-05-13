@@ -169,7 +169,10 @@ export const accounts = () => {
             )}
             {isFamilyHead && familySize < 4 ? (
               <div>
-                <button className="form-button" onClick={openFamilyForm}>
+                <button
+                  className="form-button logout button"
+                  onClick={openFamilyForm}
+                >
                   {t("AddFamilyMember")}
                 </button>
               </div>
