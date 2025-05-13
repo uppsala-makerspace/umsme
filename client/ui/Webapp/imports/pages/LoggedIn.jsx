@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
 import { PendingMembers } from "/collections/PendingMembers.js";
-import PushSetup from "../components/pushSetup";
 import { FiAlignCenter } from "react-icons/fi";
 import { LogoutButton } from "../components/LogoutButton/LogoutButtons.jsx";
 
@@ -120,7 +119,6 @@ export const LoggedIn = () => {
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
       <LanguageSwitcher />
       <div className="login-form">
-        <PushSetup />
         <div>
           <h3 className="text-h3"> {t("welcome")}</h3>
           {member ? (

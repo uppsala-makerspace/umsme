@@ -92,11 +92,7 @@ Meteor.methods({
 
     const data = {
       //payeePaymentReference: "0123456789",
-<<<<<<< HEAD
       callbackUrl: "https://70dd-2-66-54-185.ngrok-free.app/swish/callback",
-=======
-      callbackUrl: "https://9bcf-130-243-223-53.ngrok-free.app/swish/callback",
->>>>>>> 723ff8cc6af4714dfab2386cb90831cbc4b614a3
       payeeAlias: "9871065216", // testnummer från filen aliases
       currency: "SEK",
       //payerAlias: "46464646464", // testnummer från filen aliases
