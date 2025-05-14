@@ -40,6 +40,8 @@ export const accounts = () => {
           if (fmh && fmh.mid === m._id) {
             setisFamilyHead(true);
             console.log("isFamilyHead", isFamilyHead);
+          } else {
+            setFamilyHeadMembership(fmh);
           }
 
           if (m) {
