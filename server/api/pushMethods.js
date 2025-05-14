@@ -7,7 +7,7 @@ import { Memberships } from "/collections/memberships";
 
 import webpush from "web-push";
 
-const daysLeftWhenNotified = 20;
+const daysLeftWhenNotified = 371;
 
 Meteor.startup(() => {
   webpush.setVapidDetails(
