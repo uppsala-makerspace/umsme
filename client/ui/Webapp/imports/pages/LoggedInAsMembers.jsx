@@ -5,6 +5,7 @@ import { HamburgerMenu } from "../components/HamburgerMenu/HamburgerMenu";
 import { useTranslation } from "react-i18next";
 import { useTracker } from "meteor/react-meteor-data";
 import { LogoutButton } from "../components/LogoutButton/LogoutButtons.jsx";
+import PushSetup from "../components/pushSetup";
 
 export const LoggedInAsMember = () => {
   const user = useTracker(() => Meteor.user());
@@ -127,6 +128,7 @@ export const LoggedInAsMember = () => {
           )}
         <LogoutButton onClick={logout} />
       </div>
+      <PushSetup />
     </>
   );
 };

@@ -16,7 +16,8 @@
   "private": {
     "vapidPrivateKey": "seemessenger"
   },
-
+  
+  "swishCallback": "placeholder-swishCallback",
   "serviceConfigurations": {
     "google": {
       "clientId": "placeholder-for-ID",
