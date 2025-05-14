@@ -40,8 +40,6 @@ Meteor.methods({
     }).fetchAsync();
     memberships.sort((m1, m2) => (m1.memberend > m2.memberend ? -1 : 1));
     let familyHead;
-    console.log("member", member);
-    console.log("member.infamily, ", member.infamily);
     if (member.family) {
       familyHead = await Members.findOneAsync({ mid: member.infamily });
       console.log("familyHead", familyHead);
@@ -52,7 +50,6 @@ Meteor.methods({
         mid: familyHead._id,
       });
     }
-    console.log("familyHeadMembership", familyHeadMembership);
     const familyId = member.infamily || member.mid;
     const familyMembers = await Members.find({
       $or: [
@@ -80,7 +77,7 @@ Meteor.methods({
     if (!member) {
       throw new Meteor.Error("member-not-found", "Ingen medlem hittades.");
     }
-    console.log(membershipType);
+
     initiatedPayments.insertAsync({
       swishID: instructionId,
       member: member._id,
@@ -89,10 +86,11 @@ Meteor.methods({
       createdAt: new Date(),
       paymentType: membershipType,
     });
+    const callBack = Meteor.settings.swishCallback;
 
     const data = {
       //payeePaymentReference: "0123456789",
-      callbackUrl: "https://70dd-2-66-54-185.ngrok-free.app/swish/callback",
+      callbackUrl: callBack,
       payeeAlias: "9871065216", // testnummer från filen aliases
       currency: "SEK",
       //payerAlias: "46464646464", // testnummer från filen aliases
@@ -100,9 +98,6 @@ Meteor.methods({
       message: "Testbetalning via Meteor",
     };
 
-    //const v2url = `https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/${instructionId}`;
-
-    //await swishClient.put(v2url, data);
     try {
       const response = await swishClient.put(
         `https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/${instructionId}`,

@@ -71,7 +71,7 @@ const addPayment = async (paymentData) => {
     return paymentData;
 };
 const addMembership = async (payment, member) => {
-  const doc = membershipFromPayment(payment.date, payment.amount, true, detectPotentialLabPayment(member));
+  const doc = membershipFromPayment(payment.date, payment.amount, true, detectPotentialLabPayment(member)); //Göra om denna metod så den kollar på paymentType i initiatedPayment
   const membershipData = {
     mid: payment.member,
     pid: payment._id,
