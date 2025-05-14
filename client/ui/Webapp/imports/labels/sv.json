@@ -90,6 +90,8 @@
   "CheckPayment": "Kontrollera betalningen",
   "Payment": "Betalning",
   "FinishPayment": "Slutför betalning",
+  "SwishOnThisDevice": "Betala med Swish på denna enhet",
+  "SwishOnOtherDevice": "Betala med Swish på annan enhet",
   "FamilyMember": "Du är en del av ett familjemedlemskap",
   "Soda": "Läsk",
   "keys": "Nycklar",
@@ -122,5 +124,6 @@
   "MembershipRegistered": "Nu är ditt medlemskap registrerat. Om du köpt labbmedlemskap så blir dina nycklar aktiva genast och du får access till våra lokaler. Ha så roligt och glöm inte att ta väl hand om vårt makerspace!",
   "MembershipEndDate": "Du är medlem till och med:",
   "MembershipID": "Medlemskaps ID:",
-  "BackToStart": "Till startsidan"
+  "BackToStart": "Till startsidan",
+  "AddFamilyMember": "Lägg till familjemedlem"
 }

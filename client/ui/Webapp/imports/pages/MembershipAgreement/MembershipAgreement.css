@@ -20,7 +20,8 @@
   background-color: #096817;
 }
 .umsapp .pay-button {
-  background-color: #cccccc;
+  background-color: #cccccc; /* Grå färg för inaktiverad knapp */
+  cursor: not-allowed;
   border: none;
   border-radius: 5px;
   padding: 10px 20px;
@@ -111,8 +112,7 @@
 }
 
 .umsapp .AgreementHolder button:last-of-type {
-  width: 45%;
-  min-width: 150px;
+  width: 100%;
   margin-top: 20px;
   padding: 10px;
   background-color: #5fc86f;
@@ -120,9 +120,6 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin: 20px auto;
-  justify-content: center;
-  display: block;
 }
 
 .umsapp .AgreementHolder button:last-of-type:active:hover {
@@ -147,5 +144,5 @@
   margin-right: 10px;
 }
 .umsapp .BackButton:hover {
-  text-decoration: underline;
-}
+  text-decoration: underline; /* Understrykning vid hover */
+}  

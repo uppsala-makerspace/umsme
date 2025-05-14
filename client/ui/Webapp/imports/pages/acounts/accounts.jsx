@@ -19,6 +19,7 @@ export const accounts = () => {
   const [family, setFamily] = useState([]);
   const [addingFamilyMember, setAddingFamilyMember] = useState(false);
   const [isFamilyHead, setisFamilyHead] = useState(false);
+  const [familyHeadMembership, setFamilyHeadMembership] = useState(null);
   const [isInFamily, setIsInFamily] = useState(false);
   const [familySize, setFamilySize] = useState(0);
 
@@ -31,10 +32,19 @@ export const accounts = () => {
             member: m,
             memberships: ms,
             familyMembers: fm,
+            familyHeadMembership: fmh,
           } = await Meteor.callAsync("findInfoForUser");
           setIsLoading(false);
           setFamilySize(fm.length);
           console.log("familysize:", fm.length);
+          if (fmh && fmh.mid === m._id) {
+            setisFamilyHead(true);
+            console.log("isFamilyHead", isFamilyHead);
+          }
+          else if (fmh){
+            setFamilyHeadMembership(fmh)
+            console.log("familjehuvudmedlemskap",fmh)
+          }
 
           if (m) {
             setMember(m);
@@ -65,14 +75,6 @@ export const accounts = () => {
     }
   }, [member]);
 
-  useEffect(() => {
-    if (memberships?.[0]?.type === "Family lab member") {
-      setisFamilyHead(true);
-    } else {
-      setisFamilyHead(false);
-    }
-  }, [memberships]);
-
   console.log("membership", memberships);
   console.log("currentMember", member);
   console.log("familj", family);
@@ -92,17 +94,18 @@ export const accounts = () => {
   };
 
   const membershipTypeName = () => {
-    if (memberships?.[0]?.type === "Family lab member") {
+    if (memberships?.[0]?.family === true) {
       return t("memberFamily");
     }
-    if (memberships?.[0]?.amount >= 1200) {
+    if (memberships?.[0]?.type === "labandmember") {
+      //for old members we did this was callled "Individual lab member", this new name wont work for them
+
       return t("memberIndivdual");
     }
-    if (memberships?.[0]?.amount <= 1200) {
+    if (memberships?.[0]?.type === "member") {
       return t("memberBase");
     }
   };
-
   //const member_family = member.family;
   return (
     <>
@@ -135,11 +138,11 @@ export const accounts = () => {
             {t("MemberSince")}{" "}
             {memberships?.[
               memberships.length - 1
-            ]?.start.toLocaleDateString() || "–"}
+            ]?.start.toLocaleDateString() || familyHeadMembership?.start.toLocaleDateString() || "–"}
           </div>
           <div className="middle-text">
             {t("EndDate")}{" "}
-            {memberships?.[0]?.memberend.toLocaleDateString() || "–"}
+            {memberships?.[0]?.memberend.toLocaleDateString() || familyHeadMembership?.memberend.toLocaleDateString() || "-"}
           </div>
 
           <br />
@@ -169,7 +172,10 @@ export const accounts = () => {
             )}
             {isFamilyHead && familySize < 4 ? (
               <div>
-                <button className="form-button" onClick={openFamilyForm}>
+                <button
+                  className="form-button logout button"
+                  onClick={openFamilyForm}
+                >
                   {t("AddFamilyMember")}
                 </button>
               </div>

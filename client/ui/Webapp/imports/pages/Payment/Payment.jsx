@@ -10,11 +10,13 @@ export const Payment = () => {
   const user = useTracker(() => Meteor.user());
 
   const [membershipType, setMembershipType] = useState(null);
-  const [paymentApproved, setPaymentApproved] = useState(false);
+  const [intervalId, setIntervalId] = useState(null);
   const [member_Id, setMember_Id] = useState({});
   const [qrSrc, showQrSrc] = useState(null);
   const [swishId, setSwishId] = useState(null);
   const { t } = useTranslation();
+  const [swishDevice, setSwishDevice] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -48,53 +50,62 @@ export const Payment = () => {
   if (!membershipType) {
     return <div>Laddar...</div>;
   }
-  const handlePayment = async (price) => {
+  const handlePayment = async (price, SwishOnThisDevice) => {
     const price1 = price.match(/^\d+/)?.[0];
-    Meteor.call("swish.createTestPayment", price1, async (err, res) => {
+    Meteor.call("swish.createTestPayment", price1, membershipType.name, async (err, res) => {
       if (err) {
         console.error("Error:", err);
       } else {
         console.log("Got token:", res.paymentrequesttoken);
         setSwishId(res.instructionId);
-        await tryOpenSwishOrGenerateQrcode(res.paymentrequesttoken);
+        if (SwishOnThisDevice) {
+          setSwishDevice(true);
+          await openSwish(res.paymentrequesttoken); 
+        }
+        else{
+          await generateQrCode(res.paymentrequesttoken);
+          setIsLoading(true);
+        }
+        const id = setInterval(() => {
+          checkIfapproved(res.instructionId);
+        }, 4000); // Kör var 4:e sekund
+        setIntervalId(id); 
       }
     });
   };
 
-  const checkIfapproved = async () => {
+  const openSwish = (token) => {
+    const swishUrl = `swish://paymentrequest?token=${token}&callbackurl=https://3ddb-2a00-801-7ae-b2e3-4dd4-3d8c-3a8-dc53.ngrok-free.app/Payment`; //Annan callback senare
+    window.location.href = swishUrl;
+  };
+  
+  const generateQrCode = (token) => {
+      Meteor.call("getQrCode", token, (err, qrUrl) => {
+        if (err) {
+          console.error("Error fetching QR code:", err);
+        } else {
+          console.log("new QR");
+          showQrSrc(qrUrl);
+        }
+      });
+  };
+
+  const checkIfapproved = async (instructionId) => {
     Meteor.call(
-      "getPaymentStatusAndInsertMembership",
-      swishId,
-      membershipType.name,
+      "getPaymentStatus",
+      instructionId,
       (err, res) => {
-        console.log(res);
+        console.log("Resultat", res);
         if (err) {
           console.error("Error:", err);
         } else {
-          if (res === "PAID") {
+          if (res === true) {
+            clearInterval(intervalId);
             FlowRouter.go("/Confirmation");
           }
         }
       }
     );
-  };
-  console.log("Membership:", membershipType);
-
-  const tryOpenSwishOrGenerateQrcode = (token) => {
-    const swishUrl = `swish://paymentrequest?token=${token}&callbackurl=https://50f4-31-209-41-143.ngrok-free.app/Payment`; //Annan callback senare
-    const now = Date.now();
-    window.location.href = swishUrl;
-    setTimeout(() => {
-      if (Date.now() - now < 3100) {
-        Meteor.call("getQrCode", token, (err, qrUrl) => {
-          if (err) {
-            console.error("Error:", err);
-          } else {
-            showQrSrc(qrUrl);
-          }
-        });
-      }
-    }, 2000);
   };
 
   return (
@@ -109,12 +120,7 @@ export const Payment = () => {
         }}
         className="payment-container"
       >
-        {paymentApproved ? (
-          <div style={{ marginTop: 20 }}>
-            <h3>{t("paymentApproved")}</h3>
-            <p>{t("ThankPayment")}</p>
-          </div>
-        ) : qrSrc ? (
+        {qrSrc ? (
           <div style={{ marginTop: 20 }}>
             <h3 className="scanQRh3">{t("ScanQrCode")} </h3>
             <img
@@ -124,13 +130,12 @@ export const Payment = () => {
               height={300}
               className="swish-qr"
             />
-            <button
-              onClick={checkIfapproved}
-              style={{ marginTop: 10 }}
-              className="finishButton"
-            >
-              {t("CheckPayment")}
-            </button>
+          <button
+            className="finishButton"
+            disabled={isLoading}
+          >
+            {isLoading ? <div className="loader"></div> : t("CheckPayment")}
+          </button>
           </div>
         ) : (
           <>
@@ -139,10 +144,15 @@ export const Payment = () => {
             <p>{membershipType.description}</p>
             <h3>{membershipType.price}</h3>
             <button
-              onClick={() => handlePayment(membershipType.price)}
+              onClick={() => handlePayment(membershipType.price, true)}
               className="finishButton"
             >
-              {t("FinishPayment")}
+              {t("SwishOnThisDevice")}
+            </button>
+            <button
+              onClick={() => handlePayment(membershipType.price, false)}
+              className="finishButton">
+              {t("SwishOnOtherDevice")}
             </button>
           </>
         )}

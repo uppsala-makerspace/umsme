@@ -9,21 +9,26 @@
   "lockPassword": "????",
   "lockAssumeUser": "lock@uppsalamakerspace.se",
   "groupLockName": "UMSLockGroup",
-    "public": {
-      "checkPath": "http://example.com#"
-    },
-
+  "public": {
+    "checkPath": "http://example.com#",
+    "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc"
+  },
+  "private": {
+    "vapidPrivateKey": "seemessenger"
+  },
+  
+  "swishCallback": "placeholder-swishCallback",
   "serviceConfigurations": {
-      "google": {
-        "clientId": "placeholder-for-ID",
-        "secret": "placeholder-for-secret",
-        "loginStyle": "popup"
-      },
-      "facebook": {
-        "appId": "placeholder-for-ID",
-        "secret": "placeholder-for-secret",
-        "loginStyle": "popup"
-      }
+    "google": {
+      "clientId": "placeholder-for-ID",
+      "secret": "placeholder-for-secret",
+      "loginStyle": "popup"
     },
-    "env": "development"
+    "facebook": {
+      "appId": "placeholder-for-ID",
+      "secret": "placeholder-for-secret",
+      "loginStyle": "popup"
+    }
+  },
+  "env": "development"
 }

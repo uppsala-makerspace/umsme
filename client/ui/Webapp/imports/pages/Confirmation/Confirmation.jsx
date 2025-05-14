@@ -4,7 +4,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
-import "./confirmation.css";
+import "./Confirmation.css";
 
 export const Confirmation = () => {
   const user = useTracker(() => Meteor.user());
@@ -43,7 +43,7 @@ export const Confirmation = () => {
         <h1>{t("ThankYou")}</h1>
         <p>{t("MembershipRegistered")}</p>
         <p>
-          {t("MembershipID")}: {memberId || t("Unknown")}
+          {t("MembershipID")} {memberId || t("Unknown")}
         </p>
         <p>
           {t("MembershipEndDate")}{" "}

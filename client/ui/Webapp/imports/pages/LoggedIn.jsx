@@ -142,11 +142,20 @@ export const LoggedIn = () => {
             {t("becomeMember")}
           </button>
         )}
+        <br />
 
         <p style={{ textAlign: "center" }}>
           {t("yourMail")} {email}
         </p>
-
+        {/*
+        <button
+          onClick={() =>
+            Meteor.callAsync("sendPush", "Hej!", "Det här är en testnotis")
+          }
+        >
+          Skicka testnotis
+        </button>
+        */}
         <LogoutButton onClick={logout} />
       </div>
     </>

@@ -167,99 +167,6 @@ body {
   margin-top: 0px;
   padding-top: 0px;
 }
-
-.umsapp .AgreementHolder {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: left;
-}
-
-.umsapp .Agreementholder .BackButton {
-  background: none;
-  background-color: transparent !important;
-  color: black;
-}
-
-.umsapp .BackButton:hover {
-  text-decoration: underline; /* Understrykning vid hover */
-}
-
-.umsapp .AgreementHolder h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.umsapp .AgreementHolder h2 {
-  font-size: 20px;
-  margin-bottom: 10px;
-}
-
-.umsapp .AgreementHolder p {
-  font-size: 16px;
-  margin-bottom: 20px;
-}
-
-.umsapp .AgreementHolder label {
-  color: gray;
-}
-
-.umsapp .AgreementHolder input[type="checkbox"]:not(:disabled) + label {
-  color: black;
-}
-
-.umsapp .AgreementHolder button {
-  margin-top: 30px;
-  margin-bottom: 10px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.umsapp .AgreementButton {
-  border-radius: 50%;
-  background-color: #5fc86f;
-  color: white;
-}
-
-.umsapp .AgreementButton:hover {
-  background-color: #096817;
-}
-
-.umsapp .AgreementHolder button:last-of-type {
-  width: 100%;
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #5fc86f;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.umsapp .AgreementHolder button:last-of-type:active:hover {
-  background-color: #096817;
-}
-
-.umsapp .AgreementHolder button:last-of-type:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.umsapp .AgreementHolder button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.umsapp .AgreementHolder button:disabled:hover {
-  background-color: #cccccc;
-}
-
-.umsapp .AgreementHolder input[type="checkbox"] {
-  margin-right: 10px;
-}
-
 .umsapp .addMembership {
   width: 80px;
   height: 30px;
@@ -277,51 +184,6 @@ body {
 
 .umsapp .addMembership:hover {
   background-color: #096817;
-}
-
-.umsapp .MembershipAgreementModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.umsapp .AgreementContent {
-  background: white;
-  padding: 20px;
-  width: 80%;
-  max-height: 80%;
-  overflow-y: auto;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.umsapp .AgreementContent h2 {
-  margin-top: 0;
-}
-
-.umsapp .AgreementContent button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #5fc86f;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.umsapp .AgreementContent button:hover {
-  background-color: #096817;
-}
-
-.umsapp .AgreementContent p:last-of-type {
-  margin-top: 10px;
 }
 
 .umsapp .pay-button {
@@ -344,19 +206,12 @@ body {
 }
 
 
-
-
-
-
 .umsapp .form-button.white {
   background-color: #f0efef;
   color: #000000;
   border: 1px solid black;
   
 }
-
-
-
 
 
 .umsapp .social-button {
@@ -400,6 +255,25 @@ body {
   width: 90%;
   max-width: 400px;
   margin: 10px 0;
+}
+
+
+.loader {
+  width: 60px;
+  aspect-ratio: 2;
+  --_g: no-repeat radial-gradient(circle closest-side,#fff 90%,#0000);
+  background: 
+    var(--_g) 0%   50%,
+    var(--_g) 50%  50%,
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 50%;
+  animation: l3 1s infinite linear;
+}
+@keyframes l3 {
+    20%{background-position:0%   0%, 50%  50%,100%  50%}
+    40%{background-position:0% 100%, 50%   0%,100%  50%}
+    60%{background-position:0%  50%, 50% 100%,100%   0%}
+    80%{background-position:0%  50%, 50%  50%,100% 100%}
 }
 
 

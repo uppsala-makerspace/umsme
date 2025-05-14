@@ -17,7 +17,7 @@
     position: absolute;
     right: 10px;
     border: none;
-    font-size: 30px;
+    font-size: 45px;
     cursor: pointer;
   }
   .umsapp .hamburger-menu.open {
@@ -30,6 +30,7 @@
   .umsapp .links.show {
     display: block;
     text-align: right;
+    padding-right: 5px;
     list-style: none;
   }
   
@@ -43,6 +44,12 @@
   .umsapp .links a {
     text-decoration: none;
     color: black;
+  }
+
+  .umsapp button{
+
+    all: unset; 
+  
   }
 
   @media (max-width: 768px) {

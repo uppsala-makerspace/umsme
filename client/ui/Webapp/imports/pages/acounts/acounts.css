@@ -11,6 +11,8 @@
     background-size: contain;
     background-color: white;
     border: none;
+    text-align: center; 
+
   }
 
   .umsapp .profile-link {
