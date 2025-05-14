@@ -12,7 +12,8 @@
     "public": {
       "checkPath": "http://example.com#"
     },
-
+    
+  "swishCallback": "placeholder-swishCallback",
   "serviceConfigurations": {
       "google": {
         "clientId": "placeholder-for-ID",
