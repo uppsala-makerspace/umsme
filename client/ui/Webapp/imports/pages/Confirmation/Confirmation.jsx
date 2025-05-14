@@ -46,7 +46,7 @@ export const Confirmation = () => {
           {t("MembershipID")}: {memberId || t("Unknown")}
         </p>
         <p>
-          {t("MembershipEndDate")}:{" "}
+          {t("MembershipEndDate")}{" "}
           {membershipEndDate
             ? new Date(membershipEndDate).toLocaleDateString()
             : t("Unknown")}

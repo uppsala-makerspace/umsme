@@ -1,12 +1,12 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import './languageSwitcher.css';
+import "./languageSwitcher.css";
 
 export const LanguageSwitcher = () => {
   const { t, i18n } = useTranslation();
 
   const handleLanguageSwitch = () => {
-    const newLang = i18n.language === "en" ? "sv" : "en";
+    const newLang = i18n.language === "sv" ? "en" : "sv";
     i18n.changeLanguage(newLang);
     localStorage.setItem("language", newLang); // Spara det nya språket i localStorage
   };
