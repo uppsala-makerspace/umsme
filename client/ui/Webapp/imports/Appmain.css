@@ -205,14 +205,11 @@ body {
   background-color: #096817;
 }
 
-
 .umsapp .form-button.white {
   background-color: #f0efef;
   color: #000000;
   border: 1px solid black;
-  
 }
-
 
 .umsapp .social-button {
   all: unset; /* SUPERVIKTIGT, detta tar bort iOS/Safari/Chromes standardstil */
@@ -233,15 +230,12 @@ body {
   cursor: pointer;
 }
 
-
-
 .umsapp .social-button:disabled {
   background-color: #f0efef;
   color: #f0efef;
   border: 1px solid #ccc;
   cursor: not-allowed;
 }
-
 
 .umsapp .forgot-password-page form {
   display: flex;
@@ -257,25 +251,33 @@ body {
   margin: 10px 0;
 }
 
-
 .loader {
-  width: 60px;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: 32px auto 0 auto;
+  width: 100px;
   aspect-ratio: 2;
-  --_g: no-repeat radial-gradient(circle closest-side,#fff 90%,#0000);
-  background: 
-    var(--_g) 0%   50%,
-    var(--_g) 50%  50%,
-    var(--_g) 100% 50%;
-  background-size: calc(100%/3) 50%;
+  --_g: no-repeat radial-gradient(circle closest-side, #5fc86f 90%, transparent);
+  background: var(--_g) 0% 50%, var(--_g) 50% 50%, var(--_g) 100% 50%;
+  background-size: calc(100% / 3) 50%;
   animation: l3 1s infinite linear;
 }
-@keyframes l3 {
-    20%{background-position:0%   0%, 50%  50%,100%  50%}
-    40%{background-position:0% 100%, 50%   0%,100%  50%}
-    60%{background-position:0%  50%, 50% 100%,100%   0%}
-    80%{background-position:0%  50%, 50%  50%,100% 100%}
-}
 
+@keyframes l3 {
+  20% {
+    background-position: 0% 0%, 50% 50%, 100% 50%;
+  }
+  40% {
+    background-position: 0% 100%, 50% 0%, 100% 50%;
+  }
+  60% {
+    background-position: 0% 50%, 50% 100%, 100% 0%;
+  }
+  80% {
+    background-position: 0% 50%, 50% 50%, 100% 100%;
+  }
+}
 
 @media (max-width: 768px) {
   .umsapp .login-form input,
