@@ -130,7 +130,7 @@ export const Payment = () => {
               height={300}
               className="swish-qr"
             />
-            <button className="finishButton" disabled={isLoading}>
+            <button className="loadingButton" disabled={isLoading}>
               {isLoading ? <div className="loader"></div> : t("CheckPayment")}
             </button>
           </div>
