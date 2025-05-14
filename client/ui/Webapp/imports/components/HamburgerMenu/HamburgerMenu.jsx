@@ -45,7 +45,6 @@ export const HamburgerMenu = () => {
           <li>
             <a href="/LoggedInAsMember/kiosk">Kiosk</a>
           </li>
-          {/* byt detta till kiosk-routing när sidan finns */}
         </ul>
       </nav>
     </>

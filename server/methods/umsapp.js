@@ -137,7 +137,8 @@ Meteor.methods({
     }
   },
 
-  async getPaymentStatus(instructionId) { //denna ska anropas av gränssnittet i payment
+  async getPaymentStatus(instructionId) {
+    //denna ska anropas av gränssnittet i payment
     check(instructionId, String);
     const payment = await initiatedPayments.findOneAsync({
       swishID: instructionId,
@@ -146,7 +147,7 @@ Meteor.methods({
       throw new Meteor.Error("payment-not-found", "Ingen betalning hittades.");
     }
     if (payment.status === "PAID") {
-      return true; 
+      return true;
     }
   },
 

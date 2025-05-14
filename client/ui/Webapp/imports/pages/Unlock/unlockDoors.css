@@ -1,8 +1,15 @@
 .umsapp .login-form button.door-button {
+  
+    all: unset;
+    font-family: "DM Mono", monospace;
+    font-size: 16px;
+    text-align: center;
+    /*background-color: #aac4e6; eller annan färg */
     border-radius: 50%;
+    border: 1px solid black;
     width: 40%;
     aspect-ratio: 1 / 1;
     cursor: pointer;
-    border-style: 1px dashed black;
-    cursor: pointer;
+    padding: 10px;
   }
+  

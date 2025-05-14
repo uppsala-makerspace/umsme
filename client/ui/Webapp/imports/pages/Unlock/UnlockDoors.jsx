@@ -6,7 +6,7 @@ import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
 import { useTranslation } from "react-i18next";
 import { useTracker } from "meteor/react-meteor-data";
 import { useState, useEffect } from "react";
-import './unlockDoors.css'
+import "./unlockDoors.css";
 
 export const UnlockDoors = () => {
   const user = useTracker(() => Meteor.user());
@@ -32,6 +32,7 @@ export const UnlockDoors = () => {
     <>
       <HamburgerMenu />
       <LanguageSwitcher />
+      <br></br>
       <div className="login-form">
         <p style={{ marginBottom: "5px" }}> {t("outerDoor")}</p>
         <button

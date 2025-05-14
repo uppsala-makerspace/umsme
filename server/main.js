@@ -12,6 +12,8 @@ import { Unlocks } from "/collections/unlocks";
 import { initiatedPayments } from "/collections/initiatedPayments";
 import "/collections/users";
 import "./cronjob/syncAndMailUnlocks";
+import "./cronjob/notifyExpiring";
+import "./api/pushMethods.js";
 
 import "./api";
 import "./methods/mail";
@@ -187,7 +189,7 @@ Meteor.startup(async () => {
   Meteor.publish("users", createAuthFuncFor(Meteor.users));
   Meteor.publish(null, createAuthFuncFor(Meteor.roleAssignment));
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
-  Meteor.publish("initiatedPayments", createAuthFuncFor(initiatedPayments))
+  Meteor.publish("initiatedPayments", createAuthFuncFor(initiatedPayments));
 
   await ServiceConfiguration.configurations.upsertAsync(
     { service: "google" },

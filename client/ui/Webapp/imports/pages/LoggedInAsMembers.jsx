@@ -5,6 +5,7 @@ import { HamburgerMenu } from "../components/HamburgerMenu/HamburgerMenu";
 import { useTranslation } from "react-i18next";
 import { useTracker } from "meteor/react-meteor-data";
 import { LogoutButton } from "../components/LogoutButton/LogoutButtons.jsx";
+import PushSetup from "../components/pushSetup";
 
 export const LoggedInAsMember = () => {
   const user = useTracker(() => Meteor.user());
@@ -45,6 +46,7 @@ export const LoggedInAsMember = () => {
 
   console.log("memberships:", memberships);
   console.log("member.lab:", memberLab);
+  console.log("user._id:", user?._id);
   if (memberLab instanceof Date) {
     console.log("Det är ett Date-objekt");
   } else {
@@ -126,6 +128,7 @@ export const LoggedInAsMember = () => {
           )}
         <LogoutButton onClick={logout} />
       </div>
+      <PushSetup />
     </>
   );
 };

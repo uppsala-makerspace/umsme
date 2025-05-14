@@ -1,5 +1,7 @@
+import React from "react";
 import "/client/ui/admin";
 import "/client/ui/Webapp";
+import PushSetup from "/client/ui/Webapp/imports/components/pushSetup";
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -12,4 +14,12 @@ if ("serviceWorker" in navigator) {
         console.log(" SW registration failed:", registrationError);
       });
   });
+}
+
+export default function App() {
+  return (
+    <div>
+      <PushSetup />
+    </div>
+  );
 }
