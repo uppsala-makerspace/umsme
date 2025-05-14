@@ -21,6 +21,7 @@
 }
 .umsapp .pay-button {
   background-color: #cccccc; /* Grå färg för inaktiverad knapp */
+  text-align: center;
   cursor: not-allowed;
   border: none;
   border-radius: 5px;

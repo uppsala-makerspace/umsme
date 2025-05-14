@@ -73,7 +73,7 @@ const addPayment = async (paymentData) => {
 const addMembership = async (payment, member) => {
   const doc = membershipFromPayment(payment.date, payment.amount, true, detectPotentialLabPayment(member)); //Göra om denna metod så den kollar på paymentType i initiatedPayment
   const membershipData = {
-    mid: payment.member,
+    mid: member._id,
     pid: payment._id,
     type: doc.type,
     family: doc.family,
@@ -84,12 +84,6 @@ const addMembership = async (payment, member) => {
     start: new Date(),
   };
   const membershipId = await Memberships.insertAsync(membershipData);
-  if (membershipData.family) {
-    await Members.updateAsync(
-      { _id: member._id },
-      { $set: { family: true } }
-    );
-  }
 
   return {
     id: membershipId,

@@ -40,9 +40,11 @@ Meteor.methods({
     }).fetchAsync();
     memberships.sort((m1, m2) => (m1.memberend > m2.memberend ? -1 : 1));
     let familyHead;
-    if (member.family) {
+    if (member.family) { // hitta familiyhead om man är "barn"
       familyHead = await Members.findOneAsync({ mid: member.infamily });
-      console.log("familyHead", familyHead);
+    }
+    else if (memberships?.[0]?.family) { //Om familyhead är member
+      familyHead = member
     }
     let familyHeadMembership;
     if (familyHead) {
@@ -50,6 +52,7 @@ Meteor.methods({
         mid: familyHead._id,
       });
     }
+    console.log("headms", familyHeadMembership)
     const familyId = member.infamily || member.mid;
     const familyMembers = await Members.find({
       $or: [
@@ -152,7 +155,6 @@ Meteor.methods({
   },
 
   async savePendingMember(data) {
-    console.log("Sparar pendingMember, server side", data);
     check(data, {
       name: String,
       email: String,

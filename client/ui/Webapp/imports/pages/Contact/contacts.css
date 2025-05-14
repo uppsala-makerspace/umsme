@@ -11,6 +11,8 @@
 .umsapp .submit-button{
     background-color: #5fc86f;
     cursor: pointer;
+    color: white;
+    text-align: center;
 }
 
 .umsapp .submit-button:hover{
