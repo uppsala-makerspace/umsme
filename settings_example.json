@@ -14,9 +14,9 @@
     "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc"
   },
   "private": {
-    "vapidPrivateKey": "seemessenger"
+    "vapidPrivateKey": "F7hcqyRl7P27b3dALstLwz__2lK-NHNZRgxqzCL9HUo"
   },
-  
+
   "swishCallback": "placeholder-swishCallback",
   "serviceConfigurations": {
     "google": {

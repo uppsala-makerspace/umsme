@@ -4,7 +4,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
-import "./Confirmation.css";
+import "./confirmation.css";
 
 export const Confirmation = () => {
   const user = useTracker(() => Meteor.user());
