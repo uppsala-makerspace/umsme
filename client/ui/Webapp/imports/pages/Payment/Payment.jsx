@@ -76,6 +76,30 @@ export const Payment = () => {
         }
       }
     );
+    Meteor.call(
+      "swish.createTestPayment",
+      price1,
+      membershipType.name,
+      async (err, res) => {
+        if (err) {
+          console.error("Error:", err);
+        } else {
+          console.log("Got token:", res.paymentrequesttoken);
+          setSwishId(res.instructionId);
+          if (SwishOnThisDevice) {
+            setSwishDevice(true);
+            await openSwish(res.paymentrequesttoken);
+          } else {
+            await generateQrCode(res.paymentrequesttoken);
+            setIsLoading(true);
+          }
+          const id = setInterval(() => {
+            checkIfapproved(res.instructionId);
+          }, 4000); // Kör var 4:e sekund
+          setIntervalId(id);
+        }
+      }
+    );
   };
 
   const openSwish = (token) => {
@@ -130,7 +154,7 @@ export const Payment = () => {
               height={300}
               className="swish-qr"
             />
-            <button className="finishButton" disabled={isLoading}>
+            <button className="loadingButton" disabled={isLoading}>
               {isLoading ? <div className="loader"></div> : t("CheckPayment")}
             </button>
           </div>
@@ -148,7 +172,7 @@ export const Payment = () => {
             </button>
             <button
               onClick={() => handlePayment(membershipType.price, false)}
-              className="form-button"
+              className="finishButton"
             >
               {t("SwishOnOtherDevice")}
             </button>

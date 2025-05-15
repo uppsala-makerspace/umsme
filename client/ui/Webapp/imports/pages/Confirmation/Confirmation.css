@@ -8,6 +8,9 @@
   height: 100vh;
   background-color: #f0efef;
   font-family: "DM Mono", monospace;
+  max-width: 410px;
+  margin: 0 auto;
+  text-align: left;
 }
 
 .umsapp .confirmation-container h1 {

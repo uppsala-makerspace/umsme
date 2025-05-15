@@ -144,9 +144,6 @@ export const LoggedIn = () => {
         )}
         <br />
 
-        <p style={{ textAlign: "center" }}>
-          {t("yourMail")} {email}
-        </p>
         {/*
         <button
           onClick={() =>
