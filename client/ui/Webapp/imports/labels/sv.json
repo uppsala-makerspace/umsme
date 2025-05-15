@@ -7,6 +7,7 @@
   "login": "Logga in",
   "logout": "Logga ut",
   "email": "E-post",
+  "setPassword": "Skapa lösenord",
   "password": "Lösenord",
   "passwordConfirm": "Bekräfta lösenord",
   "passwordConfirmNew": "Bekräfta nytt lösenord",
@@ -22,7 +23,6 @@
   "noMembershiptext2": "Om du önskar bli medlem så är det enkelt att göra det här i appen. Välj bara det medlemskap du är intresserad av och betala, så får du omedelbar tillgång till lokalen.",
   "becomeMember": "Bli medlem",
   "memberships": "Våra medlemskap",
-  "membershipsText": "På Uppsala Makerspace vill vi att skapande ska vara tillgängligt för alla, oavsett ekonomi. Därför vill vi hålla priserna för medlemskap så låga som möjligt. Det innebär att vi alla måste hjälpas åt meddet arbete som krävs för att vår förening ska må bra.",
   "memberBase": "Medlemskap Bas",
   "memberBasetext": "Med vårt basmedlemskap är du välkommen att nyttja vårt makerspace under våra öppna kvällar samt på lördagskurserna.",
   "priceBas": "200 kr/år",
@@ -93,7 +93,7 @@
   "SwishOnOtherDevice": "Betala med Swish på annan enhet",
   "FamilyMember": "Du är en del av ett familjemedlemskap",
   "Soda": "Läsk",
-  "keys": "Nycklar",
+  "keys": "Öppna dörr",
   "Membership": "Medlemskap",
   "myAccount": "Mitt konto",
   "Calender": "Kalender",
@@ -124,6 +124,10 @@
   "MembershipEndDate": "Du är medlem till och med:",
   "MembershipID": "Medlemskaps ID:",
   "BackToStart": "Till startsidan",
-   "AddFamilyMember": "Lägg till familjemedlem"
+   "AddFamilyMember": "Lägg till familjemedlem",
+"Membershipstext1": "På Uppsala Makerspace vill vi att skapande ska vara tillgängligt för alla, oavsett ekonomi. Därför vill vi hålla priserna för medlemskap så låga som möjligt. Det innebär att vi alla måste hjälpas åt meddet arbete som krävs för att vår förening ska må bra.",
+    "MembershipsText": "Ansvarsförbindelse version: 210912\n\nLabbmedlemmar i Uppsala Makerspace kan få egen inpassering och kan då vara i lokalen och arbeta med sina projekt när det passar dem. För att underlätta samarbetet och se till att det är roligt och säkert att arbeta i lokalerna har vi satt upp nedanstående enkla regler. Medlemmar som missbrukar förtroendet kan bli avstängda för längre eller kortare tid.\n\nTillgång till lokalen:\n• Besökare är välkomna, framförallt på öppna kvällar, men regelbundet tillträde till lokalerna förutsätter labbmedlemskap i föreningen.\n• Om jag släpper in någon som inte är labbmedlem är jag personligen ansvarig för allt de gör. Medlemskap kan verifieras på sidan uppsalamakerspace.se/medlem/.\n• Den som lämnar lokalen sist ser till att inga maskiner är på, fönster är stängda, lampor är släckta och att innerdörren är stängd och låst.\n\nOrdning och reda:\n• Efter ett avslutat arbetspass ska skräp städas undan och verktyg ställas tillbaka, som regel ska man lämna lokalen i samma eller bättre skick än när man kom.\n• Personliga saker och delar till pågående projekt förvaras i en personlig back i avsedd hylla. Större föremål kan lagras under en kortare tid i förrådet på anvisad plats om de märks upp och att det finns plats. Märk upp med namn, telefonnummer och uppskattat datum för projektets färdigställande.\n• Mat får endast förtäras i köket och samlingsrummet men får inte lämnas framme. Droger och alkoholhaltiga drycker får inte förtäras i lokalen. Plocka undan, häll ut gammalt kaffe, släng äppelskruttar och annat som kan mögla.\n\nSäkerhet:\n• I trä- och metallverkstäderna ska långt hår hållas uppsatt, löst sittande kläder undvikas och skyddsutrustning användas.\n• För sin egen och andras säkerhet samt för att undvika att saker går sönder använder man bara verktyg som man är säker på att man kan hantera. Om man är osäker frågar man andra om råd eller avstår.\n• Vissa verktyg kan ha särskilda krav för användandet på en informationslapp bredvid, dessa krav måste respekteras.\n• Det är viktigt att man är väl förtrogen med var första hjälpen-kitten och brandsläckare finns.\n\nTrevnad:\n• Samtal förs i god ton och det är en självklarhet att vi hjälper varandra och delar med oss av erfarenheter.\n• Vi respekterar att man ibland måste koncentrera sig och då inte avbryter i onödan."
+  
+  
 
 }
