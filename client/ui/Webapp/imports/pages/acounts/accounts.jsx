@@ -38,18 +38,19 @@ export const accounts = () => {
           setFamilySize(fm.length);
           if (fmh && fmh.mid === m._id) {
             setisFamilyHead(true);
-            console.log("isFamilyHead", isFamilyHead);
+            const email = fm.map((member) => member.email);
+            setFamily(email);
           }
           else if (fmh){
             setFamilyHeadMembership(fmh)
+            const email = fm.map((member) => member.email);
+            setFamily(email);
           }
 
           if (m) {
             setMember(m);
             console.log("m:", m);
             setMemberships(ms);
-            const email = fm.map((member) => member.email);
-            setFamily(email);
           } else {
             // Om användaren inte är medlem
 
