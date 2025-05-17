@@ -26,12 +26,12 @@ const te = (d1, d2) => {
 };
 
 Template.MemberStatus.helpers({
-  status() {
-    const mb = Members.findOne(this.member);
+  async statusAsync() {
+    const mb = await Members.findOneAsync(this.member);
     if (!mb) {
       return {};
     }
-    const { member, lab, family } = memberStatus(mb);
+    const { member, lab, family } = await memberStatus(mb);
     const now = new Date();
     const inTwoWeeks = new Date();
     inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
