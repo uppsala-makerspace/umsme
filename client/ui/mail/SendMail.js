@@ -140,7 +140,7 @@ Template.SendMail.events({
 
 AutoForm.hooks({
   insertMailForm: {
-    formToDoc: async function(doc) {
+    formToDoc: function(doc) {
       if (!doc.from) {
         rememberState.set('message', noFrom);
       } else if (!doc.subject) {
@@ -158,8 +158,8 @@ AutoForm.hooks({
           const recipientList = document.getElementById('manualSendList').value.split(',');
           rememberState.set('to', recipientList);
         } else {
-          const recipients = await getRecipients(doc.recipients, doc.family);
-          rememberState.set('to', recipients.map(d => d.to));
+          getRecipients(doc.recipients, doc.family).then(recipients =>
+            rememberState.set('to', recipients.map(d => d.to)));
         }
       }
       return doc;
@@ -180,7 +180,7 @@ AutoForm.hooks({
       const subjectTemplate = template(doc.subject);
       const messageTemplate = template(doc.template);
 
-      let recipients = getRecipients(doc.recipients, doc.family);
+      let recipients = await getRecipients(doc.recipients, doc.family);
       // If manual, split and loop through all recipients and identify original recipient object
       if (rememberState.get('tomanual')) {
         const recipientList = `${document.getElementById('manualSendList').value},`.split('>,');
