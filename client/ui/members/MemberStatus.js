@@ -6,7 +6,10 @@ import moment from 'moment';
 import './MemberStatus.html';
 
 Template.MemberStatus.onCreated(function() {
-  Meteor.subscribe('members');
+  this.autorun(() => {
+    this.subscribe('members');
+    this.subscribe('memberships'); // Needed for memberStatus
+  });
 });
 
 Template.MemberStatus.events({
@@ -27,11 +30,15 @@ const te = (d1, d2) => {
 
 Template.MemberStatus.helpers({
   async statusAsync() {
+    // Tracker computation is lost after first await
+    const computation = Tracker.currentComputation;
     const mb = await Members.findOneAsync(this.member);
     if (!mb) {
       return {};
     }
-    const { member, lab, family } = await memberStatus(mb);
+
+    // Bring back reactivity to the async call memberStatus (lost due to the await above).
+    const { member, lab, family } = await Tracker.withComputation(computation, () => memberStatus(mb));
     const now = new Date();
     const inTwoWeeks = new Date();
     inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
