@@ -1,14 +1,29 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Members } from '../../../collections/members.js';
+import { ReactiveDict } from 'meteor/reactive-dict';
 import './MemberList.html';
 import '../../../lib/tabular/members';
+import { overdueReminderDays, reminderDays }  from '../../../lib/rules';
 
-Template.MemberList.onCreated(() => {
+Template.MemberList.onCreated(function() {
   Meteor.subscribe('members');
+  this.state = new ReactiveDict();
+  this.state.set('reminders', false);
 });
 
 Template.MemberList.helpers({
+  selector() {
+    const reminders = Template.instance().state.get('reminders');
+    if (reminders) {
+      const now = new Date();
+      now.setDate(now.getDate() - overdueReminderDays);
+      const soon = new Date();
+      soon.setDate(soon.getDate() + reminderDays);
+      return {$and: [{member: {$lt: soon}}, {member: {$gt: now}}]};
+    }
+    return {};
+  }
 });
 
 const forceDownload = (rows, filename) => {
@@ -51,6 +66,10 @@ Template.MemberList.events({
 
     forceDownload(rows, 'active_members.csv');
   },
+  'click .filterReminders': function (event, instance) {
+    instance.state.set('reminders', event.target.checked );
+  },
+
   'click .downloadAll': function () {
     const today = new Date();
     const current = Members.find({}).fetch();
