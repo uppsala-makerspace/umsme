@@ -66,6 +66,7 @@ body {
   background-color: #5fc86f;
   cursor: pointer;
   font-family: "DM Mono", monospace;
+  text-align: center; /* kanske ta bort sen */
 }
 
 .umsapp .login-logo {

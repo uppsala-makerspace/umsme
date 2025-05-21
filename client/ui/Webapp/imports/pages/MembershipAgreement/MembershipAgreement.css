@@ -28,6 +28,7 @@
   padding: 10px 20px;
   color: white;
   width: 100%;
+  text-align: center; /* kanske ta bort sen när denna knapp skrivs om */
 }
 
 .umsapp .pay-button.hover-enabled {

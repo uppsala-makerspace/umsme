@@ -76,6 +76,30 @@ export const Payment = () => {
         }
       }
     );
+    Meteor.call(
+      "swish.createTestPayment",
+      price1,
+      membershipType.name,
+      async (err, res) => {
+        if (err) {
+          console.error("Error:", err);
+        } else {
+          console.log("Got token:", res.paymentrequesttoken);
+          setSwishId(res.instructionId);
+          if (SwishOnThisDevice) {
+            setSwishDevice(true);
+            await openSwish(res.paymentrequesttoken);
+          } else {
+            await generateQrCode(res.paymentrequesttoken);
+            setIsLoading(true);
+          }
+          const id = setInterval(() => {
+            checkIfapproved(res.instructionId);
+          }, 4000); // Kör var 4:e sekund
+          setIntervalId(id);
+        }
+      }
+    );
   };
 
   const openSwish = (token) => {
