@@ -144,12 +144,22 @@ export const Payment = () => {
               onClick={() => handlePayment(membershipType.price, true)}
               className="finishButton"
             >
+              <img
+                src="/icons/smartphone-icon-with-transparent-background-free-png.webp"
+                alt="Telefon"
+                className="deviceIcon"
+              />
               {t("SwishOnThisDevice")}
             </button>
             <button
               onClick={() => handlePayment(membershipType.price, false)}
               className="finishButton"
             >
+              <img
+                src="/icons/pngtree-laptop-icon-png-image_6606927.png"
+                alt="Telefon"
+                className="deviceIcon"
+              />
               {t("SwishOnOtherDevice")}
             </button>
           </>
