@@ -43,7 +43,7 @@ export const HandleMembership = () => {
       <div className="membershipsContainer">
         <div>
           <h1>{t("memberships")}</h1>
-          <p>{t("membershipsText")}</p>
+          <p>{t("Membershipstext1")}</p>
           <br />
 
           <div className="membership">

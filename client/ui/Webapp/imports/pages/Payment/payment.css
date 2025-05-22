@@ -28,23 +28,43 @@
 }
 
 .umsapp .finishButton {
+  margin: 20px auto 0 auto;
   display: flex;
   color: #f0efef;
   justify-content: center;
   align-items: center;
+  vertical-align: middle;
   border: none;
   border-radius: 4px;
   font-size: 16px;
   background-color: #5fc86f;
   cursor: pointer;
   font-family: "DM Mono", monospace;
-  width: 300px;
-  height: 40px;
+  width: 100%;
+  height: 45px;
   overflow: hidden;
+  font-size: 15px;
+}
+
+.umsapp .deviceIcon {
+  height: 60%;
+  align-items: center;
+  vertical-align: middle;
+}
+.umsapp .loadingButton {
+  margin: 24px auto 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background-color: transparent;
+  width: 100%;
+  max-width: 120px;
+  color: #5fc86f;
+  text-align: center;
 }
 
 .umsapp .scanQRh3 {
   text-align: center;
   font-family: "DM Mono", monospace;
 }
-

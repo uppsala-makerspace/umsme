@@ -36,21 +36,28 @@ export const accounts = () => {
           } = await Meteor.callAsync("findInfoForUser");
           setIsLoading(false);
           setFamilySize(fm.length);
-          console.log("familysize:", fm.length);
           if (fmh && fmh.mid === m._id) {
             setisFamilyHead(true);
+<<<<<<< HEAD
             console.log("isFamilyHead", isFamilyHead);
           } else if (fmh) {
             setFamilyHeadMembership(fmh);
             console.log("familjehuvudmedlemskap", fmh);
+=======
+            const email = fm.map((member) => member.email);
+            setFamily(email);
+          }
+          else if (fmh){
+            setFamilyHeadMembership(fmh)
+            const email = fm.map((member) => member.email);
+            setFamily(email);
+>>>>>>> c0f0961c4140bcf831c53476d4c85597d6e439d6
           }
 
           if (m) {
             setMember(m);
             console.log("m:", m);
             setMemberships(ms);
-            const email = fm.map((member) => member.email);
-            setFamily(email);
           } else {
             // Om användaren inte är medlem
 
@@ -105,7 +112,11 @@ export const accounts = () => {
       return t("memberBase");
     }
   };
+<<<<<<< HEAD
 
+=======
+  console.log(isFamilyHead)
+>>>>>>> c0f0961c4140bcf831c53476d4c85597d6e439d6
   //const member_family = member.family;
   return (
     <>
@@ -152,7 +163,7 @@ export const accounts = () => {
           <br />
 
           <div className="middle-text">
-            {family.length > 1 ? (
+            {family.length >= 1 ? (
               <div>
                 <div>{t("FamilyMembers")}</div>
 
