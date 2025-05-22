@@ -40,12 +40,9 @@ export const accounts = () => {
           if (fmh && fmh.mid === m._id) {
             setisFamilyHead(true);
             console.log("isFamilyHead", isFamilyHead);
-          } else {
+          } else if (fmh) {
             setFamilyHeadMembership(fmh);
-          }
-          else if (fmh){
-            setFamilyHeadMembership(fmh)
-            console.log("familjehuvudmedlemskap",fmh)
+            console.log("familjehuvudmedlemskap", fmh);
           }
 
           if (m) {
@@ -108,6 +105,7 @@ export const accounts = () => {
       return t("memberBase");
     }
   };
+
   //const member_family = member.family;
   return (
     <>
@@ -140,11 +138,15 @@ export const accounts = () => {
             {t("MemberSince")}{" "}
             {memberships?.[
               memberships.length - 1
-            ]?.start.toLocaleDateString() || familyHeadMembership?.start.toLocaleDateString() || "–"}
+            ]?.start.toLocaleDateString() ||
+              familyHeadMembership?.start.toLocaleDateString() ||
+              "–"}
           </div>
           <div className="middle-text">
             {t("EndDate")}{" "}
-            {memberships?.[0]?.memberend.toLocaleDateString() || familyHeadMembership?.memberend.toLocaleDateString() || "-"}
+            {memberships?.[0]?.memberend.toLocaleDateString() ||
+              familyHeadMembership?.memberend.toLocaleDateString() ||
+              "-"}
           </div>
 
           <br />
