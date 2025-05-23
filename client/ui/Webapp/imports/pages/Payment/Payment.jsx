@@ -170,7 +170,6 @@ export const Payment = () => {
             >
               <img
                 src="/icons/smartphone-icon-with-transparent-background-free-png.webp"
-                alt="Telefon"
                 className="deviceIcon"
               />
               {t("SwishOnThisDevice")}
@@ -181,7 +180,6 @@ export const Payment = () => {
             >
               <img
                 src="/icons/pngtree-laptop-icon-png-image_6606927.png"
-                alt="Telefon"
                 className="deviceIcon"
               />
               {t("SwishOnOtherDevice")}
