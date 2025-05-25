@@ -64,7 +64,7 @@ export const RegisterForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="password">{t("password")}</label>
+          <label htmlFor="password">{t("setPassword")}</label>
           <input
             type="password"
             id="password"

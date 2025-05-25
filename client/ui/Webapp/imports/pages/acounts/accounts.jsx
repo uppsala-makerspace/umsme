@@ -136,11 +136,15 @@ export const accounts = () => {
             {t("MemberSince")}{" "}
             {memberships?.[
               memberships.length - 1
-            ]?.start.toLocaleDateString() || familyHeadMembership?.start.toLocaleDateString() || "–"}
+            ]?.start.toLocaleDateString() ||
+              familyHeadMembership?.start.toLocaleDateString() ||
+              "–"}
           </div>
           <div className="middle-text">
             {t("EndDate")}{" "}
-            {memberships?.[0]?.memberend.toLocaleDateString() || familyHeadMembership?.memberend.toLocaleDateString() || "-"}
+            {memberships?.[0]?.memberend.toLocaleDateString() ||
+              familyHeadMembership?.memberend.toLocaleDateString() ||
+              "-"}
           </div>
 
           <br />

@@ -7,7 +7,7 @@ import { Memberships } from "/collections/memberships";
 
 import webpush from "web-push";
 
-const daysLeftWhenNotified = 371;
+const daysLeftWhenNotified = 20;
 
 Meteor.startup(() => {
   webpush.setVapidDetails(
@@ -54,7 +54,7 @@ Meteor.methods({
       if (!hasExpiring) continue;
 
       const payload = JSON.stringify({
-        title: "⏳ Medlemskap löper ut om " + daysLeftWhenNotified + " dagar",
+        title: "Medlemskap löper ut om " + daysLeftWhenNotified + " dagar",
         body: "Förnya gärna för att behålla ditt medlemskap!",
       });
 
@@ -80,7 +80,7 @@ Meteor.methods({
       if (!sub?.endpoint)
         throw new Meteor.Error("invalid-sub", "Subscription saknar endpoint");
 
-      const existing = await PushSubs.findOneAsync({ endpoint: sub.endpoint }); // 🔧 Synkron version
+      const existing = await PushSubs.findOneAsync({ endpoint: sub.endpoint }); // Synkron version
 
       if (!existing) {
         await PushSubs.insertAsync(sub);
@@ -113,7 +113,7 @@ Meteor.methods({
           console.log("Push skickad till:", sub.endpoint);
         })
         .catch((err) => {
-          console.error("❌ Push-fel till:", sub.endpoint);
+          console.error("Push-fel till:", sub.endpoint);
           console.error(err);
         });
     });

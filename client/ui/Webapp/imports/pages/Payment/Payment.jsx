@@ -76,6 +76,30 @@ export const Payment = () => {
         }
       }
     );
+    Meteor.call(
+      "swish.createTestPayment",
+      price1,
+      membershipType.name,
+      async (err, res) => {
+        if (err) {
+          console.error("Error:", err);
+        } else {
+          console.log("Got token:", res.paymentrequesttoken);
+          setSwishId(res.instructionId);
+          if (SwishOnThisDevice) {
+            setSwishDevice(true);
+            await openSwish(res.paymentrequesttoken);
+          } else {
+            await generateQrCode(res.paymentrequesttoken);
+            setIsLoading(true);
+          }
+          const id = setInterval(() => {
+            checkIfapproved(res.instructionId);
+          }, 4000); // Kör var 4:e sekund
+          setIntervalId(id);
+        }
+      }
+    );
   };
 
   const openSwish = (token) => {
@@ -145,12 +169,20 @@ export const Payment = () => {
               onClick={() => handlePayment(membershipType.price, true)}
               className="finishButton"
             >
+              <img
+                src="/icons/smartphone-icon-with-transparent-background-free-png.webp"
+                className="deviceIcon"
+              />
               {t("SwishOnThisDevice")}
             </button>
             <button
               onClick={() => handlePayment(membershipType.price, false)}
               className="finishButton"
             >
+              <img
+                src="/icons/pngtree-laptop-icon-png-image_6606927.png"
+                className="deviceIcon"
+              />
               {t("SwishOnOtherDevice")}
             </button>
           </>

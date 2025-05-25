@@ -28,6 +28,7 @@
   padding: 10px 20px;
   color: white;
   width: 100%;
+  text-align: center; /* kanske ta bort sen när denna knapp skrivs om */
 }
 
 .umsapp .pay-button.hover-enabled {
@@ -121,6 +122,7 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-right: 50px;
 }
 
 .umsapp .AgreementHolder button:last-of-type:active:hover {
@@ -146,4 +148,4 @@
 }
 .umsapp .BackButton:hover {
   text-decoration: underline; /* Understrykning vid hover */
-}  
+}
