@@ -96,16 +96,14 @@ export const accounts = () => {
     if (memberships?.[0]?.family === true) {
       return t("memberFamily");
     }
-    if (memberships?.[0]?.type === "labandmember") {
+    if (memberships?.[0]?.type === "labandmember" || memberships?.[0]?.type === "lab") {
       //for old members we did this was callled "Individual lab member", this new name wont work for them
-
       return t("memberIndivdual");
     }
     if (memberships?.[0]?.type === "member") {
       return t("memberBase");
     }
   };
-  console.log(isFamilyHead)
   //const member_family = member.family;
   return (
     <>
