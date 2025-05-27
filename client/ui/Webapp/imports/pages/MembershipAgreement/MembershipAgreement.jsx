@@ -1,8 +1,4 @@
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { Template } from "meteor/templating";
-import { Members } from "/collections/members.js";
-import { Payments } from "/collections/payments";
-import { updateMember } from "/lib/utils";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
@@ -14,7 +10,9 @@ export const MembershipAgreement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
   const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const [liabilityText, setLiabilityText] = useState("");
 
   useEffect(() => {
     const selectedMembership = Session.get("selectedMembership");
@@ -25,6 +23,20 @@ export const MembershipAgreement = () => {
     }
   }, []);
 
+  useEffect(() => {
+    readLiabilityText();
+  }, [currentLanguage]);
+
+
+  const readLiabilityText = async () => {
+    try{
+    const liability = await import("./liability.json");
+    setLiabilityText(liability.default?.[currentLanguage].text);
+    }
+    catch (error) {
+      console.error("Error loading liability text:", error);
+    }
+  }
   const handleScroll = (e) => {
     const element = e.target;
     const isAtBottom =
@@ -88,7 +100,7 @@ export const MembershipAgreement = () => {
             <div className="AgreementContent" onScroll={handleScroll}>
               <h2>{t("MembershipAgreement")}</h2>
 
-              <p style={{ whiteSpace: "pre-line" }}>{t("MembershipsText")}</p>
+              <p style={{ whiteSpace: "pre-line" }}>{liabilityText}</p>
               <button onClick={() => setIsModalOpen(false)}>
                 {t("Close")}
               </button>

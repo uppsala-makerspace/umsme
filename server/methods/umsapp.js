@@ -52,7 +52,6 @@ Meteor.methods({
         mid: familyHead._id,
       });
     }
-    console.log("headms", familyHeadMembership)
     const familyId = member.infamily || member.mid;
     const familyMembers = await Members.find({
       $or: [

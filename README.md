@@ -10,6 +10,7 @@ Kopiera `settings.json_example` till `private/settings.json` och anpassa, sen ä
     meteor
 
 ### Driftsätta
+
 Sen fört skapa en build som passar din arkitektur, t.ex:
 
     meteor build ../umsme-build --architecture os.linux.x86_64
@@ -30,9 +31,9 @@ Se till att du har node (version 12), npm och mongodb installerat i din driftmil
 
 I katalogen app kan du lägga in filerna `settings.json`, `users.json` och `members.csv` utan att de påverkas av att du installerar nya paket.
 
-Skapa sen skriptet `run.sh` som du lägger parallellt med installeringsscriptet: 
+Skapa sen skriptet `run.sh` som du lägger parallellt med installeringsscriptet:
 
-    #/bin/sh    
+    #/bin/sh
     cd bundle
     PORT=3000 \
     MAIL_URL=smtp://user:password@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false \
@@ -40,9 +41,10 @@ Skapa sen skriptet `run.sh` som du lägger parallellt med installeringsscriptet:
     node main.js
 
 Se sektionen om maila från systemet nedan om hur `MAIL_URL` ska sättas.
-Katalogen `private` ska ligga under `bundle/server`, den används både för konfiguration (`settings.json`), användarhanteirng (`users.json`) och import av data (`members.csv`). 
+Katalogen `private` ska ligga under `bundle/server`, den används både för konfiguration (`settings.json`), användarhanteirng (`users.json`) och import av data (`members.csv`).
 
 ## Användarhantering
+
 Användarhantering sker genom en fil `private/user.json` som ser ut som:
 
     [
@@ -53,6 +55,7 @@ Om du tar bort användare från denna fil kommer de tas bort från databasen, de
 Om filen inte finns så kommer varken användare läggas till eller tas bort. Däremot kommer då det skrivas ut i konsolen vilka användare som finns.
 
 ## Integration med Swedbank
+
 Integration med Swedbank görs via ett separat bibliotek [umsme-bank](https://github.com/uppsala-makerspace/umsme-bank).
 Efter att det installeras bör man ändra i settings.json för att peka ut rooten i REST api:et. Det är två värden som behöver sättas:
 
@@ -60,6 +63,7 @@ Efter att det installeras bör man ändra i settings.json för att peka ut roote
     "syncNrOfTransactions": 20,
 
 ## Maila från systemet
+
 För att det ska gå att skicka mail måste man sätta miljövariabeln `MAIL_URL`. Det enklaste är att man sätter variabeln i samma kommando som man sätter igång meteor, så vi modifierar kommandot ovan till att vara:
 
     MAIL_URL=smtp://username:password@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false meteor --settings settings.json
@@ -67,7 +71,7 @@ För att det ska gå att skicka mail måste man sätta miljövariabeln `MAIL_URL
 Där `username` typiskt är en email som `kansliet@uppsalamakerspace.se`.
 Observera att man kan också slå av mailskickning i settings.json genom följande nyckelvärde:
 
-      "deliverMails": false 
+      "deliverMails": false
 
 ## Backup
 
@@ -82,14 +86,15 @@ Nedam är ett exempel på hur man gör en backup namngiven som ett visst datum (
 För att återställa motsvarande backup med mongorestore:
 
     mongorestore -h 127.0.0.1 --port 3001 --drop -d umsme backup/2020-01-30/meteor
-    
+
 Observera att namnet för databasen ovan är satt till umsme, vilket är det föreslagna namnet i en driftsatt version, i utvecklarläget kommer defaultnamnet vara `meteor`.
 
 ### Resetta databasen
+
 Om du av någon anledning vill börja om från början kan du stänga ner applikationen och sen:
 
-   meteor reset
-   
+meteor reset
+
 Därefter är det bara att starta igen.
 
 Om du kör i driftsatt läge får ta bort databasen via:
@@ -99,6 +104,7 @@ Om du kör i driftsatt läge får ta bort databasen via:
     > db.dropDatabase()
 
 ### Backup scripts
+
 För att förenkla finns det nu två scripts, backup.sh och restore.sh i backup foldern. Backup scriptet tar inget argument då det automatiskt genererar en dump med ett namn som ser ut som ett ISO datum, t.ex. `2020-02-02T12:11`. Restore scriptet tar namnet (ISO datumet) som argument, t.ex.:
 
     cd backup
@@ -108,8 +114,11 @@ Förslagsvis kör man backup scriptet en gång per natt. Då backuppens storlek 
 
 Notera även här att namnet på databasen är namngiven till `umsme`, i en default (icke driftsatt) meteor miljö är namnet istället `meteor`.
 
-
-
 ### Settings_example.json
 
-För att köra projektet så måste du ha en settings.json-fil som ser ut som settings_example-filen fast med riktiga värden på API-tokens. Kör scriptet meteor --settings settings.json för att köra igång appen med stöd för inloggning via google/facebook etc 
+För att köra projektet så måste du ha en settings.json-fil som ser ut som settings_example-filen fast med riktiga värden på API-tokens. Kör scriptet meteor --settings settings.json för att köra igång appen med stöd för inloggning via google/facebook etc.
+API-tokens för Google och Facebook måste uppdateras senare när man driftsätter projektet. Detta gör man på google respektive facebooks utvecklarsidor.
+
+### Contact-page
+
+Web3Forms används för kontaktformuläret. Besök webbplatsen https://web3forms.com/, skapa en nyckel och välj en e‑postadress som ska ta emot meddelandena. Nyckeln kopieras in i på rätt ställe i acounts.jsx.
