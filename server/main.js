@@ -149,6 +149,7 @@ Accounts.onLogin(async function (loginInfo) {
 });
 
 Meteor.startup(async () => {
+  console.log("ROOT_URL is:", process.env.ROOT_URL);
   Accounts.config({
     sendVerificationEmail: true,
   });

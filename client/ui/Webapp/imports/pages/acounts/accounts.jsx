@@ -38,20 +38,12 @@ export const accounts = () => {
           setFamilySize(fm.length);
           if (fmh && fmh.mid === m._id) {
             setisFamilyHead(true);
-<<<<<<< HEAD
-            console.log("isFamilyHead", isFamilyHead);
+            const email = fm.map((member) => member.email);
+            setFamily(email);
           } else if (fmh) {
             setFamilyHeadMembership(fmh);
-            console.log("familjehuvudmedlemskap", fmh);
-=======
             const email = fm.map((member) => member.email);
             setFamily(email);
-          }
-          else if (fmh){
-            setFamilyHeadMembership(fmh)
-            const email = fm.map((member) => member.email);
-            setFamily(email);
->>>>>>> c0f0961c4140bcf831c53476d4c85597d6e439d6
           }
 
           if (m) {
@@ -112,11 +104,7 @@ export const accounts = () => {
       return t("memberBase");
     }
   };
-<<<<<<< HEAD
-
-=======
-  console.log(isFamilyHead)
->>>>>>> c0f0961c4140bcf831c53476d4c85597d6e439d6
+  console.log(isFamilyHead);
   //const member_family = member.family;
   return (
     <>
