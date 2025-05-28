@@ -4,7 +4,7 @@ import { initiatedPayments } from "/collections/initiatedPayments";
 import { Payments } from "/collections/payments";
 import { Members } from "/collections/members";
 import { Memberships } from "/collections/memberships";
-import {detectPotentialLabPayment,membershipFromPayment} from "/lib/rules";
+import {detectPotentialLabPayment} from "/lib/rules";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -39,7 +39,7 @@ WebApp.handlers.use("/swish/callback", async (req, res, next) => {
           mobile: member.mobile,
           member: member._id,
         })
-        await addMembership(payment, member);
+        await addMembership(payment, member, initiated);
 
         res.writeHead(200);
         res.end('Success!');
@@ -70,8 +70,8 @@ const addPayment = async (paymentData) => {
     });
     return paymentData;
 };
-const addMembership = async (payment, member) => {
-  const doc = membershipFromPayment(payment.date, payment.amount, true, detectPotentialLabPayment(member)); //Göra om denna metod så den kollar på paymentType i initiatedPayment
+const addMembership = async (payment, member, initiated) => {
+  const doc = membershipFromPayment(payment.date, initiated.paymentType, member.member == null, detectPotentialLabPayment(member)); //Göra om denna metod så den kollar på paymentType i initiatedPayment
   const membershipData = {
     mid: member._id,
     pid: payment._id,
@@ -89,6 +89,70 @@ const addMembership = async (payment, member) => {
     id: membershipId,
     mid: membershipData.mid,
   };
+  }
+
+  const membershipFromPayment = (paymentDate, paymentType, first, potentialLabPayment) => {
+    const start = new Date(paymentDate);
+    let labend = new Date(paymentDate);
+    let memberend = new Date(paymentDate);
+    console.log(memberend);
+    let type = 'member';
+    let family = false;
+    let discount = false;
+    memberend.setDate(labend.getDate() + (first ? 14 : 7));
+    labend.setDate(labend.getDate() + (first ? 14 : 7));
+    switch (paymentType) {
+      case "Rabatterat medlemskap":
+        discount = true;
+        memberend.setFullYear(memberend.getFullYear() + 1);
+        labend = undefined;
+        break;
+      case "Medlemskap Bas":
+        memberend.setFullYear(memberend.getFullYear() + 1);
+        labend = undefined;
+        break;
+      case "Familjemedlemskap":
+        family = true;
+        memberend.setFullYear(memberend.getFullYear() + 1);
+        labend = undefined;
+        break;
+      case "Kvartalslabbmedlemskap":
+        labend.setMonth(labend.getMonth() + 3);
+        //memberend = undefined;  Varför undefined?
+        memberend.setMonth(labend.getMonth() + 3);
+        type = 'lab';
+        family = false;
+        break;
+      case "Rabatterat Labbmedlemskap":
+        labend.setMonth(labend.getMonth() + 12);
+        memberend.setFullYear(memberend.getFullYear() + 1);
+        type = 'labandmember';
+        family = false;
+        discount = true;
+        break;
+      case "Labbmedlem Individ":
+        labend.setMonth(labend.getMonth() + 12);
+        memberend.setFullYear(memberend.getFullYear() + 1);
+        type = 'labandmember';
+        family = false;
+        discount = false;
+        break;
+      case "Labbmedlem Familj":
+        labend.setMonth(labend.getMonth() + 12);
+        memberend.setFullYear(memberend.getFullYear() + 1);
+        type = 'labandmember';
+        family = true;
+        discount = false;
+        break;
+    }
+    return {
+      start,
+      labend,
+      memberend,
+      type,
+      discount,
+      family,
+    }
   }
 
 /*

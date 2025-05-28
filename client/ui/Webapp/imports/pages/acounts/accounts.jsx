@@ -40,8 +40,9 @@ export const accounts = () => {
             setisFamilyHead(true);
             const email = fm.map((member) => member.email);
             setFamily(email);
-          } else if (fmh) {
-            setFamilyHeadMembership(fmh);
+          }
+          else if (fmh){
+            setFamilyHeadMembership(fmh)
             const email = fm.map((member) => member.email);
             setFamily(email);
           }
@@ -95,16 +96,18 @@ export const accounts = () => {
     if (memberships?.[0]?.family === true) {
       return t("memberFamily");
     }
-    if (memberships?.[0]?.type === "labandmember") {
+    if (memberships?.[0]?.type === "labandmember" || memberships?.[0]?.type === "lab") {
       //for old members we did this was callled "Individual lab member", this new name wont work for them
-
       return t("memberIndivdual");
     }
     if (memberships?.[0]?.type === "member") {
       return t("memberBase");
     }
   };
+<<<<<<< HEAD
   console.log(isFamilyHead);
+=======
+>>>>>>> 7ef0130a716731f7ec489c044c21390837c226be
   //const member_family = member.family;
   return (
     <>

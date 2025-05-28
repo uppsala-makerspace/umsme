@@ -50,6 +50,7 @@
   height: 60%;
   align-items: center;
   vertical-align: middle;
+  margin-left: 0;
 }
 .umsapp .loadingButton {
   margin: 24px auto 0 auto;
