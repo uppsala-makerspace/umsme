@@ -7,7 +7,7 @@ import { Memberships } from "/collections/memberships";
 
 import webpush from "web-push";
 
-const daysLeftWhenNotified = 20;
+const daysLeftWhenNotified = 350;
 
 Meteor.startup(() => {
   webpush.setVapidDetails(
@@ -33,9 +33,9 @@ Meteor.methods({
 
       let member;
       if (user?.emails?.[0]?.verified) {
-        member = Members.findOneAsync({ email });
+        member = await Members.findOneAsync({ email });
       }
-      if (!member) continue; // meber is a promise here so it is always true. I get problems with Await when finding members for some reason :(
+      if (!member) continue;
       const memberships = await Memberships.find({
         mid: member._id,
       }).fetchAsync();
