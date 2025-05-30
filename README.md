@@ -121,4 +121,4 @@ API-tokens för Google och Facebook måste uppdateras senare när man driftsätt
 
 ### Contact-page
 
-Web3Forms används för kontaktformuläret. Besök webbplatsen https://web3forms.com/, skapa en nyckel och välj en e‑postadress som ska ta emot meddelandena. Nyckeln kopieras in i på rätt ställe i acounts.jsx.
+Web3Forms används för kontaktformuläret. Besök webbplatsen https://web3forms.com/, skapa en nyckel och välj en e‑postadress som ska ta emot meddelandena. Nyckeln kopieras in i på rätt ställe i contact.jsx.

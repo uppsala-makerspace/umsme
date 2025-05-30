@@ -49,12 +49,9 @@ export const accounts = () => {
 
           if (m) {
             setMember(m);
-            console.log("m:", m);
             setMemberships(ms);
           } else {
             // Om användaren inte är medlem
-
-            console.log("Användaren är inte medlem.");
             setMember(null);
             setMemberships([]);
           }
@@ -69,14 +66,10 @@ export const accounts = () => {
 
   useEffect(() => {
     if (member && member.infamily) {
-      console.log("Medlem är i familj med ID:", member.infamily);
       setIsInFamily(true);
     }
   }, [member]);
 
-  console.log("membership", memberships);
-  console.log("currentMember", member);
-  console.log("familj", family);
 
   const openFamilyForm = () => {
     FlowRouter.go("/addFamilyMember");

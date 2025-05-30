@@ -204,11 +204,9 @@ Meteor.methods({
       }
     }
 
-    console.log("Sparar PendingMember:", data);
     return PendingMembers.insertAsync(data);
   },
   async createMemberFromPending() {
-    console.log("Skapar medlem från pending, serve side");
     if (!this.userId) throw new Meteor.Error("not-authorized");
 
     const user = await Meteor.userAsync();
