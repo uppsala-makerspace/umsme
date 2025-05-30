@@ -104,10 +104,6 @@ export const accounts = () => {
       return t("memberBase");
     }
   };
-<<<<<<< HEAD
-  console.log(isFamilyHead);
-=======
->>>>>>> 7ef0130a716731f7ec489c044c21390837c226be
   //const member_family = member.family;
   return (
     <>
