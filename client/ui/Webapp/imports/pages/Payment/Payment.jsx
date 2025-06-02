@@ -174,12 +174,9 @@ export const Payment = () => {
                 <img
                   src="/icons/smartphone-icon-with-transparent-background-free-png.webp"
                   className="deviceIcon"
+                  style={{ scale: "1.5", marginRight: "10px" }}
                 />
 
-                <img
-                  src="/icons/pngtree-laptop-icon-png-image_6606927.png"
-                  className="deviceIcon"
-                />
                 {t("SwishOnThisDevice")}
               </button>
               <br />
@@ -188,6 +185,11 @@ export const Payment = () => {
                 onClick={() => handlePayment(membershipType.price, false)}
                 className="finishButton"
               >
+                <img
+                  src="/icons/pngtree-laptop-icon-png-image_6606927.png"
+                  className="deviceIcon"
+                  style={{ marginRight: "10px" }}
+                />
                 {t("SwishOnOtherDevice")}
               </button>
             </div>

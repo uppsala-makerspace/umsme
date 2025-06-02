@@ -27,16 +27,16 @@ export const MembershipAgreement = () => {
     readLiabilityText();
   }, [currentLanguage]);
 
-
   const readLiabilityText = async () => {
-    try{
-    const liability = await import("./liability.json");
-    setLiabilityText(liability.default?.[currentLanguage].text);
-    }
-    catch (error) {
+    try {
+      const respone = await fetch("/liability.json");
+      const liability = await respone.json();
+      setLiabilityText(liability?.[currentLanguage]?.text);
+      console.log("Liability text loaded:", liabilityText);
+    } catch (error) {
       console.error("Error loading liability text:", error);
     }
-  }
+  };
   const handleScroll = (e) => {
     const element = e.target;
     const isAtBottom =
@@ -110,13 +110,14 @@ export const MembershipAgreement = () => {
               <div className="AgreementContent" onScroll={handleScroll}>
                 <h2>{t("MembershipAgreement")}</h2>
 
-              <p style={{ whiteSpace: "pre-line" }}>{liabilityText}</p>
-              <button onClick={() => setIsModalOpen(false)}>
-                {t("Close")}
-              </button>
+                <p style={{ whiteSpace: "pre-line" }}>{liabilityText}</p>
+                <button onClick={() => setIsModalOpen(false)}>
+                  {t("Close")}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
