@@ -12,6 +12,7 @@ export const Confirmation = () => {
   const [membershipType, setMembershipType] = useState(null);
   const [membershipEndDate, setMembershipEndDate] = useState(null);
   const { t } = useTranslation();
+  const [memberName, setMemberName] = useState("");
 
   useEffect(() => {
     if (!user?._id) return;
@@ -25,6 +26,7 @@ export const Confirmation = () => {
         if (member) {
           setMemberId(member._id);
           setMembershipEndDate(memberships[0]?.memberend);
+          setMemberName(member.name);
         } else {
           console.log("Ingen medlemsdata hittades.");
         }
@@ -40,7 +42,11 @@ export const Confirmation = () => {
     <div>
       <LanguageSwitcher />
       <div className="confirmation-container">
-        <h1>{t("ThankYou")}</h1>
+        <h1>
+          {t("ThankYou")} {memberName?.split(" ")[0]}
+          {"!"}
+        </h1>
+
         <p>{t("MembershipRegistered")}</p>
         <p>
           {t("MembershipID")} {memberId || t("Unknown")}

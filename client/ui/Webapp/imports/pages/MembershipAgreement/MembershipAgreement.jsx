@@ -46,8 +46,15 @@ export const MembershipAgreement = () => {
   return (
     <div>
       <LanguageSwitcher />
+
       <div className="AgreementHolder">
         <button
+          style={{
+            backgroundColor: "transparent",
+            border: "none",
+            color: "black",
+            marginTop: "30px",
+          }}
           className="BackButton"
           onClick={() => FlowRouter.go("/HandleMembership")}
         >
@@ -58,12 +65,14 @@ export const MembershipAgreement = () => {
         <p>{membership.description}</p>
         <h3>{membership.price} </h3>
         <p>{t("AgreementInfo")}</p>
-        <button
-          className="AgreementButton"
-          onClick={() => setIsModalOpen(true)}
-        >
-          {t("AgreementButton")}
-        </button>
+        <div className="login-form">
+          <button
+            className="AgreementButton"
+            onClick={() => setIsModalOpen(true)}
+          >
+            {t("AgreementButton")}
+          </button>
+        </div>
         <div>
           <input
             type="checkbox"
@@ -73,28 +82,33 @@ export const MembershipAgreement = () => {
           />
           <label htmlFor="agreement">{t("IAgree")}</label>
         </div>
-        <button
-          className={`pay-button ${
-            isScrolledToBottom && isCheckboxChecked ? "hover-enabled" : ""
-          }`}
-          onClick={handleAgreement}
-          disabled={!isScrolledToBottom || !isCheckboxChecked}
-        >
-          {t("Pay")}
-        </button>
+        <div className="login-form">
+          <button
+            className={`pay-button ${
+              isScrolledToBottom && isCheckboxChecked ? "hover-enabled" : ""
+            }`}
+            onClick={handleAgreement}
+            disabled={!isScrolledToBottom || !isCheckboxChecked}
+          >
+            {t("Pay")}
+          </button>
 
-        {isModalOpen && (
-          <div className="MembershipAgreementModal">
-            <div className="AgreementContent" onScroll={handleScroll}>
-              <h2>{t("MembershipAgreement")}</h2>
+          {isModalOpen && (
+            <div className="MembershipAgreementModal">
+              <div className="AgreementContent" onScroll={handleScroll}>
+                <h2>{t("MembershipAgreement")}</h2>
 
-              <p style={{ whiteSpace: "pre-line" }}>{t("MembershipsText")}</p>
-              <button onClick={() => setIsModalOpen(false)}>
-                {t("Close")}
-              </button>
+                <p style={{ whiteSpace: "pre-line" }}>{t("MembershipsText")}</p>
+                <button
+                  style={{ textAlign: "center" }}
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  {t("Close")}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 {
   "greeting": "Hej",
-  "greeting2": "Hejsan!",
-  "welcome": "Välkommen!",
+  "greeting2": "Hejsan",
+  "welcome": "Välkommen",
   "switchButton": "Byt till engelska",
   "register": "Skapa konto",
   "login": "Logga in",
@@ -120,7 +120,7 @@
   "SendNewVerification": "Skicka ny verifieringslänk",
   "BackToLogin": "Tillbaka till inloggning",
   "PleaseVerify": "Vänligen verifiera din e-postadress",
-  "ThankYou": "Tack och välkommen!",
+  "ThankYou": "Tack och välkommen",
   "MembershipRegistered": "Nu är ditt medlemskap registrerat. Om du köpt labbmedlemskap så blir dina nycklar aktiva genast och du får access till våra lokaler. Ha så roligt och glöm inte att ta väl hand om vårt makerspace!",
   "MembershipEndDate": "Du är medlem till och med:",
   "MembershipID": "Medlemskaps ID:",

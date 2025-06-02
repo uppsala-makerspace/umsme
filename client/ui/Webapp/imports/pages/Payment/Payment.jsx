@@ -164,18 +164,23 @@ export const Payment = () => {
             <h2>{membershipType.name}</h2>
             <p>{membershipType.description}</p>
             <h3>{membershipType.price}</h3>
-            <button
-              onClick={() => handlePayment(membershipType.price, true)}
-              className="finishButton"
-            >
-              {t("SwishOnThisDevice")}
-            </button>
-            <button
-              onClick={() => handlePayment(membershipType.price, false)}
-              className="finishButton"
-            >
-              {t("SwishOnOtherDevice")}
-            </button>
+            <div className="login-form">
+              <button
+                style={{ width: "100%" }}
+                onClick={() => handlePayment(membershipType.price, true)}
+                className="finishButton"
+              >
+                {t("SwishOnThisDevice")}
+              </button>
+              <br />
+              <button
+                style={{ width: "100%" }}
+                onClick={() => handlePayment(membershipType.price, false)}
+                className="finishButton"
+              >
+                {t("SwishOnOtherDevice")}
+              </button>
+            </div>
           </>
         )}
       </div>

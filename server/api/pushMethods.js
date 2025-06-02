@@ -7,7 +7,7 @@ import { Memberships } from "/collections/memberships";
 
 import webpush from "web-push";
 
-const daysLeftWhenNotified = 20;
+const daysLeftWhenNotified = 379;
 
 Meteor.startup(() => {
   webpush.setVapidDetails(
@@ -54,7 +54,7 @@ Meteor.methods({
       if (!hasExpiring) continue;
 
       const payload = JSON.stringify({
-        title: "⏳ Medlemskap löper ut om " + daysLeftWhenNotified + " dagar",
+        title: "⏳ Medlemskap löper ut om 14 dagar",
         body: "Förnya gärna för att behålla ditt medlemskap!",
       });
 

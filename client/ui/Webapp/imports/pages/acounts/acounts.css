@@ -43,9 +43,13 @@
     padding: 4px 0;
   }
   
-  .umsapp .family-email,
+  .umsapp .family-email {
+    font-size: 0.875rem;
+  }
+
   .umsapp .remove-link {
     font-size: 0.875rem;
+    text-align: right;
   }
 
   .logout-button {
@@ -58,3 +62,7 @@
     vertical-align: middle;
     font-size: 1.2em;
   }
+
+
+    
+  

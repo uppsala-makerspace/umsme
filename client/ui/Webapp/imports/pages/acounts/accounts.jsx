@@ -40,9 +40,8 @@ export const accounts = () => {
             setisFamilyHead(true);
             const email = fm.map((member) => member.email);
             setFamily(email);
-          }
-          else if (fmh){
-            setFamilyHeadMembership(fmh)
+          } else if (fmh) {
+            setFamilyHeadMembership(fmh);
             const email = fm.map((member) => member.email);
             setFamily(email);
           }
@@ -105,7 +104,7 @@ export const accounts = () => {
       return t("memberBase");
     }
   };
-  console.log(isFamilyHead)
+  console.log(isFamilyHead);
   //const member_family = member.family;
   return (
     <>
@@ -138,11 +137,15 @@ export const accounts = () => {
             {t("MemberSince")}{" "}
             {memberships?.[
               memberships.length - 1
-            ]?.start.toLocaleDateString() || familyHeadMembership?.start.toLocaleDateString() || "–"}
+            ]?.start.toLocaleDateString() ||
+              familyHeadMembership?.start.toLocaleDateString() ||
+              "–"}
           </div>
           <div className="middle-text">
             {t("EndDate")}{" "}
-            {memberships?.[0]?.memberend.toLocaleDateString() || familyHeadMembership?.memberend.toLocaleDateString() || "-"}
+            {memberships?.[0]?.memberend.toLocaleDateString() ||
+              familyHeadMembership?.memberend.toLocaleDateString() ||
+              "-"}
           </div>
 
           <br />
@@ -156,6 +159,7 @@ export const accounts = () => {
                   {family.map((email, index) => (
                     <div key={index} className="family-row">
                       <span className="family-email">{email}</span>
+
                       {isFamilyHead && (
                         <a href="/profile" className="remove-link">
                           {t("Remove")}
@@ -171,9 +175,10 @@ export const accounts = () => {
               <div></div>
             )}
             {isFamilyHead && familySize < 4 ? (
-              <div>
+              <div login-form>
                 <button
-                  className="form-button logout button"
+                  style={{ width: "86vw" }}
+                  className="finishButton"
                   onClick={openFamilyForm}
                 >
                   {t("AddFamilyMember")}
@@ -183,6 +188,7 @@ export const accounts = () => {
               <div></div>
             )}
           </div>
+          <br />
           <LogoutButton onClick={logout} />
         </div>
       </div>

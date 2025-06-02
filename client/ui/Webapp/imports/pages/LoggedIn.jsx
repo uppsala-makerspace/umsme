@@ -12,6 +12,7 @@ export const LoggedIn = () => {
   const user = useTracker(() => Meteor.user());
 
   const [member, setMember] = useState(false);
+  const [memberName, setMemberName] = useState("");
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [family, setFamily] = useState([]);
@@ -36,6 +37,7 @@ export const LoggedIn = () => {
           if (m) {
             console.log("Användaren är medlem.");
             setMember(true);
+            setMemberName(m.name);
             if (fhm && fhm.memberend >= new Date()) {
               console.log("fhm.memberend:", fhm.memberend);
               //If the paying member of the fmaily has an active family membership, the children may also access the LoggedInAsMember page
@@ -120,7 +122,11 @@ export const LoggedIn = () => {
       <LanguageSwitcher />
       <div className="login-form">
         <div>
-          <h3 className="text-h3"> {t("welcome")}</h3>
+          <h3 className="text-h3">
+            {" "}
+            {t("welcome")} {memberName?.split(" ")[0]}
+            {"!"}
+          </h3>
           {member ? (
             <>
               <p className="text-container">{t("noMembershiptext1")}</p>

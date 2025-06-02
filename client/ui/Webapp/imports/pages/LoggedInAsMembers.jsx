@@ -13,8 +13,19 @@ export const LoggedInAsMember = () => {
   const [memberLab, setMemberLab] = useState({});
   const [memberships, setMemberships] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [member, setMember] = useState({});
+  const [member, setMember] = useState({ name: "" });
   const [memberend, setMemberEnd] = useState({});
+
+  useEffect(() => {
+    const color = "#f0efef";
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", color);
+  }, []);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -96,7 +107,10 @@ export const LoggedInAsMember = () => {
           onClick={() => FlowRouter.go("/LoggedInAsMember/keys")}
           className="round-button"
         ></button>
-        <p style={{ marginTop: "10px" }}>{t("greeting2")}</p>
+        <p style={{ marginTop: "10px" }}>
+          {t("greeting2")} {member?.name?.split(" ")[0]}
+          {"!"}
+        </p>
         <p style={{ marginTop: "0" }}> {t("PressToOpen")}</p>
         {typeof daysLeftOfLab === "number" &&
           daysLeftOfLab >= 0 &&

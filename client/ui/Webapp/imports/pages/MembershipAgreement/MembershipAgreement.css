@@ -3,7 +3,10 @@
   margin: 0 auto;
   padding: 20px;
   text-align: left;
+
 }
+
+
 
 .umsapp .Agreementholder .BackButton {
   background: none;
@@ -27,8 +30,9 @@
   border-radius: 5px;
   padding: 10px 20px;
   color: white;
-  width: 100%;
+  width: 90%;
   text-align: center; /* kanske ta bort sen när denna knapp skrivs om */
+  
 }
 
 .umsapp .pay-button.hover-enabled {
