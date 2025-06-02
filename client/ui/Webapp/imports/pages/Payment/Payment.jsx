@@ -103,7 +103,8 @@ export const Payment = () => {
   };
 
   const openSwish = (token) => {
-    const swishUrl = `swish://paymentrequest?token=${token}&callbackurl=https://3ddb-2a00-801-7ae-b2e3-4dd4-3d8c-3a8-dc53.ngrok-free.app/Payment`; //Annan callback senare
+    const callback = Meteor.settings.swishCallback;
+    const swishUrl = `swish://paymentrequest?token=${token}&callbackurl=${callback}/Payment`; //Annan callback senare
     window.location.href = swishUrl;
   };
 
@@ -117,7 +118,7 @@ export const Payment = () => {
       }
     });
   };
-
+  console.log(membershipType.name);
   const checkIfapproved = async (instructionId) => {
     Meteor.call("getPaymentStatus", instructionId, (err, res) => {
       console.log("Resultat", res);
@@ -170,6 +171,15 @@ export const Payment = () => {
                 onClick={() => handlePayment(membershipType.price, true)}
                 className="finishButton"
               >
+                <img
+                  src="/icons/smartphone-icon-with-transparent-background-free-png.webp"
+                  className="deviceIcon"
+                />
+
+                <img
+                  src="/icons/pngtree-laptop-icon-png-image_6606927.png"
+                  className="deviceIcon"
+                />
                 {t("SwishOnThisDevice")}
               </button>
               <br />

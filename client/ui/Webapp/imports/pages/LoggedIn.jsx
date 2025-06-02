@@ -64,26 +64,25 @@ export const LoggedIn = () => {
       try {
         const isPending = await Meteor.callAsync("findPendingMemberForUser");
         if (isPending) {
-          console.log("✅ Användaren finns i pendingMembers.");
-          // Exempel: redirecta om du vill
+          console.log("Användaren finns i pendingMembers.");
           // FlowRouter.go("/waitingApproval");
           Meteor.call(
             "createMemberFromPending",
             user.emails[0].address,
             (err, res) => {
               if (err) {
-                console.error("❌ Kunde inte skapa medlem från pending:", err);
+                console.error(" Kunde inte skapa medlem från pending:", err);
               } else {
-                console.log("✅ Medlem skapad:", res);
+                console.log(" Medlem skapad:", res);
                 FlowRouter.go("/loggedInAsMember");
               }
             }
           );
         } else {
-          console.log("❌ Användaren finns inte i pendingMembers.");
+          console.log("Användaren finns inte i pendingMembers.");
         }
       } catch (error) {
-        console.error("🚨 Fel vid anrop till findPendingMemberForUser:", error);
+        console.error("Fel vid anrop till findPendingMemberForUser:", error);
       }
     };
 

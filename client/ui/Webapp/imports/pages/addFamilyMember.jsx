@@ -64,7 +64,7 @@ export const AddFamilyMember = () => {
         name,
         mobile,
         youth,
-        infamily: member.mid, // Set member.mid to the current member's infamily, note that infamily is an ID
+        infamily: member.mid, // Set infamily to the current member's mid, note that infamily is an ID
         family: true,
       },
       (err) => {

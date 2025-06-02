@@ -40,11 +40,12 @@ Meteor.methods({
     }).fetchAsync();
     memberships.sort((m1, m2) => (m1.memberend > m2.memberend ? -1 : 1));
     let familyHead;
-    if (member.family) { // hitta familiyhead om man är "barn"
+    if (member.family) {
+      // hitta familiyhead om man är "barn"
       familyHead = await Members.findOneAsync({ mid: member.infamily });
-    }
-    else if (memberships?.[0]?.family) { //Om familyhead är member
-      familyHead = member
+    } else if (memberships?.[0]?.family) {
+      //Om familyhead är member
+      familyHead = member;
     }
     let familyHeadMembership;
     if (familyHead) {
@@ -52,7 +53,6 @@ Meteor.methods({
         mid: familyHead._id,
       });
     }
-    console.log("headms", familyHeadMembership)
     const familyId = member.infamily || member.mid;
     const familyMembers = await Members.find({
       $or: [
@@ -183,7 +183,7 @@ Meteor.methods({
       if (!hasLabFamilyMembership) {
         throw new Meteor.Error(
           "no-lab-family-membership",
-          "Användaren har inget medlemskap av typen 'Family lab family'."
+          "Användaren har inget medlemskap av typen 'Family lab member'."
         );
       }
       const existingFamilyMembers = await PendingMembers.find({
@@ -204,11 +204,9 @@ Meteor.methods({
       }
     }
 
-    console.log("Sparar PendingMember:", data);
     return PendingMembers.insertAsync(data);
   },
   async createMemberFromPending() {
-    console.log("Skapar medlem från pending, serve side");
     if (!this.userId) throw new Meteor.Error("not-authorized");
 
     const user = await Meteor.userAsync();

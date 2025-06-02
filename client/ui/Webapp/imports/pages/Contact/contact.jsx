@@ -20,7 +20,7 @@ export const contact = () => {
 
       const formData = new FormData(e.target);
   
-      formData.append("access_key", "f4c319c4-87ab-4c99-bf41-424dc1ed99bd");  // Replace with another key upon deployment
+      formData.append("access_key", "f4c319c4-87ab-4c99-bf41-424dc1ed99bd");  // Replace with another key from web3form upon deployment
   
       const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
