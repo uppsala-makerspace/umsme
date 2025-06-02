@@ -91,7 +91,6 @@ export const accounts = () => {
       memberships?.[0]?.type === "labandmember" ||
       memberships?.[0]?.type === "lab"
     ) {
-      //for old members we did this was callled "Individual lab member", this new name wont work for them
       return t("memberIndivdual");
     }
     if (memberships?.[0]?.type === "member") {
@@ -170,7 +169,6 @@ export const accounts = () => {
             {isFamilyHead && familySize < 4 ? (
               <div login-form>
                 <button
-                  style={{ width: "86vw" }}
                   className="finishButton"
                   onClick={openFamilyForm}
                 >

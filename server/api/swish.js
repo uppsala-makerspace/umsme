@@ -103,20 +103,24 @@ const addMembership = async (payment, member, initiated) => {
     labend.setDate(labend.getDate() + (first ? 14 : 7));
     switch (paymentType) {
       case "Rabatterat medlemskap":
+      case "Discounted membership":
         discount = true;
         memberend.setFullYear(memberend.getFullYear() + 1);
         labend = undefined;
         break;
       case "Medlemskap Bas":
+      case "Basic membership":
         memberend.setFullYear(memberend.getFullYear() + 1);
         labend = undefined;
         break;
       case "Familjemedlemskap":
+      case "Family lab member":
         family = true;
         memberend.setFullYear(memberend.getFullYear() + 1);
         labend = undefined;
         break;
       case "Kvartalslabbmedlemskap":
+      case "Quarterly lab membership":
         labend.setMonth(labend.getMonth() + 3);
         //memberend = undefined;  Varför undefined?
         memberend.setMonth(labend.getMonth() + 3);
@@ -124,6 +128,7 @@ const addMembership = async (payment, member, initiated) => {
         family = false;
         break;
       case "Rabatterat Labbmedlemskap":
+      case "Discounted lab membership":
         labend.setMonth(labend.getMonth() + 12);
         memberend.setFullYear(memberend.getFullYear() + 1);
         type = 'labandmember';
@@ -131,6 +136,7 @@ const addMembership = async (payment, member, initiated) => {
         discount = true;
         break;
       case "Labbmedlem Individ":
+      case "Individual lab member":
         labend.setMonth(labend.getMonth() + 12);
         memberend.setFullYear(memberend.getFullYear() + 1);
         type = 'labandmember';
@@ -138,6 +144,7 @@ const addMembership = async (payment, member, initiated) => {
         discount = false;
         break;
       case "Labbmedlem Familj":
+      case "Familiy membership":
         labend.setMonth(labend.getMonth() + 12);
         memberend.setFullYear(memberend.getFullYear() + 1);
         type = 'labandmember';

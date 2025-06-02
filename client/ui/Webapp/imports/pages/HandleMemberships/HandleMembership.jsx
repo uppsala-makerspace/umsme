@@ -53,11 +53,11 @@ export const HandleMembership = () => {
 
   return (
     <div>
-      <div className="login-form">
         {FlowRouter.current().path.endsWith(
           "/LoggedInAsMember/HandleMembership"
         ) && <HamburgerMenu />}
         <LanguageSwitcher />
+        <div className="login-form">
         <div className="membershipsContainer">
           <div>
             <h1>{t("memberships")}</h1>
