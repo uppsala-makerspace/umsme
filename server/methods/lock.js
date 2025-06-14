@@ -88,7 +88,7 @@ export const syncUnlocks = async () => {
   for(let i=0; i<lockLog.length;i++) {
     const event = lockLog[i];
     const timestamp = new Date(event.timestamp);
-    const unlock = Unlocks.findOne({ timestamp });
+    const unlock = await Unlocks.findOneAsync({ timestamp });
     if (!unlock) {
       const colonLocation = event.username.lastIndexOf(':')
       const username = colonLocation === -1 ? event.username : event.username.substr(0, colonLocation + 1);

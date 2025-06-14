@@ -42,12 +42,11 @@ Template.MemberStatus.helpers({
     const now = new Date();
     const inTwoWeeks = new Date();
     inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
-    const familyNow = family > now;
     const labClass = lab > inTwoWeeks ? 'success' : (lab > now ? 'warning' : 'danger');
     const memberClass = member > inTwoWeeks ? 'success' : (member > now ? 'warning' : 'danger');
     return {
-      inconsistent: !te(mb.member, member) || !te(mb.lab, lab) || (mb.family === true) !== familyNow,
-      family: familyNow,
+      inconsistent: !te(mb.member, member) || !te(mb.lab, lab) || (mb.family === true) !== family,
+      family,
       familyPatron: mb.family && !mb.infamily,
       lab: mb.lab,
       labClass,

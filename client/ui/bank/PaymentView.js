@@ -75,18 +75,20 @@ Template.PaymentView.events({
     }
   },
   'click .memberList tbody tr': async function (event, instance) {
-    event.preventDefault();
-    const dataTable = $(event.target).closest('table').DataTable();
-    const rowData = dataTable.row(event.currentTarget).data();
-    if (!rowData) return; // Won't be data if a placeholder row is clicked
+    if (event.target.nodeName !== 'A') {
+      event.preventDefault();
+      const dataTable = $(event.target).closest('table').DataTable();
+      const rowData = dataTable.row(event.currentTarget).data();
+      if (!rowData) return; // Won't be data if a placeholder row is clicked
 
-    const id = FlowRouter.getParam('_id');
-    Payments.updateAsync(id, {$set: {member: rowData._id}});
-    // Update the mobile number if it is set.
-    const payment = await Payments.findOneAsync(id);
-    const member = Members.findOneAsync(rowData._id);
-    if (payment.mobile && !member.mobile) {
-      Members.updateAsync(rowData._id, {$set: {mobile: payment.mobile}});
+      const id = FlowRouter.getParam('_id');
+      Payments.updateAsync(id, {$set: {member: rowData._id}});
+      // Update the mobile number if it is set.
+      const payment = await Payments.findOneAsync(id);
+      const member = Members.findOneAsync(rowData._id);
+      if (payment.mobile && !member.mobile) {
+        Members.updateAsync(rowData._id, {$set: {mobile: payment.mobile}});
+      }
     }
   },
   'click .removeMemberFromPayment': function (event) {

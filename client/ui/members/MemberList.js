@@ -16,11 +16,26 @@ Template.MemberList.helpers({
   selector() {
     const reminders = Template.instance().state.get('reminders');
     if (reminders) {
-      const now = new Date();
-      now.setDate(now.getDate() - overdueReminderDays);
-      const soon = new Date();
-      soon.setDate(soon.getDate() + reminderDays);
-      return {$and: [{member: {$lt: soon}}, {member: {$gt: now}}]};
+      const intervalStart = new Date();
+      intervalStart.setDate(intervalStart.getDate() - overdueReminderDays);
+      const intervalEnd = new Date();
+      intervalEnd.setDate(intervalEnd.getDate() + reminderDays);
+      return {
+        $or: [
+          {$and: [
+              {member: {$gt: intervalStart}},
+              {member: {$lt: intervalEnd}},
+              {infamily: {$exists: false}}
+            ]
+          },
+          {$and: [
+              {lab: {$gt: intervalStart}},
+              {lab: {$lt: intervalEnd}},
+              {infamily: {$exists: false}}
+            ]
+          }
+        ]
+      };
     }
     return {};
   }
@@ -42,11 +57,13 @@ const toDate = d => (d ? d.toISOString().substr(0, 10) : '');
 
 Template.MemberList.events({
   'click .memberList tbody tr': function (event) {
-    event.preventDefault();
-    const dataTable = $(event.target).closest('table').DataTable();
-    const rowData = dataTable.row(event.currentTarget).data();
-    if (!rowData) return; // Won't be data if a placeholder row is clicked
-    FlowRouter.go(`/member/${rowData._id}`);
+    if (event.target.nodeName !== 'A') {
+      event.preventDefault();
+      const dataTable = $(event.target).closest('table').DataTable();
+      const rowData = dataTable.row(event.currentTarget).data();
+      if (!rowData) return; // Won't be data if a placeholder row is clicked
+      FlowRouter.go(`/member/${rowData._id}`);
+    }
   },
   'click .downloadCurrent': function () {
     const today = new Date();
