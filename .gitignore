@@ -3,4 +3,5 @@ node_modules/
 *.iml
 backup/*
 settings.json
+start.sh
 private
