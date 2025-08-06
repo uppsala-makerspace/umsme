@@ -10,11 +10,15 @@ import webpush from "web-push";
 const daysLeftWhenNotified = 379;
 
 Meteor.startup(() => {
-  webpush.setVapidDetails(
-    "mailto:admin@example.com",
-    Meteor.settings.public.vapidPublicKey,
-    Meteor.settings.private.vapidPrivateKey
-  );
+  if (Meteor.settings.public.vapidPublicKey) {
+    webpush.setVapidDetails(
+      "mailto:admin@example.com",
+      Meteor.settings.public.vapidPublicKey,
+      Meteor.settings.private.vapidPrivateKey
+    );
+  } else {
+    console.warn('No vapid public key, cannot initialize webpush.');
+  }
 });
 
 Meteor.methods({

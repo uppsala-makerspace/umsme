@@ -1,4 +1,5 @@
 <template name="MemberStatus">
+  {{#let status=statusAsync}}
     {{#if status.inconsistent}}
     <div class="alert alert-danger" role="alert">
         Dates in member profile is not in sync with membership records. <button class="updateMemberDates">Update!</button>
@@ -13,4 +14,5 @@
          <div class="label label-default">Familymember</div>
       {{/if}}
     {{/if}}
+  {{/let}}
 </template>

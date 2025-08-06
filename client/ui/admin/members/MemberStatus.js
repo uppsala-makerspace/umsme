@@ -6,7 +6,10 @@ import moment from 'moment';
 import './MemberStatus.html';
 
 Template.MemberStatus.onCreated(function() {
-  Meteor.subscribe('members');
+  this.autorun(() => {
+    this.subscribe('members');
+    this.subscribe('memberships'); // Needed for memberStatus
+  });
 });
 
 Template.MemberStatus.events({
@@ -26,21 +29,24 @@ const te = (d1, d2) => {
 };
 
 Template.MemberStatus.helpers({
-  status() {
-    const mb = Members.findOne(this.member);
+  async statusAsync() {
+    // Tracker computation is lost after first await
+    const computation = Tracker.currentComputation;
+    const mb = await Members.findOneAsync(this.member);
     if (!mb) {
       return {};
     }
-    const { member, lab, family } = memberStatus(mb);
+
+    // Bring back reactivity to the async call memberStatus (lost due to the await above).
+    const { member, lab, family } = await Tracker.withComputation(computation, () => memberStatus(mb));
     const now = new Date();
     const inTwoWeeks = new Date();
     inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
-    const familyNow = family > now;
     const labClass = lab > inTwoWeeks ? 'success' : (lab > now ? 'warning' : 'danger');
     const memberClass = member > inTwoWeeks ? 'success' : (member > now ? 'warning' : 'danger');
     return {
-      inconsistent: !te(mb.member, member) || !te(mb.lab, lab) || (mb.family === true) !== familyNow,
-      family: familyNow,
+      inconsistent: !te(mb.member, member) || !te(mb.lab, lab) || (mb.family === true) !== family,
+      family,
       familyPatron: mb.family && !mb.infamily,
       lab: mb.lab,
       labClass,
