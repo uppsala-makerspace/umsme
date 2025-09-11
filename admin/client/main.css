@@ -1,0 +1,128 @@
+@import "ui/stats/stats.css";
+@import "ui/comment/comment.css";
+@import "ui/mail/mail.css";
+@import "ui/check/check.css";
+@import "ui/storage/storage.css";
+
+html {
+  background: aliceblue;
+  width: 100%;
+  height: 100%;
+}
+body {
+  background: aliceblue;
+}
+
+.publicPage {
+  position: fixed;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  background: white;
+}
+#main {
+  background: white;
+  padding: 10px;
+  font-family: sans-serif;
+  width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 30px;
+}
+
+.members thead th {
+  text-align: left;
+  border-bottom: 1px solid grey;
+  padding-bottom: 10px;
+}
+
+.members tbody td {
+  height: 40px;
+}
+
+.members {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+
+header {
+  position: fixed;
+  width: 100%;
+  left: 0px;
+  background-color:#600;
+  top: 0px;
+  box-shadow: 0px 3px 6px -1px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+}
+
+#menu {
+  list-style-type:none;
+  margin:0;
+  padding:0;
+  height:30px;
+  font-family:Arial;
+  font-size:0.9em;
+  width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#menu li {
+  float:left;
+  height:30px;
+  line-height:30px;
+}
+#menu li a {
+  display:block;
+  padding:0 20px;
+  color:#FFF;
+  text-decoration:none;
+}
+#menu li a:hover {
+  background-color:#900;
+  text-decoration:none;
+}
+
+.label {
+  font-size: 14px;
+  padding: 5px 10px;
+}
+
+.labelInHeading {
+  vertical-align: middle;
+}
+
+.reactive-table td, a {
+  cursor: pointer;
+}
+
+#messageViewForm textarea,
+#insertMessageForm textarea,
+#insertTemplateForm textarea,
+#messageTemplateViewForm textarea {
+  min-height: 400px;
+}
+
+#messageViewForm textarea[data-schema-key="sms"],
+#insertMessageForm textarea[data-schema-key="sms"],
+#insertTemplateForm textarea[data-schema-key="sms"],
+#messageTemplateViewForm textarea[data-schema-key="sms"] {
+  min-height: 50px;
+}
+
+.login-buttons-dropdown-align-right {
+  float: right;
+  margin: 10px 20px !important;
+}
+
+.login-buttons-dropdown-align-right a.login-link-text {
+  color: white;
+}
+
+#login-dropdown-list {
+  top: 32px;
+}
+
+.table-hover>tbody>tr:hover {
+  cursor: pointer;
+}

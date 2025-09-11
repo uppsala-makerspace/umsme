@@ -1,0 +1,18 @@
+<template name="MemberAdd">
+    <a href="../members" style="float: right">Back to member list</a>
+    <h1>Add new member</h1>
+    <div style="display:flex">
+        <div style="flex-grow: 1">
+            {{#if payment}}
+                <h2>New member information</h2>
+            {{/if}}
+            {{> quickForm collection=Members doc=draftMember  id="insertMemberForm" type="normal" validation="keyup" omitFields="family,storage,lock"}}
+        </div>
+        {{#if payment}}
+            <div style="flex-grow: 1; margin-left:10px;padding-left: 10px;border-left: 1px solid lightgray">
+                <h2>Payment information</h2>
+                {{> quickForm collection=Payments doc=payment id="paymentViewForm" omitFields="_id,member,membership,other" type="readonly"}}
+            </div>
+        {{/if}}
+    </div>
+</template>

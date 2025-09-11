@@ -1,0 +1,7 @@
+<template name="MessageTemplateAdd">
+    <a href="../templates" style="float: right">Back to template list</a>
+    <h1>Template Add</h1>
+    {{> quickForm collection=MessageTemplates id="insertTemplateForm" type="normal" validation="keyup" omitFields="deprecated,created,modified"}}
+
+    {{>MessageTemplateDocumentation}}
+</template>

@@ -1,0 +1,40 @@
+.umsapp .language-switcher {
+    display: flex;
+    top: 10px;
+    left: 10px;
+    padding: 10px 15px;
+    color: black;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    background: none;
+    font-family: "DM Mono", monospace;
+  }
+  .umsapp .language-switcher {
+    position: fixed;
+    font-size:20px;
+    padding: 5px 10px;
+    background: none;
+  }
+  
+  .umsapp .language-switcher span {
+      font-weight: normal;
+      color: black;
+      cursor: pointer;
+  }
+  
+  .umsapp .language-switcher span.active {
+      color: gray;
+      cursor: default;
+  }
+
+  .language-switcher .language:hover {
+    color: black;
+  }
+  
+  .umsapp .language-switcher .divider {
+    width: 1px;
+    height: 25px;
+    background-color: #000000;
+    margin: 0 10px;
+  }

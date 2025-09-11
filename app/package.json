@@ -1,0 +1,32 @@
+{
+  "name": "meteor-app",
+  "private": true,
+  "scripts": {
+    "start": "meteor run",
+    "test": "meteor test --once --driver-package meteortesting:mocha",
+    "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
+    "visualize": "meteor --production --extra-packages bundle-visualizer"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.20.7",
+    "@meteorrn/oauth-google": "^1.0.1",
+    "axios": "^1.8.4",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^2.2.0",
+    "i18next": "^24.2.3",
+    "meteor-node-stubs": "^1.2.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-i18next": "^15.4.1",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^6.30.0",
+    "uuid": "^11.1.0",
+    "web-push": "^3.6.7"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.jsx",
+      "server": "server/main.js"
+    }
+  }
+}

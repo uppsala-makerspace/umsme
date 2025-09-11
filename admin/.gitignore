@@ -2,4 +2,7 @@ node_modules/
 .idea
 *.iml
 backup/*
+settings.json
+start.sh
+private
 .DS_Store

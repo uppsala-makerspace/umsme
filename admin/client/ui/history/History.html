@@ -1,0 +1,50 @@
+<template name="History">
+    <h1>Member history</h1>
+    <div style="float:right;margin-right: 10em;">
+        Individual membership payment: <strong>{{stats.member}}</strong><br>
+        Individual labmembership payment: <strong>{{stats.lab}}</strong><br>
+        Family membership payment: <strong>{{stats.family}}</strong><br>
+        Family labmembership payment: <strong>{{stats.labfamily}}</strong><br>
+    </div>
+    <div style="float:right;margin-right: 10em;">
+        Historic members: <strong>{{stats.historic}}</strong><br>
+        Current members: <strong>{{stats.active}}</strong><br>
+        Members in families: <strong>{{stats.infamily}}</strong><br>
+        Paying members: <strong>{{stats.paying}}</strong><br>
+    </div>
+    <div>
+        <input type="radio" id="all_members" class="member_filter" name="memberfilter" value="all">
+        <label class="custom-control-label" for="all_members">All historic members</label>
+    </div>
+    <div>
+        <input type="radio" id="active_members" class="member_filter" name="memberfilter" value="active" checked>
+        <label class="custom-control-label" for="active_members">Current members</label>
+    </div>
+    <div>
+        <input type="radio" id="queueing_members" class="member_filter" name="memberfilter" value="queueing">
+        <label class="custom-control-label" for="queueing_members">Queueing members</label>
+    </div>
+    <div>
+        <input type="radio" id="inactive_members" class="member_filter"  name="memberfilter" value="inactive">
+        <label class="custom-control-label" for="inactive_members">Members that left</label>
+    </div>
+
+    <table class="table memberList">
+        <thead><tr><th>Name</th><th>Email</th><td>Years</td><td>Days (since joinced)</td><td>Last membership day</td><td>Lab</td><td>Family</td><td>Storage</td><td>Storage queue</td></tr></thead>
+        <tbody>
+        {{#each user in users}}
+        <tr class="{{user.statusClass}}">
+            <td><a href="/member/{{user.member._id}}">{{user.name}}</a></td>
+            <td>{{user.member.email}}</td>
+            <td>{{user.years}}</td>
+            <td>{{user.days}}</td>
+            <td>{{user.left}}</td>
+            <td>{{user.lab}}</td>
+            <td>{{user.member.family}}</td>
+            <td>{{user.member.storage}}</td>
+            <td>{{user.member.storagequeue}}</td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</template>

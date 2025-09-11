@@ -1,9 +1,0 @@
-<template name="MemberList">
-    <h1>Member List</h1>
-    <a href="/admin/members/add">Add member</a><br>
-    <label><input type="checkbox" class="filterReminders"/> Show only current reminders</label>
-    {{> tabular table=TabularTables.Members selector=selector class="table table-hover table-striped table-bordered table-condensed memberList"}}
-
-    <button class="downloadCurrent">Download all current members</button>&nbsp;<button class="downloadAll">Download all members</button>
-
-</template>

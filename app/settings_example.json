@@ -1,0 +1,34 @@
+{
+  "adminpassword": "CHANGEME",
+  "from": ["kansliet@uppsalamakerspace.se", "no-reply@uppsalamakerspace.se"],
+  "noreply": "no-reply@uppsalamakerspace.se",
+  "bankproxy": "https://uppsalamakerspace.se/bank/",
+  "syncNrOfTransactions": 20,
+  "deliverMails": true,
+  "lockUsername": "umsme@uppsalamakerspace.se",
+  "lockPassword": "????",
+  "lockAssumeUser": "lock@uppsalamakerspace.se",
+  "groupLockName": "UMSLockGroup",
+  "public": {
+    "checkPath": "http://example.com#",
+    "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc"
+  },
+  "private": {
+    "vapidPrivateKey": "F7hcqyRl7P27b3dALstLwz__2lK-NHNZRgxqzCL9HUo"
+  },
+
+  "swishCallback": "placeholder-swishCallback",
+  "serviceConfigurations": {
+    "google": {
+      "clientId": "placeholder-for-ID",
+      "secret": "placeholder-for-secret",
+      "loginStyle": "popup"
+    },
+    "facebook": {
+      "appId": "placeholder-for-ID",
+      "secret": "placeholder-for-secret",
+      "loginStyle": "popup"
+    }
+  },
+  "env": "development"
+}
