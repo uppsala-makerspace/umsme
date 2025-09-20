@@ -3,6 +3,9 @@ import LoginForm from '/imports/pages/LoginForm';
 import RegisterForm from '/imports/pages/RegisterForm';
 import Home from '/imports/pages/Home';
 import CreateMember from '/imports/pages/CreateMember';
+import Unlock from '/imports/pages/unlock'
+import Account from '/imports/pages/account'
+
 
 import { WaitForEmailVerification } from '/imports/pages/WaitForEmailVerification';
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
@@ -16,6 +19,8 @@ export const App = () => (
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/waitforemailverification" element={<WaitForEmailVerification />} />
           <Route path="/createMember" element={<CreateMember />} />
+          <Route path="/unlock" element={<Unlock />} />
+          <Route path="/account" element={<Account />} />
         </Routes>
       </Router>
     </div>);

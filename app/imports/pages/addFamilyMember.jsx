@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
-import { models } from "/lib/models"; // to access maxlengths for name and mobile dynamically
+import { models } from "/imports/common/lib/models"; // to access maxlengths for name and mobile dynamically
 import { HamburgerMenu } from "../components/HamburgerMenu/HamburgerMenu";
 
-export const AddFamilyMember = () => {
+export default () => {
   const user = useTracker(() => Meteor.user(), []);
 
   const { t } = useTranslation();
@@ -75,11 +74,11 @@ export const AddFamilyMember = () => {
         }
       }
     );
-    FlowRouter.go("/LoggedInAsMember/accounts");
+//    FlowRouter.go("/LoggedInAsMember/accounts");
   };
 
   const toLogIn = () => {
-    FlowRouter.go("/login");
+ //   FlowRouter.go("/login");
   };
 
   return (

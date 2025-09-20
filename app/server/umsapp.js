@@ -27,38 +27,49 @@ Meteor.methods({
     const member = await findMemberForUser();
     return Memberships.find({ mid: member._id }).fetchAsync();
   },
+  /**
+   * Method to get a hold of the current member, it's memberships, current status, familyMembers (if you are part of a family) and the paying family member.
+   *
+   * @return {Promise<{
+   *     member,
+   *     memberships,
+   *     status: ({memberEnd, memberStart, labEnd, labStart, family: boolean}|{}),
+   *     familyMembers,
+   *     paying
+   *   }>}
+   */
   findInfoForUser: async () => {
     const member = await findMemberForUser();
 
     if (!member) {
       throw new Meteor.Error(
         "not-found",
-        "Ingen medlem hittades för användaren"
+        "No member object can be found for the current user"
       );
     }
-    const memberships = await Memberships.find({
-      mid: member._id,
-    }).fetchAsync();
-    memberships.sort((m1, m2) => (m1.memberend > m2.memberend ? -1 : 1));
-
-    const status = await memberStatus(member);
-
     let paying;
+    let memberships;
     if (member.infamily) {
-      // hitta familyhead om man är "barn"
+      // If you are in a family, find the paying member
       paying = await Members.findOneAsync({ mid: member.infamily });
     } else {
-      //Om familyhead är member
+      // If you are not in a family or you are in a family and are the paying member
       paying = member;
+      memberships = await Memberships.find({
+        mid: member._id,
+      }).fetchAsync();
+      memberships.sort((m1, m2) => (m1.memberend > m2.memberend ? -1 : 1));
     }
-    const familyId = member.infamily || member.mid;
-    const familyMembers = await Members.find({
-      $or: [
-        { infamily: familyId }, // barn i familjen
-        { mid: familyId }, // familjehuvudet
-      ],
-    }).fetchAsync();
-    return { member, memberships, status, familyMembers };
+
+    const status = await memberStatus(paying);
+
+    let familyMembers;
+    if (member.family) {
+      familyMembers = await Members.find({
+        infamily: paying._id, // non-paying members of the family
+      }).fetchAsync();
+    }
+    return { member, memberships, status, familyMembers, paying };
   },
 
   findPendingMemberForUser: async () => {

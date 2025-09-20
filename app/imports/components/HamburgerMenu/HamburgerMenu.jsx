@@ -24,13 +24,13 @@ export const HamburgerMenu = () => {
         )}
         <ul className={`links ${isOpen ? "show" : ""}`}>
           <li>
-            <a href="/LoggedInAsMember">Start</a>
+            <a href="/">Start</a>
           </li>
           <li>
-            <a href="/LoggedInAsMember/keys">{t("keys")}</a>
+            <a href="/unlock">{t("keys")}</a>
           </li>
           <li>
-            <a href="/LoggedInAsMember/accounts">{t("myAccount")}</a>
+            <a href="/account">{t("myAccount")}</a>
           </li>
           <li>
             <a href="/LoggedInAsMember/HandleMembership">{t("Membership")}</a>

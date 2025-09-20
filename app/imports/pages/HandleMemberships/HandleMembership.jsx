@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { FiLogOut } from "react-icons/fi";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
 import "./handleMembership.css";
-import { LogoutButton } from "../../components/LogoutButton/LogoutButtons.jsx";
+import LogoutButton from "../../components/LogoutButton";
 import { LoginForm } from "../LoginForm";
 
 export const HandleMembership = () => {

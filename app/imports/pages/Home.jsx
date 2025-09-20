@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import { useTranslation } from "react-i18next";
 import { PendingMembers } from "/imports/common/collections/PendingMembers.js";
-import LogoutButton from "/imports/components/LogoutButton/LogoutButtons.jsx";
+import LogoutButton from "/imports/components/LogoutButton";
 import { Navigate, Link } from 'react-router-dom';
 import { HamburgerMenu } from "../components/HamburgerMenu/HamburgerMenu";
 
@@ -19,7 +19,7 @@ export default () => {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState(null);
 
-  const activeMembership = status && status.member >= new Date();
+  const activeMembership = status && status.memberEnd >= new Date();
 
   // Load member information
   useEffect(() => {
@@ -79,7 +79,7 @@ export default () => {
   if (status) {
     const today = new Date();
     daysLeftOfLab = Math.floor(
-      (status.lab || status.member).getTime() - today.getTime()) / msPerDay;
+      (status.labEnd || status.memberEnd).getTime() - today.getTime()) / msPerDay;
   }
   const timeToRenew = typeof daysLeftOfLab === "number" &&
     daysLeftOfLab >= 0 && daysLeftOfLab < 8;

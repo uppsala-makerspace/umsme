@@ -1,6 +1,12 @@
 import { Members } from '/imports/common/collections/members.js';
 import { Memberships } from '/imports/common/collections/memberships.js';
 
+/**
+ * Detect start and end dates for the regular and lab memberships for a specific member.
+ *
+ * @param {member} mb an instance in the Member collection
+ * @return {Promise<{memberEnd, memberStart, labEnd, labStart, family: boolean}|{}>}
+ */
 export const memberStatus = async (mb) => {
   if (!mb) {
     return {};
@@ -38,20 +44,28 @@ export const memberStatus = async (mb) => {
         break;
     }
   });
-  return { member, memberStart, lab, labStart, family};
+  return { memberEnd: member, memberStart, labEnd: lab, labStart, family};
 };
 
+/**
+ * The member instance in the member collection contains duplicate information regarding
+ * end dates of regular and lab membership. This method synchronizes that information
+ * where the instances of the memberships collection are considered the truth.
+ *
+ * @param {member} mb an instance of the member collection
+ * @return {Promise<void>}
+ */
 export const updateMember = async (mb) => {
-  const { member, lab, family } = await memberStatus(mb);
+  const { memberEnd, labEnd, family } = await memberStatus(mb);
   const $set = { family };
   const $unset = {};
-  if (member) {
-    $set.member = member;
+  if (memberEnd) {
+    $set.member = memberEnd;
   } else {
     $unset.member = "";
   }
-  if (lab) {
-    $set.lab = lab;
+  if (labEnd) {
+    $set.lab = labEnd;
   } else {
     $unset.lab = "";
   }

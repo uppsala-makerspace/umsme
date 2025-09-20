@@ -1,14 +1,13 @@
 import React from "react";
 import { Meteor } from "meteor/meteor";
-import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
 import { useTranslation } from "react-i18next";
 import { useTracker } from "meteor/react-meteor-data";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./unlockDoors.css";
 
-export const UnlockDoors = () => {
+export default () => {
   const user = useTracker(() => Meteor.user());
   const { t, i18n } = useTranslation();
 
@@ -30,8 +29,8 @@ export const UnlockDoors = () => {
 
   return (
     <>
-      <HamburgerMenu />
       <LanguageSwitcher />
+      <HamburgerMenu />
       <br></br>
       <div className="login-form">
         <p style={{ marginBottom: "5px" }}> {t("outerDoor")}</p>

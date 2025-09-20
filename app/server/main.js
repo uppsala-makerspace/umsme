@@ -4,6 +4,7 @@ import { Accounts } from "meteor/accounts-base";
 //import "./api/pushMethods.js";
 //import "./api";
 import "./umsapp";
+import "./api/test";
 
 process.env.MAIL_URL =
   "smtp://makupp30%40gmail.com:qlrlilvzxpnfjtut@smtp.gmail.com:587/";
