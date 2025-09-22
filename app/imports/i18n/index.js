@@ -4,14 +4,14 @@ import enTranslations from "./en.json";
 import svTranslations from "./sv.json";
 
 // Läs det sparade språket från localStorage, eller använd "sv" som standard
-const savedLanguage = localStorage.getItem("language") || "en";
+const savedLanguage = localStorage.getItem("language") || "sv";
 
 i18n.use(initReactI18next).init({
   resources: {
     en: { translation: enTranslations },
     sv: { translation: svTranslations },
   },
-  lng: savedLanguage, // Standard språk
+  lng: 'sv', //savedLanguage, // Standard språk
   fallbackLng: "sv",
   interpolation: {
     escapeValue: false,

@@ -1,4 +1,4 @@
-.umsapp .login-form button.round-prof {
+.umsapp button.round-prof {
     border-radius: 50%;
     width: 40%; /* Bredden är 40% av förälderelementet */
     aspect-ratio: 1 / 1; /* Gör höjden lika med bredden */

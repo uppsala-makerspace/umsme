@@ -68,13 +68,13 @@ export const HandleMembership = () => {
               <h2>{t("memberBase")}</h2>
               <p>{t("memberBasetext")}</p>
               <div className="price">
-                <h2>{t("priceBas")}</h2>
+                <h2>{t("memberBasePrice")}</h2>
                 <button
                   className="addMembership"
                   onClick={() => {
                     Session.set("selectedMembership", {
                       name: t("memberBase"),
-                      price: t("priceBas"),
+                      price: t("memberBasePrice"),
                       description: t("memberBasetext"),
                     });
                     FlowRouter.go("/MembershipAgreement");
@@ -89,13 +89,13 @@ export const HandleMembership = () => {
               <h2>{t("memberIndivdual")}</h2>
               <p>{t("memberIndivdualText")}</p>
               <div className="price">
-                <h2>{t("priceLab")}</h2>
+                <h2>{t("memberLabPrice")}</h2>
                 <button
                   className="addMembership"
                   onClick={() => {
                     Session.set("selectedMembership", {
                       name: t("memberIndivdual"),
-                      price: t("priceLab"),
+                      price: t("memberLabPrice"),
                       description: t("memberIndivdualText"),
                     });
                     FlowRouter.go("/MembershipAgreement");
@@ -107,17 +107,17 @@ export const HandleMembership = () => {
             </div>
 
             <div className="membership">
-              <h2>{t("labMemberFamily")}</h2>
-              <p>{t("labMemberFamilyText")}</p>
+              <h2>{t("memberFamilyLab")}</h2>
+              <p>{t("memberFamilyLabText")}</p>
               <div className="price">
-                <h2>{t("labMemberFamilyPrice")}</h2>
+                <h2>{t("memberFamilyLabPrice")}</h2>
                 <button
                   className="addMembership"
                   onClick={() => {
                     Session.set("selectedMembership", {
-                      name: t("labMemberFamily"),
-                      price: t("labMemberFamilyPrice"),
-                      description: t("labMemberFamilyText"),
+                      name: t("memberFamilyLab"),
+                      price: t("memberFamilyLabPrice"),
+                      description: t("memberFamilyLabText"),
                     });
                     FlowRouter.go("/MembershipAgreement");
                   }}
@@ -128,17 +128,17 @@ export const HandleMembership = () => {
             </div>
 
             <div className="membership">
-              <h2>{t("memberDiscounted")}</h2>
-              <p>{t("memberDiscountedText")}</p>
+              <h2>{t("memberDiscountedBase")}</h2>
+              <p>{t("memberDiscountedBaseText")}</p>
               <div className="price">
-                <h2>{t("priceDiscounted")}</h2>
+                <h2>{t("memberDiscountedBasePrice")}</h2>
                 <button
                   className="addMembership"
                   onClick={() => {
                     Session.set("selectedMembership", {
-                      name: t("memberDiscounted"),
-                      price: t("priceDiscounted"),
-                      description: t("memberDiscountedText"),
+                      name: t("memberDiscountedBase"),
+                      price: t("memberDiscountedBasePrice"),
+                      description: t("memberDiscountedBaseText"),
                     });
                     FlowRouter.go("/MembershipAgreement");
                   }}
@@ -152,13 +152,13 @@ export const HandleMembership = () => {
               <h2>{t("memberDiscountedLab")}</h2>
               <p>{t("memberDiscountedLabText")}</p>
               <div className="price">
-                <h2>{t("priceDiscountedLab")}</h2>
+                <h2>{t("memberDiscountedLabPrice")}</h2>
                 <button
                   className="addMembership"
                   onClick={() => {
                     Session.set("selectedMembership", {
                       name: t("memberDiscountedLab"),
-                      price: t("priceDiscountedLab"),
+                      price: t("memberDiscountedLabPrice"),
                       description: t("memberDiscountedLabText"),
                     });
                     FlowRouter.go("/MembershipAgreement");
@@ -170,17 +170,17 @@ export const HandleMembership = () => {
             </div>
 
             <div className="membership">
-              <h2>{t("memberFamily")}</h2>
-              <p>{t("memberFamilyText")}</p>
+              <h2>{t("memberFamilyBase")}</h2>
+              <p>{t("memberFamilyBaseText")}</p>
               <div className="price">
-                <h2>{t("priceFamily")}</h2>
+                <h2>{t("memberFamilyBasePrice")}</h2>
                 <button
                   className="addMembership"
                   onClick={() => {
                     Session.set("selectedMembership", {
-                      name: t("memberFamily"),
-                      price: t("priceFamily"),
-                      description: t("memberFamilyText"),
+                      name: t("memberFamilyBase"),
+                      price: t("memberFamilyBasePrice"),
+                      description: t("memberFamilyBaseText"),
                     });
                     FlowRouter.go("/MembershipAgreement");
                   }}
@@ -194,13 +194,13 @@ export const HandleMembership = () => {
               <h2>{t("memberQuarterlyLab")}</h2>
               <p>{t("memberQuarterlyLabText")}</p>
               <div className="price">
-                <h2>{t("priceQuarterlyLab")}</h2>
+                <h2>{t("memberQuarterlyPrice")}</h2>
                 <button
                   className="addMembership"
                   onClick={() => {
                     Session.set("selectedMembership", {
                       name: t("memberQuarterlyLab"),
-                      price: t("priceQuarterlyLab"),
+                      price: t("memberQuarterlyPrice"),
                       description: t("memberQuarterlyLabText"),
                     });
                     FlowRouter.go("/MembershipAgreement");

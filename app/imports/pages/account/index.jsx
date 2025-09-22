@@ -31,7 +31,7 @@ export default () => {
       <HamburgerMenu />
       <div className="login-form">
         {memberInfo && (
-          <Account memberInfo={memberInfo}></Account>
+          <Account {...memberInfo}></Account>
         )}
         <br />
         <LogoutButton />

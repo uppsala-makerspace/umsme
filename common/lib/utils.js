@@ -5,7 +5,16 @@ import { Memberships } from '/imports/common/collections/memberships.js';
  * Detect start and end dates for the regular and lab memberships for a specific member.
  *
  * @param {member} mb an instance in the Member collection
- * @return {Promise<{memberEnd, memberStart, labEnd, labStart, family: boolean}|{}>}
+ * @return {Promise<{
+ *   memberStart: date,
+ *   memberEnd: date,
+ *   labStart: date,
+ *   labEnd: date,
+ *   family: boolean,
+ *   type: string,
+ *   discounted: boolean,
+ *   quarterly: boolean
+ * }>}
  */
 export const memberStatus = async (mb) => {
   if (!mb) {
@@ -17,17 +26,27 @@ export const memberStatus = async (mb) => {
   let lab;
   let labStart;
   let family = false;
+  const now = new Date();
+  let discounted = false;
   const updateMemberDate = (ms) => {
     if (!member || ms.memberend > member) {
       member = ms.memberend;
       memberStart = ms.start;
       family = ms.family;
+      if (ms.memberend > now) {
+        discounted = !!ms.discount;
+      }
     }
   };
+  let labms;
   const updateLabDate = (ms) => {
     if (!lab || ms.labend > lab) {
       lab = ms.labend;
       labStart = ms.start;
+      if (ms.labend > now) {
+        discounted = !!ms.discount;
+        labms = ms;
+      }
     }
   };
   await Memberships.find({mid}).forEachAsync((ms) => {
@@ -44,7 +63,16 @@ export const memberStatus = async (mb) => {
         break;
     }
   });
-  return { memberEnd: member, memberStart, labEnd: lab, labStart, family};
+  let type = 'none';
+  if (member > now && lab > now) {
+    type = 'labandmember';
+  } else if (lab > now) {
+    type = 'lab';
+  } else if (member > now) {
+    type = 'member';
+  }
+  const quarterly = labms && labms.type === 'lab';
+  return { memberEnd: member, memberStart, labEnd: lab, labStart, family, type, discounted, quarterly};
 };
 
 /**
