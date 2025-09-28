@@ -1,82 +1,89 @@
-# Medlemsadministration
+# UMSME - Uppsala MakerSpace MEmber administrative system
+This is a system that aims to:
+* adminstrate members and their membership status
+* integrate with the bank to see the payments
+* send mails to groups of members
+* see statistics of how the amount of members change over time
+* administrate members storage space
+* integrate with the opening of the doors
 
-## Installera och köra igång - meteor utvecklarläge
+## INSTALL - developer mode
+
+You need a modern node version, typically node 22.
 
     cd umsme/admin
     curl https://install.meteor.com/ | sh
 
-Kopiera `example-settings.json` till `settings.json` och anpassa, sen är det bara att köra:
+Copy `example-settings.json` to `settings.json`, adapt it, then run `meteor`.
 
-    meteor
+Alternatively, see the script `example-start.sh` to point to an external mongo database etc.
 
-Alternativt, se ` example-start.sh` för ett lämpligt startskript.
+## Running the webbapp in development environment
 
-### Driftsätta
+* Copy the script `example-start-dev.sh` to `start.sh` and change the `PASSWORD` if you want to be able to send mails.
+* Copy `example-settings.json` to `settings.json`.
+* Start by executing `./start.sh`
 
-Sen fört skapa en build som passar din arkitektur, t.ex:
+## Running the webbapp in production environment
+
+First you have build for the right architecture, e.g.:
 
     meteor build ../umsme-build --architecture os.linux.x86_64
 
-Se till att du har node (version 22), npm och mongodb installerat i din driftmiljö. Packa sen upp paketet på lämpligt ställe, förslagsvis genom att ha ett intialiseringsscript, se `example-install.sh`.
+**In the deployment environment:**
 
-Se sektionen om maila från systemet nedan om hur `MAIL_URL` ska sättas.
+* Make sure you have recent version of node on your server, node 22 is suitable. Also make sure you have mongod installed separately.
+* Initialize your built bundle, see the `example-install.sh` script for how to do this.
+* Locate the `example-start.sh` and copy to `start.sh`.
+* Take notice on the section on how to set the `MAIL_URL` should be configured if you want to be able to send emails.
+Make sure you copy `example-settings.json` to `settings.json` and make relevant changes.
+* Start the app by calling `./start.sh`
 
-## Användarhantering
+## Integration with Swedbank
 
-Användarhantering sker genom en fil `private/user.json` som ser ut som:
-
-    [
-      {username: 'john', password: '12345'}
-    ]
-
-De användare som finns i denna fil kommer läggas till i databasen och deras lösen sättas till vad som är angivet.
-Användare kan inte tas bort med denna fil, det görs via användargränssnittet.
-Om filen inte finns så kommer inga användare läggas till.
-
-## Integration med Swedbank
-
-Integration med Swedbank görs via ett separat bibliotek [umsme-bank](https://github.com/uppsala-makerspace/umsme-bank).
-Efter att det installeras bör man ändra i settings.json för att peka ut rooten i REST api:et. Det är två värden som behöver sättas:
+The integration is dependant on a separate library [umsme-bank](https://github.com/uppsala-makerspace/umsme-bank).
+After the installation, change the `settings.json` to indicate the root of the REST api:et for the integration. The following values are relevant:
 
     "bankproxy": "http://localhost:8000/",
     "syncNrOfTransactions": 20,
 
-## Maila från systemet
+## Sending mails
 
-För att det ska gå att skicka mail måste man sätta miljövariabeln `MAIL_URL`. Det enklaste är att man sätter variabeln i samma kommando som man sätter igång meteor, så vi modifierar kommandot ovan till att vara:
+To be able to send emails you need to set the environement variable `MAIL_URL`. It is possible to set the variable in the command that starts the application, hence the command `meteor` is changed to:
 
     MAIL_URL=smtp://username:password@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false meteor --settings settings.json
 
-Där `username` typiskt är en email som `kansliet@uppsalamakerspace.se`.
-Observera att man kan också slå av mailskickning i settings.json genom följande nyckelvärde:
+Note 1, this is better done in a start script as indicated in `example-start.sh`.
+Note 2, `username` is typically an email like `kansliet@uppsalamakerspace.se`.
+It is possible to disable sending emails entirely by changing in settings.json:
 
       "deliverMails": false
 
 ## Backup
 
-Vi använder mongodump och mongorestore. Först måste man se till att ha dessa verktyg installerade, via apt blir der:
+We use mongodump and mongorestore. To install these tools on linux environment with apt do:
 
     sudo apt install mongo-tools
 
-Nedam är ett exempel på hur man gör en backup namngiven som ett visst datum (2020-01-30):
+Below is an example how to do backup given a certain date (2020-01-30):
 
     mongodump -h 127.0.0.1 --port 3001 --forceTableScan -d umsme -o backup/2020-01-30
 
-För att återställa motsvarande backup med mongorestore:
+To restore, use the corresponding command with mongorestore:
 
     mongorestore -h 127.0.0.1 --port 3001 --drop -d umsme backup/2020-01-30/meteor
 
-Observera att namnet för databasen ovan är satt till umsme, vilket är det föreslagna namnet i en driftsatt version, i utvecklarläget kommer defaultnamnet vara `meteor`.
+Note that the name for the database is set to umsme, which is the suggested name in a deployed version. In the development mode the default name is `meteor`.
 
-### Resetta databasen
+### Reset the databasen
 
-Om du av någon anledning vill börja om från början kan du stänga ner applikationen och sen:
+If you want to reset the database in development mode, shut down the application and do:
 
 meteor reset
 
-Därefter är det bara att starta igen.
+Then you can start again.
 
-Om du kör i driftsatt läge får ta bort databasen via:
+If you are runing against a production database:
 
     mongo
     > use umsme
@@ -84,20 +91,11 @@ Om du kör i driftsatt läge får ta bort databasen via:
 
 ### Backup scripts
 
-För att förenkla finns det nu två scripts, backup.sh och restore.sh i backup foldern. Backup scriptet tar inget argument då det automatiskt genererar en dump med ett namn som ser ut som ett ISO datum, t.ex. `2020-02-02T12:11`. Restore scriptet tar namnet (ISO datumet) som argument, t.ex.:
+To simplify regualar backup (typically in a production environment) there are two script sin the backup folder.
+The backup script does not take any argument as it automatically generates a dump from the current time in ISO form, e.g. `2020-02-02T12:11`.
+The restore script takes this date (in ISO form) as argument, e.g.:
 
     cd backup
     ./restore.sh 2020-02-02T12\:11
 
-Förslagsvis kör man backup scriptet en gång per natt. Då backuppens storlek är approximativt 1kb per medlem, så är storleken på dumpen liten. Ett år av dumpar för 200 medlemmar blir då cirka 70MB, dvs. att rensa dumpar pga diskutrymme är inte nödvändigt. Eventuellt blir det mer med många skickade meddelanden. Detta bör undersökas efter ett år.
-
-Notera även här att namnet på databasen är namngiven till `umsme`, i en default (icke driftsatt) meteor miljö är namnet istället `meteor`.
-
-### Settings_example.json
-
-För att köra projektet så måste du ha en settings.json-fil som ser ut som settings_example-filen fast med riktiga värden på API-tokens. Kör scriptet meteor --settings settings.json för att köra igång appen med stöd för inloggning via google/facebook etc.
-API-tokens för Google och Facebook måste uppdateras senare när man driftsätter projektet. Detta gör man på google respektive facebooks utvecklarsidor.
-
-### Contact-page
-
-Web3Forms används för kontaktformuläret. Besök webbplatsen https://web3forms.com/, skapa en nyckel och välj en e‑postadress som ska ta emot meddelandena. Nyckeln kopieras in i på rätt ställe i contact.jsx.
+Note that the name of the database is given to `umsme`, in a non-production environment the name needs to be changed to `meteor`.
