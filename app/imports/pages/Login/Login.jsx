@@ -1,14 +1,14 @@
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import { GoogleButton } from "../components/GoogleButton";
-import { LanguageSwitcher } from "../components/LanguageSwitcher/langueSwitcher";
-import { FacebookButton } from "../components/FacebookButton";
+import { GoogleButton } from "../../components/GoogleButton";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
+import { FacebookButton } from "../../components/FacebookButton";
 import { useTranslation } from "react-i18next";
-import { LogRegSwitcher } from "../components/LogRegSwitch/LogRegSwitcher";
+import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
 import { Navigate } from 'react-router-dom';
 
-export default () => {
+export default Login => {
   const { t, i18n } = useTranslation();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -37,13 +37,13 @@ export default () => {
       <form onSubmit={submit} className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
 
-        <LogRegSwitcher/>
+        <LogRegSwitcher />
 
         <div className="form-group">
           <label htmlFor="email">{t("email")}</label>
 
           <input
-            type="email"
+            type="text"
             placeholder={t("exEmail")}
             id="email"
             value={email}
