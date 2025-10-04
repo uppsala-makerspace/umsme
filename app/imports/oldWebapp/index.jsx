@@ -1,6 +1,6 @@
 import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import route from "/client/ui/Webapp/route";
-import { LoginForm } from "./imports/pages/LoginForm";
+import { Login } from "./imports/pages/Login/Login";
 import { RegisterForm } from "./imports/pages/RegisterForm";
 import { LoggedIn } from "./imports/pages/LoggedIn";
 import { HandleMembership } from "./imports/pages/HandleMemberships/HandleMembership.jsx";
@@ -107,7 +107,7 @@ FlowRouter.route("/HandleMembership", {
 
 FlowRouter.route("/login", {
   action() {
-    route("login", LoginForm);
+    route("login", Login);
   },
 });
 

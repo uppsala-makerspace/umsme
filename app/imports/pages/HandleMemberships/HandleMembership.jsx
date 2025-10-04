@@ -11,7 +11,6 @@ import { FiLogOut } from "react-icons/fi";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
 import "./handleMembership.css";
 import LogoutButton from "../../components/LogoutButton";
-import { LoginForm } from "../LoginForm";
 
 export const HandleMembership = () => {
   const { t, i18n } = useTranslation();
@@ -53,11 +52,11 @@ export const HandleMembership = () => {
 
   return (
     <div>
-        {FlowRouter.current().path.endsWith(
-          "/LoggedInAsMember/HandleMembership"
-        ) && <HamburgerMenu />}
-        <LanguageSwitcher />
-        <div className="login-form">
+      {FlowRouter.current().path.endsWith(
+        "/LoggedInAsMember/HandleMembership"
+      ) && <HamburgerMenu />}
+      <LanguageSwitcher />
+      <div className="login-form">
         <div className="membershipsContainer">
           <div>
             <h1>{t("memberships")}</h1>
