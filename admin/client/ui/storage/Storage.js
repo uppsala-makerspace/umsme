@@ -8,6 +8,29 @@ Template.Storage.onCreated(() => {
   Meteor.subscribe('comments');
 });
 
+const wallDefinitions = [
+  {
+    name: 'Floor 1, Wall 1',
+    start: 1,
+    end: 108,
+    shelfSize: 12
+  },
+  {
+    name: 'Floor 1, Wall 2',
+    start: 109,
+    end: 204,
+    shelfSize: 12
+  },
+  {
+    name: 'Floor 2, Wall 1',
+    start: 2001,
+    end: 2108,
+    shelfSize: 12
+  }
+];
+
+let allBoxes = [];
+
 const maxBoxes = 204;
 const wallSize = 108;
 const shelfSize = 12;
@@ -23,6 +46,11 @@ const getComments = () => {
 }
 
 const getBoxes = () => {
+  enrichDefinitionsWithBoxes();
+  return allBoxes;
+};
+
+const enrichDefinitionsWithBoxes = () => {
   const idx = {};
   const now = new Date();
   Members.find({}).forEach((member) => {
@@ -30,20 +58,23 @@ const getBoxes = () => {
       idx[member.storage] = member;
     }
   });
-  const arr = [];
   const box2comments = getComments();
-  for (let i = 1; i <= maxBoxes; i++) {
-    const member = idx[i];
-    const occupied = member !== undefined
-    const overdue = member && member.lab < now;
-    const lab = member && member.lab ? member.lab.toISOString().substring(0,10) : '';
-    const error = member && !member.lab;
-    const tooltip = member ? `${member.name} - ${lab}` : `Box nr ${i}`;
-    const comment = box2comments[i]?.text;
-    const cls = `${occupied ? 'occupied': ''} ${overdue ? 'overdue': ''} ${error ? 'error' : ''} ${comment ? 'comment': ''}`;
-    arr.push({nr: i, occupied, overdue, tooltip, member, class: cls, comment});
-  }
-  return arr;
+  allBoxes = [];
+  wallDefinitions.forEach(wallDef => {
+    wallDef.boxes = [];
+    for (let i = wallDef.start; i <= wallDef.end; i++) {
+      const member = idx[i];
+      const occupied = member !== undefined
+      const overdue = member && member.lab < now;
+      const lab = member && member.lab ? member.lab.toISOString().substring(0, 10) : '';
+      const error = member && !member.lab;
+      const tooltip = member ? `${member.name} - ${lab}` : `Box nr ${i}`;
+      const comment = box2comments[i]?.text;
+      const cls = `${occupied ? 'occupied' : ''} ${overdue ? 'overdue' : ''} ${error ? 'error' : ''} ${comment ? 'comment' : ''}`;
+      wallDef.boxes.push({nr: i, occupied, overdue, tooltip, member, class: cls, comment});
+    }
+    allBoxes = allBoxes.concat(wallDef.boxes);
+  });
 };
 
 Template.Storage.onCreated(function() {
@@ -75,14 +106,14 @@ Template.Storage.helpers({
       free: boxes.filter(box => !box.occupied && !box.comment).length,
     };
   },
-  walls: () => {
+  walls_old: () => {
     const boxes = getBoxes();
     const walls = [];
     const amountOfWalls = Math.ceil(boxes.length / wallSize);
     for (let wallCount = 0; wallCount < amountOfWalls ; wallCount++) {
       const shelves = [];
       walls.push({
-        nr: wallCount+1,
+        name: `Wall ${wallCount + 1}`,
         shelves
       });
       const wallBoxes = boxes.slice(wallCount * wallSize, wallCount * wallSize + wallSize);
@@ -98,6 +129,29 @@ Template.Storage.helpers({
         shelves.push({col1, col2});
       }
     }
+    return walls;
+  },
+  walls: () => {
+    enrichDefinitionsWithBoxes();
+    const walls = [];
+    wallDefinitions.forEach(wallDef => {
+      const shelves = [];
+      walls.push({
+        name: wallDef.name,
+        shelves
+      });
+      const amountOfShelves = Math.ceil(wallDef.end - wallDef.start / shelfSize);
+      for (let shelfCount = 0; shelfCount < amountOfShelves ; shelfCount++) {
+        const shelfBoxes = wallDef.boxes.slice(shelfCount * shelfSize,shelfCount * shelfSize + shelfSize);
+        const col1 = [];
+        const col2 = [];
+        for (let boxCount = 0; boxCount < shelfBoxes.length; boxCount += 2) {
+          col1.push(shelfBoxes[boxCount]);
+          col2.push(shelfBoxes[boxCount + 1]);
+        }
+        shelves.push({col1, col2});
+      }
+    });
     return walls;
   },
   boxEquals: function(box){

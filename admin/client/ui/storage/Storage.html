@@ -5,18 +5,22 @@
         <tbody><tr><td>{{status.boxes}}</td><td>{{status.overdue}}</td><td>{{status.unknown}}</td><td>{{status.free}}</td></tr></tbody>
     </table>
     {{#each wall in walls}}
-        <h2>Wall {{wall.nr}}</h2>
+        <h2>{{wall.name}}</h2>
         <div class="storageWall">
             {{#each shelf in wall.shelves}}
                 <div class="storageShelf">
                     <div class="storageColumn">
                         {{#each box in shelf.col1}}
+                        <a href="#{{box.nr}}">
                             <div title="{{box.tooltip}} - {{box.comment}}" class="storagebox {{box.class}}">{{box.nr}}</div>
+                        </a>
                         {{/each}}
                     </div>
                     <div class="storageColumn">
                         {{#each box in shelf.col2}}
+                        <a href="#{{box.nr}}">
                             <div title="{{box.tooltip}} - {{box.comment}}" class="storagebox {{box.class}}">{{box.nr}}</div>
+                        </a>
                         {{/each}}
                     </div>
                 </div>
@@ -30,7 +34,7 @@
         {{#each box in boxes}}
             {{#if boxEquals box.nr}}
                 <tr class="storagebox {{box.class}}"><td>{{box.nr}}</td>
-                    <td>
+                    <td id={{box.nr}}>
                         <select id="memberselect">
                             {{#if memberEquals ""}}
                                 <option value="" selected>None</option>
@@ -50,7 +54,7 @@
                     <td><button class="doneBox" data-box="{{box.nr}}">Done</button></td>
                 </tr>
             {{else}}
-                <tr class="storagebox {{box.class}}"><td>{{box.nr}}</td><td>{{#if box.occupied}}{{box.tooltip}}{{/if}}</td><td>{{comment box.nr}}</td><td><button class="editBox" data-box="{{box.nr}}">Edit</button></td></tr>
+                <tr id={{box.nr}} class="storagebox {{box.class}}"><td>{{box.nr}}</td><td>{{#if box.occupied}}<a href="/member/{{box.member._id}}">{{box.tooltip}}</a>{{/if}}</td><td>{{comment box.nr}}</td><td><button class="editBox" data-box="{{box.nr}}">Edit</button></td></tr>
             {{/if}}
         {{/each}}
         </tbody>
