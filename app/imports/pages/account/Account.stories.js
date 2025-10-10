@@ -1,4 +1,3 @@
-import { fn } from 'storybook/test';
 
 import Account from './Account';
 
@@ -7,10 +6,7 @@ export default {
   title: 'UMSAPP/Account',
   component: Account,
   parameters: {
-    // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
-//    layout: 'centered',
   },
-  // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/writing-docs/autodocs
   tags: ['autodocs']
 };
 
@@ -24,6 +20,13 @@ export const MemberBase = {
   args: {
     member: { name: 'John Doe', family: false, mid: '123' },
     status: { memberStart, memberEnd, family: false, type: 'member' }
+  },
+};
+
+export const MemberNoPayment = {
+  args: {
+    member: { name: 'John Doe', family: false, mid: '123' },
+    status: { }
   },
 };
 
@@ -59,6 +62,9 @@ export const FamilyPayer = {
   args: {
     member: { name: 'John Doe', family: true, mid: '123' },
     status: { memberStart: new Date('2016'), memberEnd: new Date('2025-12-12'), family: true, type: 'member' },
-    familyMembers: [ {name: 'Jane Doe'} ],
+    familyMembers: [ 
+      {name: 'Jane Doe', email: 'jane@doe.com'},
+      {name: 'Jack Doe', email: 'jack@doe.com'}
+     ],
   },
 };
