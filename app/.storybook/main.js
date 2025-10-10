@@ -24,18 +24,29 @@ const config = {
                   url: false, // This was the important key ** see explanation
                 },
               },
+              'postcss-loader',
             ],
           }
         ]
       }
-    }
+    },
+    {
+      name: '@storybook/addon-postcss',
+      options: {
+        cssLoaderOptions: {
+          importLoaders: 1,
+        },
+        postcssLoaderOptions: {
+          implementation: require('postcss'),
+        },
+      },
+    },
   ],
   "framework": {
     "name": "@storybook/react-webpack5",
     "options": {}
   },
   webpackFinal: async (config) => {
-//    console.log(JSON.stringify(config, undefined, '  '));
     return {
       ...config,
     };

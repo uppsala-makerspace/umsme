@@ -1,8 +1,10 @@
 import { Meteor } from 'meteor/meteor';
 import React from "react";
 import { createRoot } from 'react-dom/client';
-import { App } from '/imports/ui/App';
+import './main.css';
+import './tailwind.output.css';
 import '/imports/i18n';
+import { App } from '/imports/ui/App';
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
