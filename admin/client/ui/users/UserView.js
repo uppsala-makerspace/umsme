@@ -54,5 +54,13 @@ Template.UserView.events({
       await Meteor.users.removeAsync(id);
       FlowRouter.go('/users');
     }
+  },
+  'click .resetPassword': async function (event) {
+    const id = FlowRouter.getParam('_id');
+    if (confirm('Delete this user')) {
+      Comments.find({about: id}).forEach((comm) => {Comments.remove(comm._id);});
+      await Meteor.users.removeAsync(id);
+      FlowRouter.go('/users');
+    }
   }
 });
