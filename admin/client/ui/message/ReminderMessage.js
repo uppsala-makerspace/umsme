@@ -21,15 +21,15 @@ Template.ReminderMessage.events({
   'click .reminderButton':  async function (event) {
     event.preventDefault();
     const mb = await Members.findOneAsync(this.member);
-    const { member, lab, family } = await memberStatus(mb);
+    const { memberEnd, labEnd, family } = await memberStatus(mb);
     const membertype = mb.family === true ? 'family' : (mb.youth === true ? 'youth' : 'normal');
     const now = new Date();
     const inTwoWeeks = new Date();
     const lastTwoWeeks = new Date();
     inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
     lastTwoWeeks.setDate(lastTwoWeeks.getDate()-reminderDays);
-    const labReminder = lab < inTwoWeeks && lab > lastTwoWeeks;
-    const memberReminder = member < inTwoWeeks && member > lastTwoWeeks;
+    const labReminder = labEnd < inTwoWeeks && labEnd > lastTwoWeeks;
+    const memberReminder = memberEnd < inTwoWeeks && memberEnd > lastTwoWeeks;
     if (labReminder || memberReminder) {
       const membershiptype = labReminder && memberReminder ? 'labandmember' : (memberReminder ? 'member' : 'lab');
       let template = await MessageTemplates.findOneAsync({ type: 'reminder', membertype, membershiptype, deprecated: false });

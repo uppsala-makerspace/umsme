@@ -38,14 +38,14 @@ Template.MemberStatus.helpers({
     }
 
     // Bring back reactivity to the async call memberStatus (lost due to the await above).
-    const { member, lab, family } = await Tracker.withComputation(computation, () => memberStatus(mb));
+    const { memberEnd, labEnd, family } = await Tracker.withComputation(computation, () => memberStatus(mb));
     const now = new Date();
     const inTwoWeeks = new Date();
     inTwoWeeks.setDate(inTwoWeeks.getDate()+reminderDays);
-    const labClass = lab > inTwoWeeks ? 'success' : (lab > now ? 'warning' : 'danger');
-    const memberClass = member > inTwoWeeks ? 'success' : (member > now ? 'warning' : 'danger');
+    const labClass = labEnd > inTwoWeeks ? 'success' : (labEnd > now ? 'warning' : 'danger');
+    const memberClass = memberEnd > inTwoWeeks ? 'success' : (memberEnd > now ? 'warning' : 'danger');
     return {
-      inconsistent: !te(mb.member, member) || !te(mb.lab, lab) || (mb.family === true) !== family,
+      inconsistent: !te(mb.member, memberEnd) || !te(mb.lab, labEnd) || (mb.family === true) !== family,
       family,
       familyPatron: mb.family && !mb.infamily,
       lab: mb.lab,

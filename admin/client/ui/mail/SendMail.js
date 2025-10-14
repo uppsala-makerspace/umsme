@@ -122,13 +122,13 @@ const check = (status, recipients) => {
   lastyear.setFullYear(lastyear.getFullYear()-1);
   switch (recipients) {
     case 'members':
-      return status.member > now;
+      return status.memberEnd > now;
     case 'labmembers':
-      return status.lab > now;
+      return status.labEnd > now;
     case 'yearmembers':
-      return status.member > currentyear;
+      return status.memberEnd > currentyear;
     case 'recentmembers':
-      return status.member > lastyear;
+      return status.memberEnd > lastyear;
   }
 };
 
