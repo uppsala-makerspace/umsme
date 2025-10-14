@@ -68,6 +68,7 @@
   "RenewMembership": "Förnya medlemskap",
   "AlertEndDate": "Psst - ditt labbmedlemskap behöver förnyas inom ",
   "days": " dagar!",
+  "daysRemaining": " dagar kvar",
   "LoggedInAsMember": "Du är inloggad som medlem.",
   "calender": "Kalender",
   "contactUs": "Kontakta oss",
@@ -133,5 +134,9 @@
   "MembershipID": "Medlemskaps ID:",
   "BackToStart": "Till startsidan",
   "AddFamilyMember": "Lägg till familjemedlem",
-  "Membershipstext1": "På Uppsala Makerspace vill vi att skapande ska vara tillgängligt för alla, oavsett ekonomi. Därför vill vi hålla priserna för medlemskap så låga som möjligt. Det innebär att vi alla måste hjälpas åt meddet arbete som krävs för att vår förening ska må bra."
+  "Membershipstext1": "På Uppsala Makerspace vill vi att skapande ska vara tillgängligt för alla, oavsett ekonomi. Därför vill vi hålla priserna för medlemskap så låga som möjligt. Det innebär att vi alla måste hjälpas åt meddet arbete som krävs för att vår förening ska må bra.",
+  "Save": "Spara",
+  "CantBeEmpty": "kan inte vara tomt",
+  "IsInvalid": "är ogiltigt",
+  "and": " och "
 }
