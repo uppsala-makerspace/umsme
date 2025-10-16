@@ -64,7 +64,7 @@ const Account = ({ member, familyMembers, status }) => {
     }
   }
 
-  const payingFamilyMember = member.family && !member.infamily;
+  const payingFamilyMember = member.family && !!member.infamily;
   const daysRemaining = moment(status.memberEnd).diff(moment.now(), 'days');
 
   const validateEmail = (email: string): boolean => {
@@ -115,7 +115,7 @@ const Account = ({ member, familyMembers, status }) => {
         email: newFamilyMemberInfo.email,
       })
 
-      setNewFamilyMemberInfo({})      
+      setNewFamilyMemberInfo({})
       setAddFamilyMemberMode(false)
     }
   }
@@ -131,6 +131,9 @@ const Account = ({ member, familyMembers, status }) => {
   }
 
   const handleRemoveFamilyMember = (email: string) => {
+    // Only paying family member can remove family members
+    if (member.infamily != member._id) return;
+
     // Add a confirmation dialog here
     // Send family member's email to backend to be removed
     familyMembers = familyMembers.filter(fm => fm.email === email)
@@ -143,8 +146,13 @@ const Account = ({ member, familyMembers, status }) => {
           <FontAwesomeIcon icon={faHome} /> / <span className="text-lg font-bold"> {t("MyAccount")}</span>
         </div>
         <span className="font-bold text-center text-xl"> {member.name}</span>
-        <div className='flex w-full justify-center'>
-          <button className="relative round-prof">
+        <div className='flex w-full justify-center relative'>
+          <div className='absolute w-full h-full border'>
+            <div className='flex h-1/3'></div>
+            <div className='flex h-1/3 bg-gray-300'></div>
+            <div className='flex h-1/3'></div>
+          </div>
+          <button className="relative round-prof bg-gray-300">
             <FontAwesomeIcon
               className='absolute top-0 right-0 border-4 bg-white border-gray-500 rounded-full w-8 h-8 p-1.5 text-gray-500'
               icon={faPen} />
@@ -178,10 +186,13 @@ const Account = ({ member, familyMembers, status }) => {
         </div>
       </div>
 
-      <div className="middle-text">
+      <div className="middle-text flex flex-col gap-3">
         {payingFamilyMember && (
           <div>
-            <div className='text-gray-600 border-b-2 border-gray-600'>{t("FamilyMembers")}</div>
+            <div className='flex justify-between border-b-2 border-gray-600'>
+              <span className='text-gray-600'>{t("FamilyMembers")}</span>
+              <span className='text-gray-600 text-sm'>[{familyMembers?.length || 0}/4]</span>
+            </div>
             <div className="">
               {familyMembers?.map((fm, index) => (
                 <div key={index} className="family-row items-center">
@@ -189,7 +200,7 @@ const Account = ({ member, familyMembers, status }) => {
                     <span className="font-bold">{`${fm.name}`}</span>
                     <span className='text-sm'>{fm.email ? `${fm.email}` : ''}</span>
                   </div>
-                  <FontAwesomeIcon className='text-gray-600 cursor-pointer' icon={faTrash} onClick={() => handleRemoveFamilyMember(fm.email)} />
+                  <FontAwesomeIcon className={'' + (member.infamily != member._id ? 'cursor-not-allowed text-gray-300' : 'cursor-pointer text-gray-600')} icon={faTrash} onClick={() => handleRemoveFamilyMember(fm.email)} />
                 </div>
               ))}
             </div>
@@ -204,7 +215,7 @@ const Account = ({ member, familyMembers, status }) => {
                 className={'border rounded  !w-full !m-0 ' + (newFamilyMemberError.nameEmpty ? 'border-red-600' : 'border-gray-300')}
                 type="text"
                 name="name"
-                placeholder={t("names")} 
+                placeholder={t("names")}
                 autoFocus
                 onChange={(e) => handleUpdateNewFamilyMember("name", e.target.value)}
               />
@@ -213,7 +224,7 @@ const Account = ({ member, familyMembers, status }) => {
                 id='family_member_email'
                 className={'border rounded  !w-full !m-0 ' + (newFamilyMemberError.emailEmpty || newFamilyMemberError.emailInvalid ? 'border-red-600' : 'border-gray-300')}
                 type="email"
-                placeholder={t("email")} 
+                placeholder={t("email")}
                 onChange={(e) => handleUpdateNewFamilyMember("email", e.target.value)}
               />
 

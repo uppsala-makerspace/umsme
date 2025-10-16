@@ -60,7 +60,7 @@ export const MemberQuarterlyLab = {
 
 export const FamilyPayer = {
   args: {
-    member: { name: 'John Doe', family: true, mid: '123' },
+    member: { name: 'John Doe', family: true, mid: '123', _id: 'xxx', infamily: 'xxx' },
     status: { memberStart: new Date('2016'), memberEnd: new Date('2025-12-12'), family: true, type: 'member' },
     familyMembers: [ 
       {name: 'Jane Doe', email: 'jane@doe.com'},
