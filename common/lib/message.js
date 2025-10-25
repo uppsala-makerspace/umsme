@@ -15,7 +15,7 @@ const niceDate = (date) => {
 
 export const messageData = async (memberId, templateId, membershipId) => {
   let familyMembers = [];
-  Members.find({infamily: memberId}).forEach((m) => familyMembers.push(m.name));
+  await Members.find({infamily: memberId}).forEachAsync((m) => familyMembers.push(m.name));
   familyMembers = familyMembers.join(', ');
   const member = await Members.findOneAsync(memberId);
   const messageTemplate = await MessageTemplates.findOneAsync(templateId);
