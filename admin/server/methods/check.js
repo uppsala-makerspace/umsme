@@ -12,7 +12,7 @@ Meteor.methods({
       return member._id;
     }
   },
-  'check': async (id) => {
+  'storageCheck': async (id) => {
     const member = await Members.findOneAsync(id);
     if (member) {
       return {
@@ -24,7 +24,8 @@ Meteor.methods({
           family: member.family,
           id: member.mid,
           storage: member.storage,
-          storagequeue: member.storagequeue ? true : undefined
+          storagequeue: member.storagequeue ? true : undefined,
+          storagerequest: member.storagerequest
         },
       };
     } else {
@@ -34,7 +35,7 @@ Meteor.methods({
       }
     }
   },
-  'queue': async (id, queue) => {
+  'storageQueue': async (id, queue) => {
     console.log("Queue called "+ typeof queue);
     const member = await Members.findOneAsync(id);
     console.log("For member "+ member._id);
@@ -42,6 +43,17 @@ Meteor.methods({
       return false;
     }
     await Members.updateAsync(id, {"$set": { storagequeue: queue} });
+    return true;
+  },
+  'storageRequest': async (id, request) => {
+    console.log("Request called "+ typeof request);
+    const member = await Members.findOneAsync(id);
+    console.log("For member "+ member._id);
+    if (request) {
+      await Members.updateAsync(id, {"$set": { storagerequest: request} });
+    } else {
+      await Members.updateAsync(id, {"$unset": "storagerequest" });
+    }
     return true;
   }
 });

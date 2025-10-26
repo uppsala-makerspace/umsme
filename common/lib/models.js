@@ -99,6 +99,23 @@ export const models = {
       max: 10,
       optional: true,
     },
+    storagerequest: {
+      label: "Storage request",
+      type: String,
+      max: 30,
+      optional: true,
+      autoform: {
+        type: "select",
+        options: {
+          floor1: "Floor 1 - anywhere",
+          floor2: "Floor 2 - anywhere",
+          floor1L: "Floor 1 - bottom shelf",
+          floor2L: "Floor 2 - bottom shelf",
+          floor1U: "Floor 1 - upper shelf",
+          floor2U: "Floor 2 - upper shelf",
+        },
+      },
+    },
     mobile: { label: "Mobile", type: String, max: 20, optional: true },
   },
   membership: {
@@ -430,8 +447,7 @@ export const models = {
           forever: "No end date",
           admin: "Admin",
           old: "Old account",
-        },
-        readonly: true,
+        }
       },
     },
   },

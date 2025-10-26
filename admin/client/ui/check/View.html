@@ -41,9 +41,21 @@
                     {{#unless info.storagequeue}}❌ &nbsp; &nbsp; &nbsp;<button class="addToStorageQueue">Add me to queue</button>{{/unless}}
                     </span>
                 {{/unless}}
-                <p style="padding-top: 0px">
-
-                    </p>
+                {{#if requestAllowed}}
+                <span>Request for position of personal storage box:
+                    <select id="storageRequestSelect">
+                        <option value="">No specific request</option>
+                        <option value="floor1">Floor 1 - anywhere</option>
+                        <option value="floor1U">Floor 1 - upper shelf</option>
+                        <option value="floor1L">Floor 1 - lower shelf</option>
+                        <option value="floor2">Floor 2 - anywhere</option>
+                        <option value="floor2U">Floor 2 - upper shelf</option>
+                        <option value="floor2L">Floor 2 - lower shelf</option>
+                    </select>
+                    &nbsp; &nbsp; &nbsp;<button class="storageRequest">Change request</button>
+                </span>
+                {{/if}}
+                <p style="padding-top: 0px"></p>
                 {{/if}}
             </div>
         {{/if}}

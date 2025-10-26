@@ -29,7 +29,7 @@
     {{/each}}
     <h2>Position / box details</h2>
     <table class="table storageList">
-        <thead><tr><th>#</th><th>Name & date</th><td class="boxComment">Comment</td></tr></thead>
+        <thead><tr><th>#</th><th>Name & date</th><th>Request</th><th class="boxComment">Comment</th></tr></thead>
         <tbody>
         {{#each box in boxes}}
             {{#if boxEquals box.nr}}
@@ -50,11 +50,17 @@
                             {{/each}}
                         </select>
                     </td>
+                    <td>{{#if box.member.storagerequest}}{{box.member.storagerequest}} <button class="clearStorageRequest" data-box="{{box.nr}}">Clear request</button>{{/if}}</td>
                     <td><textarea class="boxComment">{{comment box.nr}}</textarea></td>
                     <td><button class="doneBox" data-box="{{box.nr}}">Done</button></td>
                 </tr>
             {{else}}
-                <tr id={{box.nr}} class="storagebox {{box.class}}"><td>{{box.nr}}</td><td>{{#if box.occupied}}<a href="/member/{{box.member._id}}">{{box.tooltip}}</a>{{/if}}</td><td>{{comment box.nr}}</td><td><button class="editBox" data-box="{{box.nr}}">Edit</button></td></tr>
+                <tr id={{box.nr}} class="storagebox {{box.class}}">
+                    <td>{{box.nr}}</td>
+                    <td>{{#if box.occupied}}<a href="/member/{{box.member._id}}">{{box.tooltip}}</a>{{/if}}</td>
+                    <td>{{box.member.storagerequest}}</td>
+                    <td>{{comment box.nr}}</td>
+                    <td><button class="editBox" data-box="{{box.nr}}">Edit</button></td></tr>
             {{/if}}
         {{/each}}
         </tbody>

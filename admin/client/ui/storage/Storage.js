@@ -173,6 +173,12 @@ Template.Storage.events({
   'click .doneBox': function (event, instance) {
     instance.state.set('editBox', '');
   },
+  'click .clearStorageRequest': function (event, instance) {
+    const memberId = instance.state.get('editBoxMember');
+    if (memberId) {
+      Members.update(memberId, {$unset: {storagerequest: ''}});
+    }
+  },
   'change #memberselect': function(event, instance) {
     const beforeMemberId = instance.state.get('editBoxMember');
     const afterMemberId = event.target.value;

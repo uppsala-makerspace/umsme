@@ -30,7 +30,7 @@
     </div>
 
     <table class="table memberList">
-        <thead><tr><th>Name</th><th>Email</th><td>Years</td><td>Days (since joinced)</td><td>Last membership day</td><td>Lab</td><td>Family</td><td>Storage</td><td>Storage queue</td></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><td>Years</td><td>Days (since joinced)</td><td>Last membership day</td><td>Lab</td><td>Family</td><td>Storage</td><td>Storage queue</td><td>Storage request</td></tr></thead>
         <tbody>
         {{#each user in users}}
         <tr class="{{user.statusClass}}">
@@ -43,6 +43,7 @@
             <td>{{user.member.family}}</td>
             <td>{{user.member.storage}}</td>
             <td>{{user.member.storagequeue}}</td>
+            <td>{{user.member.storagerequest}}</td>
         </tr>
         {{/each}}
         </tbody>
