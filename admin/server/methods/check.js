@@ -14,6 +14,11 @@ Meteor.methods({
   },
   'storageCheck': async (id) => {
     const member = await Members.findOneAsync(id);
+    let storage = member.storage;
+    if (member.infamily) {
+      const payingFamilyMember = await Members.findOneAsync(member.infamily);
+      storage = payingFamilyMember.storage;
+    }
     if (member) {
       return {
         member: member != null,
@@ -22,8 +27,9 @@ Meteor.methods({
           member: moment(member.member).format("YYYY-MM-DD"),
           lab: moment(member.lab).format("YYYY-MM-DD"),
           family: member.family,
+          infamily: !!member.infamily,
           id: member.mid,
-          storage: member.storage,
+          storage,
           storagequeue: member.storagequeue ? true : undefined,
           storagerequest: member.storagerequest
         },

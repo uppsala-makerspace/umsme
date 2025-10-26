@@ -34,6 +34,7 @@
                     {{#if info.storage}}
                     <label>Storage box number: {{info.storage}}</label>
                 {{/if}}
+                {{#unless info.infamily}}
                 {{#unless info.storage}}
                     <span>In queue for a personal storage box:&nbsp;
                     {{#if info.storagequeue}}✅ &nbsp; &nbsp; &nbsp;<button class="removeFromStorageQueue">Remove me from queue</button>
@@ -55,6 +56,7 @@
                     &nbsp; &nbsp; &nbsp;<button class="storageRequest">Change request</button>
                 </span>
                 {{/if}}
+                {{/unless}}
                 <p style="padding-top: 0px"></p>
                 {{/if}}
             </div>
