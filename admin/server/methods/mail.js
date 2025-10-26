@@ -29,16 +29,12 @@ Meteor.methods({
       });
   },
   async mailAboutMemberShip(email) {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
     const mb = await Members.findOneAsync({ email: email });
     const template = await MessageTemplates.findOneAsync({
       type: "status",
       deprecated: false,
     });
 
-    console.log("Hepp");
     if (mb && template) {
       const data = await messageData(mb._id, template._id);
       console.log(data.messagetext);
