@@ -14,8 +14,8 @@ export default Login => {
   const [email, setEmail] = useState("");
   const user = useTracker(() => Meteor.user());
 
-  const unverifiedUser = user && user.emails.length > 0 && !user.emails[0].verified;
-  const verified = user && user.emails.length > 0 && user.emails[0].verified;
+  const unverifiedUser = user && user.emails?.length > 0 && !user.emails[0].verified;
+  const verified = user && user.emails?.length > 0 && user.emails[0].verified;
 
   const submit = (e) => {
     e.preventDefault();

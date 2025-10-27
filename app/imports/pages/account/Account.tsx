@@ -60,6 +60,7 @@ const Account = ({ member, familyMembers, status }) => {
         }
         break;
       case 'none':
+      default:
         membershipType = 'fix';
     }
   }
