@@ -157,9 +157,15 @@ Meteor.methods({
       throw new Meteor.Error('Not authorized');
     }
     await authenticate();
-    const users = await (await fetch('https://api.danalock.com/users/v1?page=0', {headers})).json();
-    const calendars = await (await fetch('https://api.danalock.com/links/v1/calendars?page=0', {headers})).json();
-    const links = await (await fetch('https://api.danalock.com/links/v1/group_user_links?page=0', {headers})).json();
+    const users0 = await (await fetch('https://api.danalock.com/users/v1?page=0', {headers})).json();
+    const users1 = await (await fetch('https://api.danalock.com/users/v1?page=1', {headers})).json();
+    const users = users0.concat(users1);
+    const calendars0 = await (await fetch('https://api.danalock.com/links/v1/calendars?page=0', {headers})).json();
+    const calendars1 = await (await fetch('https://api.danalock.com/links/v1/calendars?page=1', {headers})).json();
+    const calendars = calendars0.concat(calendars1);
+    const links0 = await (await fetch('https://api.danalock.com/links/v1/group_user_links?page=0', {headers})).json();
+    const links1 = await (await fetch('https://api.danalock.com/links/v1/group_user_links?page=1', {headers})).json();
+    const links = links0.concat(links1);
     return { users, calendars, links };
   },
   'setCalenderEndDate': async (calendar, endDate, link) => {
