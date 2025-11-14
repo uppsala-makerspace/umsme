@@ -27,28 +27,24 @@ export default ({ memberName, memberStatus }) => {
     daysLeftOfLab >= 0 && daysLeftOfLab < 8;
 
   const name = memberName?.split(" ")[0];
-
   const activeMembership = memberStatus && memberStatus.memberEnd >= new Date();
   if (memberName === '') {
     return <>
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
-      <h3 className="text-h3">{t("welcome")} {name}!</h3>
-      <p className="text-container">{t("noMembertext1")}</p>
-      <p className="text-container">{t("noMembertext2")}</p>
+      <h3 className="text-h3">{t("welcome")}!</h3>
+      <p className="text-container">{t("noNameText1")}</p>
+      <p className="text-container">{t("noNameText2")}</p>
       <Link to="/createMember" className="wideButton">
-        <button className="form-button">{t("becomeMember")}</button>
+        <button className="form-button">{t("addNameButton")}</button>
       </Link>
     </>;
   } else if (activeMembership) {
     return <>
-      <Link to="/LoggedInAsMember/keys" style={{width: "100%", "text-align": "center"}}>
-        <button className="round-button"></button>
-      </Link>
+      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
       <h3 className="text-h3">{t("greeting2")} {name}!</h3>
-      <div style={{marginTop: "0"}}> {t("PressToOpen")}</div>
       {timeToRenew && (
         <div>
-          <p style={{textAlign: "center"}}>
+          <p className="text-container">
             {t("AlertEndDate")}
             {daysLeftOfLab.toFixed(0)} {t("days")}
           </p>
@@ -57,6 +53,19 @@ export default ({ memberName, memberStatus }) => {
           </Link>
         </div>
       )}
+      <Link to="/unlock" style={{width: "100%", "text-align": "center"}}>
+        <button className="form-button">{t("PressToOpen")}</button>
+      </Link>
+    </>;
+  } else if (daysLeftOfLab < 0) {
+    return <>
+      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
+      <h3 className="text-h3">{t("welcome")} {name}!</h3>
+      <p className="text-container">{t("expiredMembershipText1")}</p>
+      <p className="text-container">{t("expiredMembershipText2")}</p>
+      <Link to="/payment" className="wideButton">
+        <button className="form-button">{t("renewMembership")}</button>
+      </Link>
     </>;
   } else {
     return <>

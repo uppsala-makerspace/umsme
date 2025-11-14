@@ -63,7 +63,7 @@ export default () => {
         name,
         mobile,
         youth,
-        infamily: member.mid, // Set infamily to the current member's mid, note that infamily is an ID
+        infamily: member._id, // Set infamily to the current member's id, note that infamily is an ID
         family: true,
       },
       (err) => {
