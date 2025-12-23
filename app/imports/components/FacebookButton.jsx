@@ -1,11 +1,8 @@
 import React from "react";
-//import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
 
 export const FacebookButton = () => {
   const { t, i18n } = useTranslation();
-  const user = useTracker(() => Meteor.user());
 
   const configurationExists = () => {
     return ServiceConfiguration.configurations.findOne({
@@ -15,7 +12,7 @@ export const FacebookButton = () => {
 
   const loading = false;
   const isDisabled = loading || !configurationExists();
-  const buttonText = isDisabled ? "Please wait" : t("logginFacebook");
+  const buttonText = isDisabled ? "Please wait" : t("loginFacebook");
 
   const handleClick = () => {
     Meteor.loginWithFacebook({}, (err) => {

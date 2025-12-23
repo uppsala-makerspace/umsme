@@ -1,21 +1,13 @@
-import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
-import React, { useState, useEffect } from "react";
-import { GoogleButton } from "../../components/GoogleButton";
-import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
-import { FacebookButton } from "../../components/FacebookButton";
 import { useTranslation } from "react-i18next";
+import React, { useState } from "react";
+import { GoogleButton } from "../../components/GoogleButton";
+//import { FacebookButton } from "../../components/FacebookButton";
 import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
-import { Navigate } from 'react-router-dom';
 
-export default Login => {
-  const { t, i18n } = useTranslation();
+export default ({google, facebook}) => {
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const user = useTracker(() => Meteor.user());
-
-  const unverifiedUser = user && user.emails?.length > 0 && !user.emails[0].verified;
-  const verified = user && user.emails?.length > 0 && user.emails[0].verified;
 
   const submit = (e) => {
     e.preventDefault();
@@ -31,9 +23,6 @@ export default Login => {
 
   return (
     <>
-      <LanguageSwitcher />
-      {unverifiedUser ? (<Navigate to="/waitForEmailVerification" />) : null}
-      {verified ? (<Navigate to="/" />) : null}
       <form onSubmit={submit} className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
 
@@ -77,13 +66,14 @@ export default Login => {
           </button>
         </div>
 
-        <div className="form-group">
-          <GoogleButton />
-        </div>
-
+        {google && (<div className="form-group">
+          <GoogleButton conf={google}/>
+        </div>)}
+        {/*
         <div className="form-group">
           <FacebookButton />
         </div>
+      */}
       </form>
     </>
   );

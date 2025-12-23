@@ -1,38 +1,16 @@
 import React from "react";
-// import { FlowRouter } from "meteor/ostrio:flow-router-extra";
-import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
 
-export const GoogleButton = () => {
-  const { t, i18n } = useTranslation();
-  const user = useTracker(() => Meteor.user());
-
-  const configurationExists = () => {
-    return ServiceConfiguration.configurations.findOne({
-      service: "google",
-    });
-  };
-
-  const loading = false;
-  const isDisabled = loading || !configurationExists();
-  const buttonText = isDisabled ? "Please wait" : t("logginGoogle");
+export const GoogleButton = ({conf}) => {
+  const { t } = useTranslation();
+  const buttonText = !conf ? "Please wait" : t("loginGoogle");
 
   const handleClick = () => {
-    Meteor.loginWithGoogle({}, (err) => {
-      if (err) {
-        if (
-          err instanceof Meteor.Error &&
-          err.reason ===
-            "Det finns redan ett konto kopplat till den här adressen. Logga in med det kontot istället."
-        ) {
-          alert(
-            "Google-verifiering har lagts till på ditt befintliga konto. Testa att logga in med google igen så kommer det fungera!"
-          );
-        } else {
-          alert("Inloggningen misslyckades.");
-        }
+    conf.method({}, (err) => {
+      if (err.code === "account-merge") {
+        alert("Google-verifiering har lagts till på ditt befintliga konto. Testa att logga in med google igen så kommer det fungera!");
       } else {
-//        FlowRouter.go("/loggedIn");
+        alert("Inloggningen misslyckades.");
       }
     });
   };
@@ -40,7 +18,7 @@ export const GoogleButton = () => {
   return (
     <button
       className="social-button"
-      disabled={isDisabled}
+      disabled={!conf}
       onClick={handleClick}
     >
       <img src="/images/GoogleLogo.png" alt="icon" className="button-icon" />

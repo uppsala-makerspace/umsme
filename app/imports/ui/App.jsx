@@ -1,5 +1,5 @@
 import React from 'react';
-import Login from '/imports/pages/Login/Login';
+import Login from '/imports/pages/Login';
 import RegisterForm from '/imports/pages/RegisterForm';
 import Home from '/imports/pages/Home';
 import CreateMember from '/imports/pages/CreateMember';
