@@ -11,6 +11,7 @@ const method = () => {};
 
 export const LoginPage = {
   args: {
-    google: {method}
+    google: {method},
+    facebook: {method}
   }
 };

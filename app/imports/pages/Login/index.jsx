@@ -15,7 +15,7 @@ export default () => {
   if (ServiceConfiguration.configurations.findOne({service: "google"})) {
     props.google = {method: Meteor.loginWithGoogle};
   }
-  if (ServiceConfiguration.configurations.findOne({service: "google"})) {
+  if (ServiceConfiguration.configurations.findOne({service: "facebook"})) {
     props.facebook = {method: Meteor.loginWithFacebook};
   }
 

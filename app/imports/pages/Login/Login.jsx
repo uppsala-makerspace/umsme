@@ -1,8 +1,19 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { GoogleButton } from "../../components/GoogleButton";
-//import { FacebookButton } from "../../components/FacebookButton";
+import { LoginButton } from "./LoginButton";
 import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
+
+const googleConf = {
+  buttonTextKey: "loginGoogle",
+  mergeMessageKey: "oauthMergeGoogle",
+  icon: "/images/GoogleLogo.png"
+};
+
+const facebookConf = {
+  buttonTextKey: "loginFacebook",
+  mergeMessageKey: "oauthMergeFacebook",
+  icon: "/images/FacebookLogo.png"
+};
 
 export default ({google, facebook}) => {
   const { t } = useTranslation();
@@ -67,13 +78,11 @@ export default ({google, facebook}) => {
         </div>
 
         {google && (<div className="form-group">
-          <GoogleButton conf={google}/>
+          <LoginButton conf={{...googleConf, ...google}}/>
         </div>)}
-        {/*
-        <div className="form-group">
-          <FacebookButton />
-        </div>
-      */}
+        {facebook && (<div className="form-group">
+          <LoginButton conf={{...facebookConf, ...facebook}}/>
+        </div>)}
       </form>
     </>
   );
