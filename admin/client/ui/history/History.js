@@ -72,6 +72,10 @@ const load = (state, memberfilter = 'active') => {
   const memberList = [];
   Object.keys(index).forEach(key => {
     const obj = index[key];
+    if (!obj.joined) {
+      console.log(`Skipping user with id "${key}" due to missing joined date.`);
+      return;
+    }
     const days = Math.floor((now - obj.joined.getTime())/1000/3600/24);
     const member = id2member[key];
     if (!member.member) {
