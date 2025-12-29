@@ -35,6 +35,9 @@ export const models = {
       },
     },
     name: { label: "Name", type: String, max: 200 },
+    birthyear: {
+      label: "Year of birth", type: Number, optional: true
+    },
     email: {
       label: "Email",
       type: String,
@@ -474,4 +477,23 @@ export const models = {
     },
     "emails.$.verified": { label: "Verified", type: Boolean, optional: true },
   },
+  invites: {
+    email: {
+      label: "Email",
+      type: String,
+      max: 200,
+      regEx: SimpleSchema.RegEx.Email,
+      autoform: {
+        type: "email",
+      }
+    },
+    infamily: {
+      label: "Invited to family",
+      type: String,
+      max: 50,
+      autoform: {
+        omit: true,
+      }
+    },
+  }
 };
