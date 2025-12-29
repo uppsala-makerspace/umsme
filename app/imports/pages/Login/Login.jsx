@@ -64,10 +64,7 @@ export default ({google, facebook}) => {
           />
         </div>
         <p>
-          <a
-            href="/ForgotPassword"
-            style={{ fontSize: "0.9em", marginTop: "-3px" }}
-          >
+          <a href="/ForgotPassword" className="text-sm -mt-1">
             {t("ForgotPassword")}
           </a>
         </p>

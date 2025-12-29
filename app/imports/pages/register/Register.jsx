@@ -9,10 +9,11 @@ export default ({onSubmit}) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const passwordsMatch = !confirmPassword || password === confirmPassword;
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      alert(t("PasswordNoMatch"));
+    if (!passwordsMatch) {
       return;
     }
     onSubmit({email, password});
@@ -55,6 +56,9 @@ export default ({onSubmit}) => {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
+        {!passwordsMatch && (
+          <p className="text-red-500 mt-1">{t("PasswordNoMatch")}</p>
+        )}
       </div>
 
       <button type="submit" className="form-button">
