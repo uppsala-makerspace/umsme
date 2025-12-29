@@ -12,7 +12,7 @@ export default ({onSubmit}) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      alert(t("PasswordNoMatch"));
       return;
     }
     onSubmit({email, password});
