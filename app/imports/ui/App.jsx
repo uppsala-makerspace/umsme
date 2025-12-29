@@ -1,6 +1,6 @@
 import React from 'react';
 import Login from '/imports/pages/Login';
-import RegisterForm from '/imports/pages/RegisterForm';
+import Register from '/imports/pages/register';
 import Home from '/imports/pages/Home';
 import CreateMember from '/imports/pages/CreateMember';
 import Unlock from '/imports/pages/unlock'
@@ -16,7 +16,7 @@ export const App = () => (
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/waitforemailverification" element={<WaitForEmailVerification />} />
         <Route path="/createMember" element={<CreateMember />} />
         <Route path="/unlock" element={<Unlock />} />

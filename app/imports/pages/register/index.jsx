@@ -1,0 +1,32 @@
+import React from "react";
+import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
+import { Meteor } from "meteor/meteor";
+import { Accounts } from "meteor/accounts-base";
+import { useNavigate, Navigate } from 'react-router-dom';
+import Register from './Register';
+
+export default () => {
+  let navigate = useNavigate();
+
+  const handleSubmit = ({email, password}) => {
+    Accounts.createUser({ email, password }, (err) => {
+      if (err) {
+        if (err instanceof Meteor.Error && err.reason === "account-merge") {
+          alert("E-postadressen är redan registrerad. Försök logga in.");
+        } else {
+          alert("Kunde inte skapa konto: " + err.message);
+        }
+      } else {
+        navigate("/waitForEmailVerification");
+      }
+    });
+  };
+
+  return (
+    <>
+      <LanguageSwitcher />
+      {Meteor.userId() ? (<Navigate to="/" />) : null}
+      <Register onSubmit={handleSubmit} />
+    </>
+  );
+};
