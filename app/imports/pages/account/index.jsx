@@ -45,13 +45,23 @@ export default () => {
     }
   };
 
+  const removeFamilyMember = async (email) => {
+    try {
+      await Meteor.callAsync("removeFamilyMember", {email});
+      const info = await Meteor.callAsync("findInfoForUser");
+      setMemberInfo(info);
+    } catch (err) {
+      console.error("Failed to remove family member: ", err);
+    }
+  };
+
   return (
     <>
       <LanguageSwitcher />
       <HamburgerMenu />
       <div className="login-form">
         {memberInfo && (
-          <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite}></Account>
+          <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember}></Account>
         )}
         <br />
         <LogoutButton />

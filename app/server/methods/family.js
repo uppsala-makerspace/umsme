@@ -1,5 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import Invites from "/imports/common/collections/Invites";
+import { Members } from "/imports/common/collections/members";
 import {findMemberForUser} from "/server/methods/utils";
 
 Meteor.methods({
@@ -90,5 +91,33 @@ Meteor.methods({
       await Members.updateAsync(member);
       await Invites.removeAsync(invite);
     }
+  },
+
+  async removeFamilyMember({email}) {
+    const member = await findMemberForUser();
+    if (!member) {
+      throw new Meteor.Error(
+        "no-user",
+        "No user or the user is not fully registered"
+      );
+    }
+
+    if (!member.family) {
+      throw new Meteor.Error(
+        "not-a-family",
+        "The user does not have a family plan"
+      );
+    }
+
+    const familyMember = await Members.findOneAsync({email, infamily: member._id});
+    if (!familyMember) {
+      throw new Meteor.Error(
+        "not-in-family",
+        "No family member with this email in your family"
+      );
+    }
+
+    await Members.updateAsync(familyMember._id, {$unset: {infamily: ""}});
+    return true;
   },
 });

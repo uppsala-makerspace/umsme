@@ -71,6 +71,7 @@ export const FamilyPayer = {
     ],
     addFamilyInvite: fn(),
     cancelFamilyInvite: fn(),
+    removeFamilyMember: fn(),
   },
 };
 
@@ -85,5 +86,6 @@ export const FamilyPayerNoInvites = {
     familyInvites: [],
     addFamilyInvite: fn(),
     cancelFamilyInvite: fn(),
+    removeFamilyMember: fn(),
   },
 };

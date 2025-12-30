@@ -16,7 +16,7 @@ interface INewFamilyMemberValidation {
   errorMassages?: string[]
 }
 
-const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyInvite, cancelFamilyInvite }) => {
+const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyInvite, cancelFamilyInvite, removeFamilyMember }) => {
   const [addFamilyMemberMode, setAddFamilyMemberMode] = useState(false);
   const [newFamilyMemberInfo, setNewFamilyMemberInfo] = useState<INewFamilyMember>({});
   const [newFamilyMemberError, setNewFamilyMemberError] = useState<INewFamilyMemberValidation>({});
@@ -113,12 +113,9 @@ const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyI
   }
 
   const handleRemoveFamilyMember = (email: string) => {
-    // Only paying family member can remove family members
-    if (member.infamily != member._id) return;
-
-    // Add a confirmation dialog here
-    // Send family member's email to backend to be removed
-    familyMembers = familyMembers.filter(fm => fm.email === email)
+    if (removeFamilyMember) {
+      removeFamilyMember(email);
+    }
   }
 
   return (
@@ -183,7 +180,7 @@ const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyI
                       <span className="font-bold">{`${fm.name}`}</span>
                       <span className='text-sm'>{fm.email ? `${fm.email}` : ''}</span>
                     </div>
-                    <FontAwesomeIcon className={member.infamily != member._id ? 'cursor-not-allowed text-gray-300' : 'cursor-pointer text-gray-600'} icon={faTrash} onClick={() => handleRemoveFamilyMember(fm.email)} />
+                    <FontAwesomeIcon className='cursor-pointer text-gray-600 hover:text-gray-800' icon={faTrash} onClick={() => handleRemoveFamilyMember(fm.email)} />
                   </div>
                 ))}
               </div>
@@ -257,6 +254,8 @@ Account.propTypes = {
   addFamilyInvite: PropTypes.func,
   /** Callback to cancel a pending family member invite */
   cancelFamilyInvite: PropTypes.func,
+  /** Callback to remove an accepted family member */
+  removeFamilyMember: PropTypes.func,
 };
 
 export default Account;
