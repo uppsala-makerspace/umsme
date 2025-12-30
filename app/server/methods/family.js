@@ -117,7 +117,7 @@ Meteor.methods({
       );
     }
 
-    await Members.updateAsync(familyMember._id, {$unset: {infamily: ""}});
+    await Members.updateAsync(familyMember._id, {$unset: {infamily: ""}, $set: {family: false}});
     return true;
   },
 });
