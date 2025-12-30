@@ -1,9 +1,8 @@
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
-import { PendingMembers } from "/imports/common/collections/PendingMembers.js";
 import LogoutButton from "/imports/components/LogoutButton";
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
 import Home from "./Home";
 
@@ -33,33 +32,6 @@ export default () => {
     };
     fetchData();
   }, [user?._id]);
-
-  // Load pending member and update
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const isPending = await Meteor.callAsync("findPendingMemberForUser");
-        if (isPending) {
-          console.log("Användaren finns i pendingMembers.");
-          // FlowRouter.go("/waitingApproval");
-          Meteor.call(
-            "createMemberFromPending",
-            user.emails[0].address,
-            (err, res) => {
-              if (err) {
-                console.error(" Kunde inte skapa medlem från pending:", err);
-              }
-            }
-          );
-        } else {
-          console.log("Användaren finns inte i pendingMembers.");
-        }
-      } catch (error) {
-        console.error("Fel vid anrop till findPendingMemberForUser:", error);
-      }
-    };
-    fetchData();
-  }, []);
 
   if (isLoading) {
     return <div>Loading member information...</div>;

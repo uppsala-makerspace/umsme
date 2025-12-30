@@ -7,7 +7,6 @@ export const findForUser = async () => {
   let email;
   let verified;
   let member;
-  let invite;
   if (Meteor.userId()) {
     user = await Meteor.userAsync();
     const firstEmail = user?.emails?.[0];
@@ -16,13 +15,10 @@ export const findForUser = async () => {
       verified = firstEmail.verified;
       if (verified) {
         member = await Members.findOneAsync({email});
-        if (!member) {
-          invite = await Invites.findOneAsync({email});
-        }
       }
     }
   }
-  return {user, email, verified, member, invite};
+  return {user, email, verified, member};
 };
 
 export const findMemberForUser = async () => {

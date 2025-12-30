@@ -25,13 +25,33 @@ export default () => {
     fetchData();
   }, [user?._id]);
 
+  const invite = async (email) => {
+    try {
+      const result = await Meteor.callAsync("inviteFamilyMember", {email});
+      const info = await Meteor.callAsync("findInfoForUser");
+      setMemberInfo(info);
+    } catch (err) {
+      console.error("Failed to invite member to family: ", err);
+    }
+  };
+
+  const cancelInvite = async (email) => {
+    try {
+      const result = await Meteor.callAsync("cancelFamilyMemberInvite", {email});
+      const info = await Meteor.callAsync("findInfoForUser");
+      setMemberInfo(info);
+    } catch (err) {
+      console.error("Failed to cancel invite: ", err);
+    }
+  };
+
   return (
     <>
       <LanguageSwitcher />
       <HamburgerMenu />
       <div className="login-form">
         {memberInfo && (
-          <Account {...memberInfo}></Account>
+          <Account {...memberInfo} familyInvite={invite} cancelFamilyInvite={cancelInvite}></Account>
         )}
         <br />
         <LogoutButton />

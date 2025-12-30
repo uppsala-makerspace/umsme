@@ -2,7 +2,8 @@ import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
 import { memberStatus } from '/imports/common/lib/utils';
-import {findMemberForUser} from "/server/methods/utils";
+import { findMemberForUser } from "/server/methods/utils";
+import Invites from "/imports/common/collections/Invites";
 
 Meteor.methods({
   findMemberForUser: findMemberForUser,
@@ -14,12 +15,17 @@ Meteor.methods({
 
   /**
    * Method to get a hold of the current member, it's memberships, current status, familyMembers (if you are part of a family) and the paying family member.
+   * For a member that payed for a family membership there are familyMembers (those that accepted) and familyInvites
+   * (those that have been invited but have not yet created an account and accepted).
+   * There may also be an invite to a family before he/she has accepted.
    *
    * @return {Promise<{
    *     member,
    *     memberships,
    *     status: ({memberEnd, memberStart, labEnd, labStart, family: boolean}|{}),
    *     familyMembers,
+   *     familyInvites,
+   *     invite,
    *     paying
    *   }>}
    */
@@ -49,11 +55,19 @@ Meteor.methods({
     const status = await memberStatus(paying);
 
     let familyMembers;
+    let familyInvites;
     if (member.family) {
       familyMembers = await Members.find({
         infamily: paying._id, // non-paying members of the family
       }).fetchAsync();
+      familyInvites = await Invites.find({
+        infamily: paying._id, // non-paying members of the family
+      }).fetchAsync();
     }
-    return { member, memberships, status, familyMembers, paying };
+    let invite;
+    if (!member.infamily) {
+      invite = await Invites.findOneAsync({email: member.email});
+    }
+    return { member, memberships, status, familyMembers, familyInvites, invite, paying };
   },
 });

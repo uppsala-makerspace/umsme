@@ -4,16 +4,13 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import { default as React, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from 'react-router-dom';
 import "./acounts.css";
 
 interface INewFamilyMember {
-  name?: string;
   email?: string;
 }
 
 interface INewFamilyMemberValidation {
-  nameEmpty?: boolean,
   emailEmpty?: boolean,
   emailInvalid?: boolean,
   errorMassages?: string[]
@@ -65,7 +62,7 @@ const Account = ({ member, familyMembers, status }) => {
     }
   }
 
-  const payingFamilyMember = member.family && !!member.infamily;
+  const payingFamilyMember = member.family && !member.infamily;
   const daysRemaining = moment(status.memberEnd).diff(moment.now(), 'days');
 
   const validateEmail = (email: string): boolean => {
@@ -75,46 +72,31 @@ const Account = ({ member, familyMembers, status }) => {
 
   const validateNewFamilyMemberInfo = (): boolean => {
     const validation: INewFamilyMemberValidation = {
-      nameEmpty: false,
       emailEmpty: false,
       emailInvalid: false,
       errorMassages: []
     }
 
-    const errors = []
-
-    if (!newFamilyMemberInfo.name || newFamilyMemberInfo.name?.length == 0) {
-      validation.nameEmpty = true
-      errors.push(t("names"))
-    }
-
     if (!newFamilyMemberInfo.email || newFamilyMemberInfo.email?.length == 0) {
       validation.emailEmpty = true
-      errors.push(t("email"))
+      validation.errorMassages.push(t("email") + " " + t("CantBeEmpty"))
     } else {
       validation.emailInvalid = !validateEmail(newFamilyMemberInfo.email)
-    }
-
-    // Generate error messages
-    if (errors.length > 0) {
-      validation.errorMassages.push(errors.join(t("and")) + " " + t("CantBeEmpty"))
-    }
-    if (validation.emailInvalid) {
-      validation.errorMassages.push(t("email") + " " + t("IsInvalid"))
+      if (validation.emailInvalid) {
+        validation.errorMassages.push(t("email") + " " + t("IsInvalid"))
+      }
     }
 
     setNewFamilyMemberError(validation)
 
-    return !validation.nameEmpty && !validation.emailEmpty && !validation.emailInvalid
+    return !validation.emailEmpty && !validation.emailInvalid
   }
 
   const saveNewMember = () => {
     if (validateNewFamilyMemberInfo()) {
-      // Save new family member info here
-      familyMembers.push({
-        name: newFamilyMemberInfo.name,
-        email: newFamilyMemberInfo.email,
-      })
+      if (familyInvite) {
+        familyInvite(newFamilyMemberInfo.email);
+      }
 
       setNewFamilyMemberInfo({})
       setAddFamilyMemberMode(false)
@@ -126,9 +108,8 @@ const Account = ({ member, familyMembers, status }) => {
     setAddFamilyMemberMode(true)
   }
 
-  const handleUpdateNewFamilyMember = (field: "name" | "email", value: string) => {
-    newFamilyMemberInfo[field] = value
-    setNewFamilyMemberInfo(newFamilyMemberInfo)
+  const handleUpdateNewFamilyMemberEmail = (value: string) => {
+    setNewFamilyMemberInfo({email: value})
   }
 
   const handleRemoveFamilyMember = (email: string) => {
@@ -212,21 +193,12 @@ const Account = ({ member, familyMembers, status }) => {
           <>
             <form className='flex flex-col justify-stretch border rounded border-gray-400 p-1 gap-1 my-2'>
               <input
-                id='family_member_name'
-                className={'border rounded  !w-full !m-0 ' + (newFamilyMemberError.nameEmpty ? 'border-red-600' : 'border-gray-300')}
-                type="text"
-                name="name"
-                placeholder={t("names")}
-                autoFocus
-                onChange={(e) => handleUpdateNewFamilyMember("name", e.target.value)}
-              />
-
-              <input
                 id='family_member_email'
                 className={'border rounded  !w-full !m-0 ' + (newFamilyMemberError.emailEmpty || newFamilyMemberError.emailInvalid ? 'border-red-600' : 'border-gray-300')}
                 type="email"
                 placeholder={t("email")}
-                onChange={(e) => handleUpdateNewFamilyMember("email", e.target.value)}
+                autoFocus
+                onChange={(e) => handleUpdateNewFamilyMemberEmail(e.target.value)}
               />
 
               <ul className='text-sm list-disc text-red-600 pl-5'>
@@ -239,9 +211,7 @@ const Account = ({ member, familyMembers, status }) => {
           </>
           :
           payingFamilyMember && familyMembers?.length < 4 && (
-            <Link to="/addFamilyMember" className="wideButton flex self-center">
-              <button className="form-button" onClick={showNewMemberInfo}>{t("AddFamilyMember")}</button>
-            </Link>
+            <button className="form-button" onClick={showNewMemberInfo}>{t("AddFamilyMember")}</button>
           )
         }
       </div>

@@ -23,7 +23,7 @@ Meteor.methods({
     if (existing) {
       throw new Meteor.Error(
         "already-invited",
-        "E-postadressen är redan registrerad som en invite"
+        "The email is already registrerad for an invite"
       );
     }
 
@@ -48,6 +48,46 @@ Meteor.methods({
         "No invite to your family with this email"
       );
     } else {
+      await Invites.removeAsync(invite);
+    }
+  },
+  async rejectFamilyMemberInvite() {
+    const member = await findMemberForUser();
+    if (!member) {
+      throw new Meteor.Error(
+        "no-user",
+        "No user or the user is not fully registered"
+      );
+    }
+    const invite = await Invites.findOneAsync({email: member.email});
+
+    if (!invite) {
+      throw new Meteor.Error(
+        "no-invite",
+        "No invite exists for this member"
+      );
+    } else {
+      await Invites.removeAsync(invite);
+    }
+  },
+  async acceptFamilyMemberInvite() {
+    const member = await findMemberForUser();
+    if (!member) {
+      throw new Meteor.Error(
+        "no-user",
+        "No user or the user is not fully registered"
+      );
+    }
+    const invite = await Invites.findOneAsync({email: member.email});
+
+    if (!invite) {
+      throw new Meteor.Error(
+        "no-invite",
+        "No invite exists for this member"
+      );
+    } else {
+      member.infamily = invite.infamily;
+      await Members.updateAsync(member);
       await Invites.removeAsync(invite);
     }
   },

@@ -1,11 +1,10 @@
 import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
-import Invites from "/imports/common/collections/Invites";
-import {findForUser} from "/server/methods/utils";
+import { findForUser } from "/server/methods/utils";
 
 Meteor.methods({
   async createOrUpdateProfile({name, mobile, birthyear}) {
-    const { user, email, member, invite } = findForUser();
+    const { user, email, member } = findForUser();
     if (!user) throw new Meteor.Error(
       "no-user",
       "No user signed in"
@@ -32,13 +31,7 @@ Meteor.methods({
         mobile,
         mid
       };
-      if (invite) {
-        newMember.infamily = invite.infamily;
-      }
       await Members.insertAsync(newMember);
-      if (invite) {
-        await Invites.removeAsync({_id: invite._id});
-      }
     }
   },
 });
