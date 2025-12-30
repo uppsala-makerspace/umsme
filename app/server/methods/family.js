@@ -28,6 +28,16 @@ Meteor.methods({
       );
     }
 
+    // Check that family members + invites doesn't exceed 4
+    const familyMembersCount = await Members.find({infamily: member._id}).countAsync();
+    const invitesCount = await Invites.find({infamily: member._id}).countAsync();
+    if (familyMembersCount + invitesCount >= 4) {
+      throw new Meteor.Error(
+        "family-full",
+        "Maximum 4 family members and invites allowed"
+      );
+    }
+
     await Invites.insertAsync({email, infamily: member._id});
     // TODO send email.
     return true;
