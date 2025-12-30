@@ -41,6 +41,7 @@ const config = {
         },
       },
     },
+    "@storybook/addon-mcp"
   ],
   "framework": {
     "name": "@storybook/react-webpack5",
