@@ -1,4 +1,4 @@
-
+import { fn } from 'storybook/test';
 import Account from './Account';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
@@ -62,9 +62,28 @@ export const FamilyPayer = {
   args: {
     member: { name: 'John Doe', family: true, mid: '123', _id: 'xxx' },
     status: { memberStart, memberEnd, family: true, type: 'member' },
-    familyMembers: [ 
+    familyMembers: [
       {name: 'Jane Doe', email: 'jane@doe.com'},
       {name: 'Jack Doe', email: 'jack@doe.com'}
      ],
+    familyInvites: [
+      { email: 'pending@example.com' }
+    ],
+    addFamilyInvite: fn(),
+    cancelFamilyInvite: fn(),
+  },
+};
+
+export const FamilyPayerNoInvites = {
+  args: {
+    member: { name: 'John Doe', family: true, mid: '123', _id: 'xxx' },
+    status: { memberStart, memberEnd, family: true, type: 'member' },
+    familyMembers: [
+      {name: 'Jane Doe', email: 'jane@doe.com'},
+      {name: 'Jack Doe', email: 'jack@doe.com'}
+     ],
+    familyInvites: [],
+    addFamilyInvite: fn(),
+    cancelFamilyInvite: fn(),
   },
 };

@@ -51,7 +51,7 @@ export default () => {
       <HamburgerMenu />
       <div className="login-form">
         {memberInfo && (
-          <Account {...memberInfo} familyInvite={invite} cancelFamilyInvite={cancelInvite}></Account>
+          <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite}></Account>
         )}
         <br />
         <LogoutButton />

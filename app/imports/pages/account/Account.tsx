@@ -16,7 +16,7 @@ interface INewFamilyMemberValidation {
   errorMassages?: string[]
 }
 
-const Account = ({ member, familyMembers, status }) => {
+const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyInvite, cancelFamilyInvite }) => {
   const [addFamilyMemberMode, setAddFamilyMemberMode] = useState(false);
   const [newFamilyMemberInfo, setNewFamilyMemberInfo] = useState<INewFamilyMember>({});
   const [newFamilyMemberError, setNewFamilyMemberError] = useState<INewFamilyMemberValidation>({});
@@ -94,8 +94,8 @@ const Account = ({ member, familyMembers, status }) => {
 
   const saveNewMember = () => {
     if (validateNewFamilyMemberInfo()) {
-      if (familyInvite) {
-        familyInvite(newFamilyMemberInfo.email);
+      if (addFamilyInvite) {
+        addFamilyInvite(newFamilyMemberInfo.email);
       }
 
       setNewFamilyMemberInfo({})
@@ -170,22 +170,45 @@ const Account = ({ member, familyMembers, status }) => {
 
       <div className="middle-text flex flex-col gap-3">
         {payingFamilyMember && (
-          <div>
-            <div className='flex justify-between border-b-2 border-gray-600'>
-              <span className='text-gray-600'>{t("FamilyMembers")}</span>
-              <span className='text-gray-600 text-sm'>[{familyMembers?.length || 0}/4]</span>
-            </div>
-            <div className="">
-              {familyMembers?.map((fm, index) => (
-                <div key={index} className="family-row items-center">
-                  <div className='flex flex-col'>
-                    <span className="font-bold">{`${fm.name}`}</span>
-                    <span className='text-sm'>{fm.email ? `${fm.email}` : ''}</span>
+          <div className="flex flex-col gap-4">
+            <div>
+              <div className='flex justify-between border-b-2 border-gray-600'>
+                <span className='text-gray-600'>{t("FamilyMembers")}</span>
+                <span className='text-gray-600 text-sm'>[{(familyMembers?.length || 0) + (familyInvites?.length || 0)}/4]</span>
+              </div>
+              <div className="">
+                {familyMembers?.map((fm, index) => (
+                  <div key={index} className="family-row items-center">
+                    <div className='flex flex-col'>
+                      <span className="font-bold">{`${fm.name}`}</span>
+                      <span className='text-sm'>{fm.email ? `${fm.email}` : ''}</span>
+                    </div>
+                    <FontAwesomeIcon className={member.infamily != member._id ? 'cursor-not-allowed text-gray-300' : 'cursor-pointer text-gray-600'} icon={faTrash} onClick={() => handleRemoveFamilyMember(fm.email)} />
                   </div>
-                  <FontAwesomeIcon className={'' + (member.infamily != member._id ? 'cursor-not-allowed text-gray-300' : 'cursor-pointer text-gray-600')} icon={faTrash} onClick={() => handleRemoveFamilyMember(fm.email)} />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+            {familyInvites?.length > 0 && (
+              <div>
+                <div className='flex justify-between border-b-2 border-gray-600'>
+                  <span className='text-gray-600'>{t("Invites")}</span>
+                </div>
+                <div className="">
+                  {familyInvites.map((invite, index) => (
+                    <div key={index} className="family-row items-center">
+                      <div className='flex flex-col'>
+                        <span className='text-sm'>{invite.email}</span>
+                      </div>
+                      <FontAwesomeIcon
+                        className='cursor-pointer text-gray-600 hover:text-gray-800'
+                        icon={faTrash}
+                        onClick={() => cancelFamilyInvite && cancelFamilyInvite(invite.email)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -210,7 +233,7 @@ const Account = ({ member, familyMembers, status }) => {
             <button className="form-button !w-full" onClick={saveNewMember}><FontAwesomeIcon icon={faSave} /> {t("Save")}</button>
           </>
           :
-          payingFamilyMember && familyMembers?.length < 4 && (
+          payingFamilyMember && (familyMembers?.length || 0) + (familyInvites?.length || 0) < 4 && (
             <button className="form-button" onClick={showNewMemberInfo}>{t("AddFamilyMember")}</button>
           )
         }
@@ -226,9 +249,14 @@ Account.propTypes = {
   memberships: PropTypes.array,
   /** The family members of a paying member on the family plan */
   familyMembers: PropTypes.array,
+  /** Pending invites for family members */
+  familyInvites: PropTypes.array,
   /** The status containing start and enddates for regular and lab membership, current family status and type of membership */
   status: PropTypes.object,
-  arr: PropTypes.array
+  /** Callback to invite a new family member by email */
+  addFamilyInvite: PropTypes.func,
+  /** Callback to cancel a pending family member invite */
+  cancelFamilyInvite: PropTypes.func,
 };
 
 export default Account;
