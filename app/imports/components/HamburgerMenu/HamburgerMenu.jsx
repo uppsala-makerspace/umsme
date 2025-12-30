@@ -1,10 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
 import "./Hamburger.css";
 
 export const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { t, i18n } = useTranslation();
+  const user = useTracker(() => Meteor.user());
+  const [hasMember, setHasMember] = useState(false);
+
+  // Load member information
+  useEffect(() => {
+    if (!user) return;
+    const fetchData = async () => {
+      try {
+        const { member } = await Meteor.callAsync("findInfoForUser");
+        setHasMember(!!member);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, [user?._id]);
+
+  if (!hasMember) {
+    return null;
+  }
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
