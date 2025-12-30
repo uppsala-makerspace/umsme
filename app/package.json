@@ -8,7 +8,7 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "build:css": "tailwindcss -i ./client/tailwind.css -o ./client/tailwind.output.css --watch"
+    "build:css": "tailwind -i ./client/tailwind.css -o ./client/tailwind.output.css --watch"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.7",
@@ -16,7 +16,6 @@
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.0",
     "@meteorrn/oauth-google": "^1.0.1",
-    "@tailwindcss/cli": "^4.1.14",
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "body-parser": "^2.2.0",
@@ -45,7 +44,6 @@
     "@storybook/addon-styling-webpack": "^2.0.0",
     "@storybook/addon-webpack5-compiler-swc": "^4.0.1",
     "@storybook/react-webpack5": "^9.1.17",
-    "@tailwindcss/postcss": "^4.1.14",
     "autoprefixer": "^10.4.21",
     "css-loader": "^7.1.2",
     "postcss": "^8.5.6",
