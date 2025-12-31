@@ -1,6 +1,5 @@
 import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
-import Invites from "/imports/common/collections/Invites";
 
 export const findForUser = async () => {
   let user;

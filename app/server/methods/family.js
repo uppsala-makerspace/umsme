@@ -97,8 +97,7 @@ Meteor.methods({
         "No invite exists for this member"
       );
     } else {
-      member.infamily = invite.infamily;
-      await Members.updateAsync(member);
+      await Members.updateAsync(member._id, {$set: {infamily: invite.infamily}});
       await Invites.removeAsync(invite);
     }
   },

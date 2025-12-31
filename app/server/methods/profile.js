@@ -4,7 +4,7 @@ import { findForUser } from "/server/methods/utils";
 
 Meteor.methods({
   async createOrUpdateProfile({name, mobile, birthyear}) {
-    const { user, email, member } = findForUser();
+    const { user, email, member, verified } = await findForUser();
     if (!user) throw new Meteor.Error(
       "no-user",
       "No user signed in"
@@ -13,10 +13,7 @@ Meteor.methods({
       throw new Meteor.Error("not-verified", "E-post är inte verifierad");
 
     if (member) {
-      member.name = name;
-      member.mobile = mobile;
-      member.birthyear = birthyear;
-      await Members.updateAsync(member);
+      await Members.updateAsync(member._id, {$set: {name, mobile, birthyear}});
     } else {
       let mid;
       let foundUniqeId = false;
