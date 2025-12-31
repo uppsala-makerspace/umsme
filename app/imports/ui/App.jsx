@@ -2,7 +2,7 @@ import React from 'react';
 import Login from '/imports/pages/Login';
 import Register from '/imports/pages/register';
 import Home from '/imports/pages/Home';
-import CreateMember from '/imports/pages/CreateMember';
+import Profile from '/imports/pages/profile';
 import Unlock from '/imports/pages/unlock'
 import Account from '/imports/pages/account'
 
@@ -18,7 +18,7 @@ export const App = () => (
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/waitforemailverification" element={<WaitForEmailVerification />} />
-        <Route path="/createMember" element={<CreateMember />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/unlock" element={<Unlock />} />
         <Route path="/account" element={<Account />} />
       </Routes>
