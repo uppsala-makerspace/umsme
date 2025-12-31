@@ -4,6 +4,9 @@ import SimpleSchema from "meteor/aldeed:simple-schema";
 //import SimpleSchema from 'simpl-schema';
 SimpleSchema.extendOptions(['autoform']);
 
+models.member.email.regEx = SimpleSchema.RegEx.Email;
+models.invites.email.regEx = SimpleSchema.RegEx.Email;
+
 export const schemas = {
   member: new SimpleSchema(models.member),
   message: new SimpleSchema(models.message),

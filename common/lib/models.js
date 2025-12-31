@@ -1,5 +1,3 @@
-import SimpleSchema from "meteor/aldeed:simple-schema";
-
 let fromOptions;
 export const getFromOptions = (callback) => {
   if (!fromOptions) {
@@ -42,7 +40,6 @@ export const models = {
       label: "Email",
       type: String,
       max: 200,
-      regEx: SimpleSchema.RegEx.Email,
       autoform: {
         type: "email",
       },
@@ -482,7 +479,6 @@ export const models = {
       label: "Email",
       type: String,
       max: 200,
-      regEx: SimpleSchema.RegEx.Email,
       autoform: {
         type: "email",
       }
