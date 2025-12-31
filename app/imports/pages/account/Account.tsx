@@ -121,11 +121,8 @@ const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyI
   return (
     <div className='flex flex-col min-h-full h-svh flex-1 gap-5'>
       <div className='flex flex-col flex-1 gap-5'>
-        <div className='border-b-2 border-black'>
-          <FontAwesomeIcon icon={faHome} /> / <span className="text-lg font-bold"> {t("MyAccount")}</span>
-        </div>
         <span className="font-bold text-center text-xl"> {member.name}</span>
-        <div className='flex w-full justify-center relative'>
+        {/*<div className='flex w-full justify-center relative'>
           <div className='absolute w-full h-full border'>
             <div className='flex h-1/3'></div>
             <div className='flex h-1/3 bg-gray-300'></div>
@@ -136,7 +133,7 @@ const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyI
               className='absolute top-0 right-0 border-4 bg-white border-gray-500 rounded-full w-8 h-8 p-1.5 text-gray-500'
               icon={faPen} />
           </button>
-        </div>
+        </div>*/}
 
         <div className='flex justify-around'>
           <div className='flex flex-col text-center gap-1'>

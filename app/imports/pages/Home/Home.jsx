@@ -34,7 +34,7 @@ export default ({ memberName, memberStatus }) => {
       <h3 className="text-h3">{t("welcome")}!</h3>
       <p className="text-container">{t("noNameText1")}</p>
       <p className="text-container">{t("noNameText2")}</p>
-      <Link to="/createMember" className="wideButton">
+      <Link to="/profile" className="wideButton">
         <button className="form-button">{t("addNameButton")}</button>
       </Link>
     </>;
