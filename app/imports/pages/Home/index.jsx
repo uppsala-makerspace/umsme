@@ -9,23 +9,15 @@ import Home from "./Home";
 /** This view is used if there is no member or no active membership. */
 export default () => {
   const user = useTracker(() => Meteor.user());
-
-  const [memberName, setMemberName] = useState("");
-  const [memberStatus, setMemberStatus] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [memberInfo, setMemberInfo] = useState(null);
 
   // Load member information
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
       try {
-        const { member, status } = await Meteor.callAsync("findInfoForUser");
-        setIsLoading(false);
-        if (member) {
-          console.log("The user has an associated member.");
-          setMemberName(member.name);
-          setMemberStatus(status);
-        }
+        const info = await Meteor.callAsync("findInfoForUser");
+        setMemberInfo(info);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -33,16 +25,16 @@ export default () => {
     fetchData();
   }, [user?._id]);
 
-  if (isLoading) {
-    return <div>Loading member information...</div>;
-  }
-
   return <>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
     <LanguageSwitcher />
     <HamburgerMenu />
     <div className="login-form">
-      <Home memberName={memberName} memberStatus={memberStatus}></Home>
+      <Home
+        memberName={memberInfo?.member?.name || ""}
+        memberStatus={memberInfo?.status}
+        verified={memberInfo?.verified ?? false}
+      />
       <br />
       <LogoutButton />
     </div>

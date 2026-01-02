@@ -12,10 +12,11 @@ const msPerDay = 1000 * 60 * 60 * 24;
  * 4. The member has an active membership
  *
  * @param {string} memberName a name or an empty string
- * @param {object} memberStatus information about active membership etc. (includes verified flag)
+ * @param {object} memberStatus information about active membership etc.
+ * @param {boolean} verified whether the user's email is verified
  * @returns {React.JSX.Element}
  */
-export default ({ memberName, memberStatus }) => {
+export default ({ memberName, memberStatus, verified }) => {
   const { t } = useTranslation();
 
   let daysLeftOfLab = null;
@@ -30,7 +31,7 @@ export default ({ memberName, memberStatus }) => {
   const name = memberName?.split(" ")[0];
   const activeMembership = memberStatus && memberStatus.memberEnd >= new Date();
 
-  if (!memberStatus?.verified) {
+  if (!verified) {
     return <>
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
       <h3 className="text-h3">{t("welcome")}!</h3>

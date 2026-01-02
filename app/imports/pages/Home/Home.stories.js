@@ -20,41 +20,47 @@ const memberName = "John Doe";
 export const EmailNotVerified = {
   args: {
     memberName: '',
-    memberStatus: { verified: false }
+    memberStatus: {},
+    verified: false
   },
 };
 
 export const MemberNoName = {
   args: {
     memberName: '',
-    memberStatus: { verified: true, memberStart, memberEnd }
+    memberStatus: { memberStart, memberEnd },
+    verified: true
   },
 };
 
 export const MemberNotPaying = {
   args: {
     memberName,
-    memberStatus: { verified: true }
+    memberStatus: {},
+    verified: true
   },
 };
 
 export const MembershipExpired = {
   args: {
     memberName,
-    memberStatus: { verified: true, memberStart, memberEnd: memberEndPassed }
+    memberStatus: { memberStart, memberEnd: memberEndPassed },
+    verified: true
   },
 };
 
 export const MembershipTimeToRenew = {
   args: {
     memberName,
-    memberStatus: { verified: true, memberStart, memberEnd: memberEndClose }
+    memberStatus: { memberStart, memberEnd: memberEndClose },
+    verified: true
   },
 };
 
 export const MemberPaying = {
   args: {
     memberName,
-    memberStatus: { verified: true, memberStart, memberEnd }
+    memberStatus: { memberStart, memberEnd },
+    verified: true
   },
 };

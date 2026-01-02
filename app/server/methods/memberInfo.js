@@ -2,7 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
 import { memberStatus } from '/imports/common/lib/utils';
-import { findMemberForUser } from "/server/methods/utils";
+import { findMemberForUser, findForUser } from "/server/methods/utils";
 import Invites from "/imports/common/collections/Invites";
 
 Meteor.methods({
@@ -30,7 +30,7 @@ Meteor.methods({
    *   }>}
    */
   findInfoForUser: async () => {
-    const member = await findMemberForUser();
+    const { member, verified } = await findForUser();
 
     if (!member) {
       throw new Meteor.Error(
@@ -68,6 +68,6 @@ Meteor.methods({
     if (!member.infamily) {
       invite = await Invites.findOneAsync({email: member.email});
     }
-    return { member, memberships, status, familyMembers, familyInvites, invite, paying };
+    return { member, memberships, status, familyMembers, familyInvites, invite, paying, verified };
   },
 });
