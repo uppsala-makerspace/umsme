@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 import { default as React, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./acounts.css";
+import Memberships from "./Memberships";
+import { formatDate } from './util';
 
 interface INewFamilyMember {
   email?: string;
@@ -16,13 +18,13 @@ interface INewFamilyMemberValidation {
   errorMassages?: string[]
 }
 
-const Account = ({ member, familyMembers, familyInvites = [], status, paying, addFamilyInvite, cancelFamilyInvite, removeFamilyMember }) => {
+const Account = ({ member, memberships, familyMembers, familyInvites = [], status, paying, addFamilyInvite, cancelFamilyInvite, removeFamilyMember }) => {
   const [addFamilyMemberMode, setAddFamilyMemberMode] = useState(false);
   const [newFamilyMemberInfo, setNewFamilyMemberInfo] = useState<INewFamilyMember>({});
   const [newFamilyMemberError, setNewFamilyMemberError] = useState<INewFamilyMemberValidation>({});
 
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   let membershipType;
   if (member.family || member.infamily) {
     switch (status.type) {
@@ -152,11 +154,11 @@ const Account = ({ member, familyMembers, familyInvites = [], status, paying, ad
         <div className='flex w-full justify-around'>
           <div className="flex flex-col text-center">
             <span className='text-gray-600'>{t("MemberSince")}</span>
-            <span>{status.memberStart?.toLocaleDateString()}</span>
+            <span>{status.memberStart ? formatDate(status.memberStart, i18n.language) : ''}</span>
           </div>
           <div className="flex flex-col text-center">
             <span className='text-gray-600'>{t("EndDate")}</span>
-            <span>{status.memberEnd?.toLocaleDateString()}</span>
+            <span>{status.memberEnd ? formatDate(status.memberEnd, i18n.language) : ''}</span>
             <span className={daysRemaining > 60 ? 'text-green-600' : 'text-red-600 font-bold'}>{daysRemaining} {t("daysRemaining")}</span>
           </div>
         </div>
@@ -244,6 +246,10 @@ const Account = ({ member, familyMembers, familyInvites = [], status, paying, ad
             <button className="form-button" onClick={showNewMemberInfo}>{t("AddFamilyMember")}</button>
           )
         }
+
+        {!member.infamily && memberships && (
+          <Memberships memberships={memberships} />
+        )}
       </div>
     </div>
   );
