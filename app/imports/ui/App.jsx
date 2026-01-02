@@ -5,9 +5,7 @@ import Home from '/imports/pages/Home';
 import Profile from '/imports/pages/profile';
 import Unlock from '/imports/pages/unlock'
 import Account from '/imports/pages/account'
-
-
-import { WaitForEmailVerification } from '/imports/pages/WaitForEmailVerification';
+import Verification from '/imports/pages/emailVerification';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 export const App = () => (
@@ -17,7 +15,7 @@ export const App = () => (
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/waitforemailverification" element={<WaitForEmailVerification />} />
+        <Route path="/waitforemailverification" element={<Verification />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/unlock" element={<Unlock />} />
         <Route path="/account" element={<Account />} />
