@@ -17,37 +17,44 @@ memberEndPassed.setMonth(memberEndPassed.getMonth()-2);
 memberEndClose.setDate(memberEndClose.getDate()+2);
 const memberName = "John Doe";
 
+export const EmailNotVerified = {
+  args: {
+    memberName: '',
+    memberStatus: { verified: false }
+  },
+};
+
 export const MemberNoName = {
   args: {
     memberName: '',
-    memberStatus: { memberStart, memberEnd }
+    memberStatus: { verified: true, memberStart, memberEnd }
   },
 };
 
 export const MemberNotPaying = {
   args: {
     memberName,
-    memberStatus: { }
+    memberStatus: { verified: true }
   },
 };
 
 export const MembershipExpired = {
   args: {
     memberName,
-    memberStatus: { memberStart, memberEnd: memberEndPassed }
+    memberStatus: { verified: true, memberStart, memberEnd: memberEndPassed }
   },
 };
 
 export const MembershipTimeToRenew = {
   args: {
     memberName,
-    memberStatus: { memberStart, memberEnd: memberEndClose }
+    memberStatus: { verified: true, memberStart, memberEnd: memberEndClose }
   },
 };
 
 export const MemberPaying = {
   args: {
     memberName,
-    memberStatus: { memberStart, memberEnd }
+    memberStatus: { verified: true, memberStart, memberEnd }
   },
 };

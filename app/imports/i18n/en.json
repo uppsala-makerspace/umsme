@@ -120,6 +120,9 @@
   "SendNewVerification": "Send new verification link",
   "BackToLogin": "Back to login",
   "PleaseVerify": "Please verify your email address",
+  "emailNotVerifiedText1": "Before you can continue, you need to verify your email address.",
+  "emailNotVerifiedText2": "Check your inbox for a verification email and click the link to confirm your email.",
+  "verifyEmailButton": "Go to verification",
 
   "Soda": "Soda",
   "keys": "Open door",
