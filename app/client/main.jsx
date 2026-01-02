@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { Accounts } from 'meteor/accounts-base';
 import React from "react";
 import { createRoot } from 'react-dom/client';
 import './main.css';
@@ -18,6 +19,17 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
+
+Accounts.onEmailVerificationLink((token, done) => {
+  Accounts.verifyEmail(token, (error) => {
+    if (error) {
+      console.error("Email verification failed:", error);
+    } else {
+      console.log("Email verified successfully");
+    }
+    done();
+  });
+});
 
 Meteor.startup(() => {
   const container = document.getElementById('react-target');
