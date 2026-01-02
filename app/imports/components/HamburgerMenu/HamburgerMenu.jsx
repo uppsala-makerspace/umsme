@@ -57,9 +57,6 @@ export const HamburgerMenu = () => {
             <a href="/profile">{t("myProfile")}</a>
           </li>
           <li>
-            <a href="/LoggedInAsMember/HandleMembership">{t("Membership")}</a>
-          </li>
-          <li>
             <a href="/LoggedInAsMember/calendar">{t("Calender")}</a>
           </li>
           <li>

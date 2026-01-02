@@ -3,7 +3,6 @@ import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
-import LogoutButton from "/imports/components/LogoutButton";
 import Account from "./Account";
 
 export default () => {
@@ -63,8 +62,6 @@ export default () => {
         {memberInfo && (
           <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember}></Account>
         )}
-        <br />
-        <LogoutButton />
       </div>
     </>
   );

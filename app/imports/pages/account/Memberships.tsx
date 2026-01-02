@@ -37,6 +37,7 @@ const Memberships = ({ memberships = [] }: MembershipsProps) => {
       case 'member':
         return discount ? t('memberDiscountedBaseType') : t('memberBaseType');
       case 'lab':
+        return t('memberQuarterlyLabType');
       case 'labandmember':
         return discount ? t('memberDiscountedLabType') : t('memberLabType');
       default:
