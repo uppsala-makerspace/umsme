@@ -2,3 +2,4 @@ import './memberInfo';
 import './family';
 import './profile';
 import './payments';
+import './accounts';

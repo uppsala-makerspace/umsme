@@ -84,7 +84,7 @@ Accounts.onCreateUser(async (options, user) => {
   return user;
 });
 
-Accounts.onLogin(async function (loginInfo) {
+/*Accounts.onLogin(async function (loginInfo) {
   const userId = loginInfo.user._id;
   const googleEmail = loginInfo.user.services.google?.email;
   const facebookEmail = loginInfo.user.services.facebook?.email;
@@ -120,12 +120,17 @@ Accounts.onLogin(async function (loginInfo) {
     console.error("Error updating user:", error);
   }
 });
+ */
 
 Meteor.startup(async () => {
   console.log("ROOT_URL is:", process.env.ROOT_URL);
+
   Accounts.config({
     sendVerificationEmail: true,
   });
+
+  Accounts.emailTemplates.siteName = 'Uppsala MakerSpace';
+  Accounts.emailTemplates.from = 'Uppsala MakerSpace <no-reply@uppsalamakerspace.se>';
 
   /*  await ServiceConfiguration.configurations.upsertAsync(
       { service: "google" },
