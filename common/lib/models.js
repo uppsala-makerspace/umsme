@@ -56,6 +56,7 @@ export const models = {
     youth: {
       label: "Youth",
       type: Boolean,
+      optional: true,
       max: 10,
       autoform: { defaultValue: false },
     },

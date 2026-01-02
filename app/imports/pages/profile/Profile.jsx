@@ -41,7 +41,6 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
           value={mobile}
           onChange={(e) => setMobile(e.target.value)}
           maxLength={mobileMaxLength}
-          required
         />
       </div>
 
@@ -55,7 +54,6 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
           onChange={(e) => setBirthyear(e.target.value)}
           min="1900"
           max={new Date().getFullYear()}
-          required
         />
       </div>
 
