@@ -30,14 +30,13 @@ Meteor.methods({
    *   }>}
    */
   findInfoForUser: async () => {
-    const { member, verified } = await findForUser();
+    const info = await findForUser();
 
-    if (!member) {
-      throw new Meteor.Error(
-        "not-found",
-        "No member object can be found for the current user"
-      );
+    if (!info.member) {
+      return info;
     }
+
+    const member = info.member;
     let paying;
     let memberships;
     if (member.infamily) {
@@ -68,6 +67,6 @@ Meteor.methods({
     if (!member.infamily) {
       invite = await Invites.findOneAsync({email: member.email});
     }
-    return { member, memberships, status, familyMembers, familyInvites, invite, paying, verified };
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying});
   },
 });
