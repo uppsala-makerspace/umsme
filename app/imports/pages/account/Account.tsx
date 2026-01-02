@@ -137,7 +137,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
           </button>
         </div>*/}
 
-        <div className='flex justify-around'>
+        <div className='grid grid-cols-2 gap-4'>
           <div className='flex flex-col text-center gap-1'>
             <span className="middle-text text-gray-600">
               {t("TypeOfMembership")}
@@ -150,8 +150,6 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
             </span>
             <span>{member.mid}</span>
           </div>
-        </div>
-        <div className='flex w-full justify-around'>
           <div className="flex flex-col text-center">
             <span className='text-gray-600'>{t("MemberSince")}</span>
             <span>{status.memberStart ? formatDate(status.memberStart, i18n.language) : ''}</span>
@@ -159,8 +157,10 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
           <div className="flex flex-col text-center">
             <span className='text-gray-600'>{t("EndDate")}</span>
             <span>{status.memberEnd ? formatDate(status.memberEnd, i18n.language) : ''}</span>
-            <span className={daysRemaining > 60 ? 'text-green-600' : 'text-red-600 font-bold'}>{daysRemaining} {t("daysRemaining")}</span>
           </div>
+        </div>
+        <div className='text-center'>
+          <span className={daysRemaining > 60 ? 'text-green-600' : 'text-red-600 font-bold'}>{daysRemaining} {t("daysRemaining")}</span>
         </div>
       </div>
 
