@@ -5,18 +5,22 @@ import { Link } from 'react-router-dom';
 const msPerDay = 1000 * 60 * 60 * 24;
 
 /**
- * Home view shows current status of a signed in user. Four situations may occur:
+ * Home view shows current status of a signed in user. Five situations may occur:
  * 1. Email not verified - user needs to verify their email first
  * 2. No memberName indicating that the user should provide a member profile (the member object)
- * 3. The member has no active membership
- * 4. The member has an active membership
+ * 3. Pending family invite - user needs to accept or decline
+ * 4. The member has no active membership
+ * 5. The member has an active membership
  *
  * @param {string} memberName a name or an empty string
  * @param {object} memberStatus information about active membership etc.
  * @param {boolean} verified whether the user's email is verified
+ * @param {object} invite pending family invite (if any)
+ * @param {function} onAcceptInvite callback to accept family invite
+ * @param {function} onDeclineInvite callback to decline family invite
  * @returns {React.JSX.Element}
  */
-export default ({ memberName, memberStatus, verified }) => {
+export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite }) => {
   const { t } = useTranslation();
 
   let daysLeftOfLab = null;
@@ -53,7 +57,23 @@ export default ({ memberName, memberStatus, verified }) => {
         <button className="form-button">{t("addNameButton")}</button>
       </Link>
     </>;
-  } else if (activeMembership) {
+  }
+
+  if (invite) {
+    return <>
+      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
+      <h3 className="text-h3">{t("welcome")} {name}!</h3>
+      <p className="text-container">{t("familyInviteText")}</p>
+      <button className="form-button" onClick={onAcceptInvite}>
+        {t("acceptInvite")}
+      </button>
+      <button className="form-button white" onClick={onDeclineInvite}>
+        {t("declineInvite")}
+      </button>
+    </>;
+  }
+
+  if (activeMembership) {
     return <>
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
       <h3 className="text-h3">{t("greeting2")} {name}!</h3>

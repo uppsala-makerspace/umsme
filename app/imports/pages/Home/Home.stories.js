@@ -1,3 +1,4 @@
+import { fn } from 'storybook/test';
 import Home from './Home';
 
 export default {
@@ -30,6 +31,17 @@ export const MemberNoName = {
     memberName: '',
     memberStatus: { memberStart, memberEnd },
     verified: true
+  },
+};
+
+export const FamilyInvite = {
+  args: {
+    memberName,
+    memberStatus: {},
+    verified: true,
+    invite: { _id: '123', email: 'john@example.com', infamily: '456' },
+    onAcceptInvite: fn(),
+    onDeclineInvite: fn()
   },
 };
 

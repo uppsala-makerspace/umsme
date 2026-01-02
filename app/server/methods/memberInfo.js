@@ -41,7 +41,7 @@ Meteor.methods({
     let memberships;
     if (member.infamily) {
       // If you are in a family, find the paying member
-      paying = await Members.findOneAsync({ mid: member.infamily });
+      paying = await Members.findOneAsync(member.infamily);
     } else {
       // If you are not in a family or you are in a family and are the paying member
       paying = member;
