@@ -65,7 +65,10 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
   }
 
   const payingFamilyMember = member.family && !member.infamily;
-  const daysRemaining = moment(status.memberEnd).diff(moment.now(), 'days');
+  const memberDaysRemaining = status.memberEnd ? moment(status.memberEnd).diff(moment.now(), 'days') : null;
+  const labDaysRemaining = status.labEnd ? moment(status.labEnd).diff(moment.now(), 'days') : null;
+  const hasLabAccess = status.labEnd && status.type !== 'member';
+  const hasDifferentEndDates = hasLabAccess && status.memberEnd?.getTime() !== status.labEnd?.getTime();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -151,16 +154,21 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
             <span>{member.mid}</span>
           </div>
           <div className="flex flex-col text-center">
-            <span className='text-gray-600'>{t("MemberSince")}</span>
-            <span>{status.memberStart ? formatDate(status.memberStart, i18n.language) : ''}</span>
-          </div>
-          <div className="flex flex-col text-center">
-            <span className='text-gray-600'>{t("EndDate")}</span>
+            <span className='text-gray-600'>{t("MembershipEnd")}</span>
             <span>{status.memberEnd ? formatDate(status.memberEnd, i18n.language) : ''}</span>
+            <span className={memberDaysRemaining > 14 ? 'text-green-600' : 'text-red-600 font-bold'}>
+              {memberDaysRemaining} {t("daysRemaining")}
+            </span>
           </div>
-        </div>
-        <div className='text-center'>
-          <span className={daysRemaining > 60 ? 'text-green-600' : 'text-red-600 font-bold'}>{daysRemaining} {t("daysRemaining")}</span>
+          {hasLabAccess && (
+            <div className="flex flex-col text-center">
+              <span className='text-gray-600'>{t("LabEnd")}</span>
+              <span>{status.labEnd ? formatDate(status.labEnd, i18n.language) : ''}</span>
+              <span className={labDaysRemaining > 14 ? 'text-green-600' : 'text-red-600 font-bold'}>
+                {labDaysRemaining} {t("daysRemaining")}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

@@ -29,11 +29,11 @@ olderMemberStart.setMonth(olderMemberStart.getMonth()-30);
 const olderMemberEnd = new Date();
 olderMemberEnd.setMonth(olderMemberEnd.getMonth()-18);
 
-// Quarterly lab example (3 months, currently active)
+// Quarterly lab example (ending soon to show red warning)
 const quarterlyLabStart = new Date();
-quarterlyLabStart.setMonth(quarterlyLabStart.getMonth()-1);
+quarterlyLabStart.setMonth(quarterlyLabStart.getMonth()-3);
 const quarterlyLabEnd = new Date();
-quarterlyLabEnd.setMonth(quarterlyLabEnd.getMonth()+2);
+quarterlyLabEnd.setDate(quarterlyLabEnd.getDate()+10);
 
 // Base member history
 const baseMemberships = [
@@ -77,6 +77,13 @@ const familyMemberships = [
   { _id: '3', type: 'member', start: olderMemberStart, memberend: olderMemberEnd },
 ];
 
+// Family lab member history
+const familyLabMemberships = [
+  { _id: '1', type: 'labandmember', start: memberStart, memberend: memberEnd, labend: memberEnd, family: true },
+  { _id: '2', type: 'labandmember', start: previousMemberStart, memberend: previousMemberEnd, labend: previousMemberEnd, family: true },
+  { _id: '3', type: 'member', start: olderMemberStart, memberend: olderMemberEnd },
+];
+
 export const MemberBase = {
   args: {
     member: { name: 'John Doe', family: false, mid: '123' },
@@ -104,7 +111,7 @@ export const MemberDiscountedBase = {
 export const MemberLab = {
   args: {
     member: { name: 'John Doe', family: false, mid: '123' },
-    status: { memberStart, memberEnd, family: false, type: 'labandmember' },
+    status: { memberStart, memberEnd, labEnd: memberEnd, family: false, type: 'labandmember' },
     memberships: labMemberships,
   },
 };
@@ -112,7 +119,7 @@ export const MemberLab = {
 export const MemberDiscountedLab = {
   args: {
     member: { name: 'John Doe', family: false, mid: '123' },
-    status: { memberStart, memberEnd, family: false, type: 'labandmember', discounted },
+    status: { memberStart, memberEnd, labEnd: memberEnd, family: false, type: 'labandmember', discounted },
     memberships: discountedLabMemberships,
   },
 };
@@ -120,7 +127,7 @@ export const MemberDiscountedLab = {
 export const MemberQuarterlyLab = {
   args: {
     member: { name: 'John Doe', family: false, mid: '123' },
-    status: { memberStart, memberEnd, family: false, type: 'labandmember', quarterly },
+    status: { memberStart, memberEnd, labEnd: quarterlyLabEnd, family: false, type: 'labandmember', quarterly },
     memberships: quarterlyLabMemberships,
   },
 };
@@ -159,10 +166,34 @@ export const FamilyPayerNoInvites = {
   },
 };
 
+export const FamilyLabPayer = {
+  args: {
+    member: { name: 'John Doe', family: true, mid: '123', _id: 'xxx' },
+    status: { memberStart, memberEnd, labEnd: memberEnd, family: true, type: 'labandmember' },
+    familyMembers: [
+      {name: 'Jane Doe', email: 'jane@doe.com'},
+      {name: 'Jack Doe', email: 'jack@doe.com'}
+     ],
+    familyInvites: [],
+    memberships: familyLabMemberships,
+    addFamilyInvite: fn(),
+    cancelFamilyInvite: fn(),
+    removeFamilyMember: fn(),
+  },
+};
+
 export const FamilyMember = {
   args: {
     member: { name: 'Jane Doe', family: false, mid: '456', infamily: 'xxx' },
     status: { memberStart, memberEnd, family: true, type: 'member' },
+    paying: { name: 'John Doe', email: 'john@doe.com', _id: 'xxx' },
+  },
+};
+
+export const FamilyLabMember = {
+  args: {
+    member: { name: 'Jane Doe', family: false, mid: '456', infamily: 'xxx' },
+    status: { memberStart, memberEnd, labEnd: memberEnd, family: true, type: 'labandmember' },
     paying: { name: 'John Doe', email: 'john@doe.com', _id: 'xxx' },
   },
 };
