@@ -89,3 +89,11 @@ export const FamilyPayerNoInvites = {
     removeFamilyMember: fn(),
   },
 };
+
+export const FamilyMember = {
+  args: {
+    member: { name: 'Jane Doe', family: false, mid: '456', infamily: 'xxx' },
+    status: { memberStart, memberEnd, family: true, type: 'member' },
+    paying: { name: 'John Doe', email: 'john@doe.com', _id: 'xxx' },
+  },
+};

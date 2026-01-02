@@ -16,7 +16,7 @@ interface INewFamilyMemberValidation {
   errorMassages?: string[]
 }
 
-const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyInvite, cancelFamilyInvite, removeFamilyMember }) => {
+const Account = ({ member, familyMembers, familyInvites = [], status, paying, addFamilyInvite, cancelFamilyInvite, removeFamilyMember }) => {
   const [addFamilyMemberMode, setAddFamilyMemberMode] = useState(false);
   const [newFamilyMemberInfo, setNewFamilyMemberInfo] = useState<INewFamilyMember>({});
   const [newFamilyMemberError, setNewFamilyMemberError] = useState<INewFamilyMemberValidation>({});
@@ -163,6 +163,19 @@ const Account = ({ member, familyMembers, familyInvites = [], status, addFamilyI
       </div>
 
       <div className="middle-text flex flex-col gap-3">
+        {member.infamily && paying && (
+          <div className="flex flex-col gap-1">
+            <div className='flex justify-between border-b-2 border-gray-600'>
+              <span className='text-gray-600'>{t("FamilyMembership")}</span>
+            </div>
+            <p>{t("familyPayerText")}</p>
+            <div className='flex flex-col'>
+              <span className="font-bold">{paying.name}</span>
+              <span className='text-sm'>{paying.email}</span>
+            </div>
+          </div>
+        )}
+
         {payingFamilyMember && (
           <div className="flex flex-col gap-4">
             <div>
@@ -247,6 +260,8 @@ Account.propTypes = {
   familyInvites: PropTypes.array,
   /** The status containing start and enddates for regular and lab membership, current family status and type of membership */
   status: PropTypes.object,
+  /** The paying member (either self or family payer) */
+  paying: PropTypes.object,
   /** Callback to invite a new family member by email */
   addFamilyInvite: PropTypes.func,
   /** Callback to cancel a pending family member invite */
