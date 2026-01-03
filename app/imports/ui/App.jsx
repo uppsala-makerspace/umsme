@@ -7,6 +7,7 @@ import Unlock from '/imports/pages/unlock'
 import Account from '/imports/pages/account'
 import Verification from '/imports/pages/emailVerification';
 import ForgotPassword from '/imports/pages/forgotPassword';
+import ResetPassword from '/imports/pages/resetPassword';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 export const App = () => (
@@ -17,6 +18,7 @@ export const App = () => (
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgotPassword" element={<ForgotPassword />} />
+        <Route path="/resetPassword/:token" element={<ResetPassword />} />
         <Route path="/waitforemailverification" element={<Verification />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/unlock" element={<Unlock />} />

@@ -131,6 +131,9 @@ Meteor.startup(async () => {
 
   Accounts.emailTemplates.siteName = 'Uppsala MakerSpace';
   Accounts.emailTemplates.from = 'Uppsala MakerSpace <no-reply@uppsalamakerspace.se>';
+  Accounts.urls.resetPassword = (token) => {
+    return Meteor.absoluteUrl(`resetPassword/${token}`);
+  };
 
   /*  await ServiceConfiguration.configurations.upsertAsync(
       { service: "google" },
