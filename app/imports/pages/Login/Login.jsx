@@ -64,7 +64,7 @@ export default ({google, facebook}) => {
           />
         </div>
         <p>
-          <a href="/ForgotPassword" className="text-sm -mt-1">
+          <a href="/forgotPassword" className="text-sm -mt-1">
             {t("ForgotPassword")}
           </a>
         </p>
