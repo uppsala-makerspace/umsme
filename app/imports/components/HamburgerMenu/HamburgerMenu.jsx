@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
 import "./Hamburger.css";
@@ -45,25 +46,25 @@ export const HamburgerMenu = () => {
         )}
         <ul className={`links ${isOpen ? "show" : ""}`}>
           <li>
-            <a href="/">Start</a>
+            <Link to="/">Start</Link>
           </li>
           <li>
-            <a href="/unlock">{t("keys")}</a>
+            <Link to="/unlock">{t("keys")}</Link>
           </li>
           <li>
-            <a href="/account">{t("myAccount")}</a>
+            <Link to="/account">{t("myAccount")}</Link>
           </li>
           <li>
-            <a href="/profile">{t("myProfile")}</a>
+            <Link to="/profile">{t("myProfile")}</Link>
           </li>
           <li>
-            <a href="/LoggedInAsMember/calendar">{t("Calender")}</a>
+            <Link to="/LoggedInAsMember/calendar">{t("Calender")}</Link>
           </li>
           <li>
-            <a href="/LoggedInAsMember/contact">{t("contactUs")}</a>
+            <Link to="/LoggedInAsMember/contact">{t("contactUs")}</Link>
           </li>
           <li>
-            <a href="/LoggedInAsMember/kiosk">Kiosk</a>
+            <Link to="/LoggedInAsMember/kiosk">Kiosk</Link>
           </li>
         </ul>
       </nav>

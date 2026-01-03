@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { LoginButton } from "./LoginButton";
 import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
 
@@ -64,9 +65,9 @@ export default ({google, facebook}) => {
           />
         </div>
         <p>
-          <a href="/forgotPassword" className="text-sm -mt-1">
+          <Link to="/forgotPassword" className="text-sm -mt-1">
             {t("ForgotPassword")}
-          </a>
+          </Link>
         </p>
         <div className="form-group">
           <button type="submit" className="form-button">
