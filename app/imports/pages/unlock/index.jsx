@@ -1,62 +1,40 @@
-import React from "react";
-import { Meteor } from "meteor/meteor";
-import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
-import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
-import { useTranslation } from "react-i18next";
-import { useTracker } from "meteor/react-meteor-data";
-import { useState } from "react";
-import "./unlockDoors.css";
+import React, { useState, useMemo } from "react";
+import { Navigate } from "react-router-dom";
+import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
+import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import Unlock from "./Unlock";
+
+const DOORS = [
+  { id: "outerDoor", labelKey: "outerDoor" },
+  { id: "upperFloor", labelKey: "upperFloor" },
+  { id: "lowerFloor", labelKey: "lowerFloor" },
+];
 
 export default () => {
-  const user = useTracker(() => Meteor.user());
-  const { t, i18n } = useTranslation();
+  const initialOpeningState = useMemo(
+    () => Object.fromEntries(DOORS.map((door) => [door.id, false])),
+    []
+  );
 
-  const [opening, setOpening] = useState({
-    outerDoor: false,
-    upperFloor: false,
-    lowerFloor: false,
-  });
+  const [opening, setOpening] = useState(initialOpeningState);
 
-  const handleSubmit = (door) => {
-    setOpening((prev) => ({ ...prev, [door]: true }));
+  const handleOpenDoor = (doorId) => {
+    setOpening((prev) => ({ ...prev, [doorId]: true }));
 
     setTimeout(() => {
-      setOpening((prev) => ({ ...prev, [door]: false }));
+      setOpening((prev) => ({ ...prev, [doorId]: false }));
     }, 3000);
 
-    // Lägg till så att dörren faktiskt öppnas
+    // TODO: Add actual door opening logic
   };
 
   return (
     <>
+      {!Meteor.userId() ? <Navigate to="/login" /> : null}
       <LanguageSwitcher />
       <HamburgerMenu />
-      <br></br>
       <div className="login-form">
-        <p style={{ marginBottom: "5px" }}> {t("outerDoor")}</p>
-        <button
-          style={{ marginTop: "0", marginBottom: "8vh" }}
-          className="door-button"
-          onClick={() => handleSubmit("outerDoor")}
-        >
-          {opening.outerDoor ? t("isOpening") : t("openDoor")}
-        </button>
-        <p style={{ marginBottom: "5px" }}> {t("upperFloor")}</p>
-        <button
-          style={{ marginTop: "0", marginBottom: "8vh" }}
-          className="door-button"
-          onClick={() => handleSubmit("upperFloor")}
-        >
-          {opening.upperFloor ? t("isOpening") : t("openDoor")}
-        </button>
-        <p style={{ marginBottom: "5px" }}> {t("lowerFloor")}</p>
-        <button
-          style={{ marginTop: "0", marginBottom: "8vh" }}
-          className="door-button"
-          onClick={() => handleSubmit("lowerFloor")}
-        >
-          {opening.lowerFloor ? t("isOpening") : t("openDoor")}
-        </button>
+        <Unlock doors={DOORS} opening={opening} onOpenDoor={handleOpenDoor} />
       </div>
     </>
   );

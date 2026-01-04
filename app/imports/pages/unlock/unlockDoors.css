@@ -1,15 +1,72 @@
+.umsapp .login-form .door-label {
+  margin-bottom: 10px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+}
+
 .umsapp .login-form button.door-button {
-  
-    all: unset;
-    font-family: "DM Mono", monospace;
-    font-size: 16px;
-    text-align: center;
-    /*background-color: #aac4e6; eller annan färg */
-    border-radius: 50%;
-    border: 1px solid black;
-    width: 40%;
-    aspect-ratio: 1 / 1;
-    cursor: pointer;
-    padding: 10px;
-  }
+  all: unset;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  font-family: "DM Mono", monospace;
+  font-size: 0;
+  background-color: #5fc86f;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+  margin-top: 0;
+  margin-bottom: 5vh;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* Circular top of keyhole */
+.umsapp .login-form button.door-button::before {
+  content: "";
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+/* Trapezoid bottom of keyhole */
+.umsapp .login-form button.door-button::after {
+  content: "";
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 42px;
+  background-color: white;
+  clip-path: polygon(0% 0%, 100% 0%, 130% 100%, -30% 100%);
+}
+
+.umsapp .login-form button.door-button:hover {
+  background-color: #4db85d;
+}
+
+.umsapp .login-form button.door-button:active {
+  background-color: #096817;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Text label that appears on hover */
+.umsapp .login-form button.door-button span {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: white;
+  white-space: nowrap;
+}
   
