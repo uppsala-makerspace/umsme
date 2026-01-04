@@ -9,7 +9,6 @@
     background-color: white;
     margin-left: 1em;
     width: 30vw;
-    height: 75vh;
     border: 1px solid grey;
   }
   
@@ -29,7 +28,6 @@
   }
   .umsapp .links.show {
     display: block;
-    text-align: right;
     padding-right: 5px;
     list-style: none;
   }
@@ -46,14 +44,13 @@
     color: black;
   }
 
-  .umsapp button{
-
-    all: unset; 
-  
+  .umsapp .links .logout-button {
+    all: unset;
+    color: black;
+    cursor: pointer;
   }
 
   @media (max-width: 768px) {
   .umsapp .nav-bar.menu-open {
-    height: 75vh;
     width: 70vw;
   }}

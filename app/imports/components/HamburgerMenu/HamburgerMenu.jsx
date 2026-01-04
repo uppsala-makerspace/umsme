@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
 import "./Hamburger.css";
 
 export const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const user = useTracker(() => Meteor.user());
   const [hasMember, setHasMember] = useState(false);
 
@@ -30,6 +31,12 @@ export const HamburgerMenu = () => {
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleLogout = () => {
+    Meteor.logout(() => {
+      navigate("/login");
+    });
   };
 
   return (
@@ -64,7 +71,9 @@ export const HamburgerMenu = () => {
             <Link to="/LoggedInAsMember/contact">{t("contactUs")}</Link>
           </li>
           <li>
-            <Link to="/LoggedInAsMember/kiosk">Kiosk</Link>
+            <button onClick={handleLogout} className="logout-button">
+              {t("logout")}
+            </button>
           </li>
         </ul>
       </nav>
