@@ -8,7 +8,8 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "build:css": "tailwind -i ./client/tailwind.css -o ./client/tailwind.output.css --watch"
+    "build:css": "tailwindcss -i ./client/tailwind.css -o ./client/tailwind.output.css",
+    "watch:css": "tailwindcss -i ./client/tailwind.css -o ./client/tailwind.output.css --watch"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.7",
