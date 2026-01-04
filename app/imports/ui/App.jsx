@@ -8,6 +8,7 @@ import Account from '/imports/pages/account'
 import Verification from '/imports/pages/emailVerification';
 import ForgotPassword from '/imports/pages/forgotPassword';
 import ResetPassword from '/imports/pages/resetPassword';
+import Calendar from '/imports/pages/calendar';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 export const App = () => (
@@ -23,6 +24,7 @@ export const App = () => (
         <Route path="/profile" element={<Profile />} />
         <Route path="/unlock" element={<Unlock />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/calendar" element={<Calendar />} />
       </Routes>
     </Router>
   </div>);

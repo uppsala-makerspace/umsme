@@ -58,7 +58,7 @@ export const HamburgerMenu = () => {
             <Link to="/profile">{t("myProfile")}</Link>
           </li>
           <li>
-            <Link to="/LoggedInAsMember/calendar">{t("Calender")}</Link>
+            <Link to="/calendar">{t("Calender")}</Link>
           </li>
           <li>
             <Link to="/LoggedInAsMember/contact">{t("contactUs")}</Link>
