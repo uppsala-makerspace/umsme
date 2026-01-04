@@ -1,5 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
+import { Navigate } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
@@ -56,6 +57,7 @@ export default () => {
 
   return (
     <>
+      {!Meteor.userId() ? <Navigate to="/login" /> : null}
       <LanguageSwitcher />
       <HamburgerMenu />
       <div className="login-form">
