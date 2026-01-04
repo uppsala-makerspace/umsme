@@ -37,6 +37,8 @@ export const WithEvents = {
     events: sampleEvents,
     loading: false,
     error: '',
+    mode: 'upcoming',
+    onModeChange: (mode) => console.log('Mode changed to:', mode),
   }
 };
 
@@ -45,6 +47,8 @@ export const Loading = {
     events: [],
     loading: true,
     error: '',
+    mode: 'upcoming',
+    onModeChange: () => {},
   }
 };
 
@@ -53,6 +57,18 @@ export const Empty = {
     events: [],
     loading: false,
     error: '',
+    mode: 'upcoming',
+    onModeChange: (mode) => console.log('Mode changed to:', mode),
+  }
+};
+
+export const EmptyPastEvents = {
+  args: {
+    events: [],
+    loading: false,
+    error: '',
+    mode: 'past',
+    onModeChange: (mode) => console.log('Mode changed to:', mode),
   }
 };
 
@@ -61,6 +77,8 @@ export const WithError = {
     events: [],
     loading: false,
     error: 'Failed to fetch calendar: API key invalid',
+    mode: 'upcoming',
+    onModeChange: () => {},
   }
 };
 
@@ -89,6 +107,8 @@ export const WithLinks = {
     events: eventsWithLinks,
     loading: false,
     error: '',
+    mode: 'upcoming',
+    onModeChange: (mode) => console.log('Mode changed to:', mode),
   }
 };
 
@@ -100,6 +120,8 @@ export const WithLoadMore = {
     hasMore: true,
     loadingMore: false,
     onLoadMore: () => alert('Load more clicked'),
+    mode: 'upcoming',
+    onModeChange: (mode) => console.log('Mode changed to:', mode),
   }
 };
 
@@ -111,5 +133,39 @@ export const LoadingMore = {
     hasMore: true,
     loadingMore: true,
     onLoadMore: () => {},
+    mode: 'upcoming',
+    onModeChange: () => {},
+  }
+};
+
+const pastEvents = [
+  {
+    id: '1',
+    summary: 'Christmas Party',
+    start: new Date(Date.now() - 86400000).toISOString(),
+    end: new Date(Date.now() - 86400000 + 14400000).toISOString(),
+    location: 'Uppsala Makerspace',
+    description: 'Annual Christmas celebration'
+  },
+  {
+    id: '2',
+    summary: 'Arduino Workshop',
+    start: new Date(Date.now() - 172800000).toISOString(),
+    end: new Date(Date.now() - 172800000 + 7200000).toISOString(),
+    location: 'Uppsala Makerspace',
+    description: 'Introduction to Arduino programming'
+  },
+];
+
+export const PastEvents = {
+  args: {
+    events: pastEvents,
+    loading: false,
+    error: '',
+    hasMore: true,
+    loadingMore: false,
+    onLoadMore: () => alert('Load older events clicked'),
+    mode: 'past',
+    onModeChange: (mode) => console.log('Mode changed to:', mode),
   }
 };

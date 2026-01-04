@@ -11,12 +11,15 @@ DOMPurify.addHook("afterSanitizeAttributes", (node) => {
   }
 });
 
-const formatEventDate = (startDate, endDate, language) => {
+const formatEventDate = (startDate, endDate, language, mode) => {
   const locale = language === 'sv' ? 'sv-SE' : 'en-US';
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  if (mode === 'past') {
+    dateOptions.year = 'numeric';
+  }
   const timeOptions = { hour: '2-digit', minute: '2-digit' };
 
   const startDateStr = start.toLocaleDateString(locale, dateOptions);
@@ -26,38 +29,44 @@ const formatEventDate = (startDate, endDate, language) => {
   return `${startDateStr} ${startTimeStr} - ${endTimeStr}`;
 };
 
-const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore }) => {
+const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore, mode, onModeChange }) => {
   const { t, i18n } = useTranslation();
 
-  if (loading) {
-    return (
-      <div className="login-form">
-        <div className="loader"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="login-form">
-        <p className="text-red-600">{error}</p>
-      </div>
-    );
-  }
+  const tabClass = (tabMode) =>
+    `px-4 py-2 font-medium ${
+      mode === tabMode
+        ? "text-blue-600 border-b-2 border-blue-600"
+        : "text-gray-500 hover:text-gray-700 cursor-pointer"
+    }`;
 
   return (
     <div className="login-form">
       <h3 className="text-h3">{t("Calender")}</h3>
-      <div className="flex flex-col gap-4 mt-4">
+      <div className="flex border-b mb-4">
+        <button className={tabClass("upcoming")} onClick={() => onModeChange("upcoming")}>
+          {t("upcomingEvents")}
+        </button>
+        <button className={tabClass("past")} onClick={() => onModeChange("past")}>
+          {t("pastEvents")}
+        </button>
+      </div>
+      {loading ? (
+        <div className="loader"></div>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
+      ) : (
+      <div className="flex flex-col gap-4">
         {events.length === 0 ? (
-          <p className="text-center text-gray-600">{t("noUpcomingEvents")}</p>
+          <p className="text-center text-gray-600">
+            {mode === "past" ? t("noPastEvents") : t("noUpcomingEvents")}
+          </p>
         ) : (
           <>
             {events.map((event) => (
               <div key={event.id} className="border rounded p-3 bg-white">
                 <h4 className="font-bold">{event.summary}</h4>
                 <p className="text-sm text-gray-600">
-                  {formatEventDate(event.start, event.end, i18n.language)}
+                  {formatEventDate(event.start, event.end, i18n.language, mode)}
                 </p>
                 {event.location && (
                   <p className="text-sm text-gray-500">{event.location}</p>
@@ -78,12 +87,13 @@ const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore }) 
                 disabled={loadingMore}
                 className="w-full py-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 cursor-pointer disabled:cursor-default"
               >
-                {loadingMore ? t("loading") : t("loadMoreEvents")}
+                {loadingMore ? t("loading") : (mode === "past" ? t("loadOlderEvents") : t("loadMoreEvents"))}
               </button>
             )}
           </>
         )}
       </div>
+      )}
     </div>
   );
 };
@@ -108,6 +118,10 @@ Calendar.propTypes = {
   loadingMore: PropTypes.bool,
   /** Callback to load more events */
   onLoadMore: PropTypes.func,
+  /** Current view mode: upcoming or past events */
+  mode: PropTypes.oneOf(["upcoming", "past"]),
+  /** Callback when mode changes */
+  onModeChange: PropTypes.func,
 };
 
 Calendar.defaultProps = {
@@ -117,6 +131,8 @@ Calendar.defaultProps = {
   hasMore: false,
   loadingMore: false,
   onLoadMore: () => {},
+  mode: "upcoming",
+  onModeChange: () => {},
 };
 
 export default Calendar;
