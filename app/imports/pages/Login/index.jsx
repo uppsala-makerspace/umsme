@@ -9,7 +9,7 @@ export default () => {
   const user = useTracker(() => Meteor.user());
 
   const unverifiedUser = user && user.emails?.length > 0 && !user.emails[0].verified;
-  const verified = user && user.emails?.length > 0 && user.emails[0].verified;
+  const verified = user && ((user.emails?.length > 0 && user.emails[0].verified) || !user.emails);
 
   const props = {};
   if (ServiceConfiguration.configurations.findOne({service: "google"})) {
