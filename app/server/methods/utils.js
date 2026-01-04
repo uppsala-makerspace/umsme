@@ -15,6 +15,8 @@ export const findForUser = async () => {
       if (verified) {
         member = await Members.findOneAsync({email});
       }
+    } else {
+      verified = true;
     }
   }
   return {user, email, verified, member};
