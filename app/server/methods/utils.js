@@ -9,13 +9,15 @@ export const findForUser = async () => {
   if (Meteor.userId()) {
     user = await Meteor.userAsync();
     const firstEmail = user?.emails?.[0];
+    const firstService = user?.service?.[0];
     if (firstEmail) {
       email = firstEmail?.address;
       verified = firstEmail.verified;
       if (verified) {
         member = await Members.findOneAsync({email});
       }
-    } else {
+    } else if (firstService) {
+      email = firstService.email;
       verified = true;
     }
   }
