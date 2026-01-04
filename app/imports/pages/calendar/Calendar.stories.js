@@ -112,6 +112,28 @@ export const WithLinks = {
   }
 };
 
+const eventsWithLongLinks = [
+  {
+    id: '1',
+    summary: 'Keramikverkstaden Intro',
+    start: new Date(Date.now() + 86400000).toISOString(),
+    end: new Date(Date.now() + 86400000 + 3600000).toISOString(),
+    location: 'Uppsala Makerspace',
+    description: '<p>Anmäl dig via länken:</p><p><a href="https://simplesignup.se/event/232698-intropass-till-keramikverkstaden-8-1-very-long-url-that-should-wrap-properly">https://simplesignup.se/event/232698-intropass-till-keramikverkstaden-8-1-very-long-url-that-should-wrap-properly</a></p>'
+  },
+];
+
+export const WithLongLinks = {
+  name: 'With Long Links (wrapped)',
+  args: {
+    events: eventsWithLongLinks,
+    loading: false,
+    error: '',
+    mode: 'upcoming',
+    onModeChange: (mode) => console.log('Mode changed to:', mode),
+  }
+};
+
 export const WithLoadMore = {
   args: {
     events: sampleEvents,

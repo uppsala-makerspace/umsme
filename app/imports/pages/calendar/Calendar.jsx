@@ -73,7 +73,7 @@ const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore, mo
                 )}
                 {event.description && (
                   <div
-                    className="text-sm mt-2 [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800"
+                    className="text-sm mt-2 break-all [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800"
                     dangerouslySetInnerHTML={{
                       __html: DOMPurify.sanitize(event.description),
                     }}

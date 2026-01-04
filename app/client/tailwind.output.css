@@ -725,6 +725,10 @@ video {
   gap: 1.25rem;
 }
 
+.break-all {
+  word-break: break-all;
+}
+
 .rounded {
   border-radius: 0.25rem;
 }
