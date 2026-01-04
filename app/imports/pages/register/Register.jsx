@@ -22,6 +22,12 @@ export default ({onSubmit}) => {
   return (
     <form onSubmit={handleSubmit} className="login-form">
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
+
+      <p className="info-message">
+        <span className="info-icon">⚠</span>
+        {t("useExistingEmailInfo")}
+      </p>
+
       <LogRegSwitcher/>
       <p className="text-container">{t("registerText")}</p>
       <div className="form-group">

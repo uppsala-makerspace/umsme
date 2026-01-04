@@ -29,6 +29,11 @@ export default ({google, facebook, onSubmit}) => {
       <form onSubmit={submit} className="login-form">
         <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
 
+        <p className="info-message">
+          <span className="info-icon">⚠</span>
+          {t("useExistingEmailInfo")}
+        </p>
+
         <LogRegSwitcher />
 
         <div className="form-group">
@@ -55,7 +60,7 @@ export default ({google, facebook, onSubmit}) => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <p>
+        <p className="text-center">
           <Link to="/forgotPassword" className="text-sm -mt-1">
             {t("ForgotPassword")}
           </Link>

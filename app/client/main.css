@@ -76,9 +76,9 @@
   max-width: 250px;
   height: auto;
   width: 100%;
-  margin-top: 40px;
+  margin-top: 25px;
   margin-right: auto;
-  margin-bottom: 80px;
+  margin-bottom: 50px;
   margin-left: auto;
 }
 
@@ -258,6 +258,30 @@ body {
   width: 100%;
   text-decoration: none;
   text-align: center;
+}
+
+.umsapp .info-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.umsapp .info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 21px;
+    background-color: #ffc107;
+    color: #000;
+    font-size: 32px;
+    font-weight: bold;
+    border-radius: 0px;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    padding-bottom: 3px;
 }
 
 .loader {
