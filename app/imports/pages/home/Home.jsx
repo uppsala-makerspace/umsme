@@ -88,10 +88,10 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
           </Link>
         </div>
       )}
-      <Link to="/unlock" style={{width: "100%", "text-align": "center"}}>
+      <Link to="/unlock" className="wideButton">
         <button className="form-button">{t("keys")}</button>
       </Link>
-      <Link to="/calendar" style={{width: "100%", "text-align": "center"}}>
+      <Link to="/calendar" className="wideButton">
         <button className="form-button">{t("calender")}</button>
       </Link>
     </>;

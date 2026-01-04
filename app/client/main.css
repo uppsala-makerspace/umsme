@@ -257,6 +257,7 @@ body {
 .umsapp .wideButton {
   width: 100%;
   text-decoration: none;
+  text-align: center;
 }
 
 .loader {
