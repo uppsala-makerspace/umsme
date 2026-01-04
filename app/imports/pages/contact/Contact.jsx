@@ -1,5 +1,18 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { getSlackChannelUrl } from "/imports/utils/slack";
+
+const SlackLink = ({ channel, children }) => {
+  const url = getSlackChannelUrl(channel);
+  if (!url) {
+    return <strong>#{channel}</strong>;
+  }
+  return (
+    <a href={url} className="text-blue-600 underline font-bold">
+      #{channel}
+    </a>
+  );
+};
 
 const Contact = () => {
   const { t } = useTranslation();
@@ -18,7 +31,7 @@ const Contact = () => {
             </a>
           </li>
           <li>
-            {t("slackChannel")}: <strong>#fråga-styrelsen</strong>
+            {t("slackChannel")}: <SlackLink channel="fråga-styrelsen" />
           </li>
         </ul>
         <p className="text-sm mt-2">
@@ -36,7 +49,7 @@ const Contact = () => {
         <p className="text-sm mb-2">{t("boardInformationDescription")}</p>
         <ul className="text-sm list-disc ml-5">
           <li>{t("infoNewsletter")}</li>
-          <li>{t("infoSlackGeneral")}</li>
+          <li>{t("infoSlackGeneral")} <SlackLink channel="general" /></li>
           <li>{t("infoCalendar")}</li>
           <li>{t("infoBlogpost")}</li>
         </ul>
@@ -47,10 +60,10 @@ const Contact = () => {
         <p className="text-sm mb-2">{t("memberCommunicationDescription")}</p>
         <ul className="text-sm list-disc ml-5">
           <li>
-            <strong>#lokalen</strong> - {t("channelLokalenDescription")}
+            <SlackLink channel="lokalen" /> - {t("channelLokalenDescription")}
           </li>
           <li>
-            <strong>#random</strong> - {t("channelRandomDescription")}
+            <SlackLink channel="random" /> - {t("channelRandomDescription")}
           </li>
         </ul>
         <p className="text-sm mt-2">{t("moreChannelsDescription")}</p>
