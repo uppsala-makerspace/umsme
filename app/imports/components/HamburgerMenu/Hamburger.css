@@ -1,15 +1,16 @@
 .umsapp .nav-bar {
     position: fixed;
     top: 0;
-    right: 0;
+    right: 4px;
     z-index: 100;
     cursor: pointer;
   }
   .umsapp .nav-bar.menu-open {
     background-color: white;
-    margin-left: 1em;
     width: 30vw;
     border: 1px solid grey;
+    border-radius: 4px;
+    top: 4px;
   }
   
   .umsapp .hamburger-menu {
