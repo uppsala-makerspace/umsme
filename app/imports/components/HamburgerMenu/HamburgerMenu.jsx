@@ -68,7 +68,7 @@ export const HamburgerMenu = () => {
             <Link to="/calendar">{t("Calender")}</Link>
           </li>
           <li>
-            <Link to="/LoggedInAsMember/contact">{t("contactUs")}</Link>
+            <Link to="/contact">{t("contactUs")}</Link>
           </li>
           <li>
             <button onClick={handleLogout} className="logout-button">
