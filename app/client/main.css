@@ -51,6 +51,14 @@
   box-sizing: border-box;
 }
 
+.umsapp .login-form button {
+  cursor: pointer;
+}
+
+.umsapp .login-form button:disabled {
+  cursor: default;
+}
+
 .umsapp .form-button {
   color: #f0efef;
   text-align: center;

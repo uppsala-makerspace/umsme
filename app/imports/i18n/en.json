@@ -134,6 +134,8 @@
   "myProfile": "My Profile",
   "Calender": "Calendar",
   "noUpcomingEvents": "No upcoming events",
+  "loadMoreEvents": "Load more events",
+  "loading": "Loading...",
   "Products": "Products",
   "addToCart": "Add to cart",
   "yourCartIsEmpty": "Your cart is empty",

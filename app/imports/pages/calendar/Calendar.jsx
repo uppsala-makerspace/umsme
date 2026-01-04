@@ -26,7 +26,7 @@ const formatEventDate = (startDate, endDate, language) => {
   return `${startDateStr} ${startTimeStr} - ${endTimeStr}`;
 };
 
-const Calendar = ({ events, loading, error }) => {
+const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore }) => {
   const { t, i18n } = useTranslation();
 
   if (loading) {
@@ -52,25 +52,36 @@ const Calendar = ({ events, loading, error }) => {
         {events.length === 0 ? (
           <p className="text-center text-gray-600">{t("noUpcomingEvents")}</p>
         ) : (
-          events.map((event) => (
-            <div key={event.id} className="border rounded p-3 bg-white">
-              <h4 className="font-bold">{event.summary}</h4>
-              <p className="text-sm text-gray-600">
-                {formatEventDate(event.start, event.end, i18n.language)}
-              </p>
-              {event.location && (
-                <p className="text-sm text-gray-500">{event.location}</p>
-              )}
-              {event.description && (
-                <div
-                  className="text-sm mt-2 [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800"
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(event.description),
-                  }}
-                />
-              )}
-            </div>
-          ))
+          <>
+            {events.map((event) => (
+              <div key={event.id} className="border rounded p-3 bg-white">
+                <h4 className="font-bold">{event.summary}</h4>
+                <p className="text-sm text-gray-600">
+                  {formatEventDate(event.start, event.end, i18n.language)}
+                </p>
+                {event.location && (
+                  <p className="text-sm text-gray-500">{event.location}</p>
+                )}
+                {event.description && (
+                  <div
+                    className="text-sm mt-2 [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(event.description),
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+            {hasMore && (
+              <button
+                onClick={onLoadMore}
+                disabled={loadingMore}
+                className="w-full py-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 cursor-pointer disabled:cursor-default"
+              >
+                {loadingMore ? t("loading") : t("loadMoreEvents")}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -91,12 +102,21 @@ Calendar.propTypes = {
   loading: PropTypes.bool,
   /** Error message if fetch failed */
   error: PropTypes.string,
+  /** Whether more events are available to load */
+  hasMore: PropTypes.bool,
+  /** Whether more events are currently being loaded */
+  loadingMore: PropTypes.bool,
+  /** Callback to load more events */
+  onLoadMore: PropTypes.func,
 };
 
 Calendar.defaultProps = {
   events: [],
   loading: false,
   error: "",
+  hasMore: false,
+  loadingMore: false,
+  onLoadMore: () => {},
 };
 
 export default Calendar;

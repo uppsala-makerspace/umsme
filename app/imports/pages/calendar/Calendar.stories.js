@@ -91,3 +91,25 @@ export const WithLinks = {
     error: '',
   }
 };
+
+export const WithLoadMore = {
+  args: {
+    events: sampleEvents,
+    loading: false,
+    error: '',
+    hasMore: true,
+    loadingMore: false,
+    onLoadMore: () => alert('Load more clicked'),
+  }
+};
+
+export const LoadingMore = {
+  args: {
+    events: sampleEvents,
+    loading: false,
+    error: '',
+    hasMore: true,
+    loadingMore: true,
+    onLoadMore: () => {},
+  }
+};
