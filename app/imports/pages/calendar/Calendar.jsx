@@ -3,6 +3,14 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
 
+// Configure DOMPurify to open links in new tab
+DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+  if (node.tagName === "A") {
+    node.setAttribute("target", "_blank");
+    node.setAttribute("rel", "noopener noreferrer");
+  }
+});
+
 const formatEventDate = (startDate, endDate, language) => {
   const locale = language === 'sv' ? 'sv-SE' : 'en-US';
   const start = new Date(startDate);
@@ -55,7 +63,7 @@ const Calendar = ({ events, loading, error }) => {
               )}
               {event.description && (
                 <div
-                  className="text-sm mt-2 prose prose-sm"
+                  className="text-sm mt-2 [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800"
                   dangerouslySetInnerHTML={{
                     __html: DOMPurify.sanitize(event.description),
                   }}
