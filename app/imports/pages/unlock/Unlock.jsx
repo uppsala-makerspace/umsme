@@ -6,6 +6,10 @@ import "./unlockDoors.css";
 const Unlock = ({ doors, opening, onOpenDoor }) => {
   const { t } = useTranslation();
 
+  if (doors.length === 0) {
+    return <p className="text-sm text-center">{t("noAvailableDoors")}</p>;
+  }
+
   return (
     <>
       {doors.map((door) => (

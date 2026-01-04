@@ -91,6 +91,7 @@
   "PressToOpen": "Press to open",
   "openDoor": "Open",
   "isOpening": "Opening...",
+  "noAvailableDoors": "No available doors. Make sure you have an active lab membership.",
   "outerDoor": "Outer Door",
   "upperFloor": "Upper floor",
   "lowerFloor": "Lower floor",
@@ -128,7 +129,7 @@
   "verifyEmailButton": "Go to verification",
 
   "Soda": "Soda",
-  "keys": "Open door",
+  "keys": "Open doors",
   "Membership": "Membership",
   "myAccount": "My Account",
   "myProfile": "My Profile",

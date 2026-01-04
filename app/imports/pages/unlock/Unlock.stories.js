@@ -44,3 +44,11 @@ export const SingleDoor = {
     onOpenDoor: (door) => console.log(`Opening ${door}`),
   },
 };
+
+export const NoDoors = {
+  args: {
+    doors: [],
+    opening: {},
+    onOpenDoor: (door) => console.log(`Opening ${door}`),
+  },
+};
