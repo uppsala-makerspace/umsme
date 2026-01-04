@@ -8,11 +8,7 @@ export const LoginButton = ({conf}) => {
   const handleClick = () => {
     conf.method({}, (err) => {
       if (err) {
-        if (err.code === "account-merge") {
-          alert(t(conf.mergeMessageKey));
-        } else {
-          alert(t("loginFailed"));
-        }
+        alert(t("loginFailed"));
       }
     });
   };

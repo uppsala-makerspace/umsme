@@ -11,7 +11,16 @@ export default () => {
   const unverifiedUser = user && user.emails?.length > 0 && !user.emails[0].verified;
   const verified = user && ((user.emails?.length > 0 && user.emails[0].verified) || !user.emails);
 
-  const props = {};
+  const handleLogin = (email, password) => {
+    Meteor.loginWithPassword(email, password, (err) => {
+      if (err) {
+        console.error("Login failed:", err);
+        alert("Login failed. Please check that your email and password are correct.");
+      }
+    });
+  };
+
+  const props = { onSubmit: handleLogin };
   if (ServiceConfiguration.configurations.findOne({service: "google"})) {
     props.google = {method: Meteor.loginWithGoogle};
   }

@@ -15,8 +15,6 @@
   "exEmail": "exempel@ex.com",
   "loginGoogle": "Fortsätt med Google",
   "loginFacebook": "Fortsätt med Facebook",
-  "oauthMergeGoogle": "Google-verifiering har lagts till på ditt befintliga konto. Testa att logga in med Google igen så kommer det fungera!",
-  "oauthMergeFacebook": "Facebook-verifiering har lagts till på ditt befintliga konto. Testa att logga in med Facebook igen så kommer det fungera!",
   "loginFailed": "Inloggningen misslyckades.",
   "noNameText1": "Kul att du vill gå med i Uppsala Makerspace!",
   "noNameText2": "Innan vi går vidare behöver vi lite mer information om dig.",

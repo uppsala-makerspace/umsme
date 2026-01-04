@@ -6,31 +6,22 @@ import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
 
 const googleConf = {
   buttonTextKey: "loginGoogle",
-  mergeMessageKey: "oauthMergeGoogle",
   icon: "/images/GoogleLogo.png"
 };
 
 const facebookConf = {
   buttonTextKey: "loginFacebook",
-  mergeMessageKey: "oauthMergeFacebook",
   icon: "/images/FacebookLogo.png"
 };
 
-export default ({google, facebook}) => {
+export default ({google, facebook, onSubmit}) => {
   const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
 
   const submit = (e) => {
     e.preventDefault();
-    Meteor.loginWithPassword(email, password, (err) => {
-      if (err) {
-        console.error("Login failed:", err);
-        alert(
-          "Login failed. Please check that your email and password are correct."
-        );
-      }
-    });
+    onSubmit(email, password);
   };
 
   return (
