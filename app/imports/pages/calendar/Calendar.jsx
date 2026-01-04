@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
+import DOMPurify from "dompurify";
 
 const formatEventDate = (startDate, endDate, language) => {
   const locale = language === 'sv' ? 'sv-SE' : 'en-US';
@@ -53,7 +54,12 @@ const Calendar = ({ events, loading, error }) => {
                 <p className="text-sm text-gray-500">{event.location}</p>
               )}
               {event.description && (
-                <p className="text-sm mt-2">{event.description}</p>
+                <div
+                  className="text-sm mt-2 prose prose-sm"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(event.description),
+                  }}
+                />
               )}
             </div>
           ))

@@ -63,3 +63,22 @@ export const WithError = {
     error: 'Failed to fetch calendar: API key invalid',
   }
 };
+
+const eventsWithHtml = [
+  {
+    id: '1',
+    summary: 'Open Evening',
+    start: new Date(Date.now() + 86400000).toISOString(),
+    end: new Date(Date.now() + 86400000 + 10800000).toISOString(),
+    location: 'Uppsala Makerspace',
+    description: '<p>Join us for our <strong>weekly open evening!</strong></p><ul><li>Meet members</li><li>See projects</li><li>Ask questions</li></ul><p>More info at <a href="https://uppsalamakerspace.se">our website</a>.</p>'
+  },
+];
+
+export const WithHtmlDescription = {
+  args: {
+    events: eventsWithHtml,
+    loading: false,
+    error: '',
+  }
+};
