@@ -1,14 +1,4 @@
 {
-  "adminpassword": "CHANGEME",
-  "from": ["kansliet@uppsalamakerspace.se", "no-reply@uppsalamakerspace.se"],
-  "noreply": "no-reply@uppsalamakerspace.se",
-  "bankproxy": "https://uppsalamakerspace.se/bank/",
-  "syncNrOfTransactions": 20,
-  "deliverMails": true,
-  "lockUsername": "umsme@uppsalamakerspace.se",
-  "lockPassword": "????",
-  "lockAssumeUser": "lock@uppsalamakerspace.se",
-  "groupLockName": "UMSLockGroup",
   "public": {
     "checkPath": "http://example.com#",
     "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc",
@@ -24,10 +14,14 @@
         { "name": "fråga-styrelsen", "id": "C02FBP7UQTG" },
         { "name": "random", "id": "C29LM3D6Z" }
       ]
+    },
+    "oauth": {
+      "google": true,
+      "facebook": true
     }
   },
   "private": {
-    "vapidPrivateKey": "F7hcqyRl7P27b3dALstLwz__2lK-NHNZRgxqzCL9HUo"
+    "vapidPrivateKey": "Some key here"
   },
 
   "swishCallback": "placeholder-swishCallback",

@@ -8,6 +8,10 @@ import Login from './Login';
 export default () => {
   const user = useTracker(() => Meteor.user());
 
+  const oauth = Meteor.settings?.public?.oauth;
+  const google = oauth?.google ? { method: Meteor.loginWithGoogle } : null;
+  const facebook = oauth?.facebook ? { method: Meteor.loginWithFacebook } : null;
+
   const unverifiedUser = user && user.emails?.length > 0 && !user.emails[0].verified;
   const verified = user && ((user.emails?.length > 0 && user.emails[0].verified) || !user.emails);
 
@@ -20,20 +24,12 @@ export default () => {
     });
   };
 
-  const props = { onSubmit: handleLogin };
-  if (ServiceConfiguration.configurations.findOne({service: "google"})) {
-    props.google = {method: Meteor.loginWithGoogle};
-  }
-  if (ServiceConfiguration.configurations.findOne({service: "facebook"})) {
-    props.facebook = {method: Meteor.loginWithFacebook};
-  }
-
   return (
     <>
       <LanguageSwitcher />
       {unverifiedUser ? (<Navigate to="/waitForEmailVerification" />) : null}
       {verified ? (<Navigate to="/" />) : null}
-      <Login {...props}></Login>
+      <Login onSubmit={handleLogin} google={google} facebook={facebook} />
     </>
   );
 };
