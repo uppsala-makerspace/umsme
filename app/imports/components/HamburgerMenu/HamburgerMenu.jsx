@@ -59,6 +59,9 @@ export const HamburgerMenu = () => {
             <Link to="/unlock">{t("keys")}</Link>
           </li>
           <li>
+            <Link to="/storage">{t("myBox")}</Link>
+          </li>
+          <li>
             <Link to="/account">{t("myAccount")}</Link>
           </li>
           <li>

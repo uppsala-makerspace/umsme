@@ -114,6 +114,7 @@ export const models = {
           floor2L: "Floor 2 - bottom shelf",
           floor1U: "Floor 1 - upper shelf",
           floor2U: "Floor 2 - upper shelf",
+          none: "No box needed",
         },
       },
     },

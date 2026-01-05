@@ -4,6 +4,7 @@ import Register from '/imports/pages/register';
 import Home from '/imports/pages/home';
 import Profile from '/imports/pages/profile';
 import Unlock from '/imports/pages/unlock'
+import Storage from '/imports/pages/storage'
 import Account from '/imports/pages/account'
 import Verification from '/imports/pages/emailVerification';
 import ForgotPassword from '/imports/pages/forgotPassword';
@@ -24,6 +25,7 @@ export const App = () => (
         <Route path="/waitforemailverification" element={<Verification />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/unlock" element={<Unlock />} />
+        <Route path="/storage" element={<Storage />} />
         <Route path="/account" element={<Account />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/contact" element={<Contact />} />

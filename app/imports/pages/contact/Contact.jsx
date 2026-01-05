@@ -2,8 +2,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 
-const SlackLink = ({ channel, children }) => {
-  const url = getSlackChannelUrl(channel);
+const SlackLink = ({ channel, slackConfig }) => {
+  const url = getSlackChannelUrl(channel, slackConfig);
   if (!url) {
     return <strong>#{channel}</strong>;
   }
@@ -14,7 +14,7 @@ const SlackLink = ({ channel, children }) => {
   );
 };
 
-const Contact = () => {
+const Contact = ({ slackConfig }) => {
   const { t } = useTranslation();
 
   return (
@@ -31,7 +31,7 @@ const Contact = () => {
             </a>
           </li>
           <li>
-            {t("slackChannel")}: <SlackLink channel="fråga-styrelsen" />
+            {t("slackChannel")}: <SlackLink channel="fråga-styrelsen" slackConfig={slackConfig} />
           </li>
         </ul>
         <p className="text-sm mt-2">
@@ -49,7 +49,7 @@ const Contact = () => {
         <p className="text-sm mb-2">{t("boardInformationDescription")}</p>
         <ul className="text-sm list-disc ml-5">
           <li>{t("infoNewsletter")}</li>
-          <li>{t("infoSlackGeneral")} <SlackLink channel="general" /></li>
+          <li>{t("infoSlackGeneral")} <SlackLink channel="general" slackConfig={slackConfig} /></li>
           <li>{t("infoCalendar")}</li>
           <li>{t("infoBlogpost")}</li>
         </ul>
@@ -60,10 +60,10 @@ const Contact = () => {
         <p className="text-sm mb-2">{t("memberCommunicationDescription")}</p>
         <ul className="text-sm list-disc ml-5">
           <li>
-            <SlackLink channel="lokalen" /> - {t("channelLokalenDescription")}
+            <SlackLink channel="lokalen" slackConfig={slackConfig} /> - {t("channelLokalenDescription")}
           </li>
           <li>
-            <SlackLink channel="random" /> - {t("channelRandomDescription")}
+            <SlackLink channel="random" slackConfig={slackConfig} /> - {t("channelRandomDescription")}
           </li>
         </ul>
         <p className="text-sm mt-2">{t("moreChannelsDescription")}</p>

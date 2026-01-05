@@ -4,3 +4,4 @@ import './profile';
 //import './payments';
 import './accounts';
 import './doors';
+import './storage';

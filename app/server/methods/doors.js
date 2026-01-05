@@ -1,32 +1,7 @@
 import { Meteor } from "meteor/meteor";
-import { memberStatus } from "/imports/common/lib/utils";
-import { findForUser } from "/server/methods/utils";
-import { Members } from "/imports/common/collections/members";
+import { findForUser, hasActiveLabMembership } from "/server/methods/utils";
 
 const DOORS = ["outerDoor", "upperFloor", "lowerFloor"];
-
-/**
- * Gets the lab end date for the current user.
- * @returns {Promise<Date|null>} The lab end date or null if not found
- */
-const getLabEndForUser = async () => {
-  if (!Meteor.userId()) {
-    return null;
-  }
-
-  const info = await findForUser();
-  if (!info.member) {
-    return null;
-  }
-
-  // Get the paying member for family memberships
-  const paying = info.member.infamily
-    ? await Members.findOneAsync(info.member.infamily)
-    : info.member;
-
-  const status = await memberStatus(paying);
-  return status.labEnd || null;
-};
 
 Meteor.methods({
   /**
@@ -34,13 +9,14 @@ Meteor.methods({
    * @returns {Promise<string[]>} Array of door IDs or empty array if not authorized
    */
   availableDoors: async () => {
-    const labEnd = await getLabEndForUser();
-
-    if (labEnd && labEnd > new Date()) {
-      return DOORS;
+    if (!Meteor.userId()) {
+      return [];
     }
 
-    return [];
+    const { member } = await findForUser();
+    const hasLab = await hasActiveLabMembership(member);
+
+    return hasLab ? DOORS : [];
   },
 
   /**
@@ -57,9 +33,10 @@ Meteor.methods({
       throw new Meteor.Error("invalid-door", "Invalid door ID");
     }
 
-    const labEnd = await getLabEndForUser();
+    const { member } = await findForUser();
+    const hasLab = await hasActiveLabMembership(member);
 
-    if (!labEnd || labEnd <= new Date()) {
+    if (!hasLab) {
       throw new Meteor.Error("not-authorized", "No active lab membership");
     }
 
