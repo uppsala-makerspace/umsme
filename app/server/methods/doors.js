@@ -1,5 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import { findForUser, hasActiveLabMembership } from "/server/methods/utils";
+import { LiabilityDocuments } from "/imports/common/collections/liabilityDocuments";
 
 const DOORS = ["outerDoor", "upperFloor", "lowerFloor"];
 
@@ -38,6 +39,15 @@ Meteor.methods({
 
     if (!hasLab) {
       throw new Meteor.Error("not-authorized", "No active lab membership");
+    }
+
+    // Check if member has approved the latest liability
+    const latestLiability = await LiabilityDocuments.findOneAsync({}, { sort: { date: -1 } });
+    if (latestLiability) {
+      const memberLiabilityDate = member.liabilityDate;
+      if (!memberLiabilityDate || memberLiabilityDate.getTime() !== latestLiability.date.getTime()) {
+        throw new Meteor.Error("liability-not-approved", "You must approve the latest liability agreement");
+      }
     }
 
     // TODO: Add actual door unlocking logic here
