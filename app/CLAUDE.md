@@ -9,7 +9,7 @@ UMSAPP is a membership management application for Uppsala MakerSpace. It handles
 ## Development Commands
 
 ```bash
-# Run the application (requires settings.json)
+# Run the application (requires settings.json) - runs on port 3001
 meteor --settings settings.json
 
 # Run tests
@@ -109,3 +109,7 @@ WebApp.handlers.use("/api/endpoint", async (req, res) => { ... });
 ## Language
 
 The codebase contains Swedish comments and error messages. Default UI language is Swedish.
+
+## Git Commits
+
+- Do not include "Generated with Claude Code" or "Co-Authored-By" footers in commit messages

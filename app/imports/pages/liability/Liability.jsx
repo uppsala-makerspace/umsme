@@ -57,6 +57,12 @@ const Liability = ({
   const currentLanguage = i18n.language || "sv";
   const localizedText = text?.[currentLanguage] || text?.sv || text?.en || "";
 
+  // useMemo must be called before any early returns to comply with Rules of Hooks
+  const renderedMarkdown = useMemo(() => {
+    if (!localizedText) return "";
+    return marked(localizedText);
+  }, [localizedText]);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
@@ -84,11 +90,6 @@ const Liability = ({
   }
 
   const showApproveButton = status !== "approved";
-
-  const renderedMarkdown = useMemo(() => {
-    if (!localizedText) return "";
-    return marked(localizedText);
-  }, [localizedText]);
 
   return (
     <div className="flex flex-col p-4 max-w-2xl mx-auto">
