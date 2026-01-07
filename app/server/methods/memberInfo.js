@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
+import { LiabilityDocuments } from "/imports/common/collections/liabilityDocuments";
 import { memberStatus } from '/imports/common/lib/utils';
 import { findMemberForUser, findForUser } from "/server/methods/utils";
 import Invites from "/imports/common/collections/Invites";
@@ -27,7 +28,8 @@ Meteor.methods({
    *     familyInvites,
    *     invite,
    *     paying,
-   *     liabilityDate
+   *     liabilityDate,
+   *     liabilityOutdated
    *   }>}
    */
   findInfoForUser: async () => {
@@ -69,6 +71,16 @@ Meteor.methods({
       invite = await Invites.findOneAsync({email: member.email});
     }
     const liabilityDate = member.liabilityDate ?? null;
-    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate});
+
+    // Check if member's liability approval is outdated
+    let liabilityOutdated = false;
+    if (liabilityDate) {
+      const latestLiability = await LiabilityDocuments.findOneAsync({}, { sort: { date: -1 } });
+      if (latestLiability && latestLiability.date.getTime() !== liabilityDate.getTime()) {
+        liabilityOutdated = true;
+      }
+    }
+
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated});
   },
 });

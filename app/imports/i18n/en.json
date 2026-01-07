@@ -218,5 +218,9 @@
   "liabilityReadAndApprove": "Please read through the agreement carefully and approve it at the bottom.",
   "liabilityCheckbox": "I have read, understood and agreed to the liability agreement above.",
   "liabilityApproveButton": "Approve",
-  "liabilityNotFound": "No liability agreement found."
+  "liabilityNotFound": "No liability agreement found.",
+
+  "homeLiabilityNotApproved": "Before you can open doors, you need to approve the liability agreement.",
+  "homeLiabilityOutdated": "The liability agreement has been updated. Please review and approve the new version.",
+  "homeLiabilityButton": "Go to liability agreement"
 }

@@ -18,9 +18,11 @@ const msPerDay = 1000 * 60 * 60 * 24;
  * @param {object} invite pending family invite (if any)
  * @param {function} onAcceptInvite callback to accept family invite
  * @param {function} onDeclineInvite callback to decline family invite
+ * @param {Date|null} liabilityDate date of approved liability (null if not approved)
+ * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite }) => {
+export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated }) => {
   const { t } = useTranslation();
 
   let daysLeftOfLab = null;
@@ -74,6 +76,8 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
   }
 
   if (activeMembership) {
+    const liabilityNeedsAttention = !liabilityDate || liabilityOutdated;
+
     return <>
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
       <h3 className="text-h3">{t("greeting2")} {name}!</h3>
@@ -88,12 +92,25 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
           </Link>
         </div>
       )}
-      <Link to="/unlock" className="wideButton">
-        <button className="form-button">{t("keys")}</button>
-      </Link>
-      <Link to="/calendar" className="wideButton">
-        <button className="form-button">{t("calender")}</button>
-      </Link>
+      {liabilityNeedsAttention ? (
+        <>
+          <p className="text-container">
+            {liabilityOutdated ? t("homeLiabilityOutdated") : t("homeLiabilityNotApproved")}
+          </p>
+          <Link to="/liability" className="wideButton">
+            <button className="form-button">{t("homeLiabilityButton")}</button>
+          </Link>
+        </>
+      ) : (
+        <>
+          <Link to="/unlock" className="wideButton">
+            <button className="form-button">{t("keys")}</button>
+          </Link>
+          <Link to="/calendar" className="wideButton">
+            <button className="form-button">{t("calender")}</button>
+          </Link>
+        </>
+      )}
     </>;
   } else if (daysLeftOfLab < 0) {
     return <>

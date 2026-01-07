@@ -218,5 +218,9 @@
   "liabilityReadAndApprove": "Vänligen läs igenom ansvarsförbindelsen noggrant och godkänn den längst ner.",
   "liabilityCheckbox": "Jag har läst, förstått och godkänner ansvarsförbindelsen ovan.",
   "liabilityApproveButton": "Godkänn",
-  "liabilityNotFound": "Ingen ansvarsförbindelse hittades."
+  "liabilityNotFound": "Ingen ansvarsförbindelse hittades.",
+
+  "homeLiabilityNotApproved": "Innan du kan öppna dörrar måste du godkänna ansvarsförbindelsen.",
+  "homeLiabilityOutdated": "Ansvarsförbindelsen har uppdaterats. Vänligen läs igenom och godkänn den nya versionen.",
+  "homeLiabilityButton": "Gå till ansvarsförbindelsen"
 }

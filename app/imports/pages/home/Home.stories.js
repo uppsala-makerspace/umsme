@@ -17,6 +17,8 @@ memberEnd.setMonth(memberEnd.getMonth()+2);
 memberEndPassed.setMonth(memberEndPassed.getMonth()-2);
 memberEndClose.setDate(memberEndClose.getDate()+2);
 const memberName = "John Doe";
+const liabilityDate = new Date('2024-01-15');
+const oldLiabilityDate = new Date('2023-06-01');
 
 export const EmailNotVerified = {
   args: {
@@ -65,7 +67,9 @@ export const MembershipTimeToRenew = {
   args: {
     memberName,
     memberStatus: { memberStart, memberEnd: memberEndClose },
-    verified: true
+    verified: true,
+    liabilityDate,
+    liabilityOutdated: false
   },
 };
 
@@ -73,6 +77,28 @@ export const MemberPaying = {
   args: {
     memberName,
     memberStatus: { memberStart, memberEnd },
-    verified: true
+    verified: true,
+    liabilityDate,
+    liabilityOutdated: false
+  },
+};
+
+export const LiabilityNotApproved = {
+  args: {
+    memberName,
+    memberStatus: { memberStart, memberEnd },
+    verified: true,
+    liabilityDate: null,
+    liabilityOutdated: false
+  },
+};
+
+export const LiabilityOutdated = {
+  args: {
+    memberName,
+    memberStatus: { memberStart, memberEnd },
+    verified: true,
+    liabilityDate: oldLiabilityDate,
+    liabilityOutdated: true
   },
 };

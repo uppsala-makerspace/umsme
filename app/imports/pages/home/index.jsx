@@ -55,6 +55,8 @@ export default () => {
         invite={memberInfo?.invite}
         onAcceptInvite={handleAcceptInvite}
         onDeclineInvite={handleDeclineInvite}
+        liabilityDate={memberInfo?.liabilityDate}
+        liabilityOutdated={memberInfo?.liabilityOutdated}
       />
     </div>
   </>;
