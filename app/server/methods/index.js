@@ -5,3 +5,4 @@ import './profile';
 import './accounts';
 import './doors';
 import './storage';
+import './liabilityDocuments';

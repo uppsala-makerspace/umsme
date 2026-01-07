@@ -26,7 +26,8 @@ Meteor.methods({
    *     familyMembers,
    *     familyInvites,
    *     invite,
-   *     paying
+   *     paying,
+   *     liabilityDate
    *   }>}
    */
   findInfoForUser: async () => {
@@ -67,6 +68,7 @@ Meteor.methods({
     if (!member.infamily) {
       invite = await Invites.findOneAsync({email: member.email});
     }
-    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying});
+    const liabilityDate = member.liabilityDate ?? null;
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate});
   },
 });

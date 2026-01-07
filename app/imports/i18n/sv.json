@@ -207,5 +207,16 @@
   "storageFloor2Bottom": "Våning 2 - nedre hylla",
   "storageFloor1Upper": "Våning 1 - övre hylla",
   "storageFloor2Upper": "Våning 2 - övre hylla",
-  "storageNoBoxNeeded": "Behöver ingen låda"
+  "storageNoBoxNeeded": "Behöver ingen låda",
+
+  "liability": "Ansvarsförbindelse",
+  "liabilityTitle": "Ansvarsförbindelse",
+  "liabilityApproved": "Du har godkänt den aktuella ansvarsförbindelsen.",
+  "liabilityOutdated": "Du har godkänt en äldre version av ansvarsförbindelsen.",
+  "liabilityOutdatedInfo": "Vänligen läs igenom det uppdaterade dokumentet och godkänn det längst ner.",
+  "liabilityNotApproved": "Du har inte godkänt ansvarsförbindelsen ännu.",
+  "liabilityReadAndApprove": "Vänligen läs igenom dokumentet noggrant och godkänn det längst ner.",
+  "liabilityCheckbox": "Jag har läst, förstått och godkänner ansvarsförbindelsen ovan.",
+  "liabilityApproveButton": "Godkänn",
+  "liabilityNotFound": "Ingen ansvarsförbindelse hittades."
 }

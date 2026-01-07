@@ -62,6 +62,9 @@ export const HamburgerMenu = () => {
             <Link to="/storage">{t("myBox")}</Link>
           </li>
           <li>
+            <Link to="/liability">{t("liability")}</Link>
+          </li>
+          <li>
             <Link to="/account">{t("myAccount")}</Link>
           </li>
           <li>

@@ -66,6 +66,12 @@ export const models = {
       optional: true,
       autoform: { defaultValue: false },
     },
+    liabilityDate: {
+      label: "Liability version approved",
+      type: Date,
+      optional: true,
+      autoform: { readonly: true },
+    },
     member: {
       label: "Member date",
       type: Date,
@@ -493,5 +499,32 @@ export const models = {
         omit: true,
       }
     },
-  }
+  },
+  liabilityDocument: {
+    title: { label: "Title", type: String, max: 200 },
+    date: { label: "Date", type: Date },
+    text: {
+      label: "Document text",
+      type: Object,
+      blackbox: true,
+    },
+    "text.sv": {
+      label: "Document text (Swedish)",
+      type: String,
+      max: 50000,
+      optional: true,
+      autoform: {
+        type: "textarea",
+      },
+    },
+    "text.en": {
+      label: "Document text (English)",
+      type: String,
+      max: 50000,
+      optional: true,
+      autoform: {
+        type: "textarea",
+      },
+    },
+  },
 };

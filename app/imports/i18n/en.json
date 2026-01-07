@@ -207,5 +207,16 @@
   "storageFloor2Bottom": "Floor 2 - bottom shelf",
   "storageFloor1Upper": "Floor 1 - upper shelf",
   "storageFloor2Upper": "Floor 2 - upper shelf",
-  "storageNoBoxNeeded": "I no longer need a box"
+  "storageNoBoxNeeded": "I no longer need a box",
+
+  "liability": "Liability",
+  "liabilityTitle": "Liability Agreement",
+  "liabilityApproved": "You have approved the current liability document.",
+  "liabilityOutdated": "You have approved an older version of the liability document.",
+  "liabilityOutdatedInfo": "Please read through the updated document and approve it at the bottom.",
+  "liabilityNotApproved": "You have not yet approved the liability document.",
+  "liabilityReadAndApprove": "Please read through the document carefully and approve it at the bottom.",
+  "liabilityCheckbox": "I have read, understood and agreed to the liability document above.",
+  "liabilityApproveButton": "Approve",
+  "liabilityNotFound": "No liability document found."
 }

@@ -18,5 +18,6 @@ export const schemas = {
   comments: new SimpleSchema(models.comment),
   unlocks: new SimpleSchema(models.unlocks),
   users: new SimpleSchema(models.users),
-  initiatedPayments: new SimpleSchema(models.initiatedPayments)
+  initiatedPayments: new SimpleSchema(models.initiatedPayments),
+  liabilityDocument: new SimpleSchema(models.liabilityDocument),
 };
