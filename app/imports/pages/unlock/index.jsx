@@ -9,23 +9,32 @@ export default () => {
   const [doors, setDoors] = useState([]);
   const [opening, setOpening] = useState({});
   const [loading, setLoading] = useState(true);
+  const [liabilityDate, setLiabilityDate] = useState(null);
+  const [liabilityOutdated, setLiabilityOutdated] = useState(false);
 
   useEffect(() => {
-    const fetchDoors = async () => {
+    const fetchData = async () => {
       try {
-        const doorIds = await Meteor.callAsync("availableDoors");
+        const [doorIds, memberInfo] = await Promise.all([
+          Meteor.callAsync("availableDoors"),
+          Meteor.callAsync("findInfoForUser")
+        ]);
+
         const doorObjects = doorIds.map((id) => ({ id, labelKey: id }));
         setDoors(doorObjects);
         setOpening(Object.fromEntries(doorIds.map((id) => [id, false])));
+
+        setLiabilityDate(memberInfo?.liabilityDate ?? null);
+        setLiabilityOutdated(memberInfo?.liabilityOutdated ?? false);
       } catch (error) {
-        console.error("Error fetching available doors:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
     if (Meteor.userId()) {
-      fetchDoors();
+      fetchData();
     } else {
       setLoading(false);
     }
@@ -55,7 +64,13 @@ export default () => {
       <HamburgerMenu />
       <div className="login-form">
         {loading ? null : (
-          <Unlock doors={doors} opening={opening} onOpenDoor={handleOpenDoor} />
+          <Unlock
+            doors={doors}
+            opening={opening}
+            onOpenDoor={handleOpenDoor}
+            liabilityDate={liabilityDate}
+            liabilityOutdated={liabilityOutdated}
+          />
         )}
       </div>
     </>
