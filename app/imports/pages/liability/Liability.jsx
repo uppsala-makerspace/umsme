@@ -18,7 +18,7 @@ const StatusBanner = ({ status, t }) => {
     return (
       <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
         <p className="font-medium">{t("liabilityOutdated")}</p>
-        <p className="text-sm mt-1">{t("liabilityOutdatedInfo")}</p>
+        <p className="text-sm mt-3">{t("liabilityOutdatedInfo")}</p>
       </div>
     );
   }
@@ -27,7 +27,7 @@ const StatusBanner = ({ status, t }) => {
   return (
     <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
       <p className="font-medium">{t("liabilityNotApproved")}</p>
-      <p className="text-sm mt-1">{t("liabilityReadAndApprove")}</p>
+      <p className="text-sm mt-3">{t("liabilityReadAndApprove")}</p>
     </div>
   );
 };
@@ -92,7 +92,7 @@ const Liability = ({
   const showApproveButton = status !== "approved";
 
   return (
-    <div className="flex flex-col p-4 max-w-2xl mx-auto">
+    <div className="flex flex-col p-4 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">{t("liabilityTitle")}</h1>
 
       <StatusBanner status={status} t={t} />
@@ -104,7 +104,7 @@ const Liability = ({
 
       {showApproveButton && (
         <div className="sticky bottom-0 pt-2 pb-2">
-          <div className="flex items-start">
+          <div className="flex items-start mb-4">
             <input
               style={{width: "unset", margin: "10px 10px"}}
               type="checkbox"
@@ -118,7 +118,7 @@ const Liability = ({
             </label>
           </div>
           <button
-            className="form-button"
+            className="form-button w-full py-3"
             onClick={onApprove}
             disabled={approving || !hasAgreed}
           >

@@ -211,12 +211,12 @@
 
   "liability": "Liability",
   "liabilityTitle": "Liability Agreement",
-  "liabilityApproved": "You have approved the current liability document.",
-  "liabilityOutdated": "You have approved an older version of the liability document.",
-  "liabilityOutdatedInfo": "Please read through the updated document and approve it at the bottom.",
-  "liabilityNotApproved": "You have not yet approved the liability document.",
-  "liabilityReadAndApprove": "Please read through the document carefully and approve it at the bottom.",
-  "liabilityCheckbox": "I have read, understood and agreed to the liability document above.",
+  "liabilityApproved": "You have approved the current liability agreement.",
+  "liabilityOutdated": "You have approved an older version of the liability agreement.",
+  "liabilityOutdatedInfo": "Please read through the updated agreement and approve it at the bottom.",
+  "liabilityNotApproved": "You have not yet approved the liability agreement.",
+  "liabilityReadAndApprove": "Please read through the agreement carefully and approve it at the bottom.",
+  "liabilityCheckbox": "I have read, understood and agreed to the liability agreement above.",
   "liabilityApproveButton": "Approve",
-  "liabilityNotFound": "No liability document found."
+  "liabilityNotFound": "No liability agreement found."
 }

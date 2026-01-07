@@ -213,9 +213,9 @@
   "liabilityTitle": "Ansvarsförbindelse",
   "liabilityApproved": "Du har godkänt den aktuella ansvarsförbindelsen.",
   "liabilityOutdated": "Du har godkänt en äldre version av ansvarsförbindelsen.",
-  "liabilityOutdatedInfo": "Vänligen läs igenom det uppdaterade dokumentet och godkänn det längst ner.",
+  "liabilityOutdatedInfo": "Vänligen läs igenom den uppdaterade ansvarsförbindelsen och godkänn den längst ner.",
   "liabilityNotApproved": "Du har inte godkänt ansvarsförbindelsen ännu.",
-  "liabilityReadAndApprove": "Vänligen läs igenom dokumentet noggrant och godkänn det längst ner.",
+  "liabilityReadAndApprove": "Vänligen läs igenom ansvarsförbindelsen noggrant och godkänn den längst ner.",
   "liabilityCheckbox": "Jag har läst, förstått och godkänner ansvarsförbindelsen ovan.",
   "liabilityApproveButton": "Godkänn",
   "liabilityNotFound": "Ingen ansvarsförbindelse hittades."
