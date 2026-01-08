@@ -1,0 +1,32 @@
+{
+  "public": {
+    "checkPath": "http://example.com#",
+    "vapidPublicKey": "test-vapid-public-key",
+    "googleCalendar": {
+      "apiKey": "test-calendar-api-key",
+      "calendarId": "test@group.calendar.google.com"
+    },
+    "slack": {
+      "team": "TEST",
+      "channels": []
+    },
+    "oauth": {
+      "google": false,
+      "facebook": false
+    }
+  },
+  "private": {
+    "vapidPrivateKey": "test-vapid-private-key",
+    "homeAssistant": {
+      "url": "http://localhost:8123",
+      "token": "test-token",
+      "locks": [
+        { "id": "outerDoor", "entityId": "switch.outer_door", "type": "switch" },
+        { "id": "upperFloor", "entityId": "lock.upper_floor", "type": "lock" }
+      ]
+    }
+  },
+  "swishCallback": "http://localhost:3002/api/swish",
+  "serviceConfigurations": {},
+  "env": "test"
+}

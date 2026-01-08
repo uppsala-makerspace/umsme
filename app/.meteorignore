@@ -1,0 +1,7 @@
+# E2E tests - not compiled by Meteor
+e2e/
+playwright-report/
+test-results/
+
+# Claude Code session data
+.claude/

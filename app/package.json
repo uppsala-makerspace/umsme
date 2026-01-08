@@ -9,7 +9,11 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "build:css": "tailwindcss -i ./client/tailwind.css -o ./client/tailwind.output.css",
-    "watch:css": "tailwindcss -i ./client/tailwind.css -o ./client/tailwind.output.css --watch"
+    "watch:css": "tailwindcss -i ./client/tailwind.css -o ./client/tailwind.output.css --watch",
+    "start:test": "SEED_TEST_DATA=true MONGO_URL=mongodb://localhost:27017/umsapp-e2e-test meteor --port 3002 --settings settings_test.json",
+    "seed:dev": "SEED_TEST_DATA=true SEED_ONLY=true MONGO_URL=mongodb://localhost:27017/umsme meteor --port 3001 --settings settings.json",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.7",
@@ -39,6 +43,7 @@
     }
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@storybook/addon-docs": "^9.1.17",
     "@storybook/addon-mcp": "^0.1.6",
     "@storybook/addon-onboarding": "^9.1.17",
