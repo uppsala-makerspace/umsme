@@ -16,6 +16,7 @@ import './ui/bank';
 import './ui/door';
 import './ui/check';
 import './ui/users';
+import './ui/liability';
 import './layouts/AppBody.html';
 import './layouts/Home.html';
 import { Accounts } from 'meteor/accounts-base';

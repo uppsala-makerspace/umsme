@@ -1,0 +1,4 @@
+<template name="LiabilityDocumentView">
+    <h1>Liability Document <small><a class="deleteLiabilityDocument">Delete</a></small></h1>
+    {{> quickForm collection=LiabilityDocuments doc=liabilityDocument id="liabilityDocumentViewForm" omitFields="_id" type="update" buttonContent="Update and go back to list"}}
+</template>
