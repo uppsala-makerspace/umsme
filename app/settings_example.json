@@ -22,6 +22,7 @@
   },
   "private": {
     "vapidPrivateKey": "Some key here",
+    "mailUrl": "smtp://user:password@smtp.example.com:587",
     "homeAssistant": {
       "url": "http://homeassistant.local:8123",
       "token": "your-long-lived-access-token",

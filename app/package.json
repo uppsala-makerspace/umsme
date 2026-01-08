@@ -2,9 +2,8 @@
   "name": "meteor-app",
   "private": true,
   "scripts": {
-    "start": "meteor run",
-    "test": "meteor test --once --driver-package meteortesting:mocha",
-    "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
+    "dev": "MONGO_URL=mongodb://localhost:27017/umsme meteor --port 3001 --settings settings.json",
+    "test": "npm run test:e2e",
     "visualize": "meteor --production --extra-packages bundle-visualizer",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
