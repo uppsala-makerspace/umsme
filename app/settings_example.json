@@ -21,7 +21,16 @@
     }
   },
   "private": {
-    "vapidPrivateKey": "Some key here"
+    "vapidPrivateKey": "Some key here",
+    "homeAssistant": {
+      "url": "http://homeassistant.local:8123",
+      "token": "your-long-lived-access-token",
+      "locks": [
+        { "id": "outerDoor", "entityId": "switch.outer_door", "type": "switch" },
+        { "id": "upperFloor", "entityId": "lock.upper_floor", "type": "lock" },
+        { "id": "lowerFloor", "entityId": "lock.lower_floor", "type": "lock" }
+      ]
+    }
   },
 
   "swishCallback": "placeholder-swishCallback",
