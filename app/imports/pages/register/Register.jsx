@@ -29,7 +29,6 @@ export default ({onSubmit}) => {
       </p>
 
       <LogRegSwitcher/>
-      <p className="text-container">{t("registerText")}</p>
       <div className="form-group">
         <label htmlFor="email">{t("email")}</label>
         <input
