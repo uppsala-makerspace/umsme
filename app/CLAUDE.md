@@ -113,3 +113,8 @@ The codebase contains Swedish comments and error messages. Default UI language i
 ## Git Commits
 
 - Do not include "Generated with Claude Code" or "Co-Authored-By" footers in commit messages
+
+## Working Directory
+
+- Stay within `umsme2/app/` and `umsme2/common/` directories when working on this project
+- Do not search or operate in other parent or sibling directories
