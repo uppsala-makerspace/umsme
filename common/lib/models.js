@@ -70,7 +70,7 @@ export const models = {
       label: "Liability version approved",
       type: Date,
       optional: true,
-      autoform: { readonly: true, omit: true },
+      autoform: { readonly: false },
     },
     member: {
       label: "Member date",
