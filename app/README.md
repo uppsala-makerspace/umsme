@@ -48,6 +48,38 @@ This seeds the `umsme` database with test accounts. Press `Ctrl+C` after you see
 
 **Warning:** This script clears existing data in the `users`, `members`, `membership`, `liabilityDocuments`, and `invites` collections before seeding.
 
+## UI Development with Storybook
+
+The project uses [Storybook](https://storybook.js.org/) for developing and testing UI components in isolation.
+
+### Running Storybook
+
+```bash
+npm run storybook
+```
+
+This starts Storybook on `http://localhost:6006`.
+
+### Why Storybook?
+
+- **Isolated development**: Build and test components without running the full app
+- **Visual verification**: See how components look in different states (loading, error, empty, etc.)
+- **Documentation**: Stories serve as living documentation for component usage
+- **Faster iteration**: No need to navigate through the app to test a specific component
+
+### Adding Stories
+
+Stories are co-located with their components using the `.stories.js` naming convention:
+
+```
+imports/pages/home/
+├── Home.jsx
+├── Home.stories.js
+└── index.jsx
+```
+
+When creating or modifying UI components, add or update the corresponding story to verify the component renders correctly in all its states.
+
 ## E2E Testing
 
 The project uses Playwright for end-to-end testing.
