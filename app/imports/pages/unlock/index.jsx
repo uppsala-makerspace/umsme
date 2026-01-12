@@ -96,6 +96,34 @@ export default () => {
     }
   }, []);
 
+  const handleRetryLocation = () => {
+    if (!navigator.geolocation) {
+      return;
+    }
+    setLocationPermission("pending");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserPosition({
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
+        setLocationPermission("granted");
+        setLocationError(null);
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        setLocationError(error.message);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationPermission("denied");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      }
+    );
+  };
+
   const handleOpenDoor = async (doorId) => {
     setOpening((prev) => ({ ...prev, [doorId]: true }));
 
@@ -130,6 +158,7 @@ export default () => {
             locationPermission={locationPermission}
             proximityRange={proximityRange}
             isAdmin={isAdmin}
+            onRetryLocation={handleRetryLocation}
           />
         )}
       </div>

@@ -15,8 +15,16 @@ const Unlock = ({
   locationPermission,
   proximityRange,
   isAdmin,
+  onRetryLocation,
+  isPWAOverride,
 }) => {
   const { t } = useTranslation();
+
+  // Detect if running as installed PWA (can be overridden for testing)
+  const isPWA =
+    isPWAOverride ??
+    (window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true);
 
   const liabilityNeedsAttention = !liabilityDate || liabilityOutdated;
 
@@ -59,7 +67,15 @@ const Unlock = ({
     <>
       {/* Location denied message */}
       {locationDenied && (
-        <p className="location-denied-message">{t("locationDenied")}</p>
+        <div className="location-denied-container">
+          <p className="location-denied-message">{t("locationDenied")}</p>
+          <p className="location-denied-instructions">
+            {t(isPWA ? "locationDeniedInstructionsPWA" : "locationDeniedInstructionsBrowser")}
+          </p>
+          <button className="location-retry-button" onClick={onRetryLocation}>
+            {t("locationRetry")}
+          </button>
+        </div>
       )}
 
       {doors.map((door) => {
@@ -112,6 +128,8 @@ Unlock.propTypes = {
   locationPermission: PropTypes.oneOf(["pending", "granted", "denied", "unavailable"]),
   proximityRange: PropTypes.number,
   isAdmin: PropTypes.bool,
+  onRetryLocation: PropTypes.func,
+  isPWAOverride: PropTypes.bool,
 };
 
 Unlock.defaultProps = {
@@ -119,6 +137,8 @@ Unlock.defaultProps = {
   locationPermission: "pending",
   proximityRange: 100,
   isAdmin: false,
+  onRetryLocation: () => {},
+  isPWAOverride: undefined,
 };
 
 export default Unlock;

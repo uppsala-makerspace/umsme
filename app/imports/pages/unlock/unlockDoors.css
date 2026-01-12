@@ -92,10 +92,45 @@
   font-weight: bold;
 }
 
-/* Location denied message */
+/* Location denied container */
+.umsapp .login-form .location-denied-container {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
 .umsapp .login-form .location-denied-message {
   color: #ef4444;
   font-size: 0.9rem;
-  text-align: center;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.umsapp .login-form .location-denied-instructions {
+  color: #6b7280;
+  font-size: 0.85rem;
   margin: 0 0 1rem 0;
+  line-height: 1.4;
+}
+
+.umsapp .login-form .location-retry-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.umsapp .login-form .location-retry-button:hover {
+  background-color: #2563eb;
+}
+
+.umsapp .login-form .location-retry-button:active {
+  background-color: #1d4ed8;
 }

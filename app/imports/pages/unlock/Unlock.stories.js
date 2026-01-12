@@ -37,6 +37,7 @@ export const Default = {
     doors: defaultDoors,
     opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate,
     liabilityOutdated: false,
     locationPermission: "granted",
@@ -51,6 +52,7 @@ export const InRange = {
     doors: doorsWithLocation,
     opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate,
     liabilityOutdated: false,
     locationPermission: "granted",
@@ -65,6 +67,7 @@ export const OutOfRange = {
     doors: doorsWithLocation,
     opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate,
     liabilityOutdated: false,
     locationPermission: "granted",
@@ -74,17 +77,35 @@ export const OutOfRange = {
   },
 };
 
-export const LocationDenied = {
+export const LocationDeniedBrowser = {
   args: {
     doors: doorsWithLocation,
     opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate,
     liabilityOutdated: false,
     locationPermission: "denied",
     userPosition: null,
     proximityRange: 100,
     isAdmin: false,
+    isPWAOverride: false,
+  },
+};
+
+export const LocationDeniedPWA = {
+  args: {
+    doors: doorsWithLocation,
+    opening: defaultOpening,
+    onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
+    liabilityDate,
+    liabilityOutdated: false,
+    locationPermission: "denied",
+    userPosition: null,
+    proximityRange: 100,
+    isAdmin: false,
+    isPWAOverride: true,
   },
 };
 
@@ -93,6 +114,7 @@ export const AdminBypass = {
     doors: doorsWithLocation,
     opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate,
     liabilityOutdated: false,
     locationPermission: "granted",
@@ -111,6 +133,7 @@ export const OuterDoorOpening = {
       lowerFloor: false,
     },
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate,
     liabilityOutdated: false,
     locationPermission: "granted",
@@ -127,6 +150,7 @@ export const SingleDoor = {
       mainEntrance: false,
     },
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate,
     liabilityOutdated: false,
     locationPermission: "granted",
@@ -141,6 +165,7 @@ export const NoDoors = {
     doors: [],
     opening: {},
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate,
     liabilityOutdated: false,
     locationPermission: "granted",
@@ -155,6 +180,7 @@ export const LiabilityNotApproved = {
     doors: defaultDoors,
     opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate: null,
     liabilityOutdated: false,
     locationPermission: "granted",
@@ -169,6 +195,7 @@ export const LiabilityOutdated = {
     doors: defaultDoors,
     opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
     liabilityDate: oldLiabilityDate,
     liabilityOutdated: true,
     locationPermission: "granted",
