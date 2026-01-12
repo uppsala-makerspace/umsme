@@ -1,5 +1,2 @@
 settings.json
-
-# Playwright
-playwright-report/
-test-results/
+dist

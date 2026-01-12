@@ -11,16 +11,19 @@
 ### Installation
 
 ```bash
+meteor install
 npm install
 ```
 
 ### Running the App
 
+Before you can start the application you need to make sure you have created a `settings.json` file, you can take inspiration from `settings_example.json`.
+
 ```bash
-meteor --settings settings.json
+npm run dev
 ```
 
-The app runs on `http://localhost:3000` by default.
+The app runs on `http://localhost:3001` by default.
 
 ## Development with Test Data
 

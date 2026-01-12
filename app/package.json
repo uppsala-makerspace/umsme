@@ -6,6 +6,7 @@
     "test": "npm run test:e2e",
     "visualize": "meteor --production --extra-packages bundle-visualizer",
     "storybook": "storybook dev -p 6006",
+    "build": "meteor build output --architecture os.linux.x86_64",
     "build-storybook": "storybook build",
     "build:css": "tailwindcss -i ./client/tailwind.css -o ./client/tailwind.output.css",
     "watch:css": "tailwindcss -i ./client/tailwind.css -o ./client/tailwind.output.css --watch",
