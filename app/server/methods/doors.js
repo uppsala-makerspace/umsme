@@ -18,23 +18,32 @@ const getLocks = () => {
 
 Meteor.methods({
   /**
-   * Returns available locks if user is signed in and has an active lab membership.
-   * @returns {Promise<string[]>} Array of lock IDs or empty array if not authorized
+   * Returns available doors with their locations if user has an active lab membership.
+   * Does not expose sensitive data like entityId, type, token, or url.
+   * @returns {Promise<{ proximityRange: number, doors: Array<{ id: string, location: { lat: number, long: number } | null }> }>}
    */
   availableDoors: async () => {
+    const config = Meteor.settings.private?.homeAssistant;
+    const proximityRange = config?.proximityRange || 100;
+
     if (!Meteor.userId()) {
-      return [];
+      return { proximityRange, doors: [] };
     }
 
     const { member } = await findForUser();
     const hasLab = await hasActiveLabMembership(member);
 
     if (!hasLab) {
-      return [];
+      return { proximityRange, doors: [] };
     }
 
     const locks = getLocks();
-    return locks.map(lock => lock.id);
+    const doors = locks.map(lock => ({
+      id: lock.id,
+      location: lock.location || null,
+    }));
+
+    return { proximityRange, doors };
   },
 
   /**

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Meteor } from "meteor/meteor";
+import { useTracker } from "meteor/react-meteor-data";
+import { Roles } from "meteor/roles";
 import { Navigate } from "react-router-dom";
 import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
@@ -11,18 +13,72 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const [liabilityDate, setLiabilityDate] = useState(null);
   const [liabilityOutdated, setLiabilityOutdated] = useState(false);
+  const [userPosition, setUserPosition] = useState(null);
+  const [locationPermission, setLocationPermission] = useState("pending"); // pending, granted, denied, unavailable
+  const [locationError, setLocationError] = useState(null);
+  const [proximityRange, setProximityRange] = useState(100);
 
+  // Check if user has admin or admin-locks role
+  const isAdmin = useTracker(() => {
+    const userId = Meteor.userId();
+    if (!userId) return false;
+    return Roles.userIsInRole(userId, ["admin", "admin-locks"]);
+  }, []);
+
+  // Start geolocation tracking
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationPermission("unavailable");
+      return;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setUserPosition({
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
+        setLocationPermission("granted");
+        setLocationError(null);
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        setLocationError(error.message);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationPermission("denied");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 5000,
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
+  // Fetch door data and member info
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [doorIds, memberInfo] = await Promise.all([
+        const [doorsResult, memberInfo] = await Promise.all([
           Meteor.callAsync("availableDoors"),
           Meteor.callAsync("findInfoForUser")
         ]);
 
-        const doorObjects = doorIds.map((id) => ({ id, labelKey: id }));
+        // Set proximity range and doors from server
+        setProximityRange(doorsResult.proximityRange || 100);
+
+        const doorObjects = doorsResult.doors.map((door) => ({
+          id: door.id,
+          labelKey: door.id,
+          location: door.location,
+        }));
         setDoors(doorObjects);
-        setOpening(Object.fromEntries(doorIds.map((id) => [id, false])));
+        setOpening(Object.fromEntries(doorObjects.map((d) => [d.id, false])));
 
         setLiabilityDate(memberInfo?.liabilityDate ?? null);
         setLiabilityOutdated(memberInfo?.liabilityOutdated ?? false);
@@ -70,6 +126,10 @@ export default () => {
             onOpenDoor={handleOpenDoor}
             liabilityDate={liabilityDate}
             liabilityOutdated={liabilityOutdated}
+            userPosition={userPosition}
+            locationPermission={locationPermission}
+            proximityRange={proximityRange}
+            isAdmin={isAdmin}
           />
         )}
       </div>

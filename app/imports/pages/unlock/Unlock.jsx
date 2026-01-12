@@ -2,9 +2,20 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { getDistanceTo, formatDistance } from "/imports/utils/location";
 import "./unlockDoors.css";
 
-const Unlock = ({ doors, opening, onOpenDoor, liabilityDate, liabilityOutdated }) => {
+const Unlock = ({
+  doors,
+  opening,
+  onOpenDoor,
+  liabilityDate,
+  liabilityOutdated,
+  userPosition,
+  locationPermission,
+  proximityRange,
+  isAdmin,
+}) => {
   const { t } = useTranslation();
 
   const liabilityNeedsAttention = !liabilityDate || liabilityOutdated;
@@ -26,16 +37,55 @@ const Unlock = ({ doors, opening, onOpenDoor, liabilityDate, liabilityOutdated }
     return <p className="text-sm text-center">{t("noAvailableDoors")}</p>;
   }
 
+  const locationDenied = locationPermission === "denied";
+
+  // Helper to check if a door is in range
+  const isDoorInRange = (door) => {
+    if (isAdmin) return true; // Admins can always unlock
+    if (!door.location) return true; // No location configured, allow
+    if (!userPosition) return false; // No user position yet
+
+    const distance = getDistanceTo(userPosition, door.location);
+    return distance !== null && distance <= proximityRange;
+  };
+
+  // Helper to get distance to a door
+  const getDistance = (door) => {
+    if (!door.location || !userPosition) return null;
+    return getDistanceTo(userPosition, door.location);
+  };
+
   return (
     <>
-      {doors.map((door) => (
-        <React.Fragment key={door.id}>
-          <p className="door-label">{t(door.labelKey)}</p>
-          <button className="door-button" onClick={() => onOpenDoor(door.id)}>
-            <span>{opening[door.id] ? t("isOpening") : t("openDoor")}</span>
-          </button>
-        </React.Fragment>
-      ))}
+      {/* Location denied message */}
+      {locationDenied && (
+        <p className="location-denied-message">{t("locationDenied")}</p>
+      )}
+
+      {doors.map((door) => {
+        const inRange = isDoorInRange(door);
+        const distance = getDistance(door);
+        const isDisabled = !inRange || (locationDenied && !isAdmin);
+
+        return (
+          <React.Fragment key={door.id}>
+            <p className="door-label">{t(door.labelKey)}</p>
+            <button
+              className={`door-button ${isDisabled ? "disabled" : ""}`}
+              onClick={() => !isDisabled && onOpenDoor(door.id)}
+              disabled={isDisabled}
+            >
+              <span>
+                {opening[door.id]
+                  ? t("isOpening")
+                  : isDisabled && distance !== null
+                  ? formatDistance(distance)
+                  : t("openDoor")}
+              </span>
+            </button>
+          </React.Fragment>
+        );
+      })}
     </>
   );
 };
@@ -45,12 +95,30 @@ Unlock.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       labelKey: PropTypes.string.isRequired,
+      location: PropTypes.shape({
+        lat: PropTypes.number,
+        long: PropTypes.number,
+      }),
     })
   ).isRequired,
   opening: PropTypes.objectOf(PropTypes.bool).isRequired,
   onOpenDoor: PropTypes.func.isRequired,
   liabilityDate: PropTypes.instanceOf(Date),
   liabilityOutdated: PropTypes.bool,
+  userPosition: PropTypes.shape({
+    lat: PropTypes.number,
+    long: PropTypes.number,
+  }),
+  locationPermission: PropTypes.oneOf(["pending", "granted", "denied", "unavailable"]),
+  proximityRange: PropTypes.number,
+  isAdmin: PropTypes.bool,
+};
+
+Unlock.defaultProps = {
+  userPosition: null,
+  locationPermission: "pending",
+  proximityRange: 100,
+  isAdmin: false,
 };
 
 export default Unlock;

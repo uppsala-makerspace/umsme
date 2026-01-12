@@ -69,4 +69,33 @@
   color: white;
   white-space: nowrap;
 }
-  
+
+/* Disabled door button (out of range) */
+.umsapp .login-form button.door-button.disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.umsapp .login-form button.door-button.disabled:hover {
+  background-color: #9ca3af;
+}
+
+.umsapp .login-form button.door-button.disabled:active {
+  background-color: #9ca3af;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Distance label on disabled button */
+.umsapp .login-form button.door-button.disabled span {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Location denied message */
+.umsapp .login-form .location-denied-message {
+  color: #ef4444;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0 0 1rem 0;
+}

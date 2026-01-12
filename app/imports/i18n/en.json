@@ -93,6 +93,7 @@
   "openDoor": "Open",
   "isOpening": "Opening...",
   "noAvailableDoors": "No available doors. Make sure you have an active lab membership.",
+  "locationDenied": "Location access denied. Please enable location to unlock doors.",
   "outerDoor": "Outer Door",
   "upperFloor": "Upper floor",
   "lowerFloor": "Lower floor",

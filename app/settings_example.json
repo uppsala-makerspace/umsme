@@ -26,10 +26,11 @@
     "homeAssistant": {
       "url": "http://homeassistant.local:8123",
       "token": "your-long-lived-access-token",
+      "proximityRange": 100,
       "locks": [
-        { "id": "outerDoor", "entityId": "switch.outer_door", "type": "switch" },
-        { "id": "upperFloor", "entityId": "lock.upper_floor", "type": "lock" },
-        { "id": "lowerFloor", "entityId": "lock.lower_floor", "type": "lock" }
+        { "id": "outerDoor", "entityId": "switch.outer_door", "type": "switch", "location": { "lat": 59.858, "long": 17.639 } },
+        { "id": "upperFloor", "entityId": "lock.upper_floor", "type": "lock", "location": { "lat": 59.858, "long": 17.639 } },
+        { "id": "lowerFloor", "entityId": "lock.lower_floor", "type": "lock", "location": { "lat": 59.858, "long": 17.639 } }
       ]
     }
   },

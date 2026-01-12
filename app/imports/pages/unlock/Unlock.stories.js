@@ -1,13 +1,31 @@
 import Unlock from "./Unlock";
 
+// Doors without location (backward compatible)
 const defaultDoors = [
   { id: "outerDoor", labelKey: "outerDoor" },
   { id: "upperFloor", labelKey: "upperFloor" },
   { id: "lowerFloor", labelKey: "lowerFloor" },
 ];
 
+// Doors with location data
+const doorsWithLocation = [
+  { id: "outerDoor", labelKey: "outerDoor", location: { lat: 59.858, long: 17.639 } },
+  { id: "upperFloor", labelKey: "upperFloor", location: { lat: 59.858, long: 17.639 } },
+  { id: "lowerFloor", labelKey: "lowerFloor", location: { lat: 59.858, long: 17.639 } },
+];
+
+// User positions
+const userNearby = { lat: 59.858, long: 17.639 }; // At the location
+const userFarAway = { lat: 59.85, long: 17.63 }; // ~900m away
+
 const liabilityDate = new Date("2024-01-15");
 const oldLiabilityDate = new Date("2023-06-01");
+
+const defaultOpening = {
+  outerDoor: false,
+  upperFloor: false,
+  lowerFloor: false,
+};
 
 export default {
   title: "Pages/Unlock",
@@ -17,14 +35,70 @@ export default {
 export const Default = {
   args: {
     doors: defaultDoors,
-    opening: {
-      outerDoor: false,
-      upperFloor: false,
-      lowerFloor: false,
-    },
+    opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
     liabilityDate,
     liabilityOutdated: false,
+    locationPermission: "granted",
+    userPosition: userNearby,
+    proximityRange: 100,
+    isAdmin: false,
+  },
+};
+
+export const InRange = {
+  args: {
+    doors: doorsWithLocation,
+    opening: defaultOpening,
+    onOpenDoor: (door) => console.log(`Opening ${door}`),
+    liabilityDate,
+    liabilityOutdated: false,
+    locationPermission: "granted",
+    userPosition: userNearby,
+    proximityRange: 100,
+    isAdmin: false,
+  },
+};
+
+export const OutOfRange = {
+  args: {
+    doors: doorsWithLocation,
+    opening: defaultOpening,
+    onOpenDoor: (door) => console.log(`Opening ${door}`),
+    liabilityDate,
+    liabilityOutdated: false,
+    locationPermission: "granted",
+    userPosition: userFarAway,
+    proximityRange: 100,
+    isAdmin: false,
+  },
+};
+
+export const LocationDenied = {
+  args: {
+    doors: doorsWithLocation,
+    opening: defaultOpening,
+    onOpenDoor: (door) => console.log(`Opening ${door}`),
+    liabilityDate,
+    liabilityOutdated: false,
+    locationPermission: "denied",
+    userPosition: null,
+    proximityRange: 100,
+    isAdmin: false,
+  },
+};
+
+export const AdminBypass = {
+  args: {
+    doors: doorsWithLocation,
+    opening: defaultOpening,
+    onOpenDoor: (door) => console.log(`Opening ${door}`),
+    liabilityDate,
+    liabilityOutdated: false,
+    locationPermission: "granted",
+    userPosition: userFarAway,
+    proximityRange: 100,
+    isAdmin: true,
   },
 };
 
@@ -39,6 +113,10 @@ export const OuterDoorOpening = {
     onOpenDoor: (door) => console.log(`Opening ${door}`),
     liabilityDate,
     liabilityOutdated: false,
+    locationPermission: "granted",
+    userPosition: userNearby,
+    proximityRange: 100,
+    isAdmin: false,
   },
 };
 
@@ -51,6 +129,10 @@ export const SingleDoor = {
     onOpenDoor: (door) => console.log(`Opening ${door}`),
     liabilityDate,
     liabilityOutdated: false,
+    locationPermission: "granted",
+    userPosition: userNearby,
+    proximityRange: 100,
+    isAdmin: false,
   },
 };
 
@@ -61,33 +143,37 @@ export const NoDoors = {
     onOpenDoor: (door) => console.log(`Opening ${door}`),
     liabilityDate,
     liabilityOutdated: false,
+    locationPermission: "granted",
+    userPosition: userNearby,
+    proximityRange: 100,
+    isAdmin: false,
   },
 };
 
 export const LiabilityNotApproved = {
   args: {
     doors: defaultDoors,
-    opening: {
-      outerDoor: false,
-      upperFloor: false,
-      lowerFloor: false,
-    },
+    opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
     liabilityDate: null,
     liabilityOutdated: false,
+    locationPermission: "granted",
+    userPosition: userNearby,
+    proximityRange: 100,
+    isAdmin: false,
   },
 };
 
 export const LiabilityOutdated = {
   args: {
     doors: defaultDoors,
-    opening: {
-      outerDoor: false,
-      upperFloor: false,
-      lowerFloor: false,
-    },
+    opening: defaultOpening,
     onOpenDoor: (door) => console.log(`Opening ${door}`),
     liabilityDate: oldLiabilityDate,
     liabilityOutdated: true,
+    locationPermission: "granted",
+    userPosition: userNearby,
+    proximityRange: 100,
+    isAdmin: false,
   },
 };
