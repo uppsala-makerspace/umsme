@@ -70,7 +70,7 @@ export default () => {
         ]);
 
         // Set proximity range and doors from server
-        setProximityRange(doorsResult.proximityRange || 100);
+        setProximityRange(doorsResult.proximityRange || 200);
 
         const doorObjects = doorsResult.doors.map((door) => ({
           id: door.id,
