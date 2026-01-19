@@ -74,7 +74,6 @@ const createChangeSelector = (searchCollections) => async (selector, userId) => 
         const memberIds = matchingMembers.map(m => m._id);
         if (memberIds.length > 0) {
           orConditions.push({ memberId: { $in: memberIds } });
-          orConditions.push({ certifierId: { $in: memberIds } });
         }
       }
 
