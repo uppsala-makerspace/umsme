@@ -1,0 +1,450 @@
+.certificate-detail-container {
+  padding: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.back-link {
+  display: inline-block;
+  color: #5fc86f;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Certificate Header */
+.certificate-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.certificate-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+
+.certificate-description {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+/* Markdown content styling */
+.markdown-content p {
+  margin: 0.5rem 0;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.markdown-content h1 { font-size: 1.25rem; }
+.markdown-content h2 { font-size: 1.125rem; }
+.markdown-content h3 { font-size: 1rem; }
+.markdown-content h4 { font-size: 0.875rem; }
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.markdown-content ul {
+  list-style-type: disc;
+}
+
+.markdown-content ol {
+  list-style-type: decimal;
+}
+
+.markdown-content li {
+  margin: 0.25rem 0;
+  display: list-item;
+}
+
+.markdown-content a {
+  color: #5fc86f;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.markdown-content code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: "DM Mono", monospace;
+}
+
+.markdown-content pre {
+  background-color: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.markdown-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid #5fc86f;
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+.certificate-validity-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Mandatory Certificate Notice */
+.mandatory-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  background-color: #fefce8;
+  border: 1px solid #fde047;
+  border-radius: 8px;
+}
+
+.mandatory-notice-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #854d0e;
+}
+
+.mandatory-notice .mandatory-icon {
+  font-size: 1.25rem;
+}
+
+/* Sections */
+.detail-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+/* Status Cards */
+.status-card {
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+}
+
+.status-card.valid {
+  border-left: 4px solid #5fc86f;
+  background-color: #f0fdf4;
+}
+
+.status-card.expired {
+  border-left: 4px solid #9ca3af;
+  background-color: #f9fafb;
+}
+
+.status-card.pending {
+  border-left: 4px solid #f59e0b;
+  background-color: #fffbeb;
+}
+
+.status-card.available {
+  border-left: 4px solid #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* Status Details */
+.status-details {
+  margin-top: 0.75rem;
+}
+
+.status-detail {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  margin-right: 0.5rem;
+}
+
+.status-badge.valid,
+.status-badge.confirmed {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.expired {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-badge.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* Attestation List */
+.attestation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.attestation-item {
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 8px;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+}
+
+.attestation-item.own-request {
+  border-left: 4px solid #f59e0b;
+}
+
+.attestation-item.confirmed {
+  border-left: 4px solid #5fc86f;
+  background-color: #f0fdf4;
+}
+
+.attestation-info {
+  margin-bottom: 0.75rem;
+}
+
+.requester-name {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.own-request-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  margin-left: 0.5rem;
+}
+
+.attempt-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  margin-left: 0.5rem;
+}
+
+.validity-date {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.attestation-comment {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background-color: #f9fafb;
+  border-radius: 4px;
+}
+
+/* Certifier Comment Box */
+.certifier-comment-box {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-left: 4px solid #0ea5e9;
+  border-radius: 6px;
+}
+
+.certifier-comment-box.highlight {
+  background-color: #fef3c7;
+  border-color: #fcd34d;
+  border-left-color: #f59e0b;
+}
+
+.certifier-comment-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0369a1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.certifier-comment-box.highlight .certifier-comment-label {
+  color: #92400e;
+}
+
+.certifier-comment-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #1e3a5f;
+  line-height: 1.5;
+}
+
+.certifier-comment-box.highlight .certifier-comment-text {
+  color: #78350f;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.attestation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-family: "DM Mono", monospace;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #5fc86f;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #096817;
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #d1d5db;
+}
+
+.btn-success {
+  background-color: #5fc86f;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #096817;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+/* Comment Input */
+.comment-input {
+  flex: 1;
+  min-width: 150px;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-family: "DM Mono", monospace;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: #5fc86f;
+  box-shadow: 0 0 0 2px rgba(95, 200, 111, 0.2);
+}
+
+/* Error Message */
+.error-message {
+  color: #dc2626;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .action-buttons,
+  .attestation-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .comment-input {
+    width: 100%;
+  }
+}

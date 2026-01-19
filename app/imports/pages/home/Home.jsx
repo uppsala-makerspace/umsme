@@ -106,6 +106,9 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
           <Link to="/unlock" className="wideButton">
             <button className="form-button">{t("keys")}</button>
           </Link>
+          <Link to="/certificates" className="wideButton">
+            <button className="form-button">{t("certificates")}</button>
+          </Link>
           <Link to="/calendar" className="wideButton">
             <button className="form-button">{t("calender")}</button>
           </Link>

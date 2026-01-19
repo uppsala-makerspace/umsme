@@ -12,7 +12,10 @@ import ForgotPassword from '/imports/pages/forgotPassword';
 import ResetPassword from '/imports/pages/resetPassword';
 import Calendar from '/imports/pages/calendar';
 import Contact from '/imports/pages/contact';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Certificates from '/imports/pages/certificates';
+import CertificateDetail from '/imports/pages/certificateDetail';
+import CertifierRequestDetail from '/imports/pages/certifierRequestDetail';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 export const App = () => (
   <div>
@@ -31,6 +34,10 @@ export const App = () => (
         <Route path="/account" element={<Account />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/certificates" element={<Certificates />} />
+        <Route path="/certificates/:certificateId" element={<CertificateDetail />} />
+        <Route path="/certifier-requests" element={<Navigate to="/certificates" replace />} />
+        <Route path="/certifier-requests/:attestationId" element={<CertifierRequestDetail />} />
       </Routes>
     </Router>
   </div>);

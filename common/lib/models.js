@@ -634,6 +634,7 @@ export const models = {
       label: "Certified by",
       type: String,
       max: 50,
+      optional: true,
     },
     startDate: {
       label: "Start date",
@@ -652,6 +653,27 @@ export const models = {
       autoform: {
         type: "textarea",
       },
+    },
+    privateComment: {
+      label: "Private comment",
+      type: String,
+      max: 1000,
+      optional: true,
+      autoform: {
+        type: "textarea",
+      },
+    },
+    attempt: {
+      label: "Attempt",
+      type: Number,
+      optional: true,
+      autoform: { omit: true },
+    },
+    confirmedAt: {
+      label: "Confirmed at",
+      type: Date,
+      optional: true,
+      autoform: { omit: true },
     },
   },
 };
