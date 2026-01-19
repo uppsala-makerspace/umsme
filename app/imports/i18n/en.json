@@ -236,7 +236,7 @@
   "myCertificates": "My Certificates",
   "availableCertificates": "Available Certificates",
   "requestsToConfirm": "Requests to Confirm",
-  "requestCertificate": "Request",
+  "requestCertificate": "Ask for confirmation",
   "cancelRequest": "Cancel",
   "reRequest": "Re-request",
   "confirmRequest": "Confirm",
@@ -281,9 +281,16 @@
   "noExpiration": "No expiration",
   "pendingRequest": "pending request",
   "pendingRequests": "pending requests",
-  "canRequestCertificate": "You can request this certificate.",
+  "canRequestCertificate": "If a certifier is present and ready to confirm you, you can initiate a request below. The request is valid for 2 hours.",
   "yourRequest": "Your request",
   "hasComment": "Has comment",
   "mandatoryCertificate": "Mandatory certificate",
-  "mandatoryCertificateNotice": "This is a mandatory certificate for all members."
+  "mandatoryCertificateNotice": "This is a mandatory certificate for all members.",
+
+  "unlockMandatoryCertificateRequired": "Before you can open doors, you need to have the mandatory safety certificate.",
+  "unlockMandatoryCertificateButton": "Get certificate",
+
+  "refresh": "Refresh",
+
+  "pendingRequestWaiting": "Waiting for a certifier to confirm, deny, or provide feedback. If no action is taken within roughly 2 hours, the request will be removed."
 }

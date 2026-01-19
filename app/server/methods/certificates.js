@@ -507,6 +507,40 @@ Meteor.methods({
   },
 
   /**
+   * Get mandatory certificate status for the current user.
+   * Returns the mandatory certificate and whether the user has a valid attestation.
+   */
+  "certificates.getMandatoryStatus": async () => {
+    const member = await findMemberForUser();
+    if (!member) {
+      return { certificate: null, hasValidAttestation: true };
+    }
+
+    const mandatoryCertificate = await Certificates.findOneAsync({ mandatory: true });
+    if (!mandatoryCertificate) {
+      return { certificate: null, hasValidAttestation: true };
+    }
+
+    // Check if member has a confirmed attestation
+    const attestation = await Attestations.findOneAsync({
+      certificateId: mandatoryCertificate._id,
+      memberId: member._id,
+      certifierId: { $exists: true },
+    });
+
+    if (!attestation) {
+      return { certificate: mandatoryCertificate, hasValidAttestation: false };
+    }
+
+    // Check if attestation is expired
+    if (attestation.endDate && attestation.endDate < new Date()) {
+      return { certificate: mandatoryCertificate, hasValidAttestation: false };
+    }
+
+    return { certificate: mandatoryCertificate, hasValidAttestation: true };
+  },
+
+  /**
    * Remove a commented request (certifier or requester).
    */
   "certificates.remove": async (attestationId) => {

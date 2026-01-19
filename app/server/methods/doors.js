@@ -2,6 +2,8 @@ import { Meteor } from "meteor/meteor";
 import { fetch } from "meteor/fetch";
 import { findForUser, hasActiveLabMembership } from "/server/methods/utils";
 import { LiabilityDocuments } from "/imports/common/collections/liabilityDocuments";
+import { Certificates } from "/imports/common/collections/certificates";
+import { Attestations } from "/imports/common/collections/attestations";
 
 const getHomeAssistantConfig = () => {
   const config = Meteor.settings.private?.homeAssistant;
@@ -76,6 +78,23 @@ Meteor.methods({
       const memberLiabilityDate = member.liabilityDate;
       if (!memberLiabilityDate || memberLiabilityDate.getTime() !== latestLiability.date.getTime()) {
         throw new Meteor.Error("liability-not-approved", "You must approve the latest liability agreement");
+      }
+    }
+
+    // Check if member has mandatory certificate attestation
+    const mandatoryCertificate = await Certificates.findOneAsync({ mandatory: true });
+    if (mandatoryCertificate) {
+      const attestation = await Attestations.findOneAsync({
+        certificateId: mandatoryCertificate._id,
+        memberId: member._id,
+        certifierId: { $exists: true },
+      });
+      if (!attestation) {
+        throw new Meteor.Error("mandatory-certificate-missing", "You must have the mandatory certificate", mandatoryCertificate._id);
+      }
+      // Check if attestation is not expired
+      if (attestation.endDate && attestation.endDate < new Date()) {
+        throw new Meteor.Error("mandatory-certificate-expired", "Your mandatory certificate has expired", mandatoryCertificate._id);
       }
     }
 

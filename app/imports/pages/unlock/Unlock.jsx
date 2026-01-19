@@ -11,6 +11,8 @@ const Unlock = ({
   onOpenDoor,
   liabilityDate,
   liabilityOutdated,
+  mandatoryCertificate,
+  hasMandatoryCertificate,
   userPosition,
   locationPermission,
   proximityRange,
@@ -36,6 +38,19 @@ const Unlock = ({
         </p>
         <Link to="/liability" className="wideButton">
           <button className="form-button">{t("homeLiabilityButton")}</button>
+        </Link>
+      </>
+    );
+  }
+
+  if (mandatoryCertificate && !hasMandatoryCertificate) {
+    return (
+      <>
+        <p className="text-container">
+          {t("unlockMandatoryCertificateRequired")}
+        </p>
+        <Link to={`/certificates/${mandatoryCertificate._id}`} className="wideButton">
+          <button className="form-button">{t("unlockMandatoryCertificateButton")}</button>
         </Link>
       </>
     );

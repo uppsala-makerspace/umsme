@@ -183,9 +183,68 @@
   background-color: #fffbeb;
 }
 
+.pending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pending-header-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pending-requested-at {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.85rem;
+  color: #92400e;
+}
+
+.pending-waiting-message {
+  margin: 0.75rem 0 0 0;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: #78350f;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.btn-refresh-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: #fbbf24;
+  color: #78350f;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.btn-refresh-icon:hover:not(:disabled) {
+  background-color: #f59e0b;
+  transform: rotate(45deg);
+}
+
+.btn-refresh-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .status-card.available {
   border-left: 4px solid #3b82f6;
   background-color: #eff6ff;
+}
+
+.status-card.available p {
+  margin-bottom: 1rem;
 }
 
 /* Status Details */

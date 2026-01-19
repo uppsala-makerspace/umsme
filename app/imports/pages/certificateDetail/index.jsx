@@ -77,6 +77,7 @@ export default () => {
         onRequest={handleRequest}
         onCancel={handleCancel}
         onReRequest={handleReRequest}
+        onRefresh={fetchData}
       />
     </>
   );

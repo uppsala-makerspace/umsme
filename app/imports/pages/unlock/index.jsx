@@ -13,6 +13,8 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const [liabilityDate, setLiabilityDate] = useState(null);
   const [liabilityOutdated, setLiabilityOutdated] = useState(false);
+  const [mandatoryCertificate, setMandatoryCertificate] = useState(null);
+  const [hasMandatoryCertificate, setHasMandatoryCertificate] = useState(true);
   const [userPosition, setUserPosition] = useState(null);
   const [locationPermission, setLocationPermission] = useState("pending"); // pending, granted, denied, unavailable
   const [locationError, setLocationError] = useState(null);
@@ -64,9 +66,10 @@ export default () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [doorsResult, memberInfo] = await Promise.all([
+        const [doorsResult, memberInfo, certStatus] = await Promise.all([
           Meteor.callAsync("availableDoors"),
-          Meteor.callAsync("findInfoForUser")
+          Meteor.callAsync("findInfoForUser"),
+          Meteor.callAsync("certificates.getMandatoryStatus")
         ]);
 
         // Set proximity range and doors from server
@@ -82,6 +85,12 @@ export default () => {
 
         setLiabilityDate(memberInfo?.liabilityDate ?? null);
         setLiabilityOutdated(memberInfo?.liabilityOutdated ?? false);
+
+        // Set mandatory certificate status
+        if (certStatus) {
+          setMandatoryCertificate(certStatus.certificate);
+          setHasMandatoryCertificate(certStatus.hasValidAttestation);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -154,6 +163,8 @@ export default () => {
             onOpenDoor={handleOpenDoor}
             liabilityDate={liabilityDate}
             liabilityOutdated={liabilityOutdated}
+            mandatoryCertificate={mandatoryCertificate}
+            hasMandatoryCertificate={hasMandatoryCertificate}
             userPosition={userPosition}
             locationPermission={locationPermission}
             proximityRange={proximityRange}

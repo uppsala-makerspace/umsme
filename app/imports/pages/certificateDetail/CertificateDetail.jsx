@@ -13,6 +13,7 @@ const CertificateDetail = ({
   onRequest,
   onCancel,
   onReRequest,
+  onRefresh,
 }) => {
   const { t, i18n } = useTranslation();
   const [actionLoading, setActionLoading] = useState(false);
@@ -33,6 +34,15 @@ const CertificateDetail = ({
   const formatDate = (date) => {
     if (!date) return "";
     return new Date(date).toLocaleDateString(lang === "sv" ? "sv-SE" : "en-US");
+  };
+
+  const formatDateTime = (date) => {
+    if (!date) return "";
+    const locale = lang === "sv" ? "sv-SE" : "en-US";
+    return new Date(date).toLocaleString(locale, {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
   };
 
   const handleAction = async (action, ...args) => {
@@ -175,17 +185,36 @@ const CertificateDetail = ({
 
         {isPending && (
           <div className="status-card pending">
-            <span className="status-badge pending">{t("pendingRequest")}</span>
-            {myAttestation.attempt > 1 && (
-              <span className="attempt-badge">
-                {t("attemptNumber", { number: myAttestation.attempt })}
-              </span>
-            )}
-            {myAttestation.comment && (
+            <div className="pending-header">
+              <div className="pending-header-left">
+                <span className="status-badge pending">{t("pendingRequest")}</span>
+                {myAttestation.attempt > 1 && (
+                  <span className="attempt-badge">
+                    {t("attemptNumber", { number: myAttestation.attempt })}
+                  </span>
+                )}
+              </div>
+              <button
+                className="btn-refresh-icon"
+                onClick={onRefresh}
+                disabled={actionLoading}
+                title={t("refresh")}
+              >
+                ↻
+              </button>
+            </div>
+            <p className="pending-requested-at">
+              {t("requestedAt")}: {formatDateTime(myAttestation.startDate)}
+            </p>
+            {myAttestation.comment ? (
               <div className="certifier-comment-box highlight">
                 <span className="certifier-comment-label">{t("certifierFeedback")}</span>
                 <p className="certifier-comment-text">{myAttestation.comment}</p>
               </div>
+            ) : (
+              <p className="pending-waiting-message">
+                {t("pendingRequestWaiting")}
+              </p>
             )}
             <div className="action-buttons">
               <button
@@ -233,6 +262,7 @@ CertificateDetail.propTypes = {
   onRequest: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   onReRequest: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
 };
 
 export default CertificateDetail;

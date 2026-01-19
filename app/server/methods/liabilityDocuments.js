@@ -57,8 +57,9 @@ Meteor.methods({
       throw new Meteor.Error("not-found", "No member found for user");
     }
 
+    // Use document.date from the database to ensure exact match for comparison
     await Members.updateAsync(member._id, {
-      $set: { liabilityDate: date },
+      $set: { liabilityDate: document.date },
     });
 
     return { success: true };

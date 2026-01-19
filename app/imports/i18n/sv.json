@@ -236,7 +236,7 @@
   "myCertificates": "Mina certifikat",
   "availableCertificates": "Tillgängliga certifikat",
   "requestsToConfirm": "Förfrågningar att bekräfta",
-  "requestCertificate": "Begär",
+  "requestCertificate": "Be om bekräftelse",
   "cancelRequest": "Avbryt",
   "reRequest": "Begär igen",
   "confirmRequest": "Bekräfta",
@@ -281,9 +281,16 @@
   "noExpiration": "Inget utgångsdatum",
   "pendingRequest": "väntande förfrågan",
   "pendingRequests": "väntande förfrågningar",
-  "canRequestCertificate": "Du kan begära detta certifikat.",
+  "canRequestCertificate": "Om en certifierare är närvarande och redo att bekräfta dig kan du initiera en förfrågan nedan. Förfrågan är giltig i 2 timmar.",
   "yourRequest": "Din förfrågan",
   "hasComment": "Har kommentar",
   "mandatoryCertificate": "Obligatoriskt certifikat",
-  "mandatoryCertificateNotice": "Detta är ett obligatoriskt certifikat för alla medlemmar."
+  "mandatoryCertificateNotice": "Detta är ett obligatoriskt certifikat för alla medlemmar.",
+
+  "unlockMandatoryCertificateRequired": "Innan du kan öppna dörrar behöver du ha det obligatoriska säkerhetscertifikatet.",
+  "unlockMandatoryCertificateButton": "Skaffa certifikat",
+
+  "refresh": "Uppdatera",
+
+  "pendingRequestWaiting": "Väntar på att en certifierare ska bekräfta, neka eller ge feedback. Om ingen åtgärd vidtas inom ungefär 2 timmar kommer förfrågan att tas bort."
 }
