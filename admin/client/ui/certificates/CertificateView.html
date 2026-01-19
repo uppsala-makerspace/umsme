@@ -1,0 +1,98 @@
+<template name="CertificateView">
+    <a href="/certificates" style="float: right">Back to certificates</a>
+    <h1>Certificate: {{certificate.name.sv}}{{#if certificate.name.en}} / {{certificate.name.en}}{{/if}}
+        {{#if certificate.mandatory}}<span class="label label-primary">Mandatory</span>{{/if}}
+        {{#unless certificate.mandatory}}<small><a class="deleteCertificate">Delete</a></small>{{/unless}}
+    </h1>
+
+    {{#if certificate.mandatory}}
+    <div class="alert alert-info">
+        This certificate is mandatory for membership and cannot be deleted or unmarked.
+    </div>
+    {{else}}
+        {{#if canMarkMandatory}}
+        <p><button class="btn btn-warning markMandatory">Mark as Mandatory for Membership</button></p>
+        {{/if}}
+    {{/if}}
+
+    <h2>Certificate Details</h2>
+    {{> quickForm collection=Certificates doc=certificate id="certificateViewForm" omitFields="_id" type="update" buttonContent="Update"}}
+
+    <hr>
+
+    <h2>Certifiers <small><a class="showCertifierSelector">Add</a></small></h2>
+    <p class="text-muted">Members who are allowed to grant this certificate (in addition to those with the certifier role).</p>
+
+    {{#if showCertifierSelector}}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Add Certifier <a class="hideCertifierSelector pull-right">Cancel</a></h3>
+        </div>
+        <div class="panel-body">
+            <p>Select a member to add as certifier:</p>
+            {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed certifierList"}}
+        </div>
+    </div>
+    {{/if}}
+
+    {{#if hasCertifiers}}
+    <ul class="list-group">
+        {{#each certifiers}}
+        <li class="list-group-item">
+            <a href="/member/{{_id}}">{{name}}</a>
+            <a class="removeCertifier pull-right text-danger" data-id="{{_id}}">Remove</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No specific certifiers assigned. Only members with the certifier role (if set) can grant this certificate.</em></p>
+    {{/if}}
+
+    <hr>
+
+    <h2>Certificate Holders</h2>
+
+    <p>
+        <button class="btn btn-primary showAttestationForm">Grant Certificate</button>
+    </p>
+
+    {{#if showAttestationForm}}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Grant Certificate <a class="hideAttestationForm pull-right">Cancel</a></h3>
+        </div>
+        <div class="panel-body">
+            {{#if selectedMember}}
+                <p><strong>Member:</strong> <a href="/member/{{selectedMember._id}}">{{selectedMember.name}}</a> <small><a class="clearSelectedMember">Change</a></small></p>
+
+                <p><strong>Certifier:</strong>
+                    {{#if selectedCertifier}}
+                        <a href="/member/{{selectedCertifier._id}}">{{selectedCertifier.name}}</a> <small><a class="showAttestationCertifierSelector">Change</a></small>
+                    {{else}}
+                        <em>None selected</em> <small><a class="showAttestationCertifierSelector">Select</a></small>
+                    {{/if}}
+                </p>
+
+                {{#if showAttestationCertifierSelector}}
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Select Certifier <a class="hideAttestationCertifierSelector pull-right">Cancel</a></h4>
+                    </div>
+                    <div class="panel-body">
+                        {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed attestationCertifierList"}}
+                    </div>
+                </div>
+                {{else}}
+                    {{> quickForm id="grantAttestationForm" collection=Attestations type="normal" fields="startDate,endDate,comment"}}
+                {{/if}}
+            {{else}}
+                <p>Select a member to grant the attestation to:</p>
+                {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed memberList"}}
+            {{/if}}
+        </div>
+    </div>
+    {{/if}}
+
+    {{> tabular table=TabularTables.Attestations selector=attestationSelector class="table table-hover table-striped table-bordered table-condensed attestationList"}}
+
+</template>

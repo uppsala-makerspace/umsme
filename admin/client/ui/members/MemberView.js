@@ -12,6 +12,7 @@ import '../message/MessageList';
 import '../membership/MembershipList';
 import '../family/FamilyList';
 import '../message/ReminderMessage';
+import '../certificates/MemberAttestations';
 
 Template.MemberView.onCreated(function() {
   Meteor.subscribe('members');

@@ -1,0 +1,47 @@
+<template name="MemberAttestations">
+    <h2>Certificates</h2>
+
+    <p>
+        <button class="btn btn-primary showAttestationForm">Grant Certificate</button>
+    </p>
+
+    {{#if showAttestationForm}}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Grant Certificate <a class="hideAttestationForm pull-right">Cancel</a></h3>
+        </div>
+        <div class="panel-body">
+            {{#if selectedCertificate}}
+                <p><strong>Certificate:</strong> <a href="/certificate/{{selectedCertificate._id}}">{{selectedCertificateName}}</a> <small><a class="clearSelectedCertificate">Change</a></small></p>
+
+                <p><strong>Certifier:</strong>
+                    {{#if selectedCertifier}}
+                        <a href="/member/{{selectedCertifier._id}}">{{selectedCertifier.name}}</a> <small><a class="showCertifierSelector">Change</a></small>
+                    {{else}}
+                        <em>None selected</em> <small><a class="showCertifierSelector">Select</a></small>
+                    {{/if}}
+                </p>
+
+                {{#if showCertifierSelector}}
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Select Certifier <a class="hideCertifierSelector pull-right">Cancel</a></h4>
+                    </div>
+                    <div class="panel-body">
+                        {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed certifierMemberList"}}
+                    </div>
+                </div>
+                {{else}}
+                    {{> quickForm id="grantMemberAttestationForm" collection=Attestations type="normal" fields="startDate,endDate,comment"}}
+                {{/if}}
+            {{else}}
+                <p>Select a certificate to grant:</p>
+                {{> tabular table=TabularTables.Certificates class="table table-hover table-striped table-bordered table-condensed certificateList"}}
+            {{/if}}
+        </div>
+    </div>
+    {{/if}}
+
+    {{> tabular table=TabularTables.MemberAttestations selector=attestationSelector class="table table-hover table-striped table-bordered table-condensed memberAttestationList"}}
+
+</template>

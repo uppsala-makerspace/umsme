@@ -1,0 +1,11 @@
+.attestation-table tr.has-comment td,
+.member-attestation-table tr.has-comment td {
+    border-bottom: none;
+}
+
+.attestation-table tr.comment-row td,
+.member-attestation-table tr.comment-row td {
+    border-top: none;
+    padding-top: 0;
+    color: #666;
+}

@@ -9,6 +9,8 @@ import { Comments } from '/imports/common/collections/comments';
 import { Unlocks } from '/imports/common/collections/unlocks';
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
+import { Certificates } from '/imports/common/collections/certificates';
+import { Attestations } from '/imports/common/collections/attestations';
 
 const createAuthFuncFor = (col) => async function () {
   if (
@@ -31,6 +33,8 @@ export default () => {
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
   Meteor.publish('initiatedPayments', createAuthFuncFor(initiatedPayments));
   Meteor.publish('liabilityDocuments', createAuthFuncFor(LiabilityDocuments));
+  Meteor.publish('certificates', createAuthFuncFor(Certificates));
+  Meteor.publish('attestations', createAuthFuncFor(Attestations));
 
   Meteor.publish(null, async function () {
     if (this.userId) {

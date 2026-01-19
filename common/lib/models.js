@@ -11,6 +11,16 @@ export const getFromOptions = (callback) => {
   return fromOptions || [];
 };
 
+export const getRoleOptions = () => {
+  if (typeof Meteor !== 'undefined' && Meteor.roles) {
+    return Meteor.roles.find().map(role => ({
+      label: role._id,
+      value: role._id
+    }));
+  }
+  return [];
+};
+
 export const models = {
   initiatedPayments: {
     swishID: {
@@ -521,6 +531,123 @@ export const models = {
       label: "Document text (English)",
       type: String,
       max: 50000,
+      optional: true,
+      autoform: {
+        type: "textarea",
+      },
+    },
+  },
+  certificate: {
+    name: {
+      label: "Name",
+      type: Object,
+      blackbox: true,
+    },
+    "name.sv": {
+      label: "Name (Swedish)",
+      type: String,
+      max: 200,
+    },
+    "name.en": {
+      label: "Name (English)",
+      type: String,
+      max: 200,
+      optional: true,
+    },
+    description: {
+      label: "Description",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "description.sv": {
+      label: "Description (Swedish)",
+      type: String,
+      max: 1000,
+      optional: true,
+      autoform: {
+        type: "textarea",
+        rows: 10,
+      },
+    },
+    "description.en": {
+      label: "Description (English)",
+      type: String,
+      max: 1000,
+      optional: true,
+      autoform: {
+        type: "textarea",
+        rows: 10,
+      },
+    },
+    defaultValidityDays: {
+      label: "Default validity (days)",
+      type: Number,
+      optional: true,
+    },
+    prerequisites: {
+      label: "Prerequisites",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "prerequisites.$": { type: String, autoform: { omit: true } },
+    certifiers: {
+      label: "Certifiers",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "certifiers.$": { type: String, autoform: { omit: true } },
+    certifierRole: {
+      label: "Certifier role",
+      type: String,
+      max: 100,
+      optional: true,
+      autoform: {
+        type: "select",
+        firstOption: "(Select a role)",
+        options: getRoleOptions,
+      },
+    },
+    mandatory: {
+      label: "Mandatory for membership",
+      type: Boolean,
+      optional: true,
+      autoform: {
+        omit: true,
+      },
+    },
+  },
+  attestation: {
+    certificateId: {
+      label: "Certificate",
+      type: String,
+      max: 50,
+    },
+    memberId: {
+      label: "Member",
+      type: String,
+      max: 50,
+    },
+    certifierId: {
+      label: "Certified by",
+      type: String,
+      max: 50,
+    },
+    startDate: {
+      label: "Start date",
+      type: Date,
+    },
+    endDate: {
+      label: "End date",
+      type: Date,
+      optional: true,
+    },
+    comment: {
+      label: "Comment",
+      type: String,
+      max: 1000,
       optional: true,
       autoform: {
         type: "textarea",

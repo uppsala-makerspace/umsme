@@ -20,4 +20,6 @@ export const schemas = {
   users: new SimpleSchema(models.users),
   initiatedPayments: new SimpleSchema(models.initiatedPayments),
   liabilityDocument: new SimpleSchema(models.liabilityDocument),
+  certificate: new SimpleSchema(models.certificate),
+  attestation: new SimpleSchema(models.attestation),
 };
