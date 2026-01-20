@@ -1,12 +1,10 @@
 import { Meteor } from "meteor/meteor";
+import { Accounts } from "meteor/accounts-base";
 import { Roles } from "meteor/roles";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Attestations } from "/imports/common/collections/attestations";
 import { Members } from "/imports/common/collections/members";
 import { findMemberForUser } from "./utils";
-
-// Time in milliseconds after which pending requests without comments are removed
-const PENDING_EXPIRY_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 /**
  * Check if a member can certify a given certificate.
@@ -25,7 +23,7 @@ const canCertify = async (memberId, certificate) => {
   if (certificate.certifierRole) {
     const member = await Members.findOneAsync(memberId);
     if (member) {
-      const user = await Meteor.users.findOneAsync({ "emails.address": member.email });
+      const user = Accounts.findUserByEmail(member.email);
       if (user && Roles.userIsInRole(user._id, certificate.certifierRole)) {
         return true;
       }
@@ -33,18 +31,6 @@ const canCertify = async (memberId, certificate) => {
   }
 
   return false;
-};
-
-/**
- * Remove expired pending requests (older than 2 hours with no comment).
- */
-const cleanupExpiredRequests = async () => {
-  const expiryTime = new Date(Date.now() - PENDING_EXPIRY_MS);
-  await Attestations.removeAsync({
-    certifierId: { $exists: false },
-    comment: { $exists: false },
-    startDate: { $lt: expiryTime },
-  });
 };
 
 Meteor.methods({
@@ -92,9 +78,6 @@ Meteor.methods({
     let recentlyConfirmed = [];
 
     if (userCanCertify) {
-      // Clean up expired requests first
-      await cleanupExpiredRequests();
-
       // Get pending attestations for this certificate
       pendingRequests = await Attestations.find({
         certificateId,
@@ -164,9 +147,6 @@ Meteor.methods({
       throw new Meteor.Error("not-found", "Member not found");
     }
 
-    // Clean up expired requests first
-    await cleanupExpiredRequests();
-
     const attestations = await Attestations.find({ memberId: member._id }).fetchAsync();
 
     // Enrich with certificate info and remove privateComment (only visible to certifiers/admins)
@@ -193,9 +173,6 @@ Meteor.methods({
     if (!member) {
       throw new Meteor.Error("not-found", "Member not found");
     }
-
-    // Clean up expired requests first
-    await cleanupExpiredRequests();
 
     // Get all certificates this member can certify
     const allCertificates = await Certificates.find({}).fetchAsync();
