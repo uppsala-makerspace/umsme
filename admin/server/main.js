@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import '/imports/common/collections/users';
 import './cronjob/syncAndMailUnlocks';
+import './cronjob/cleanupPendingAttestations';
 import './methods/mail';
 import './methods/lock';
 import './methods/bank';
