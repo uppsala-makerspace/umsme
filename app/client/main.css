@@ -37,7 +37,7 @@
   flex-direction: column;
   /* align-items: center; */
   width: 100%;
-  max-width: 400px;
+  max-width: 576px;
   padding: 2%;
 }
 

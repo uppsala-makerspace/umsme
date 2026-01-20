@@ -95,7 +95,7 @@ const Storage = ({
           <p className="text-3xl font-bold text-green-600">{storage}</p>
         </div>
 
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-xl">
           <h3 className="text-lg font-medium mb-2">{t("requestBoxChange")}</h3>
           <p className="text-sm text-gray-600 mb-3">{t("requestBoxChangeInfo")}</p>
           <select
@@ -144,7 +144,7 @@ const Storage = ({
           {t("cancelQueue")}
         </button>
 
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-xl">
           <h3 className="text-lg font-medium mb-2">{t("boxPreference")}</h3>
           <p className="text-sm text-gray-600 mb-3">{t("boxPreferenceInfo")}</p>
           <select
@@ -184,7 +184,7 @@ const Storage = ({
         <p className="text-gray-600">{t("noBoxAssigned")}</p>
       </div>
 
-      <div className="w-full max-w-md text-center">
+      <div className="w-full max-w-xl text-center">
         <p className="text-sm text-gray-600 mb-4">{t("queueForBoxInfo")}</p>
         <button
           className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 disabled:opacity-50"

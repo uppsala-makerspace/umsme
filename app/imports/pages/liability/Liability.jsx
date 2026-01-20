@@ -92,7 +92,7 @@ const Liability = ({
   const showApproveButton = status !== "approved";
 
   return (
-    <div className="flex flex-col p-4 max-w-md mx-auto">
+    <div className="flex flex-col p-4 max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">{t("liabilityTitle")}</h1>
 
       <StatusBanner status={status} t={t} />
