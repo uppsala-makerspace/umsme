@@ -1,8 +1,8 @@
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React from "react";
-import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { Navigate } from 'react-router-dom';
+import TopBar from "/imports/components/TopBar";
 import Login from './Login';
 
 export default () => {
@@ -26,7 +26,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
+      <TopBar />
       {unverifiedUser ? (<Navigate to="/waitForEmailVerification" />) : null}
       {verified ? (<Navigate to="/" />) : null}
       <Login onSubmit={handleLogin} google={google} facebook={facebook} />

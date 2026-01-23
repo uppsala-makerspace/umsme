@@ -1,7 +1,7 @@
 import React, { useState } from "react";
+import TopBar from "/imports/components/TopBar";
 import { Accounts } from "meteor/accounts-base";
 import { useTranslation } from "react-i18next";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import ForgotPassword from "./ForgotPassword";
 
 export default () => {
@@ -20,7 +20,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
+      <TopBar />
       <ForgotPassword message={message} onSubmit={handleForgotPassword} />
     </>
   );

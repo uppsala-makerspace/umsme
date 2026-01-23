@@ -1,7 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect } from "react";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
-import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Calendar from "./Calendar";
 
@@ -146,8 +145,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
-      <HamburgerMenu />
+      <TopBar />
       <Calendar
         events={events}
         loading={loading}

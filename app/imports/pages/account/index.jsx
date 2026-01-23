@@ -2,8 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { Navigate } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
-import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
-import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Account from "./Account";
 
@@ -59,8 +58,7 @@ export default () => {
   return (
     <>
       {!Meteor.userId() ? <Navigate to="/login" /> : null}
-      <LanguageSwitcher />
-      <HamburgerMenu />
+      <TopBar />
       <div className="login-form">
         {memberInfo && (
           <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember}></Account>

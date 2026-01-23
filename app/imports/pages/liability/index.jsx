@@ -2,8 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
-import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Liability from "./Liability";
 
@@ -60,8 +59,7 @@ export default () => {
   return (
     <>
       {!Meteor.userId() ? <Navigate to="/login" /> : null}
-      <LanguageSwitcher />
-      <HamburgerMenu />
+      <TopBar />
       <Liability
         documentDate={document?.date ? new Date(document.date) : null}
         text={document?.text}

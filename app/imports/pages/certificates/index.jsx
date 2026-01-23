@@ -2,8 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback } from "react";
 import { Navigate } from "react-router-dom";
-import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
-import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Certificates from "./Certificates.jsx";
 
@@ -59,8 +58,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
-      <HamburgerMenu />
+      <TopBar />
       <Certificates
         loading={loading}
         certificates={certificates}

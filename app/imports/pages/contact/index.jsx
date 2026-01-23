@@ -1,8 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
-import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Contact from "./Contact";
 
@@ -11,8 +10,7 @@ export default () => {
 
   return <>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
-    <LanguageSwitcher />
-    <HamburgerMenu />
+    <TopBar />
     <div className="login-form">
       <Contact slackConfig={slackConfig} />
     </div>

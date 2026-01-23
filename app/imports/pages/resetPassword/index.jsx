@@ -1,8 +1,8 @@
 import React, { useState } from "react";
+import TopBar from "/imports/components/TopBar";
 import { Accounts } from "meteor/accounts-base";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import ResetPassword from "./ResetPassword";
 
 export default () => {
@@ -24,7 +24,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
+      <TopBar />
       <ResetPassword message={message} onSubmit={handleResetPassword} />
     </>
   );

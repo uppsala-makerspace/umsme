@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { useNavigate } from "react-router-dom";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
-import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Profile from "./Profile";
 
@@ -36,8 +35,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
-      <HamburgerMenu />
+      <TopBar />
       {memberInfo && (
         <Profile
           onSubmit={handleSubmit}

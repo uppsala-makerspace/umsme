@@ -1,13 +1,12 @@
 .umsapp .language-switcher {
     display: flex;
-    top: 10px;
-    left: 10px;
+    align-items: center;
     color: black;
     cursor: pointer;
     border: none;
     font-family: "DM Mono", monospace;
-    font-size: 20px;
-    padding: 20px;
+    font-size: 18px;
+    padding: 0;
     background: none;
   }
   

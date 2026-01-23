@@ -1,8 +1,7 @@
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import { Navigate } from 'react-router-dom';
-import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Home from "./Home";
 
@@ -46,8 +45,7 @@ export default () => {
 
   return <>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
-    <LanguageSwitcher />
-    <HamburgerMenu />
+    <TopBar />
     <div className="login-form">
       <Home
         memberName={memberInfo?.member?.name || ""}

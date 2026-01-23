@@ -3,8 +3,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { Roles } from "meteor/roles";
 import { Navigate } from "react-router-dom";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
-import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Unlock from "./Unlock";
 
@@ -154,8 +153,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
-      <HamburgerMenu />
+      <TopBar />
       <div className="login-form">
         {loading ? null : (
           <Unlock

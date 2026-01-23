@@ -1,8 +1,8 @@
 import React from "react";
+import TopBar from "/imports/components/TopBar";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { Navigate } from "react-router-dom";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import WaitForEmailVerification from "./WaitForEmailVerification";
 
 export default () => {
@@ -23,7 +23,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
+      <TopBar />
       <WaitForEmailVerification
         onSendVerification={handleSendVerification}
       />

@@ -1,5 +1,5 @@
 import React from "react";
-import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
+import TopBar from "/imports/components/TopBar";
 import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
 import { useNavigate, Navigate } from 'react-router-dom';
@@ -24,7 +24,7 @@ export default () => {
 
   return (
     <>
-      <LanguageSwitcher />
+      <TopBar />
       {Meteor.userId() ? (<Navigate to="/" />) : null}
       <Register onSubmit={handleSubmit} />
     </>
