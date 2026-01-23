@@ -287,7 +287,7 @@
   "mandatoryCertificate": "Obligatoriskt certifikat",
   "mandatoryCertificateNotice": "Detta är ett obligatoriskt certifikat för alla medlemmar.",
 
-  "unlockMandatoryCertificateRequired": "Innan du kan öppna dörrar behöver du ha det obligatoriska säkerhetscertifikatet.",
+  "unlockMandatoryCertificateRequired": "Innan du kan öppna dörrar behöver du delta i en medlemsintroduktion.",
   "unlockMandatoryCertificateButton": "Skaffa certifikat",
 
   "refresh": "Uppdatera",

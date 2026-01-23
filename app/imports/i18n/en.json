@@ -287,7 +287,7 @@
   "mandatoryCertificate": "Mandatory certificate",
   "mandatoryCertificateNotice": "This is a mandatory certificate for all members.",
 
-  "unlockMandatoryCertificateRequired": "Before you can open doors, you need to have the mandatory safety certificate.",
+  "unlockMandatoryCertificateRequired": "Before you can open doors, you need to participate in a member introduction.",
   "unlockMandatoryCertificateButton": "Get certificate",
 
   "refresh": "Refresh",

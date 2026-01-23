@@ -204,3 +204,20 @@ export const LiabilityOutdated = {
     isAdmin: false,
   },
 };
+
+export const MemberIntroductionMissing = {
+  args: {
+    doors: defaultDoors,
+    opening: defaultOpening,
+    onOpenDoor: (door) => console.log(`Opening ${door}`),
+    onRetryLocation: () => console.log("Retrying location"),
+    liabilityDate,
+    liabilityOutdated: false,
+    mandatoryCertificate: { _id: "abc123", name: { en: "Member Introduction", sv: "Medlemsintroduktion" } },
+    hasMandatoryCertificate: false,
+    locationPermission: "granted",
+    userPosition: userNearby,
+    proximityRange: 100,
+    isAdmin: false,
+  },
+};
