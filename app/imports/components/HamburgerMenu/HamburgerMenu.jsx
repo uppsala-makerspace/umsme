@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ export const HamburgerMenu = () => {
   const navigate = useNavigate();
   const user = useTracker(() => Meteor.user());
   const [hasMember, setHasMember] = useState(false);
+  const menuRef = useRef(null);
 
   // Load member information
   useEffect(() => {
@@ -24,6 +25,20 @@ export const HamburgerMenu = () => {
     };
     fetchData();
   }, [user?._id]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
 
   if (!hasMember) {
     return null;
@@ -41,7 +56,7 @@ export const HamburgerMenu = () => {
 
   return (
     <>
-      <nav className={`nav-bar ${isOpen ? "menu-open" : ""}`}>
+      <nav ref={menuRef} className={`nav-bar ${isOpen ? "menu-open" : ""}`}>
         {isOpen ? (
           <button className="hamburger-menu open" onClick={toggleMenu}>
             ✖
@@ -53,28 +68,16 @@ export const HamburgerMenu = () => {
         )}
         <ul className={`links ${isOpen ? "show" : ""}`}>
           <li>
-            <Link to="/">Start</Link>
-          </li>
-          <li>
-            <Link to="/unlock">{t("keys")}</Link>
-          </li>
-          <li>
             <Link to="/storage">{t("myBox")}</Link>
           </li>
           <li>
             <Link to="/liability">{t("liability")}</Link>
           </li>
           <li>
-            <Link to="/certificates">{t("certificates")}</Link>
-          </li>
-          <li>
             <Link to="/account">{t("myAccount")}</Link>
           </li>
           <li>
             <Link to="/profile">{t("myProfile")}</Link>
-          </li>
-          <li>
-            <Link to="/calendar">{t("Calender")}</Link>
           </li>
           <li>
             <Link to="/contact">{t("contactUs")}</Link>

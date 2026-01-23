@@ -2,32 +2,32 @@
     position: relative;
     cursor: pointer;
   }
-  .umsapp .nav-bar.menu-open {
-    background-color: white;
-    width: 30vw;
-    border: 1px solid grey;
-    border-radius: 4px;
-    top: 4px;
-  }
-  
+
   .umsapp .hamburger-menu {
     border: none;
-    font-size: 32px;
+    font-size: 24px;
+    line-height: 1;
     cursor: pointer;
     background: none;
     padding: 0;
   }
-  .umsapp .hamburger-menu.open {
-    background-color: white;
-  }
-  
+
   .umsapp .links {
     display: none;
   }
   .umsapp .links.show {
     display: block;
-    padding: 2.5em 5px 0.5em 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 0;
     list-style: none;
+    min-width: 200px;
+    z-index: 200;
   }
   
   .umsapp .links li {
