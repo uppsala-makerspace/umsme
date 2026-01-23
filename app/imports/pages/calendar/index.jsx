@@ -2,6 +2,7 @@ import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import Calendar from "./Calendar";
 
 const PAST_EVENTS_DAYS = 90; // Fetch past events in 90-day windows
@@ -157,6 +158,7 @@ export default () => {
         mode={mode}
         onModeChange={handleModeChange}
       />
+      <BottomNavigation />
     </>
   );
 };

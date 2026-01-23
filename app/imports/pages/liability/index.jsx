@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import Liability from "./Liability";
 
 export default () => {
@@ -69,6 +70,7 @@ export default () => {
         approving={approving}
         onApprove={handleApprove}
       />
+      <BottomNavigation />
     </>
   );
 };

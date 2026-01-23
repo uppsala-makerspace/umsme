@@ -92,25 +92,13 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
           </Link>
         </div>
       )}
-      {liabilityNeedsAttention ? (
+      {liabilityNeedsAttention && (
         <>
           <p className="text-container">
             {liabilityOutdated ? t("homeLiabilityOutdated") : t("homeLiabilityNotApproved")}
           </p>
           <Link to="/liability" className="wideButton">
             <button className="form-button">{t("homeLiabilityButton")}</button>
-          </Link>
-        </>
-      ) : (
-        <>
-          <Link to="/unlock" className="wideButton">
-            <button className="form-button">{t("keys")}</button>
-          </Link>
-          <Link to="/certificates" className="wideButton">
-            <button className="form-button">{t("certificates")}</button>
-          </Link>
-          <Link to="/calendar" className="wideButton">
-            <button className="form-button">{t("calender")}</button>
           </Link>
         </>
       )}

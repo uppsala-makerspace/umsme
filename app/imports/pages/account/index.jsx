@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import Account from "./Account";
 
 export default () => {
@@ -65,6 +66,7 @@ export default () => {
           <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember}></Account>
         )}
       </div>
+      <BottomNavigation />
     </>
   );
 };

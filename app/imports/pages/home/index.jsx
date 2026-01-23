@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import { Navigate } from 'react-router-dom';
 import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import Home from "./Home";
 
 /** This view is used if there is no member or no active membership. */
@@ -59,5 +60,6 @@ export default () => {
         liabilityOutdated={memberInfo?.liabilityOutdated}
       />
     </div>
+    <BottomNavigation />
   </>;
 };

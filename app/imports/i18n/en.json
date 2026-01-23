@@ -292,5 +292,13 @@
 
   "refresh": "Refresh",
 
-  "pendingRequestWaiting": "Waiting for a certifier to confirm, deny, or provide feedback. If no action is taken within roughly 2 hours, the request will be removed."
+  "pendingRequestWaiting": "Waiting for a certifier to confirm, deny, or provide feedback. If no action is taken within roughly 2 hours, the request will be removed.",
+
+  "navHome": "Home",
+  "navDoors": "Doors",
+  "navMap": "Map",
+  "navCalendar": "Calendar",
+  "navCertificates": "Certificates",
+  "mapPageTitle": "Map",
+  "mapTodo": "Map feature coming soon"
 }

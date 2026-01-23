@@ -292,5 +292,13 @@
 
   "refresh": "Uppdatera",
 
-  "pendingRequestWaiting": "Väntar på att en certifierare ska bekräfta, neka eller ge feedback. Om ingen åtgärd vidtas inom ungefär 2 timmar kommer förfrågan att tas bort."
+  "pendingRequestWaiting": "Väntar på att en certifierare ska bekräfta, neka eller ge feedback. Om ingen åtgärd vidtas inom ungefär 2 timmar kommer förfrågan att tas bort.",
+
+  "navHome": "Hem",
+  "navDoors": "Dörrar",
+  "navMap": "Karta",
+  "navCalendar": "Kalender",
+  "navCertificates": "Certifikat",
+  "mapPageTitle": "Karta",
+  "mapTodo": "Kartfunktion kommer snart"
 }

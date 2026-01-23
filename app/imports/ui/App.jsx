@@ -11,6 +11,7 @@ import Verification from '/imports/pages/emailVerification';
 import ForgotPassword from '/imports/pages/forgotPassword';
 import ResetPassword from '/imports/pages/resetPassword';
 import Calendar from '/imports/pages/calendar';
+import Map from '/imports/pages/map';
 import Contact from '/imports/pages/contact';
 import Certificates from '/imports/pages/certificates';
 import CertificateDetail from '/imports/pages/certificateDetail';
@@ -33,6 +34,7 @@ export const App = () => (
         <Route path="/liability" element={<Liability />} />
         <Route path="/account" element={<Account />} />
         <Route path="/calendar" element={<Calendar />} />
+        <Route path="/map" element={<Map />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/certificates" element={<Certificates />} />
         <Route path="/certificates/:certificateId" element={<CertificateDetail />} />

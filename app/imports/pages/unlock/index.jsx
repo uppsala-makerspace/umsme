@@ -5,6 +5,7 @@ import { Roles } from "meteor/roles";
 import { Navigate } from "react-router-dom";
 import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import Unlock from "./Unlock";
 
 export default () => {
@@ -173,6 +174,7 @@ export default () => {
           />
         )}
       </div>
+      <BottomNavigation />
     </>
   );
 };

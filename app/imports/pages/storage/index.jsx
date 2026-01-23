@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import Storage from "./Storage";
 
 export default () => {
@@ -80,6 +81,7 @@ export default () => {
         onSubmitRequest={handleSubmitRequest}
         onCancelQueue={handleCancelQueue}
       />
+      <BottomNavigation />
     </>
   );
 };

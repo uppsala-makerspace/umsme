@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import CertificateDetail from "./CertificateDetail.jsx";
 
 export default () => {
@@ -79,6 +80,7 @@ export default () => {
         onReRequest={handleReRequest}
         onRefresh={fetchData}
       />
+      <BottomNavigation />
     </>
   );
 };

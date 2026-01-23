@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import Certificates from "./Certificates.jsx";
 
 export default () => {
@@ -68,6 +69,7 @@ export default () => {
         pendingToConfirm={pendingToConfirm}
         recentlyConfirmed={recentlyConfirmed}
       />
+      <BottomNavigation />
     </>
   );
 };

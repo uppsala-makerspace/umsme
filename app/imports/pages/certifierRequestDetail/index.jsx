@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "../../components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import CertifierRequestDetail from "./CertifierRequestDetail.jsx";
 
 export default () => {
@@ -87,6 +88,7 @@ export default () => {
         onDeny={handleDeny}
         onSaveComments={handleSaveComments}
       />
+      <BottomNavigation />
     </>
   );
 };

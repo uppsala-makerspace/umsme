@@ -4,6 +4,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import { useNavigate } from "react-router-dom";
 import { LanguageSwitcher } from "/imports/components/LanguageSwitcher/langueSwitcher";
 import { HamburgerMenu } from "/imports/components/HamburgerMenu/HamburgerMenu";
+import BottomNavigation from "/imports/components/BottomNavigation";
 import Profile from "./Profile";
 
 export default () => {
@@ -45,6 +46,7 @@ export default () => {
           initialBirthyear={memberInfo.member?.birthyear || ""}
         />
       )}
+      <BottomNavigation />
     </>
   );
 };
