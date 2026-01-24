@@ -2,8 +2,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 
-const SlackLink = ({ channel, slackConfig }) => {
-  const url = getSlackChannelUrl(channel, slackConfig);
+const SlackLink = ({ channel, slackTeam, slackChannelIds }) => {
+  const url = getSlackChannelUrl(channel, slackTeam, slackChannelIds);
   if (!url) {
     return <strong>#{channel}</strong>;
   }
@@ -14,7 +14,7 @@ const SlackLink = ({ channel, slackConfig }) => {
   );
 };
 
-const Contact = ({ slackConfig }) => {
+const Contact = ({ slackTeam, slackChannelIds }) => {
   const { t } = useTranslation();
 
   return (
@@ -31,7 +31,7 @@ const Contact = ({ slackConfig }) => {
             </a>
           </li>
           <li>
-            {t("slackChannel")}: <SlackLink channel="fråga-styrelsen" slackConfig={slackConfig} />
+            {t("slackChannel")}: <SlackLink channel="fråga-styrelsen" slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
           </li>
         </ul>
         <p className="text-sm mt-2">
@@ -49,7 +49,7 @@ const Contact = ({ slackConfig }) => {
         <p className="text-sm mb-2">{t("boardInformationDescription")}</p>
         <ul className="text-sm list-disc ml-5">
           <li>{t("infoNewsletter")}</li>
-          <li>{t("infoSlackGeneral")} <SlackLink channel="general" slackConfig={slackConfig} /></li>
+          <li>{t("infoSlackGeneral")} <SlackLink channel="general" slackTeam={slackTeam} slackChannelIds={slackChannelIds} /></li>
           <li>{t("infoCalendar")}</li>
           <li>{t("infoBlogpost")}</li>
         </ul>
@@ -60,10 +60,10 @@ const Contact = ({ slackConfig }) => {
         <p className="text-sm mb-2">{t("memberCommunicationDescription")}</p>
         <ul className="text-sm list-disc ml-5">
           <li>
-            <SlackLink channel="lokalen" slackConfig={slackConfig} /> - {t("channelLokalenDescription")}
+            <SlackLink channel="lokalen" slackTeam={slackTeam} slackChannelIds={slackChannelIds} /> - {t("channelLokalenDescription")}
           </li>
           <li>
-            <SlackLink channel="random" slackConfig={slackConfig} /> - {t("channelRandomDescription")}
+            <SlackLink channel="random" slackTeam={slackTeam} slackChannelIds={slackChannelIds} /> - {t("channelRandomDescription")}
           </li>
         </ul>
         <p className="text-sm mt-2">{t("moreChannelsDescription")}</p>
