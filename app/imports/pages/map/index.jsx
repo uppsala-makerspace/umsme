@@ -6,6 +6,8 @@ import BottomNavigation from "/imports/components/BottomNavigation";
 import Map from "./Map";
 
 export default () => {
+  const slackTeam = Meteor.settings?.public?.slack?.team;
+
   if (!Meteor.userId()) {
     return <Navigate to="/login" />;
   }
@@ -13,7 +15,7 @@ export default () => {
   return (
     <>
       <TopBar />
-      <Map />
+      <Map slackTeam={slackTeam} />
       <BottomNavigation />
     </>
   );

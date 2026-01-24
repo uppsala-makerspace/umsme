@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Meteor } from "meteor/meteor";
 import { useTranslation } from "react-i18next";
 import RoomPopup from "./RoomPopup";
 import "./style.css";
 
-const Map = () => {
+const Map = ({ slackTeam }) => {
   const { t } = useTranslation();
   const [roomsConfig, setRoomsConfig] = useState(null);
   const [slackChannels, setSlackChannels] = useState(null);
-  const slackTeam = Meteor.settings?.public?.slack?.team;
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [activeFloor, setActiveFloor] = useState(2); // Floor 2 on top by default
   const floor1Ref = useRef(null);
