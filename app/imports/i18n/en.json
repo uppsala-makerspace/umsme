@@ -300,5 +300,7 @@
   "navCalendar": "Calendar",
   "navCertificates": "Certificates",
   "mapPageTitle": "Map",
-  "mapTodo": "Map feature coming soon"
+  "mapTodo": "Map feature coming soon",
+  "floor": "Floor",
+  "slackChannels": "Slack channels"
 }

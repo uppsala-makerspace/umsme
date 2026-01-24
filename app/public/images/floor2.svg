@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="725"
+   height="1110"
+   viewBox="0 0 725 1110"
+   id="svg721"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs721">
+    <style
+       id="style1"><![CDATA[
+.quilt1 .floor {
+  fill: #F2F6D0;
+}
+.quilt2 .floor {
+  fill: #D0E1D4;
+}
+.quilt3 .floor {
+  fill: #D9D2B6;
+}
+.quilt4 .floor {
+  fill: #E4BE9E;
+}
+.walls {
+  fill:none;
+  stroke: grey;
+  stroke-opacity:1;
+  stroke-width:10;
+}
+.floor {
+  fill:#ffb380;
+  stroke:none;
+}
+.marker {
+  display:inline;
+  fill:none;
+  stroke:none;
+  stroke-width:2.5;
+}
+.outer-walls {
+  fill:none;
+  stroke:#000000;
+  stroke-width:10;
+}
+.ventilationshaft {
+  fill:#7C7C7C;
+  stroke:none;
+}
+.ventilationshaft-walls {
+  fill:none;
+  stroke:#000000;
+  stroke-width:10;
+}
+]]></style>
+  </defs>
+  <g
+     id="rooms"
+     transform="translate(-15,-10)">
+    <g id="electronics_workshop" class="quilt2">
+      <path
+         d="M 475,425 V 335 H 735 V 735 H 475 V 675 635 465"
+         id="electronics_workshop-floor"
+         class="floor" />
+      <path
+         d="M 475,425 V 335 H 735 V 735 H 475 v -60 m 0,-40 V 465"
+         id="electronics_workshop-walls"
+         class="walls" />
+      <circle
+         id="electronics_workshop-marker"
+         cx="600"
+         cy="536.25"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="ceramics_workshop" class="quilt1">
+      <path
+         d="m 475,290 v 45 H 735 V 15 H 475 v 235"
+         id="ceramics_workshop-floor"
+         class="floor" />
+      <path
+         d="m 475,290 v 45 H 735 V 15 H 475 v 235"
+         id="ceramics_workshop-walls"
+         class="walls" />
+      <circle
+         id="ceramics_workshop-marker"
+         cx="600"
+         cy="161.25"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g
+       id="textiles_workshop" class="quilt4">
+      <path
+         d="m 735,735 v 380 H 475 v -10 -40 -250 -40 -40 z"
+         id="textiles_workshop-floor"
+         class="floor" />
+      <path
+         d="M 475,1065 V 815 m 0,-40 v -40 h 260 v 380 H 475 v -10"
+         id="textiles_workshop-walls"
+         class="walls" />
+      <circle
+         id="textiles_workshop-marker"
+         cx="603.75"
+         cy="925"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g
+       id="oven_room" class="quilt1">
+      <path
+         d="m 385.00004,1045 v 70 h -30 L 310.96158,1001.3654 385.00004,975 v 30"
+         id="oven_room-floor"
+         class="floor" />
+      <path
+         d="m 385.00004,1045 v 70 h -30 L 311.88463,1001.2256 385.00004,975 v 30"
+         id="oven_room-walls"
+         class="walls" />
+      <circle
+         id="oven_room-marker"
+         cx="355"
+         cy="1036.25"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="misc_room" class="quilt2">
+      <path
+         d="m 385.00004,825 v 80 l -95.6875,37.1016 -76.25,-201.3516 171.9375,-65.75 v 110"
+         id="misc_room-floor"
+         class="floor" />
+      <path
+         d="m 385.00004,825 v 80 l -95.6875,37.1016 -76.25,-201.3516 171.9375,-65.75 v 110"
+         id="misc_room-walls"
+         class="walls" />
+      <circle
+         id="misc_room-marker"
+         cx="325"
+         cy="808.75"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="kitchen" class="quilt1">
+      <path
+         d="M 385.00004,435 V 675 L 213.36723,740.8203 25.00004,245 h 270 v 120 h 20 40 m 0,0 h 30 v 30 40"
+         id="kitchen-floor"
+         class="floor" />
+      <path
+         d="M 385.00004,435 V 675 L 213.36723,740.8203 25.00004,245 h 270 v 120 h 20 m 40,0 h 30 v 30"
+         id="kitchen-walls"
+         class="walls" />
+      <circle
+         id="kitchen-marker"
+         cx="245"
+         cy="458.75"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="bathroom" class="quilt2">
+      <path
+         d="m 355.00004,365 h 30 v -70 h -90 v 70 h 20"
+         id="bathroom-floor"
+         class="floor" />
+      <path
+         d="m 355.00004,365 h 30 v -70 h -90 v 70 h 20"
+         id="bathroom-walls"
+         class="walls" />
+      <circle
+         id="bathroom-marker"
+         cx="340"
+         cy="333.75"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="hallway_toilet" class="quilt4">
+      <path
+         d="m 385.00004,290 v 5 h -90 v -50 h 90 v 5"
+         id="hallway_toilet-floor"
+         class="floor" />
+      <path
+         d="m 385.00004,290 v 5 h -90 v -50 h 90 v 5"
+         id="hallway_toilet-walls"
+         class="walls" />
+      <circle
+         id="hallway_toilet-marker"
+         cx="341.25"
+         cy="270"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="entrance_toilet" class="quilt4">
+      <path
+         d="m 355.00004,145 h -10 c 0,0 0,-70 0,-70 0,0 60,0 60,0 v 70 h -10"
+         id="entrance_toilet-floor"
+         class="floor" />
+      <path
+         d="m 355.00004,145 h -10 c 0,0 0,-70 0,-70 0,0 60,0 60,0 v 70 h -10"
+         id="entrance_toilet-walls"
+         class="walls" />
+      <circle
+         id="entrance_toilet-marker"
+         cx="375"
+         cy="111.25"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="inner_storage" class="quilt1">
+      <path
+         d="M 405.00004,25 V 15 h -70 c 0,0 0,60 0,60 0,0 70,0 70,0 V 65"
+         id="inner_storage-floor"
+         class="floor" />
+      <path
+         d="M 405.00004,25 V 15 h -70 c 0,0 0,60 0,60 0,0 70,0 70,0 V 65"
+         id="inner_storage-walls"
+         class="walls" />
+      <circle
+         id="inner_storage-marker"
+         cx="370"
+         cy="46.25"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="outer_storage" class="quilt3">
+      <path
+         d="M 405.00004,25 V 15 H 475 v 80 h -15 -40 m 0,0 H 405.00004 V 65 25"
+         id="outer_storage-floor"
+         class="floor" />
+      <path
+         d="M 405.00004,65 V 95 H 420 m 40,0 h 15 V 15 h -69.99996 v 10"
+         id="outer_storage-walls"
+         class="walls" />
+      <circle
+         id="outer_storage-marker"
+         cx="438.75"
+         cy="55"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g
+       id="entrance" class="quilt2">
+      <path
+         d="m 475,95 v 155 h -90 v -5 H 345.00004 V 145 h 60 V 95 Z"
+         id="entrance-floor"
+         class="floor" />
+      <path
+         d="m 345.00004,225 v 20 H 385 v 5 m 90,0 V 95 h -15 m -40,0 h -14.99996 v 50 h -10 m -40,0 h -10 v 20"
+         id="entrance-walls"
+         class="walls" />
+      <circle
+         id="entrance-marker"
+         cx="408.75"
+         cy="195"
+         r="6.2499986"
+         class="marker" />
+    </g>
+    <g id="boxstorage" class="quilt3">
+      <path
+         d="m 385,250 h 90 v 865 h -90 z"
+         id="boxstorage-floor"
+         class="floor" />
+      <path
+         d="m 475,290 v 135 m 0,40 v 170 m 0,40 v 100 m 0,40 v 250 m 0,40 v 10 h -90 v -70 m 0,-40 V 825 m 0,-40 V 435 m 0,-40 V 290"
+         id="boxstorage-walls"
+         class="walls" />
+      <circle
+         id="boxstorage-marker"
+         cx="427.5"
+         cy="542.5"
+         r="6.2499986"
+         class="marker" />
+    </g>
+  </g>
+  <g
+     id="outline"
+     transform="translate(-15,-10)">
+    <path
+       d="M 345.00004,165 V 75 h -10 V 15 H 735 V 1115 H 355.00004 l -330,-870 h 320 v -20"
+       id="outer-walls"
+       class="outer-walls" />
+    <g
+       id="ventilation_shaft">
+      <path
+         d="m 385.00004,905 v 70 l -73.14933,26.2124 -22.40636,-59.1563 z"
+         id="ventilation_shaft-floor"
+         class="ventilationshaft" />
+      <path
+         d="m 385.00004,905 v 70 l -73.14933,26.2124 -22.40636,-59.1563 z"
+         id="ventilation_shaft-walls"
+         class="ventilationshaft-walls" />
+    </g>
+  </g>
+</svg>

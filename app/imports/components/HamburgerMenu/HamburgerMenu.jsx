@@ -56,6 +56,15 @@ export const HamburgerMenu = () => {
 
   return (
     <>
+      {isOpen && (
+        <div
+          className="menu-overlay"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(false);
+          }}
+        />
+      )}
       <nav ref={menuRef} className={`nav-bar ${isOpen ? "menu-open" : ""}`}>
         {isOpen ? (
           <button className="hamburger-menu open" onClick={toggleMenu}>

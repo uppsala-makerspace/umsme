@@ -1,0 +1,146 @@
+{
+  "floor1": {
+    "woodworkshop": {
+      "name": { "en": "Wood Workshop", "sv": "Träverkstad" },
+      "description": { "en": "Woodworking space with various power tools and hand tools.", "sv": "Träverkstad med diverse maskiner och handverktyg." },
+      "slackChannels": ["#träverkstaden"]
+    },
+    "CNCworkshop": {
+      "name": { "en": "CNC & Lathe", "sv": "CNC och svarv" },
+      "description": { "en": "This room belongs to the wood workshop and contains CNC machines and the lathe.", "sv": "Detta rum tillhör träverkstaden och innehåller CNC-maskiner och svarven." },
+      "slackChannels": ["#cnc", "#träverkstaden"]
+    },
+    "metalworkshop": {
+      "name": { "en": "Metal Workshop", "sv": "Metallverkstad" },
+      "description": { "en": "Metalworking space with welding, grinding, and machining equipment.", "sv": "Metallverkstad med svets-, slip- och bearbetningsutrustning." },
+      "slackChannels": ["#metallverkstaden", "#metallsvarven", "#cykel", "#svets_och_smide"]
+    },
+    "3dworkshop": {
+      "name": { "en": "3D Workshop", "sv": "3D-verkstad" },
+      "description": { "en": "3D printers and lasercutters.", "sv": "3D-skrivare och laserskärare." },
+      "slackChannels": ["#3dverkstaden","#3dprinting", "#laser"]
+    },
+    "paintroom": {
+      "name": { "en": "Paint Room", "sv": "Målningsrum" },
+      "description": { "en": "Ventilated space for painting and finishing.", "sv": "Ventilerat utrymme för målning och ytbehandling." },
+      "slackChannels": ["#målarverkstad"]
+    },
+    "bigroom": {
+      "name": { "en": "Big Room", "sv": "Stora rummet" },
+      "description": { "en": "Large multipurpose space.", "sv": "Stort allrumsutrymme." },
+      "slackChannels": ["#random", "#lokalen", "#trivselgruppen"]
+    },
+    "kitchen": {
+      "name": { "en": "Kitchen", "sv": "Kök" },
+      "description": { "en": "Kitchen and social area.", "sv": "Kök och socialt utrymme." },
+      "slackChannels": ["#lokalen","#random","#kiosk", "#trashtalk"]
+    },
+    "entrance": {
+      "name": { "en": "Entrance", "sv": "Entré" },
+      "description": { "en": "Main entrance area.", "sv": "Huvudentré." },
+      "slackChannels": ["#verktygspool"]
+    },
+    "boxstorage": {
+      "name": { "en": "Box Storage", "sv": "Lådförvaring" },
+      "description": { "en": "Member storage boxes.", "sv": "Medlemsförvaringslådor." },
+      "slackChannels": []
+    },
+    "storageroom": {
+      "name": { "en": "Storage Room", "sv": "Förråd" },
+      "description": { "en": "General storage for material and TEMPORARY storage of larger member projects.", "sv": "Allmän förvaring för material och TILLFÄLLIG förvaring av större medlemsprojekt." },
+      "slackChannels": []
+    },
+    "bigbathroom": {
+      "name": { "en": "Big Bathroom", "sv": "Stora toaletten" },
+      "description": { "en": "Large bathroom with mirror for changing.", "sv": "Stor toalett med spegel för ombyte." },
+      "slackChannels": ["#toalettstädning"]
+    },
+    "smallbathroom": {
+      "name": { "en": "Small Bathroom", "sv": "Lilla toaletten" },
+      "description": { "en": "Small bathroom.", "sv": "Liten toalett." },
+      "slackChannels": ["#toalettstädning"]
+    },
+    "storagebathroom": {
+      "name": { "en": "Temporary storage", "sv": "Temporär förvaring" },
+      "description": { "en": "Storage room for trash until next fixardag.", "sv": "Förvaringsutrymme för soporna till nästa fixardag." },
+      "slackChannels": []
+    },
+    "innercleaningroom": {
+      "name": { "en": "Inner Cleaning Room", "sv": "Inre städrum" },
+      "description": { "en": "This room is temporary used for the kiln, will be repurposed.", "sv": "Detta rum används tillfälligt för keramikugnen och kommer att få ett nytt syfte." },
+      "slackChannels": ["#keramikverkstad"]
+    },
+    "outercleaningroom": {
+      "name": { "en": "Outer Cleaning Room", "sv": "Yttre städrum" },
+      "description": { "en": "This room is temporary used for ceramics before being loaded into the kiln.", "sv": "Detta rum används tillfälligt för keramik som ska brännas." },
+      "slackChannels": ["#keramikverkstad"]
+    }
+  },
+  "floor2": {
+    "electronics_workshop": {
+      "name": { "en": "Electronics Workshop", "sv": "Elektronikverkstad" },
+      "description": { "en": "Electronics workbenches, soldering stations, and components. This room is also the base for the saturday courses.", "sv": "Elektronikarbetsbänkar, lödstationer och komponenter. Detta rum är också basen för lördagskurserna." },
+      "slackChannels": ["#electronics", "#loerdagskurser"]
+    },
+    "ceramics_workshop": {
+      "name": { "en": "Ceramics Workshop", "sv": "Keramikverkstad" },
+      "description": { "en": "Pottery wheels, kilns, and ceramic supplies.", "sv": "Drejskivor, ugnar och keramikutrustning." },
+      "slackChannels": ["#keramikverkstad","#keramikguiden-erfarenheter-och-tips","#tryck-på-lera", "#återvinning-av-lera"]
+    },
+    "textiles_workshop": {
+      "name": { "en": "Textiles Workshop", "sv": "Textilverkstad" },
+      "description": { "en": "Sewing machines, textile and leather equipment. There is also a vinyl cutter here.", "sv": "Symaskiner, textilutrustning och läderverktyg. Här finns också en vinylskärare." },
+      "slackChannels": ["#textilverkstad", "#bildateljéverkstaden", "#vinylskäraren"]
+    },
+    "oven_room": {
+      "name": { "en": "Oven Room", "sv": "Ugnsrum" },
+      "description": { "en": "High-temperature ovens and kilns.", "sv": "Högtemperaturugnar." },
+      "slackChannels": ["#keramikverkstad", "#keramikguiden-erfarenheter-och-tips"]
+    },
+    "misc_room": {
+      "name": { "en": "Misc Room", "sv": "Diverse rum" },
+      "description": { "en": "Harbours the bookbindary workshop.", "sv": "Inrymmer bokbinderiverkstaden." },
+      "slackChannels": ["#bokbindarverkstad"]
+    },
+    "kitchen": {
+      "name": { "en": "Kitchen", "sv": "Kök" },
+      "description": { "en": "Second floor kitchen area.", "sv": "Kök på andra våningen." },
+      "slackChannels": ["#trashtalk","#trivselgruppen"]
+    },
+    "entrance": {
+      "name": { "en": "Entrance", "sv": "Entré" },
+      "description": { "en": "Second floor entrance.", "sv": "Entré på andra våningen." },
+      "slackChannels": []
+    },
+    "boxstorage": {
+      "name": { "en": "Box Storage", "sv": "Lådförvaring" },
+      "description": { "en": "Member storage boxes.", "sv": "Medlemsförvaringslådor." },
+      "slackChannels": []
+    },
+    "bathroom": {
+      "name": { "en": "Bathroom", "sv": "Toalett" },
+      "description": { "en": "Large bathroom including a shower.", "sv": "Stor toalett som också har en dush." },
+      "slackChannels": ["#toalettstädning"]
+    },
+    "entrance_toilet": {
+      "name": { "en": "Entrance Toilet", "sv": "Entrétoalett" },
+      "description": { "en": "Toilet near the entrance.", "sv": "Toalett vid entrén." },
+      "slackChannels": ["#toalettstädning"]
+    },
+    "hallway_toilet": {
+      "name": { "en": "Hallway Toilet", "sv": "Korridortoalett" },
+      "description": { "en": "Toilet in the hallway.", "sv": "Toalett i korridoren." },
+      "slackChannels": ["#toalettstädning"]
+    },
+    "inner_storage": {
+      "name": { "en": "Inner storage ceramics", "sv": "Inre förråd keramik" },
+      "description": { "en": "Inner storage area used by the ceramics workshop.", "sv": "Inre förråd som disponeras av keramikverkstaden." },
+      "slackChannels": ["#keramikverkstad"]
+    },
+    "outer_storage": {
+      "name": { "en": "Outer Storage ceramics", "sv": "Yttre förråd keramik" },
+      "description": { "en": "Outer storage area user by the ceramics workshop.", "sv": "Yttre förråd som disponeras av keramikverkstaden." },
+      "slackChannels": ["#keramikverkstad"]
+    }
+  }
+}

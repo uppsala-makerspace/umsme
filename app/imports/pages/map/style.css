@@ -1,0 +1,185 @@
+.map-container {
+  padding: 0.5rem;
+  /* Fill available height: 100vh - top bar (44px) - bottom nav (60px) - padding */
+  height: calc(100vh - 44px - 60px);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Floor selector */
+.floor-selector {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 20;
+  height: 50px;
+  width: 70px;
+  cursor: pointer;
+}
+
+.floor-selector-item {
+  position: absolute;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  white-space: nowrap;
+}
+
+.floor-selector-item.active {
+  transform: translate(8px, 0);
+  opacity: 1;
+  color: #111827;
+}
+
+.floor-selector-item.inactive {
+  transform: translate(0, 20px);
+  opacity: 0.5;
+  color: #6b7280;
+}
+
+/* Stacked floors container */
+.map-floors-container {
+  position: relative;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Individual floor */
+.map-floor {
+  position: absolute;
+  max-height: calc(100% - 40px);
+  /* Animate transform and opacity */
+  transition: transform 0.4s ease-out,
+              opacity 0.4s ease-out;
+}
+
+/* SVG objects */
+.map-svg {
+  display: block;
+  width: auto;
+  /* Account for floor offsets (2 * 15px on mobile, 2 * 30px on desktop) */
+  height: calc(100vh - 44px - 60px - 80px);
+  max-height: 100%;
+  max-width: calc(100vw - 1rem - 30px); /* Screen width minus padding and offset */
+}
+
+/* Active floor: top-right position, on top */
+.map-floor.active {
+  z-index: 10;
+  transform: translate(15px, -15px) scale(1);
+  opacity: 1;
+}
+
+/* Inactive floor: bottom-left position, behind */
+.map-floor.inactive {
+  z-index: 5;
+  transform: translate(-15px, 25px) scale(0.95);
+  cursor: pointer;
+  opacity: 0.4;
+}
+
+
+/* Larger offsets on bigger screens */
+@media (min-width: 640px) {
+  .map-svg {
+    height: calc(100vh - 44px - 60px - 100px);
+    max-width: calc(100vw - 1rem - 60px); /* Screen width minus padding and offset */
+  }
+
+  .map-floor.active {
+    transform: translate(30px, -30px) scale(1);
+  }
+
+  .map-floor.inactive {
+    transform: translate(-30px, 40px) scale(0.95);
+  }
+}
+
+/* Room popup overlay */
+.room-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+/* Room popup modal */
+.room-popup {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.room-popup-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  line-height: 1;
+  padding: 0.25rem;
+}
+
+.room-popup-close:hover {
+  color: #374151;
+}
+
+.room-popup-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  padding-right: 2rem;
+  color: #111827;
+}
+
+.room-popup-description {
+  color: #4b5563;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.room-popup-slack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.room-popup-slack-label {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.room-popup-slack-link {
+  color: #5fc86f;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.room-popup-slack-link:hover {
+  text-decoration: underline;
+}
+
+.hepp {
+  color: #7c7c7c;
+}

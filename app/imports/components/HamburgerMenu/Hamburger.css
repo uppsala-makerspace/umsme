@@ -1,6 +1,16 @@
-.umsapp .nav-bar {
+.umsapp .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+  }
+
+  .umsapp .nav-bar {
     position: relative;
     cursor: pointer;
+    z-index: 150;
   }
 
   .umsapp .hamburger-menu {

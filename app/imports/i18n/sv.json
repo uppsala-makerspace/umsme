@@ -300,5 +300,7 @@
   "navCalendar": "Kalender",
   "navCertificates": "Certifikat",
   "mapPageTitle": "Karta",
-  "mapTodo": "Kartfunktion kommer snart"
+  "mapTodo": "Kartfunktion kommer snart",
+  "floor": "Våning",
+  "slackChannels": "Slack-kanaler"
 }
