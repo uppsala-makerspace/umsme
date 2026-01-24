@@ -9,8 +9,14 @@ const Map = ({ slackTeam }) => {
   const [slackChannels, setSlackChannels] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [activeFloor, setActiveFloor] = useState(2); // Floor 2 on top by default
+  const activeFloorRef = useRef(activeFloor); // Ref to access current floor in event handlers
   const floor1Ref = useRef(null);
   const floor2Ref = useRef(null);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    activeFloorRef.current = activeFloor;
+  }, [activeFloor]);
 
   // Load room configuration and slack channels
   useEffect(() => {
@@ -26,7 +32,7 @@ const Map = ({ slackTeam }) => {
   }, []);
 
   // Setup click handlers for rooms after SVG loads
-  const setupRoomClickHandlers = (svgDoc, floorKey) => {
+  const setupRoomClickHandlers = (svgDoc, floorKey, floorNumber) => {
     if (!svgDoc || !roomsConfig) return;
 
     // Add click handler on SVG root for floor switching
@@ -53,8 +59,12 @@ const Map = ({ slackTeam }) => {
         marker.style.opacity = "1";
         marker.style.strokeWidth = "2";
         floor.addEventListener("click", (e) => {
-          e.stopPropagation(); // Prevent floor switching when clicking a room
-          setSelectedRoom({ ...rooms[roomId], id: roomId });
+          // Only show popup if this floor is active
+          if (activeFloorRef.current === floorNumber) {
+            e.stopPropagation(); // Prevent floor switching when clicking a room
+            setSelectedRoom({ ...rooms[roomId], id: roomId });
+          }
+          // Otherwise let the click propagate to switch floors
         });
       }
     });
@@ -65,7 +75,7 @@ const Map = ({ slackTeam }) => {
     const obj = floor1Ref.current;
     if (obj) {
       const svgDoc = obj.contentDocument;
-      setupRoomClickHandlers(svgDoc, "floor1");
+      setupRoomClickHandlers(svgDoc, "floor1", 1);
     }
   };
 
@@ -74,7 +84,7 @@ const Map = ({ slackTeam }) => {
     const obj = floor2Ref.current;
     if (obj) {
       const svgDoc = obj.contentDocument;
-      setupRoomClickHandlers(svgDoc, "floor2");
+      setupRoomClickHandlers(svgDoc, "floor2", 2);
     }
   };
 
