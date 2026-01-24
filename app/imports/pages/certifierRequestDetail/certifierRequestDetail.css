@@ -1,5 +1,6 @@
 .request-detail-container {
   padding: 1rem;
+  padding-bottom: 5rem; /* Space for bottom navigation */
   max-width: 576px;
   margin: 0 auto;
 }
