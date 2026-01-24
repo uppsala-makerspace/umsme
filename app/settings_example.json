@@ -22,6 +22,9 @@
   },
   "private": {
     "vapidPrivateKey": "Some key here",
+    "slack": {
+      "botToken": "xoxb-your-slack-bot-token"
+    },
     "mailUrl": "smtp://user:password@smtp.example.com:587",
     "homeAssistant": {
       "url": "http://homeassistant.local:8123",

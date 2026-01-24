@@ -6,3 +6,6 @@ test-results/
 
 # Claude Code session data
 .claude/
+
+# Utility scripts
+scripts/
