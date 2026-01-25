@@ -18,7 +18,7 @@ const fs = require("fs");
 const path = require("path");
 
 const SETTINGS_PATH = path.join(__dirname, "..", "settings.json");
-const OUTPUT_PATH = path.join(__dirname, "..", "public", "data", "slack-channels.json");
+const OUTPUT_PATH = path.join(__dirname, "..", "app", "public", "data", "slack-channels.json");
 
 async function fetchChannels(token, cursor = null) {
   const params = new URLSearchParams({

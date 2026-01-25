@@ -2,11 +2,8 @@
   "name": "umsme",
   "private": true,
   "scripts": {
-    "sigma": "meteor run --settings settings.json",
-    "start": "meteor run",
-    "test": "meteor test --once --driver-package meteortesting:mocha",
-    "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
-    "visualize": "meteor --production --extra-packages bundle-visualizer"
+    "build": "meteor build dist --architecture os.linux.x86_64",
+    "start": "meteor run --settings settings.json"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.9",

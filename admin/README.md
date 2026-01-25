@@ -26,9 +26,9 @@ Alternatively, see the script `example-start.sh` to point to an external mongo d
 
 ## Running the webbapp in production environment
 
-First you have build for the right architecture, e.g.:
+First you have build for the right architecture, the `npm run build` command corresponds to:
 
-    meteor build ../umsme-build --architecture os.linux.x86_64
+    meteor build dist --architecture os.linux.x86_64
 
 **In the deployment environment:**
 
