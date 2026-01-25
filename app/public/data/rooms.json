@@ -80,7 +80,7 @@
     "electronics_workshop": {
       "name": { "en": "Electronics Workshop", "sv": "Elektronikverkstad" },
       "description": { "en": "Electronics workbenches, soldering stations, and components. This room is also the base for the saturday courses.", "sv": "Elektronikarbetsbänkar, lödstationer och komponenter. Detta rum är också basen för lördagskurserna." },
-      "slackChannels": ["#electronics", "#loerdagskurser"]
+      "slackChannels": ["#elektronik", "#loerdagskurser"]
     },
     "ceramics_workshop": {
       "name": { "en": "Ceramics Workshop", "sv": "Keramikverkstad" },
