@@ -31,7 +31,8 @@ swish/
 ├── server/
 │   ├── main.js              # Application entry point
 │   └── api/
-│       └── callback.js      # Swish callback handler
+│       ├── swish.js         # Swish HTTP callback handler
+│       └── payments.js      # Shared payment processing logic
 ├── imports/
 │   └── common -> ../../common   # Shared collections (symlink)
 ├── tests/
