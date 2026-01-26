@@ -1,6 +1,6 @@
-# Swish Callback Service
+# Payment Callback Service
 
-A minimal Meteor application dedicated to receiving Swish payment callbacks for Uppsala MakerSpace. This service handles payment callbacks separately from the main member app, providing isolated payment processing for stability and simplified deployment.
+A minimal Meteor application dedicated to receiving payment callbacks for Uppsala MakerSpace. This service handles payment callbacks separately from the main member app, providing isolated payment processing for stability and simplified deployment.
 
 ## Quick Start
 
@@ -27,18 +27,23 @@ npm run dev
 ## Directory Structure
 
 ```
-swish/
+payment/
 ├── server/
 │   ├── main.js              # Application entry point
-│   └── api/
-│       ├── swish.js         # Swish HTTP callback handler
-│       └── payments.js      # Shared payment processing logic
+│   ├── api/
+│   │   ├── swish.js         # Swish HTTP callback handler
+│   │   └── payments.js      # Shared payment processing logic
+│   └── cronjob/
+│       └── expireInitiatedPayments.js  # Background job for stale payments
 ├── imports/
 │   └── common -> ../../common   # Shared collections (symlink)
 ├── tests/
 │   ├── main.js              # Test entry point
+│   ├── settings.json        # Test-specific settings
 │   ├── test-helpers.js      # Shared test utilities
-│   └── *.test.js            # Test suites by category
+│   ├── swish/               # HTTP endpoint tests
+│   ├── cronjob/             # Background job tests
+│   └── business-logic/      # Payment processing tests
 ├── settings_example.json    # Configuration template
 └── MEMBERSHIP_RULES.md      # Business rules documentation
 ```
@@ -51,11 +56,22 @@ swish/
 {
   "swish": {
     "expectedCallbackIdentifier": "optional-swish-identifier"
-  }
+  },
+  "expireInitiatedPayments": [
+    {
+      "paymentType": "swish",
+      "expiry": 360,
+      "recurrence": 60
+    }
+  ]
 }
 ```
 
 - `expectedCallbackIdentifier`: Optional Swish callback identifier for validation. If set, callbacks without matching `callbackIdentifier` will be rejected with 403.
+- `expireInitiatedPayments`: Array of expiration job configurations:
+  - `paymentType`: Payment type to expire (e.g., "swish")
+  - `expiry`: Seconds after which to mark stale payments as EXPIRED
+  - `recurrence`: Seconds between job runs
 
 ## API Endpoint
 
@@ -87,15 +103,16 @@ Receives Swish payment status callbacks.
 
 ## Test Suite
 
-The service has comprehensive test coverage organized into 11 categories with 53 tests.
+The service has comprehensive test coverage organized into 12 categories with 55 tests.
 
 | Category | Tests | Description |
 |----------|-------|-------------|
 | VAL | 2 | Request validation (method, JSON format) |
 | NIP | 4 | No initiated payment (orphan callbacks) |
-| INIT | 5 | Initiated payment matching and status updates |
+| INIT | 6 | Initiated payment matching and status updates |
 | IDEM | 2 | Idempotency (duplicate callback handling) |
-| TYPE | 8 | Membership type creation (all 7 payment types + unknown) |
+| EXP | 4 | Expiration cron job |
+| TYPE | 7 | Membership type creation |
 | RENEW | 6 | Renewal timing (grace periods, early/late renewal) |
 | QLAB | 5 | Quarterly lab scenarios (Q1-Q4 from rules) |
 | SWITCH | 3 | Membership switching (upgrade/downgrade) |
@@ -130,8 +147,8 @@ See [MEMBERSHIP_RULES.md](./MEMBERSHIP_RULES.md) for detailed documentation of:
 ## Edge Cases
 
 ### Missing Initiated Payment
-If a callback arrives for an unknown `swishID`:
-- Creates an orphan Payment record with `swishID` field for manual matching
+If a callback arrives for an unknown `externalId`:
+- Creates an orphan Payment record with `externalId` field for manual matching
 - Logs warning for admin review
 - Returns 200 to prevent Swish retries
 
