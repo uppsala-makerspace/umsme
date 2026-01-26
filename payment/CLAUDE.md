@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code when working with the Swish callback service.
+This file provides guidance to Claude Code when working with the payment callback service.
 
 ## Project Overview
 
@@ -23,7 +23,7 @@ npm run build
 
 ### Directory Structure
 ```
-swish/
+payment/
 ├── server/
 │   ├── main.js           # Entry point
 │   └── api/
@@ -76,5 +76,5 @@ Do not include "Generated with Claude Code" or "Co-Authored-By" footers in commi
 ## Working Directory
 
 When working on this service:
-- Operate within `swish/` and `common/`
+- Operate within `payment/` and `common/`
 - Test changes affect shared collections carefully

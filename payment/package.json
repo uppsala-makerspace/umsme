@@ -1,0 +1,23 @@
+{
+  "name": "payment",
+  "private": true,
+  "scripts": {
+    "dev": "MONGO_URL=mongodb://localhost:27017/umsme meteor --port 3003 --settings settings.json",
+    "test": "meteor test --full-app --once --driver-package meteortesting:mocha --port 3004 --settings settings.json",
+    "test:watch": "meteor test --full-app --driver-package meteortesting:mocha --port 3004 --settings settings.json",
+    "build": "meteor build dist --architecture os.linux.x86_64"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.20.7",
+    "body-parser": "^2.2.0",
+    "meteor-node-stubs": "^1.2.5",
+    "moment": "^2.30.1",
+    "uuid": "^11.1.0"
+  },
+  "meteor": {
+    "mainModule": {
+      "server": "server/main.js"
+    },
+    "testModule": "tests/main.js"
+  }
+}

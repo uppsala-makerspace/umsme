@@ -1,0 +1,16 @@
+# Meteor
+.meteor/local
+
+# Dependencies
+node_modules
+
+# Settings (contains secrets)
+settings.json
+
+# Build output
+dist/
+
+# IDE
+.idea
+*.swp
+*.swo

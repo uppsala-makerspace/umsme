@@ -1,6 +1,6 @@
-# Swish Callback Service - Test Specifications
+# Payment Callback Service - Test Specifications
 
-This document describes the e2e tests for the Swish callback service.
+This document describes the e2e tests for the payment callback service.
 
 ## Test Environment
 
