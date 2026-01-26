@@ -56,6 +56,10 @@ export const memberStatus = async (mb) => {
         break;
       case 'lab':
         updateLabDate(ms);
+        // Quarterly lab may extend memberend when labend > memberend
+        if (ms.memberend) {
+          updateMemberDate(ms);
+        }
         break;
       case 'labandmember':
         updateMemberDate(ms);
