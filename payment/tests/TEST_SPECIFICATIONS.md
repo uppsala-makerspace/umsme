@@ -30,6 +30,7 @@ Each test is self-contained: it clears the database in `beforeEach` and creates 
 | NIP | swish/no-initiated-payment.test.js | 4 | Orphan payment handling |
 | INIT | swish/initiated-payment.test.js | 6 | Core callback flow |
 | IDEM | swish/idempotency.test.js | 2 | Duplicate callback handling |
+| EXP | cronjob/expiration.test.js | 4 | Expiration cron job |
 | TYPE | business-logic/membership-types.test.js | 7 | Payment type mapping |
 | RENEW | business-logic/renewal-timing.test.js | 6 | Grace period and extension timing |
 | QLAB | business-logic/quarterly-lab.test.js | 5 | Quarterly lab scenarios (Q1-Q4) |
@@ -38,7 +39,7 @@ Each test is self-contained: it clears the database in `beforeEach` and creates 
 | ERROR | business-logic/error-cases.test.js | 3 | Error handling verification |
 | DENORM | business-logic/member-denormalized.test.js | 9 | Member field denormalization |
 
-**Total: 51 tests**
+**Total: 55 tests**
 
 ---
 
@@ -92,7 +93,22 @@ Duplicate callback handling.
 
 ---
 
-## 5. Membership Type Tests (TYPE)
+## 5. Expiration Cron Job Tests (EXP)
+
+Background job that expires stale initiated payments. Configured via `Meteor.settings.expireInitiatedPayments`.
+
+Tests use a dedicated `testPayment` type (configured in `tests/settings.json`) to be independent of swish-specific logic.
+
+| Test ID | Description |
+|---------|-------------|
+| EXP-001 | Stale initiated payment gets expired |
+| EXP-002 | Initiated payment of non-configured type is not expired |
+| EXP-003 | Recent initiated payment is not expired |
+| EXP-004 | Already resolved payments are not affected |
+
+---
+
+## 6. Membership Type Tests (TYPE)
 
 Payment type to membership mapping.
 
@@ -108,7 +124,7 @@ Payment type to membership mapping.
 
 ---
 
-## 6. Renewal Timing Tests (RENEW)
+## 7. Renewal Timing Tests (RENEW)
 
 Grace period and extension timing (from MEMBERSHIP_RULES.md).
 
@@ -123,7 +139,7 @@ Grace period and extension timing (from MEMBERSHIP_RULES.md).
 
 ---
 
-## 7. Quarterly Lab Tests (QLAB)
+## 8. Quarterly Lab Tests (QLAB)
 
 Maps to Q1-Q4 scenarios in MEMBERSHIP_RULES.md.
 
@@ -137,7 +153,7 @@ Maps to Q1-Q4 scenarios in MEMBERSHIP_RULES.md.
 
 ---
 
-## 8. Switching Scenarios Tests (SWITCH)
+## 9. Switching Scenarios Tests (SWITCH)
 
 Maps to S1-S2 scenarios in MEMBERSHIP_RULES.md.
 
@@ -149,7 +165,7 @@ Maps to S1-S2 scenarios in MEMBERSHIP_RULES.md.
 
 ---
 
-## 9. Family Switching Tests (FAMILY)
+## 10. Family Switching Tests (FAMILY)
 
 Maps to S3-S4 scenarios in MEMBERSHIP_RULES.md.
 
@@ -162,7 +178,7 @@ Maps to S3-S4 scenarios in MEMBERSHIP_RULES.md.
 
 ---
 
-## 10. Error Case Tests (ERROR)
+## 11. Error Case Tests (ERROR)
 
 Verifies error handling mechanics: payment created (audit trail), no membership created, paymentError set on member.
 
@@ -174,7 +190,7 @@ Verifies error handling mechanics: payment created (audit trail), no membership 
 
 ---
 
-## 11. Member Denormalized Field Tests (DENORM)
+## 12. Member Denormalized Field Tests (DENORM)
 
 Verifies that member objects are updated with denormalized fields (member, lab, family) after payment, and that family members are also updated.
 
@@ -194,16 +210,30 @@ Verifies that member objects are updated with denormalized fields (member, lab, 
 
 ## Test Organization
 
-Tests are organized into two folders:
+Tests are organized into three folders:
 
 - **swish/** - HTTP endpoint tests (VAL, NIP, INIT, IDEM)
+- **cronjob/** - Background job tests (EXP)
 - **business-logic/** - Payment processing rules tests (TYPE, RENEW, QLAB, SWITCH, FAMILY, ERROR, DENORM)
 
 Each folder has its own `helpers.js`:
 - `swish/helpers.js` - HTTP helpers: `postCallback`, `createInitiatedPayment`
+- `cronjob/helpers.js` - Cron job helpers: `createInitiatedPaymentWithDate`, `sleep`
 - `business-logic/helpers.js` - API helpers: `processPayment` (calls payments.js directly)
 
 Shared helpers (`clearTestData`, `createTestMember`) are in `test-helpers.js`.
+
+## Test Settings
+
+Tests use `tests/settings.json` with a dedicated `testPayment` type and fast expiration:
+- `paymentType`: "testPayment" (test-specific, independent of swish)
+- `expiry`: 2 (seconds)
+- `recurrence`: 1 (seconds)
+
+Production settings in `settings.json` use:
+- `paymentType`: "swish"
+- `expiry`: 360 (6 minutes)
+- `recurrence`: 60 (every minute)
 
 ## Implementation Notes
 

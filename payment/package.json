@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "MONGO_URL=mongodb://localhost:27017/umsme meteor --port 3003 --settings settings.json",
-    "test": "meteor test --full-app --once --driver-package meteortesting:mocha --port 3004 --settings settings.json",
-    "test:watch": "meteor test --full-app --driver-package meteortesting:mocha --port 3004 --settings settings.json",
+    "test": "meteor test --full-app --once --driver-package meteortesting:mocha --port 3004 --settings tests/settings.json",
+    "test:watch": "meteor test --full-app --driver-package meteortesting:mocha --port 3004 --settings tests/settings.json",
     "build": "meteor build dist --architecture os.linux.x86_64"
   },
   "dependencies": {

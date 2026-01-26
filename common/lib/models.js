@@ -30,6 +30,7 @@ export const models = {
     status: { label: "status", type: String },
     amount: { label: "amount", type: String },
     createdAt: { label: "createdAt", type: Date },
+    resolvedAt: { label: "resolvedAt", type: Date, optional: true },
     paymentType: { label: "Payment type", type: String },
     errorCode: { label: "Error code", type: String, max: 20, optional: true },
     errorMessage: { label: "Error message", type: String, max: 200, optional: true },

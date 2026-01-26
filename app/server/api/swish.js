@@ -28,7 +28,7 @@ WebApp.handlers.use("/swish/callback", async (req, res, next) => {
         }
         initiatedPayments.updateAsync(
           { externalId: obj.id },
-          { $set: { status: "PAID" , createdAt: obj.datePaid}}
+          { $set: { status: "PAID", resolvedAt: new Date(obj.datePaid) }}
         );
         const member = await Members.findOneAsync(initiated.member);
         const payment = await addPayment( {

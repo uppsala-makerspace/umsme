@@ -4,6 +4,9 @@ import './swish/no-initiated-payment.test.js';
 import './swish/initiated-payment.test.js';
 import './swish/idempotency.test.js';
 
+// Cron job tests
+import './cronjob/expiration.test.js';
+
 // Business logic tests - membership rules from payments.js
 import './business-logic/membership-types.test.js';
 import './business-logic/renewal-timing.test.js';

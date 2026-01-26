@@ -1,5 +1,12 @@
 {
   "swish": {
     "expectedCallbackIdentifier": "optional-swish-identifier"
-  }
+  },
+  "expireInitiatedPayments": [
+    {
+      "paymentType": "swish",
+      "expiry": 360,
+      "recurrence": 60
+    }
+  ]
 }

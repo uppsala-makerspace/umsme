@@ -107,7 +107,7 @@ async function handlePaidStatus(obj, initiated) {
   // Update initiated payment status
   await initiatedPayments.updateAsync(
     { externalId: id },
-    { $set: { status: "PAID", createdAt: new Date(datePaid) } }
+    { $set: { status: "PAID", resolvedAt: new Date(datePaid) } }
   );
 
   // Find member
@@ -164,6 +164,7 @@ async function handleFailedStatus(obj, initiated, status) {
   // Update initiated payment with failure status
   const updateData = {
     status,
+    resolvedAt: new Date(),
     ...(errorCode && { errorCode }),
     ...(errorMessage && { errorMessage }),
   };
