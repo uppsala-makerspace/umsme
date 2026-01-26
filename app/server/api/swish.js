@@ -20,14 +20,14 @@ WebApp.handlers.use("/swish/callback", async (req, res, next) => {
   if (obj && typeof obj === 'object') {
     if (obj.status === 'PAID') {
       try {
-      const initiated = await initiatedPayments.findOneAsync({ swishID: obj.id });
+      const initiated = await initiatedPayments.findOneAsync({ externalId: obj.id });
         if (!initiated) {
           res.writeHead(404);
           res.end('Payment not found!');
           return;
         }
         initiatedPayments.updateAsync(
-          { swishID: obj.id }, 
+          { externalId: obj.id },
           { $set: { status: "PAID" , createdAt: obj.datePaid}}
         );
         const member = await Members.findOneAsync(initiated.member);

@@ -33,7 +33,7 @@ describe('No Initiated Payment Tests', function () {
     await clearTestData();
   });
 
-  it('NIP-001: PAID callback creates orphan payment with swishID', async function () {
+  it('NIP-001: PAID callback creates orphan payment with externalId', async function () {
     const swishId = 'test-orphan-' + Date.now();
     const callbackBody = {
       id: swishId,
@@ -48,12 +48,12 @@ describe('No Initiated Payment Tests', function () {
     assert.strictEqual(response.status, 200, 'Expected 200 response');
     assert.strictEqual(response.text, 'Callback processed');
 
-    const payment = await Payments.findOneAsync({ swishID: swishId });
+    const payment = await Payments.findOneAsync({ externalId: swishId });
     assert.ok(payment, 'Payment should be created');
     assert.strictEqual(payment.type, 'swish');
     assert.strictEqual(payment.amount, 200);
     assert.strictEqual(payment.mobile, '46701234567');
-    assert.strictEqual(payment.swishID, swishId);
+    assert.strictEqual(payment.externalId, swishId);
     assert.strictEqual(payment.member, undefined, 'Orphan payment should not have member');
 
     const membershipCount = await Memberships.find({}).countAsync();

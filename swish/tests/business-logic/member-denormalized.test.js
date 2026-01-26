@@ -11,7 +11,7 @@ import {
   clearTestData,
   createTestMember,
   processPayment,
-} from '../test-helpers';
+} from './helpers';
 
 /**
  * Helper to add months to a date
@@ -73,10 +73,9 @@ describe('Member Denormalized Field Tests', function () {
   describe('Primary Member Updates', function () {
     it('DENORM-001: memberBase updates member.member and member.family on member object', async function () {
       const memberId = await createTestMember();
-      const swishId = 'denorm-001-' + Date.now();
       const now = new Date();
 
-      await processPayment(memberId, swishId, 'memberBase', 300);
+      await processPayment(memberId, 'memberBase', 300);
 
       const member = await Members.findOneAsync(memberId);
 
@@ -97,10 +96,9 @@ describe('Member Denormalized Field Tests', function () {
 
     it('DENORM-002: memberLab updates member.member, member.lab, and member.family', async function () {
       const memberId = await createTestMember();
-      const swishId = 'denorm-002-' + Date.now();
       const now = new Date();
 
-      await processPayment(memberId, swishId, 'memberLab', 1200);
+      await processPayment(memberId, 'memberLab', 1200);
 
       const member = await Members.findOneAsync(memberId);
 
@@ -123,9 +121,8 @@ describe('Member Denormalized Field Tests', function () {
 
     it('DENORM-003: familyBase updates member.family to true', async function () {
       const memberId = await createTestMember();
-      const swishId = 'denorm-003-' + Date.now();
 
-      await processPayment(memberId, swishId, 'familyBase', 500);
+      await processPayment(memberId, 'familyBase', 500);
 
       const member = await Members.findOneAsync(memberId);
       assert.strictEqual(member.family, true, 'member.family should be true');
@@ -135,10 +132,9 @@ describe('Member Denormalized Field Tests', function () {
       // Create member with existing membership
       const memberEnd = addMonths(new Date(), 6);
       const memberId = await createTestMember({ member: memberEnd });
-      const swishId = 'denorm-004-' + Date.now();
       const now = new Date();
 
-      await processPayment(memberId, swishId, 'memberQuarterlyLab', 350);
+      await processPayment(memberId, 'memberQuarterlyLab', 350);
 
       const member = await Members.findOneAsync(memberId);
 
@@ -154,9 +150,8 @@ describe('Member Denormalized Field Tests', function () {
     it('DENORM-005: Previous paymentError is cleared after successful payment', async function () {
       // Create member with an existing paymentError
       const memberId = await createTestMember({ paymentError: 'SOME_ERROR' });
-      const swishId = 'denorm-005-' + Date.now();
 
-      await processPayment(memberId, swishId, 'memberBase', 300);
+      await processPayment(memberId, 'memberBase', 300);
 
       const member = await Members.findOneAsync(memberId);
       assert.strictEqual(member.paymentError, null, 'paymentError should be cleared');
@@ -168,10 +163,8 @@ describe('Member Denormalized Field Tests', function () {
       const primaryId = await createTestMember();
       const family1Id = await createFamilyMember(primaryId, { name: 'Family 1' });
       const family2Id = await createFamilyMember(primaryId, { name: 'Family 2' });
-      const swishId = 'denorm-006-' + Date.now();
-      const now = new Date();
 
-      await processPayment(primaryId, swishId, 'familyBase', 500);
+      await processPayment(primaryId, 'familyBase', 500);
 
       // Check primary member
       const primary = await Members.findOneAsync(primaryId);
@@ -198,9 +191,8 @@ describe('Member Denormalized Field Tests', function () {
     it('DENORM-007: familyLab updates all family members with member and lab dates', async function () {
       const primaryId = await createTestMember();
       const familyId = await createFamilyMember(primaryId);
-      const swishId = 'denorm-007-' + Date.now();
 
-      await processPayment(primaryId, swishId, 'familyLab', 1400);
+      await processPayment(primaryId, 'familyLab', 1400);
 
       const primary = await Members.findOneAsync(primaryId);
       const family = await Members.findOneAsync(familyId);
@@ -223,9 +215,8 @@ describe('Member Denormalized Field Tests', function () {
     it('DENORM-008: Non-family payment does not update unrelated members', async function () {
       const primaryId = await createTestMember();
       const unrelatedId = await createTestMember({ name: 'Unrelated Member' });
-      const swishId = 'denorm-008-' + Date.now();
 
-      await processPayment(primaryId, swishId, 'memberBase', 300);
+      await processPayment(primaryId, 'memberBase', 300);
 
       const unrelated = await Members.findOneAsync(unrelatedId);
 
@@ -237,10 +228,9 @@ describe('Member Denormalized Field Tests', function () {
     it('DENORM-009: Regular payment does not update family members (only family payments do)', async function () {
       const primaryId = await createTestMember();
       const familyId = await createFamilyMember(primaryId);
-      const swishId = 'denorm-009-' + Date.now();
 
       // Pay with regular (non-family) payment
-      await processPayment(primaryId, swishId, 'memberBase', 300);
+      await processPayment(primaryId, 'memberBase', 300);
 
       const primary = await Members.findOneAsync(primaryId);
       const family = await Members.findOneAsync(familyId);

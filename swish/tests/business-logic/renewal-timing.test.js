@@ -11,12 +11,11 @@
  */
 
 import assert from 'assert';
-import { Memberships } from '/imports/common/collections/memberships';
 import {
   clearTestData,
   createTestMember,
   processPayment,
-} from '../test-helpers';
+} from './helpers';
 
 /**
  * Helper to add days to a date
@@ -62,10 +61,9 @@ describe('Renewal Timing Tests', function () {
 
   it('RENEW-001: First-time memberBase gets 14-day grace period + 1 year', async function () {
     const memberId = await createTestMember();
-    const swishId = 'renew-001-' + Date.now();
     const now = new Date();
 
-    const membership = await processPayment(memberId, swishId, 'memberBase', 300);
+    const membership = await processPayment(memberId, 'memberBase', 300);
 
     assert.ok(membership, 'Membership should be created');
 
@@ -82,9 +80,8 @@ describe('Renewal Timing Tests', function () {
     // Create member with existing membership that expires in 6 months
     const futureDate = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: futureDate });
-    const swishId = 'renew-002-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberBase', 300);
+    const membership = await processPayment(memberId, 'memberBase', 300);
 
     assert.ok(membership, 'Membership should be created');
 
@@ -101,10 +98,9 @@ describe('Renewal Timing Tests', function () {
     // Create member with expired membership (1 month ago)
     const pastDate = addMonths(new Date(), -1);
     const memberId = await createTestMember({ member: pastDate });
-    const swishId = 'renew-003-' + Date.now();
     const now = new Date();
 
-    const membership = await processPayment(memberId, swishId, 'memberBase', 300);
+    const membership = await processPayment(memberId, 'memberBase', 300);
 
     assert.ok(membership, 'Membership should be created');
 
@@ -119,10 +115,9 @@ describe('Renewal Timing Tests', function () {
 
   it('RENEW-004: First-time memberLab gets 14-day grace + 1 year for both dates', async function () {
     const memberId = await createTestMember();
-    const swishId = 'renew-004-' + Date.now();
     const now = new Date();
 
-    const membership = await processPayment(memberId, swishId, 'memberLab', 1200);
+    const membership = await processPayment(memberId, 'memberLab', 1200);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.type, 'labandmember');
@@ -145,9 +140,8 @@ describe('Renewal Timing Tests', function () {
     const memberEnd = addMonths(new Date(), 8);
     const labEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd, lab: labEnd });
-    const swishId = 'renew-005-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberLab', 1200);
+    const membership = await processPayment(memberId, 'memberLab', 1200);
 
     assert.ok(membership, 'Membership should be created');
 
@@ -168,10 +162,9 @@ describe('Renewal Timing Tests', function () {
     const memberEnd = addMonths(new Date(), 6); // Active, > 2 months away
     const labEnd = addMonths(new Date(), -1); // Expired
     const memberId = await createTestMember({ member: memberEnd, lab: labEnd });
-    const swishId = 'renew-006-' + Date.now();
     const now = new Date();
 
-    const membership = await processPayment(memberId, swishId, 'memberLab', 1200);
+    const membership = await processPayment(memberId, 'memberLab', 1200);
 
     assert.ok(membership, 'Membership should be created');
 

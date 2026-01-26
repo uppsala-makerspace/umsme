@@ -13,7 +13,7 @@ import {
   clearTestData,
   createTestMember,
   createInitiatedPayment,
-} from '../test-helpers';
+} from './helpers';
 
 describe('Initiated Payment Tests', function () {
   this.timeout(10000);
@@ -39,7 +39,7 @@ describe('Initiated Payment Tests', function () {
     assert.strictEqual(response.status, 200);
 
     // Verify payment created
-    const payment = await Payments.findOneAsync({ swishID: swishId });
+    const payment = await Payments.findOneAsync({ externalId: swishId });
     assert.ok(payment, 'Payment should be created');
     assert.strictEqual(payment.member, memberId);
     assert.strictEqual(payment.amount, 300);
@@ -64,7 +64,7 @@ describe('Initiated Payment Tests', function () {
       datePaid: new Date().toISOString(),
     });
 
-    const initiated = await initiatedPayments.findOneAsync({ swishID: swishId });
+    const initiated = await initiatedPayments.findOneAsync({ externalId: swishId });
     assert.strictEqual(initiated.status, 'PAID');
   });
 
@@ -81,7 +81,7 @@ describe('Initiated Payment Tests', function () {
 
     assert.strictEqual(response.status, 200);
 
-    const initiated = await initiatedPayments.findOneAsync({ swishID: swishId });
+    const initiated = await initiatedPayments.findOneAsync({ externalId: swishId });
     assert.strictEqual(initiated.status, 'CANCELLED');
 
     // No payment should be created
@@ -104,7 +104,7 @@ describe('Initiated Payment Tests', function () {
 
     assert.strictEqual(response.status, 200);
 
-    const initiated = await initiatedPayments.findOneAsync({ swishID: swishId });
+    const initiated = await initiatedPayments.findOneAsync({ externalId: swishId });
     assert.strictEqual(initiated.status, 'DECLINED');
     assert.strictEqual(initiated.errorCode, 'DS01');
     assert.strictEqual(initiated.errorMessage, 'User declined the payment');
@@ -125,9 +125,33 @@ describe('Initiated Payment Tests', function () {
 
     assert.strictEqual(response.status, 200);
 
-    const initiated = await initiatedPayments.findOneAsync({ swishID: swishId });
+    const initiated = await initiatedPayments.findOneAsync({ externalId: swishId });
     assert.strictEqual(initiated.status, 'ERROR');
     assert.strictEqual(initiated.errorCode, 'RP03');
     assert.strictEqual(initiated.errorMessage, 'Request timeout');
+  });
+
+  it('INIT-006: Unknown paymentType creates payment but no membership', async function () {
+    const memberId = await createTestMember();
+    const externalId = 'init-006-' + Date.now();
+
+    await createInitiatedPayment(memberId, externalId, 'unknownType', 100);
+
+    await postCallback({
+      id: externalId,
+      status: 'PAID',
+      amount: 100,
+      payerAlias: '46701234567',
+      datePaid: new Date().toISOString(),
+    });
+
+    // Payment should be created
+    const payment = await Payments.findOneAsync({ externalId });
+    assert.ok(payment, 'Payment should be created');
+    assert.strictEqual(payment.member, memberId);
+
+    // No membership should be created
+    const membershipCount = await Memberships.find({ mid: memberId }).countAsync();
+    assert.strictEqual(membershipCount, 0, 'No membership should be created for unknown type');
   });
 });

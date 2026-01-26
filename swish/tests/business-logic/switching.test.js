@@ -13,12 +13,11 @@
  */
 
 import assert from 'assert';
-import { Memberships } from '/imports/common/collections/memberships';
 import {
   clearTestData,
   createTestMember,
   processPayment,
-} from '../test-helpers';
+} from './helpers';
 
 /**
  * Helper to add months to a date
@@ -57,10 +56,9 @@ describe('Switching Scenarios Tests', function () {
     // Member with active membership more than 2 months out (e.g., 6 months)
     const memberEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd });
-    const swishId = 'switch-001-' + Date.now();
     const now = new Date();
 
-    const membership = await processPayment(memberId, swishId, 'memberLab', 1200);
+    const membership = await processPayment(memberId, 'memberLab', 1200);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.type, 'labandmember');
@@ -82,9 +80,8 @@ describe('Switching Scenarios Tests', function () {
     // Member with active membership within 2 months (e.g., 1 month out)
     const memberEnd = addMonths(new Date(), 1);
     const memberId = await createTestMember({ member: memberEnd });
-    const swishId = 'switch-002-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberLab', 1200);
+    const membership = await processPayment(memberId, 'memberLab', 1200);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.type, 'labandmember');
@@ -107,9 +104,8 @@ describe('Switching Scenarios Tests', function () {
     const memberEnd = addMonths(new Date(), 6);
     const labEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd, lab: labEnd });
-    const swishId = 'switch-003-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberBase', 300);
+    const membership = await processPayment(memberId, 'memberBase', 300);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.type, 'member');

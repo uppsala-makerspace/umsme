@@ -13,13 +13,12 @@
  */
 
 import assert from 'assert';
-import { Memberships } from '/imports/common/collections/memberships';
 import { Members } from '/imports/common/collections/members';
 import {
   clearTestData,
   createTestMember,
   processPayment,
-} from '../test-helpers';
+} from './helpers';
 
 /**
  * Helper to add days to a date
@@ -50,9 +49,8 @@ describe('Family Switching Tests', function () {
     // Regular member with membership ending in 10 days (within 14 day window)
     const memberEnd = addDays(new Date(), 10);
     const memberId = await createTestMember({ member: memberEnd, family: false });
-    const swishId = 'family-001-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'familyBase', 500);
+    const membership = await processPayment(memberId, 'familyBase', 500);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.family, true, 'Should be family membership');
@@ -62,9 +60,8 @@ describe('Family Switching Tests', function () {
     // Regular member with membership ending in 6 months (way more than 14 days)
     const memberEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd, family: false });
-    const swishId = 'family-002-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'familyBase', 500);
+    const membership = await processPayment(memberId, 'familyBase', 500);
 
     // Should NOT create membership
     assert.ok(!membership, 'No membership should be created');
@@ -78,9 +75,8 @@ describe('Family Switching Tests', function () {
     // Family member with membership ending in 10 days (within 14 day window)
     const memberEnd = addDays(new Date(), 10);
     const memberId = await createTestMember({ member: memberEnd, family: true });
-    const swishId = 'family-003-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberBase', 300);
+    const membership = await processPayment(memberId, 'memberBase', 300);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.family, false, 'Should not be family membership');
@@ -90,9 +86,8 @@ describe('Family Switching Tests', function () {
     // Family member with membership ending in 6 months (way more than 14 days)
     const memberEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd, family: true });
-    const swishId = 'family-004-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberBase', 300);
+    const membership = await processPayment(memberId, 'memberBase', 300);
 
     // Should NOT create membership
     assert.ok(!membership, 'No membership should be created');

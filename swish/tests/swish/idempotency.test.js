@@ -12,7 +12,7 @@ import {
   clearTestData,
   createTestMember,
   createInitiatedPayment,
-} from '../test-helpers';
+} from './helpers';
 
 describe('Idempotency Tests', function () {
   this.timeout(10000);
@@ -44,7 +44,7 @@ describe('Idempotency Tests', function () {
     assert.strictEqual(response2.status, 200);
 
     // Only one payment should exist
-    const paymentCount = await Payments.find({ swishID: swishId }).countAsync();
+    const paymentCount = await Payments.find({ externalId: swishId }).countAsync();
     assert.strictEqual(paymentCount, 1, 'Only one payment should be created');
   });
 

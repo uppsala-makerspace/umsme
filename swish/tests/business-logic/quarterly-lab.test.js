@@ -11,13 +11,12 @@
  */
 
 import assert from 'assert';
-import { Memberships } from '/imports/common/collections/memberships';
 import { Members } from '/imports/common/collections/members';
 import {
   clearTestData,
   createTestMember,
   processPayment,
-} from '../test-helpers';
+} from './helpers';
 
 /**
  * Helper to add months to a date
@@ -46,9 +45,8 @@ describe('Quarterly Lab Tests', function () {
   it('QLAB-001 (Q1): First-time member buying quarterly returns error', async function () {
     // First-time member (no member date)
     const memberId = await createTestMember();
-    const swishId = 'qlab-001-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberQuarterlyLab', 350);
+    const membership = await processPayment(memberId, 'memberQuarterlyLab', 350);
 
     // Should NOT create membership for first-time member buying quarterly
     assert.ok(!membership, 'No membership should be created');
@@ -62,10 +60,9 @@ describe('Quarterly Lab Tests', function () {
     // Member with active membership (6 months out) but no lab
     const memberEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd });
-    const swishId = 'qlab-002-' + Date.now();
     const now = new Date();
 
-    const membership = await processPayment(memberId, swishId, 'memberQuarterlyLab', 350);
+    const membership = await processPayment(memberId, 'memberQuarterlyLab', 350);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.type, 'lab');
@@ -90,9 +87,8 @@ describe('Quarterly Lab Tests', function () {
     const memberEnd = addMonths(new Date(), 8);
     const labEnd = addMonths(new Date(), 4);
     const memberId = await createTestMember({ member: memberEnd, lab: labEnd });
-    const swishId = 'qlab-003-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberQuarterlyLab', 350);
+    const membership = await processPayment(memberId, 'memberQuarterlyLab', 350);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.type, 'lab');
@@ -116,9 +112,8 @@ describe('Quarterly Lab Tests', function () {
     // Member with active membership and lab with same end dates
     const endDate = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: endDate, lab: endDate });
-    const swishId = 'qlab-004-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberQuarterlyLab', 350);
+    const membership = await processPayment(memberId, 'memberQuarterlyLab', 350);
 
     assert.ok(membership, 'Membership should be created');
     assert.strictEqual(membership.type, 'lab');
@@ -143,9 +138,8 @@ describe('Quarterly Lab Tests', function () {
     const memberEnd = addMonths(new Date(), 2); // Membership ends in 2 months
     const labEnd = addMonths(new Date(), 1); // Lab ends in 1 month
     const memberId = await createTestMember({ member: memberEnd, lab: labEnd });
-    const swishId = 'qlab-005-' + Date.now();
 
-    const membership = await processPayment(memberId, swishId, 'memberQuarterlyLab', 350);
+    const membership = await processPayment(memberId, 'memberQuarterlyLab', 350);
 
     assert.ok(membership, 'Membership should be created');
 

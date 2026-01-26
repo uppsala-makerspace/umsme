@@ -56,7 +56,7 @@ WebApp.handlers.use("/swish/callback", async (req, res) => {
 
   try {
     // Find the initiated payment
-    const initiated = await initiatedPayments.findOneAsync({ swishID: id });
+    const initiated = await initiatedPayments.findOneAsync({ externalId: id });
 
     // Handle different status types
     switch (status) {
@@ -99,14 +99,14 @@ async function handlePaidStatus(obj, initiated) {
 
   if (!initiated) {
     // Orphan payment - create payment record for manual matching
-    console.warn(`[Swish] No initiated payment found for swishID: ${id}, creating orphan payment`);
+    console.warn(`[Swish] No initiated payment found for externalId: ${id}, creating orphan payment`);
     await createOrphanPayment(obj);
     return;
   }
 
   // Update initiated payment status
   await initiatedPayments.updateAsync(
-    { swishID: id },
+    { externalId: id },
     { $set: { status: "PAID", createdAt: new Date(datePaid) } }
   );
 
@@ -119,7 +119,7 @@ async function handlePaidStatus(obj, initiated) {
       type: "swish",
       amount: Number(initiated.amount),
       date: new Date(datePaid),
-      swishID: id,
+      externalId: id,
     });
     console.warn(`[Swish] Created payment ${payment._id} without member`);
     return;
@@ -133,7 +133,7 @@ async function handlePaidStatus(obj, initiated) {
     name: member.name,
     mobile: member.mobile,
     member: member._id,
-    swishID: id,
+    externalId: id,
   });
   console.log(`[Swish] Created payment ${payment._id} for member ${member._id}`);
 
@@ -169,7 +169,7 @@ async function handleFailedStatus(obj, initiated, status) {
   };
 
   await initiatedPayments.updateAsync(
-    { swishID: id },
+    { externalId: id },
     { $set: updateData }
   );
 
@@ -187,10 +187,10 @@ async function createOrphanPayment(obj) {
     amount: Number(amount),
     date: new Date(datePaid),
     mobile: payerAlias,
-    swishID: id,
+    externalId: id,
   });
 
-  console.warn(`[Swish] Created orphan payment ${payment._id} with swishID ${id} for manual matching`);
+  console.warn(`[Swish] Created orphan payment ${payment._id} with externalId ${id} for manual matching`);
   return payment;
 }
 

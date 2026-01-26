@@ -23,14 +23,16 @@ export const getRoleOptions = () => {
 
 export const models = {
   initiatedPayments: {
-    swishID: {
+    externalId: {
       type: String,
     },
     member: { label: "Member", type: String, max: 20, optional: true },
     status: { label: "status", type: String },
     amount: { label: "amount", type: String },
     createdAt: { label: "createdAt", type: Date },
-    paymentType: {label: "Payment type", type: String},
+    paymentType: { label: "Payment type", type: String },
+    errorCode: { label: "Error code", type: String, max: 20, optional: true },
+    errorMessage: { label: "Error message", type: String, max: 200, optional: true },
   },
   member: {
     mid: {
@@ -135,6 +137,13 @@ export const models = {
       },
     },
     mobile: { label: "Mobile", type: String, max: 20, optional: true },
+    paymentError: {
+      label: "Payment Error",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { readonly: true },
+    },
   },
   membership: {
     mid: {
@@ -407,6 +416,7 @@ export const models = {
     },
     member: { label: "Member", type: String, max: 20, optional: true },
     membership: { label: "Membership", type: String, max: 20, optional: true },
+    externalId: { label: "External ID", type: String, max: 40, optional: true },
   },
   lockusers: {
     name: { label: "Member", type: String, max: 40 },

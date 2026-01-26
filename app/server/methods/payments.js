@@ -45,7 +45,7 @@ Meteor.methods({
     }
 
     initiatedPayments.insertAsync({
-      swishID: instructionId,
+      externalId: instructionId,
       member: member._id,
       status: "INITIATED",
       amount: price,
@@ -107,7 +107,7 @@ Meteor.methods({
     //denna ska anropas av gränssnittet i payment
     check(instructionId, String);
     const payment = await initiatedPayments.findOneAsync({
-      swishID: instructionId,
+      externalId: instructionId,
     });
     if (!payment) {
       throw new Meteor.Error("payment-not-found", "Ingen betalning hittades.");

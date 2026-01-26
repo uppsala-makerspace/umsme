@@ -13,11 +13,10 @@ import { Payments } from '/imports/common/collections/payments';
 import { Memberships } from '/imports/common/collections/memberships';
 import { Members } from '/imports/common/collections/members';
 import {
-  postCallback,
   clearTestData,
   createTestMember,
-  createInitiatedPayment,
-} from '../test-helpers';
+  processPayment,
+} from './helpers';
 
 /**
  * Helper to add months to a date
@@ -38,28 +37,16 @@ describe('Error Case Tests', function () {
   it('ERROR-001: QUARTERLY_WITHOUT_BASE_MEMBERSHIP - payment created, no membership, error set', async function () {
     // First-time member (no member date)
     const memberId = await createTestMember();
-    const swishId = 'error-001-' + Date.now();
 
-    await createInitiatedPayment(memberId, swishId, 'memberQuarterlyLab', 350);
-
-    const response = await postCallback({
-      id: swishId,
-      status: 'PAID',
-      amount: 350,
-      payerAlias: '46701234567',
-      datePaid: new Date().toISOString(),
-    });
-
-    assert.strictEqual(response.status, 200, 'Should return 200 to prevent Swish retries');
-
-    // Payment SHOULD be created (audit trail)
-    const payment = await Payments.findOneAsync({ swishID: swishId });
-    assert.ok(payment, 'Payment should be created for audit trail');
-    assert.strictEqual(payment.member, memberId);
+    // processPayment creates a payment and calls the API
+    const membership = await processPayment(memberId, 'memberQuarterlyLab', 350);
 
     // Membership should NOT be created
-    const membershipCount = await Memberships.find({ mid: memberId }).countAsync();
-    assert.strictEqual(membershipCount, 0, 'No membership should be created');
+    assert.ok(!membership, 'No membership should be created');
+
+    // Payment SHOULD be created (audit trail)
+    const paymentCount = await Payments.find({ member: memberId }).countAsync();
+    assert.strictEqual(paymentCount, 1, 'Payment should be created for audit trail');
 
     // Error should be set on member
     const member = await Members.findOneAsync(memberId);
@@ -70,28 +57,15 @@ describe('Error Case Tests', function () {
     // Regular member with membership ending in 6 months
     const memberEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd, family: false });
-    const swishId = 'error-002-' + Date.now();
 
-    await createInitiatedPayment(memberId, swishId, 'familyBase', 500);
-
-    const response = await postCallback({
-      id: swishId,
-      status: 'PAID',
-      amount: 500,
-      payerAlias: '46701234567',
-      datePaid: new Date().toISOString(),
-    });
-
-    assert.strictEqual(response.status, 200, 'Should return 200 to prevent Swish retries');
-
-    // Payment SHOULD be created (audit trail)
-    const payment = await Payments.findOneAsync({ swishID: swishId });
-    assert.ok(payment, 'Payment should be created for audit trail');
-    assert.strictEqual(payment.member, memberId);
+    const membership = await processPayment(memberId, 'familyBase', 500);
 
     // Membership should NOT be created
-    const membershipCount = await Memberships.find({ mid: memberId }).countAsync();
-    assert.strictEqual(membershipCount, 0, 'No membership should be created');
+    assert.ok(!membership, 'No membership should be created');
+
+    // Payment SHOULD be created (audit trail)
+    const paymentCount = await Payments.find({ member: memberId }).countAsync();
+    assert.strictEqual(paymentCount, 1, 'Payment should be created for audit trail');
 
     // Error should be set on member
     const member = await Members.findOneAsync(memberId);
@@ -102,28 +76,15 @@ describe('Error Case Tests', function () {
     // Family member with membership ending in 6 months
     const memberEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd, family: true });
-    const swishId = 'error-003-' + Date.now();
 
-    await createInitiatedPayment(memberId, swishId, 'memberBase', 300);
-
-    const response = await postCallback({
-      id: swishId,
-      status: 'PAID',
-      amount: 300,
-      payerAlias: '46701234567',
-      datePaid: new Date().toISOString(),
-    });
-
-    assert.strictEqual(response.status, 200, 'Should return 200 to prevent Swish retries');
-
-    // Payment SHOULD be created (audit trail)
-    const payment = await Payments.findOneAsync({ swishID: swishId });
-    assert.ok(payment, 'Payment should be created for audit trail');
-    assert.strictEqual(payment.member, memberId);
+    const membership = await processPayment(memberId, 'memberBase', 300);
 
     // Membership should NOT be created
-    const membershipCount = await Memberships.find({ mid: memberId }).countAsync();
-    assert.strictEqual(membershipCount, 0, 'No membership should be created');
+    assert.ok(!membership, 'No membership should be created');
+
+    // Payment SHOULD be created (audit trail)
+    const paymentCount = await Payments.find({ member: memberId }).countAsync();
+    assert.strictEqual(paymentCount, 1, 'Payment should be created for audit trail');
 
     // Error should be set on member
     const member = await Members.findOneAsync(memberId);
