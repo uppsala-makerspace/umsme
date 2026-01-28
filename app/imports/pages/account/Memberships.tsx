@@ -26,10 +26,10 @@ const Memberships = ({ memberships = [] }: MembershipsProps) => {
     if (family) {
       switch (type) {
         case 'member':
-          return t('memberFamilyBaseType');
+          return t('familyBaseType');
         case 'lab':
         case 'labandmember':
-          return t('memberFamilyLabType');
+          return t('familyLabType');
       }
     }
 

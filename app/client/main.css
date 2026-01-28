@@ -52,6 +52,51 @@
   box-sizing: border-box;
 }
 
+.umsapp .login-form input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.umsapp .checkbox-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #fff;
+}
+
+.umsapp .checkbox-option:hover {
+  border-color: #5fc86f;
+}
+
+.umsapp .checkbox-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: #5fc86f;
+}
+
+.umsapp .checkbox-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.umsapp .checkbox-option-label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.umsapp .checkbox-option-description {
+  font-size: 12px;
+  color: #666;
+}
+
 .umsapp .login-form button {
   cursor: pointer;
 }

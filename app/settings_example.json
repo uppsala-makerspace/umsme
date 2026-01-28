@@ -1,4 +1,17 @@
 {
+  "swish": {
+    "payeeAlias": "9871065216",
+    "callbackUrl": "https://your-payment-service/swish/callback",
+    "api": {
+      "paymentRequest": "https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests",
+      "qrCode": "https://mpc.getswish.net/qrg-swish/api/v1/commerce"
+    },
+    "messages": {
+      "sv": "Betalning Uppsala Makerspace",
+      "en": "Payment Uppsala Makerspace"
+    },
+    "timeoutSeconds": 180
+  },
   "public": {
     "checkPath": "http://example.com#",
     "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc",
@@ -32,7 +45,6 @@
     }
   },
 
-  "swishCallback": "placeholder-swishCallback",
   "serviceConfigurations": {
     "google": {
       "clientId": "placeholder-for-ID",

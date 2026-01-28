@@ -29,11 +29,11 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
   if (member.family || member.infamily) {
     switch (status.type) {
       case 'member':
-        membershipType = t('memberFamilyBaseType');
+        membershipType = t('familyBaseType');
         break;
       case 'lab':
       case 'labandmember':
-        membershipType = t('memberFamilyLabType');
+        membershipType = t('familyLabType');
     }
   } else {
     switch (status.type) {
