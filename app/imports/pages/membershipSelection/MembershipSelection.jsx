@@ -78,11 +78,19 @@ export default function MembershipSelection({
     .filter((opt) => !opt.disabled)
     .reduce((max, opt) => (opt.amount > (max?.amount || 0) ? opt : max), null);
 
+  // Show "Renew membership" if membership is expired or expiring within 14 days
+  const isRenewal = (() => {
+    if (!memberStatus?.memberEnd) return false;
+    const now = new Date();
+    const fourteenDaysFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    return memberStatus.memberEnd < fourteenDaysFromNow;
+  })();
+
   return (
     <div className="flex flex-col gap-4">
       <MembershipStatus member={member} status={memberStatus} />
 
-      <h3 className="text-h3">{t("selectMembership")}</h3>
+      <h3 className="text-h3">{t(isRenewal ? "renewMembership" : "selectMembership")}</h3>
 
       {memberStatus?.type === "none" && (
         <p className="text-container">{t("Membershipstext1")}</p>
