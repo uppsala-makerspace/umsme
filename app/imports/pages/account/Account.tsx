@@ -4,6 +4,7 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import { default as React, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from 'react-router-dom';
 import "./acounts.css";
 import Memberships from "./Memberships";
 import { formatDate } from './util';
@@ -171,7 +172,11 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
           )}
         </div>
       </div>
-
+      <Link to="/membership" className="wideButton">
+        <button className="form-button">
+          {t(memberDaysRemaining < 14 ? "renewMembership" : "extendMembership")}
+        </button>
+      </Link>
       <div className="middle-text flex flex-col gap-3">
         {member.infamily && paying && (
           <div className="flex flex-col gap-1">

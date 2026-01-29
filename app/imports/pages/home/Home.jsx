@@ -87,7 +87,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
             {t("AlertEndDate")}
             {daysLeftOfLab.toFixed(0)} {t("days")}
           </p>
-          <Link to="/LoggedInAsMember/HandleMembership" className="wideButton">
+          <Link to="/membership" className="wideButton">
             <button className="form-button">{t("RenewMembership")}</button>
           </Link>
         </div>
