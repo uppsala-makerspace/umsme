@@ -103,7 +103,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
         <MembershipStatus member={member} status={status} />
       </div>
       <Link to="/membership" className="wideButton">
-        <button className="form-button">
+        <button className={`form-button ${memberDaysRemaining >= 14 ? "white" : ""}`}>
           {t(memberDaysRemaining < 14 ? "renewMembership" : "extendMembership")}
         </button>
       </Link>
