@@ -32,7 +32,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
       (memberStatus.labEnd || memberStatus.memberEnd).getTime() - today.getTime()) / msPerDay;
   }
   const timeToRenew = typeof daysLeftOfLab === "number" &&
-    daysLeftOfLab >= 0 && daysLeftOfLab < 8;
+    daysLeftOfLab >= 0 && daysLeftOfLab < 14;
 
   const name = memberName?.split(" ")[0];
   const activeMembership = memberStatus && memberStatus.memberEnd >= new Date();
