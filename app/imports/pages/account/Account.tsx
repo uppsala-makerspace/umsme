@@ -1,4 +1,4 @@
-import { faHome, faPen, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import moment from 'moment';
 import PropTypes from 'prop-types';
@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from 'react-router-dom';
 import "./acounts.css";
 import Memberships from "./Memberships";
-import { formatDate } from './util';
+import MembershipStatus from "/imports/components/MembershipStatus";
 
 interface INewFamilyMember {
   email?: string;
@@ -25,51 +25,10 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
   const [newFamilyMemberError, setNewFamilyMemberError] = useState<INewFamilyMemberValidation>({});
 
 
-  const { t, i18n } = useTranslation();
-  let membershipType;
-  if (member.family || member.infamily) {
-    switch (status.type) {
-      case 'member':
-        membershipType = t('familyBaseType');
-        break;
-      case 'lab':
-      case 'labandmember':
-        membershipType = t('familyLabType');
-    }
-  } else {
-    switch (status.type) {
-      case 'member':
-        if (status.discounted) {
-          membershipType = t('memberDiscountedBaseType');
-        } else {
-          membershipType = t('memberBaseType');
-        }
-        break;
-      case 'lab':
-      case 'labandmember':
-        if (status.quarterly) {
-          if (status.discounted) {
-            membershipType = t('memberDiscountedQuarterlyLabType');
-          } else {
-            membershipType = t('memberQuarterlyLabType');
-          }
-        } else if (status.discounted) {
-          membershipType = t('memberDiscountedLabType');
-        } else {
-          membershipType = t('memberLabType');
-        }
-        break;
-      case 'none':
-      default:
-        membershipType = 'fix';
-    }
-  }
+  const { t } = useTranslation();
 
   const payingFamilyMember = member.family && !member.infamily;
   const memberDaysRemaining = status.memberEnd ? moment(status.memberEnd).diff(moment.now(), 'days') : null;
-  const labDaysRemaining = status.labEnd ? moment(status.labEnd).diff(moment.now(), 'days') : null;
-  const hasLabAccess = status.labEnd && status.type !== 'member';
-  const hasDifferentEndDates = hasLabAccess && status.memberEnd?.getTime() !== status.labEnd?.getTime();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -141,36 +100,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
           </button>
         </div>*/}
 
-        <div className='grid grid-cols-2 gap-4'>
-          <div className='flex flex-col text-center gap-1'>
-            <span className="middle-text text-gray-600">
-              {t("TypeOfMembership")}
-            </span>
-            <span>{membershipType}</span>
-          </div>
-          <div className='flex flex-col text-center gap-1'>
-            <span className="middle-text text-gray-600">
-              {t("MemberID")}:
-            </span>
-            <span>{member.mid}</span>
-          </div>
-          <div className="flex flex-col text-center">
-            <span className='text-gray-600'>{t("MembershipEnd")}</span>
-            <span>{status.memberEnd ? formatDate(status.memberEnd, i18n.language) : ''}</span>
-            <span className={memberDaysRemaining > 14 ? 'text-green-600' : 'text-red-600 font-bold'}>
-              {memberDaysRemaining} {t("daysRemaining")}
-            </span>
-          </div>
-          {hasLabAccess && (
-            <div className="flex flex-col text-center">
-              <span className='text-gray-600'>{t("LabEnd")}</span>
-              <span>{status.labEnd ? formatDate(status.labEnd, i18n.language) : ''}</span>
-              <span className={labDaysRemaining > 14 ? 'text-green-600' : 'text-red-600 font-bold'}>
-                {labDaysRemaining} {t("daysRemaining")}
-              </span>
-            </div>
-          )}
-        </div>
+        <MembershipStatus member={member} status={status} />
       </div>
       <Link to="/membership" className="wideButton">
         <button className="form-button">
