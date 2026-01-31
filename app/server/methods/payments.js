@@ -5,23 +5,33 @@ import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
 import { findMemberForUser } from "/server/methods/utils";
+import fs from "fs";
+import path from "path";
 
-// Lazy-loaded payment options (Assets not available at module load time)
+// Get the app root directory (where meteor was started from)
+const appRoot = process.env.PWD;
+
+// Lazy-loaded payment options
 let _paymentOptions = null;
 let _paymentTypes = null;
 
 /**
- * Get payment options from configuration file in private folder.
+ * Get payment options from configuration file.
  * Lazy-loaded on first access.
  */
-const getPaymentOptions = async () => {
+const getPaymentOptions = () => {
   if (!_paymentOptions) {
+    const configPath = Meteor.settings?.private?.paymentOptionsPath;
+    if (!configPath) {
+      throw new Meteor.Error("config-error", "Payment options path not configured");
+    }
     try {
-      const text = await Assets.getTextAsync("paymentOptions.json");
+      const fullPath = path.resolve(appRoot, configPath);
+      const text = fs.readFileSync(fullPath, "utf8");
       _paymentOptions = JSON.parse(text);
     } catch (err) {
       console.error("Failed to load payment options config:", err);
-      _paymentOptions = { options: [] };
+      throw new Meteor.Error("config-error", "Failed to load payment options");
     }
   }
   return _paymentOptions;
@@ -31,9 +41,9 @@ const getPaymentOptions = async () => {
  * Get payment types as a map of paymentType -> option object.
  * Lazy-loaded on first access.
  */
-const getPaymentTypes = async () => {
+const getPaymentTypes = () => {
   if (!_paymentTypes) {
-    const options = await getPaymentOptions();
+    const options = getPaymentOptions();
     _paymentTypes = options.reduce((acc, opt) => {
       acc[opt.paymentType] = opt;
       return acc;
@@ -67,8 +77,8 @@ Meteor.methods({
    * Get payment options configuration.
    * @returns {Object} The payment options config with all options
    */
-  async "payment.getOptions"() {
-    return await getPaymentOptions();
+  "payment.getOptions"() {
+    return getPaymentOptions();
   },
 
   /**
@@ -81,7 +91,7 @@ Meteor.methods({
     check(paymentType, String);
 
     // Validate payment type
-    const paymentTypes = await getPaymentTypes();
+    const paymentTypes = getPaymentTypes();
     if (!paymentTypes[paymentType]) {
       throw new Meteor.Error("invalid-type", "Invalid payment type");
     }
@@ -119,7 +129,6 @@ Meteor.methods({
 
     try {
       const swishClient = await getSwishClient();
-      console.log("NOW MAKING REQUEST");
       const response = await swishClient.put(
         `${config.api.paymentRequest}/${externalId}`,
         data

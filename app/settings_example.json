@@ -16,6 +16,7 @@
   },
   "private": {
     "vapidPrivateKey": "Some key here",
+    "paymentOptionsPath": "config/paymentOptions.json",
     "slack": {
       "botToken": "xoxb-your-slack-bot-token"
     },
@@ -31,10 +32,13 @@
       ]
     },
     "swish": {
-      "payeeAlias": "9871065216",
+      "payeeAlias": "1234679304",
       "callbackUrl": "https://your-payment-service/swish/callback",
+      "certPath": "config/testswish/Swish_Merchant_TestCertificate_1234679304.pem",
+      "keyPath": "config/testswish/Swish_Merchant_TestCertificate_1234679304.key",
+      "caPath": "config/testswish/Swish_TLS_RootCA.pem",
       "api": {
-        "paymentRequest": "https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/",
+        "paymentRequest": "https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests",
         "qrCode": "https://mpc.getswish.net/qrg-swish/api/v1/commerce"
       },
       "messages": {

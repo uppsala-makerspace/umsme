@@ -1,24 +1,34 @@
+import { Meteor } from "meteor/meteor";
 import https from "https";
 import axios from "axios";
+import fs from "fs";
+import path from "path";
 
-// Lazy-loaded swish client (Assets not available at module load time)
+// Lazy-loaded swish client
 let _swishClient = null;
+
+// Get the app root directory (where meteor was started from)
+const appRoot = process.env.PWD;
 
 /**
  * Get the Swish axios client with certificates loaded.
- * Lazy-loaded on first access using Assets.getTextAsync.
+ * Lazy-loaded on first access.
  */
 export const getSwishClient = async () => {
   if (!_swishClient) {
-    const [cert, key, ca] = await Promise.all([
-      Assets.getTextAsync("Swish_test_public_key.pem"),
-      Assets.getTextAsync("Swish_test_private_key.key"),
-      Assets.getTextAsync("Swish_TLS_RootCA.pem"),
-    ]);
+    const config = Meteor.settings?.private?.swish;
+    if (!config?.certPath || !config?.keyPath || !config?.caPath) {
+      throw new Meteor.Error("config-error", "Swish certificate paths not configured");
+    }
 
-    console.log("cert: " + cert);
-    console.log("key: " + key);
-    console.log("ca: " + ca);
+    // Resolve paths relative to app root
+    const certPath = path.resolve(appRoot, config.certPath);
+    const keyPath = path.resolve(appRoot, config.keyPath);
+    const caPath = path.resolve(appRoot, config.caPath);
+
+    const cert = fs.readFileSync(certPath);
+    const key = fs.readFileSync(keyPath);
+    const ca = fs.readFileSync(caPath);
 
     const agent = new https.Agent({
       cert,
