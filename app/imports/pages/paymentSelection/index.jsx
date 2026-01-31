@@ -4,7 +4,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
-import MembershipPayment from "./MembershipPayment";
+import PaymentSelection from "./PaymentSelection";
 
 const POLL_INTERVAL = 2000; // 2 seconds
 const TIMEOUT_MS = 180000; // 3 minutes
@@ -172,7 +172,7 @@ export default function MembershipPaymentPage() {
     <>
       <TopBar />
       <div className="login-form">
-        <MembershipPayment
+        <PaymentSelection
           paymentOption={paymentOption}
           step={step}
           qrCode={qrCode}

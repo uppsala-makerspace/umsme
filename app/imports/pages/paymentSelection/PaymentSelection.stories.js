@@ -1,9 +1,9 @@
 import { fn } from "storybook/test";
-import MembershipPayment from "./MembershipPayment";
+import PaymentSelection from "./PaymentSelection";
 
 export default {
-  title: "UMSAPP/MembershipPayment",
-  component: MembershipPayment,
+  title: "UMSAPP/PaymentSelection",
+  component: PaymentSelection,
   parameters: {},
   tags: ["autodocs"],
 };

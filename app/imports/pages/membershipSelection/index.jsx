@@ -82,7 +82,7 @@ export default function MembershipSelectionPage() {
   }, [paymentOptionsConfig, memberInfo.memberStatus, isFamily]);
 
   const handleSelectOption = (option) => {
-    navigate(`/membership/pay/${option.paymentType}`);
+    navigate(`/paymentSelection/${option.paymentType}`);
   };
 
   const handleFamilyChange = (checked) => {

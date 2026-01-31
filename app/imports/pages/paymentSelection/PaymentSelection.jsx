@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 /**
- * Pure presentation component for membership payment.
+ * Pure presentation component for payment.
  *
  * @param {Object} props
  * @param {Object} props.paymentOption - The selected payment option from config
@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
  * @param {function} props.onCancel - Callback to cancel
  * @param {function} props.onBackToStart - Callback to go back to home
  */
-export default function MembershipPayment({
+export default function PaymentSelection({
   paymentOption,
   step = "method",
   qrCode = null,

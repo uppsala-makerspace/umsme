@@ -17,7 +17,7 @@ import Certificates from '/imports/pages/certificates';
 import CertificateDetail from '/imports/pages/certificateDetail';
 import CertifierRequestDetail from '/imports/pages/certifierRequestDetail';
 import MembershipSelection from '/imports/pages/membershipSelection';
-import MembershipPayment from '/imports/pages/payment';
+import PaymentSelection from '/imports/pages/paymentSelection';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 export const App = () => (
@@ -43,7 +43,7 @@ export const App = () => (
         <Route path="/certifier-requests" element={<Navigate to="/certificates" replace />} />
         <Route path="/certifier-requests/:attestationId" element={<CertifierRequestDetail />} />
         <Route path="/membership" element={<MembershipSelection />} />
-        <Route path="/membership/pay/:paymentType" element={<MembershipPayment />} />
+        <Route path="/paymentSelection/:paymentType" element={<PaymentSelection />} />
         <Route path="/payment" element={<Navigate to="/membership" replace />} />
       </Routes>
     </Router>
