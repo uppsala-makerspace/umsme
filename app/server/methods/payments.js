@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import { v4 as uuidv4 } from "uuid";
-import { swishClient } from "./swish-client.js";
+import { getSwishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
@@ -118,6 +118,8 @@ Meteor.methods({
     };
 
     try {
+      const swishClient = await getSwishClient();
+      console.log("NOW MAKING REQUEST");
       const response = await swishClient.put(
         `${config.api.paymentRequest}/${externalId}`,
         data
@@ -174,6 +176,7 @@ Meteor.methods({
     };
 
     try {
+      const swishClient = await getSwishClient();
       const response = await swishClient.post(
         config.api.qrCode,
         data,
@@ -257,6 +260,7 @@ Meteor.methods({
     };
 
     try {
+      const swishClient = await getSwishClient();
       const response = await swishClient.put(
         `${config.api.paymentRequest}/${instructionId}`,
         data
