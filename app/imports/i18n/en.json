@@ -288,6 +288,7 @@
   "discountedPriceInfo": "For students, pensioners, or unemployed. Not available for families.",
   "familyMembershipInfo": "For up to 5 people at the same address",
   "payWithSwish": "Pay with Swish",
+  "selectPaymentMethod": "Select payment method",
   "waitingForPayment": "Waiting for payment...",
   "paymentFailed": "Payment failed",
   "paymentTimeout": "Payment timed out",

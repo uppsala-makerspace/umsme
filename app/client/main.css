@@ -52,7 +52,8 @@
   box-sizing: border-box;
 }
 
-.umsapp .login-form input[type="checkbox"] {
+.umsapp .login-form input[type="checkbox"],
+.umsapp .login-form input[type="radio"] {
   width: auto;
   margin: 0;
   padding: 0;

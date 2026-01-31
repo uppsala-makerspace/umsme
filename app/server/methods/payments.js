@@ -4,37 +4,43 @@ import { swishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
-import { findForUser, findMemberForUser } from "/server/methods/utils";
-import { memberStatus } from "/imports/common/lib/utils";
-import { Members } from "/imports/common/collections/members";
-import fs from "fs";
-import path from "path";
+import { findMemberForUser } from "/server/methods/utils";
+
+// Lazy-loaded payment options (Assets not available at module load time)
+let _paymentOptions = null;
+let _paymentTypes = null;
 
 /**
- * Load payment options from configuration file.
- * Returns a map of paymentType -> { amount, name }
+ * Get payment options from configuration file in private folder.
+ * Lazy-loaded on first access.
  */
-const loadPaymentTypes = () => {
-  try {
-    const configPath = path.join(process.cwd(), "public", "data", "paymentOptions.json");
-    const configData = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    return configData.options.reduce((acc, opt) => {
-      acc[opt.paymentType] = {
-        amount: opt.amount,
-        name: opt.label?.en || opt.paymentType,
-        period: opt.period,
-        discountedOnly: opt.discountedOnly,
-        familyOnly: opt.familyOnly,
-      };
-      return acc;
-    }, {});
-  } catch (err) {
-    console.error("Failed to load payment options config:", err);
-    return {};
+const getPaymentOptions = async () => {
+  if (!_paymentOptions) {
+    try {
+      const text = await Assets.getTextAsync("paymentOptions.json");
+      _paymentOptions = JSON.parse(text);
+    } catch (err) {
+      console.error("Failed to load payment options config:", err);
+      _paymentOptions = { options: [] };
+    }
   }
+  return _paymentOptions;
 };
 
-const PAYMENT_TYPES = loadPaymentTypes();
+/**
+ * Get payment types as a map of paymentType -> option object.
+ * Lazy-loaded on first access.
+ */
+const getPaymentTypes = async () => {
+  if (!_paymentTypes) {
+    const options = await getPaymentOptions();
+    _paymentTypes = options.reduce((acc, opt) => {
+      acc[opt.paymentType] = opt;
+      return acc;
+    }, {});
+  }
+  return _paymentTypes;
+};
 
 /**
  * Get Swish configuration from settings
@@ -58,86 +64,11 @@ const getSwishMessage = (language = "sv") => {
 
 Meteor.methods({
   /**
-   * Get available payment options based on the member's current status.
-   *
-   * @returns {Object} Object with available payment options and member info
+   * Get payment options configuration.
+   * @returns {Object} The payment options config with all options
    */
-  async "payment.getAvailableOptions"() {
-    const { member, verified } = await findForUser();
-
-    if (!verified) {
-      throw new Meteor.Error("not-verified", "Email not verified");
-    }
-
-    if (!member) {
-      throw new Meteor.Error("no-member", "No member record found");
-    }
-
-    if (!member.name) {
-      throw new Meteor.Error("no-name", "Member name is required");
-    }
-
-    // Get the paying member for family memberships
-    const paying = member.infamily
-      ? await Members.findOneAsync(member.infamily)
-      : member;
-
-    const status = await memberStatus(paying);
-    const options = [];
-
-    // Determine available options based on membership status
-    switch (status.type) {
-      case "none":
-        // New member - show all base options
-        options.push(
-          { type: "memberBase", recommended: true },
-          { type: "memberDiscountedBase" },
-          { type: "memberLab" },
-          { type: "memberDiscountedLab" }
-        );
-        break;
-
-      case "member":
-        // Has base membership - can upgrade to lab
-        options.push(
-          { type: "memberLab", recommended: true },
-          { type: "memberDiscountedLab" },
-          { type: "memberQuarterlyLab" }
-        );
-        break;
-
-      case "lab":
-      case "labandmember":
-        // Has lab - show renewal options
-        options.push(
-          { type: "memberLab", recommended: true },
-          { type: "memberDiscountedLab" },
-          { type: "memberQuarterlyLab" }
-        );
-        // If base membership needs renewal too
-        if (!status.memberEnd || status.memberEnd < new Date()) {
-          options.push({ type: "memberBase" });
-        }
-        break;
-    }
-
-    // Add payment type details to options
-    const optionsWithDetails = options.map(opt => ({
-      ...opt,
-      ...PAYMENT_TYPES[opt.type],
-    }));
-
-    return {
-      member: {
-        name: member.name,
-        mid: member.mid,
-        family: member.family,
-        infamily: member.infamily,
-      },
-      memberStatus: status,
-      isFamily: !!member.infamily || !!member.family,
-      options: optionsWithDetails,
-    };
+  async "payment.getOptions"() {
+    return await getPaymentOptions();
   },
 
   /**
@@ -150,7 +81,8 @@ Meteor.methods({
     check(paymentType, String);
 
     // Validate payment type
-    if (!PAYMENT_TYPES[paymentType]) {
+    const paymentTypes = await getPaymentTypes();
+    if (!paymentTypes[paymentType]) {
       throw new Meteor.Error("invalid-type", "Invalid payment type");
     }
 
@@ -164,7 +96,7 @@ Meteor.methods({
     }
 
     const config = getSwishConfig();
-    const { amount } = PAYMENT_TYPES[paymentType];
+    const { amount } = paymentTypes[paymentType];
     const externalId = uuidv4().replace(/-/g, "").toUpperCase();
 
     // Create initiated payment record

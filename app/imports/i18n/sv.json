@@ -288,6 +288,7 @@
   "discountedPriceInfo": "För studenter, pensionärer eller arbetslösa. Ej tillgängligt för familjer.",
   "familyMembershipInfo": "För upp till 5 personer på samma adress",
   "payWithSwish": "Betala med Swish",
+  "selectPaymentMethod": "Välj betalningsmetod",
   "waitingForPayment": "Väntar på betalning...",
   "paymentFailed": "Betalningen misslyckades",
   "paymentTimeout": "Betalningen tog för lång tid",

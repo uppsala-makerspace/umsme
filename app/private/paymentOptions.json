@@ -1,0 +1,97 @@
+[
+  {
+    "paymentType": "memberBase",
+    "amount": 200,
+    "period": "year",
+    "label": {
+      "en": "Basic membership",
+      "sv": "Medlemskap Bas"
+    },
+    "description": {
+      "en": "With our basic membership, you're welcome to use our makerspace during our open evenings and Saturday workshops.",
+      "sv": "Med vårt basmedlemskap är du välkommen att nyttja vårt makerspace under våra öppna kvällar samt på lördagskurserna."
+    }
+  },
+  {
+    "paymentType": "memberDiscountedBase",
+    "amount": 100,
+    "period": "year",
+    "label": {
+      "en": "Basic membership (discounted)",
+      "sv": "Medlemskap Bas (rabatterat)"
+    },
+    "description": {
+      "en": "If you are a student, pensioner or unemployed you can get access to the Makerspace during our open evenings and Saturday workshops at a reduced price.",
+      "sv": "Om du är studerande, pensionär eller arbetssökande kan du få tillgång till Makerspace under våra öppna kvällar och lördagskurser till ett reducerat pris."
+    },
+    "discountedOnly": true
+  },
+  {
+    "paymentType": "memberLab",
+    "amount": 1600,
+    "period": "year",
+    "label": {
+      "en": "Lab Membership",
+      "sv": "Medlemskap Labb"
+    },
+    "description": {
+      "en": "With a Lab Membership, you get 24/7 access to the Makerspace. You'll also get a personal storage box, so you don't have to carry your things back and forth.",
+      "sv": "Med ett labbmedlemskap får du tillgång till Makerspace 24/7. Du får också en förvaringslåda att ha saker i så du slipper ta dem fram och tillbaka."
+    }
+  },
+  {
+    "paymentType": "memberDiscountedLab",
+    "amount": 1200,
+    "period": "year",
+    "label": {
+      "en": "Lab Membership (discounted)",
+      "sv": "Medlemskap Labb (rabatterat)"
+    },
+    "description": {
+      "en": "If you are a student, pensioner or unemployed you can get 24/7 access to the Makerspace at a reduced price.",
+      "sv": "Om du är studerande, pensionär eller arbetssökande kan du få tillgång till Makerspace 24/7 till ett reducerat pris."
+    },
+    "discountedOnly": true
+  },
+  {
+    "paymentType": "memberQuarterlyLab",
+    "amount": 450,
+    "period": "quarter",
+    "label": {
+      "en": "Lab Membership (quarterly)",
+      "sv": "Medlemskap Labb (kvartal)"
+    },
+    "description": {
+      "en": "With a quarterly lab membership, you get 24/7 access to the Makerspace for three months. This requires membership.",
+      "sv": "Med ett kvartalslabbmedlemskap får du tillgång till Makerspace 24/7 under tre månader. För detta krävs det att man har ett medlemskap redan."
+    }
+  },
+  {
+    "paymentType": "familyBase",
+    "amount": 300,
+    "period": "year",
+    "label": {
+      "en": "Family Basic Membership",
+      "sv": "Familjemedlemskap Bas"
+    },
+    "description": {
+      "en": "With a family membership, up to five people registered at the same address get access to the Makerspace during our open evenings and Saturday workshops.",
+      "sv": "Med ett familjemedlemskap får upp till fem personer skrivna på samma adress tillgång till Makerspace under våra öppna kvällar och lördagskurser."
+    },
+    "familyOnly": true
+  },
+  {
+    "paymentType": "familyLab",
+    "amount": 2000,
+    "period": "year",
+    "label": {
+      "en": "Family Lab Membership",
+      "sv": "Familjemedlemskap Labb"
+    },
+    "description": {
+      "en": "With a Family Lab Membership, up to five people registered at the same address get 24/7 access to the Makerspace.",
+      "sv": "Med ett labbmedlemskap för familjen får du tillgång till Makerspace 24/7 för upp till 5 personer som är skrivna på samma adress."
+    },
+    "familyOnly": true
+  }
+]

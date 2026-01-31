@@ -1,150 +1,83 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useTracker } from "meteor/react-meteor-data";
+import React, { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import PaymentSelection from "./PaymentSelection";
 
-const POLL_INTERVAL = 2000; // 2 seconds
-const TIMEOUT_MS = 180000; // 3 minutes
-
-export default function MembershipPaymentPage() {
+export default function PaymentSelectionPage() {
   const { t } = useTranslation();
-  const user = useTracker(() => Meteor.user());
   const navigate = useNavigate();
   const { paymentType } = useParams();
 
   const [paymentOption, setPaymentOption] = useState(null);
-  const [step, setStep] = useState("method");
-  const [qrCode, setQrCode] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [externalId, setExternalId] = useState(null);
-
-  const pollIntervalRef = useRef(null);
-  const timeoutRef = useRef(null);
-
-  // Cleanup polling on unmount
-  useEffect(() => {
-    return () => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
 
   // Load payment option from config
   useEffect(() => {
-    fetch("/data/paymentOptions.json")
-      .then((res) => res.json())
+    Meteor.callAsync("payment.getOptions")
       .then((data) => {
-        const option = data.options?.find((o) => o.paymentType === paymentType);
+        const option = data?.find((o) => o.paymentType === paymentType);
         if (option) {
           setPaymentOption(option);
         } else {
           setError("Invalid payment type");
-          setStep("error");
         }
         setIsLoading(false);
       })
       .catch((err) => {
         console.error("Failed to load payment options config:", err);
         setError("Failed to load payment options");
-        setStep("error");
         setIsLoading(false);
       });
   }, [paymentType]);
 
-  // Start polling for payment status
-  const startPolling = useCallback((extId) => {
-    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-    timeoutRef.current = setTimeout(() => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-      setError("timeout");
-      setStep("error");
-    }, TIMEOUT_MS);
-
-    pollIntervalRef.current = setInterval(async () => {
-      try {
-        const result = await Meteor.callAsync("payment.getStatus", extId);
-
-        if (result.status === "PAID") {
-          clearInterval(pollIntervalRef.current);
-          clearTimeout(timeoutRef.current);
-          setStep("success");
-        } else if (
-          result.status === "ERROR" ||
-          result.status === "CANCELLED" ||
-          result.status === "DECLINED"
-        ) {
-          clearInterval(pollIntervalRef.current);
-          clearTimeout(timeoutRef.current);
-          setError(result.error || result.status);
-          setStep("error");
-        }
-      } catch (err) {
-        console.error("Error polling payment status:", err);
-      }
-    }, POLL_INTERVAL);
-  }, []);
-
-  // Handle payment method selection
-  const handleSelectMethod = useCallback(
+  // Handle pay button click
+  const handlePay = useCallback(
     async (method) => {
       setIsLoading(true);
       setError(null);
 
       try {
         const result = await Meteor.callAsync("payment.initiate", paymentType);
-        setExternalId(result.externalId);
+        const { externalId, paymentrequesttoken } = result;
 
         if (method === "qr") {
           const qrCodeData = await Meteor.callAsync(
             "payment.getQrCode",
-            result.paymentrequesttoken
+            paymentrequesttoken
           );
-          setQrCode(qrCodeData);
-          setStep("processing");
-          startPolling(result.externalId);
+          // Navigate to initiated payment with QR code in state
+          navigate(`/initiatedPayment/${externalId}`, {
+            state: { qrCode: qrCodeData }
+          });
         } else {
-          setStep("processing");
-          startPolling(result.externalId);
-          const deepLink = `swish://paymentrequest?token=${result.paymentrequesttoken}&callbackurl=`; //update with callbackurl
-          window.location.href = result.deepLink;
+          // Build the callback URL (the page we're navigating to)
+          const callbackUrl = `${window.location.origin}/initiatedPayment/${externalId}`;
+          const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+
+          // Construct the Swish deep link with callback
+          const deepLink = `swish://paymentrequest?token=${paymentrequesttoken}&callbackurl=${encodedCallbackUrl}`;
+
+          // Navigate to initiated payment first
+          navigate(`/initiatedPayment/${externalId}`);
+
+          // Then redirect to Swish app
+          window.location.href = deepLink;
         }
       } catch (err) {
         console.error("Error initiating payment:", err);
         setError(err.reason || err.message);
-        setStep("error");
-      } finally {
         setIsLoading(false);
       }
     },
-    [paymentType, startPolling]
+    [paymentType, navigate]
   );
-
-  // Handle retry
-  const handleRetry = useCallback(() => {
-    setStep("method");
-    setQrCode(null);
-    setError(null);
-    setExternalId(null);
-    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  }, []);
 
   // Handle cancel / back
   const handleCancel = useCallback(() => {
-    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     navigate("/membership");
-  }, [navigate]);
-
-  // Handle back to start after success
-  const handleBackToStart = useCallback(() => {
-    navigate("/");
   }, [navigate]);
 
   // Redirect if not logged in
@@ -168,20 +101,33 @@ export default function MembershipPaymentPage() {
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <>
+        <TopBar />
+        <div className="login-form">
+          <div className="flex flex-col gap-4 items-center">
+            <p className="text-red-600">{error}</p>
+            <button className="form-button white" onClick={handleCancel}>
+              {t("cancel")}
+            </button>
+          </div>
+        </div>
+        <BottomNavigation />
+      </>
+    );
+  }
+
   return (
     <>
       <TopBar />
       <div className="login-form">
         <PaymentSelection
           paymentOption={paymentOption}
-          step={step}
-          qrCode={qrCode}
-          error={error}
           isLoading={isLoading}
-          onSelectMethod={handleSelectMethod}
-          onRetry={handleRetry}
+          onPay={handlePay}
           onCancel={handleCancel}
-          onBackToStart={handleBackToStart}
         />
       </div>
       <BottomNavigation />

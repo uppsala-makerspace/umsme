@@ -15,7 +15,7 @@ export default function MembershipSelectionPage() {
   const user = useTracker(() => Meteor.user());
   const navigate = useNavigate();
 
-  const [paymentOptionsConfig, setPaymentOptionsConfig] = useState([]);
+  const [paymentOptions, setPaymentOptions] = useState([]);
   const [memberInfo, setMemberInfo] = useState({
     member: null,
     memberStatus: null,
@@ -28,10 +28,9 @@ export default function MembershipSelectionPage() {
 
   // Load payment options configuration
   useEffect(() => {
-    fetch("/data/paymentOptions.json")
-      .then((res) => res.json())
-      .then((data) => setPaymentOptionsConfig(data.options || []))
-      .catch((err) => console.error("Failed to load payment options config:", err));
+    Meteor.callAsync("payment.getOptions")
+      .then((data) => setPaymentOptions(data || []))
+      .catch((err) => console.error("Failed to load payment options:", err));
   }, []);
 
   // Fetch member info
@@ -41,10 +40,10 @@ export default function MembershipSelectionPage() {
     const fetchMemberInfo = async () => {
       try {
         setIsLoading(true);
-        const result = await Meteor.callAsync("payment.getAvailableOptions");
+        const result = await Meteor.callAsync("findInfoForUser");
         setMemberInfo({
           member: result.member,
-          memberStatus: result.memberStatus,
+          memberStatus: result.status,
         });
       } catch (err) {
         console.error("Error fetching member info:", err);
@@ -75,11 +74,11 @@ export default function MembershipSelectionPage() {
   // Compute options with availability rules applied
   const optionsWithAvailability = useMemo(() => {
     return calculateOptionAvailability(
-      paymentOptionsConfig,
+      paymentOptions,
       memberInfo.memberStatus,
       isFamily
     );
-  }, [paymentOptionsConfig, memberInfo.memberStatus, isFamily]);
+  }, [paymentOptions, memberInfo.memberStatus, isFamily]);
 
   const handleSelectOption = (option) => {
     navigate(`/paymentSelection/${option.paymentType}`);
