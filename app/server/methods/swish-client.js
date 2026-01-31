@@ -3,9 +3,9 @@ import axios from "axios";
 import fs from "fs";
 
 export const agent = new https.Agent({
-  cert: fs.readFileSync(Assets.absoluteFilePath("cert.pem")),
-  key: fs.readFileSync(Assets.absoluteFilePath("key.pem")),
-  ca: fs.readFileSync(Assets.absoluteFilePath("ca.pem")),
+  cert: fs.readFileSync(Assets.absoluteFilePath("Swish_test_public_key.pem")),
+  key: fs.readFileSync(Assets.absoluteFilePath("Swish_test_private_key.key")),
+  ca: fs.readFileSync(Assets.absoluteFilePath("Swish_TLS_RootCA.pem")),
   minVersion: "TLSv1.2",
   maxVersion: "TLSv1.2",
 });
