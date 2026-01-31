@@ -41,7 +41,7 @@ const PAYMENT_TYPES = loadPaymentTypes();
  * @throws {Meteor.Error} if Swish is not configured
  */
 const getSwishConfig = () => {
-  const config = Meteor.settings?.swish;
+  const config = Meteor.settings?.private?.swish;
   if (!config) {
     throw new Meteor.Error("config-error", "Swish is not configured");
   }
