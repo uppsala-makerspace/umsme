@@ -193,14 +193,11 @@ Meteor.methods({
 
       if (response.status === 201) {
         const { paymentrequesttoken } = response.headers;
-        const deepLink = `swish://paymentrequest?token=${paymentrequesttoken}&callbackurl=`;
 
         return {
           paymentrequesttoken,
           externalId,
-          deepLink,
-          amount,
-          paymentType,
+          amount
         };
       } else {
         // Update payment status on failure

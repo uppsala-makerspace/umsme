@@ -111,6 +111,7 @@ export default function MembershipPaymentPage() {
         } else {
           setStep("processing");
           startPolling(result.externalId);
+          const deepLink = `swish://paymentrequest?token=${result.paymentrequesttoken}&callbackurl=`; //update with callbackurl
           window.location.href = result.deepLink;
         }
       } catch (err) {
