@@ -17,7 +17,7 @@ import Certificates from '/imports/pages/certificates';
 import CertificateDetail from '/imports/pages/certificateDetail';
 import CertifierRequestDetail from '/imports/pages/certifierRequestDetail';
 import MembershipSelection from '/imports/pages/membershipSelection';
-import MembershipPayment from '/imports/pages/membershipPayment';
+import MembershipPayment from '/imports/pages/payment';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 export const App = () => (
