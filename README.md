@@ -1,28 +1,27 @@
 # UMSME - Uppsala MakerSpace MEmber administrative system
 
-This is a monorepo containing:
+This is a monorepo containing three Meteor applications:
 
-- `app` a user centered PWA (Progressive Web Application) that can be used on both desktop and in mobile
-- `admin` a user interface targeting administrators that works more closely with the database
+- `app` - Member-facing PWA (Progressive Web Application) for desktop and mobile
+- `admin` - Administrator interface for database management
+- `payment` - Payment callback service for processing Swish payments
 
-See READMEs for app and admin for more details.
+See the README in each directory for more details.
 
-## Common functionality
+## Common
 
-Both applications are meteor applications that makes use of the authentification and authorization mechanisms provided by Meteor.
-There is a `common` directory containing schema definitions, collections and some utility functionality that is common across both applications.
-The common directory is made accessible via soft links into both applications.
+The `common` directory contains schema definitions, collections, and utility functions shared across all applications. It is accessible via symlinks from each app's `imports/common`.
 
 ## Admin
 
-Admin makes heavy use of publications and meteor reactivity to keep the datastructures in sync between the database and the frontend.
-Admin uses Collection2, Blaze, FlowRouter, tabular, AutoForm and Bootstrap3 as the main building blocks.
+Uses publications and Meteor reactivity to keep data in sync between the database and frontend.
+Built with Collection2, Blaze, FlowRouter, Tabular, AutoForm, and Bootstrap 3.
 
 ## App
 
-The app largely utilizing meteor methods to fetch data.
-App uses React, React router and Tailwind at it's core. 
+Uses Meteor methods to fetch data.
+Built with React, React Router, and Tailwind CSS.
 
+## Payment
 
-
-
+Minimal server-only application that receives Swish payment callbacks and processes them into the shared database.
