@@ -103,20 +103,19 @@ const Liability = ({
       />
 
       {showApproveButton && (
-        <div className="sticky bottom-0 pt-2 pb-2">
-          <div className="flex items-start mb-4">
+        <div className="pt-4 pb-20">
+          <label htmlFor="liability-checkbox" className="flex items-start gap-3 mb-4 cursor-pointer">
             <input
-              style={{width: "unset", margin: "10px 10px"}}
               type="checkbox"
               id="liability-checkbox"
               checked={hasAgreed}
               onChange={(e) => setHasAgreed(e.target.checked)}
-              className="ml-2 mr-2"
+              className="mt-1 flex-shrink-0"
             />
-            <label htmlFor="liability-checkbox" className="text-sm cursor-pointer">
+            <span className="text-sm">
               {t("liabilityCheckbox")}
-            </label>
-          </div>
+            </span>
+          </label>
           <button
             className="form-button w-full py-3"
             onClick={onApprove}
