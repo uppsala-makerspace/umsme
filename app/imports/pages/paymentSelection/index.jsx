@@ -6,13 +6,21 @@ import BottomNavigation from "/imports/components/BottomNavigation";
 import PaymentSelection from "./PaymentSelection";
 
 export default function PaymentSelectionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { paymentType } = useParams();
 
   const [paymentOption, setPaymentOption] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Get Swish disabled status from public settings
+  const swishSettings = Meteor.settings?.public?.swish;
+  const swishDisabled = swishSettings?.disabled === true;
+  const lang = i18n.language === "sv" ? "sv" : "en";
+  const disabledMessage = swishDisabled
+    ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))
+    : null;
 
   // Load payment option from config
   useEffect(() => {
@@ -126,6 +134,7 @@ export default function PaymentSelectionPage() {
         <PaymentSelection
           paymentOption={paymentOption}
           isLoading={isLoading}
+          disabledMessage={disabledMessage}
           onPay={handlePay}
           onCancel={handleCancel}
         />

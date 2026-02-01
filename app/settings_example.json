@@ -1,6 +1,13 @@
 {
   "public": {
     "checkPath": "http://example.com#",
+    "swish": {
+      "disabled": false,
+      "disabledMessage": {
+        "sv": "Swish-betalningar är tillfälligt avstängda.",
+        "en": "Swish payments are temporarily disabled."
+      }
+    },
     "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc",
     "googleCalendar": {
       "apiKey": "placeholder-for-google-calendar-api-key",

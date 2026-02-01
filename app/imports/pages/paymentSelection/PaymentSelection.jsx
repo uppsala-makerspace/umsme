@@ -7,12 +7,14 @@ import { useTranslation } from "react-i18next";
  * @param {Object} props
  * @param {Object} props.paymentOption - The selected payment option from config
  * @param {boolean} props.isLoading - Whether something is loading
+ * @param {string} props.disabledMessage - Message to show when payments are disabled
  * @param {function} props.onPay - Callback when user clicks pay with selected method ('deeplink' or 'qr')
  * @param {function} props.onCancel - Callback to cancel
  */
 export default function PaymentSelection({
   paymentOption,
   isLoading = false,
+  disabledMessage,
   onPay,
   onCancel,
 }) {
@@ -27,6 +29,12 @@ export default function PaymentSelection({
   return (
     <div className="flex flex-col gap-4">
       <h3 className="text-h3">{t("selectPaymentMethod")}</h3>
+
+      {disabledMessage && (
+        <div className="p-4 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800">
+          {disabledMessage}
+        </div>
+      )}
 
       <div className="flex flex-col gap-2 p-4 bg-gray-100 rounded-lg">
         <span className="font-semibold">{getLabel(paymentOption)}</span>
@@ -60,7 +68,7 @@ export default function PaymentSelection({
       <button
         className="form-button"
         onClick={() => onPay?.(selectedMethod)}
-        disabled={isLoading}
+        disabled={isLoading || !!disabledMessage}
       >
         {t("Pay")}
       </button>

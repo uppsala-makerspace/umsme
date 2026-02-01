@@ -11,9 +11,17 @@ import {
 } from "./availabilityRules";
 
 export default function MembershipSelectionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const user = useTracker(() => Meteor.user());
   const navigate = useNavigate();
+
+  // Get Swish disabled status from public settings
+  const swishSettings = Meteor.settings?.public?.swish;
+  const swishDisabled = swishSettings?.disabled === true;
+  const lang = i18n.language === "sv" ? "sv" : "en";
+  const disabledMessage = swishDisabled
+    ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))
+    : null;
 
   const [paymentOptions, setPaymentOptions] = useState([]);
   const [memberInfo, setMemberInfo] = useState({
@@ -142,6 +150,7 @@ export default function MembershipSelectionPage() {
           isDiscounted={isDiscounted}
           isFamily={isFamily}
           familyLocked={checkboxState.familyLocked}
+          disabledMessage={disabledMessage}
           onSelectOption={handleSelectOption}
           onDiscountedChange={setIsDiscounted}
           onFamilyChange={handleFamilyChange}

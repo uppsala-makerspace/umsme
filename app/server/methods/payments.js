@@ -64,6 +64,14 @@ const getSwishConfig = () => {
   return config;
 };
 
+/**
+ * Check if Swish payments are disabled via public settings.
+ * @returns {boolean}
+ */
+const isSwishDisabled = () => {
+  return Meteor.settings?.public?.swish?.disabled === true;
+};
+
 const formatError = (status, errArr) => {
   const swishErrs = errArr.map(errObj => {
     const additional = errObj.additionalInformation == '' ? '' : `; ${errObj.additionalInformation}`;
@@ -90,6 +98,11 @@ Meteor.methods({
    */
   async "payment.initiate"(paymentType) {
     check(paymentType, String);
+
+    // Check if Swish payments are disabled
+    if (isSwishDisabled()) {
+      throw new Meteor.Error("swish-disabled", "Swish payments are currently disabled");
+    }
 
     // Validate payment type
     const paymentTypes = getPaymentTypes();

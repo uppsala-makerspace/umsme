@@ -12,6 +12,7 @@ import MembershipStatus from "/imports/components/MembershipStatus";
  * @param {boolean} props.isDiscounted - Whether discounted pricing is selected
  * @param {boolean} props.isFamily - Whether family membership is selected
  * @param {boolean} props.familyLocked - Whether family checkbox is locked
+ * @param {string} props.disabledMessage - Message to show when payments are disabled
  * @param {function} props.onSelectOption - Callback when user selects an option
  * @param {function} props.onDiscountedChange - Callback when discounted checkbox changes
  * @param {function} props.onFamilyChange - Callback when family checkbox changes
@@ -24,6 +25,7 @@ export default function MembershipSelection({
   isDiscounted = false,
   isFamily = false,
   familyLocked = false,
+  disabledMessage,
   onSelectOption,
   onDiscountedChange,
   onFamilyChange,
@@ -89,6 +91,12 @@ export default function MembershipSelection({
   return (
     <div className="flex flex-col gap-4">
       <MembershipStatus member={member} status={memberStatus} />
+
+      {disabledMessage && (
+        <div className="p-4 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800">
+          {disabledMessage}
+        </div>
+      )}
 
       <h3 className="text-h3">{t(isRenewal ? "renewMembership" : "selectMembership")}</h3>
 
