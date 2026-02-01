@@ -4,7 +4,7 @@ import { getSwishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
-import { findMemberForUser } from "/server/methods/utils";
+import { findMemberForUser, sanitizeForSwish } from "/server/methods/utils";
 import fs from "fs";
 import path from "path";
 
@@ -64,6 +64,15 @@ const getSwishConfig = () => {
   return config;
 };
 
+const formatError = (status, errArr) => {
+  const swishErrs = errArr.map(errObj => {
+    const additional = errObj.additionalInformation == '' ? '' : `; ${errObj.additionalInformation}`;
+    return `${errObj.errorMessage} (${errObj.errorCode})${additional}`;
+  });
+
+  return `HTTP status: ${status}, Swish: ${swishErrs.join(', ')}`;
+}
+
 Meteor.methods({
   /**
    * Get payment options configuration.
@@ -116,7 +125,7 @@ Meteor.methods({
       payeeAlias: config.payeeAlias,
       currency: "SEK",
       amount: amount.toString(),
-      message: `pt:${paymentType} mid:${member.mid} ${member.name}`,
+      message: sanitizeForSwish(`pt:${paymentType} mid:${member.mid} ${member.name}`),
       //callbackIdentifier
     };
 
@@ -144,12 +153,13 @@ Meteor.methods({
         throw new Meteor.Error("payment-failed", "Failed to create payment request");
       }
     } catch (error) {
-      console.error("Swish payment initiation error:", error);
+      const errorMessage = `Swish payment initiation error: ${formatError(error.status, error.response.data)}`;
+      console.error(errorMessage);
 
       // Update payment status on error
       await initiatedPayments.updateAsync(
         { externalId },
-        { $set: { status: "ERROR", error: error.message } }
+        { $set: { status: "ERROR", error: errorMessage} }
       );
 
       if (error instanceof Meteor.Error) {
