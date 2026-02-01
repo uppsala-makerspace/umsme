@@ -11,7 +11,7 @@ export default () => {
   const handleForgotPassword = (email) => {
     Accounts.forgotPassword({ email }, (error) => {
       if (error) {
-        setMessage(t("CouldNotFind") + error);
+        setMessage(t("CouldNotFind"));
       } else {
         setMessage(t("SentResetEmail") + email);
       }
