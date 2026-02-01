@@ -300,5 +300,22 @@
   "disabledNoBaseMembership": "Not available without base membership",
   "disabledHasYearlyLab": "You already have a yearly lab membership",
   "disabledRenewYearlyFirst": "Renew yearly membership first",
-  "familyLockedUntilRenewal": "Family status can only be changed during renewal"
+  "familyLockedUntilRenewal": "Family status can only be changed during renewal",
+
+  "installApp": "Install app",
+  "installed": "Installed",
+  "installTitle": "Install the app",
+  "installAlreadyInstalled": "Already installed? Open the app from your home screen.",
+  "installAlreadyInstalledPWA": "You are using the installed app.",
+  "installShowButtonCheckbox": "Show install button in the menu bar",
+  "installIosTitle": "Install on iPhone/iPad",
+  "installIosStep1": "Tap the share button",
+  "installIosStep2": "Scroll down and tap \"Add to Home Screen\"",
+  "installIosStep3": "Tap \"Add\" in the top right corner",
+  "installAndroidTitle": "Install on Android",
+  "installAndroidStep1": "Tap the menu button",
+  "installAndroidStep2": "Tap \"Install app\" or \"Add to Home screen\"",
+  "installAndroidStep3": "Tap \"Install\" to confirm",
+  "installDesktopInfo": "The app works fine in a regular browser, but some features like location detection for opening doors may be less accurate on desktop.",
+  "installDesktopQrText": "Scan with your phone to install the app"
 }

@@ -92,6 +92,9 @@ export const HamburgerMenu = () => {
             <Link to="/contact">{t("contactUs")}</Link>
           </li>
           <li>
+            <Link to="/install">{t("installApp")}</Link>
+          </li>
+          <li>
             <button onClick={handleLogout} className="logout-button">
               {t("logout")}
             </button>

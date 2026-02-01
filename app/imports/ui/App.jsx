@@ -19,6 +19,7 @@ import CertifierRequestDetail from '/imports/pages/certifierRequestDetail';
 import MembershipSelection from '/imports/pages/membershipSelection';
 import PaymentSelection from '/imports/pages/paymentSelection';
 import InitiatedPayment from '/imports/pages/initiatedPayment';
+import Install from '/imports/pages/install';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 export const App = () => (
@@ -47,6 +48,7 @@ export const App = () => (
         <Route path="/paymentSelection/:paymentType" element={<PaymentSelection />} />
         <Route path="/initiatedPayment/:externalId" element={<InitiatedPayment />} />
         <Route path="/payment" element={<Navigate to="/membership" replace />} />
+        <Route path="/install" element={<Install />} />
       </Routes>
     </Router>
   </div>);

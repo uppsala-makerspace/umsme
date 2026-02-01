@@ -10,3 +10,37 @@
   z-index: 100;
   min-height: 44px;
 }
+
+.install-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.install-button:hover {
+  background-color: #2563eb;
+}
+
+.install-button.installed {
+  background-color: #10b981;
+  padding: 0.25rem;
+  cursor: default;
+}
+
+.install-button-text {
+  display: none;
+}
+
+@media (min-width: 360px) {
+  .install-button-text {
+    display: inline;
+  }
+}

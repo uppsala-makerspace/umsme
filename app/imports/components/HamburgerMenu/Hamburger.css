@@ -20,6 +20,8 @@
     cursor: pointer;
     background: none;
     padding: 0;
+    width: 28px;
+    text-align: center;
   }
 
   .umsapp .links {
@@ -57,7 +59,4 @@
     cursor: pointer;
   }
 
-  @media (max-width: 768px) {
-  .umsapp .nav-bar.menu-open {
-    width: 70vw;
-  }}
+  
