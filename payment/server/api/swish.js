@@ -89,7 +89,7 @@ WebApp.handlers.use("/swish/callback", async (req, res) => {
  * Handle PAID status callback
  */
 async function handlePaidStatus(obj, initiated) {
-  const { id, datePaid, amount, payerAlias } = obj;
+  const { id, datePaid, amount, payerAlias, message, paymentReference } = obj;
 
   // Check if already processed (idempotency)
   if (initiated?.status === 'PAID') {
@@ -128,12 +128,13 @@ async function handlePaidStatus(obj, initiated) {
   // Create payment record
   const payment = await addPayment({
     type: "swish",
-    amount: Number(initiated.amount),
+    amount: Number(amount),
     date: new Date(datePaid),
     name: member.name,
-    mobile: member.mobile,
+    mobile: payerAlias,
     member: member._id,
-    externalId: id,
+    externalId: paymentReference,
+    message
   });
   console.log(`[Swish] Created payment ${payment._id} for member ${member._id}`);
 
@@ -181,10 +182,11 @@ async function handleFailedStatus(obj, initiated, status) {
  * Create orphan payment record for manual matching
  */
 async function createOrphanPayment(obj) {
-  const { id, datePaid, amount, payerAlias } = obj;
+  const { id, datePaid, amount, payerAlias, message } = obj;
 
   const payment = await addPayment({
     type: "swish",
+    message,
     amount: Number(amount),
     date: new Date(datePaid),
     mobile: payerAlias,

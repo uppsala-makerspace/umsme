@@ -64,14 +64,6 @@ const getSwishConfig = () => {
   return config;
 };
 
-/**
- * Get Swish payment message in the user's preferred language
- */
-const getSwishMessage = (language = "sv") => {
-  const config = getSwishConfig();
-  return config.messages?.[language] || config.messages?.sv || "Payment Uppsala Makerspace";
-};
-
 Meteor.methods({
   /**
    * Get payment options configuration.
@@ -116,7 +108,7 @@ Meteor.methods({
       status: "INITIATED",
       amount,
       createdAt: new Date(),
-      paymentType,
+      paymentType
     });
 
     const data = {
@@ -124,7 +116,8 @@ Meteor.methods({
       payeeAlias: config.payeeAlias,
       currency: "SEK",
       amount: amount.toString(),
-      message: getSwishMessage(),
+      message: `pt:${paymentType} mid:${member.mid} ${member.name}`,
+      //callbackIdentifier
     };
 
     try {
@@ -238,53 +231,6 @@ Meteor.methods({
       resolvedAt: payment.resolvedAt,
       error: payment.error,
     };
-  },
-
-  // Keep legacy methods for backward compatibility
-  async "swish.createTestPayment"(price, membershipType) {
-    const instructionId = uuidv4().replace(/-/g, "").toUpperCase();
-
-    const member = await findMemberForUser();
-    if (!member) {
-      throw new Meteor.Error("member-not-found", "Ingen medlem hittades.");
-    }
-
-    await initiatedPayments.insertAsync({
-      externalId: instructionId,
-      member: member._id,
-      status: "INITIATED",
-      amount: price,
-      createdAt: new Date(),
-      paymentType: membershipType,
-    });
-
-    const config = getSwishConfig();
-
-    const data = {
-      callbackUrl: config.callbackUrl,
-      payeeAlias: config.payeeAlias,
-      currency: "SEK",
-      amount: price.toString(),
-      message: getSwishMessage(),
-    };
-
-    try {
-      const swishClient = await getSwishClient();
-      const response = await swishClient.put(
-        `${config.api.paymentRequest}/${instructionId}`,
-        data
-      );
-
-      if (response.status === 201) {
-        const { paymentrequesttoken } = response.headers;
-        return { paymentrequesttoken, instructionId };
-      } else {
-        throw new Meteor.Error("payment-failed", "Did not get 201 status");
-      }
-    } catch (error) {
-      console.error(error);
-      throw new Meteor.Error("payment-error", "Payment creation failed");
-    }
   },
 
   async getQrCode(token) {

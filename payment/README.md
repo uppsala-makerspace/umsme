@@ -14,6 +14,9 @@ npm install
 # Start development server (port 3003)
 npm run dev
 ```
+The server will now accept HTTP POST calls on:
+
+    http://localhost:3003/swish/callback
 
 ## Scripts
 
