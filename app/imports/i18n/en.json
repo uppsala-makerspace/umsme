@@ -306,6 +306,7 @@
   "installed": "Installed",
   "installTitle": "Install the app",
   "installAlreadyInstalled": "Already installed? Open the app from your home screen.",
+  "installOpenApp": "Open app",
   "installAlreadyInstalledPWA": "You are using the installed app.",
   "installShowButtonCheckbox": "Show install button in the menu bar",
   "installIosTitle": "Install on iPhone/iPad",

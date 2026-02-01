@@ -104,7 +104,17 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, onDismiss, 
       {/* Hint for users who may have already installed */}
       {!isInstalledPWA && platform !== 'desktop' && (
         <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded text-sm">
-          {t("installAlreadyInstalled")}
+          <p>{t("installAlreadyInstalled")}</p>
+          {platform === 'android' && (
+            <div className="mt-2">
+              <a
+                href="web+ums://open"
+                className="inline-block bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700"
+              >
+                {t("installOpenApp")}
+              </a>
+            </div>
+          )}
         </div>
       )}
 

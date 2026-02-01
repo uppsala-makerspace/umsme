@@ -306,6 +306,7 @@
   "installed": "Installerad",
   "installTitle": "Installera appen",
   "installAlreadyInstalled": "Redan installerad? Öppna appen från din hemskärm.",
+  "installOpenApp": "Öppna appen",
   "installAlreadyInstalledPWA": "Du använder den installerade appen.",
   "installShowButtonCheckbox": "Visa installationsknappen i menyraden",
   "installIosTitle": "Installera på iPhone/iPad",
