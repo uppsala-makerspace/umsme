@@ -41,10 +41,6 @@
         "paymentRequest": "https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests",
         "qrCode": "https://mpc.getswish.net/qrg-swish/api/v1/commerce"
       },
-      "messages": {
-        "sv": "Betalning Uppsala Makerspace",
-        "en": "Payment Uppsala Makerspace"
-      },
       "timeoutSeconds": 180
     }
   },
