@@ -7,6 +7,22 @@ import './tailwind.output.css';
 import '/imports/i18n';
 import { App } from '/imports/ui/App';
 
+// Store the install prompt event globally so it persists and is available to all components
+window.deferredInstallPrompt = null;
+
+// Listen for the beforeinstallprompt event as early as possible
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window.deferredInstallPrompt = e;
+  // Dispatch custom event to notify components
+  window.dispatchEvent(new CustomEvent('installpromptavailable'));
+});
+
+window.addEventListener('appinstalled', () => {
+  window.deferredInstallPrompt = null;
+  window.dispatchEvent(new CustomEvent('appinstalled'));
+});
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker

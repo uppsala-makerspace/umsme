@@ -6,23 +6,8 @@ import Install from "./Install";
 
 const STORAGE_KEY = 'pwa-install-dismissed';
 
-// Store the install prompt event globally so it persists across component mounts
-let deferredPrompt = null;
-
-// Listen for the beforeinstallprompt event
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Dispatch custom event to notify components
-    window.dispatchEvent(new CustomEvent('installpromptavailable'));
-  });
-
-  window.addEventListener('appinstalled', () => {
-    deferredPrompt = null;
-    window.dispatchEvent(new CustomEvent('appinstalled'));
-  });
-}
+// Use the global install prompt stored on window (set up in main.jsx)
+const getDeferredPrompt = () => typeof window !== 'undefined' ? window.deferredInstallPrompt : null;
 
 /**
  * Detect the user's platform
@@ -78,7 +63,7 @@ export default function InstallPage() {
   const isInstalledPWA = isPWA();
   const qrCodeUrl = getQrCodeUrl();
   const [isDismissed, setIsDismissed] = useState(isInstallDismissed());
-  const [installPromptAvailable, setInstallPromptAvailable] = useState(!!deferredPrompt);
+  const [installPromptAvailable, setInstallPromptAvailable] = useState(!!getDeferredPrompt());
 
   useEffect(() => {
     const handlePromptAvailable = () => setInstallPromptAvailable(true);
@@ -104,12 +89,13 @@ export default function InstallPage() {
   }, []);
 
   const handleInstallClick = useCallback(async () => {
-    if (!deferredPrompt) return false;
+    const prompt = getDeferredPrompt();
+    if (!prompt) return false;
 
     try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      deferredPrompt = null;
+      await prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      window.deferredInstallPrompt = null;
       setInstallPromptAvailable(false);
       return outcome === 'accepted';
     } catch (err) {
