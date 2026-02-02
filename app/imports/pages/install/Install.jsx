@@ -122,20 +122,10 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
         </div>
       )}
 
-      {/* Hint for users who may have already installed */}
-      {!isInstalledPWA && platform !== 'desktop' && (
+      {/* Hint for iOS users who may have already installed */}
+      {!isInstalledPWA && platform === 'ios' && (
         <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded text-sm">
           <p>{t("installAlreadyInstalled")}</p>
-          {platform === 'android' && (
-            <div className="mt-2">
-              <a
-                href="web+ums://open"
-                className="inline-block bg-green-500 text-white px-4 py-2 rounded font-medium hover:bg-green-600"
-              >
-                {t("installOpenApp")}
-              </a>
-            </div>
-          )}
         </div>
       )}
 
@@ -143,10 +133,16 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
       {!isInstalledPWA && platform === 'ios' && <IosInstructions t={t} />}
       {!isInstalledPWA && platform === 'android' && (
         <>
-          {installPromptAvailable && (
-            <AndroidInstallButton t={t} onInstallClick={onInstallClick} />
+          {installPromptAvailable ? (
+            <>
+              <AndroidInstallButton t={t} onInstallClick={onInstallClick} />
+              <AndroidManualInstructions t={t} showAlternativeHeader={true} />
+            </>
+          ) : (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+              <p className="font-medium">{t("installAndroidAlreadyInstalled")}</p>
+            </div>
           )}
-          <AndroidManualInstructions t={t} showAlternativeHeader={installPromptAvailable} />
         </>
       )}
       {!isInstalledPWA && platform === 'desktop' && <DesktopInstructions t={t} qrCodeUrl={qrCodeUrl} />}
