@@ -1,10 +1,28 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import UAParser from "ua-parser-js";
 import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import Install from "./Install";
 
 const STORAGE_KEY = 'pwa-install-dismissed';
+
+// Store the install prompt event globally so it persists across component mounts
+let deferredPrompt = null;
+
+// Listen for the beforeinstallprompt event
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Dispatch custom event to notify components
+    window.dispatchEvent(new CustomEvent('installpromptavailable'));
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    window.dispatchEvent(new CustomEvent('appinstalled'));
+  });
+}
 
 /**
  * Detect the user's platform
@@ -60,6 +78,20 @@ export default function InstallPage() {
   const isInstalledPWA = isPWA();
   const qrCodeUrl = getQrCodeUrl();
   const [isDismissed, setIsDismissed] = useState(isInstallDismissed());
+  const [installPromptAvailable, setInstallPromptAvailable] = useState(!!deferredPrompt);
+
+  useEffect(() => {
+    const handlePromptAvailable = () => setInstallPromptAvailable(true);
+    const handleAppInstalled = () => setInstallPromptAvailable(false);
+
+    window.addEventListener('installpromptavailable', handlePromptAvailable);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('installpromptavailable', handlePromptAvailable);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
 
   const handleDismiss = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, 'true');
@@ -71,6 +103,21 @@ export default function InstallPage() {
     setIsDismissed(false);
   }, []);
 
+  const handleInstallClick = useCallback(async () => {
+    if (!deferredPrompt) return false;
+
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      setInstallPromptAvailable(false);
+      return outcome === 'accepted';
+    } catch (err) {
+      console.error('Install prompt error:', err);
+      return false;
+    }
+  }, []);
+
   return (
     <>
       <TopBar />
@@ -79,8 +126,10 @@ export default function InstallPage() {
         isInstalledPWA={isInstalledPWA}
         isDismissed={isDismissed}
         qrCodeUrl={qrCodeUrl}
+        installPromptAvailable={installPromptAvailable}
         onDismiss={handleDismiss}
         onRestore={handleRestore}
+        onInstallClick={handleInstallClick}
       />
       <BottomNavigation />
     </>

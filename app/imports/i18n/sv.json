@@ -314,6 +314,8 @@
   "installIosStep2": "Scrolla ner och tryck på \"Lägg till på hemskärmen\"",
   "installIosStep3": "Tryck på \"Lägg till\" i övre högra hörnet",
   "installAndroidTitle": "Installera på Android",
+  "installAndroidButton": "Installera appen",
+  "installAndroidAlternativeTitle": "Alternativt kan du göra det manuellt:",
   "installAndroidStep1": "Tryck på menyknappen",
   "installAndroidStep2": "Tryck på \"Installera app\" eller \"Lägg till på hemskärmen\"",
   "installAndroidStep3": "Tryck på \"Installera\" för att bekräfta",

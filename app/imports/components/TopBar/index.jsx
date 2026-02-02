@@ -62,7 +62,7 @@ const InstallButton = () => {
 export const TopBar = () => {
   const location = useLocation();
   const isHome = location.pathname === "/" || location.pathname === "/home";
-  const isInstalledPWA = true || isPWA();
+  const isInstalledPWA = isPWA();
 
   return (
     <header className="top-bar">

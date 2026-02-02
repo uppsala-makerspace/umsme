@@ -314,6 +314,8 @@
   "installIosStep2": "Scroll down and tap \"Add to Home Screen\"",
   "installIosStep3": "Tap \"Add\" in the top right corner",
   "installAndroidTitle": "Install on Android",
+  "installAndroidButton": "Install app",
+  "installAndroidAlternativeTitle": "Alternatively, you can do it manually:",
   "installAndroidStep1": "Tap the menu button",
   "installAndroidStep2": "Tap \"Install app\" or \"Add to Home screen\"",
   "installAndroidStep3": "Tap \"Install\" to confirm",

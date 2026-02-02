@@ -32,11 +32,13 @@ const IosInstructions = ({ t }) => (
 );
 
 /**
- * Android installation instructions
+ * Android manual installation instructions
  */
-const AndroidInstructions = ({ t }) => (
+const AndroidManualInstructions = ({ t, showAlternativeHeader }) => (
   <div className="flex flex-col gap-4">
-    <h2 className="text-lg font-semibold">{t("installAndroidTitle")}</h2>
+    <h2 className="text-lg font-semibold">
+      {showAlternativeHeader ? t("installAndroidAlternativeTitle") : t("installAndroidTitle")}
+    </h2>
     <ol className="list-decimal list-inside space-y-3 text-sm">
       <li className="flex items-start gap-2">
         <span className="font-mono bg-gray-100 px-2 py-1 rounded">1.</span>
@@ -54,6 +56,23 @@ const AndroidInstructions = ({ t }) => (
         <span>{t("installAndroidStep3")}</span>
       </li>
     </ol>
+  </div>
+);
+
+/**
+ * Android one-click install button
+ */
+const AndroidInstallButton = ({ t, onInstallClick }) => (
+  <div className="flex flex-col gap-4">
+    <button
+      onClick={onInstallClick}
+      className="w-full bg-green-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-600 flex items-center justify-center gap-2"
+    >
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      </svg>
+      {t("installAndroidButton")}
+    </button>
   </div>
 );
 
@@ -84,10 +103,12 @@ const DesktopInstructions = ({ t, qrCodeUrl }) => (
  * @param {boolean} props.isInstalledPWA - Whether running as installed PWA
  * @param {boolean} props.isDismissed - Whether the install button was dismissed
  * @param {string} props.qrCodeUrl - URL for QR code image (desktop only)
+ * @param {boolean} props.installPromptAvailable - Whether the native install prompt is available
  * @param {function} props.onDismiss - Callback when user clicks "prefer browser"
  * @param {function} props.onRestore - Callback when user wants to show install button again
+ * @param {function} props.onInstallClick - Callback to trigger native install prompt
  */
-const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, onDismiss, onRestore }) => {
+const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installPromptAvailable, onDismiss, onRestore, onInstallClick }) => {
   const { t } = useTranslation();
 
   return (
@@ -120,7 +141,14 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, onDismiss, 
 
       {/* Platform-specific instructions (only when not installed as PWA) */}
       {!isInstalledPWA && platform === 'ios' && <IosInstructions t={t} />}
-      {!isInstalledPWA && platform === 'android' && <AndroidInstructions t={t} />}
+      {!isInstalledPWA && platform === 'android' && (
+        <>
+          {installPromptAvailable && (
+            <AndroidInstallButton t={t} onInstallClick={onInstallClick} />
+          )}
+          <AndroidManualInstructions t={t} showAlternativeHeader={installPromptAvailable} />
+        </>
+      )}
       {!isInstalledPWA && platform === 'desktop' && <DesktopInstructions t={t} qrCodeUrl={qrCodeUrl} />}
 
       {/* Dismiss/Restore option (only when not installed as PWA) */}
