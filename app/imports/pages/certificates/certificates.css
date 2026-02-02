@@ -1,5 +1,6 @@
 .certificates-container {
   padding: 1rem;
+  padding-bottom: 5rem;
   max-width: 576px;
   margin: 0 auto;
 }
