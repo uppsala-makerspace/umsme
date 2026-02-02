@@ -109,7 +109,7 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, onDismiss, 
             <div className="mt-2">
               <a
                 href="web+ums://open"
-                className="inline-block bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700"
+                className="inline-block bg-green-500 text-white px-4 py-2 rounded font-medium hover:bg-green-600"
               >
                 {t("installOpenApp")}
               </a>
@@ -118,13 +118,13 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, onDismiss, 
         </div>
       )}
 
-      {/* Platform-specific instructions */}
-      {platform === 'ios' && <IosInstructions t={t} />}
-      {platform === 'android' && <AndroidInstructions t={t} />}
-      {platform === 'desktop' && <DesktopInstructions t={t} qrCodeUrl={qrCodeUrl} />}
+      {/* Platform-specific instructions (only when not installed as PWA) */}
+      {!isInstalledPWA && platform === 'ios' && <IosInstructions t={t} />}
+      {!isInstalledPWA && platform === 'android' && <AndroidInstructions t={t} />}
+      {!isInstalledPWA && platform === 'desktop' && <DesktopInstructions t={t} qrCodeUrl={qrCodeUrl} />}
 
-      {/* Dismiss/Restore option */}
-      {(!isInstalledPWA || platform === 'desktop') && (
+      {/* Dismiss/Restore option (only when not installed as PWA) */}
+      {!isInstalledPWA && (
         <div className="mt-6 pt-4 border-t border-gray-200">
           <label className="flex items-center gap-3 cursor-pointer">
             <input

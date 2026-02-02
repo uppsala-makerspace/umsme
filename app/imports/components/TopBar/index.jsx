@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HamburgerMenu } from "../HamburgerMenu/HamburgerMenu";
 import { LanguageSwitcher } from "../LanguageSwitcher/langueSwitcher";
@@ -17,15 +17,6 @@ const isPWA = () => {
 };
 
 /**
- * Check if running on mobile device
- */
-const isMobile = () => {
-  if (typeof navigator === 'undefined') return false;
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  return /iPad|iPhone|iPod|android/i.test(userAgent);
-};
-
-/**
  * Check if the install prompt has been dismissed
  */
 const isInstallDismissed = () => {
@@ -34,30 +25,30 @@ const isInstallDismissed = () => {
 };
 
 /**
- * Install button component for TopBar
+ * Installed icon component - shown on all views when PWA is installed
+ */
+const InstalledIcon = () => {
+  const { t } = useTranslation();
+  return (
+    <Link to="/install" className="install-button installed" title={t("installed")}>
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+    </Link>
+  );
+};
+
+/**
+ * Install button component - shown on home view when not installed
  */
 const InstallButton = () => {
   const { t } = useTranslation();
-  const isInstalledPWA = isPWA();
   const dismissed = isInstallDismissed();
 
-  // Don't show if dismissed and not in PWA mode
-  if (dismissed && !isInstalledPWA) {
+  if (dismissed) {
     return null;
   }
 
-  // Show success state if running as PWA
-  if (isInstalledPWA) {
-    return (
-      <span className="install-button installed" title={t("installed")}>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      </span>
-    );
-  }
-
-  // Show install button
   return (
     <Link to="/install" className="install-button">
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,11 +60,17 @@ const InstallButton = () => {
 };
 
 export const TopBar = () => {
+  const location = useLocation();
+  const isHome = location.pathname === "/" || location.pathname === "/home";
+  const isInstalledPWA = true || isPWA();
+
   return (
     <header className="top-bar">
       <HamburgerMenu />
-      <InstallButton />
-      <LanguageSwitcher />
+      <div className="top-bar-right">
+        {isInstalledPWA ? <InstalledIcon /> : (isHome && <InstallButton />)}
+        <LanguageSwitcher />
+      </div>
     </header>
   );
 };

@@ -11,12 +11,18 @@
   min-height: 44px;
 }
 
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
 .install-button {
   display: flex;
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  background-color: #3b82f6;
+  background-color: #22c55e;
   color: white;
   border-radius: 0.25rem;
   font-size: 0.75rem;
@@ -26,13 +32,22 @@
 }
 
 .install-button:hover {
-  background-color: #2563eb;
+  background-color: #16a34a;
 }
 
 .install-button.installed {
-  background-color: #10b981;
-  padding: 0.25rem;
-  cursor: default;
+  background-color: transparent;
+  color: #6b7280;
+  padding: 0;
+}
+
+.install-button.installed:hover {
+  background-color: transparent;
+}
+
+.install-button.installed svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .install-button-text {
