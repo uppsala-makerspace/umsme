@@ -26,7 +26,7 @@ describe('Initiated Payment Tests', function () {
     const memberId = await createTestMember();
     const swishId = 'init-001-' + Date.now();
 
-    await createInitiatedPayment(memberId, swishId, 'memberBase', 300);
+    const initiatedId = await createInitiatedPayment(memberId, swishId, 'memberBase', 300);
 
     const response = await postCallback({
       id: swishId,
@@ -38,8 +38,8 @@ describe('Initiated Payment Tests', function () {
 
     assert.strictEqual(response.status, 200);
 
-    // Verify payment created
-    const payment = await Payments.findOneAsync({ externalId: swishId });
+    // Verify payment created (linked via initiatedBy)
+    const payment = await Payments.findOneAsync({ initiatedBy: initiatedId });
     assert.ok(payment, 'Payment should be created');
     assert.strictEqual(payment.member, memberId);
     assert.strictEqual(payment.amount, 300);
@@ -135,7 +135,7 @@ describe('Initiated Payment Tests', function () {
     const memberId = await createTestMember();
     const externalId = 'init-006-' + Date.now();
 
-    await createInitiatedPayment(memberId, externalId, 'unknownType', 100);
+    const initiatedId = await createInitiatedPayment(memberId, externalId, 'unknownType', 100);
 
     await postCallback({
       id: externalId,
@@ -145,8 +145,8 @@ describe('Initiated Payment Tests', function () {
       datePaid: new Date().toISOString(),
     });
 
-    // Payment should be created
-    const payment = await Payments.findOneAsync({ externalId });
+    // Payment should be created (linked via initiatedBy)
+    const payment = await Payments.findOneAsync({ initiatedBy: initiatedId });
     assert.ok(payment, 'Payment should be created');
     assert.strictEqual(payment.member, memberId);
 

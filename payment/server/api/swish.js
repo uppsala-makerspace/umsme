@@ -134,6 +134,7 @@ async function handlePaidStatus(obj, initiated) {
     mobile: payerAlias,
     member: member._id,
     externalId: paymentReference,
+    initiatedBy: initiated._id,
     message
   });
   console.log(`[Swish] Created payment ${payment._id} for member ${member._id}`);

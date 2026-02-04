@@ -25,7 +25,7 @@ describe('Idempotency Tests', function () {
     const memberId = await createTestMember();
     const swishId = 'idem-001-' + Date.now();
 
-    await createInitiatedPayment(memberId, swishId, 'memberBase', 300);
+    const initiatedId = await createInitiatedPayment(memberId, swishId, 'memberBase', 300);
 
     const callbackBody = {
       id: swishId,
@@ -43,8 +43,8 @@ describe('Idempotency Tests', function () {
     const response2 = await postCallback(callbackBody);
     assert.strictEqual(response2.status, 200);
 
-    // Only one payment should exist
-    const paymentCount = await Payments.find({ externalId: swishId }).countAsync();
+    // Only one payment should exist (linked via initiatedBy)
+    const paymentCount = await Payments.find({ initiatedBy: initiatedId }).countAsync();
     assert.strictEqual(paymentCount, 1, 'Only one payment should be created');
   });
 

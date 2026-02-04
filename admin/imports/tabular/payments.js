@@ -7,7 +7,7 @@ import { models } from "/imports/common/lib/models";
 import { extractor, dateViewFunction } from "/imports/common/lib/fieldsUtils";
 
 const paymentDefaults = {
-  filter: ['member', 'hash', 'membership', 'other', 'mobile', 'name'],
+  filter: ['member', 'hash', 'membership', 'other', 'mobile', 'name', 'externalId', 'initiatedBy'],
   append: [{
     title: 'Status',
     render(value, type, doc) {

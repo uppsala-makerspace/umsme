@@ -23,9 +23,10 @@ export async function postCallback(body) {
 
 /**
  * Create an initiated payment for testing
+ * @returns {string} The _id of the created initiatedPayment
  */
 export async function createInitiatedPayment(memberId, externalId, paymentType, amount = 300) {
-  await initiatedPayments.insertAsync({
+  return await initiatedPayments.insertAsync({
     externalId,
     member: memberId,
     paymentType,

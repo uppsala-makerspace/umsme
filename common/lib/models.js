@@ -417,7 +417,8 @@ export const models = {
     },
     member: { label: "Member", type: String, max: 20, optional: true },
     membership: { label: "Membership", type: String, max: 20, optional: true },
-    externalId: { label: "External ID", type: String, max: 40, optional: true },
+    externalId: { label: "External ID", type: String, max: 40, optional: true, autoform: { readonly: true } },
+    initiatedBy: { label: "Initiated by", type: String, max: 20, optional: true, autoform: { readonly: true } },
   },
   lockusers: {
     name: { label: "Member", type: String, max: 40 },
