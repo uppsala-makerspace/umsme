@@ -308,6 +308,7 @@
   "installAlreadyInstalled": "Already installed? Look for the UMS icon among your apps.",
   "installAlreadyInstalledPWA": "You are using the installed app.",
   "installAndroidAlreadyInstalled": "Looks like you already have the app! Look for the UMS icon among your apps.",
+  "installAndroidInstalling": "Your phone is installing the app. You will most likely see a message soon confirming that it is installed. After that you should be able to locate the UMS icon among your apps.",
   "installShowButtonCheckbox": "Show install button in the menu bar",
   "installIosTitle": "Install on iPhone/iPad",
   "installIosStep1": "Tap the share button",

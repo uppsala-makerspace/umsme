@@ -64,6 +64,7 @@ export default function InstallPage() {
   const qrCodeUrl = getQrCodeUrl();
   const [isDismissed, setIsDismissed] = useState(isInstallDismissed());
   const [installPromptAvailable, setInstallPromptAvailable] = useState(!!getDeferredPrompt());
+  const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
     const handlePromptAvailable = () => setInstallPromptAvailable(true);
@@ -97,6 +98,9 @@ export default function InstallPage() {
       const { outcome } = await prompt.userChoice;
       window.deferredInstallPrompt = null;
       setInstallPromptAvailable(false);
+      if (outcome === 'accepted') {
+        setIsInstalling(true);
+      }
       return outcome === 'accepted';
     } catch (err) {
       console.error('Install prompt error:', err);
@@ -113,6 +117,7 @@ export default function InstallPage() {
         isDismissed={isDismissed}
         qrCodeUrl={qrCodeUrl}
         installPromptAvailable={installPromptAvailable}
+        isInstalling={isInstalling}
         onDismiss={handleDismiss}
         onRestore={handleRestore}
         onInstallClick={handleInstallClick}

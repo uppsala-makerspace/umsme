@@ -17,8 +17,15 @@ export default {
     isDismissed: {
       control: { type: "boolean" },
     },
+    installPromptAvailable: {
+      control: { type: "boolean" },
+    },
+    isInstalling: {
+      control: { type: "boolean" },
+    },
     onDismiss: { action: "dismissed" },
     onRestore: { action: "restored" },
+    onInstallClick: { action: "install clicked" },
   },
 };
 
@@ -38,6 +45,30 @@ export const Android = {
     platform: "android",
     isInstalledPWA: false,
     isDismissed: false,
+    installPromptAvailable: true,
+    isInstalling: false,
+    qrCodeUrl,
+  },
+};
+
+export const AndroidInstalling = {
+  args: {
+    platform: "android",
+    isInstalledPWA: false,
+    isDismissed: false,
+    installPromptAvailable: false,
+    isInstalling: true,
+    qrCodeUrl,
+  },
+};
+
+export const AndroidAlreadyInstalledNoPrompt = {
+  args: {
+    platform: "android",
+    isInstalledPWA: false,
+    isDismissed: false,
+    installPromptAvailable: false,
+    isInstalling: false,
     qrCodeUrl,
   },
 };
@@ -83,6 +114,8 @@ export const DismissedAndroid = {
     platform: "android",
     isInstalledPWA: false,
     isDismissed: true,
+    installPromptAvailable: true,
+    isInstalling: false,
     qrCodeUrl,
   },
 };

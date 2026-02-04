@@ -308,6 +308,7 @@
   "installAlreadyInstalled": "Redan installerad? Leta efter UMS-ikonen bland dina appar.",
   "installAlreadyInstalledPWA": "Du använder den installerade appen.",
   "installAndroidAlreadyInstalled": "Det verkar som att du redan har appen! Leta efter UMS-ikonen bland dina appar.",
+  "installAndroidInstalling": "Din telefon installerar appen. Du kommer troligen snart se ett meddelande som bekräftar att den är installerad. Efter det bör du kunna hitta UMS-ikonen bland dina appar.",
   "installShowButtonCheckbox": "Visa installationsknappen i menyraden",
   "installIosTitle": "Installera på iPhone/iPad",
   "installIosStep1": "Tryck på dela-knappen",

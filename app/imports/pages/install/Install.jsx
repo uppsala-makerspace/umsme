@@ -104,11 +104,12 @@ const DesktopInstructions = ({ t, qrCodeUrl }) => (
  * @param {boolean} props.isDismissed - Whether the install button was dismissed
  * @param {string} props.qrCodeUrl - URL for QR code image (desktop only)
  * @param {boolean} props.installPromptAvailable - Whether the native install prompt is available
+ * @param {boolean} props.isInstalling - Whether the app is currently being installed (user accepted prompt)
  * @param {function} props.onDismiss - Callback when user clicks "prefer browser"
  * @param {function} props.onRestore - Callback when user wants to show install button again
  * @param {function} props.onInstallClick - Callback to trigger native install prompt
  */
-const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installPromptAvailable, onDismiss, onRestore, onInstallClick }) => {
+const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installPromptAvailable, isInstalling, onDismiss, onRestore, onInstallClick }) => {
   const { t } = useTranslation();
 
   return (
@@ -138,6 +139,10 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
               <AndroidInstallButton t={t} onInstallClick={onInstallClick} />
               <AndroidManualInstructions t={t} showAlternativeHeader={true} />
             </>
+          ) : isInstalling ? (
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+              <p className="font-medium">{t("installAndroidInstalling")}</p>
+            </div>
           ) : (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
               <p className="font-medium">{t("installAndroidAlreadyInstalled")}</p>
