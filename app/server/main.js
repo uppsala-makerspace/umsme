@@ -3,7 +3,6 @@
 //import "./api";
 import { Meteor } from "meteor/meteor";
 import "./methods";
-import "./api/test";
 import "./accounts";
 
 // Set MAIL_URL from settings if configured
