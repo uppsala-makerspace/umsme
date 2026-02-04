@@ -4,8 +4,8 @@
     "amount": 200,
     "period": "year",
     "label": {
-      "en": "Basic membership",
-      "sv": "Medlemskap Bas"
+      "en": "Yearly Basic membership",
+      "sv": "Årligt Medlemskap Bas"
     },
     "description": {
       "en": "With our basic membership, you're welcome to use our makerspace during our open evenings and Saturday workshops.",
@@ -17,8 +17,8 @@
     "amount": 100,
     "period": "year",
     "label": {
-      "en": "Basic membership (discounted)",
-      "sv": "Medlemskap Bas (rabatterat)"
+      "en": "Yearly Basic membership (discounted)",
+      "sv": "Årligt Medlemskap Bas (rabatterat)"
     },
     "description": {
       "en": "If you are a student, pensioner or unemployed you can get access to the Makerspace during our open evenings and Saturday workshops at a reduced price.",
@@ -31,8 +31,8 @@
     "amount": 1600,
     "period": "year",
     "label": {
-      "en": "Lab Membership",
-      "sv": "Medlemskap Labb"
+      "en": "Yearly Lab Membership",
+      "sv": "Årligt Medlemskap Labb"
     },
     "description": {
       "en": "With a Lab Membership, you get 24/7 access to the Makerspace. You'll also get a personal storage box, so you don't have to carry your things back and forth.",
@@ -44,8 +44,8 @@
     "amount": 1200,
     "period": "year",
     "label": {
-      "en": "Lab Membership (discounted)",
-      "sv": "Medlemskap Labb (rabatterat)"
+      "en": "Yearly Lab Membership (discounted)",
+      "sv": "Årligt Medlemskap Labb (rabatterat)"
     },
     "description": {
       "en": "If you are a student, pensioner or unemployed you can get 24/7 access to the Makerspace at a reduced price.",
@@ -58,12 +58,12 @@
     "amount": 450,
     "period": "quarter",
     "label": {
-      "en": "Lab Membership (quarterly)",
-      "sv": "Medlemskap Labb (kvartal)"
+      "en": "Quarterly Lab Access",
+      "sv": "Kvartalsvis Labbåtkomst"
     },
     "description": {
-      "en": "With a quarterly lab membership, you get 24/7 access to the Makerspace for three months. This requires membership.",
-      "sv": "Med ett kvartalslabbmedlemskap får du tillgång till Makerspace 24/7 under tre månader. För detta krävs det att man har ett medlemskap redan."
+      "en": "With quarterly lab access, you get 24/7 access to the Makerspace for three months. This requires membership.",
+      "sv": "Med kvartalssvis labbåtkomst kan du vara på Makerspace 24/7 under tre månader när du vill. För detta krävs det att man har ett medlemskap redan."
     }
   },
   {
@@ -71,8 +71,8 @@
     "amount": 300,
     "period": "year",
     "label": {
-      "en": "Family Basic Membership",
-      "sv": "Familjemedlemskap Bas"
+      "en": "Yearly Family Basic Membership",
+      "sv": "Årligt Familjemedlemskap Bas"
     },
     "description": {
       "en": "With a family membership, up to five people registered at the same address get access to the Makerspace during our open evenings and Saturday workshops.",
@@ -85,8 +85,8 @@
     "amount": 2000,
     "period": "year",
     "label": {
-      "en": "Family Lab Membership",
-      "sv": "Familjemedlemskap Labb"
+      "en": "Yearly Family Lab Membership",
+      "sv": "Årligt Familjemedlemskap Labb"
     },
     "description": {
       "en": "With a Family Lab Membership, up to five people registered at the same address get 24/7 access to the Makerspace.",
