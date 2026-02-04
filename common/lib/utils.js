@@ -166,6 +166,7 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
 
   // === CALCULATE MEMBERSHIP ===
 
+  let start = null;
   let memberend = null;
   let labend = hasActiveLab ? new Date(member.lab) : null;
   let type = 'member';
@@ -178,10 +179,12 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
       type = 'lab';
       if (!hasActiveLab) {
         // Q2: Has membership, no lab -> labend = now + 3 months
+        start = new Date(now);
         labend = new Date(now);
         labend.setMonth(labend.getMonth() + 3);
       } else {
         // Q3/Q4: Has active lab -> labend = labend + 3 months
+        start = new Date(member.lab);
         labend = new Date(member.lab);
         labend.setMonth(labend.getMonth() + 3);
       }
@@ -199,9 +202,11 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
       // S2: If has active lab, labend unchanged (kept from initialization)
       // memberend extends from current or now + grace
       if (hasActiveMembership) {
+        start = new Date(member.member);
         memberend = new Date(member.member);
         memberend.setFullYear(memberend.getFullYear() + 1);
       } else {
+        start = new Date(now);
         memberend = new Date(now);
         memberend.setDate(memberend.getDate() + graceDays);
         memberend.setFullYear(memberend.getFullYear() + 1);
@@ -218,11 +223,14 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
       if (hasActiveMembership && !hasActiveLab) {
         if (memberendMoreThan2MonthsAway) {
           // memberend > now + 2 months: labend = memberend = now + 14 months
+          start = new Date(now);
+          start.setMonth(start.getMonth() + 2);
           memberend = new Date(now);
           memberend.setMonth(memberend.getMonth() + 14);
           labend = new Date(memberend);
         } else {
           // memberend <= now + 2 months: labend = memberend = memberend + 1 year
+          start = new Date(member.member);
           memberend = new Date(member.member);
           memberend.setFullYear(memberend.getFullYear() + 1);
           labend = new Date(memberend);
@@ -230,18 +238,22 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
       } else {
         // Standard lab membership (first time or renewal with existing lab)
         if (hasActiveMembership) {
+          start = new Date(member.member);
           memberend = new Date(member.member);
           memberend.setFullYear(memberend.getFullYear() + 1);
         } else {
+          start = new Date(now);
           memberend = new Date(now);
           memberend.setDate(memberend.getDate() + graceDays);
           memberend.setFullYear(memberend.getFullYear() + 1);
         }
 
         if (hasActiveLab) {
+          start = new Date(member.lab);
           labend = new Date(member.lab);
           labend.setFullYear(labend.getFullYear() + 1);
         } else {
+          start = new Date(now);
           labend = new Date(now);
           labend.setDate(labend.getDate() + graceDays);
           labend.setFullYear(labend.getFullYear() + 1);
@@ -260,5 +272,6 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
     type,
     discount,
     family,
+    start
   };
 }

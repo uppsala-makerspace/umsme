@@ -70,7 +70,7 @@ export async function processPayment(payment, member, paymentType) {
     labend: result.labend,
     memberend: result.memberend,
     amount: payment.amount,
-    start: new Date(),
+    start: result.start,
   };
 
   const membershipId = await Memberships.insertAsync(doc);
