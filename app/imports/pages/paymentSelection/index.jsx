@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import PaymentSelection from "./PaymentSelection";
+import { membershipFromPayment } from "/imports/common/lib/utils";
 
 export default function PaymentSelectionPage() {
   const { t, i18n } = useTranslation();
@@ -11,6 +12,7 @@ export default function PaymentSelectionPage() {
   const { paymentType } = useParams();
 
   const [paymentOption, setPaymentOption] = useState(null);
+  const [member, setMember] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -22,20 +24,26 @@ export default function PaymentSelectionPage() {
     ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))
     : null;
 
-  // Load payment option from config
+  // Load payment option from config and member info
   useEffect(() => {
-    Meteor.callAsync("payment.getOptions")
-      .then((data) => {
-        const option = data?.find((o) => o.paymentType === paymentType);
+    Promise.all([
+      Meteor.callAsync("payment.getOptions"),
+      Meteor.callAsync("findInfoForUser"),
+    ])
+      .then(([options, info]) => {
+        const option = options?.find((o) => o.paymentType === paymentType);
         if (option) {
           setPaymentOption(option);
         } else {
           setError("Invalid payment type");
         }
+        if (info?.member) {
+          setMember(info.member);
+        }
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to load payment options config:", err);
+        console.error("Failed to load data:", err);
         setError("Failed to load payment options");
         setIsLoading(false);
       });
@@ -88,6 +96,14 @@ export default function PaymentSelectionPage() {
     navigate("/membership");
   }, [navigate]);
 
+  // Calculate membership dates based on payment type and member status
+  const membershipDates = useMemo(() => {
+    if (!paymentOption?.paymentType || !member) return null;
+    const result = membershipFromPayment(new Date(), paymentOption.paymentType, member);
+    if (!result || result.error) return null;
+    return result;
+  }, [paymentOption?.paymentType, member]);
+
   // Redirect if not logged in
   if (!Meteor.userId()) {
     return <Navigate to="/login" />;
@@ -133,6 +149,7 @@ export default function PaymentSelectionPage() {
       <div className="login-form">
         <PaymentSelection
           paymentOption={paymentOption}
+          membershipDates={membershipDates}
           isLoading={isLoading}
           disabledMessage={disabledMessage}
           onPay={handlePay}

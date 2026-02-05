@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
  *
  * @param {Object} props
  * @param {Object} props.paymentOption - The selected payment option from config
+ * @param {Object} props.membershipDates - Calculated membership dates { memberend, labend }
  * @param {boolean} props.isLoading - Whether something is loading
  * @param {string} props.disabledMessage - Message to show when payments are disabled
  * @param {function} props.onPay - Callback when user clicks pay with selected method ('deeplink' or 'qr')
@@ -13,6 +14,7 @@ import { useTranslation } from "react-i18next";
  */
 export default function PaymentSelection({
   paymentOption,
+  membershipDates,
   isLoading = false,
   disabledMessage,
   onPay,
@@ -25,6 +27,16 @@ export default function PaymentSelection({
   // Helper to get localized text
   const getLabel = (option) =>
     option?.label?.[lang] || option?.label?.en || option?.paymentType || "";
+
+  // Format date for display
+  const formatDate = (date) => {
+    if (!date) return null;
+    return date.toLocaleDateString(lang === "sv" ? "sv-SE" : "en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -39,6 +51,25 @@ export default function PaymentSelection({
       <div className="flex flex-col gap-2 p-4 bg-gray-100 rounded-lg">
         <span className="font-semibold">{getLabel(paymentOption)}</span>
         <span>{paymentOption?.amount} kr</span>
+        {membershipDates && (
+          <div className="text-sm text-gray-600 mt-2 border-t border-gray-200 pt-2">
+            {membershipDates.start && (
+              <div>
+                {t("membershipStartDate")}: {formatDate(membershipDates.start)}
+              </div>
+            )}
+            {membershipDates.memberend && (
+              <div>
+                {t("membershipValidUntil")}: {formatDate(membershipDates.memberend)}
+              </div>
+            )}
+            {membershipDates.labend && (
+              <div>
+                {t("labAccessValidUntil")}: {formatDate(membershipDates.labend)}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 pl-4">

@@ -199,6 +199,7 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
     case 'memberBase':
     case 'memberDiscountedBase':
     case 'familyBase':
+      labend = undefined;
       // S2: If has active lab, labend unchanged (kept from initialization)
       // memberend extends from current or now + grace
       if (hasActiveMembership) {
