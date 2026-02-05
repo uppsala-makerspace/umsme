@@ -298,6 +298,8 @@
   "paymentTimeoutDescription": "Betalningen avbröts på grund av timeout. Försök igen.",
   "tryAgain": "Försök igen",
   "cancel": "Avbryt",
+  "close": "Stäng",
+  "termsOfPurchase": "Köpvillkor",
 
   "disabledTooEarlyToRenew": "För tidigt att förnya",
   "disabledNoBaseMembership": "Kräver aktivt medlemskap",

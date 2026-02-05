@@ -298,6 +298,8 @@
   "paymentTimeoutDescription": "The payment was cancelled due to timeout. Please try again.",
   "tryAgain": "Try again",
   "cancel": "Cancel",
+  "close": "Close",
+  "termsOfPurchase": "Terms of purchase",
 
   "disabledTooEarlyToRenew": "Too early to renew",
   "disabledNoBaseMembership": "Not available without base membership",

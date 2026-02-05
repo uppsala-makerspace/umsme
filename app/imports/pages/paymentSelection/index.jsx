@@ -13,6 +13,7 @@ export default function PaymentSelectionPage() {
 
   const [paymentOption, setPaymentOption] = useState(null);
   const [member, setMember] = useState(null);
+  const [termsContent, setTermsContent] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -24,13 +25,14 @@ export default function PaymentSelectionPage() {
     ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))
     : null;
 
-  // Load payment option from config and member info
+  // Load payment option from config, member info, and terms
   useEffect(() => {
     Promise.all([
       Meteor.callAsync("payment.getOptions"),
       Meteor.callAsync("findInfoForUser"),
+      Meteor.callAsync("texts.termsOfPurchaseMembership", i18n.language === "sv" ? "sv" : "en").catch(() => null),
     ])
-      .then(([options, info]) => {
+      .then(([options, info, terms]) => {
         const option = options?.find((o) => o.paymentType === paymentType);
         if (option) {
           setPaymentOption(option);
@@ -40,6 +42,9 @@ export default function PaymentSelectionPage() {
         if (info?.member) {
           setMember(info.member);
         }
+        if (terms) {
+          setTermsContent(terms);
+        }
         setIsLoading(false);
       })
       .catch((err) => {
@@ -47,7 +52,7 @@ export default function PaymentSelectionPage() {
         setError("Failed to load payment options");
         setIsLoading(false);
       });
-  }, [paymentType]);
+  }, [paymentType, i18n.language]);
 
   // Handle pay button click
   const handlePay = useCallback(
@@ -150,6 +155,7 @@ export default function PaymentSelectionPage() {
         <PaymentSelection
           paymentOption={paymentOption}
           membershipDates={membershipDates}
+          termsContent={termsContent}
           isLoading={isLoading}
           disabledMessage={disabledMessage}
           onPay={handlePay}

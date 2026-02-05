@@ -24,6 +24,26 @@ const labPaymentOption = {
   description: { en: "24/7 access to the Makerspace.", sv: "24/7 tillgång till Makerspace." },
 };
 
+// Sample terms content in markdown
+const sampleTermsContent = `# Terms of Purchase
+
+## 1. Membership
+
+By purchasing a membership, you agree to follow the rules and regulations of Uppsala Makerspace.
+
+## 2. Payment
+
+- All payments are non-refundable
+- Memberships are personal and cannot be transferred
+- Family memberships require all members to live at the same address
+
+## 3. Cancellation
+
+You may cancel your membership at any time, but no refunds will be issued for the remaining period.
+
+For questions, contact kansliet@uppsalamakerspace.se
+`;
+
 // Membership dates for a new member (1 year + 14 days grace from now)
 const newMemberDates = {
   start: new Date(),
@@ -62,6 +82,7 @@ export const Default = {
   args: {
     paymentOption,
     membershipDates: newMemberDates,
+    termsContent: sampleTermsContent,
     isLoading: false,
     ...baseActions,
   },
@@ -72,6 +93,7 @@ export const Renewal = {
   args: {
     paymentOption,
     membershipDates: renewalDates,
+    termsContent: sampleTermsContent,
     isLoading: false,
     ...baseActions,
   },
@@ -82,6 +104,7 @@ export const LabMembership = {
   args: {
     paymentOption: labPaymentOption,
     membershipDates: labMembershipDates,
+    termsContent: sampleTermsContent,
     isLoading: false,
     ...baseActions,
   },
@@ -92,6 +115,7 @@ export const LabRenewal = {
   args: {
     paymentOption: labPaymentOption,
     membershipDates: labRenewalDates,
+    termsContent: sampleTermsContent,
     isLoading: false,
     ...baseActions,
   },
@@ -112,7 +136,19 @@ export const Loading = {
   args: {
     paymentOption,
     membershipDates: newMemberDates,
+    termsContent: sampleTermsContent,
     isLoading: true,
+    ...baseActions,
+  },
+};
+
+// Without terms content (terms not configured)
+export const WithoutTerms = {
+  args: {
+    paymentOption,
+    membershipDates: newMemberDates,
+    termsContent: null,
+    isLoading: false,
     ...baseActions,
   },
 };

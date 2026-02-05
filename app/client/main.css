@@ -359,6 +359,60 @@ body {
   }
 }
 
+/* Markdown content styling for terms dialogs */
+.terms-content {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.terms-content h1 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 0.75em;
+}
+
+.terms-content h2 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+}
+
+.terms-content h3 {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.terms-content p {
+  margin-bottom: 0.75em;
+}
+
+.terms-content ul,
+.terms-content ol {
+  margin-left: 1.5em;
+  margin-bottom: 0.75em;
+  padding-left: 0;
+}
+
+.terms-content ul {
+  list-style-type: disc;
+}
+
+.terms-content ol {
+  list-style-type: decimal;
+}
+
+.terms-content li {
+  margin-bottom: 0.25em;
+}
+
+.terms-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .umsapp .login-form input,
   .umsapp .login-form button,
