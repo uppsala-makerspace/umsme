@@ -48,7 +48,7 @@ export default function PaymentSelection({
         </div>
       )}
 
-      <div className="flex flex-col gap-2 p-4 bg-gray-100 rounded-lg">
+      <div className="flex flex-col gap-2 p-4 bg-white rounded-lg border border-gray-200">
         <span className="font-semibold">{getLabel(paymentOption)}</span>
         <span>{paymentOption?.amount} kr</span>
         {membershipDates && (
