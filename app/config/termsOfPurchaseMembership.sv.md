@@ -4,7 +4,7 @@ Genom att köpa ett medlemskap godkänner du att följa Uppsala Makerspaces regl
 
 ## 2. Betalning
 
-- Alla betalningar är utan då föreningen är momsbefriad.
+- Alla betalningar är utan moms då föreningen är momsbefriad.
 - Alla betalningar är icke-återbetalningsbara och utan ångerrätt. (*)
 - Medlemskap är personliga och kan inte överlåtas.
 - Familjemedlemskap kräver att alla medlemmar bor på samma adress.
