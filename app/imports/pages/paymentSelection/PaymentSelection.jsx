@@ -44,8 +44,6 @@ export default function PaymentSelection({
 
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="text-h3">{t("selectPaymentMethod")}</h3>
-
       {disabledMessage && (
         <div className="p-4 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800">
           {disabledMessage}
@@ -86,6 +84,8 @@ export default function PaymentSelection({
           </div>
         )}
       </div>
+
+      <h3 className="text-h3">{t("selectPaymentMethod")}</h3>
 
       <div className="flex flex-col gap-2 pl-4">
         <label className="flex items-center gap-2 cursor-pointer">
