@@ -4,12 +4,21 @@ By purchasing a membership, you agree to follow the rules and regulations of Upp
 
 ## 2. Payment
 
-* All payments are non-refundable
-* Memberships are personal and cannot be transferred
-* Family memberships require all members to live at the same address
+- All payments are VAT-free as the organization is VAT-exempt.
+- All payments are non-refundable and without right of withdrawal. (*)
+- Memberships are personal and cannot be transferred.
+- Family memberships require all members to live at the same address.
 
 ## 3. Cancellation
 
 You may cancel your membership at any time, but no refunds will be issued for the remaining period.
 
-For questions, contact kansliet@uppsalamakerspace.se
+For questions, contact: kansliet@uppsalamakerspace.se
+
+Uppsala Makerspace <br>
+c/o Matthias Palmér <br>
+Ringgatan 2E<br>
+75217 Uppsala<br>
+Organization number: 802490-8900
+
+(*) Uppsala Makerspace is a non-profit organization and therefore the Distance Selling Act's 14-day right of withdrawal does not apply.

@@ -46,7 +46,7 @@
 .umsapp .login-form button {
   width: 100%;
   max-width: 100%;
-  margin: 10px 0;
+  margin: 10px 0 !important;
   padding: 10px;
   font-size: 16px;
   box-sizing: border-box;
@@ -418,7 +418,7 @@ body {
   .umsapp .login-form button,
   .umsapp .text-area {
     width: 90%;
-    margin: 5px auto;
+    margin: 5px 5% !important;
   }
   .umsapp .text-container {
     width: 90%;
