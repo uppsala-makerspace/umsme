@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Button from "../../components/Button";
 
 export const LoginButton = ({conf}) => {
   const { t } = useTranslation();
@@ -14,13 +15,14 @@ export const LoginButton = ({conf}) => {
   };
 
   return (
-    <button
-      className="social-button"
+    <Button
+      variant="social"
+      fullWidth
       disabled={!conf}
       onClick={handleClick}
     >
-      <img src={conf?.icon} alt="icon" className="button-icon" />
+      <img src={conf?.icon} alt="icon" className="w-6 h-6" />
       {buttonText}
-    </button>
+    </Button>
   );
 };

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { LoginButton } from "./LoginButton";
 import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
+import Button from "../../components/Button";
 
 const googleConf = {
   buttonTextKey: "loginGoogle",
@@ -66,9 +67,9 @@ export default ({google, facebook, onSubmit}) => {
           </Link>
         </p>
         <div className="form-group">
-          <button type="submit" className="form-button">
+          <Button type="submit" variant="primary" fullWidth>
             {t("login")}
-          </button>
+          </Button>
         </div>
 
         {google && (<div className="form-group">

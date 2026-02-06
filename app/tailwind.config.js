@@ -5,7 +5,20 @@ module.exports = {
         "./.storybook/**/*.{js,jsx,ts,tsx,html}",
     ],
     theme: {
-        extend: {},
+        extend: {
+            colors: {
+                brand: {
+                    green: '#5fc86f',
+                    'green-dark': '#096817',
+                },
+                surface: {
+                    DEFAULT: '#f0efef',
+                },
+            },
+            fontFamily: {
+                mono: ['"DM Mono"', 'monospace'],
+            },
+        },
     },
     plugins: [],
 }
