@@ -46,7 +46,7 @@
 .umsapp .login-form button {
   width: 100%;
   max-width: 100%;
-  margin: 10px 0 !important;
+  margin: 10px 0;
   padding: 10px;
   font-size: 16px;
   box-sizing: border-box;
@@ -424,5 +424,8 @@ body {
     width: 90%;
     margin: 5px auto;
     margin-bottom: 20px;
+  }
+  .umsapp .login-form.unlock .door-button {
+    margin: 5px auto 40px !important;
   }
 }

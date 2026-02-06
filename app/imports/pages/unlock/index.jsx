@@ -154,7 +154,7 @@ export default () => {
   return (
     <>
       <TopBar />
-      <div className="login-form">
+      <div className="login-form unlock">
         {loading ? null : (
           <Unlock
             doors={doors}
