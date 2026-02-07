@@ -6,16 +6,6 @@ body {
   background-color: #f0efef;
 }
 
-.umsapp {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: #f0efef;
-  overflow-x: hidden;
-  width: 100%;
-  font-family: "DM Mono", monospace;
-}
-
 .umsapp .info-icon {
     display: inline-flex;
     align-items: center;

@@ -624,6 +624,10 @@ video {
   margin: 0px !important;
 }
 
+.m-0 {
+  margin: 0px;
+}
+
 .mx-2\.5 {
   margin-left: 0.625rem;
   margin-right: 0.625rem;
@@ -979,6 +983,10 @@ video {
   overflow-y: auto;
 }
 
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
 .break-all {
   word-break: break-all;
 }
@@ -1164,6 +1172,10 @@ video {
 
 .\!p-0 {
   padding: 0px !important;
+}
+
+.p-0 {
+  padding: 0px;
 }
 
 .p-1 {

@@ -33,7 +33,7 @@ const preview = {
         <Router>
           <Routes>
             <Route path="/*" element={(
-              <div className="umsapp">
+              <div className="umsapp m-0 p-0 h-full w-full bg-surface overflow-x-hidden font-mono">
               <Story></Story>
             </div>)}>
             </Route>
