@@ -3,6 +3,7 @@ import { LogRegSwitcher } from "/imports/components/LogRegSwitch/LogRegSwitcher"
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import MainContent from "../../components/MainContent";
 
 export default ({onSubmit}) => {
   const { t } = useTranslation();
@@ -22,7 +23,8 @@ export default ({onSubmit}) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
+    <MainContent>
+    <form onSubmit={handleSubmit}>
       <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
 
       <p className="flex items-start gap-2 text-sm text-gray-700 mb-4">
@@ -65,5 +67,6 @@ export default ({onSubmit}) => {
         {t("register")}
       </Button>
     </form>
+    </MainContent>
   );
 };

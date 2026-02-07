@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { models } from "/imports/common/lib/models";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import MainContent from "../../components/MainContent";
 
 export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthyear = "" }) => {
   const { t } = useTranslation();
@@ -19,7 +20,8 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
+    <MainContent>
+    <form onSubmit={handleSubmit}>
 
       <Input
         label={t("Name")}
@@ -57,5 +59,6 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
         {t("Save")}
       </Button>
     </form>
+    </MainContent>
   );
 };

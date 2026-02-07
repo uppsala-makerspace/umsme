@@ -19,9 +19,7 @@ export default () => {
   return <>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
     <TopBar />
-    <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-      <Contact slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
-    </div>
+    <Contact slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
     <BottomNavigation />
   </>;
 };

@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 import "./certifierRequestDetail.css";
 
 const CertifierRequestDetail = ({
@@ -69,20 +70,20 @@ const CertifierRequestDetail = ({
 
   if (loading) {
     return (
-      <div className="request-detail-container">
+      <MainContent>
         <p className="text-center">{t("loading")}</p>
-      </div>
+      </MainContent>
     );
   }
 
   if (error) {
     return (
-      <div className="request-detail-container">
+      <MainContent>
         <p className="error-message">{error}</p>
         <Link to="/certificates" state={{ tab: "requests" }} className="back-link">
           {t("backToRequests")}
         </Link>
-      </div>
+      </MainContent>
     );
   }
 
@@ -94,7 +95,7 @@ const CertifierRequestDetail = ({
   const isConfirmed = !!attestation.certifierId;
 
   return (
-    <div className="request-detail-container">
+    <MainContent>
       <Link to="/certificates" state={{ tab: "requests" }} className="back-link">
         &larr; {t("backToRequests")}
       </Link>
@@ -210,7 +211,7 @@ const CertifierRequestDetail = ({
           </div>
         </section>
       )}
-    </div>
+    </MainContent>
   );
 };
 

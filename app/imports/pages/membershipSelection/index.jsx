@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import MembershipSelection from "./MembershipSelection";
-import Button from "../../components/Button";
 import {
   calculateOptionAvailability,
   getInitialCheckboxState,
@@ -108,56 +107,24 @@ export default function MembershipSelectionPage() {
     return <Navigate to="/login" />;
   }
 
-  if (isLoading) {
-    return (
-      <>
-        <TopBar />
-        <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-          <div className="flex flex-col gap-4 items-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
-            <span>{t("loading")}</span>
-          </div>
-        </div>
-        <BottomNavigation />
-      </>
-    );
-  }
-
-  if (error) {
-    return (
-      <>
-        <TopBar />
-        <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-          <div className="flex flex-col gap-4 items-center">
-            <p className="text-red-500">{error}</p>
-            <Button onClick={() => navigate("/")}>
-              {t("BackToStart")}
-            </Button>
-          </div>
-        </div>
-        <BottomNavigation />
-      </>
-    );
-  }
-
   return (
     <>
       <TopBar />
-      <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-        <MembershipSelection
-          member={memberInfo.member}
-          memberStatus={memberInfo.memberStatus}
-          options={optionsWithAvailability}
-          isDiscounted={isDiscounted}
-          isFamily={isFamily}
-          familyLocked={checkboxState.familyLocked}
-          disabledMessage={disabledMessage}
-          onSelectOption={handleSelectOption}
-          onDiscountedChange={setIsDiscounted}
-          onFamilyChange={handleFamilyChange}
-          onCancel={handleCancel}
-        />
-      </div>
+      <MembershipSelection
+        loading={isLoading}
+        error={error}
+        member={memberInfo.member}
+        memberStatus={memberInfo.memberStatus}
+        options={optionsWithAvailability}
+        isDiscounted={isDiscounted}
+        isFamily={isFamily}
+        familyLocked={checkboxState.familyLocked}
+        disabledMessage={disabledMessage}
+        onSelectOption={handleSelectOption}
+        onDiscountedChange={setIsDiscounted}
+        onFamilyChange={handleFamilyChange}
+        onCancel={handleCancel}
+      />
       <BottomNavigation />
     </>
   );

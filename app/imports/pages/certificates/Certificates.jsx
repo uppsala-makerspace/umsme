@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
+import MainContent from "../../components/MainContent";
 import "./certificates.css";
 
 const Certificates = ({
@@ -30,9 +31,9 @@ const Certificates = ({
 
   if (loading) {
     return (
-      <div className="certificates-container">
+      <MainContent>
         <p className="text-center">{t("loading")}</p>
-      </div>
+      </MainContent>
     );
   }
 
@@ -54,7 +55,7 @@ const Certificates = ({
   const pendingRequestsCount = pendingToConfirm.length;
 
   return (
-    <div className="certificates-container">
+    <MainContent>
       {/* Show tabs only for certifiers, otherwise just a heading */}
       {isCertifier ? (
         <div className="certificates-tabs">
@@ -248,7 +249,7 @@ const Certificates = ({
           )}
         </div>
       )}
-    </div>
+    </MainContent>
   );
 };
 

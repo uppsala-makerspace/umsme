@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { getSlackChannelUrl } from "/imports/utils/slack";
+import MainContent from "../../components/MainContent";
 
 const SlackLink = ({ channel, slackTeam, slackChannelIds }) => {
   const url = getSlackChannelUrl(channel, slackTeam, slackChannelIds);
@@ -18,7 +19,7 @@ const Contact = ({ slackTeam, slackChannelIds }) => {
   const { t } = useTranslation();
 
   return (
-    <>
+    <MainContent>
       <h3 className="text-center">{t("contactUs")}</h3>
 
       <section className="mt-4">
@@ -68,7 +69,7 @@ const Contact = ({ slackTeam, slackChannelIds }) => {
         </ul>
         <p className="text-sm mt-2">{t("moreChannelsDescription")}</p>
       </section>
-    </>
+    </MainContent>
   );
 };
 

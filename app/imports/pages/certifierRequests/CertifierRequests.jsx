@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import MainContent from "../../components/MainContent";
 import "./certifierRequests.css";
 
 const CertifierRequests = ({
@@ -25,14 +26,14 @@ const CertifierRequests = ({
 
   if (loading) {
     return (
-      <div className="certifier-container">
+      <MainContent>
         <p className="text-center">{t("loading")}</p>
-      </div>
+      </MainContent>
     );
   }
 
   return (
-    <div className="certifier-container">
+    <MainContent>
       <Link to="/certificates" className="back-link">
         &larr; {t("backToCertificates")}
       </Link>
@@ -97,7 +98,7 @@ const CertifierRequests = ({
           </ul>
         </section>
       )}
-    </div>
+    </MainContent>
   );
 };
 

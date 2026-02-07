@@ -59,11 +59,9 @@ export default () => {
     <>
       {!Meteor.userId() ? <Navigate to="/login" /> : null}
       <TopBar />
-      <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-        {memberInfo && (
-          <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember}></Account>
-        )}
-      </div>
+      {memberInfo && (
+        <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember}></Account>
+      )}
       <BottomNavigation />
     </>
   );

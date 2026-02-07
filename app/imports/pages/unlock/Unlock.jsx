@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getDistanceTo, formatDistance } from "/imports/utils/location";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 import "./unlockDoors.css";
 
 const Unlock = ({
@@ -33,32 +34,32 @@ const Unlock = ({
 
   if (liabilityNeedsAttention) {
     return (
-      <>
+      <MainContent className="unlock">
         <p className="flex flex-col items-center text-center mt-5 mb-4">
           {liabilityOutdated ? t("homeLiabilityOutdated") : t("homeLiabilityNotApproved")}
         </p>
         <Link to="/liability" className="w-full block no-underline text-center">
           <Button fullWidth>{t("homeLiabilityButton")}</Button>
         </Link>
-      </>
+      </MainContent>
     );
   }
 
   if (mandatoryCertificate && !hasMandatoryCertificate) {
     return (
-      <>
+      <MainContent className="unlock">
         <p className="flex flex-col items-center text-center mt-5 mb-4">
           {t("unlockMandatoryCertificateRequired")}
         </p>
         <Link to={`/certificates/${mandatoryCertificate._id}`} className="w-full block no-underline text-center">
           <Button fullWidth>{t("unlockMandatoryCertificateButton")}</Button>
         </Link>
-      </>
+      </MainContent>
     );
   }
 
   if (doors.length === 0) {
-    return <p className="text-sm text-center">{t("noAvailableDoors")}</p>;
+    return <MainContent className="unlock"><p className="text-sm text-center">{t("noAvailableDoors")}</p></MainContent>;
   }
 
   const locationDenied = locationPermission === "denied";
@@ -80,7 +81,7 @@ const Unlock = ({
   };
 
   return (
-    <>
+    <MainContent className="unlock">
       {/* Location denied message */}
       {locationDenied && (
         <div className="location-denied-container">
@@ -118,7 +119,7 @@ const Unlock = ({
           </React.Fragment>
         );
       })}
-    </>
+    </MainContent>
   );
 };
 

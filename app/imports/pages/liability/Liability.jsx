@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { marked } from "marked";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 
 /**
  * Status banner component showing liability approval status
@@ -66,17 +67,17 @@ const Liability = ({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8">
+      <MainContent className="items-center justify-center pt-8">
         <p className="text-gray-600">{t("loading")}</p>
-      </div>
+      </MainContent>
     );
   }
 
   if (!localizedText) {
     return (
-      <div className="flex flex-col items-center justify-center p-8">
+      <MainContent className="items-center justify-center pt-8">
         <p className="text-gray-600">{t("liabilityNotFound")}</p>
-      </div>
+      </MainContent>
     );
   }
 
@@ -93,7 +94,7 @@ const Liability = ({
   const showApproveButton = status !== "approved";
 
   return (
-    <div className="flex flex-col p-4 max-w-xl mx-auto">
+    <MainContent>
       <h1 className="text-2xl font-bold mb-4">{t("liabilityTitle")}</h1>
 
       <StatusBanner status={status} t={t} />
@@ -126,7 +127,7 @@ const Liability = ({
           </Button>
         </div>
       )}
-    </div>
+    </MainContent>
   );
 };
 

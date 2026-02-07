@@ -5,7 +5,6 @@ import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import PaymentSelection from "./PaymentSelection";
 import { membershipFromPayment } from "/imports/common/lib/utils";
-import Button from "../../components/Button";
 
 export default function PaymentSelectionPage() {
   const { t, i18n } = useTranslation();
@@ -115,54 +114,20 @@ export default function PaymentSelectionPage() {
     return <Navigate to="/login" />;
   }
 
-  // Loading state while fetching config
-  if (isLoading && !paymentOption) {
-    return (
-      <>
-        <TopBar />
-        <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-          <div className="flex flex-col gap-4 items-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
-            <span>{t("loading")}</span>
-          </div>
-        </div>
-        <BottomNavigation />
-      </>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <>
-        <TopBar />
-        <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-          <div className="flex flex-col gap-4 items-center">
-            <p className="text-red-600">{error}</p>
-            <Button variant="secondary" onClick={handleCancel}>
-              {t("cancel")}
-            </Button>
-          </div>
-        </div>
-        <BottomNavigation />
-      </>
-    );
-  }
-
   return (
     <>
       <TopBar />
-      <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-        <PaymentSelection
-          paymentOption={paymentOption}
-          membershipDates={membershipDates}
-          termsContent={termsContent}
-          isLoading={isLoading}
-          disabledMessage={disabledMessage}
-          onPay={handlePay}
-          onCancel={handleCancel}
-        />
-      </div>
+      <PaymentSelection
+        loading={isLoading && !paymentOption}
+        error={error}
+        paymentOption={paymentOption}
+        membershipDates={membershipDates}
+        termsContent={termsContent}
+        isLoading={isLoading}
+        disabledMessage={disabledMessage}
+        onPay={handlePay}
+        onCancel={handleCancel}
+      />
       <BottomNavigation />
     </>
   );

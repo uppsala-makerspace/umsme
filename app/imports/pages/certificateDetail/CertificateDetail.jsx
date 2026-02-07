@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 import "./certificateDetail.css";
 
 const CertificateDetail = ({
@@ -57,20 +58,20 @@ const CertificateDetail = ({
 
   if (loading) {
     return (
-      <div className="certificate-detail-container">
+      <MainContent>
         <p className="text-center">{t("loading")}</p>
-      </div>
+      </MainContent>
     );
   }
 
   if (error) {
     return (
-      <div className="certificate-detail-container">
+      <MainContent>
         <p className="error-message">{error}</p>
         <Link to="/certificates" className="back-link">
           {t("backToCertificates")}
         </Link>
-      </div>
+      </MainContent>
     );
   }
 
@@ -86,7 +87,7 @@ const CertificateDetail = ({
   const canRequest = !myAttestation || isExpired;
 
   return (
-    <div className="certificate-detail-container">
+    <MainContent>
       <Link to="/certificates" className="back-link">
         &larr; {t("backToCertificates")}
       </Link>
@@ -249,7 +250,7 @@ const CertificateDetail = ({
           </div>
         )}
       </section>
-    </div>
+    </MainContent>
   );
 };
 

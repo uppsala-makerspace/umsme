@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import MainContent from "../../components/MainContent";
 
 const ForgotPassword = ({ message, onSubmit }) => {
   const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ const ForgotPassword = ({ message, onSubmit }) => {
   };
 
   return (
-    <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
+    <MainContent>
       <h3 className="text-center">{t("ForgotPassword")}</h3>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("FillInEmail")}</p>
       <form onSubmit={handleSubmit}>
@@ -30,7 +31,7 @@ const ForgotPassword = ({ message, onSubmit }) => {
         </Button>
       </form>
       {message && <p className="flex flex-col items-center text-center mt-5 mb-4">{message}</p>}
-    </div>
+    </MainContent>
   );
 };
 

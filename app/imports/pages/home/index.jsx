@@ -46,18 +46,16 @@ export default () => {
   return <>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
     <TopBar />
-    <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-      <Home
-        memberName={memberInfo?.member?.name || ""}
-        memberStatus={memberInfo?.status}
-        verified={memberInfo?.verified ?? false}
-        invite={memberInfo?.invite}
-        onAcceptInvite={handleAcceptInvite}
-        onDeclineInvite={handleDeclineInvite}
-        liabilityDate={memberInfo?.liabilityDate}
-        liabilityOutdated={memberInfo?.liabilityOutdated}
-      />
-    </div>
+    <Home
+      memberName={memberInfo?.member?.name || ""}
+      memberStatus={memberInfo?.status}
+      verified={memberInfo?.verified ?? false}
+      invite={memberInfo?.invite}
+      onAcceptInvite={handleAcceptInvite}
+      onDeclineInvite={handleDeclineInvite}
+      liabilityDate={memberInfo?.liabilityDate}
+      liabilityOutdated={memberInfo?.liabilityOutdated}
+    />
     <BottomNavigation />
   </>;
 };

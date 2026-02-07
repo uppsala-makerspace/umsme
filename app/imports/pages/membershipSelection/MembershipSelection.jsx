@@ -2,11 +2,14 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import MembershipStatus from "/imports/components/MembershipStatus";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 
 /**
  * Pure presentation component for membership selection.
  *
  * @param {Object} props
+ * @param {boolean} props.loading - Whether data is loading
+ * @param {string} props.error - Error message to display
  * @param {Object} props.member - The member object
  * @param {Object} props.memberStatus - Current membership status
  * @param {Array} props.options - Available payment options from config
@@ -20,6 +23,8 @@ import Button from "../../components/Button";
  * @param {function} props.onCancel - Callback to cancel
  */
 export default function MembershipSelection({
+  loading,
+  error,
   member,
   memberStatus,
   options = [],
@@ -89,7 +94,32 @@ export default function MembershipSelection({
     return memberStatus.memberEnd < fourteenDaysFromNow;
   })();
 
+  if (loading) {
+    return (
+      <MainContent>
+        <div className="flex flex-col gap-4 items-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
+          <span>{t("loading")}</span>
+        </div>
+      </MainContent>
+    );
+  }
+
+  if (error) {
+    return (
+      <MainContent>
+        <div className="flex flex-col gap-4 items-center">
+          <p className="text-red-500">{error}</p>
+          <Button onClick={onCancel}>
+            {t("BackToStart")}
+          </Button>
+        </div>
+      </MainContent>
+    );
+  }
+
   return (
+    <MainContent>
     <div className="flex flex-col gap-4">
       <MembershipStatus member={member} status={memberStatus} />
 
@@ -174,5 +204,6 @@ export default function MembershipSelection({
         {t("cancel")}
       </Button>
     </div>
+    </MainContent>
   );
 }

@@ -95,16 +95,14 @@ export default function InitiatedPaymentPage() {
   return (
     <>
       <TopBar />
-      <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-        <InitiatedPayment
-          step={step}
-          qrCode={qrCode}
-          error={error}
-          onRetry={handleRetry}
-          onCancel={handleCancel}
-          onBackToStart={handleBackToStart}
-        />
-      </div>
+      <InitiatedPayment
+        step={step}
+        qrCode={qrCode}
+        error={error}
+        onRetry={handleRetry}
+        onCancel={handleCancel}
+        onBackToStart={handleBackToStart}
+      />
       <BottomNavigation />
     </>
   );

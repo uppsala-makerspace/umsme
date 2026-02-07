@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 
 /**
  * iOS installation instructions
@@ -111,7 +112,7 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-6 p-4 max-w-xl mx-auto pb-20">
+    <MainContent className="gap-6">
       <h1 className="text-2xl font-bold">{t("installTitle")}</h1>
 
       {/* Already installed message when in PWA mode (mobile only) */}
@@ -166,7 +167,7 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
           </label>
         </div>
       )}
-    </div>
+    </MainContent>
   );
 };
 

@@ -2,20 +2,25 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { marked } from "marked";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 
 /**
  * Pure presentation component for payment method selection.
  *
  * @param {Object} props
+ * @param {boolean} props.loading - Whether initial data is loading
+ * @param {string} props.error - Error message to display
  * @param {Object} props.paymentOption - The selected payment option from config
  * @param {Object} props.membershipDates - Calculated membership dates { memberend, labend }
  * @param {string} props.termsContent - Markdown content for terms of purchase
- * @param {boolean} props.isLoading - Whether something is loading
+ * @param {boolean} props.isLoading - Whether a payment action is in progress
  * @param {string} props.disabledMessage - Message to show when payments are disabled
  * @param {function} props.onPay - Callback when user clicks pay with selected method ('deeplink' or 'qr')
  * @param {function} props.onCancel - Callback to cancel
  */
 export default function PaymentSelection({
+  loading,
+  error,
   paymentOption,
   membershipDates,
   termsContent,
@@ -43,7 +48,32 @@ export default function PaymentSelection({
     });
   };
 
+  if (loading) {
+    return (
+      <MainContent>
+        <div className="flex flex-col gap-4 items-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
+          <span>{t("loading")}</span>
+        </div>
+      </MainContent>
+    );
+  }
+
+  if (error) {
+    return (
+      <MainContent>
+        <div className="flex flex-col gap-4 items-center">
+          <p className="text-red-600">{error}</p>
+          <Button variant="secondary" onClick={onCancel}>
+            {t("cancel")}
+          </Button>
+        </div>
+      </MainContent>
+    );
+  }
+
   return (
+    <MainContent>
     <div className="flex flex-col gap-4">
       {disabledMessage && (
         <div className="p-4 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800">
@@ -159,5 +189,6 @@ export default function PaymentSelection({
         </div>
       )}
     </div>
+    </MainContent>
   );
 }

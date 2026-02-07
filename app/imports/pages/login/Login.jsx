@@ -5,6 +5,7 @@ import { LoginButton } from "./LoginButton";
 import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import MainContent from "../../components/MainContent";
 
 const googleConf = {
   buttonTextKey: "loginGoogle",
@@ -27,8 +28,8 @@ export default ({google, facebook, onSubmit}) => {
   };
 
   return (
-    <>
-      <form onSubmit={submit} className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
+    <MainContent>
+      <form onSubmit={submit}>
         <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
 
         <p className="flex items-start gap-2 text-sm text-gray-700 mb-4">
@@ -73,6 +74,6 @@ export default ({google, facebook, onSubmit}) => {
           <LoginButton conf={{...facebookConf, ...facebook}}/>
         )}
       </form>
-    </>
+    </MainContent>
   );
 };

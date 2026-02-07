@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 
 /**
  * Pure presentation component for initiated payment status.
@@ -26,6 +27,7 @@ export default function InitiatedPayment({
   // Processing / waiting for payment step
   if (step === "processing") {
     return (
+      <MainContent>
       <div className="flex flex-col gap-4 items-center">
         <h3 className="text-center">{t("waitingForPayment")}</h3>
 
@@ -51,12 +53,14 @@ export default function InitiatedPayment({
           {t("cancel")}
         </Button>
       </div>
+      </MainContent>
     );
   }
 
   // Success step
   if (step === "success") {
     return (
+      <MainContent>
       <div className="flex flex-col gap-4 items-center">
         <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
           <svg
@@ -81,6 +85,7 @@ export default function InitiatedPayment({
           {t("BackToStart")}
         </Button>
       </div>
+      </MainContent>
     );
   }
 
@@ -88,6 +93,7 @@ export default function InitiatedPayment({
   if (step === "error") {
     const isTimeout = error === "timeout";
     return (
+      <MainContent>
       <div className="flex flex-col gap-4 items-center">
         <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center">
           <svg
@@ -119,14 +125,17 @@ export default function InitiatedPayment({
           {t("cancel")}
         </Button>
       </div>
+      </MainContent>
     );
   }
 
   // Fallback loading state
   return (
+    <MainContent>
     <div className="flex flex-col gap-4 items-center">
       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
       <span>{t("loading")}</span>
     </div>
+    </MainContent>
   );
 }

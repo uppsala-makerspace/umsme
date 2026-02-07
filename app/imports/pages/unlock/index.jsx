@@ -154,24 +154,22 @@ export default () => {
   return (
     <>
       <TopBar />
-      <div className="unlock flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
-        {loading ? null : (
-          <Unlock
-            doors={doors}
-            opening={opening}
-            onOpenDoor={handleOpenDoor}
-            liabilityDate={liabilityDate}
-            liabilityOutdated={liabilityOutdated}
-            mandatoryCertificate={mandatoryCertificate}
-            hasMandatoryCertificate={hasMandatoryCertificate}
-            userPosition={userPosition}
-            locationPermission={locationPermission}
-            proximityRange={proximityRange}
-            isAdmin={isAdmin}
-            onRetryLocation={handleRetryLocation}
-          />
-        )}
-      </div>
+      {loading ? null : (
+        <Unlock
+          doors={doors}
+          opening={opening}
+          onOpenDoor={handleOpenDoor}
+          liabilityDate={liabilityDate}
+          liabilityOutdated={liabilityOutdated}
+          mandatoryCertificate={mandatoryCertificate}
+          hasMandatoryCertificate={hasMandatoryCertificate}
+          userPosition={userPosition}
+          locationPermission={locationPermission}
+          proximityRange={proximityRange}
+          isAdmin={isAdmin}
+          onRetryLocation={handleRetryLocation}
+        />
+      )}
       <BottomNavigation />
     </>
   );

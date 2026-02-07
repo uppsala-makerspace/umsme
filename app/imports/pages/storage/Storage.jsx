@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
+import MainContent from "../../components/MainContent";
 import "./storage-page.css";
 
 const STORAGE_LOCATION_OPTIONS = [
@@ -72,31 +73,31 @@ const Storage = ({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8">
+      <MainContent className="items-center justify-center pt-8">
         <p className="text-gray-600">{t("loading")}</p>
-      </div>
+      </MainContent>
     );
   }
 
   if (!hasLabMembership) {
     return (
-      <div className="flex flex-col items-center justify-center p-8">
+      <MainContent className="items-center justify-center pt-8">
         <p className="text-gray-600 text-center">{t("storageRequiresLab")}</p>
-      </div>
+      </MainContent>
     );
   }
 
   // User has a storage box
   if (storage) {
     return (
-      <div className="flex flex-col items-center p-8 gap-6">
+      <MainContent className="items-center pt-8 gap-6">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">{t("myBox")}</h2>
           <p className="text-lg text-gray-600 mb-1">{t("myBoxNumber")}</p>
           <p className="text-3xl font-bold text-green-600">{storage}</p>
         </div>
 
-        <div className="w-full max-w-xl">
+        <div className="w-full">
           <h3 className="text-lg font-medium mb-2">{t("requestBoxChange")}</h3>
           <p className="text-sm text-gray-600 mb-3">{t("requestBoxChangeInfo")}</p>
           <select
@@ -125,14 +126,14 @@ const Storage = ({
             </p>
           )}
         </div>
-      </div>
+      </MainContent>
     );
   }
 
   // User is in queue for a box
   if (storagequeue) {
     return (
-      <div className="flex flex-col items-center p-8 gap-2">
+      <MainContent className="items-center pt-8 gap-2">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">{t("myBox")}</h2>
           <p className="text-gray-600">{t("inQueueForBox")}</p>
@@ -146,7 +147,7 @@ const Storage = ({
           {t("cancelQueue")}
         </button>
 
-        <div className="w-full max-w-xl">
+        <div className="w-full">
           <h3 className="text-lg font-medium mb-2">{t("boxPreference")}</h3>
           <p className="text-sm text-gray-600 mb-3">{t("boxPreferenceInfo")}</p>
           <select
@@ -175,19 +176,19 @@ const Storage = ({
             </p>
           )}
         </div>
-      </div>
+      </MainContent>
     );
   }
 
   // User has no box and is not in queue
   return (
-    <div className="flex flex-col items-center p-8 gap-6">
+    <MainContent className="items-center pt-8 gap-6">
       <div className="text-center">
         <h2 className="text-xl font-semibold mb-2">{t("myBox")}</h2>
         <p className="text-gray-600">{t("noBoxAssigned")}</p>
       </div>
 
-      <div className="w-full max-w-xl text-center">
+      <div className="w-full text-center">
         <p className="text-sm text-gray-600 mb-4">{t("queueForBoxInfo")}</p>
         <Button
           fullWidth
@@ -197,7 +198,7 @@ const Storage = ({
           {isSubmitting ? t("loading") : t("queueForBox")}
         </Button>
       </div>
-    </div>
+    </MainContent>
   );
 };
 

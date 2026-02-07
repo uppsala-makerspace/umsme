@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
+import MainContent from "../../components/MainContent";
 
 // Configure DOMPurify to open links in new tab
 DOMPurify.addHook("afterSanitizeAttributes", (node) => {
@@ -40,7 +41,7 @@ const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore, mo
     }`;
 
   return (
-    <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
+    <MainContent>
       <div className="flex border-b mb-4">
         <button className={tabClass("upcoming")} onClick={() => onModeChange("upcoming")}>
           {t("upcomingEvents")}
@@ -93,7 +94,7 @@ const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore, mo
         )}
       </div>
       )}
-    </div>
+    </MainContent>
   );
 };
 

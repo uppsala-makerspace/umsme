@@ -10,6 +10,7 @@ import Memberships from "./Memberships";
 import MembershipStatus from "/imports/components/MembershipStatus";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import MainContent from "../../components/MainContent";
 
 interface INewFamilyMember {
   email?: string;
@@ -86,6 +87,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
   }
 
   return (
+    <MainContent>
     <div className='flex flex-col min-h-full h-svh flex-1 gap-5'>
       <div className='flex flex-col flex-1 gap-5'>
         <span className="font-bold text-center text-xl"> {member.name}</span>
@@ -192,6 +194,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
         )}
       </div>
     </div>
+    </MainContent>
   );
 };
 
