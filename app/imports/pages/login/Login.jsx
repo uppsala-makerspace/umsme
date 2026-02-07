@@ -63,16 +63,18 @@ export default ({google, facebook, onSubmit}) => {
             {t("ForgotPassword")}
           </Link>
         </p>
-        <Button type="submit" variant="primary" fullWidth>
-          {t("login")}
-        </Button>
+        <div className="flex flex-col gap-3">
+          <Button type="submit" variant="primary" fullWidth>
+            {t("login")}
+          </Button>
 
-        {google && (
-          <LoginButton conf={{...googleConf, ...google}}/>
-        )}
-        {facebook && (
-          <LoginButton conf={{...facebookConf, ...facebook}}/>
-        )}
+          {google && (
+            <LoginButton conf={{...googleConf, ...google}}/>
+          )}
+          {facebook && (
+            <LoginButton conf={{...facebookConf, ...facebook}}/>
+          )}
+        </div>
       </form>
     </MainContent>
   );
