@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import "./acounts.css";
 import Memberships from "./Memberships";
 import MembershipStatus from "/imports/components/MembershipStatus";
+import Button from "../../components/Button";
 
 interface INewFamilyMember {
   email?: string;
@@ -103,9 +104,9 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
         <MembershipStatus member={member} status={status} />
       </div>
       <Link to="/membership" className="wideButton">
-        <button className={`form-button ${memberDaysRemaining >= 14 ? "white" : ""}`}>
+        <Button variant={memberDaysRemaining >= 14 ? "secondary" : "primary"} fullWidth>
           {t(memberDaysRemaining < 14 ? "renewMembership" : "extendMembership")}
-        </button>
+        </Button>
       </Link>
       <div className="middle-text flex flex-col gap-3">
         {member.infamily && paying && (
@@ -182,11 +183,11 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
                 })}
               </ul>
             </form>
-            <button className="form-button !w-full" onClick={saveNewMember}><FontAwesomeIcon icon={faSave} /> {t("Save")}</button>
+            <Button fullWidth onClick={saveNewMember}><FontAwesomeIcon icon={faSave} /> {t("Save")}</Button>
           </>
           :
           payingFamilyMember && (familyMembers?.length || 0) + (familyInvites?.length || 0) < 4 && (
-            <button className="form-button" onClick={showNewMemberInfo}>{t("AddFamilyMember")}</button>
+            <Button onClick={showNewMemberInfo}>{t("AddFamilyMember")}</Button>
           )
         }
 

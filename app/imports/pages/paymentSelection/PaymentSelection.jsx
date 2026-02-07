@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { marked } from "marked";
+import Button from "../../components/Button";
 
 /**
  * Pure presentation component for payment method selection.
@@ -111,17 +112,17 @@ export default function PaymentSelection({
         </label>
       </div>
 
-      <button
-        className="form-button"
+      <Button
+        fullWidth
         onClick={() => onPay?.(selectedMethod)}
         disabled={isLoading || !!disabledMessage}
       >
         {t("Pay")}
-      </button>
+      </Button>
 
-      <button className="form-button white" onClick={onCancel}>
+      <Button variant="secondary" fullWidth onClick={onCancel}>
         {t("cancel")}
-      </button>
+      </Button>
 
       {/* Terms of Purchase Dialog */}
       {showTermsDialog && (
@@ -147,12 +148,12 @@ export default function PaymentSelection({
               dangerouslySetInnerHTML={{ __html: marked(termsContent || "") }}
             />
             <div className="p-4 border-t">
-              <button
+              <Button
                 onClick={() => setShowTermsDialog(false)}
-                className="form-button !w-full"
+                fullWidth
               >
                 {t("close")}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

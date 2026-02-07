@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { LogRegSwitcher } from "/imports/components/LogRegSwitch/LogRegSwitcher";
 import { useTranslation } from "react-i18next";
+import Button from "../../components/Button";
 
 export default ({onSubmit}) => {
   const { t } = useTranslation();
@@ -66,9 +67,9 @@ export default ({onSubmit}) => {
         )}
       </div>
 
-      <button type="submit" className="form-button">
+      <Button type="submit" fullWidth>
         {t("register")}
-      </button>
+      </Button>
     </form>
   );
 };

@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Button from "../../components/Button";
 
 /**
  * Pure presentation component for initiated payment status.
@@ -46,9 +47,9 @@ export default function InitiatedPayment({
           <span>{t("loading")}</span>
         </div>
 
-        <button className="form-button white" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           {t("cancel")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -76,9 +77,9 @@ export default function InitiatedPayment({
         <p className="text-container">{t("ThankPayment")}</p>
         <p className="text-container">{t("MembershipRegistered")}</p>
 
-        <button className="form-button" onClick={onBackToStart}>
+        <Button onClick={onBackToStart}>
           {t("BackToStart")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -110,13 +111,13 @@ export default function InitiatedPayment({
           {isTimeout ? t("paymentTimeoutDescription") : error || t("SomethingWentWrong")}
         </p>
 
-        <button className="form-button" onClick={onRetry}>
+        <Button onClick={onRetry}>
           {t("tryAgain")}
-        </button>
+        </Button>
 
-        <button className="form-button white" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           {t("cancel")}
-        </button>
+        </Button>
       </div>
     );
   }

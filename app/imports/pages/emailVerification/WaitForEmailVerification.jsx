@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Button from "../../components/Button";
 
 export default ({ onSendVerification }) => {
   const { t } = useTranslation();
@@ -8,12 +9,9 @@ export default ({ onSendVerification }) => {
     <div className="login-form">
       <h1 style={{ textAlign: "center" }}>{t("PleaseVerify")}</h1>
       <div className="form-group">
-        <button
-          className="form-button"
-          onClick={onSendVerification}
-        >
+        <Button fullWidth onClick={onSendVerification}>
           {t("SendNewVerification")}
-        </button>
+        </Button>
       </div>
     </div>
   );

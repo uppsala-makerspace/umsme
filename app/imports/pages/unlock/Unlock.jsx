@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getDistanceTo, formatDistance } from "/imports/utils/location";
+import Button from "../../components/Button";
 import "./unlockDoors.css";
 
 const Unlock = ({
@@ -37,7 +38,7 @@ const Unlock = ({
           {liabilityOutdated ? t("homeLiabilityOutdated") : t("homeLiabilityNotApproved")}
         </p>
         <Link to="/liability" className="wideButton">
-          <button className="form-button">{t("homeLiabilityButton")}</button>
+          <Button fullWidth>{t("homeLiabilityButton")}</Button>
         </Link>
       </>
     );
@@ -50,7 +51,7 @@ const Unlock = ({
           {t("unlockMandatoryCertificateRequired")}
         </p>
         <Link to={`/certificates/${mandatoryCertificate._id}`} className="wideButton">
-          <button className="form-button">{t("unlockMandatoryCertificateButton")}</button>
+          <Button fullWidth>{t("unlockMandatoryCertificateButton")}</Button>
         </Link>
       </>
     );

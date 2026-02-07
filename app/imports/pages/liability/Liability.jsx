@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { marked } from "marked";
+import Button from "../../components/Button";
 
 /**
  * Status banner component showing liability approval status
@@ -116,13 +117,13 @@ const Liability = ({
               {t("liabilityCheckbox")}
             </span>
           </label>
-          <button
-            className="form-button w-full py-3"
+          <Button
+            fullWidth
             onClick={onApprove}
             disabled={approving || !hasAgreed}
           >
             {approving ? t("loading") : t("liabilityApproveButton")}
-          </button>
+          </Button>
         </div>
       )}
     </div>

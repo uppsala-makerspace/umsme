@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { models } from "/imports/common/lib/models";
+import Button from "../../components/Button";
 
 export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthyear = "" }) => {
   const { t } = useTranslation();
@@ -57,9 +58,9 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
         />
       </div>
 
-      <button type="submit" className="form-button">
+      <Button type="submit" fullWidth>
         {t("Save")}
-      </button>
+      </Button>
     </form>
   );
 };

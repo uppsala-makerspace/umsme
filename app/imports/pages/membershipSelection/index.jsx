@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import MembershipSelection from "./MembershipSelection";
+import Button from "../../components/Button";
 import {
   calculateOptionAvailability,
   getInitialCheckboxState,
@@ -129,9 +130,9 @@ export default function MembershipSelectionPage() {
         <div className="login-form">
           <div className="flex flex-col gap-4 items-center">
             <p className="text-red-500">{error}</p>
-            <button className="form-button" onClick={() => navigate("/")}>
+            <Button onClick={() => navigate("/")}>
               {t("BackToStart")}
-            </button>
+            </Button>
           </div>
         </div>
         <BottomNavigation />

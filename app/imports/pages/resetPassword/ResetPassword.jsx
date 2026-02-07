@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
+import Button from "../../components/Button";
 
 const ResetPassword = ({ message, onSubmit }) => {
   const [password, setPassword] = useState("");
@@ -35,9 +36,9 @@ const ResetPassword = ({ message, onSubmit }) => {
         {showMismatchWarning && (
           <p className="text-red-600 text-sm">{t("PasswordNoMatch")}</p>
         )}
-        <button className="form-button" type="submit" disabled={!isValid}>
+        <Button type="submit" fullWidth disabled={!isValid}>
           {t("ResetPassword")}
-        </button>
+        </Button>
       </form>
       {message && <p className="text-container">{message}</p>}
     </div>

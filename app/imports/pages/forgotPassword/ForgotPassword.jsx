@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
+import Button from "../../components/Button";
 
 const ForgotPassword = ({ message, onSubmit }) => {
   const [email, setEmail] = useState("");
@@ -23,9 +24,9 @@ const ForgotPassword = ({ message, onSubmit }) => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <button className="form-button" type="submit">
+        <Button type="submit" fullWidth>
           {t("SendLink")}
-        </button>
+        </Button>
       </form>
       {message && <p className="text-container">{message}</p>}
     </div>

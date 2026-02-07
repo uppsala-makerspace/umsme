@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from 'react-router-dom';
+import Button from "../../components/Button";
 
 const msPerDay = 1000 * 60 * 60 * 24;
 
@@ -44,7 +45,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
       <p className="text-container">{t("emailNotVerifiedText1")}</p>
       <p className="text-container">{t("emailNotVerifiedText2")}</p>
       <Link to="/waitforemailverification" className="wideButton">
-        <button className="form-button">{t("verifyEmailButton")}</button>
+        <Button fullWidth>{t("verifyEmailButton")}</Button>
       </Link>
     </>;
   }
@@ -56,7 +57,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
       <p className="text-container">{t("noNameText1")}</p>
       <p className="text-container">{t("noNameText2")}</p>
       <Link to="/profile" className="wideButton">
-        <button className="form-button">{t("addNameButton")}</button>
+        <Button fullWidth>{t("addNameButton")}</Button>
       </Link>
     </>;
   }
@@ -66,12 +67,12 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
       <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
       <h3 className="text-h3">{t("welcome")} {name}!</h3>
       <p className="text-container">{t("familyInviteText")}</p>
-      <button className="form-button" onClick={onAcceptInvite}>
+      <Button fullWidth onClick={onAcceptInvite}>
         {t("acceptInvite")}
-      </button>
-      <button className="form-button white" onClick={onDeclineInvite}>
+      </Button>
+      <Button variant="secondary" fullWidth onClick={onDeclineInvite}>
         {t("declineInvite")}
-      </button>
+      </Button>
     </>;
   }
 
@@ -88,7 +89,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
             {daysLeftOfLab.toFixed(0)} {t("days")}
           </p>
           <Link to="/membership" className="wideButton">
-            <button className="form-button">{t("RenewMembership")}</button>
+            <Button fullWidth>{t("RenewMembership")}</Button>
           </Link>
         </div>
       )}
@@ -98,7 +99,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
             {liabilityOutdated ? t("homeLiabilityOutdated") : t("homeLiabilityNotApproved")}
           </p>
           <Link to="/liability" className="wideButton">
-            <button className="form-button">{t("homeLiabilityButton")}</button>
+            <Button fullWidth>{t("homeLiabilityButton")}</Button>
           </Link>
         </>
       )}
@@ -110,7 +111,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
       <p className="text-container">{t("expiredMembershipText1")}</p>
       <p className="text-container">{t("expiredMembershipText2")}</p>
       <Link to="/payment" className="wideButton">
-        <button className="form-button">{t("renewMembership")}</button>
+        <Button fullWidth>{t("renewMembership")}</Button>
       </Link>
     </>;
   } else {
@@ -120,7 +121,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
       <p className="text-container">{t("noMembershiptext1")}</p>
       <p className="text-container">{t("noMembershiptext2")}</p>
       <Link to="/payment" className="wideButton">
-        <button className="form-button">{t("getMembership")}</button>
+        <Button fullWidth>{t("getMembership")}</Button>
       </Link>
     </>;
   }

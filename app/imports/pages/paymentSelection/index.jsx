@@ -5,6 +5,7 @@ import TopBar from "/imports/components/TopBar";
 import BottomNavigation from "/imports/components/BottomNavigation";
 import PaymentSelection from "./PaymentSelection";
 import { membershipFromPayment } from "/imports/common/lib/utils";
+import Button from "../../components/Button";
 
 export default function PaymentSelectionPage() {
   const { t, i18n } = useTranslation();
@@ -138,9 +139,9 @@ export default function PaymentSelectionPage() {
         <div className="login-form">
           <div className="flex flex-col gap-4 items-center">
             <p className="text-red-600">{error}</p>
-            <button className="form-button white" onClick={handleCancel}>
+            <Button variant="secondary" onClick={handleCancel}>
               {t("cancel")}
-            </button>
+            </Button>
           </div>
         </div>
         <BottomNavigation />

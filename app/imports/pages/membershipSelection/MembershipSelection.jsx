@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import MembershipStatus from "/imports/components/MembershipStatus";
+import Button from "../../components/Button";
 
 /**
  * Pure presentation component for membership selection.
@@ -143,9 +144,11 @@ export default function MembershipSelection({
           const isDisabled = option.disabled;
           const isRecommended = option.paymentType === recommendedOption?.paymentType;
           return (
-            <button
+            <Button
               key={option.paymentType}
-              className={`form-button ${isRecommended ? "" : "white"} ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+              variant={isRecommended ? "primary" : "secondary"}
+              fullWidth
+              className={isDisabled ? "opacity-50" : ""}
               onClick={() => !isDisabled && onSelectOption?.(option)}
               disabled={isDisabled}
             >
@@ -160,14 +163,14 @@ export default function MembershipSelection({
                   </span>
                 )}
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>
 
-      <button className="form-button white" onClick={onCancel}>
+      <Button variant="secondary" fullWidth onClick={onCancel}>
         {t("cancel")}
-      </button>
+      </Button>
     </div>
   );
 }

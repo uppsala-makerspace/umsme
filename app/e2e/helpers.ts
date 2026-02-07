@@ -135,7 +135,7 @@ export const selectors = {
 
   // Email verification page (language-independent selectors)
   verificationPage: '.login-form h1',
-  sendVerificationButton: '.login-form button.form-button',
+  sendVerificationButton: `.login-form button:has-text("${en.SendNewVerification}")`,
 
   // Navigation
   hamburgerMenu: '.hamburger-menu',
