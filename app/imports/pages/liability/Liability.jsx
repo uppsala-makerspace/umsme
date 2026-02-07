@@ -90,8 +90,6 @@ const Liability = ({
 
   return (
     <MainContent>
-      <h1 className="text-2xl font-bold mb-4">{t("liabilityTitle")}</h1>
-
       <StatusBanner status={status} t={t} />
 
       <Markdown className="mb-6">{localizedText}</Markdown>

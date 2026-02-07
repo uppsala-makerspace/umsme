@@ -93,7 +93,6 @@ const Storage = ({
     return (
       <MainContent className="items-center pt-8 gap-6">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">{t("myBox")}</h2>
           <p className="text-lg text-gray-600 mb-1">{t("myBoxNumber")}</p>
           <p className="text-3xl font-bold text-green-600">{storage}</p>
         </div>
@@ -136,7 +135,6 @@ const Storage = ({
     return (
       <MainContent className="items-center pt-8 gap-2">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">{t("myBox")}</h2>
           <p className="text-gray-600">{t("inQueueForBox")}</p>
         </div>
 
@@ -185,7 +183,6 @@ const Storage = ({
   return (
     <MainContent className="items-center pt-8 gap-6">
       <div className="text-center">
-        <h2 className="text-xl font-semibold mb-2">{t("myBox")}</h2>
         <p className="text-gray-600">{t("noBoxAssigned")}</p>
       </div>
 

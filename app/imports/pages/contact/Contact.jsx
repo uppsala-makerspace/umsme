@@ -20,9 +20,7 @@ const Contact = ({ slackTeam, slackChannelIds }) => {
 
   return (
     <MainContent>
-      <h3 className="text-center">{t("contactUs")}</h3>
-
-      <section className="mt-4">
+      <section>
         <h4 className="font-bold mb-2">{t("contactBoard")}</h4>
         <p className="text-sm mb-2">{t("contactBoardDescription")}</p>
         <ul className="text-sm list-disc ml-5">

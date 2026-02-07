@@ -113,8 +113,6 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
 
   return (
     <MainContent className="gap-6">
-      <h1 className="text-2xl font-bold">{t("installTitle")}</h1>
-
       {/* Already installed message when in PWA mode (mobile only) */}
       {isInstalledPWA && platform !== 'desktop' && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
