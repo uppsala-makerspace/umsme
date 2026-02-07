@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-import MainContent from "../../components/MainContent";
-import Loader from "../../components/Loader";
-import Tabs from "../../components/Tabs";
-import { getLocalized, formatDate } from "./utils";
-import BackLink from "./components/BackLink";
-import StatusBadge from "./components/StatusBadge";
-import CertificateItem from "./components/CertificateItem";
+import MainContent from "../../../components/MainContent";
+import Loader from "../../../components/Loader";
+import Tabs from "../../../components/Tabs";
+import { getLocalized, formatDate } from "../utils";
+import BackLink from "../components/BackLink";
+import StatusBadge from "../components/StatusBadge";
+import CertificateItem from "../components/CertificateItem";
 
 const Certificates = ({
   loading,
