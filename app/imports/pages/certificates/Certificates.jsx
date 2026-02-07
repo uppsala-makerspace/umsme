@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
+import Tabs from "../../components/Tabs";
 import "./certificates.css";
 
 const Certificates = ({
@@ -59,23 +60,14 @@ const Certificates = ({
     <MainContent>
       {/* Show tabs only for certifiers, otherwise just a heading */}
       {isCertifier ? (
-        <div className="certificates-tabs">
-          <button
-            className={`tab-button ${activeTab === "my" ? "active" : ""}`}
-            onClick={() => setActiveTab("my")}
-          >
-            {t("myCertificatesTab")}
-          </button>
-          <button
-            className={`tab-button ${activeTab === "requests" ? "active" : ""}`}
-            onClick={() => setActiveTab("requests")}
-          >
-            {t("requestsTab")}
-            {pendingRequestsCount > 0 && (
-              <span className="tab-badge">{pendingRequestsCount}</span>
-            )}
-          </button>
-        </div>
+        <Tabs
+          tabs={[
+            { key: "my", label: t("myCertificatesTab") },
+            { key: "requests", label: t("requestsTab"), badge: pendingRequestsCount > 0 ? pendingRequestsCount : undefined },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
       ) : (
         <h2 className="certificates-title">{t("certificates")}</h2>
       )}

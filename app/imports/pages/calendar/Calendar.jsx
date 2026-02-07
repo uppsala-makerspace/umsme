@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
+import Tabs from "../../components/Tabs";
 
 // Configure DOMPurify to open links in new tab
 DOMPurify.addHook("afterSanitizeAttributes", (node) => {
@@ -34,23 +35,16 @@ const formatEventDate = (startDate, endDate, language, mode) => {
 const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore, mode, onModeChange }) => {
   const { t, i18n } = useTranslation();
 
-  const tabClass = (tabMode) =>
-    `px-4 py-2 font-medium ${
-      mode === tabMode
-        ? "text-[#5fc86f] border-b-2 border-[#5fc86f]"
-        : "text-gray-500 hover:text-gray-700 cursor-pointer"
-    }`;
-
   return (
     <MainContent>
-      <div className="flex border-b mb-4">
-        <button className={tabClass("upcoming")} onClick={() => onModeChange("upcoming")}>
-          {t("upcomingEvents")}
-        </button>
-        <button className={tabClass("past")} onClick={() => onModeChange("past")}>
-          {t("pastEvents")}
-        </button>
-      </div>
+      <Tabs
+        tabs={[
+          { key: "upcoming", label: t("upcomingEvents") },
+          { key: "past", label: t("pastEvents") },
+        ]}
+        activeTab={mode}
+        onTabChange={onModeChange}
+      />
       {loading ? (
         <Loader />
       ) : error ? (
