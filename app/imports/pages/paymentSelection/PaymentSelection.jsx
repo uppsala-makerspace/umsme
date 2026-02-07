@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { marked } from "marked";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
+import Markdown from "../../components/Markdown";
 
 /**
  * Pure presentation component for payment method selection.
@@ -173,10 +173,9 @@ export default function PaymentSelection({
                 &times;
               </button>
             </div>
-            <div
-              className="p-4 overflow-y-auto terms-content"
-              dangerouslySetInnerHTML={{ __html: marked(termsContent || "") }}
-            />
+            <div className="p-4 overflow-y-auto">
+              <Markdown>{termsContent}</Markdown>
+            </div>
             <div className="p-4 border-t">
               <Button
                 onClick={() => setShowTermsDialog(false)}

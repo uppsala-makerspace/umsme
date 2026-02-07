@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { marked } from "marked";
-import DOMPurify from "dompurify";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
+import Markdown from "../../components/Markdown";
 import "./certificateDetail.css";
 
 const CertificateDetail = ({
@@ -25,12 +24,6 @@ const CertificateDetail = ({
   const getLocalized = (obj) => {
     if (!obj) return "";
     return obj[lang] || obj.sv || obj.en || "";
-  };
-
-  const renderMarkdown = (text) => {
-    if (!text) return "";
-    const html = marked.parse(text, { breaks: true });
-    return DOMPurify.sanitize(html);
   };
 
   const formatDate = (date) => {
@@ -96,10 +89,9 @@ const CertificateDetail = ({
       <section className="certificate-header">
         <h2 className="certificate-title">{getLocalized(certificate.name)}</h2>
         {certificate.description && (
-          <div
-            className="certificate-description markdown-content"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(getLocalized(certificate.description)) }}
-          />
+          <Markdown className="certificate-description">
+            {getLocalized(certificate.description)}
+          </Markdown>
         )}
         {certificate.defaultValidityDays && (
           <p className="certificate-validity-info">

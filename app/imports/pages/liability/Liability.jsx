@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { marked } from "marked";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
+import Markdown from "../../components/Markdown";
 
 /**
  * Status banner component showing liability approval status
@@ -59,12 +59,6 @@ const Liability = ({
   const currentLanguage = i18n.language || "sv";
   const localizedText = text?.[currentLanguage] || text?.sv || text?.en || "";
 
-  // useMemo must be called before any early returns to comply with Rules of Hooks
-  const renderedMarkdown = useMemo(() => {
-    if (!localizedText) return "";
-    return marked(localizedText);
-  }, [localizedText]);
-
   if (loading) {
     return (
       <MainContent className="items-center justify-center pt-8">
@@ -99,10 +93,7 @@ const Liability = ({
 
       <StatusBanner status={status} t={t} />
 
-      <div
-        className="prose prose-sm max-w-none mb-6 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-4 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:ml-5 [&_li]:mb-1"
-        dangerouslySetInnerHTML={{ __html: renderedMarkdown }}
-      />
+      <Markdown className="mb-6">{localizedText}</Markdown>
 
       {showApproveButton && (
         <div className="pt-4 pb-20">

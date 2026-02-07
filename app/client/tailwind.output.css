@@ -863,10 +863,6 @@ video {
   max-width: 250px;
 }
 
-.max-w-none {
-  max-width: none;
-}
-
 .max-w-xl {
   max-width: 36rem;
 }
@@ -1598,50 +1594,4 @@ video {
 .\[\&_a\]\:hover\:text-blue-800:hover a {
   --tw-text-opacity: 1;
   color: rgb(30 64 175 / var(--tw-text-opacity, 1));
-}
-
-.\[\&_h1\]\:mb-3 h1 {
-  margin-bottom: 0.75rem;
-}
-
-.\[\&_h1\]\:text-xl h1 {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-}
-
-.\[\&_h1\]\:font-bold h1 {
-  font-weight: 700;
-}
-
-.\[\&_h2\]\:mb-2 h2 {
-  margin-bottom: 0.5rem;
-}
-
-.\[\&_h2\]\:mt-4 h2 {
-  margin-top: 1rem;
-}
-
-.\[\&_h2\]\:text-lg h2 {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-}
-
-.\[\&_h2\]\:font-semibold h2 {
-  font-weight: 600;
-}
-
-.\[\&_li\]\:mb-1 li {
-  margin-bottom: 0.25rem;
-}
-
-.\[\&_p\]\:mb-2 p {
-  margin-bottom: 0.5rem;
-}
-
-.\[\&_ul\]\:ml-5 ul {
-  margin-left: 1.25rem;
-}
-
-.\[\&_ul\]\:list-disc ul {
-  list-style-type: disc;
 }
