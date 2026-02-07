@@ -8,11 +8,9 @@ export default ({ onSendVerification }) => {
   return (
     <div className="login-form">
       <h1 style={{ textAlign: "center" }}>{t("PleaseVerify")}</h1>
-      <div className="form-group">
-        <Button fullWidth onClick={onSendVerification}>
-          {t("SendNewVerification")}
-        </Button>
-      </div>
+      <Button fullWidth onClick={onSendVerification}>
+        {t("SendNewVerification")}
+      </Button>
     </div>
   );
 };

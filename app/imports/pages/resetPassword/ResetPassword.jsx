@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 const ResetPassword = ({ message, onSubmit }) => {
   const [password, setPassword] = useState("");
@@ -21,21 +22,19 @@ const ResetPassword = ({ message, onSubmit }) => {
     <div className="login-form">
       <form onSubmit={handleSubmit}>
         <h3 className="text-h3">{t("ResetPassword")}</h3>
-        <input
+        <Input
           type="password"
           placeholder={t("newPassword")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <input
+        <Input
           type="password"
           placeholder={t("passwordConfirmNew")}
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
+          error={showMismatchWarning ? t("PasswordNoMatch") : undefined}
         />
-        {showMismatchWarning && (
-          <p className="text-red-600 text-sm">{t("PasswordNoMatch")}</p>
-        )}
         <Button type="submit" fullWidth disabled={!isValid}>
           {t("ResetPassword")}
         </Button>

@@ -9,6 +9,7 @@ import "./acounts.css";
 import Memberships from "./Memberships";
 import MembershipStatus from "/imports/components/MembershipStatus";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 interface INewFamilyMember {
   email?: string;
@@ -168,20 +169,15 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
         {addFamilyMemberMode ?
           <>
             <form className='flex flex-col justify-stretch border rounded border-gray-400 p-1 gap-1 my-2'>
-              <input
+              <Input
                 id='family_member_email'
-                className={'border rounded  !w-full !m-0 ' + (newFamilyMemberError.emailEmpty || newFamilyMemberError.emailInvalid ? 'border-red-600' : 'border-gray-300')}
                 type="email"
                 placeholder={t("email")}
                 autoFocus
                 onChange={(e) => handleUpdateNewFamilyMemberEmail(e.target.value)}
+                className="!mb-0"
+                error={newFamilyMemberError.errorMassages?.join(", ")}
               />
-
-              <ul className='text-sm list-disc text-red-600 pl-5'>
-                {newFamilyMemberError.errorMassages?.map(err => {
-                  return <li>{err}</li>
-                })}
-              </ul>
             </form>
             <Button fullWidth onClick={saveNewMember}><FontAwesomeIcon icon={faSave} /> {t("Save")}</Button>
           </>

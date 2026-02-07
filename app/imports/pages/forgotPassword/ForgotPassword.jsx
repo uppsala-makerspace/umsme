@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 const ForgotPassword = ({ message, onSubmit }) => {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ const ForgotPassword = ({ message, onSubmit }) => {
       <h3 className="text-h3">{t("ForgotPassword")}</h3>
       <p className="text-container">{t("FillInEmail")}</p>
       <form onSubmit={handleSubmit}>
-        <input
+        <Input
           type="email"
           placeholder={t("YourEmail")}
           value={email}

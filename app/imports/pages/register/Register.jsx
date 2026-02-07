@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { LogRegSwitcher } from "/imports/components/LogRegSwitch/LogRegSwitcher";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 export default ({onSubmit}) => {
   const { t } = useTranslation();
@@ -30,42 +31,35 @@ export default ({onSubmit}) => {
       </p>
 
       <LogRegSwitcher/>
-      <div className="form-group">
-        <label htmlFor="email">{t("email")}</label>
-        <input
-          type="email"
-          id="email"
-          placeholder={t("exEmail")}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
 
-      <div className="form-group">
-        <label htmlFor="password">{t("setPassword")}</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
+      <Input
+        label={t("email")}
+        id="email"
+        type="email"
+        placeholder={t("exEmail")}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
 
-      <div className="form-group">
-        <label htmlFor="confirm-password">{t("passwordConfirm")}</label>
-        <input
-          type="password"
-          id="confirm-password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        {!passwordsMatch && (
-          <p className="text-red-500 mt-1">{t("PasswordNoMatch")}</p>
-        )}
-      </div>
+      <Input
+        label={t("setPassword")}
+        id="password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+
+      <Input
+        label={t("passwordConfirm")}
+        id="confirm-password"
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        required
+        error={!passwordsMatch ? t("PasswordNoMatch") : undefined}
+      />
 
       <Button type="submit" fullWidth>
         {t("register")}

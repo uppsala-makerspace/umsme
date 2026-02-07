@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { LoginButton } from "./LoginButton";
 import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 const googleConf = {
   buttonTextKey: "loginGoogle",
@@ -37,47 +38,40 @@ export default ({google, facebook, onSubmit}) => {
 
         <LogRegSwitcher />
 
-        <div className="form-group">
-          <label htmlFor="email">{t("email")}</label>
+        <Input
+          label={t("email")}
+          id="email"
+          type="text"
+          placeholder={t("exEmail")}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
-          <input
-            type="text"
-            placeholder={t("exEmail")}
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">{t("password")}</label>
-
-          <input
-            type="password"
-            placeholder={t("password")}
-            name="password"
-            required
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        <Input
+          label={t("password")}
+          id="password"
+          type="password"
+          placeholder={t("password")}
+          name="password"
+          required
+          onChange={(e) => setPassword(e.target.value)}
+        />
         <p className="text-center">
           <Link to="/forgotPassword" className="text-sm -mt-1">
             {t("ForgotPassword")}
           </Link>
         </p>
-        <div className="form-group">
-          <Button type="submit" variant="primary" fullWidth>
-            {t("login")}
-          </Button>
-        </div>
+        <Button type="submit" variant="primary" fullWidth>
+          {t("login")}
+        </Button>
 
-        {google && (<div className="form-group">
+        {google && (
           <LoginButton conf={{...googleConf, ...google}}/>
-        </div>)}
-        {facebook && (<div className="form-group">
+        )}
+        {facebook && (
           <LoginButton conf={{...facebookConf, ...facebook}}/>
-        </div>)}
+        )}
       </form>
     </>
   );

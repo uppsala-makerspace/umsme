@@ -117,26 +117,6 @@
   margin-left: auto;
 }
 
-.umsapp .form-group {
-  width: 100%;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.umsapp .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.umsapp .form-group input {
-  background-color: #f0efef;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #000000;
-  border-radius: 4px;
-  font-size: 16px;
-}
 
 .umsapp .button-icon {
   width: 25px;

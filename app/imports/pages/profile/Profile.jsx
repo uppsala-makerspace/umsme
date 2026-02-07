@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { models } from "/imports/common/lib/models";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthyear = "" }) => {
   const { t } = useTranslation();
@@ -20,43 +21,37 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
   return (
     <form onSubmit={handleSubmit} className="login-form">
 
-      <div className="form-group">
-        <label htmlFor="name">{t("Name")}</label>
-        <input
-          type="text"
-          id="name"
-          placeholder={t("names")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={nameMaxLength}
-          required
-        />
-      </div>
+      <Input
+        label={t("Name")}
+        id="name"
+        type="text"
+        placeholder={t("names")}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        maxLength={nameMaxLength}
+        required
+      />
 
-      <div className="form-group">
-        <label htmlFor="mobile">{t("number")}</label>
-        <input
-          type="tel"
-          id="mobile"
-          placeholder="0701234567"
-          value={mobile}
-          onChange={(e) => setMobile(e.target.value)}
-          maxLength={mobileMaxLength}
-        />
-      </div>
+      <Input
+        label={t("number")}
+        id="mobile"
+        type="tel"
+        placeholder="0701234567"
+        value={mobile}
+        onChange={(e) => setMobile(e.target.value)}
+        maxLength={mobileMaxLength}
+      />
 
-      <div className="form-group">
-        <label htmlFor="birthyear">{t("birthyear")}</label>
-        <input
-          type="number"
-          id="birthyear"
-          placeholder="1990"
-          value={birthyear}
-          onChange={(e) => setBirthyear(e.target.value)}
-          min="1900"
-          max={new Date().getFullYear()}
-        />
-      </div>
+      <Input
+        label={t("birthyear")}
+        id="birthyear"
+        type="number"
+        placeholder="1990"
+        value={birthyear}
+        onChange={(e) => setBirthyear(e.target.value)}
+        min="1900"
+        max={new Date().getFullYear()}
+      />
 
       <Button type="submit" fullWidth>
         {t("Save")}
