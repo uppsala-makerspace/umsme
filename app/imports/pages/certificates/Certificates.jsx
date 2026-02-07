@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Tabs from "../../components/Tabs";
 import { getLocalized, formatDate } from "./utils";
-import "./certificates.css";
+import BackLink from "./components/BackLink";
+import StatusBadge from "./components/StatusBadge";
+import CertificateItem from "./components/CertificateItem";
 
 const Certificates = ({
   loading,
@@ -60,81 +62,66 @@ const Certificates = ({
           onTabChange={setActiveTab}
         />
       ) : (
-        <h2 className="certificates-title">{t("certificates")}</h2>
+        <h2 className="text-2xl mb-6 text-center">{t("certificates")}</h2>
       )}
 
       {/* My Certificates Tab */}
       {activeTab === "my" && (
-        <div className="tab-content">
+        <div>
           {/* My Pending Requests */}
           {myPending.length > 0 && (
-            <section className="certificates-section">
-              <h3 className="section-title">{t("myPendingRequests")}</h3>
-              <ul className="certificate-list">
+            <section className="mb-8">
+              <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("myPendingRequests")}</h3>
+              <ul className="list-none p-0 m-0">
                 {myPending.map((att) => (
-                  <li key={att._id} className={`certificate-item pending ${att.certificate?.mandatory ? "mandatory" : ""}`}>
-                    <Link to={`/certificates/${att.certificateId}`} className="certificate-link">
-                      <div className="certificate-info">
-                        <span className="certificate-name">
-                          {getLocalized(att.certificate?.name, lang)}
-                          {att.certificate?.mandatory && <span className="mandatory-icon" title={t("mandatoryCertificate")}>⭐</span>}
-                          {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
-                        </span>
-                        {att.attempt > 1 && (
-                          <span className="attempt-badge">
-                            {t("attemptNumber", { number: att.attempt })}
-                          </span>
-                        )}
-                      </div>
-                      <span className="link-arrow">&rarr;</span>
-                    </Link>
-                  </li>
+                  <CertificateItem key={att._id} to={`/certificates/${att.certificateId}`} status="pending" mandatory={att.certificate?.mandatory}>
+                    <span className="flex items-center font-semibold leading-snug">
+                      {getLocalized(att.certificate?.name, lang)}
+                      {att.certificate?.mandatory && <span className="inline-flex items-center ml-2 text-sm leading-none" title={t("mandatoryCertificate")}>⭐</span>}
+                      {att.comment && <span className="inline-flex items-center ml-2 text-sm leading-none cursor-help" title={t("hasComment")}>💬</span>}
+                    </span>
+                    {att.attempt > 1 && (
+                      <StatusBadge variant="attempt" small>
+                        {t("attemptNumber", { number: att.attempt })}
+                      </StatusBadge>
+                    )}
+                  </CertificateItem>
                 ))}
               </ul>
             </section>
           )}
 
           {/* My Certificates (Valid + Expired) */}
-          <section className="certificates-section">
-            <h3 className="section-title">{t("myCertificates")}</h3>
+          <section className="mb-8">
+            <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("myCertificates")}</h3>
             {myValid.length === 0 && myExpired.length === 0 ? (
-              <p className="empty-message">{t("noCertificates")}</p>
+              <p className="text-center text-gray-500 p-8 italic">{t("noCertificates")}</p>
             ) : (
-              <ul className="certificate-list">
+              <ul className="list-none p-0 m-0">
                 {myValid.map((att) => (
-                  <li key={att._id} className={`certificate-item valid ${att.certificate?.mandatory ? "mandatory" : ""}`}>
-                    <Link to={`/certificates/${att.certificateId}`} className="certificate-link">
-                      <div className="certificate-info">
-                        <span className="certificate-name">
-                          {getLocalized(att.certificate?.name, lang)}
-                          {att.certificate?.mandatory && <span className="mandatory-icon" title={t("mandatoryCertificate")}>⭐</span>}
-                          {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
-                        </span>
-                        {att.endDate && (
-                          <span className="validity-date">
-                            {t("validUntil")}: {formatDate(att.endDate, lang)}
-                          </span>
-                        )}
-                      </div>
-                      <span className="link-arrow">&rarr;</span>
-                    </Link>
-                  </li>
+                  <CertificateItem key={att._id} to={`/certificates/${att.certificateId}`} status="valid" mandatory={att.certificate?.mandatory}>
+                    <span className="flex items-center font-semibold leading-snug">
+                      {getLocalized(att.certificate?.name, lang)}
+                      {att.certificate?.mandatory && <span className="inline-flex items-center ml-2 text-sm leading-none" title={t("mandatoryCertificate")}>⭐</span>}
+                      {att.comment && <span className="inline-flex items-center ml-2 text-sm leading-none cursor-help" title={t("hasComment")}>💬</span>}
+                    </span>
+                    {att.endDate && (
+                      <span className="block text-xs text-gray-500">
+                        {t("validUntil")}: {formatDate(att.endDate, lang)}
+                      </span>
+                    )}
+                  </CertificateItem>
                 ))}
                 {myExpired.map((att) => (
-                  <li key={att._id} className={`certificate-item expired ${att.certificate?.mandatory ? "mandatory" : ""}`}>
-                    <Link to={`/certificates/${att.certificateId}`} className="certificate-link">
-                      <div className="certificate-info">
-                        <span className="certificate-name">
-                          {getLocalized(att.certificate?.name, lang)}
-                          {att.certificate?.mandatory && <span className="mandatory-icon" title={t("mandatoryCertificate")}>⭐</span>}
-                          {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
-                        </span>
-                        <span className="expired-badge">{t("expired")}</span>
-                        <span className="validity-date">{formatDate(att.endDate, lang)}</span>
-                      </div>
-                      <span className="link-arrow">&rarr;</span>
-                    </Link>
-                  </li>
+                  <CertificateItem key={att._id} to={`/certificates/${att.certificateId}`} status="expired" mandatory={att.certificate?.mandatory}>
+                    <span className="flex items-center font-semibold leading-snug">
+                      {getLocalized(att.certificate?.name, lang)}
+                      {att.certificate?.mandatory && <span className="inline-flex items-center ml-2 text-sm leading-none" title={t("mandatoryCertificate")}>⭐</span>}
+                      {att.comment && <span className="inline-flex items-center ml-2 text-sm leading-none cursor-help" title={t("hasComment")}>💬</span>}
+                    </span>
+                    <StatusBadge variant="expired" small>{t("expired")}</StatusBadge>
+                    <span className="block text-xs text-gray-500">{formatDate(att.endDate, lang)}</span>
+                  </CertificateItem>
                 ))}
               </ul>
             )}
@@ -142,21 +129,16 @@ const Certificates = ({
 
           {/* Available Certificates */}
           {availableCertificates.length > 0 && (
-            <section className="certificates-section">
-              <h3 className="section-title">{t("availableCertificates")}</h3>
-              <ul className="certificate-list">
+            <section className="mb-8">
+              <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("availableCertificates")}</h3>
+              <ul className="list-none p-0 m-0">
                 {availableCertificates.map((cert) => (
-                  <li key={cert._id} className={`certificate-item available ${cert.mandatory ? "mandatory" : ""}`}>
-                    <Link to={`/certificates/${cert._id}`} className="certificate-link">
-                      <div className="certificate-info">
-                        <span className="certificate-name">
-                          {getLocalized(cert.name, lang)}
-                          {cert.mandatory && <span className="mandatory-icon" title={t("mandatoryCertificate")}>⭐</span>}
-                        </span>
-                      </div>
-                      <span className="link-arrow">&rarr;</span>
-                    </Link>
-                  </li>
+                  <CertificateItem key={cert._id} to={`/certificates/${cert._id}`} status="available" mandatory={cert.mandatory}>
+                    <span className="flex items-center font-semibold leading-snug">
+                      {getLocalized(cert.name, lang)}
+                      {cert.mandatory && <span className="inline-flex items-center ml-2 text-sm leading-none" title={t("mandatoryCertificate")}>⭐</span>}
+                    </span>
+                  </CertificateItem>
                 ))}
               </ul>
             </section>
@@ -166,67 +148,57 @@ const Certificates = ({
 
       {/* Requests Tab (Certifier View) */}
       {activeTab === "requests" && (
-        <div className="tab-content">
+        <div>
           {/* Pending Requests to Confirm */}
           {pendingToConfirm.length > 0 ? (
-            <section className="certificates-section">
-              <h3 className="section-title">{t("requestsToConfirm")}</h3>
-              <ul className="certificate-list">
+            <section className="mb-8">
+              <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("requestsToConfirm")}</h3>
+              <ul className="list-none p-0 m-0">
                 {pendingToConfirm.map((att) => (
-                  <li key={att._id} className="certificate-item to-confirm">
-                    <Link to={`/certifier-requests/${att._id}`} className="certificate-link">
-                      <div className="certificate-info">
-                        <span className="certificate-name">
-                          {att.requesterName}
-                          {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
-                        </span>
-                        <span className="requester-certificate">
-                          {getLocalized(att.certificate?.name, lang)}
-                        </span>
-                        {att.attempt > 1 && (
-                          <span className="attempt-badge">
-                            {t("attemptNumber", { number: att.attempt })}
-                          </span>
-                        )}
-                      </div>
-                      <span className="link-arrow">&rarr;</span>
-                    </Link>
-                  </li>
+                  <CertificateItem key={att._id} to={`/certifier-requests/${att._id}`} status="to-confirm">
+                    <span className="flex items-center font-semibold leading-snug">
+                      {att.requesterName}
+                      {att.comment && <span className="inline-flex items-center ml-2 text-sm leading-none cursor-help" title={t("hasComment")}>💬</span>}
+                    </span>
+                    <span className="block text-sm text-gray-500 mt-0.5">
+                      {getLocalized(att.certificate?.name, lang)}
+                    </span>
+                    {att.attempt > 1 && (
+                      <StatusBadge variant="attempt" small>
+                        {t("attemptNumber", { number: att.attempt })}
+                      </StatusBadge>
+                    )}
+                  </CertificateItem>
                 ))}
               </ul>
             </section>
           ) : (
-            <section className="certificates-section">
-              <p className="empty-message">{t("noPendingRequests")}</p>
+            <section className="mb-8">
+              <p className="text-center text-gray-500 p-8 italic">{t("noPendingRequests")}</p>
             </section>
           )}
 
           {/* Recently Confirmed */}
           {recentlyConfirmed.length > 0 && (
-            <section className="certificates-section">
-              <h3 className="section-title">{t("recentlyConfirmed")}</h3>
-              <ul className="certificate-list">
+            <section className="mb-8">
+              <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("recentlyConfirmed")}</h3>
+              <ul className="list-none p-0 m-0">
                 {recentlyConfirmed.map((att) => (
-                  <li key={att._id} className="certificate-item confirmed">
-                    <Link to={`/certifier-requests/${att._id}`} className="certificate-link">
-                      <div className="certificate-info">
-                        <span className="certificate-name">
-                          {att.requesterName}
-                          {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
-                        </span>
-                        <span className="requester-certificate">
-                          {getLocalized(att.certificate?.name, lang)}
-                        </span>
-                        <span className="confirmed-badge">{t("confirmed")}</span>
-                        {att.endDate && (
-                          <span className="validity-date">
-                            {t("validUntil")}: {formatDate(att.endDate, lang)}
-                          </span>
-                        )}
-                      </div>
-                      <span className="link-arrow">&rarr;</span>
-                    </Link>
-                  </li>
+                  <CertificateItem key={att._id} to={`/certifier-requests/${att._id}`} status="confirmed">
+                    <span className="flex items-center font-semibold leading-snug">
+                      {att.requesterName}
+                      {att.comment && <span className="inline-flex items-center ml-2 text-sm leading-none cursor-help" title={t("hasComment")}>💬</span>}
+                    </span>
+                    <span className="block text-sm text-gray-500 mt-0.5">
+                      {getLocalized(att.certificate?.name, lang)}
+                    </span>
+                    <StatusBadge variant="confirmed" small>{t("confirmed")}</StatusBadge>
+                    {att.endDate && (
+                      <span className="block text-xs text-gray-500">
+                        {t("validUntil")}: {formatDate(att.endDate, lang)}
+                      </span>
+                    )}
+                  </CertificateItem>
                 ))}
               </ul>
             </section>
