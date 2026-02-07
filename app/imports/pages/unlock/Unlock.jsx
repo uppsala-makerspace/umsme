@@ -88,9 +88,9 @@ const Unlock = ({
           <p className="location-denied-instructions">
             {t(isPWA ? "locationDeniedInstructionsPWA" : "locationDeniedInstructionsBrowser")}
           </p>
-          <button className="location-retry-button" onClick={onRetryLocation}>
+          <Button variant="secondary" onClick={onRetryLocation}>
             {t("locationRetry")}
-          </button>
+          </Button>
         </div>
       )}
 

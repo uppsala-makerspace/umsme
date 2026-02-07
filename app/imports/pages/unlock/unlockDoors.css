@@ -116,21 +116,3 @@
   line-height: 1.4;
 }
 
-.umsapp .login-form .location-retry-button {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1.5rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.umsapp .login-form .location-retry-button:hover {
-  background-color: #2563eb;
-}
-
-.umsapp .login-form .location-retry-button:active {
-  background-color: #1d4ed8;
-}
