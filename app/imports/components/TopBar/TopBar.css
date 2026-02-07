@@ -11,6 +11,21 @@
   min-height: 44px;
 }
 
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.page-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .top-bar-right {
   display: flex;
   align-items: center;

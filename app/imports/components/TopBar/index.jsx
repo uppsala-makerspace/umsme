@@ -59,14 +59,28 @@ const InstallButton = () => {
   );
 };
 
+const PAGE_TITLES = {
+  "/storage": "myBox",
+  "/liability": "liability",
+  "/account": "myAccount",
+  "/profile": "myProfile",
+  "/contact": "contactUs",
+  "/install": "installApp",
+};
+
 export const TopBar = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const isHome = location.pathname === "/" || location.pathname === "/home";
   const isInstalledPWA = isPWA();
+  const titleKey = PAGE_TITLES[location.pathname];
 
   return (
     <header className="top-bar">
-      <HamburgerMenu />
+      <div className="top-bar-left">
+        <HamburgerMenu />
+        {titleKey && <span className="page-title">{t(titleKey)}</span>}
+      </div>
       <div className="top-bar-right">
         {isInstalledPWA ? <InstalledIcon /> : (isHome && <InstallButton />)}
         <LanguageSwitcher />

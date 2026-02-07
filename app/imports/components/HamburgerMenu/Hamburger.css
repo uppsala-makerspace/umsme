@@ -53,6 +53,11 @@
     color: black;
   }
 
+  .umsapp .links .active-item {
+    color: #5fc86f;
+    cursor: default;
+  }
+
   .umsapp .links .logout-button {
     all: unset;
     color: black;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
 import "./Hamburger.css";
@@ -8,6 +8,7 @@ export const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useTracker(() => Meteor.user());
   const [hasMember, setHasMember] = useState(false);
   const menuRef = useRef(null);
@@ -76,24 +77,22 @@ export const HamburgerMenu = () => {
           </button>
         )}
         <ul className={`links ${isOpen ? "show" : ""}`}>
-          <li>
-            <Link to="/storage">{t("myBox")}</Link>
-          </li>
-          <li>
-            <Link to="/liability">{t("liability")}</Link>
-          </li>
-          <li>
-            <Link to="/account">{t("myAccount")}</Link>
-          </li>
-          <li>
-            <Link to="/profile">{t("myProfile")}</Link>
-          </li>
-          <li>
-            <Link to="/contact">{t("contactUs")}</Link>
-          </li>
-          <li>
-            <Link to="/install">{t("installApp")}</Link>
-          </li>
+          {[
+            { to: "/storage", label: "myBox" },
+            { to: "/liability", label: "liability" },
+            { to: "/account", label: "myAccount" },
+            { to: "/profile", label: "myProfile" },
+            { to: "/contact", label: "contactUs" },
+            { to: "/install", label: "installApp" },
+          ].map(({ to, label }) => (
+            <li key={to}>
+              {location.pathname === to ? (
+                <span className="active-item">{t(label)}</span>
+              ) : (
+                <Link to={to}>{t(label)}</Link>
+              )}
+            </li>
+          ))}
           <li>
             <button onClick={handleLogout} className="logout-button">
               {t("logout")}
