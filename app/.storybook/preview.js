@@ -33,9 +33,9 @@ const preview = {
         <Router>
           <Routes>
             <Route path="/*" element={(
-              <div className="umsapp"><div className="login-form">
+              <div className="umsapp">
               <Story></Story>
-            </div></div>)}>
+            </div>)}>
             </Route>
           </Routes>
         </Router>

@@ -11,7 +11,7 @@ export default {
   argTypes: {
     variant: {
       control: "select",
-      options: ["primary", "secondary", "social"],
+      options: ["primary", "secondary", "social", "danger"],
     },
     fullWidth: {
       control: "boolean",
@@ -133,12 +133,29 @@ export const SocialDisabled = {
   },
 };
 
+// Danger button - destructive actions
+export const Danger = {
+  args: {
+    variant: "danger",
+    children: "Delete",
+  },
+};
+
+export const DangerDisabled = {
+  args: {
+    variant: "danger",
+    disabled: true,
+    children: "Delete",
+  },
+};
+
 // All variants together for comparison
 export const AllVariants = {
   render: () => (
     <div className="flex flex-col gap-4 w-64">
       <Button variant="primary">Primary Button</Button>
       <Button variant="secondary">Secondary Button</Button>
+      <Button variant="danger">Danger Button</Button>
       <Button variant="social">
         <img src="/images/GoogleLogo.png" alt="Google" className="w-6 h-6" />
         Social Button

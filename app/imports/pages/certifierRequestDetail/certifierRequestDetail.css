@@ -220,55 +220,6 @@
   box-shadow: 0 0 0 2px rgba(95, 200, 111, 0.2);
 }
 
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-family: "DM Mono", monospace;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  flex: 1;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-success {
-  background-color: #5fc86f;
-  color: white;
-}
-
-.btn-success:hover:not(:disabled) {
-  background-color: #096817;
-}
-
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background-color: #dc2626;
-}
-
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #d1d5db;
-}
-
 /* Error Message */
 .error-message {
   color: #dc2626;
@@ -276,13 +227,3 @@
   padding: 2rem;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .btn {
-    width: 100%;
-  }
-}

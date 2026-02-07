@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import Button from "../../components/Button";
 import "./certifierRequestDetail.css";
 
 const CertifierRequestDetail = ({
@@ -177,34 +178,35 @@ const CertifierRequestDetail = ({
           />
         </div>
 
-        <button
-          className="btn btn-secondary"
+        <Button
+          variant="secondary"
           onClick={() => handleAction(onSaveComments)}
           disabled={actionLoading || !hasCommentChanges()}
         >
           {t("saveComments")}
-        </button>
+        </Button>
       </section>
 
       {/* Actions */}
       {!isConfirmed && (
         <section className="detail-section">
           <h3 className="section-title">{t("actions")}</h3>
-          <div className="action-buttons">
-            <button
-              className="btn btn-success"
+          <div className="flex gap-3">
+            <Button
+              className="flex-1"
               onClick={() => handleAction(onConfirm)}
               disabled={actionLoading}
             >
               {t("confirmRequest")}
-            </button>
-            <button
-              className="btn btn-danger"
+            </Button>
+            <Button
+              variant="danger"
+              className="flex-1"
               onClick={() => handleAction(onDeny)}
               disabled={actionLoading}
             >
               {t("denyRequest")}
-            </button>
+            </Button>
           </div>
         </section>
       )}

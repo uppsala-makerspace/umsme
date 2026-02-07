@@ -212,31 +212,6 @@
   line-height: 1.5;
 }
 
-.btn-refresh-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background-color: #fbbf24;
-  color: #78350f;
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
-}
-
-.btn-refresh-icon:hover:not(:disabled) {
-  background-color: #f59e0b;
-  transform: rotate(45deg);
-}
-
-.btn-refresh-icon:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .status-card.available {
   border-left: 4px solid #3b82f6;
@@ -402,70 +377,12 @@
   color: #78350f;
 }
 
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
+/* Attestation Actions (used in attestation list items) */
 .attestation-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-family: "DM Mono", monospace;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background-color: #5fc86f;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #096817;
-}
-
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #d1d5db;
-}
-
-.btn-success {
-  background-color: #5fc86f;
-  color: white;
-}
-
-.btn-success:hover:not(:disabled) {
-  background-color: #096817;
-}
-
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background-color: #dc2626;
 }
 
 /* Comment Input */
@@ -494,13 +411,8 @@
 
 /* Responsive */
 @media (max-width: 480px) {
-  .action-buttons,
   .attestation-actions {
     flex-direction: column;
-  }
-
-  .btn {
-    width: 100%;
   }
 
   .comment-input {

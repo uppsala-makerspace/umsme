@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import Button from "../../components/Button";
 import "./certificateDetail.css";
 
 const CertificateDetail = ({
@@ -171,14 +172,13 @@ const CertificateDetail = ({
                 <p className="certifier-comment-text">{myAttestation.comment}</p>
               </div>
             )}
-            <div className="action-buttons">
-              <button
-                className="btn btn-primary"
+            <div className="flex flex-wrap gap-2 mt-3">
+              <Button
                 onClick={() => handleAction(onRequest)}
                 disabled={actionLoading}
               >
                 {t("requestCertificate")}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -195,7 +195,7 @@ const CertificateDetail = ({
                 )}
               </div>
               <button
-                className="btn-refresh-icon"
+                className="!w-8 !h-8 !p-0 !m-0 flex items-center justify-center border-none rounded-full bg-amber-400 text-amber-900 text-xl cursor-pointer transition-all duration-200 hover:bg-amber-500 hover:rotate-45 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={onRefresh}
                 disabled={actionLoading}
                 title={t("refresh")}
@@ -216,21 +216,23 @@ const CertificateDetail = ({
                 {t("pendingRequestWaiting")}
               </p>
             )}
-            <div className="action-buttons">
-              <button
-                className="btn btn-secondary"
+            <div className="flex gap-2 mt-3">
+              <Button
+                variant="secondary"
+                className="flex-1"
                 onClick={() => handleAction(onReRequest, myAttestation._id)}
                 disabled={actionLoading}
               >
                 {t("reRequest")}
-              </button>
-              <button
-                className="btn btn-danger"
+              </Button>
+              <Button
+                variant="danger"
+                className="flex-1"
                 onClick={() => handleAction(onCancel, myAttestation._id)}
                 disabled={actionLoading}
               >
                 {t("cancelRequest")}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -238,13 +240,12 @@ const CertificateDetail = ({
         {canRequest && !isExpired && (
           <div className="status-card available">
             <p>{t("canRequestCertificate")}</p>
-            <button
-              className="btn btn-primary"
+            <Button
               onClick={() => handleAction(onRequest)}
               disabled={actionLoading}
             >
               {t("requestCertificate")}
-            </button>
+            </Button>
           </div>
         )}
       </section>
