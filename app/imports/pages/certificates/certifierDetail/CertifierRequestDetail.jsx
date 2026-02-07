@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import Button from "../../components/Button";
-import MainContent from "../../components/MainContent";
-import Loader from "../../components/Loader";
-import Markdown from "../../components/Markdown";
-import { getLocalized, formatDate, formatDateTime } from "../certificates/utils";
+import Button from "../../../components/Button";
+import MainContent from "../../../components/MainContent";
+import Loader from "../../../components/Loader";
+import Markdown from "../../../components/Markdown";
+import { getLocalized, formatDate, formatDateTime } from "../utils";
+import BackLink from "../components/BackLink";
 
 const CertifierRequestDetail = ({
   loading,
@@ -58,9 +58,7 @@ const CertifierRequestDetail = ({
     return (
       <MainContent>
         <p className="text-red-600 text-center p-8">{error}</p>
-        <Link to="/certificates" state={{ tab: "requests" }} className="inline-block text-[#5fc86f] no-underline mb-4 text-sm hover:underline">
-          {t("backToRequests")}
-        </Link>
+        <BackLink state={{ tab: "requests" }}>{t("backToRequests")}</BackLink>
       </MainContent>
     );
   }
@@ -74,9 +72,7 @@ const CertifierRequestDetail = ({
 
   return (
     <MainContent>
-      <Link to="/certificates" state={{ tab: "requests" }} className="inline-block text-[#5fc86f] no-underline mb-4 text-sm hover:underline">
-        &larr; {t("backToRequests")}
-      </Link>
+      <BackLink state={{ tab: "requests" }}>{t("backToRequests")}</BackLink>
 
       {/* Certificate Info */}
       <section className="mb-8 pb-4 border-b-2 border-gray-200">
