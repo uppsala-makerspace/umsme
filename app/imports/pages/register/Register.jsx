@@ -5,6 +5,7 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
+import WarningIcon from "../../components/WarningIcon";
 
 export default ({onSubmit}) => {
   const { t } = useTranslation();
@@ -29,7 +30,7 @@ export default ({onSubmit}) => {
       <Logo />
 
       <p className="flex items-start gap-2 text-sm text-gray-700 mb-4">
-        <span className="info-icon">⚠</span>
+        <WarningIcon />
         {t("useExistingEmailInfo")}
       </p>
 
