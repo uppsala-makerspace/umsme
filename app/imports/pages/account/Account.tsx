@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { default as React, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from 'react-router-dom';
-import "./acounts.css";
+
 import Memberships from "./Memberships";
 import MembershipStatus from "/imports/components/MembershipStatus";
 import Button from "../../components/Button";
@@ -111,7 +111,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
           {t(memberDaysRemaining < 14 ? "renewMembership" : "extendMembership")}
         </Button>
       </Link>
-      <div className="middle-text flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         {member.infamily && paying && (
           <div className="flex flex-col gap-1">
             <div className='flex justify-between border-b-2 border-gray-600'>
@@ -134,7 +134,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
               </div>
               <div className="">
                 {familyMembers?.map((fm, index) => (
-                  <div key={index} className="family-row items-center">
+                  <div key={index} className="flex justify-between py-1 items-center">
                     <div className='flex flex-col'>
                       <span className="font-bold">{`${fm.name}`}</span>
                       <span className='text-sm'>{fm.email ? `${fm.email}` : ''}</span>
@@ -151,7 +151,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
                 </div>
                 <div className="">
                   {familyInvites.map((invite, index) => (
-                    <div key={index} className="family-row items-center">
+                    <div key={index} className="flex justify-between py-1 items-center">
                       <div className='flex flex-col'>
                         <span className='text-sm'>{invite.email}</span>
                       </div>

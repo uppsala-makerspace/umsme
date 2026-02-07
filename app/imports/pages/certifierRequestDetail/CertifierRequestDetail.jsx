@@ -6,7 +6,6 @@ import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Markdown from "../../components/Markdown";
-import "./certifierRequestDetail.css";
 
 const CertifierRequestDetail = ({
   loading,
@@ -73,8 +72,8 @@ const CertifierRequestDetail = ({
   if (error) {
     return (
       <MainContent>
-        <p className="error-message">{error}</p>
-        <Link to="/certificates" state={{ tab: "requests" }} className="back-link">
+        <p className="text-red-600 text-center p-8">{error}</p>
+        <Link to="/certificates" state={{ tab: "requests" }} className="inline-block text-[#5fc86f] no-underline mb-4 text-sm hover:underline">
           {t("backToRequests")}
         </Link>
       </MainContent>
@@ -90,50 +89,50 @@ const CertifierRequestDetail = ({
 
   return (
     <MainContent>
-      <Link to="/certificates" state={{ tab: "requests" }} className="back-link">
+      <Link to="/certificates" state={{ tab: "requests" }} className="inline-block text-[#5fc86f] no-underline mb-4 text-sm hover:underline">
         &larr; {t("backToRequests")}
       </Link>
 
       {/* Certificate Info */}
-      <section className="certificate-header">
-        <h2 className="certificate-title">{getLocalized(certificate.name)}</h2>
+      <section className="mb-8 pb-4 border-b-2 border-gray-200">
+        <h2 className="text-2xl mb-3 text-gray-800">{getLocalized(certificate.name)}</h2>
         {certificate.description && (
-          <Markdown className="certificate-description">
+          <Markdown className="text-gray-600 leading-relaxed mb-3">
             {getLocalized(certificate.description)}
           </Markdown>
         )}
         {certificate.defaultValidityDays && (
-          <p className="certificate-validity-info">
+          <p className="text-sm text-gray-500">
             {t("validityPeriod")}: {certificate.defaultValidityDays} {t("daysUnit")}
           </p>
         )}
       </section>
 
       {/* Requester Info */}
-      <section className="detail-section">
-        <h3 className="section-title">{t("requesterInfo")}</h3>
-        <div className={`status-card ${isConfirmed ? "confirmed" : "pending"}`}>
-          <div className="status-details">
-            <p className="status-detail">
-              <span className="detail-label">{t("requester")}:</span> {attestation.requesterName}
+      <section className="mb-6">
+        <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("requesterInfo")}</h3>
+        <div className={`p-4 rounded-lg bg-white border border-gray-200 ${isConfirmed ? "border-l-4 border-l-[#5fc86f] bg-green-50" : "border-l-4 border-l-violet-500 bg-violet-50"}`}>
+          <div className="flex flex-col gap-2">
+            <p className="m-0 text-sm text-gray-600">
+              <span className="font-semibold text-gray-700">{t("requester")}:</span> {attestation.requesterName}
             </p>
-            <p className="status-detail">
-              <span className="detail-label">{t("requestedAt")}:</span> {formatDateTime(attestation.startDate)}
+            <p className="m-0 text-sm text-gray-600">
+              <span className="font-semibold text-gray-700">{t("requestedAt")}:</span> {formatDateTime(attestation.startDate)}
             </p>
             {attestation.attempt > 1 && (
-              <p className="status-detail">
-                <span className="detail-label">{t("attempt")}:</span> {attestation.attempt}
+              <p className="m-0 text-sm text-gray-600">
+                <span className="font-semibold text-gray-700">{t("attempt")}:</span> {attestation.attempt}
               </p>
             )}
             {isConfirmed && (
               <>
-                <p className="status-detail">
-                  <span className="detail-label">{t("status")}:</span>{" "}
-                  <span className="confirmed-badge">{t("confirmed")}</span>
+                <p className="m-0 text-sm text-gray-600">
+                  <span className="font-semibold text-gray-700">{t("status")}:</span>{" "}
+                  <span className="inline-block text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">{t("confirmed")}</span>
                 </p>
                 {attestation.endDate && (
-                  <p className="status-detail">
-                    <span className="detail-label">{t("validUntil")}:</span> {formatDate(attestation.endDate)}
+                  <p className="m-0 text-sm text-gray-600">
+                    <span className="font-semibold text-gray-700">{t("validUntil")}:</span> {formatDate(attestation.endDate)}
                   </p>
                 )}
               </>
@@ -143,15 +142,15 @@ const CertifierRequestDetail = ({
       </section>
 
       {/* Comments Section */}
-      <section className="detail-section">
-        <h3 className="section-title">{t("comments")}</h3>
+      <section className="mb-6">
+        <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("comments")}</h3>
 
         {/* Public Comment */}
-        <div className="comment-field">
-          <label className="comment-label">{t("publicComment")}</label>
-          <p className="comment-description">{t("publicCommentDescription")}</p>
+        <div className="mb-5">
+          <label className="block font-semibold text-gray-700 mb-1">{t("publicComment")}</label>
+          <p className="text-xs text-gray-500 mb-2">{t("publicCommentDescription")}</p>
           <textarea
-            className="comment-textarea"
+            className="w-full p-3 border border-gray-300 rounded-md text-sm font-mono resize-vertical min-h-[80px] focus:outline-none focus:border-[#5fc86f] focus:ring-2 focus:ring-[#5fc86f]/20"
             placeholder={t("publicCommentPlaceholder")}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
@@ -160,11 +159,11 @@ const CertifierRequestDetail = ({
         </div>
 
         {/* Private Comment */}
-        <div className="comment-field">
-          <label className="comment-label">{t("privateComment")}</label>
-          <p className="comment-description">{t("privateCommentDescription")}</p>
+        <div className="mb-5">
+          <label className="block font-semibold text-gray-700 mb-1">{t("privateComment")}</label>
+          <p className="text-xs text-gray-500 mb-2">{t("privateCommentDescription")}</p>
           <textarea
-            className="comment-textarea"
+            className="w-full p-3 border border-gray-300 rounded-md text-sm font-mono resize-vertical min-h-[80px] focus:outline-none focus:border-[#5fc86f] focus:ring-2 focus:ring-[#5fc86f]/20"
             placeholder={t("privateCommentPlaceholder")}
             value={privateComment}
             onChange={(e) => setPrivateComment(e.target.value)}
@@ -183,8 +182,8 @@ const CertifierRequestDetail = ({
 
       {/* Actions */}
       {!isConfirmed && (
-        <section className="detail-section">
-          <h3 className="section-title">{t("actions")}</h3>
+        <section className="mb-6">
+          <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("actions")}</h3>
           <div className="flex gap-3">
             <Button
               className="flex-1"
