@@ -42,7 +42,6 @@ export const App = () => (
         <Route path="/contact" element={<Contact />} />
         <Route path="/certificates" element={<Certificates />} />
         <Route path="/certificates/:certificateId" element={<CertificateDetail />} />
-        <Route path="/certifier-requests" element={<Navigate to="/certificates" replace />} />
         <Route path="/certifier-requests/:attestationId" element={<CertifierRequestDetail />} />
         <Route path="/membership" element={<MembershipSelection />} />
         <Route path="/paymentSelection/:paymentType" element={<PaymentSelection />} />
