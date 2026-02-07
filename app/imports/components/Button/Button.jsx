@@ -23,6 +23,7 @@ export default function Button({
     transition-colors duration-150 ease-in-out
     disabled:cursor-not-allowed
     box-border
+    flex items-center justify-center gap-3
   `;
 
   const variantStyles = {
@@ -43,7 +44,6 @@ export default function Button({
       hover:bg-gray-200
       disabled:bg-surface disabled:text-surface disabled:border-gray-300
       py-3 px-5
-      flex items-center justify-center gap-2.5
     `,
     danger: `
       bg-red-500 text-white border-none rounded
