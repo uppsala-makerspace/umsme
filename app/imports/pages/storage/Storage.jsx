@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Button from "../../components/Button";
 import "./storage-page.css";
 
 const STORAGE_LOCATION_OPTIONS = [
@@ -110,13 +111,14 @@ const Storage = ({
               </option>
             ))}
           </select>
-          <button
-            className="mt-3 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          <Button
+            className="mt-3"
+            fullWidth
             onClick={handleSubmitRequest}
             disabled={isSubmitting}
           >
             {isSubmitting ? t("loading") : t("submitRequest")}
-          </button>
+          </Button>
           {storagerequest && (
             <p className="mt-2 text-sm text-green-600 text-center">
               {t("currentRequest")}: {t(STORAGE_REQUEST_OPTIONS.find(o => o.value === storagerequest)?.key || storagerequest)}
@@ -159,13 +161,14 @@ const Storage = ({
               </option>
             ))}
           </select>
-          <button
-            className="mt-3 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          <Button
+            className="mt-3"
+            fullWidth
             onClick={handleSubmitRequest}
             disabled={isSubmitting}
           >
             {isSubmitting ? t("loading") : t("submitRequest")}
-          </button>
+          </Button>
           {storagerequest && (
             <p className="mt-2 text-sm text-green-600 text-center">
               {t("currentRequest")}: {t(STORAGE_LOCATION_OPTIONS.find(o => o.value === storagerequest)?.key || storagerequest)}
@@ -186,13 +189,13 @@ const Storage = ({
 
       <div className="w-full max-w-xl text-center">
         <p className="text-sm text-gray-600 mb-4">{t("queueForBoxInfo")}</p>
-        <button
-          className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 disabled:opacity-50"
+        <Button
+          fullWidth
           onClick={handleQueueForBox}
           disabled={isSubmitting}
         >
           {isSubmitting ? t("loading") : t("queueForBox")}
-        </button>
+        </Button>
       </div>
     </div>
   );
