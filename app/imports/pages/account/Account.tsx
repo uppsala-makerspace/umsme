@@ -185,7 +185,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
           </>
           :
           payingFamilyMember && (familyMembers?.length || 0) + (familyInvites?.length || 0) < 4 && (
-            <Button onClick={showNewMemberInfo}>{t("AddFamilyMember")}</Button>
+            <Button variant="secondary" onClick={showNewMemberInfo}>{t("AddFamilyMember")}</Button>
           )
         }
 
