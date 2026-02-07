@@ -3,6 +3,7 @@ import { LogRegSwitcher } from "/imports/components/LogRegSwitch/LogRegSwitcher"
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
 
 export default ({onSubmit}) => {
@@ -25,7 +26,7 @@ export default ({onSubmit}) => {
   return (
     <MainContent>
     <form onSubmit={handleSubmit}>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <Logo />
 
       <p className="flex items-start gap-2 text-sm text-gray-700 mb-4">
         <span className="info-icon">⚠</span>

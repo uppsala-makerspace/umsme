@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from 'react-router-dom';
 import Button from "../../components/Button";
+import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
 
 const msPerDay = 1000 * 60 * 60 * 24;
@@ -41,7 +42,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
 
   if (!verified) {
     return <MainContent>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <Logo />
       <h3 className="text-center">{t("welcome")}!</h3>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("emailNotVerifiedText1")}</p>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("emailNotVerifiedText2")}</p>
@@ -53,7 +54,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
 
   if (memberName === '') {
     return <MainContent>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <Logo />
       <h3 className="text-center">{t("welcome")}!</h3>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("noNameText1")}</p>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("noNameText2")}</p>
@@ -65,7 +66,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
 
   if (invite) {
     return <MainContent>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <Logo />
       <h3 className="text-center">{t("welcome")} {name}!</h3>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("familyInviteText")}</p>
       <Button fullWidth onClick={onAcceptInvite}>
@@ -81,7 +82,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
     const liabilityNeedsAttention = !liabilityDate || liabilityOutdated;
 
     return <MainContent>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <Logo />
       <h3 className="text-center">{t("greeting2")} {name}!</h3>
       {timeToRenew && (
         <div>
@@ -107,7 +108,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
     </MainContent>;
   } else if (daysLeftOfLab < 0) {
     return <MainContent>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <Logo />
       <h3 className="text-center">{t("welcome")} {name}!</h3>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("expiredMembershipText1")}</p>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("expiredMembershipText2")}</p>
@@ -117,7 +118,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
     </MainContent>;
   } else {
     return <MainContent>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <Logo />
       <h3 className="text-center">{t("welcome")} {name}!</h3>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("noMembershiptext1")}</p>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("noMembershiptext2")}</p>

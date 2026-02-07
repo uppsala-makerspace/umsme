@@ -25,11 +25,6 @@
   box-sizing: border-box;
 }
 
-.umsapp img {
-  max-width: 100%;
-  height: auto;
-}
-
 html,
 body {
   margin: 0;
