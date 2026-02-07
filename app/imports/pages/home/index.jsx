@@ -1,8 +1,7 @@
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { Navigate } from 'react-router-dom';
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Home from "./Home";
 
 /** This view is used if there is no member or no active membership. */
@@ -43,9 +42,8 @@ export default () => {
     }
   };
 
-  return <>
+  return <Layout>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
-    <TopBar />
     <Home
       memberName={memberInfo?.member?.name || ""}
       memberStatus={memberInfo?.status}
@@ -56,6 +54,5 @@ export default () => {
       liabilityDate={memberInfo?.liabilityDate}
       liabilityOutdated={memberInfo?.liabilityOutdated}
     />
-    <BottomNavigation />
-  </>;
+  </Layout>;
 };

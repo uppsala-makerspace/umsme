@@ -36,7 +36,7 @@ const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore, mo
   const { t, i18n } = useTranslation();
 
   return (
-    <MainContent>
+    <MainContent topPadding={false}>
       <Tabs
         tabs={[
           { key: "upcoming", label: t("upcomingEvents") },

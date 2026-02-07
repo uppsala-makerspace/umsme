@@ -2,8 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback } from "react";
 import { Navigate } from "react-router-dom";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Certificates from "./Certificates.jsx";
 
 export default () => {
@@ -57,8 +56,7 @@ export default () => {
   }
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       <Certificates
         loading={loading}
         certificates={certificates}
@@ -67,7 +65,6 @@ export default () => {
         pendingToConfirm={pendingToConfirm}
         recentlyConfirmed={recentlyConfirmed}
       />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 };

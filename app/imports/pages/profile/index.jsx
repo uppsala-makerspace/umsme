@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { useNavigate } from "react-router-dom";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Profile from "./Profile";
 
 export default () => {
@@ -34,8 +33,7 @@ export default () => {
   };
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       {memberInfo && (
         <Profile
           onSubmit={handleSubmit}
@@ -44,7 +42,6 @@ export default () => {
           initialBirthyear={memberInfo.member?.birthyear || ""}
         />
       )}
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 };

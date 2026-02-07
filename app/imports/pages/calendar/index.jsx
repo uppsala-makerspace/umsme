@@ -1,7 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect } from "react";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Calendar from "./Calendar";
 
 const PAST_EVENTS_DAYS = 90; // Fetch past events in 90-day windows
@@ -144,8 +143,7 @@ export default () => {
   const hasMore = mode === "past" ? hasMorePastEvents : !!nextPageToken;
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       <Calendar
         events={events}
         loading={loading}
@@ -156,7 +154,6 @@ export default () => {
         mode={mode}
         onModeChange={handleModeChange}
       />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 };

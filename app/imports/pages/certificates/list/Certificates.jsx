@@ -50,7 +50,7 @@ const Certificates = ({
   const pendingRequestsCount = pendingToConfirm.length;
 
   return (
-    <MainContent>
+    <MainContent topPadding={false}>
       {/* Show tabs only for certifiers, otherwise just a heading */}
       {isCertifier ? (
         <Tabs

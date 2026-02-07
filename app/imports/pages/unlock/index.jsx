@@ -3,8 +3,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { Roles } from "meteor/roles";
 import { Navigate } from "react-router-dom";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Unlock from "./Unlock";
 
 export default () => {
@@ -152,8 +151,7 @@ export default () => {
   }
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       {loading ? null : (
         <Unlock
           doors={doors}
@@ -170,7 +168,6 @@ export default () => {
           onRetryLocation={handleRetryLocation}
         />
       )}
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 };

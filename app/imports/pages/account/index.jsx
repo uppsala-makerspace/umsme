@@ -2,8 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { Navigate } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Account from "./Account";
 
 export default () => {
@@ -56,13 +55,11 @@ export default () => {
   };
 
   return (
-    <>
+    <Layout>
       {!Meteor.userId() ? <Navigate to="/login" /> : null}
-      <TopBar />
       {memberInfo && (
         <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember}></Account>
       )}
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 };

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import TopBar from "/imports/components/TopBar";
 import { Accounts } from "meteor/accounts-base";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import Layout from "/imports/components/Layout/Layout";
 import ResetPassword from "./ResetPassword";
 
 export default () => {
@@ -23,9 +23,8 @@ export default () => {
   };
 
   return (
-    <>
-      <TopBar />
+    <Layout bottomNav={false}>
       <ResetPassword message={message} onSubmit={handleResetPassword} />
-    </>
+    </Layout>
   );
 };

@@ -1,8 +1,8 @@
 import React from "react";
-import TopBar from "/imports/components/TopBar";
 import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
 import { useNavigate, Navigate } from 'react-router-dom';
+import Layout from "/imports/components/Layout/Layout";
 import Register from './Register';
 
 export default () => {
@@ -23,10 +23,9 @@ export default () => {
   };
 
   return (
-    <>
-      <TopBar />
+    <Layout bottomNav={false}>
       {Meteor.userId() ? (<Navigate to="/" />) : null}
       <Register onSubmit={handleSubmit} />
-    </>
+    </Layout>
   );
 };

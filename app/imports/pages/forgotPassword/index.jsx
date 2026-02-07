@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import TopBar from "/imports/components/TopBar";
 import { Accounts } from "meteor/accounts-base";
 import { useTranslation } from "react-i18next";
+import Layout from "/imports/components/Layout/Layout";
 import ForgotPassword from "./ForgotPassword";
 
 export default () => {
@@ -19,9 +19,8 @@ export default () => {
   };
 
   return (
-    <>
-      <TopBar />
+    <Layout bottomNav={false}>
       <ForgotPassword message={message} onSubmit={handleForgotPassword} />
-    </>
+    </Layout>
   );
 };

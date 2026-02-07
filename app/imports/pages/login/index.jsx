@@ -2,7 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React from "react";
 import { Navigate } from 'react-router-dom';
-import TopBar from "/imports/components/TopBar";
+import Layout from "/imports/components/Layout/Layout";
 import Login from './Login';
 
 export default () => {
@@ -25,11 +25,10 @@ export default () => {
   };
 
   return (
-    <>
-      <TopBar />
+    <Layout bottomNav={false}>
       {unverifiedUser ? (<Navigate to="/waitForEmailVerification" />) : null}
       {verified ? (<Navigate to="/" />) : null}
       <Login onSubmit={handleLogin} google={google} facebook={facebook} />
-    </>
+    </Layout>
   );
 };

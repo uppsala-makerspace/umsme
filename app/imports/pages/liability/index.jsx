@@ -2,8 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Liability from "./Liability";
 
 export default () => {
@@ -57,9 +56,8 @@ export default () => {
   };
 
   return (
-    <>
+    <Layout>
       {!Meteor.userId() ? <Navigate to="/login" /> : null}
-      <TopBar />
       <Liability
         documentDate={document?.date ? new Date(document.date) : null}
         text={document?.text}
@@ -68,7 +66,6 @@ export default () => {
         approving={approving}
         onApprove={handleApprove}
       />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 };

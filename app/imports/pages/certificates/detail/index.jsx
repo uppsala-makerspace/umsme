@@ -2,8 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import CertificateDetail from "./CertificateDetail.jsx";
 
 export default () => {
@@ -67,8 +66,7 @@ export default () => {
   }
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       <CertificateDetail
         loading={loading}
         error={error}
@@ -78,7 +76,6 @@ export default () => {
         onReRequest={handleReRequest}
         onRefresh={fetchData}
       />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 };

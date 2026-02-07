@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import MembershipSelection from "./MembershipSelection";
 import {
   calculateOptionAvailability,
@@ -108,8 +107,7 @@ export default function MembershipSelectionPage() {
   }
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       <MembershipSelection
         loading={isLoading}
         error={error}
@@ -125,7 +123,6 @@ export default function MembershipSelectionPage() {
         onFamilyChange={handleFamilyChange}
         onCancel={handleCancel}
       />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 }

@@ -1,8 +1,7 @@
 import React from "react";
 import { Meteor } from "meteor/meteor";
 import { Navigate } from "react-router-dom";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Map from "./Map";
 
 export default () => {
@@ -13,10 +12,8 @@ export default () => {
   }
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       <Map slackTeam={slackTeam} />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 };

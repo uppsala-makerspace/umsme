@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import UAParser from "ua-parser-js";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Install from "./Install";
 
 const STORAGE_KEY = 'pwa-install-dismissed';
@@ -109,8 +108,7 @@ export default function InstallPage() {
   }, []);
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       <Install
         platform={platform}
         isInstalledPWA={isInstalledPWA}
@@ -122,8 +120,7 @@ export default function InstallPage() {
         onRestore={handleRestore}
         onInstallClick={handleInstallClick}
       />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 }
 

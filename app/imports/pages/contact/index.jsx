@@ -1,8 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import Contact from "./Contact";
 
 export default () => {
@@ -16,10 +15,8 @@ export default () => {
       .catch((err) => console.error("Failed to load slack channels:", err));
   }, []);
 
-  return <>
+  return <Layout>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
-    <TopBar />
     <Contact slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
-    <BottomNavigation />
-  </>;
+  </Layout>;
 };

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import PaymentSelection from "./PaymentSelection";
 import { membershipFromPayment } from "/imports/common/lib/utils";
 
@@ -115,8 +114,7 @@ export default function PaymentSelectionPage() {
   }
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       <PaymentSelection
         loading={isLoading && !paymentOption}
         error={error}
@@ -128,7 +126,6 @@ export default function PaymentSelectionPage() {
         onPay={handlePay}
         onCancel={handleCancel}
       />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 }

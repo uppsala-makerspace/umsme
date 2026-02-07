@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import TopBar from "/imports/components/TopBar";
-import BottomNavigation from "/imports/components/BottomNavigation";
+import Layout from "/imports/components/Layout/Layout";
 import InitiatedPayment from "./InitiatedPayment";
 
 const POLL_INTERVAL = 2000; // 2 seconds
@@ -93,8 +92,7 @@ export default function InitiatedPaymentPage() {
   }
 
   return (
-    <>
-      <TopBar />
+    <Layout>
       <InitiatedPayment
         step={step}
         qrCode={qrCode}
@@ -103,7 +101,6 @@ export default function InitiatedPaymentPage() {
         onCancel={handleCancel}
         onBackToStart={handleBackToStart}
       />
-      <BottomNavigation />
-    </>
+    </Layout>
   );
 }
