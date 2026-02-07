@@ -12,7 +12,7 @@ export default () => {
   }
 
   return (
-    <Layout>
+    <Layout scroll={false}>
       <Map slackTeam={slackTeam} />
     </Layout>
   );
