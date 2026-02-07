@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HamburgerMenu } from "../HamburgerMenu/HamburgerMenu";
 import { LanguageSwitcher } from "../LanguageSwitcher/langueSwitcher";
-import "./TopBar.css";
 
 const STORAGE_KEY = 'pwa-install-dismissed';
 
@@ -30,8 +29,8 @@ const isInstallDismissed = () => {
 const InstalledIcon = () => {
   const { t } = useTranslation();
   return (
-    <Link to="/install" className="install-button installed" title={t("installed")}>
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <Link to="/install" className="text-gray-500" title={t("installed")}>
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
       </svg>
     </Link>
@@ -50,11 +49,11 @@ const InstallButton = () => {
   }
 
   return (
-    <Link to="/install" className="install-button">
+    <Link to="/install" className="flex items-center gap-1 px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium no-underline transition-colors">
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
       </svg>
-      <span className="install-button-text">{t("installApp")}</span>
+      <span className="hidden min-[360px]:inline">{t("installApp")}</span>
     </Link>
   );
 };
@@ -76,12 +75,12 @@ export const TopBar = () => {
   const titleKey = PAGE_TITLES[location.pathname];
 
   return (
-    <header className="top-bar">
-      <div className="top-bar-left">
+    <header className="flex justify-between items-center px-4 py-2 bg-white border-b border-gray-200 min-h-[44px]">
+      <div className="flex items-center gap-2 min-w-0">
         <HamburgerMenu />
-        {titleKey && <span className="page-title">{t(titleKey)}</span>}
+        {titleKey && <span className="text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">{t(titleKey)}</span>}
       </div>
-      <div className="top-bar-right">
+      <div className="flex items-center gap-[22px]">
         {isInstalledPWA ? <InstalledIcon /> : (isHome && <InstallButton />)}
         <LanguageSwitcher />
       </div>

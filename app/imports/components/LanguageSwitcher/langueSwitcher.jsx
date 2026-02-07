@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import "./languageSwitcher.css";
 
 export const LanguageSwitcher = () => {
   const { t, i18n } = useTranslation();
@@ -8,16 +7,16 @@ export const LanguageSwitcher = () => {
   const handleLanguageSwitch = () => {
     const newLang = i18n.language === "sv" ? "en" : "sv";
     i18n.changeLanguage(newLang);
-    localStorage.setItem("language", newLang); // Spara det nya språket i localStorage
+    localStorage.setItem("language", newLang);
   };
 
   return (
-    <button className="language-switcher" onClick={handleLanguageSwitch}>
-      <span className={i18n.language === "sv" ? "active" : "language"}>
+    <button className="flex items-center text-black cursor-pointer border-none font-mono text-lg p-0 bg-transparent" onClick={handleLanguageSwitch}>
+      <span className={i18n.language === "sv" ? "text-gray-500 cursor-default" : "text-black cursor-pointer hover:text-black"}>
         SV
       </span>
       <div className="w-px h-[25px] bg-black mx-2.5"></div>
-      <span className={i18n.language === "en" ? "active" : "language"}>
+      <span className={i18n.language === "en" ? "text-gray-500 cursor-default" : "text-black cursor-pointer hover:text-black"}>
         ENG
       </span>
     </button>

@@ -15,7 +15,6 @@ import {
   CalendarIcon as CalendarSolid,
   DocumentTextIcon as DocSolid,
 } from "@heroicons/react/24/solid";
-import "./BottomNavigation.css";
 
 const navItems = [
   { path: "/", labelKey: "navHome", OutlineIcon: HomeOutline, SolidIcon: HomeSolid, exact: true },
@@ -37,7 +36,7 @@ export default () => {
   };
 
   return (
-    <nav className="bottom-nav">
+    <nav className="flex bg-white border-t border-gray-200 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
       {navItems.map((item) => {
         const active = isActive(item);
         const Icon = active ? item.SolidIcon : item.OutlineIcon;
@@ -45,9 +44,9 @@ export default () => {
           <NavLink
             key={item.path}
             to={item.path}
-            className={`bottom-nav-item ${active ? "active" : ""}`}
+            className={`flex-1 flex flex-col items-center no-underline text-xs py-1 ${active ? "text-brand-green" : "text-gray-500"}`}
           >
-            <Icon className="bottom-nav-icon" />
+            <Icon className="w-6 h-6 mb-1" />
             <span>{t(item.labelKey)}</span>
           </NavLink>
         );
