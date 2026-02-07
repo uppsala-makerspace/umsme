@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
+import { getLocalized, formatDate } from "../certificates/utils";
 
 const CertifierRequests = ({
   loading,
@@ -13,16 +14,6 @@ const CertifierRequests = ({
   const { t, i18n } = useTranslation();
 
   const lang = i18n.language || "sv";
-
-  const getLocalized = (obj) => {
-    if (!obj) return "";
-    return obj[lang] || obj.sv || obj.en || "";
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString(lang === "sv" ? "sv-SE" : "en-US");
-  };
 
   if (loading) {
     return (
@@ -51,7 +42,7 @@ const CertifierRequests = ({
                   <div className="flex flex-col gap-1">
                     <span className="font-semibold text-gray-900">{att.requesterName}</span>
                     <span className="text-sm text-gray-500">
-                      {getLocalized(att.certificate?.name)}
+                      {getLocalized(att.certificate?.name, lang)}
                     </span>
                     {att.attempt > 1 && (
                       <span className="inline-block text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full ml-2">
@@ -82,12 +73,12 @@ const CertifierRequests = ({
                   <div className="flex flex-col gap-1">
                     <span className="font-semibold text-gray-900">{att.requesterName}</span>
                     <span className="text-sm text-gray-500">
-                      {getLocalized(att.certificate?.name)}
+                      {getLocalized(att.certificate?.name, lang)}
                     </span>
                     <span className="inline-block text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">{t("confirmed")}</span>
                     {att.endDate && (
                       <span className="inline-block text-xs text-gray-500 ml-3">
-                        {t("validUntil")}: {formatDate(att.endDate)}
+                        {t("validUntil")}: {formatDate(att.endDate, lang)}
                       </span>
                     )}
                   </div>

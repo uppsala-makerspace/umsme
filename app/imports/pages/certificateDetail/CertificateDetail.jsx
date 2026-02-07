@@ -6,6 +6,7 @@ import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Markdown from "../../components/Markdown";
+import { getLocalized, formatDate, formatDateTime } from "../certificates/utils";
 import "./certificateDetail.css";
 
 const CertificateDetail = ({
@@ -21,25 +22,6 @@ const CertificateDetail = ({
   const [actionLoading, setActionLoading] = useState(false);
 
   const lang = i18n.language || "sv";
-
-  const getLocalized = (obj) => {
-    if (!obj) return "";
-    return obj[lang] || obj.sv || obj.en || "";
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString(lang === "sv" ? "sv-SE" : "en-US");
-  };
-
-  const formatDateTime = (date) => {
-    if (!date) return "";
-    const locale = lang === "sv" ? "sv-SE" : "en-US";
-    return new Date(date).toLocaleString(locale, {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
-  };
 
   const handleAction = async (action, ...args) => {
     setActionLoading(true);
@@ -88,10 +70,10 @@ const CertificateDetail = ({
 
       {/* Certificate Info */}
       <section className="certificate-header">
-        <h2 className="certificate-title">{getLocalized(certificate.name)}</h2>
+        <h2 className="certificate-title">{getLocalized(certificate.name, lang)}</h2>
         {certificate.description && (
           <Markdown className="certificate-description">
-            {getLocalized(certificate.description)}
+            {getLocalized(certificate.description, lang)}
           </Markdown>
         )}
         {certificate.defaultValidityDays && (
@@ -123,11 +105,11 @@ const CertificateDetail = ({
                 </p>
               )}
               <p className="status-detail">
-                <span className="detail-label">{t("certifiedOn")}:</span> {formatDate(myAttestation.confirmedAt || myAttestation.startDate)}
+                <span className="detail-label">{t("certifiedOn")}:</span> {formatDate(myAttestation.confirmedAt || myAttestation.startDate, lang)}
               </p>
               {myAttestation.endDate ? (
                 <p className="status-detail">
-                  <span className="detail-label">{t("validUntil")}:</span> {formatDate(myAttestation.endDate)}
+                  <span className="detail-label">{t("validUntil")}:</span> {formatDate(myAttestation.endDate, lang)}
                 </p>
               ) : (
                 <p className="status-detail">
@@ -154,10 +136,10 @@ const CertificateDetail = ({
                 </p>
               )}
               <p className="status-detail">
-                <span className="detail-label">{t("certifiedOn")}:</span> {formatDate(myAttestation.confirmedAt || myAttestation.startDate)}
+                <span className="detail-label">{t("certifiedOn")}:</span> {formatDate(myAttestation.confirmedAt || myAttestation.startDate, lang)}
               </p>
               <p className="status-detail">
-                <span className="detail-label">{t("expiredOn")}:</span> {formatDate(myAttestation.endDate)}
+                <span className="detail-label">{t("expiredOn")}:</span> {formatDate(myAttestation.endDate, lang)}
               </p>
             </div>
             {myAttestation.comment && (
@@ -198,7 +180,7 @@ const CertificateDetail = ({
               </button>
             </div>
             <p className="pending-requested-at">
-              {t("requestedAt")}: {formatDateTime(myAttestation.startDate)}
+              {t("requestedAt")}: {formatDateTime(myAttestation.startDate, lang)}
             </p>
             {myAttestation.comment ? (
               <div className="certifier-comment-box highlight">

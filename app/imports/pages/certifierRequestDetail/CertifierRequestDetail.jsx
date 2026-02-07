@@ -6,6 +6,7 @@ import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Markdown from "../../components/Markdown";
+import { getLocalized, formatDate, formatDateTime } from "../certificates/utils";
 
 const CertifierRequestDetail = ({
   loading,
@@ -21,22 +22,6 @@ const CertifierRequestDetail = ({
   const [actionLoading, setActionLoading] = useState(false);
 
   const lang = i18n.language || "sv";
-
-  const getLocalized = (obj) => {
-    if (!obj) return "";
-    return obj[lang] || obj.sv || obj.en || "";
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString(lang === "sv" ? "sv-SE" : "en-US");
-  };
-
-  const formatDateTime = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    return `${d.toLocaleDateString(lang === "sv" ? "sv-SE" : "en-US")} ${d.toLocaleTimeString(lang === "sv" ? "sv-SE" : "en-US", { hour: "2-digit", minute: "2-digit" })}`;
-  };
 
   const handleAction = async (action) => {
     setActionLoading(true);
@@ -95,10 +80,10 @@ const CertifierRequestDetail = ({
 
       {/* Certificate Info */}
       <section className="mb-8 pb-4 border-b-2 border-gray-200">
-        <h2 className="text-2xl mb-3 text-gray-800">{getLocalized(certificate.name)}</h2>
+        <h2 className="text-2xl mb-3 text-gray-800">{getLocalized(certificate.name, lang)}</h2>
         {certificate.description && (
           <Markdown className="text-gray-600 leading-relaxed mb-3">
-            {getLocalized(certificate.description)}
+            {getLocalized(certificate.description, lang)}
           </Markdown>
         )}
         {certificate.defaultValidityDays && (
@@ -117,7 +102,7 @@ const CertifierRequestDetail = ({
               <span className="font-semibold text-gray-700">{t("requester")}:</span> {attestation.requesterName}
             </p>
             <p className="m-0 text-sm text-gray-600">
-              <span className="font-semibold text-gray-700">{t("requestedAt")}:</span> {formatDateTime(attestation.startDate)}
+              <span className="font-semibold text-gray-700">{t("requestedAt")}:</span> {formatDateTime(attestation.startDate, lang)}
             </p>
             {attestation.attempt > 1 && (
               <p className="m-0 text-sm text-gray-600">
@@ -132,7 +117,7 @@ const CertifierRequestDetail = ({
                 </p>
                 {attestation.endDate && (
                   <p className="m-0 text-sm text-gray-600">
-                    <span className="font-semibold text-gray-700">{t("validUntil")}:</span> {formatDate(attestation.endDate)}
+                    <span className="font-semibold text-gray-700">{t("validUntil")}:</span> {formatDate(attestation.endDate, lang)}
                   </p>
                 )}
               </>

@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Tabs from "../../components/Tabs";
+import { getLocalized, formatDate } from "./utils";
 import "./certificates.css";
 
 const Certificates = ({
@@ -20,16 +21,6 @@ const Certificates = ({
   const [activeTab, setActiveTab] = useState(location.state?.tab || "my");
 
   const lang = i18n.language || "sv";
-
-  const getLocalized = (obj) => {
-    if (!obj) return "";
-    return obj[lang] || obj.sv || obj.en || "";
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString(lang === "sv" ? "sv-SE" : "en-US");
-  };
 
   if (loading) {
     return (
@@ -85,7 +76,7 @@ const Certificates = ({
                     <Link to={`/certificates/${att.certificateId}`} className="certificate-link">
                       <div className="certificate-info">
                         <span className="certificate-name">
-                          {getLocalized(att.certificate?.name)}
+                          {getLocalized(att.certificate?.name, lang)}
                           {att.certificate?.mandatory && <span className="mandatory-icon" title={t("mandatoryCertificate")}>⭐</span>}
                           {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
                         </span>
@@ -115,13 +106,13 @@ const Certificates = ({
                     <Link to={`/certificates/${att.certificateId}`} className="certificate-link">
                       <div className="certificate-info">
                         <span className="certificate-name">
-                          {getLocalized(att.certificate?.name)}
+                          {getLocalized(att.certificate?.name, lang)}
                           {att.certificate?.mandatory && <span className="mandatory-icon" title={t("mandatoryCertificate")}>⭐</span>}
                           {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
                         </span>
                         {att.endDate && (
                           <span className="validity-date">
-                            {t("validUntil")}: {formatDate(att.endDate)}
+                            {t("validUntil")}: {formatDate(att.endDate, lang)}
                           </span>
                         )}
                       </div>
@@ -134,12 +125,12 @@ const Certificates = ({
                     <Link to={`/certificates/${att.certificateId}`} className="certificate-link">
                       <div className="certificate-info">
                         <span className="certificate-name">
-                          {getLocalized(att.certificate?.name)}
+                          {getLocalized(att.certificate?.name, lang)}
                           {att.certificate?.mandatory && <span className="mandatory-icon" title={t("mandatoryCertificate")}>⭐</span>}
                           {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
                         </span>
                         <span className="expired-badge">{t("expired")}</span>
-                        <span className="validity-date">{formatDate(att.endDate)}</span>
+                        <span className="validity-date">{formatDate(att.endDate, lang)}</span>
                       </div>
                       <span className="link-arrow">&rarr;</span>
                     </Link>
@@ -159,7 +150,7 @@ const Certificates = ({
                     <Link to={`/certificates/${cert._id}`} className="certificate-link">
                       <div className="certificate-info">
                         <span className="certificate-name">
-                          {getLocalized(cert.name)}
+                          {getLocalized(cert.name, lang)}
                           {cert.mandatory && <span className="mandatory-icon" title={t("mandatoryCertificate")}>⭐</span>}
                         </span>
                       </div>
@@ -190,7 +181,7 @@ const Certificates = ({
                           {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
                         </span>
                         <span className="requester-certificate">
-                          {getLocalized(att.certificate?.name)}
+                          {getLocalized(att.certificate?.name, lang)}
                         </span>
                         {att.attempt > 1 && (
                           <span className="attempt-badge">
@@ -224,12 +215,12 @@ const Certificates = ({
                           {att.comment && <span className="comment-icon" title={t("hasComment")}>💬</span>}
                         </span>
                         <span className="requester-certificate">
-                          {getLocalized(att.certificate?.name)}
+                          {getLocalized(att.certificate?.name, lang)}
                         </span>
                         <span className="confirmed-badge">{t("confirmed")}</span>
                         {att.endDate && (
                           <span className="validity-date">
-                            {t("validUntil")}: {formatDate(att.endDate)}
+                            {t("validUntil")}: {formatDate(att.endDate, lang)}
                           </span>
                         )}
                       </div>
