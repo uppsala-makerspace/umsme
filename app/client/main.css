@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-color: #f0efef;
+}
+
 .umsapp {
   margin: 0;
   padding: 0;
@@ -12,45 +16,11 @@
   font-family: "DM Mono", monospace;
 }
 
-.umsapp #main {
-  background: #f0efef;
-  font-family: sans-serif;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2%;
-}
-
-.umsapp * {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background-color: #f0efef;
-}
-
-.umsapp .unlock button.round-button {
-  border-radius: 50%;
-  width: 40%;
-  height: 120px;
-  margin-top: 50px;
-  cursor: pointer;
-  background-image: url(/icons/icon-512x512-v3.png);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  border: none;
-}
-
 .umsapp .info-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
+    width: 30px;
     height: 21px;
     background-color: #ffc107;
     color: #000;
@@ -141,10 +111,4 @@ body {
 .terms-content a {
   color: #2563eb;
   text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-  .umsapp .unlock .door-button {
-    margin: 5px auto 40px !important;
-  }
 }

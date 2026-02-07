@@ -116,3 +116,9 @@
   line-height: 1.4;
 }
 
+@media (max-width: 768px) {
+  .umsapp .unlock button.door-button {
+    margin: 5px auto 40px !important;
+  }
+}
+
