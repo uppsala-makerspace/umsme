@@ -99,39 +99,41 @@ export default function MembershipSelection({
         </div>
       )}
 
-      <h3 className="text-h3">{t(isRenewal ? "renewMembership" : "selectMembership")}</h3>
+      <h3 className="text-center">{t(isRenewal ? "renewMembership" : "selectMembership")}</h3>
 
       {memberStatus?.type === "none" && (
-        <p className="text-container">{t("Membershipstext1")}</p>
+        <p className="flex flex-col items-center text-center mt-5 mb-4">{t("Membershipstext1")}</p>
       )}
 
       {/* Membership type checkboxes */}
       <div className="flex flex-col gap-2">
-        <label className={`checkbox-option ${familyLocked ? "opacity-50" : ""}`}>
+        <label className={`flex items-start gap-3 p-3 border border-gray-300 rounded cursor-pointer bg-white hover:border-brand-green ${familyLocked ? "opacity-50" : ""}`}>
           <input
             type="checkbox"
             checked={isFamily}
             onChange={(e) => onFamilyChange?.(e.target.checked)}
             disabled={familyLocked}
+            className="w-[18px] h-[18px] mt-0.5 shrink-0 accent-brand-green"
           />
-          <div className="checkbox-option-text">
-            <span className="checkbox-option-label">{t("FamilyMembership")}</span>
-            <span className="checkbox-option-description">
+          <div className="flex flex-col gap-0.5">
+            <span className="font-medium text-sm">{t("FamilyMembership")}</span>
+            <span className="text-xs text-gray-500">
               {familyLocked ? t("familyLockedUntilRenewal") : t("familyMembershipInfo")}
             </span>
           </div>
         </label>
 
         {!isFamily && (
-          <label className="checkbox-option">
+          <label className="flex items-start gap-3 p-3 border border-gray-300 rounded cursor-pointer bg-white hover:border-brand-green">
             <input
               type="checkbox"
               checked={isDiscounted}
               onChange={(e) => onDiscountedChange?.(e.target.checked)}
+              className="w-[18px] h-[18px] mt-0.5 shrink-0 accent-brand-green"
             />
-            <div className="checkbox-option-text">
-              <span className="checkbox-option-label">{t("discountedPrice")}</span>
-              <span className="checkbox-option-description">
+            <div className="flex flex-col gap-0.5">
+              <span className="font-medium text-sm">{t("discountedPrice")}</span>
+              <span className="text-xs text-gray-500">
                 {t("discountedPriceInfo")}
               </span>
             </div>

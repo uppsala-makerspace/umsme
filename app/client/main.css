@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* @import url("https://fonts.googleapis.com/css2?family=DM+Mono&display=swap"); */
 
 .umsapp {
   margin: 0;
@@ -31,99 +30,6 @@
   height: auto;
 }
 
-.umsapp .login-form {
-  display: flex;
-  margin: 0 auto !important;
-  flex-direction: column;
-  /* align-items: center; */
-  width: 100%;
-  max-width: 576px;
-  padding: 2%;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
-}
-
-.umsapp .login-form input,
-.umsapp .login-form button {
-  width: 100%;
-  max-width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-
-.umsapp .login-form input[type="checkbox"],
-.umsapp .login-form input[type="radio"] {
-  width: auto;
-  margin: 0;
-  padding: 0;
-}
-
-.umsapp .checkbox-option {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  background: #fff;
-}
-
-.umsapp .checkbox-option:hover {
-  border-color: #5fc86f;
-}
-
-.umsapp .checkbox-option input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  flex-shrink: 0;
-  accent-color: #5fc86f;
-}
-
-.umsapp .checkbox-option-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.umsapp .checkbox-option-label {
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.umsapp .checkbox-option-description {
-  font-size: 12px;
-  color: #666;
-}
-
-.umsapp .login-form button {
-  cursor: pointer;
-}
-
-.umsapp .login-form button:disabled {
-  cursor: default;
-}
-
-.umsapp .login-logo {
-  display: block;
-  max-width: 250px;
-  height: auto;
-  width: 100%;
-  margin-top: 25px;
-  margin-right: auto;
-  margin-bottom: 50px;
-  margin-left: auto;
-}
-
-
-.umsapp .button-icon {
-  width: 25px;
-  height: 25px;
-  margin-right: 8px;
-  vertical-align: middle;
-}
 html,
 body {
   margin: 0;
@@ -132,24 +38,7 @@ body {
   background-color: #f0efef;
 }
 
-.umsapp .divider {
-  width: 1px;
-  height: 20px;
-  background-color: #000000;
-  margin: 0 10px;
-}
-
-.umsapp .text-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.umsapp .login-form button.round-button {
+.umsapp .unlock button.round-button {
   border-radius: 50%;
   width: 40%;
   height: 120px;
@@ -160,92 +49,6 @@ body {
   background-position: center;
   background-size: contain;
   border: none;
-}
-
-.umsapp .text-h3 {
-  justify-content: center;
-  text-align: center;
-}
-.umsapp .membershipsContainer p {
-  max-width: 450px;
-}
-.umsapp .membership {
-  padding: 5px;
-  margin: 10px;
-}
-
-.umsapp .price {
-  display: flex;
-  align-items: center;
-  column-gap: 20px;
-  margin-top: 0px;
-  padding-top: 0px;
-}
-.umsapp .addMembership {
-  width: 80px;
-  height: 30px;
-  color: #f0efef;
-  justify-content: center;
-  border: none;
-  border-radius: 20px;
-  font-size: 16px;
-  background-color: #5fc86f;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.umsapp .addMembership:hover {
-  background-color: #096817;
-}
-
-.umsapp .pay-button {
-  background-color: #cccccc; /* Grå färg för inaktiverad knapp */
-  cursor: not-allowed;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  color: white;
-  width: 100%;
-}
-
-.umsapp .pay-button.hover-enabled {
-  background-color: #5fc86f;
-  cursor: pointer;
-}
-
-.umsapp .pay-button.hover-enabled:hover {
-  background-color: #096817;
-}
-
-.umsapp .forgot-password-page form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.umsapp .forgot-password-page form input,
-.umsapp .forgot-password-page form button {
-  width: 90%;
-  max-width: 400px;
-  margin: 10px 0;
-}
-
-.umsapp .wideButton {
-  width: 100%;
-  text-decoration: none;
-  text-align: center;
-}
-
-.umsapp .info-message {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 16px;
 }
 
 .umsapp .info-icon {
@@ -346,18 +149,7 @@ body {
 }
 
 @media (max-width: 768px) {
-  .umsapp .login-form input,
-  .umsapp .login-form button,
-  .umsapp .text-area {
-    width: 90%;
-    margin: 5px 5% !important;
-  }
-  .umsapp .text-container {
-    width: 90%;
-    margin: 5px auto;
-    margin-bottom: 20px;
-  }
-  .umsapp .login-form.unlock .door-button {
+  .umsapp .unlock .door-button {
     margin: 5px auto 40px !important;
   }
 }

@@ -9,7 +9,7 @@ export const LogRegSwitcher = () => {
   return (
     <div className="logreg-switcher">
       <NavLink to="/login">{t('login')}</NavLink>
-      <div className="divider"></div>
+      <div className="w-px h-5 bg-[#ccc] mx-2.5"></div>
       <NavLink to="/register">{t('register')}</NavLink>
     </div>
   );

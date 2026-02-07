@@ -24,10 +24,3 @@
   .language-switcher .language:hover {
     color: black;
   }
-  
-  .umsapp .language-switcher .divider {
-    width: 1px;
-    height: 25px;
-    background-color: #000000;
-    margin: 0 10px;
-  }

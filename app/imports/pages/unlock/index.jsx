@@ -154,7 +154,7 @@ export default () => {
   return (
     <>
       <TopBar />
-      <div className="login-form unlock">
+      <div className="unlock flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
         {loading ? null : (
           <Unlock
             doors={doors}

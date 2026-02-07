@@ -27,11 +27,11 @@ export default function InitiatedPayment({
   if (step === "processing") {
     return (
       <div className="flex flex-col gap-4 items-center">
-        <h3 className="text-h3">{t("waitingForPayment")}</h3>
+        <h3 className="text-center">{t("waitingForPayment")}</h3>
 
         {qrCode ? (
           <>
-            <p className="text-container">{t("ScanQrCode")}</p>
+            <p className="flex flex-col items-center text-center mt-5 mb-4">{t("ScanQrCode")}</p>
             <img
               src={qrCode}
               alt="Swish QR Code"
@@ -39,7 +39,7 @@ export default function InitiatedPayment({
             />
           </>
         ) : (
-          <p className="text-container">{t("FinishPayment")}</p>
+          <p className="flex flex-col items-center text-center mt-5 mb-4">{t("FinishPayment")}</p>
         )}
 
         <div className="flex items-center gap-2">
@@ -73,9 +73,9 @@ export default function InitiatedPayment({
             />
           </svg>
         </div>
-        <h3 className="text-h3">{t("paymentApproved")}</h3>
-        <p className="text-container">{t("ThankPayment")}</p>
-        <p className="text-container">{t("MembershipRegistered")}</p>
+        <h3 className="text-center">{t("paymentApproved")}</h3>
+        <p className="flex flex-col items-center text-center mt-5 mb-4">{t("ThankPayment")}</p>
+        <p className="flex flex-col items-center text-center mt-5 mb-4">{t("MembershipRegistered")}</p>
 
         <Button onClick={onBackToStart}>
           {t("BackToStart")}
@@ -104,10 +104,10 @@ export default function InitiatedPayment({
             />
           </svg>
         </div>
-        <h3 className="text-h3">
+        <h3 className="text-center">
           {isTimeout ? t("paymentTimeout") : t("paymentFailed")}
         </h3>
-        <p className="text-container">
+        <p className="flex flex-col items-center text-center mt-5 mb-4">
           {isTimeout ? t("paymentTimeoutDescription") : error || t("SomethingWentWrong")}
         </p>
 

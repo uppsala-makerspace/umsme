@@ -28,10 +28,10 @@ export default ({google, facebook, onSubmit}) => {
 
   return (
     <>
-      <form onSubmit={submit} className="login-form">
-        <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
+      <form onSubmit={submit} className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
+        <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
 
-        <p className="info-message">
+        <p className="flex items-start gap-2 text-sm text-gray-700 mb-4">
           <span className="info-icon">⚠</span>
           {t("useExistingEmailInfo")}
         </p>

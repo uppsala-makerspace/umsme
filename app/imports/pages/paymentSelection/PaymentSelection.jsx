@@ -86,7 +86,7 @@ export default function PaymentSelection({
         )}
       </div>
 
-      <h3 className="text-h3">{t("selectPaymentMethod")}</h3>
+      <h3 className="text-center">{t("selectPaymentMethod")}</h3>
 
       <div className="flex flex-col gap-2 pl-4">
         <label className="flex items-center gap-2 cursor-pointer">
@@ -138,7 +138,7 @@ export default function PaymentSelection({
               <h2 className="text-lg font-semibold">{t("termsOfPurchase")}</h2>
               <button
                 onClick={() => setShowTermsDialog(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl leading-none !w-auto !m-0 !p-0"
+                className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
               >
                 &times;
               </button>

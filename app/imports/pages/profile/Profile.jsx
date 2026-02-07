@@ -19,7 +19,7 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
   };
 
   return (
-    <form onSubmit={handleSubmit} className="login-form">
+    <form onSubmit={handleSubmit} className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
 
       <Input
         label={t("Name")}

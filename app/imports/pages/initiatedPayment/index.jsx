@@ -95,7 +95,7 @@ export default function InitiatedPaymentPage() {
   return (
     <>
       <TopBar />
-      <div className="login-form">
+      <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
         <InitiatedPayment
           step={step}
           qrCode={qrCode}

@@ -34,10 +34,10 @@ const Unlock = ({
   if (liabilityNeedsAttention) {
     return (
       <>
-        <p className="text-container">
+        <p className="flex flex-col items-center text-center mt-5 mb-4">
           {liabilityOutdated ? t("homeLiabilityOutdated") : t("homeLiabilityNotApproved")}
         </p>
-        <Link to="/liability" className="wideButton">
+        <Link to="/liability" className="w-full block no-underline text-center">
           <Button fullWidth>{t("homeLiabilityButton")}</Button>
         </Link>
       </>
@@ -47,10 +47,10 @@ const Unlock = ({
   if (mandatoryCertificate && !hasMandatoryCertificate) {
     return (
       <>
-        <p className="text-container">
+        <p className="flex flex-col items-center text-center mt-5 mb-4">
           {t("unlockMandatoryCertificateRequired")}
         </p>
-        <Link to={`/certificates/${mandatoryCertificate._id}`} className="wideButton">
+        <Link to={`/certificates/${mandatoryCertificate._id}`} className="w-full block no-underline text-center">
           <Button fullWidth>{t("unlockMandatoryCertificateButton")}</Button>
         </Link>
       </>

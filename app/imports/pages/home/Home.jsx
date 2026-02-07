@@ -40,11 +40,11 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
 
   if (!verified) {
     return <>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
-      <h3 className="text-h3">{t("welcome")}!</h3>
-      <p className="text-container">{t("emailNotVerifiedText1")}</p>
-      <p className="text-container">{t("emailNotVerifiedText2")}</p>
-      <Link to="/waitforemailverification" className="wideButton">
+      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <h3 className="text-center">{t("welcome")}!</h3>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("emailNotVerifiedText1")}</p>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("emailNotVerifiedText2")}</p>
+      <Link to="/waitforemailverification" className="w-full block no-underline text-center">
         <Button fullWidth>{t("verifyEmailButton")}</Button>
       </Link>
     </>;
@@ -52,11 +52,11 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
 
   if (memberName === '') {
     return <>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
-      <h3 className="text-h3">{t("welcome")}!</h3>
-      <p className="text-container">{t("noNameText1")}</p>
-      <p className="text-container">{t("noNameText2")}</p>
-      <Link to="/profile" className="wideButton">
+      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <h3 className="text-center">{t("welcome")}!</h3>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("noNameText1")}</p>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("noNameText2")}</p>
+      <Link to="/profile" className="w-full block no-underline text-center">
         <Button fullWidth>{t("addNameButton")}</Button>
       </Link>
     </>;
@@ -64,9 +64,9 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
 
   if (invite) {
     return <>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
-      <h3 className="text-h3">{t("welcome")} {name}!</h3>
-      <p className="text-container">{t("familyInviteText")}</p>
+      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <h3 className="text-center">{t("welcome")} {name}!</h3>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("familyInviteText")}</p>
       <Button fullWidth onClick={onAcceptInvite}>
         {t("acceptInvite")}
       </Button>
@@ -80,25 +80,25 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
     const liabilityNeedsAttention = !liabilityDate || liabilityOutdated;
 
     return <>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
-      <h3 className="text-h3">{t("greeting2")} {name}!</h3>
+      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <h3 className="text-center">{t("greeting2")} {name}!</h3>
       {timeToRenew && (
         <div>
-          <p className="text-container">
+          <p className="flex flex-col items-center text-center mt-5 mb-4">
             {t("AlertEndDate")}
             {daysLeftOfLab.toFixed(0)} {t("days")}
           </p>
-          <Link to="/membership" className="wideButton">
+          <Link to="/membership" className="w-full block no-underline text-center">
             <Button fullWidth>{t("RenewMembership")}</Button>
           </Link>
         </div>
       )}
       {liabilityNeedsAttention && (
         <>
-          <p className="text-container">
+          <p className="flex flex-col items-center text-center mt-5 mb-4">
             {liabilityOutdated ? t("homeLiabilityOutdated") : t("homeLiabilityNotApproved")}
           </p>
-          <Link to="/liability" className="wideButton">
+          <Link to="/liability" className="w-full block no-underline text-center">
             <Button fullWidth>{t("homeLiabilityButton")}</Button>
           </Link>
         </>
@@ -106,21 +106,21 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
     </>;
   } else if (daysLeftOfLab < 0) {
     return <>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
-      <h3 className="text-h3">{t("welcome")} {name}!</h3>
-      <p className="text-container">{t("expiredMembershipText1")}</p>
-      <p className="text-container">{t("expiredMembershipText2")}</p>
-      <Link to="/payment" className="wideButton">
+      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <h3 className="text-center">{t("welcome")} {name}!</h3>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("expiredMembershipText1")}</p>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("expiredMembershipText2")}</p>
+      <Link to="/payment" className="w-full block no-underline text-center">
         <Button fullWidth>{t("renewMembership")}</Button>
       </Link>
     </>;
   } else {
     return <>
-      <img src="/images/UmLogo.png" alt="UM Logo" className="login-logo" />
-      <h3 className="text-h3">{t("welcome")} {name}!</h3>
-      <p className="text-container">{t("noMembershiptext1")}</p>
-      <p className="text-container">{t("noMembershiptext2")}</p>
-      <Link to="/payment" className="wideButton">
+      <img src="/images/UmLogo.png" alt="UM Logo" className="block max-w-[250px] w-full h-auto mt-6 mb-12 mx-auto" />
+      <h3 className="text-center">{t("welcome")} {name}!</h3>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("noMembershiptext1")}</p>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("noMembershiptext2")}</p>
+      <Link to="/payment" className="w-full block no-underline text-center">
         <Button fullWidth>{t("getMembership")}</Button>
       </Link>
     </>;

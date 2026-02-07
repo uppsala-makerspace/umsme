@@ -19,9 +19,9 @@ const ResetPassword = ({ message, onSubmit }) => {
   };
 
   return (
-    <div className="login-form">
+    <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
       <form onSubmit={handleSubmit}>
-        <h3 className="text-h3">{t("ResetPassword")}</h3>
+        <h3 className="text-center">{t("ResetPassword")}</h3>
         <Input
           type="password"
           placeholder={t("newPassword")}
@@ -39,7 +39,7 @@ const ResetPassword = ({ message, onSubmit }) => {
           {t("ResetPassword")}
         </Button>
       </form>
-      {message && <p className="text-container">{message}</p>}
+      {message && <p className="flex flex-col items-center text-center mt-5 mb-4">{message}</p>}
     </div>
   );
 };

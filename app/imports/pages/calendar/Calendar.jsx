@@ -40,7 +40,7 @@ const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore, mo
     }`;
 
   return (
-    <div className="login-form">
+    <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
       <div className="flex border-b mb-4">
         <button className={tabClass("upcoming")} onClick={() => onModeChange("upcoming")}>
           {t("upcomingEvents")}

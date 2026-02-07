@@ -1,11 +1,11 @@
-.umsapp .login-form .door-label {
+.umsapp .unlock .door-label {
   margin-bottom: 10px;
   font-weight: bold;
   text-align: center;
   width: 100%;
 }
 
-.umsapp .login-form button.door-button {
+.umsapp .unlock button.door-button {
   all: unset;
   display: block;
   margin-left: auto;
@@ -25,7 +25,7 @@
 }
 
 /* Circular top of keyhole */
-.umsapp .login-form button.door-button::before {
+.umsapp .unlock button.door-button::before {
   content: "";
   position: absolute;
   top: 28px;
@@ -38,7 +38,7 @@
 }
 
 /* Trapezoid bottom of keyhole */
-.umsapp .login-form button.door-button::after {
+.umsapp .unlock button.door-button::after {
   content: "";
   position: absolute;
   top: 50px;
@@ -50,17 +50,17 @@
   clip-path: polygon(0% 0%, 100% 0%, 130% 100%, -30% 100%);
 }
 
-.umsapp .login-form button.door-button:hover {
+.umsapp .unlock button.door-button:hover {
   background-color: #4db85d;
 }
 
-.umsapp .login-form button.door-button:active {
+.umsapp .unlock button.door-button:active {
   background-color: #096817;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Text label that appears on hover */
-.umsapp .login-form button.door-button span {
+.umsapp .unlock button.door-button span {
   position: absolute;
   bottom: 8px;
   left: 50%;
@@ -71,29 +71,29 @@
 }
 
 /* Disabled door button (out of range) */
-.umsapp .login-form button.door-button.disabled {
+.umsapp .unlock button.door-button.disabled {
   background-color: #9ca3af;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-.umsapp .login-form button.door-button.disabled:hover {
+.umsapp .unlock button.door-button.disabled:hover {
   background-color: #9ca3af;
 }
 
-.umsapp .login-form button.door-button.disabled:active {
+.umsapp .unlock button.door-button.disabled:active {
   background-color: #9ca3af;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Distance label on disabled button */
-.umsapp .login-form button.door-button.disabled span {
+.umsapp .unlock button.door-button.disabled span {
   font-size: 14px;
   font-weight: bold;
 }
 
 /* Location denied container */
-.umsapp .login-form .location-denied-container {
+.umsapp .unlock .location-denied-container {
   text-align: center;
   margin-bottom: 2rem;
   padding: 1rem;
@@ -102,14 +102,14 @@
   border: 1px solid #fecaca;
 }
 
-.umsapp .login-form .location-denied-message {
+.umsapp .unlock .location-denied-message {
   color: #ef4444;
   font-size: 0.9rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
 }
 
-.umsapp .login-form .location-denied-instructions {
+.umsapp .unlock .location-denied-instructions {
   color: #6b7280;
   font-size: 0.85rem;
   margin: 0 0 1rem 0;

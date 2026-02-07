@@ -16,7 +16,7 @@ export const LanguageSwitcher = () => {
       <span className={i18n.language === "sv" ? "active" : "language"}>
         SV
       </span>
-      <div className="divider"></div>
+      <div className="w-px h-[25px] bg-black mx-2.5"></div>
       <span className={i18n.language === "en" ? "active" : "language"}>
         ENG
       </span>

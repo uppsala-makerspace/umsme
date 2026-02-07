@@ -14,9 +14,9 @@ const ForgotPassword = ({ message, onSubmit }) => {
   };
 
   return (
-    <div className="login-form">
-      <h3 className="text-h3">{t("ForgotPassword")}</h3>
-      <p className="text-container">{t("FillInEmail")}</p>
+    <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
+      <h3 className="text-center">{t("ForgotPassword")}</h3>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("FillInEmail")}</p>
       <form onSubmit={handleSubmit}>
         <Input
           type="email"
@@ -29,7 +29,7 @@ const ForgotPassword = ({ message, onSubmit }) => {
           {t("SendLink")}
         </Button>
       </form>
-      {message && <p className="text-container">{message}</p>}
+      {message && <p className="flex flex-col items-center text-center mt-5 mb-4">{message}</p>}
     </div>
   );
 };

@@ -120,7 +120,7 @@ export default function PaymentSelectionPage() {
     return (
       <>
         <TopBar />
-        <div className="login-form">
+        <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
           <div className="flex flex-col gap-4 items-center">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
             <span>{t("loading")}</span>
@@ -136,7 +136,7 @@ export default function PaymentSelectionPage() {
     return (
       <>
         <TopBar />
-        <div className="login-form">
+        <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
           <div className="flex flex-col gap-4 items-center">
             <p className="text-red-600">{error}</p>
             <Button variant="secondary" onClick={handleCancel}>
@@ -152,7 +152,7 @@ export default function PaymentSelectionPage() {
   return (
     <>
       <TopBar />
-      <div className="login-form">
+      <div className="flex flex-col mx-auto w-full max-w-xl px-[2%] pb-[calc(80px+env(safe-area-inset-bottom))]">
         <PaymentSelection
           paymentOption={paymentOption}
           membershipDates={membershipDates}

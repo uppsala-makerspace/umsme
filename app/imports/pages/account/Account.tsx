@@ -104,7 +104,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
 
         <MembershipStatus member={member} status={status} />
       </div>
-      <Link to="/membership" className="wideButton">
+      <Link to="/membership" className="w-full block no-underline text-center">
         <Button variant={memberDaysRemaining >= 14 ? "secondary" : "primary"} fullWidth>
           {t(memberDaysRemaining < 14 ? "renewMembership" : "extendMembership")}
         </Button>
