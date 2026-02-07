@@ -14,7 +14,7 @@ import Calendar from '/imports/pages/calendar';
 import Map from '/imports/pages/map';
 import Contact from '/imports/pages/contact';
 import Certificates from '/imports/pages/certificates';
-import CertificateDetail from '/imports/pages/certificateDetail';
+import CertificateDetail from '/imports/pages/certificates/detail';
 import CertifierRequestDetail from '/imports/pages/certifierRequestDetail';
 import MembershipSelection from '/imports/pages/membershipSelection';
 import PaymentSelection from '/imports/pages/paymentSelection';

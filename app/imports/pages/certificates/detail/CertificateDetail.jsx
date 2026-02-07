@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import Button from "../../components/Button";
-import MainContent from "../../components/MainContent";
-import Loader from "../../components/Loader";
-import Markdown from "../../components/Markdown";
-import { getLocalized, formatDate, formatDateTime } from "../certificates/utils";
-import "./certificateDetail.css";
+import Button from "../../../components/Button";
+import MainContent from "../../../components/MainContent";
+import Loader from "../../../components/Loader";
+import Markdown from "../../../components/Markdown";
+import { getLocalized, formatDate, formatDateTime } from "../utils";
+import BackLink from "../components/BackLink";
+import StatusBadge from "../components/StatusBadge";
 
 const CertificateDetail = ({
   loading,
@@ -43,10 +43,8 @@ const CertificateDetail = ({
   if (error) {
     return (
       <MainContent>
-        <p className="error-message">{error}</p>
-        <Link to="/certificates" className="back-link">
-          {t("backToCertificates")}
-        </Link>
+        <p className="text-red-600 text-center p-8">{error}</p>
+        <BackLink>{t("backToCertificates")}</BackLink>
       </MainContent>
     );
   }
@@ -64,20 +62,18 @@ const CertificateDetail = ({
 
   return (
     <MainContent>
-      <Link to="/certificates" className="back-link">
-        &larr; {t("backToCertificates")}
-      </Link>
+      <BackLink>{t("backToCertificates")}</BackLink>
 
       {/* Certificate Info */}
-      <section className="certificate-header">
-        <h2 className="certificate-title">{getLocalized(certificate.name, lang)}</h2>
+      <section className="mb-8 pb-4 border-b-2 border-gray-200">
+        <h2 className="text-2xl mb-3 text-gray-800">{getLocalized(certificate.name, lang)}</h2>
         {certificate.description && (
-          <Markdown className="certificate-description">
+          <Markdown className="text-gray-600 leading-relaxed mb-3">
             {getLocalized(certificate.description, lang)}
           </Markdown>
         )}
         {certificate.defaultValidityDays && (
-          <p className="certificate-validity-info">
+          <p className="text-sm text-gray-500">
             {t("validityPeriod")}: {certificate.defaultValidityDays} {t("daysUnit")}
           </p>
         )}
@@ -85,67 +81,67 @@ const CertificateDetail = ({
 
       {/* Mandatory Certificate Notice */}
       {certificate.mandatory && (
-        <div className="mandatory-notice">
-          <span className="mandatory-notice-text">{t("mandatoryCertificateNotice")}</span>
-          <span className="mandatory-icon">⭐</span>
+        <div className="flex justify-between items-center py-3 px-4 mb-6 bg-yellow-50 border border-yellow-300 rounded-lg">
+          <span className="text-sm font-medium text-yellow-800">{t("mandatoryCertificateNotice")}</span>
+          <span className="text-xl">⭐</span>
         </div>
       )}
 
       {/* My Status */}
-      <section className="detail-section">
-        <h3 className="section-title">{t("myStatus")}</h3>
+      <section className="mb-8">
+        <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("myStatus")}</h3>
 
         {isValid && (
-          <div className="status-card valid">
-            <span className="status-badge valid">{t("certified")}</span>
-            <div className="status-details">
+          <div className="p-4 rounded-lg border border-gray-200 border-l-4 border-l-[#5fc86f] bg-green-50">
+            <StatusBadge variant="valid">{t("certified")}</StatusBadge>
+            <div className="mt-3">
               {myAttestation.certifierName && (
-                <p className="status-detail">
-                  <span className="detail-label">{t("certifiedBy")}:</span> {myAttestation.certifierName}
+                <p className="my-1 text-sm text-gray-600">
+                  <span className="font-semibold text-gray-700">{t("certifiedBy")}:</span> {myAttestation.certifierName}
                 </p>
               )}
-              <p className="status-detail">
-                <span className="detail-label">{t("certifiedOn")}:</span> {formatDate(myAttestation.confirmedAt || myAttestation.startDate, lang)}
+              <p className="my-1 text-sm text-gray-600">
+                <span className="font-semibold text-gray-700">{t("certifiedOn")}:</span> {formatDate(myAttestation.confirmedAt || myAttestation.startDate, lang)}
               </p>
               {myAttestation.endDate ? (
-                <p className="status-detail">
-                  <span className="detail-label">{t("validUntil")}:</span> {formatDate(myAttestation.endDate, lang)}
+                <p className="my-1 text-sm text-gray-600">
+                  <span className="font-semibold text-gray-700">{t("validUntil")}:</span> {formatDate(myAttestation.endDate, lang)}
                 </p>
               ) : (
-                <p className="status-detail">
-                  <span className="detail-label">{t("validUntil")}:</span> {t("noExpiration")}
+                <p className="my-1 text-sm text-gray-600">
+                  <span className="font-semibold text-gray-700">{t("validUntil")}:</span> {t("noExpiration")}
                 </p>
               )}
             </div>
             {myAttestation.comment && (
-              <div className="certifier-comment-box">
-                <span className="certifier-comment-label">{t("certifierComment")}</span>
-                <p className="certifier-comment-text">{myAttestation.comment}</p>
+              <div className="mt-4 py-3 px-4 bg-sky-50 border border-sky-200 border-l-4 border-l-sky-500 rounded-md">
+                <span className="block text-xs font-semibold text-sky-700 uppercase tracking-wide mb-2">{t("certifierComment")}</span>
+                <p className="m-0 text-sm text-[#1e3a5f] leading-relaxed">{myAttestation.comment}</p>
               </div>
             )}
           </div>
         )}
 
         {isExpired && (
-          <div className="status-card expired">
-            <span className="status-badge expired">{t("expired")}</span>
-            <div className="status-details">
+          <div className="p-4 rounded-lg border border-gray-200 border-l-4 border-l-gray-400 bg-gray-50">
+            <StatusBadge variant="expired">{t("expired")}</StatusBadge>
+            <div className="mt-3">
               {myAttestation.certifierName && (
-                <p className="status-detail">
-                  <span className="detail-label">{t("certifiedBy")}:</span> {myAttestation.certifierName}
+                <p className="my-1 text-sm text-gray-600">
+                  <span className="font-semibold text-gray-700">{t("certifiedBy")}:</span> {myAttestation.certifierName}
                 </p>
               )}
-              <p className="status-detail">
-                <span className="detail-label">{t("certifiedOn")}:</span> {formatDate(myAttestation.confirmedAt || myAttestation.startDate, lang)}
+              <p className="my-1 text-sm text-gray-600">
+                <span className="font-semibold text-gray-700">{t("certifiedOn")}:</span> {formatDate(myAttestation.confirmedAt || myAttestation.startDate, lang)}
               </p>
-              <p className="status-detail">
-                <span className="detail-label">{t("expiredOn")}:</span> {formatDate(myAttestation.endDate, lang)}
+              <p className="my-1 text-sm text-gray-600">
+                <span className="font-semibold text-gray-700">{t("expiredOn")}:</span> {formatDate(myAttestation.endDate, lang)}
               </p>
             </div>
             {myAttestation.comment && (
-              <div className="certifier-comment-box">
-                <span className="certifier-comment-label">{t("certifierComment")}</span>
-                <p className="certifier-comment-text">{myAttestation.comment}</p>
+              <div className="mt-4 py-3 px-4 bg-sky-50 border border-sky-200 border-l-4 border-l-sky-500 rounded-md">
+                <span className="block text-xs font-semibold text-sky-700 uppercase tracking-wide mb-2">{t("certifierComment")}</span>
+                <p className="m-0 text-sm text-[#1e3a5f] leading-relaxed">{myAttestation.comment}</p>
               </div>
             )}
             <div className="flex flex-wrap gap-2 mt-3">
@@ -160,14 +156,14 @@ const CertificateDetail = ({
         )}
 
         {isPending && (
-          <div className="status-card pending">
-            <div className="pending-header">
-              <div className="pending-header-left">
-                <span className="status-badge pending">{t("pendingRequest")}</span>
+          <div className="p-4 rounded-lg border border-gray-200 border-l-4 border-l-amber-500 bg-amber-50">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center flex-wrap gap-2">
+                <StatusBadge variant="pending">{t("pendingRequest")}</StatusBadge>
                 {myAttestation.attempt > 1 && (
-                  <span className="attempt-badge">
+                  <StatusBadge variant="attempt" small>
                     {t("attemptNumber", { number: myAttestation.attempt })}
-                  </span>
+                  </StatusBadge>
                 )}
               </div>
               <button
@@ -179,16 +175,16 @@ const CertificateDetail = ({
                 ↻
               </button>
             </div>
-            <p className="pending-requested-at">
+            <p className="mt-2 mb-0 text-sm text-amber-800">
               {t("requestedAt")}: {formatDateTime(myAttestation.startDate, lang)}
             </p>
             {myAttestation.comment ? (
-              <div className="certifier-comment-box highlight">
-                <span className="certifier-comment-label">{t("certifierFeedback")}</span>
-                <p className="certifier-comment-text">{myAttestation.comment}</p>
+              <div className="mt-4 py-3 px-4 bg-amber-100 border border-amber-300 border-l-4 border-l-amber-500 rounded-md">
+                <span className="block text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">{t("certifierFeedback")}</span>
+                <p className="m-0 text-sm text-amber-900 leading-relaxed">{myAttestation.comment}</p>
               </div>
             ) : (
-              <p className="pending-waiting-message">
+              <p className="mt-3 mb-0 p-3 text-sm text-amber-900 bg-white/50 rounded-md leading-relaxed">
                 {t("pendingRequestWaiting")}
               </p>
             )}
@@ -214,8 +210,8 @@ const CertificateDetail = ({
         )}
 
         {canRequest && !isExpired && (
-          <div className="status-card available">
-            <p>{t("canRequestCertificate")}</p>
+          <div className="p-4 rounded-lg border border-gray-200 border-l-4 border-l-blue-500 bg-blue-50">
+            <p className="mb-4">{t("canRequestCertificate")}</p>
             <Button
               onClick={() => handleAction(onRequest)}
               disabled={actionLoading}
