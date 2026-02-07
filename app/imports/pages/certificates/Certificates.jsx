@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import MainContent from "../../components/MainContent";
+import Loader from "../../components/Loader";
 import "./certificates.css";
 
 const Certificates = ({
@@ -32,7 +33,7 @@ const Certificates = ({
   if (loading) {
     return (
       <MainContent>
-        <p className="text-center">{t("loading")}</p>
+        <Loader />
       </MainContent>
     );
   }

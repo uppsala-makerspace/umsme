@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
+import Loader from "../../components/Loader";
 import Markdown from "../../components/Markdown";
 
 /**
@@ -61,8 +62,8 @@ const Liability = ({
 
   if (loading) {
     return (
-      <MainContent className="items-center justify-center pt-8">
-        <p className="text-gray-600">{t("loading")}</p>
+      <MainContent>
+        <Loader />
       </MainContent>
     );
   }

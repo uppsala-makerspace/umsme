@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import MainContent from "../../components/MainContent";
+import Loader from "../../components/Loader";
 import "./certifierRequests.css";
 
 const CertifierRequests = ({
@@ -27,7 +28,7 @@ const CertifierRequests = ({
   if (loading) {
     return (
       <MainContent>
-        <p className="text-center">{t("loading")}</p>
+        <Loader />
       </MainContent>
     );
   }

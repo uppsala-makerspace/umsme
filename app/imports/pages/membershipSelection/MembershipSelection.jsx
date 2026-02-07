@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import MembershipStatus from "/imports/components/MembershipStatus";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
+import Loader from "../../components/Loader";
 
 /**
  * Pure presentation component for membership selection.
@@ -97,10 +98,7 @@ export default function MembershipSelection({
   if (loading) {
     return (
       <MainContent>
-        <div className="flex flex-col gap-4 items-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
-          <span>{t("loading")}</span>
-        </div>
+        <Loader />
       </MainContent>
     );
   }

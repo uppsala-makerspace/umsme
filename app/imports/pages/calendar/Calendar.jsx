@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
 import MainContent from "../../components/MainContent";
+import Loader from "../../components/Loader";
 
 // Configure DOMPurify to open links in new tab
 DOMPurify.addHook("afterSanitizeAttributes", (node) => {
@@ -51,7 +52,7 @@ const Calendar = ({ events, loading, error, hasMore, loadingMore, onLoadMore, mo
         </button>
       </div>
       {loading ? (
-        <div className="loader"></div>
+        <Loader />
       ) : error ? (
         <p className="text-red-600">{error}</p>
       ) : (

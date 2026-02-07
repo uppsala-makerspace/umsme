@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
+import Loader from "../../components/Loader";
 import Markdown from "../../components/Markdown";
 import "./certificateDetail.css";
 
@@ -52,7 +53,7 @@ const CertificateDetail = ({
   if (loading) {
     return (
       <MainContent>
-        <p className="text-center">{t("loading")}</p>
+        <Loader />
       </MainContent>
     );
   }

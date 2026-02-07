@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
+import Loader from "../../components/Loader";
 
 /**
  * Pure presentation component for initiated payment status.
@@ -132,10 +133,7 @@ export default function InitiatedPayment({
   // Fallback loading state
   return (
     <MainContent>
-    <div className="flex flex-col gap-4 items-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
-      <span>{t("loading")}</span>
-    </div>
+      <Loader />
     </MainContent>
   );
 }
