@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 import { Navigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Unlock from "./Unlock";
+import { LocationContext } from "/imports/context/LocationContext";
 
 export default () => {
   const userId = useTracker(() => Meteor.userId());
+  const { userPosition, locationPermission } = useContext(LocationContext);
   const [doors, setDoors] = useState([]);
   const [opening, setOpening] = useState({});
   const [loading, setLoading] = useState(true);
@@ -14,59 +16,44 @@ export default () => {
   const [liabilityOutdated, setLiabilityOutdated] = useState(false);
   const [mandatoryCertificate, setMandatoryCertificate] = useState(null);
   const [hasMandatoryCertificate, setHasMandatoryCertificate] = useState(true);
-  const [userPosition, setUserPosition] = useState(null);
-  const [locationPermission, setLocationPermission] = useState("pending"); // pending, granted, denied, unavailable
   const [proximityRange, setProximityRange] = useState(100);
   const [isAdmin, setIsAdmin] = useState(false);
+  const promptWatchIdRef = useRef(null);
 
-  // Start geolocation tracking
+  // When permission is pending (first visit), trigger the browser prompt via
+  // watchPosition. Once the user grants permission, the LocationContext picks
+  // it up and starts global tracking, so we can clear this local watch.
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocationPermission("unavailable");
+    if (locationPermission !== "pending" || !navigator.geolocation) {
+      // Permission already resolved — clear any prompt watch
+      if (promptWatchIdRef.current != null) {
+        navigator.geolocation.clearWatch(promptWatchIdRef.current);
+        promptWatchIdRef.current = null;
+      }
       return;
     }
 
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        setUserPosition({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-        setLocationPermission("granted");
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationPermission("denied");
+    promptWatchIdRef.current = navigator.geolocation.watchPosition(
+      () => {
+        // Success — context will handle tracking from here
+        if (promptWatchIdRef.current != null) {
+          navigator.geolocation.clearWatch(promptWatchIdRef.current);
+          promptWatchIdRef.current = null;
         }
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 5000,
-      }
+      () => {
+        // Error handled by context's permission listener
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
     );
 
     return () => {
-      navigator.geolocation.clearWatch(watchId);
+      if (promptWatchIdRef.current != null) {
+        navigator.geolocation.clearWatch(promptWatchIdRef.current);
+        promptWatchIdRef.current = null;
+      }
     };
-  }, []);
-
-  // Listen for permission changes via Permissions API
-  useEffect(() => {
-    if (!navigator.permissions) return;
-    let status;
-    const onChange = () => {
-      if (status.state === "granted") setLocationPermission("granted");
-      else if (status.state === "denied") setLocationPermission("denied");
-      else setLocationPermission("pending");
-    };
-    navigator.permissions.query({ name: "geolocation" }).then((s) => {
-      status = s;
-      status.addEventListener("change", onChange);
-    }).catch(() => {});
-    return () => status?.removeEventListener("change", onChange);
-  }, []);
+  }, [locationPermission]);
 
   // Fetch door data and member info.
   // Sequential calls to avoid a race condition where parallel Meteor.callAsync

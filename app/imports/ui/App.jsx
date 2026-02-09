@@ -24,10 +24,12 @@ import Notifications from '/imports/pages/notifications';
 import NotificationSettings from '/imports/pages/notificationSettings';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { NotificationProvider } from '/imports/context/NotificationContext';
+import { LocationProvider } from '/imports/context/LocationContext';
 
 export const App = () => (
   <div>
     <Router>
+      <LocationProvider>
       <NotificationProvider>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -56,5 +58,6 @@ export const App = () => (
           <Route path="/notification-settings" element={<NotificationSettings />} />
         </Routes>
       </NotificationProvider>
+      </LocationProvider>
     </Router>
   </div>);
