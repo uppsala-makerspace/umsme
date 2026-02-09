@@ -59,7 +59,7 @@ const InstallButton = () => {
   }
 
   return (
-    <Link to="/install" className="flex items-center gap-1 px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium no-underline transition-colors">
+    <Link to="/install" className="flex items-center gap-1 px-2 py-1 sm:mx-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium no-underline transition-colors">
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
       </svg>
@@ -145,16 +145,17 @@ export const TopBar = ({ showNotifications = true }) => {
   const titleKey = PAGE_TITLES[location.pathname];
 
   return (
-    <header className="flex justify-between items-center px-4 py-2 bg-white border-b border-gray-200 min-h-[44px]">
+    <header className="flex justify-between items-center pl-4 pr-2 sm:pr-4 py-2 bg-white border-b border-gray-200 min-h-[44px]">
       <div className="flex items-center gap-2 min-w-0">
         <HamburgerMenu />
         {titleKey && <span className="text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">{t(titleKey)}</span>}
       </div>
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-1 sm:gap-2">
           {isInstalledPWA ? <InstalledIcon active={location.pathname === "/install"} /> : (showInstall && <InstallButton />)}
           {showNotifications && <NotificationBell active={location.pathname === "/notifications" || location.pathname === "/notification-settings"} />}
         </div>
+        <div className="w-px self-stretch bg-gray-200"></div>
         <LanguageSwitcher />
       </div>
     </header>

@@ -11,11 +11,11 @@ export const LanguageSwitcher = () => {
   };
 
   return (
-    <button className="flex items-center text-black cursor-pointer border-none font-mono text-lg p-0 bg-transparent" onClick={handleLanguageSwitch}>
+    <button className="flex items-center cursor-pointer border-none font-mono text-sm px-3 py-1 bg-gray-100 rounded-full" onClick={handleLanguageSwitch}>
       <span className={i18n.language === "sv" ? "text-brand-green font-bold" : "text-gray-500 cursor-pointer"}>
         SV
       </span>
-      <div className="w-px h-[25px] bg-gray-300 mx-2.5"></div>
+      <div className="w-px h-4 bg-gray-300 mx-2"></div>
       <span className={i18n.language === "en" ? "text-brand-green font-bold" : "text-gray-500 cursor-pointer"}>
         ENG
       </span>
