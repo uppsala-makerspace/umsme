@@ -19,7 +19,7 @@ export default () => {
   };
 
   return (
-    <Layout bottomNav={false}>
+    <Layout bottomNav={false} showNotifications={false}>
       <ForgotPassword message={message} onSubmit={handleForgotPassword} />
     </Layout>
   );

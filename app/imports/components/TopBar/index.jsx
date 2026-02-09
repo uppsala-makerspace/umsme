@@ -124,7 +124,7 @@ const PAGE_TITLES = {
 export const TopBar = ({ showNotifications = true }) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const isHome = location.pathname === "/" || location.pathname === "/home";
+  const showInstall = ["/", "/home", "/login", "/register"].includes(location.pathname);
   const isInstalledPWA = isPWA();
   const titleKey = PAGE_TITLES[location.pathname];
 
@@ -135,12 +135,10 @@ export const TopBar = ({ showNotifications = true }) => {
         {titleKey && <span className="text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">{t(titleKey)}</span>}
       </div>
       <div className="flex items-center gap-5">
-        {showNotifications && (
-          <div className="flex items-center gap-2">
-            {isInstalledPWA ? <InstalledIcon /> : (isHome && <InstallButton />)}
-            <NotificationBell />
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {isInstalledPWA ? <InstalledIcon /> : (showInstall && <InstallButton />)}
+          {showNotifications && <NotificationBell />}
+        </div>
         <LanguageSwitcher />
       </div>
     </header>

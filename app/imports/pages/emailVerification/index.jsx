@@ -22,7 +22,7 @@ export default () => {
   }
 
   return (
-    <Layout bottomNav={false}>
+    <Layout bottomNav={false} showNotifications={false}>
       <WaitForEmailVerification
         onSendVerification={handleSendVerification}
       />

@@ -27,7 +27,7 @@ export default () => {
   };
 
   return (
-    <Layout bottomNav={false}>
+    <Layout bottomNav={false} showNotifications={false}>
       {Meteor.userId() ? (<Navigate to="/" />) : null}
       <Register onSubmit={handleSubmit} google={google} facebook={facebook} />
     </Layout>

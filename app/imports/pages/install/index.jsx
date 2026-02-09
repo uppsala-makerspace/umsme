@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
+import { Meteor } from "meteor/meteor";
 import UAParser from "ua-parser-js";
 import Layout from "/imports/components/Layout/Layout";
 import Install from "./Install";
@@ -107,8 +108,10 @@ export default function InstallPage() {
     }
   }, []);
 
+  const isLoggedIn = !!Meteor.userId();
+
   return (
-    <Layout>
+    <Layout bottomNav={isLoggedIn} showNotifications={isLoggedIn}>
       <Install
         platform={platform}
         isInstalledPWA={isInstalledPWA}
@@ -116,6 +119,7 @@ export default function InstallPage() {
         qrCodeUrl={qrCodeUrl}
         installPromptAvailable={installPromptAvailable}
         isInstalling={isInstalling}
+        showDismissToggle={isLoggedIn}
         onDismiss={handleDismiss}
         onRestore={handleRestore}
         onInstallClick={handleInstallClick}

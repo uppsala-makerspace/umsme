@@ -25,7 +25,7 @@ export default () => {
   };
 
   return (
-    <Layout bottomNav={false}>
+    <Layout bottomNav={false} showNotifications={false}>
       {unverifiedUser ? (<Navigate to="/waitForEmailVerification" />) : null}
       {verified ? (<Navigate to="/" />) : null}
       <Login onSubmit={handleLogin} google={google} facebook={facebook} />

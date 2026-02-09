@@ -108,7 +108,7 @@ const DesktopInstructions = ({ t, qrCodeUrl }) => (
  * @param {function} props.onRestore - Callback when user wants to show install button again
  * @param {function} props.onInstallClick - Callback to trigger native install prompt
  */
-const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installPromptAvailable, isInstalling, onDismiss, onRestore, onInstallClick }) => {
+const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installPromptAvailable, isInstalling, showDismissToggle = true, onDismiss, onRestore, onInstallClick }) => {
   const { t } = useTranslation();
 
   return (
@@ -149,8 +149,8 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
       )}
       {!isInstalledPWA && platform === 'desktop' && <DesktopInstructions t={t} qrCodeUrl={qrCodeUrl} />}
 
-      {/* Dismiss/Restore option (only when not installed as PWA) */}
-      {!isInstalledPWA && (
+      {/* Dismiss/Restore option (only when not installed as PWA, and user is logged in) */}
+      {!isInstalledPWA && showDismissToggle && (
         <div className="mt-6 pt-4 border-t border-gray-200">
           <label className="flex items-center gap-3 cursor-pointer">
             <input

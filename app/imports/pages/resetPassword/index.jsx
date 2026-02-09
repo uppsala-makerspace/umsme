@@ -23,7 +23,7 @@ export default () => {
   };
 
   return (
-    <Layout bottomNav={false}>
+    <Layout bottomNav={false} showNotifications={false}>
       <ResetPassword message={message} onSubmit={handleResetPassword} />
     </Layout>
   );
