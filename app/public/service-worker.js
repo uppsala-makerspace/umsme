@@ -114,7 +114,11 @@ self.addEventListener("push", (event) => {
       // BroadcastChannel may not be supported
     }
 
-    await self.registration.showNotification(title, { body });
+    await self.registration.showNotification(title, {
+      body,
+      icon: "/icons/icon-192x192-v3.png",
+      badge: "/icons/icon-192x192-v3.png",
+    });
   };
 
   event.waitUntil(work());
