@@ -152,3 +152,15 @@ export const WithoutTerms = {
     ...baseActions,
   },
 };
+
+// Family member - blocked from paying
+export const FamilyMemberBlocked = {
+  args: {
+    paymentOption,
+    membershipDates: newMemberDates,
+    termsContent: sampleTermsContent,
+    isLoading: false,
+    isFamilyMember: true,
+    ...baseActions,
+  },
+};

@@ -279,6 +279,21 @@ export const FamilyMemberCanChangeStatus = {
   },
 };
 
+// === FAMILY MEMBER (infamily - non-paying) ===
+
+export const FamilyMemberBlocked = {
+  args: {
+    member: { name: "Jane Doe", mid: 12352, infamily: "xxx" },
+    memberStatus: { type: "member", memberEnd: daysFromNow(10), family: true },
+    options: calculateOptionAvailability(allOptions, { type: "member", memberEnd: daysFromNow(10), family: true }, false),
+    isDiscounted: false,
+    isFamily: false,
+    isFamilyMember: true,
+    familyLocked: false,
+    ...baseActions,
+  },
+};
+
 // === EXPIRED MEMBER ===
 
 // Expired member - treated as new, all yearly options available

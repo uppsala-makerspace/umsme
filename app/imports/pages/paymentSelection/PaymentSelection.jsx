@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
@@ -26,6 +27,7 @@ export default function PaymentSelection({
   membershipDates,
   termsContent,
   isLoading = false,
+  isFamilyMember = false,
   disabledMessage,
   onPay,
   onCancel,
@@ -65,6 +67,20 @@ export default function PaymentSelection({
           <Button variant="secondary" onClick={onCancel}>
             {t("cancel")}
           </Button>
+        </div>
+      </MainContent>
+    );
+  }
+
+  if (isFamilyMember) {
+    return (
+      <MainContent>
+        <div className="flex flex-col gap-4 items-center text-center">
+          <p className="text-gray-600">{t("familyRenewalWarning")}</p>
+          <p className="text-gray-500 text-sm">{t("familyLeaveHint")}</p>
+          <Link to="/account" className="w-full block no-underline text-center">
+            <Button fullWidth>{t("goToAccount")}</Button>
+          </Link>
         </div>
       </MainContent>
     );

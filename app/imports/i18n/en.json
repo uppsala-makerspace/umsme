@@ -341,5 +341,9 @@
   "membershipExpires7days": "Your membership expires in 7 days",
   "membershipExpiresToday": "Your membership expires today",
   "membershipExpired7days": "Your membership expired 7 days ago",
-  "renewPrompt": "Please renew to keep your membership!"
+  "renewPrompt": "Please renew to keep your membership!",
+
+  "familyRenewalWarning": "You are part of a family membership. Contact the person responsible for the payment to renew.",
+  "familyLeaveHint": "You can also choose to leave the family from your account page.",
+  "goToAccount": "Go to account"
 }

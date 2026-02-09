@@ -106,11 +106,17 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
 
         <MembershipStatus member={member} status={status} />
       </div>
-      <Link to="/membership" className="w-full block no-underline text-center">
-        <Button variant={memberDaysRemaining >= 14 ? "secondary" : "primary"} fullWidth>
-          {t(memberDaysRemaining < 14 ? "renewMembership" : "extendMembership")}
-        </Button>
-      </Link>
+      {member.infamily ? (
+        <p className="text-center text-gray-600">
+          {t("familyRenewalWarning")}
+        </p>
+      ) : (
+        <Link to="/membership" className="w-full block no-underline text-center">
+          <Button variant={memberDaysRemaining >= 14 ? "secondary" : "primary"} fullWidth>
+            {t(memberDaysRemaining < 14 ? "renewMembership" : "extendMembership")}
+          </Button>
+        </Link>
+      )}
       <div className="flex flex-col gap-3">
         {member.infamily && paying && (
           <div className="flex flex-col gap-1">

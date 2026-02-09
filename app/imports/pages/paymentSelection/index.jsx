@@ -10,11 +10,13 @@ export default function PaymentSelectionPage() {
   const navigate = useNavigate();
   const { paymentType } = useParams();
 
-  const [paymentOption, setPaymentOption] = useState(null);
-  const [member, setMember] = useState(null);
+  const [loadResult, setLoadResult] = useState(null);
   const [termsContent, setTermsContent] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const paymentOption = loadResult?.paymentOption || null;
+  const member = loadResult?.member || null;
 
   // Get Swish disabled status from public settings
   const swishSettings = Meteor.settings?.public?.swish;
@@ -33,14 +35,13 @@ export default function PaymentSelectionPage() {
     ])
       .then(([options, info, terms]) => {
         const option = options?.find((o) => o.paymentType === paymentType);
-        if (option) {
-          setPaymentOption(option);
-        } else {
+        if (!option) {
           setError("Invalid payment type");
         }
-        if (info?.member) {
-          setMember(info.member);
-        }
+        setLoadResult({
+          paymentOption: option || null,
+          member: info?.member || null,
+        });
         if (terms) {
           setTermsContent(terms);
         }
@@ -116,12 +117,13 @@ export default function PaymentSelectionPage() {
   return (
     <Layout>
       <PaymentSelection
-        loading={isLoading && !paymentOption}
+        loading={isLoading && !loadResult}
         error={error}
         paymentOption={paymentOption}
         membershipDates={membershipDates}
         termsContent={termsContent}
         isLoading={isLoading}
+        isFamilyMember={!!member?.infamily}
         disabledMessage={disabledMessage}
         onPay={handlePay}
         onCancel={handleCancel}

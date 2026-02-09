@@ -116,6 +116,7 @@ export default function MembershipSelectionPage() {
         options={optionsWithAvailability}
         isDiscounted={isDiscounted}
         isFamily={isFamily}
+        isFamilyMember={!!memberInfo.member?.infamily}
         familyLocked={checkboxState.familyLocked}
         disabledMessage={disabledMessage}
         onSelectOption={handleSelectOption}

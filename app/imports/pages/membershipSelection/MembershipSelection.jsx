@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import MembershipStatus from "/imports/components/MembershipStatus";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
@@ -31,6 +32,7 @@ export default function MembershipSelection({
   options = [],
   isDiscounted = false,
   isFamily = false,
+  isFamilyMember = false,
   familyLocked = false,
   disabledMessage,
   onSelectOption,
@@ -111,6 +113,21 @@ export default function MembershipSelection({
           <Button onClick={onCancel}>
             {t("BackToStart")}
           </Button>
+        </div>
+      </MainContent>
+    );
+  }
+
+  if (isFamilyMember) {
+    return (
+      <MainContent>
+        <div className="flex flex-col gap-4 items-center text-center">
+          <MembershipStatus member={member} status={memberStatus} />
+          <p className="text-gray-600">{t("familyRenewalWarning")}</p>
+          <p className="text-gray-500 text-sm">{t("familyLeaveHint")}</p>
+          <Link to="/account" className="w-full block no-underline text-center">
+            <Button fullWidth>{t("goToAccount")}</Button>
+          </Link>
         </div>
       </MainContent>
     );

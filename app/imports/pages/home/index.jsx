@@ -55,6 +55,7 @@ export default () => {
       onDeclineInvite={handleDeclineInvite}
       liabilityDate={memberInfo?.liabilityDate}
       liabilityOutdated={memberInfo?.liabilityOutdated}
+      isFamily={!!memberInfo?.member?.infamily}
     />
   </Layout>;
 };

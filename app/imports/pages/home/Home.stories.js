@@ -73,6 +73,17 @@ export const MembershipTimeToRenew = {
   },
 };
 
+export const FamilyMemberTimeToRenew = {
+  args: {
+    memberName,
+    memberStatus: { memberStart, memberEnd: memberEndClose },
+    verified: true,
+    liabilityDate,
+    liabilityOutdated: false,
+    isFamily: true
+  },
+};
+
 export const MemberPaying = {
   args: {
     memberName,

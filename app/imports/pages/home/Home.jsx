@@ -24,7 +24,7 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated }) => {
+export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily }) => {
   const { t } = useTranslation();
 
   let daysLeftOfLab = null;
@@ -90,9 +90,15 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
             {t("AlertEndDate")}
             {daysLeftOfLab} {t("days")}
           </p>
-          <Link to="/membership" className="w-full block no-underline text-center">
-            <Button fullWidth>{t("RenewMembership")}</Button>
-          </Link>
+          {isFamily ? (
+            <p className="flex flex-col items-center text-center mb-4 text-gray-600">
+              {t("familyRenewalWarning")}
+            </p>
+          ) : (
+            <Link to="/membership" className="w-full block no-underline text-center">
+              <Button fullWidth>{t("RenewMembership")}</Button>
+            </Link>
+          )}
         </div>
       )}
       {liabilityNeedsAttention && (
