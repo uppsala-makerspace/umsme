@@ -27,13 +27,22 @@ const isInstallDismissed = () => {
 /**
  * Installed icon component - shown on all views when PWA is installed
  */
-const InstalledIcon = () => {
+const InstalledIcon = ({ active }) => {
   const { t } = useTranslation();
   return (
-    <Link to="/install" className="text-gray-500" title={t("installed")}>
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-      </svg>
+    <Link to="/install" className={active ? "text-brand-green" : "text-gray-500"} title={t("installed")}>
+      {active ? (
+        <svg className="w-6 h-6" viewBox="0 0 24 24">
+          <path fill="currentColor" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          <circle cx="12" cy="18" r="0.75" fill="white" />
+          <rect x="9.5" y="4" width="5" height="1" rx="0.5" fill="white" />
+        </svg>
+      ) : (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          <rect x="9.5" y="4" width="5" height="1" rx="0.5" fill="currentColor" />
+        </svg>
+      )}
     </Link>
   );
 };
@@ -62,7 +71,7 @@ const InstallButton = () => {
 /**
  * Bell icon with unread notification count badge or permission warning
  */
-const NotificationBell = () => {
+const NotificationBell = ({ active }) => {
   const { unreadCount } = useContext(NotificationContext);
   const [isGranted, setIsGranted] = useState(
     typeof Notification !== "undefined" && Notification.permission === "granted"
@@ -91,10 +100,17 @@ const NotificationBell = () => {
   }, []);
 
   return (
-    <Link to={isGranted ? "/notifications" : "/notification-settings"} className="relative text-gray-500">
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-      </svg>
+    <Link to={isGranted ? "/notifications" : "/notification-settings"} className={`relative ${active ? "text-brand-green" : "text-gray-500"}`}>
+      {active ? (
+        <svg className="w-6 h-6" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5z" />
+          <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      ) : (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      )}
       {isGranted ? (
         unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
@@ -134,10 +150,10 @@ export const TopBar = ({ showNotifications = true }) => {
         <HamburgerMenu />
         {titleKey && <span className="text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">{t(titleKey)}</span>}
       </div>
-      <div className="flex items-center gap-5">
-        <div className="flex items-center gap-2">
-          {isInstalledPWA ? <InstalledIcon /> : (showInstall && <InstallButton />)}
-          {showNotifications && <NotificationBell />}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1">
+          {isInstalledPWA ? <InstalledIcon active={location.pathname === "/install"} /> : (showInstall && <InstallButton />)}
+          {showNotifications && <NotificationBell active={location.pathname === "/notifications" || location.pathname === "/notification-settings"} />}
         </div>
         <LanguageSwitcher />
       </div>
