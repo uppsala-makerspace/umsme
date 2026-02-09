@@ -24,6 +24,7 @@
   "private": {
     "vapidPrivateKey": "Some key here",
     "paymentOptionsPath": "config/paymentOptions.json",
+    "notificationsPath": "config/notifications.json",
     "termsOfPurchaseMembershipEn": "config/termsOfPurchaseMembership.en.md",
     "termsOfPurchaseMembershipSv": "config/termsOfPurchaseMembership.sv.md",
     "slack": {

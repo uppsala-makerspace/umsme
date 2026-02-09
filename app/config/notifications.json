@@ -1,0 +1,107 @@
+{
+  "7daysBefore": {
+    "remaining": 7,
+    "title": {
+      "sv": "Ditt medlemskap löper ut om 7 dagar",
+      "en": "Your membership expires in 7 days"
+    },
+    "body": {
+      "sv": "Förnya gärna för att behålla ditt medlemskap!",
+      "en": "Please renew to keep your membership!"
+    }
+  },
+  "dayOf": {
+    "remaining": 0,
+    "title": {
+      "sv": "Ditt medlemskap löper ut idag",
+      "en": "Your membership expires today"
+    },
+    "body": {
+      "sv": "Förnya gärna för att behålla ditt medlemskap!",
+      "en": "Please renew to keep your membership!"
+    }
+  },
+  "7daysAfter": {
+    "remaining": -7,
+    "title": {
+      "sv": "Ditt medlemskap gick ut för 7 dagar sedan",
+      "en": "Your membership expired 7 days ago"
+    },
+    "body": {
+      "sv": "Förnya gärna för att behålla ditt medlemskap!",
+      "en": "Please renew to keep your membership!"
+    }
+  },
+  "lab7daysBefore": {
+    "remaining": 7,
+    "lab": true,
+    "title": {
+      "sv": "Din kvartalsvisa labbåtkomst löper ut om 7 dagar",
+      "en": "Your quarterly lab access expires in 7 days"
+    },
+    "body": {
+      "sv": "Förnya gärna för att behålla din labbåtkomst!",
+      "en": "Please renew to keep your lab access!"
+    }
+  },
+  "labDayOf": {
+    "remaining": 0,
+    "lab": true,
+    "title": {
+      "sv": "Din kvartalsvisa labbåtkomst löper ut idag",
+      "en": "Your quarterly lab access expires today"
+    },
+    "body": {
+      "sv": "Förnya gärna för att behålla din labbåtkomst!",
+      "en": "Please renew to keep your lab access!"
+    }
+  },
+  "lab7daysAfter": {
+    "remaining": -7,
+    "lab": true,
+    "title": {
+      "sv": "Din kvartalsvisa labbåtkomst gick ut för 7 dagar sedan",
+      "en": "Your quarterly lab access expired 7 days ago"
+    },
+    "body": {
+      "sv": "Förnya gärna för att behålla din labbåtkomst!",
+      "en": "Please renew to keep your lab access!"
+    }
+  },
+  "family7daysBefore": {
+    "remaining": 7,
+    "family": true,
+    "title": {
+      "sv": "Ditt familjemedlemskap löper ut om 7 dagar",
+      "en": "Your family membership expires in 7 days"
+    },
+    "body": {
+      "sv": "Be den som betalar i din familj att förnya!",
+      "en": "Ask the membership holder in your family to renew!"
+    }
+  },
+  "familyDayOf": {
+    "remaining": 0,
+    "family": true,
+    "title": {
+      "sv": "Ditt familjemedlemskap löper ut idag",
+      "en": "Your family membership expires today"
+    },
+    "body": {
+      "sv": "Be den som betalar i din familj att förnya!",
+      "en": "Ask the membership holder in your family to renew!"
+    }
+  },
+  "family7daysAfter": {
+    "remaining": -7,
+    "family": true,
+    "title": {
+      "sv": "Ditt familjemedlemskap gick ut för 7 dagar sedan",
+      "en": "Your family membership expired 7 days ago"
+    },
+    "body": {
+      "sv": "Be den som betalar i din familj att förnya!",
+      "en": "Ask the membership holder in your family to renew!"
+    }
+  }
+}

@@ -4,43 +4,14 @@ import { getSwishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
-import { findMemberForUser, sanitizeForSwish } from "/server/methods/utils";
-import fs from "fs";
-import path from "path";
+import { findMemberForUser, sanitizeForSwish, loadJson } from "/server/methods/utils";
 
-// Get the app root directory (where meteor was started from)
-const appRoot = process.env.PWD;
-
-// Lazy-loaded payment options
-let _paymentOptions = null;
-let _paymentTypes = null;
-
-/**
- * Get payment options from configuration file.
- * Lazy-loaded on first access.
- */
-const getPaymentOptions = () => {
-  if (!_paymentOptions) {
-    const configPath = Meteor.settings?.private?.paymentOptionsPath;
-    if (!configPath) {
-      throw new Meteor.Error("config-error", "Payment options path not configured");
-    }
-    try {
-      const fullPath = path.resolve(appRoot, configPath);
-      const text = fs.readFileSync(fullPath, "utf8");
-      _paymentOptions = JSON.parse(text);
-    } catch (err) {
-      console.error("Failed to load payment options config:", err);
-      throw new Meteor.Error("config-error", "Failed to load payment options");
-    }
-  }
-  return _paymentOptions;
-};
+const getPaymentOptions = () => loadJson("paymentOptionsPath");
 
 /**
  * Get payment types as a map of paymentType -> option object.
- * Lazy-loaded on first access.
  */
+let _paymentTypes = null;
 const getPaymentTypes = () => {
   if (!_paymentTypes) {
     const options = getPaymentOptions();

@@ -1,6 +1,60 @@
 import { Meteor } from "meteor/meteor";
+import fs from "fs";
+import path from "path";
 import { Members } from "/imports/common/collections/members";
 import { memberStatus } from "/imports/common/lib/utils";
+
+// Get the app root directory (where meteor was started from)
+const appRoot = process.env.PWD;
+
+// Cache for loaded config files
+const configCache = {};
+
+const readConfigFile = (settingsKey) => {
+  const configPath = Meteor.settings?.private?.[settingsKey];
+  if (!configPath) {
+    throw new Meteor.Error("config-error", `Config path not configured: ${settingsKey}`);
+  }
+  try {
+    const fullPath = path.resolve(appRoot, configPath);
+    return fs.readFileSync(fullPath, "utf8");
+  } catch (err) {
+    console.error(`Failed to load config file for ${settingsKey}:`, err);
+    throw new Meteor.Error("config-error", "Failed to load config file");
+  }
+};
+
+/**
+ * Load a text file from the path specified in settings.
+ * Cached after first load.
+ * @param {string} settingsKey - The key in settings.private for the file path
+ * @returns {string} The file contents
+ */
+export const loadText = (settingsKey) => {
+  if (!configCache[settingsKey]) {
+    configCache[settingsKey] = readConfigFile(settingsKey);
+  }
+  return configCache[settingsKey];
+};
+
+/**
+ * Load and parse a JSON file from the path specified in settings.
+ * Cached after first load.
+ * @param {string} settingsKey - The key in settings.private for the file path
+ * @returns {*} The parsed JSON content
+ */
+export const loadJson = (settingsKey) => {
+  if (!configCache[settingsKey]) {
+    const text = readConfigFile(settingsKey);
+    try {
+      configCache[settingsKey] = JSON.parse(text);
+    } catch (err) {
+      console.error(`Invalid JSON in config file for ${settingsKey}:`, err);
+      throw new Meteor.Error("config-error", `Invalid JSON in config file for ${settingsKey}`);
+    }
+  }
+  return configCache[settingsKey];
+};
 
 /**
  * Character mappings for accented characters not in the Swedish alphabet.
