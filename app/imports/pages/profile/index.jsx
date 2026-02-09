@@ -32,8 +32,10 @@ export default () => {
     }
   };
 
+  const hasMember = !!memberInfo?.member?.name;
+
   return (
-    <Layout>
+    <Layout bottomNav={hasMember} showNotifications={hasMember}>
       {memberInfo && (
         <Profile
           onSubmit={handleSubmit}
