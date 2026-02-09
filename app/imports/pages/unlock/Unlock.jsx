@@ -84,9 +84,9 @@ const Unlock = ({
     <MainContent className="unlock">
       {/* Location denied message */}
       {locationDenied && (
-        <div className="location-denied-container">
-          <p className="location-denied-message">{t("locationDenied")}</p>
-          <p className="location-denied-instructions">
+        <div className="text-center mb-8 p-4 bg-red-50 rounded-lg border border-red-200">
+          <p className="text-red-500 text-sm font-semibold mb-2">{t("locationDenied")}</p>
+          <p className="text-gray-500 text-sm mb-4 leading-snug">
             {t(isPWA ? "locationDeniedInstructionsPWA" : "locationDeniedInstructionsBrowser")}
           </p>
           <Button variant="secondary" onClick={onRetryLocation}>
@@ -102,7 +102,7 @@ const Unlock = ({
 
         return (
           <React.Fragment key={door.id}>
-            <p className="door-label">{t(door.labelKey)}</p>
+            <p className="mb-2.5 font-bold text-center w-full">{t(door.labelKey)}</p>
             <button
               className={`door-button ${isDisabled ? "disabled" : ""}`}
               onClick={() => !isDisabled && onOpenDoor(door.id)}

@@ -106,7 +106,7 @@ const Storage = ({
             <h3 className="text-lg font-medium mb-2">{t("requestBoxChange")}</h3>
             <p className="text-sm text-gray-600 mb-3">{t("requestBoxChangeInfo")}</p>
             <select
-              className="storage-select w-full p-3 border border-gray-300 rounded-lg bg-white"
+              className="storage-select appearance-none pr-10 w-full p-3 border border-gray-300 rounded-lg bg-white"
               value={selectedRequest}
               onChange={(e) => setSelectedRequest(e.target.value)}
             >
@@ -158,7 +158,7 @@ const Storage = ({
               <h3 className="text-lg font-medium mb-2">{t("boxPreference")}</h3>
               <p className="text-sm text-gray-600 mb-3">{t("boxPreferenceInfo")}</p>
               <select
-                className="storage-select w-full p-3 border border-gray-300 rounded-lg bg-white"
+                className="storage-select appearance-none pr-10 w-full p-3 border border-gray-300 rounded-lg bg-white"
                 value={selectedRequest}
                 onChange={(e) => setSelectedRequest(e.target.value)}
               >
