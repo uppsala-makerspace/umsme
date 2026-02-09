@@ -10,29 +10,50 @@ const appRoot = process.env.PWD;
 // Cache for loaded config files
 const configCache = {};
 
-const readConfigFile = (settingsKey) => {
+// Default filenames bundled in private/ for each settings key
+const defaultAssets = {
+  termsOfPurchaseMembershipEn: "termsOfPurchaseMembership.en.md",
+  termsOfPurchaseMembershipSv: "termsOfPurchaseMembership.sv.md",
+  paymentOptionsPath: "paymentOptions.json",
+  notificationsPath: "notifications.json",
+  roomsPath: "rooms.json",
+  slackChannelsPath: "slack-channels.json",
+};
+
+const readConfigFile = async (settingsKey) => {
   const configPath = Meteor.settings?.private?.[settingsKey];
-  if (!configPath) {
-    throw new Meteor.Error("config-error", `Config path not configured: ${settingsKey}`);
+  if (configPath) {
+    try {
+      const fullPath = path.resolve(appRoot, configPath);
+      return fs.readFileSync(fullPath, "utf8");
+    } catch (err) {
+      console.error(`Failed to load config file for ${settingsKey}:`, err);
+      throw new Meteor.Error("config-error", "Failed to load config file");
+    }
   }
-  try {
-    const fullPath = path.resolve(appRoot, configPath);
-    return fs.readFileSync(fullPath, "utf8");
-  } catch (err) {
-    console.error(`Failed to load config file for ${settingsKey}:`, err);
-    throw new Meteor.Error("config-error", "Failed to load config file");
+
+  const assetName = defaultAssets[settingsKey];
+  if (assetName) {
+    try {
+      return await Assets.getTextAsync(assetName);
+    } catch (err) {
+      console.error(`Failed to load bundled asset ${assetName} for ${settingsKey}:`, err);
+      throw new Meteor.Error("config-error", `Failed to load bundled asset: ${assetName}`);
+    }
   }
+
+  throw new Meteor.Error("config-error", `Config path not configured: ${settingsKey}`);
 };
 
 /**
  * Load a text file from the path specified in settings.
  * Cached after first load.
  * @param {string} settingsKey - The key in settings.private for the file path
- * @returns {string} The file contents
+ * @returns {Promise<string>} The file contents
  */
-export const loadText = (settingsKey) => {
+export const loadText = async (settingsKey) => {
   if (!configCache[settingsKey]) {
-    configCache[settingsKey] = readConfigFile(settingsKey);
+    configCache[settingsKey] = await readConfigFile(settingsKey);
   }
   return configCache[settingsKey];
 };
@@ -41,11 +62,11 @@ export const loadText = (settingsKey) => {
  * Load and parse a JSON file from the path specified in settings.
  * Cached after first load.
  * @param {string} settingsKey - The key in settings.private for the file path
- * @returns {*} The parsed JSON content
+ * @returns {Promise<*>} The parsed JSON content
  */
-export const loadJson = (settingsKey) => {
+export const loadJson = async (settingsKey) => {
   if (!configCache[settingsKey]) {
-    const text = readConfigFile(settingsKey);
+    const text = await readConfigFile(settingsKey);
     try {
       configCache[settingsKey] = JSON.parse(text);
     } catch (err) {

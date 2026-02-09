@@ -12,9 +12,9 @@ const getPaymentOptions = () => loadJson("paymentOptionsPath");
  * Get payment types as a map of paymentType -> option object.
  */
 let _paymentTypes = null;
-const getPaymentTypes = () => {
+const getPaymentTypes = async () => {
   if (!_paymentTypes) {
-    const options = getPaymentOptions();
+    const options = await getPaymentOptions();
     _paymentTypes = options.reduce((acc, opt) => {
       acc[opt.paymentType] = opt;
       return acc;
@@ -57,8 +57,8 @@ Meteor.methods({
    * Get payment options configuration.
    * @returns {Object} The payment options config with all options
    */
-  "payment.getOptions"() {
-    return getPaymentOptions();
+  async "payment.getOptions"() {
+    return await getPaymentOptions();
   },
 
   /**
@@ -76,7 +76,7 @@ Meteor.methods({
     }
 
     // Validate payment type
-    const paymentTypes = getPaymentTypes();
+    const paymentTypes = await getPaymentTypes();
     if (!paymentTypes[paymentType]) {
       throw new Meteor.Error("invalid-type", "Invalid payment type");
     }

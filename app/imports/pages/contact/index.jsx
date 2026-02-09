@@ -9,8 +9,7 @@ export default () => {
   const slackTeam = Meteor.settings?.public?.slack?.team;
 
   useEffect(() => {
-    fetch("/data/slack-channels.json")
-      .then((res) => res.json())
+    Meteor.callAsync("data.slackChannels")
       .then((data) => setSlackChannelIds(data))
       .catch((err) => console.error("Failed to load slack channels:", err));
   }, []);

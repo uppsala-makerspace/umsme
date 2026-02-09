@@ -23,11 +23,13 @@
   },
   "private": {
     "vapidPrivateKey": "Some key here",
-    "paymentOptionsPath": "config/paymentOptions.json",
-    "notificationsPath": "config/notifications.json",
+    "paymentOptionsPath": "private/paymentOptions.json",
+    "notificationsPath": "private/notifications.json",
     "notifyExpiringTime": "at 09:00 am",
-    "termsOfPurchaseMembershipEn": "config/termsOfPurchaseMembership.en.md",
-    "termsOfPurchaseMembershipSv": "config/termsOfPurchaseMembership.sv.md",
+    "termsOfPurchaseMembershipEn": "private/termsOfPurchaseMembership.en.md",
+    "termsOfPurchaseMembershipSv": "private/termsOfPurchaseMembership.sv.md",
+    "roomsPath": "private/rooms.json",
+    "slackChannelsPath": "private/slack-channels.json",
     "slack": {
       "botToken": "xoxb-your-slack-bot-token"
     },

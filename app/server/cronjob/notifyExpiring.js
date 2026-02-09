@@ -13,7 +13,7 @@ const notifyExpiringMemberships = async () => {
   const today = new Date();
 
 
-  const notificationTypes = loadJson("notificationsPath");
+  const notificationTypes = await loadJson("notificationsPath");
 
   let members = await Members.find({
     "notificationPrefs.membershipExpiry": { $ne: false },

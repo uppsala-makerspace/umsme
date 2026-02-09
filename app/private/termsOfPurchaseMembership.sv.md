@@ -15,10 +15,11 @@ Du kan avsluta ditt medlemskap när som helst, men ingen återbetalning kommer a
 
 Vid frågor, kontakta: kansliet@uppsalamakerspace.se
 
-Uppsala Makerspace <br>
-c/o Matthias Palmér <br>
-Ringgatan 2E<br>
-75217 Uppsala<br>
+Uppsala Makerspace
+c/o Matthias Palmér
+Ringgatan 2E
+75217 Uppsala
 Organisationsnummer: 802490-8900
+
 
 (*) Uppsala Makerspace är en ideell organisation och därmed gäller inte distansköpslagen om 14 dagars ångerrätt. 

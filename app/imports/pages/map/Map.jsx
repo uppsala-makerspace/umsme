@@ -1,3 +1,4 @@
+import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import RoomPopup from "./RoomPopup";
@@ -20,13 +21,11 @@ const Map = ({ slackTeam }) => {
 
   // Load room configuration and slack channels
   useEffect(() => {
-    fetch("/data/rooms.json")
-      .then((res) => res.json())
+    Meteor.callAsync("data.rooms")
       .then((data) => setRoomsConfig(data))
       .catch((err) => console.error("Failed to load rooms config:", err));
 
-    fetch("/data/slack-channels.json")
-      .then((res) => res.json())
+    Meteor.callAsync("data.slackChannels")
       .then((data) => setSlackChannels(data))
       .catch((err) => console.error("Failed to load slack channels:", err));
   }, []);

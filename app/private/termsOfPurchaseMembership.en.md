@@ -15,10 +15,11 @@ You may cancel your membership at any time, but no refunds will be issued for th
 
 For questions, contact: kansliet@uppsalamakerspace.se
 
-Uppsala Makerspace <br>
-c/o Matthias Palmér <br>
-Ringgatan 2E<br>
-75217 Uppsala<br>
+Uppsala Makerspace
+c/o Matthias Palmér
+Ringgatan 2E
+75217 Uppsala
 Organization number: 802490-8900
+
 
 (*) Uppsala Makerspace is a non-profit organization and therefore the Distance Selling Act's 14-day right of withdrawal does not apply.

@@ -1,5 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import { loadText } from "/server/methods/utils";
+import { loadText, loadJson } from "/server/methods/utils";
 
 Meteor.methods({
   /**
@@ -7,8 +7,16 @@ Meteor.methods({
    * @param {string} lang - Language code ('en' or 'sv')
    * @returns {string} Markdown content
    */
-  "texts.termsOfPurchaseMembership"(lang = "en") {
+  async "texts.termsOfPurchaseMembership"(lang = "en") {
     const settingKey = lang === "sv" ? "termsOfPurchaseMembershipSv" : "termsOfPurchaseMembershipEn";
-    return loadText(settingKey);
+    return await loadText(settingKey);
+  },
+
+  async "data.rooms"() {
+    return await loadJson("roomsPath");
+  },
+
+  async "data.slackChannels"() {
+    return await loadJson("slackChannelsPath");
   },
 });
