@@ -67,12 +67,14 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
       <Logo />
       <h3 className="text-center">{t("welcome")} {name}!</h3>
       <p className="flex flex-col items-center text-center mt-5 mb-4">{t("familyInviteText")}</p>
-      <Button fullWidth onClick={onAcceptInvite}>
-        {t("acceptInvite")}
-      </Button>
-      <Button variant="secondary" fullWidth onClick={onDeclineInvite}>
-        {t("declineInvite")}
-      </Button>
+      <div className="flex flex-col gap-3">
+        <Button fullWidth onClick={onAcceptInvite}>
+          {t("acceptInvite")}
+        </Button>
+        <Button variant="secondary" fullWidth onClick={onDeclineInvite}>
+          {t("declineInvite")}
+        </Button>
+      </div>
     </MainContent>;
   }
 
