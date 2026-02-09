@@ -1,13 +1,25 @@
 import React, { useState } from "react";
 import { LogRegSwitcher } from "/imports/components/LogRegSwitch/LogRegSwitcher";
 import { useTranslation } from "react-i18next";
+import { LoginButton } from "../login/LoginButton";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
+import OrDivider from "../../components/OrDivider";
 import WarningIcon from "../../components/WarningIcon";
 
-export default ({onSubmit}) => {
+const googleConf = {
+  buttonTextKey: "loginGoogle",
+  icon: "/images/GoogleLogo.png"
+};
+
+const facebookConf = {
+  buttonTextKey: "loginFacebook",
+  icon: "/images/FacebookLogo.png"
+};
+
+export default ({onSubmit, google, facebook}) => {
   const { t } = useTranslation();
 
   const [email, setEmail] = useState("");
@@ -65,9 +77,19 @@ export default ({onSubmit}) => {
         error={!passwordsMatch ? t("PasswordNoMatch") : undefined}
       />
 
-      <Button type="submit" fullWidth>
-        {t("register")}
-      </Button>
+      <div className="flex flex-col gap-3">
+        <Button type="submit" fullWidth>
+          {t("register")}
+        </Button>
+
+        {(google || facebook) && <OrDivider />}
+        {google && (
+          <LoginButton conf={{...googleConf, ...google}}/>
+        )}
+        {facebook && (
+          <LoginButton conf={{...facebookConf, ...facebook}}/>
+        )}
+      </div>
     </form>
     </MainContent>
   );

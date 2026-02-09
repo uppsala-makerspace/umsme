@@ -7,6 +7,7 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
+import OrDivider from "../../components/OrDivider";
 import WarningIcon from "../../components/WarningIcon";
 
 const googleConf = {
@@ -70,6 +71,7 @@ export default ({google, facebook, onSubmit}) => {
             {t("login")}
           </Button>
 
+          {(google || facebook) && <OrDivider />}
           {google && (
             <LoginButton conf={{...googleConf, ...google}}/>
           )}

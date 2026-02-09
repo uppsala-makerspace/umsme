@@ -14,3 +14,10 @@ export const RegisterPage = {
     onSubmit
   }
 };
+
+export const WithGoogle = {
+  args: {
+    onSubmit,
+    google: { method: () => {} },
+  }
+};
