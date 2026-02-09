@@ -2,6 +2,7 @@ import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
+import { subscribeToPush } from "/imports/hooks/pushSetupHook";
 import NotificationSettings from "./NotificationSettings";
 
 export default () => {
@@ -51,6 +52,18 @@ export default () => {
     }
   };
 
+  const handleRequestPermission = async () => {
+    try {
+      const permission = await Notification.requestPermission();
+      setPushPermission(permission);
+      if (permission === "granted") {
+        await subscribeToPush();
+      }
+    } catch (e) {
+      console.error("Error requesting permission:", e);
+    }
+  };
+
   return (
     <Layout>
       {!Meteor.userId() ? <Navigate to="/login" /> : null}
@@ -61,6 +74,7 @@ export default () => {
         isAdmin={isAdmin}
         onToggle={handleToggle}
         onSendTest={handleSendTest}
+        onRequestPermission={handleRequestPermission}
       />
     </Layout>
   );

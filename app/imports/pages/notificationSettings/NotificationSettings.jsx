@@ -11,6 +11,7 @@ import MainContent from "/imports/components/MainContent";
  * @param {boolean} props.isAdmin - Whether the current user is an admin
  * @param {function} props.onToggle - Callback when a pref toggle is clicked, receives the pref key
  * @param {function} props.onSendTest - Callback to send a test notification
+ * @param {function} props.onRequestPermission - Callback to request push notification permission
  */
 const NotificationSettings = ({
   prefs = { membershipExpiry: true },
@@ -19,6 +20,7 @@ const NotificationSettings = ({
   isAdmin = false,
   onToggle,
   onSendTest,
+  onRequestPermission,
 }) => {
   const { t } = useTranslation();
 
@@ -30,13 +32,26 @@ const NotificationSettings = ({
     <MainContent>
       <div className="space-y-4">
         {/* Push permission status */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">
-            {pushPermission === "granted"
-              ? t("pushPermissionGranted")
-              : t("pushPermissionDenied")}
-          </p>
-        </div>
+        {pushPermission === "granted" ? (
+          <div className="bg-white rounded-lg border border-green-200 p-4">
+            <p className="text-sm text-green-700">{t("pushPermissionGranted")}</p>
+          </div>
+        ) : pushPermission === "denied" ? (
+          <div className="bg-amber-50 rounded-lg border border-amber-300 p-4">
+            <p className="text-sm font-medium text-amber-800">{t("pushPermissionDenied")}</p>
+            <p className="text-sm text-amber-700 mt-2">{t("pushPermissionDeniedInstructions")}</p>
+          </div>
+        ) : (
+          <div className="bg-amber-50 rounded-lg border border-amber-300 p-4">
+            <p className="text-sm text-amber-800 mb-3">{t("pushPermissionDefault")}</p>
+            <button
+              onClick={onRequestPermission}
+              className="w-full py-2 px-4 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-sm font-medium"
+            >
+              {t("pushPermissionAllow")}
+            </button>
+          </div>
+        )}
 
         {/* Membership expiry toggle */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center">

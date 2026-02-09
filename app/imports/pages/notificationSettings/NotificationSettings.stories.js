@@ -27,6 +27,18 @@ export const Loading = {
   },
 };
 
+export const PushDefault = {
+  args: {
+    prefs: { membershipExpiry: true },
+    loading: false,
+    pushPermission: "default",
+    isAdmin: false,
+    onToggle: (key) => console.log("Toggle:", key),
+    onSendTest: () => console.log("Send test"),
+    onRequestPermission: () => console.log("Request permission"),
+  },
+};
+
 export const PushDenied = {
   args: {
     prefs: { membershipExpiry: true },
