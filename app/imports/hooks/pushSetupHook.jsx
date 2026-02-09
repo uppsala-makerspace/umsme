@@ -10,46 +10,52 @@ function urlBase64ToUint8Array(base64String) {
   return new Uint8Array([...rawData].map((c) => c.charCodeAt(0)));
 }
 
-export function usePushSetup() {
+export async function subscribeToPush() {
+  const vapidKey = Meteor.settings?.public?.vapidPublicKey;
+  if (!vapidKey) return;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+  const registration = await navigator.serviceWorker.ready;
+  let subscription = await registration.pushManager.getSubscription();
+
+  if (!subscription) {
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidKey),
+    });
+  }
+
+  const json = subscription.toJSON();
+  await Meteor.callAsync("savePushSubscription", {
+    endpoint: subscription.endpoint,
+    expirationTime: subscription.expirationTime,
+    keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
+  });
+
+  await setLanguage(i18n.language);
+}
+
+export function usePushSetup(enabled = true) {
   const subscribed = useRef(false);
 
   useEffect(() => {
+    if (!enabled) return;
     if (subscribed.current) return;
     if (!Meteor.userId()) return;
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-
-    const vapidKey = Meteor.settings?.public?.vapidPublicKey;
-    if (!vapidKey) return;
+    if (!Meteor.settings?.public?.vapidPublicKey) return;
 
     subscribed.current = true;
 
     const setup = async () => {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") return;
-
-      const registration = await navigator.serviceWorker.ready;
-      let subscription = await registration.pushManager.getSubscription();
-
-      if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey),
-        });
-      }
-
-      const json = subscription.toJSON();
-      await Meteor.callAsync("savePushSubscription", {
-        endpoint: subscription.endpoint,
-        expirationTime: subscription.expirationTime,
-        keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-      });
-
-      // Sync language to IndexedDB for service worker
-      await setLanguage(i18n.language);
+      window.dispatchEvent(new Event("push-permission-granted"));
+      await subscribeToPush();
     };
 
     setup().catch((err) => console.warn("Push setup failed:", err.message));
-  }, [Meteor.userId()]);
+  }, [enabled, Meteor.userId()]);
 
   // Sync language changes to IndexedDB
   useEffect(() => {

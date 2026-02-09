@@ -9,7 +9,8 @@ import { usePushSetup } from "/imports/hooks/pushSetupHook";
 export default () => {
   const user = useTracker(() => Meteor.user());
   const [memberInfo, setMemberInfo] = useState(null);
-  usePushSetup();
+  const hasMember = !!memberInfo?.member?.name;
+  usePushSetup(hasMember);
 
   const fetchMemberInfo = async () => {
     try {
@@ -44,7 +45,7 @@ export default () => {
     }
   };
 
-  return <Layout>
+  return <Layout bottomNav={hasMember} showNotifications={hasMember}>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
     <Home
       memberName={memberInfo?.member?.name || ""}

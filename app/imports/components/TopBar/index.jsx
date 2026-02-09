@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HamburgerMenu } from "../HamburgerMenu/HamburgerMenu";
@@ -60,18 +60,50 @@ const InstallButton = () => {
 };
 
 /**
- * Bell icon with unread notification count badge
+ * Bell icon with unread notification count badge or permission warning
  */
 const NotificationBell = () => {
   const { unreadCount } = useContext(NotificationContext);
+  const [isGranted, setIsGranted] = useState(
+    typeof Notification !== "undefined" && Notification.permission === "granted"
+  );
+
+  useEffect(() => {
+    // Safari fallback: usePushSetup dispatches this after requestPermission resolves
+    const onGranted = () => setIsGranted(true);
+    window.addEventListener("push-permission-granted", onGranted);
+
+    // Permissions API: works on Chrome/Firefox/Edge, may throw on Safari
+    let status;
+    const onPermissionChange = () => setIsGranted(status.state === "granted");
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: "notifications" }).then((s) => {
+        status = s;
+        onPermissionChange();
+        status.addEventListener("change", onPermissionChange);
+      }).catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener("push-permission-granted", onGranted);
+      status?.removeEventListener("change", onPermissionChange);
+    };
+  }, []);
+
   return (
-    <Link to="/notifications" className="relative text-gray-500">
+    <Link to={isGranted ? "/notifications" : "/notification-settings"} className="relative text-gray-500">
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
       </svg>
-      {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-          {unreadCount > 99 ? "99+" : unreadCount}
+      {isGranted ? (
+        unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )
+      ) : (
+        <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+          !
         </span>
       )}
     </Link>
@@ -89,7 +121,7 @@ const PAGE_TITLES = {
   "/notification-settings": "notificationSettings",
 };
 
-export const TopBar = () => {
+export const TopBar = ({ showNotifications = true }) => {
   const { t } = useTranslation();
   const location = useLocation();
   const isHome = location.pathname === "/" || location.pathname === "/home";
@@ -103,8 +135,8 @@ export const TopBar = () => {
         {titleKey && <span className="text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">{t(titleKey)}</span>}
       </div>
       <div className="flex items-center gap-[22px]">
-        {isInstalledPWA ? <InstalledIcon /> : (isHome && <InstallButton />)}
-        <NotificationBell />
+        {showNotifications && (isInstalledPWA ? <InstalledIcon /> : (isHome && <InstallButton />))}
+        {showNotifications && <NotificationBell />}
         <LanguageSwitcher />
       </div>
     </header>
