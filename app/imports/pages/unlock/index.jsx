@@ -14,7 +14,6 @@ export default () => {
   const [hasMandatoryCertificate, setHasMandatoryCertificate] = useState(true);
   const [userPosition, setUserPosition] = useState(null);
   const [locationPermission, setLocationPermission] = useState("pending"); // pending, granted, denied, unavailable
-  const [locationError, setLocationError] = useState(null);
   const [proximityRange, setProximityRange] = useState(100);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -32,11 +31,9 @@ export default () => {
           long: position.coords.longitude,
         });
         setLocationPermission("granted");
-        setLocationError(null);
       },
       (error) => {
         console.error("Geolocation error:", error);
-        setLocationError(error.message);
         if (error.code === error.PERMISSION_DENIED) {
           setLocationPermission("denied");
         }
@@ -51,6 +48,22 @@ export default () => {
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
+  }, []);
+
+  // Listen for permission changes via Permissions API
+  useEffect(() => {
+    if (!navigator.permissions) return;
+    let status;
+    const onChange = () => {
+      if (status.state === "granted") setLocationPermission("granted");
+      else if (status.state === "denied") setLocationPermission("denied");
+      else setLocationPermission("pending");
+    };
+    navigator.permissions.query({ name: "geolocation" }).then((s) => {
+      status = s;
+      status.addEventListener("change", onChange);
+    }).catch(() => {});
+    return () => status?.removeEventListener("change", onChange);
   }, []);
 
   // Fetch door data and member info
@@ -99,34 +112,6 @@ export default () => {
     }
   }, []);
 
-  const handleRetryLocation = () => {
-    if (!navigator.geolocation) {
-      return;
-    }
-    setLocationPermission("pending");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserPosition({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-        setLocationPermission("granted");
-        setLocationError(null);
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        setLocationError(error.message);
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationPermission("denied");
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-      }
-    );
-  };
-
   const handleOpenDoor = async (doorId) => {
     setOpening((prev) => ({ ...prev, [doorId]: true }));
 
@@ -160,7 +145,6 @@ export default () => {
           locationPermission={locationPermission}
           proximityRange={proximityRange}
           isAdmin={isAdmin}
-          onRetryLocation={handleRetryLocation}
         />
       )}
     </Layout>

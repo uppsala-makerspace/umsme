@@ -19,7 +19,6 @@ const Unlock = ({
   locationPermission,
   proximityRange,
   isAdmin,
-  onRetryLocation,
   isPWAOverride,
 }) => {
   const { t } = useTranslation();
@@ -86,12 +85,9 @@ const Unlock = ({
       {locationDenied && (
         <div className="text-center mb-8 p-4 bg-red-50 rounded-lg border border-red-200">
           <p className="text-red-500 text-sm font-semibold mb-2">{t("locationDenied")}</p>
-          <p className="text-gray-500 text-sm mb-4 leading-snug">
+          <p className="text-gray-500 text-sm leading-snug">
             {t(isPWA ? "locationDeniedInstructionsPWA" : "locationDeniedInstructionsBrowser")}
           </p>
-          <Button variant="secondary" onClick={onRetryLocation}>
-            {t("locationRetry")}
-          </Button>
         </div>
       )}
 
@@ -145,7 +141,6 @@ Unlock.propTypes = {
   locationPermission: PropTypes.oneOf(["pending", "granted", "denied", "unavailable"]),
   proximityRange: PropTypes.number,
   isAdmin: PropTypes.bool,
-  onRetryLocation: PropTypes.func,
   isPWAOverride: PropTypes.bool,
 };
 
@@ -154,7 +149,6 @@ Unlock.defaultProps = {
   locationPermission: "pending",
   proximityRange: 100,
   isAdmin: false,
-  onRetryLocation: () => {},
   isPWAOverride: undefined,
 };
 
