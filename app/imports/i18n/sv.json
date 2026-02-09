@@ -175,6 +175,7 @@
   "myBox": "Min låda",
   "myBoxNumber": "Lådnummer:",
   "storageRequiresLab": "Du behöver ett aktivt labbmedlemskap för att ha en förvaringslåda.",
+  "storageFamilyReadOnly": "Kontakta den som betalar för familjen för att göra ändringar.",
   "noBoxAssigned": "Du har ingen förvaringslåda än.",
   "queueForBoxInfo": "Ställ dig i kö för att få en förvaringslåda när en blir ledig.",
   "queueForBox": "Ställ dig i kö",

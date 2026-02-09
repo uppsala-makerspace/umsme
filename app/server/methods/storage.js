@@ -20,11 +20,19 @@ Meteor.methods({
 
     const hasLab = await hasActiveLabMembership(member);
 
+    let storageMember = member;
+    let familyPayer = false;
+    if (member.infamily) {
+      storageMember = await Members.findOneAsync(member.infamily);
+      familyPayer = true;
+    }
+
     return {
-      storage: member.storage ?? null,
-      storagequeue: member.storagequeue ?? null,
-      storagerequest: member.storagerequest ?? null,
+      storage: storageMember.storage ?? null,
+      storagequeue: storageMember.storagequeue ?? null,
+      storagerequest: storageMember.storagerequest ?? null,
       hasLabMembership: hasLab,
+      familyPayer,
     };
   },
 

@@ -175,6 +175,7 @@
   "myBox": "My Box",
   "myBoxNumber": "Box number:",
   "storageRequiresLab": "You need an active lab membership to have a storage box.",
+  "storageFamilyReadOnly": "Contact the person paying for the family to make changes.",
   "noBoxAssigned": "You don't have a storage box yet.",
   "queueForBoxInfo": "Join the queue to get a storage box when one becomes available.",
   "queueForBox": "Queue for a box",

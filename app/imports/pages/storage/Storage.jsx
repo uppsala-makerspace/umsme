@@ -27,9 +27,10 @@ const STORAGE_REQUEST_OPTIONS = [
  * @param {string|null} props.storagerequest - Current storage request value
  * @param {boolean} props.hasLabMembership - Whether the user has an active lab membership
  * @param {boolean} props.loading - Loading state
- * @param {function} props.onQueueForBox - Callback when user wants to queue for a box
- * @param {function} props.onSubmitRequest - Callback when user submits a storage request
- * @param {function} props.onCancelQueue - Callback when user wants to cancel queue
+ * @param {boolean} [props.readOnly] - Whether to show read-only view (family members)
+ * @param {function} [props.onQueueForBox] - Callback when user wants to queue for a box
+ * @param {function} [props.onSubmitRequest] - Callback when user submits a storage request
+ * @param {function} [props.onCancelQueue] - Callback when user wants to cancel queue
  */
 const Storage = ({
   storage,
@@ -37,6 +38,7 @@ const Storage = ({
   storagerequest,
   hasLabMembership,
   loading,
+  readOnly,
   onQueueForBox,
   onSubmitRequest,
   onCancelQueue,
@@ -97,35 +99,39 @@ const Storage = ({
           <p className="text-3xl font-bold text-green-600">{storage}</p>
         </div>
 
-        <div className="w-full">
-          <h3 className="text-lg font-medium mb-2">{t("requestBoxChange")}</h3>
-          <p className="text-sm text-gray-600 mb-3">{t("requestBoxChangeInfo")}</p>
-          <select
-            className="storage-select w-full p-3 border border-gray-300 rounded-lg bg-white"
-            value={selectedRequest}
-            onChange={(e) => setSelectedRequest(e.target.value)}
-          >
-            <option value="">{t("selectPreference")}</option>
-            {STORAGE_REQUEST_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {t(option.key)}
-              </option>
-            ))}
-          </select>
-          <Button
-            className="mt-3"
-            fullWidth
-            onClick={handleSubmitRequest}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? t("loading") : t("submitRequest")}
-          </Button>
-          {storagerequest && (
-            <p className="mt-2 text-sm text-green-600 text-center">
-              {t("currentRequest")}: {t(STORAGE_REQUEST_OPTIONS.find(o => o.value === storagerequest)?.key || storagerequest)}
-            </p>
-          )}
-        </div>
+        {readOnly ? (
+          <p className="text-sm text-gray-500 text-center">{t("storageFamilyReadOnly")}</p>
+        ) : (
+          <div className="w-full">
+            <h3 className="text-lg font-medium mb-2">{t("requestBoxChange")}</h3>
+            <p className="text-sm text-gray-600 mb-3">{t("requestBoxChangeInfo")}</p>
+            <select
+              className="storage-select w-full p-3 border border-gray-300 rounded-lg bg-white"
+              value={selectedRequest}
+              onChange={(e) => setSelectedRequest(e.target.value)}
+            >
+              <option value="">{t("selectPreference")}</option>
+              {STORAGE_REQUEST_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {t(option.key)}
+                </option>
+              ))}
+            </select>
+            <Button
+              className="mt-3"
+              fullWidth
+              onClick={handleSubmitRequest}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? t("loading") : t("submitRequest")}
+            </Button>
+            {storagerequest && (
+              <p className="mt-2 text-sm text-green-600 text-center">
+                {t("currentRequest")}: {t(STORAGE_REQUEST_OPTIONS.find(o => o.value === storagerequest)?.key || storagerequest)}
+              </p>
+            )}
+          </div>
+        )}
       </MainContent>
     );
   }
@@ -138,43 +144,47 @@ const Storage = ({
           <p className="text-gray-600">{t("inQueueForBox")}</p>
         </div>
 
-        <button
-          className="text-red-500 hover:text-red-600 text-sm"
-          onClick={handleCancelQueue}
-          disabled={isSubmitting}
-        >
-          {t("cancelQueue")}
-        </button>
+        {!readOnly && (
+          <>
+            <button
+              className="text-red-500 hover:text-red-600 text-sm"
+              onClick={handleCancelQueue}
+              disabled={isSubmitting}
+            >
+              {t("cancelQueue")}
+            </button>
 
-        <div className="w-full">
-          <h3 className="text-lg font-medium mb-2">{t("boxPreference")}</h3>
-          <p className="text-sm text-gray-600 mb-3">{t("boxPreferenceInfo")}</p>
-          <select
-            className="storage-select w-full p-3 border border-gray-300 rounded-lg bg-white"
-            value={selectedRequest}
-            onChange={(e) => setSelectedRequest(e.target.value)}
-          >
-            <option value="">{t("selectPreference")}</option>
-            {STORAGE_LOCATION_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {t(option.key)}
-              </option>
-            ))}
-          </select>
-          <Button
-            className="mt-3"
-            fullWidth
-            onClick={handleSubmitRequest}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? t("loading") : t("submitRequest")}
-          </Button>
-          {storagerequest && (
-            <p className="mt-2 text-sm text-green-600 text-center">
-              {t("currentRequest")}: {t(STORAGE_LOCATION_OPTIONS.find(o => o.value === storagerequest)?.key || storagerequest)}
-            </p>
-          )}
-        </div>
+            <div className="w-full">
+              <h3 className="text-lg font-medium mb-2">{t("boxPreference")}</h3>
+              <p className="text-sm text-gray-600 mb-3">{t("boxPreferenceInfo")}</p>
+              <select
+                className="storage-select w-full p-3 border border-gray-300 rounded-lg bg-white"
+                value={selectedRequest}
+                onChange={(e) => setSelectedRequest(e.target.value)}
+              >
+                <option value="">{t("selectPreference")}</option>
+                {STORAGE_LOCATION_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {t(option.key)}
+                  </option>
+                ))}
+              </select>
+              <Button
+                className="mt-3"
+                fullWidth
+                onClick={handleSubmitRequest}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? t("loading") : t("submitRequest")}
+              </Button>
+              {storagerequest && (
+                <p className="mt-2 text-sm text-green-600 text-center">
+                  {t("currentRequest")}: {t(STORAGE_LOCATION_OPTIONS.find(o => o.value === storagerequest)?.key || storagerequest)}
+                </p>
+              )}
+            </div>
+          </>
+        )}
       </MainContent>
     );
   }
@@ -186,16 +196,20 @@ const Storage = ({
         <p className="text-gray-600">{t("noBoxAssigned")}</p>
       </div>
 
-      <div className="w-full text-center">
-        <p className="text-sm text-gray-600 mb-4">{t("queueForBoxInfo")}</p>
-        <Button
-          fullWidth
-          onClick={handleQueueForBox}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? t("loading") : t("queueForBox")}
-        </Button>
-      </div>
+      {readOnly ? (
+        <p className="text-sm text-gray-500 text-center">{t("storageFamilyReadOnly")}</p>
+      ) : (
+        <div className="w-full text-center">
+          <p className="text-sm text-gray-600 mb-4">{t("queueForBoxInfo")}</p>
+          <Button
+            fullWidth
+            onClick={handleQueueForBox}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? t("loading") : t("queueForBox")}
+          </Button>
+        </div>
+      )}
     </MainContent>
   );
 };

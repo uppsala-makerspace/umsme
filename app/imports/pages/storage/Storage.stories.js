@@ -108,3 +108,25 @@ export const NoBoxNotInQueue = {
     onCancelQueue: () => console.log("Cancel queue"),
   },
 };
+
+export const FamilyMemberHasBox = {
+  args: {
+    storage: 42,
+    storagequeue: null,
+    storagerequest: null,
+    hasLabMembership: true,
+    loading: false,
+    readOnly: true,
+  },
+};
+
+export const FamilyMemberNoBox = {
+  args: {
+    storage: null,
+    storagequeue: false,
+    storagerequest: null,
+    hasLabMembership: true,
+    loading: false,
+    readOnly: true,
+  },
+};

@@ -13,6 +13,7 @@ export default () => {
     storagequeue: null,
     storagerequest: null,
     hasLabMembership: false,
+    familyPayer: false,
   });
 
   useEffect(() => {
@@ -73,9 +74,12 @@ export default () => {
         storagerequest={storageData.storagerequest}
         hasLabMembership={storageData.hasLabMembership}
         loading={loading}
-        onQueueForBox={handleQueueForBox}
-        onSubmitRequest={handleSubmitRequest}
-        onCancelQueue={handleCancelQueue}
+        readOnly={storageData.familyPayer}
+        {...(!storageData.familyPayer && {
+          onQueueForBox: handleQueueForBox,
+          onSubmitRequest: handleSubmitRequest,
+          onCancelQueue: handleCancelQueue,
+        })}
       />
     </Layout>
   );
