@@ -45,6 +45,42 @@ const NOTIFICATION_TYPES = {
       en: "Please renew to keep your membership!",
     },
   },
+  lab7daysBefore: {
+    remaining: 7,
+    lab: true,
+    title: {
+      sv: "Din kvartalsvisa labbåtkomst löper ut om 7 dagar",
+      en: "Your quarterly lab access expires in 7 days",
+    },
+    body: {
+      sv: "Förnya gärna för att behålla din labbåtkomst!",
+      en: "Please renew to keep your lab access!",
+    },
+  },
+  labDayOf: {
+    remaining: 0,
+    lab: true,
+    title: {
+      sv: "Din kvartalsvisa labbåtkomst löper ut idag",
+      en: "Your quarterly lab access expires today",
+    },
+    body: {
+      sv: "Förnya gärna för att behålla din labbåtkomst!",
+      en: "Please renew to keep your lab access!",
+    },
+  },
+  lab7daysAfter: {
+    remaining: -7,
+    lab: true,
+    title: {
+      sv: "Din kvartalsvisa labbåtkomst gick ut för 7 dagar sedan",
+      en: "Your quarterly lab access expired 7 days ago",
+    },
+    body: {
+      sv: "Förnya gärna för att behålla din labbåtkomst!",
+      en: "Please renew to keep your lab access!",
+    },
+  },
 };
 
 const notifyExpiringMemberships = async () => {
@@ -73,8 +109,16 @@ const notifyExpiringMemberships = async () => {
     const memberEnd = new Date(status.memberEnd);
     memberEnd.setHours(0, 0, 0, 0);
 
+    const labEnd = status.labEnd ? new Date(status.labEnd) : null;
+    if (labEnd) labEnd.setHours(0, 0, 0, 0);
+
+    const isLab = labEnd && daysBetween(memberEnd, labEnd) !== 0;
+    const endDate = isLab ? labEnd : memberEnd;
+
     for (const [type, config] of Object.entries(NOTIFICATION_TYPES)) {
-      if (daysBetween(today, memberEnd) !== config.remaining) continue;
+      if (isLab && !config.lab) continue;
+      if (!isLab && config.lab) continue;
+      if (daysBetween(today, endDate) !== config.remaining) continue;
 
       // Check for duplicate
       const last = member.lastExpiryNotification;
@@ -84,7 +128,6 @@ const notifyExpiringMemberships = async () => {
 
       const subs = await PushSubs.find({ userId: user._id }).fetchAsync();
       if (subs.length === 0) continue;
-      console.log(memberEnd);
 
       const payload = {
         title: config.title,
