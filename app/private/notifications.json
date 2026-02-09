@@ -11,7 +11,7 @@
     }
   },
   "dayOf": {
-    "remaining": 1,
+    "remaining": 0,
     "title": {
       "sv": "Ditt medlemskap löper ut idag",
       "en": "Your membership expires today"
@@ -81,7 +81,7 @@
     }
   },
   "familyDayOf": {
-    "remaining": 1,
+    "remaining": 0,
     "family": true,
     "title": {
       "sv": "Ditt familjemedlemskap löper ut idag",
