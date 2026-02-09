@@ -86,6 +86,8 @@ const NOTIFICATION_TYPES = {
 const notifyExpiringMemberships = async () => {
   console.log("Checking for expiring memberships");
   const today = new Date();
+  today.setHours(12, 0, 0, 0);
+
 
   let members = await Members.find({
     "notificationPrefs.membershipExpiry": { $ne: false },
@@ -107,10 +109,10 @@ const notifyExpiringMemberships = async () => {
     if (!status.memberEnd) continue;
 
     const memberEnd = new Date(status.memberEnd);
-    memberEnd.setHours(0, 0, 0, 0);
+    memberEnd.setHours(12, 0, 0, 0);
 
     const labEnd = status.labEnd ? new Date(status.labEnd) : null;
-    if (labEnd) labEnd.setHours(0, 0, 0, 0);
+    if (labEnd) labEnd.setHours(12, 0, 0, 0);
 
     const isLab = labEnd && daysBetween(memberEnd, labEnd) !== 0;
     const endDate = isLab ? labEnd : memberEnd;
@@ -150,7 +152,7 @@ const notifyExpiringMemberships = async () => {
 SyncedCron.add({
   name: "Notify expiring memberships",
   schedule(parser) {
-    return parser.text("at 11:17 pm");
+    return parser.text("at 09:00 am");
   },
   async job() {
     console.log("Running expiring membership notification cron job");
