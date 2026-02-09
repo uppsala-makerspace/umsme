@@ -39,6 +39,17 @@ export const PushDefault = {
   },
 };
 
+export const PushUnsupported = {
+  args: {
+    prefs: { membershipExpiry: true },
+    loading: false,
+    pushPermission: "unsupported",
+    isAdmin: false,
+    onToggle: (key) => console.log("Toggle:", key),
+    onSendTest: () => console.log("Send test"),
+  },
+};
+
 export const PushDenied = {
   args: {
     prefs: { membershipExpiry: true },

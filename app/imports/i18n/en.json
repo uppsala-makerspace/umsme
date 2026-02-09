@@ -340,6 +340,8 @@
   "pushPermissionAllow": "Allow notifications",
   "pushPermissionDenied": "Push notifications are blocked.",
   "pushPermissionDeniedInstructions": "To enable notifications, open your browser or device settings and allow notifications for this site.",
+  "pushPermissionUnsupported": "Push notifications are not supported in this browser. Install the app to enable notifications.",
+  "pushPermissionInstall": "Install app",
   "pushPermissionGranted": "Push notifications enabled",
   "testNotifTitle": "Test notification",
   "testNotifBody": "This is a test notification from UMS.",

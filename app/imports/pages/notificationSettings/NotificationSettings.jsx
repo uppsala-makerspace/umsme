@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import MainContent from "/imports/components/MainContent";
 
 /**
@@ -33,7 +34,17 @@ const NotificationSettings = ({
     <MainContent>
       <div className="space-y-4">
         {/* Push permission status */}
-        {pushPermission === "granted" ? (
+        {pushPermission === "unsupported" ? (
+          <div className="bg-amber-50 rounded-lg border border-amber-300 p-4">
+            <p className="text-sm text-amber-800 mb-3">{t("pushPermissionUnsupported")}</p>
+            <Link
+              to="/install"
+              className="block w-full py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-medium text-center no-underline"
+            >
+              {t("pushPermissionInstall")}
+            </Link>
+          </div>
+        ) : pushPermission === "granted" ? (
           <div className="bg-white rounded-lg border border-green-200 p-4">
             <p className="text-sm text-green-700">{t("pushPermissionGranted")}</p>
           </div>

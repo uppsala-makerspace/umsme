@@ -13,6 +13,10 @@ export default () => {
 
   // Listen for permission changes (Permissions API + custom event fallback)
   useEffect(() => {
+    if (!("PushManager" in window)) {
+      setPushPermission("unsupported");
+      return;
+    }
     if (typeof Notification !== "undefined") {
       setPushPermission(Notification.permission);
     }
