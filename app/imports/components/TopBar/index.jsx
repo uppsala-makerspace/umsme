@@ -134,9 +134,13 @@ export const TopBar = ({ showNotifications = true }) => {
         <HamburgerMenu />
         {titleKey && <span className="text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">{t(titleKey)}</span>}
       </div>
-      <div className="flex items-center gap-[22px]">
-        {showNotifications && (isInstalledPWA ? <InstalledIcon /> : (isHome && <InstallButton />))}
-        {showNotifications && <NotificationBell />}
+      <div className="flex items-center gap-5">
+        {showNotifications && (
+          <div className="flex items-center gap-2">
+            {isInstalledPWA ? <InstalledIcon /> : (isHome && <InstallButton />)}
+            <NotificationBell />
+          </div>
+        )}
         <LanguageSwitcher />
       </div>
     </header>
