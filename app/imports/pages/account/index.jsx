@@ -54,11 +54,21 @@ export default () => {
     }
   };
 
+  const leaveFamily = async () => {
+    try {
+      await Meteor.callAsync("leaveFamilyMembership");
+      const info = await Meteor.callAsync("findInfoForUser");
+      setMemberInfo(info);
+    } catch (err) {
+      console.error("Failed to leave family: ", err);
+    }
+  };
+
   return (
     <Layout>
       {!Meteor.userId() ? <Navigate to="/login" /> : null}
       {memberInfo && (
-        <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember}></Account>
+        <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember} onLeaveFamily={leaveFamily}></Account>
       )}
     </Layout>
   );

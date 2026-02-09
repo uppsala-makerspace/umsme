@@ -102,6 +102,26 @@ Meteor.methods({
     }
   },
 
+  async leaveFamilyMembership() {
+    const member = await findMemberForUser();
+    if (!member) {
+      throw new Meteor.Error(
+        "no-user",
+        "No user or the user is not fully registered"
+      );
+    }
+
+    if (!member.infamily) {
+      throw new Meteor.Error(
+        "not-in-family",
+        "The user is not part of a family"
+      );
+    }
+
+    await Members.updateAsync(member._id, {$unset: {infamily: ""}, $set: {family: false}});
+    return true;
+  },
+
   async removeFamilyMember({email}) {
     const member = await findMemberForUser();
     if (!member) {

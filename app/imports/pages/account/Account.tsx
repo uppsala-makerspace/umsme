@@ -22,7 +22,7 @@ interface INewFamilyMemberValidation {
   errorMassages?: string[]
 }
 
-const Account = ({ member, memberships, familyMembers, familyInvites = [], status, paying, addFamilyInvite, cancelFamilyInvite, removeFamilyMember }) => {
+const Account = ({ member, memberships, familyMembers, familyInvites = [], status, paying, addFamilyInvite, cancelFamilyInvite, removeFamilyMember, onLeaveFamily }) => {
   const [addFamilyMemberMode, setAddFamilyMemberMode] = useState(false);
   const [newFamilyMemberInfo, setNewFamilyMemberInfo] = useState<INewFamilyMember>({});
   const [newFamilyMemberError, setNewFamilyMemberError] = useState<INewFamilyMemberValidation>({});
@@ -128,6 +128,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
               <span className="font-bold">{paying.name}</span>
               <span className='text-sm'>{paying.email}</span>
             </div>
+            <Button variant="secondary" fullWidth onClick={onLeaveFamily} className="mt-3">{t("leaveFamily")}</Button>
           </div>
         )}
 
@@ -223,6 +224,8 @@ Account.propTypes = {
   cancelFamilyInvite: PropTypes.func,
   /** Callback to remove an accepted family member */
   removeFamilyMember: PropTypes.func,
+  /** Callback to leave a family membership */
+  onLeaveFamily: PropTypes.func,
 };
 
 export default Account;

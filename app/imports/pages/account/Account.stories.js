@@ -187,6 +187,7 @@ export const FamilyMember = {
     member: { name: 'Jane Doe', family: false, mid: '456', infamily: 'xxx' },
     status: { memberStart, memberEnd, family: true, type: 'member' },
     paying: { name: 'John Doe', email: 'john@doe.com', _id: 'xxx' },
+    onLeaveFamily: fn(),
   },
 };
 
@@ -195,5 +196,6 @@ export const FamilyLabMember = {
     member: { name: 'Jane Doe', family: false, mid: '456', infamily: 'xxx' },
     status: { memberStart, memberEnd, labEnd: memberEnd, family: true, type: 'labandmember' },
     paying: { name: 'John Doe', email: 'john@doe.com', _id: 'xxx' },
+    onLeaveFamily: fn(),
   },
 };

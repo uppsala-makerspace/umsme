@@ -344,6 +344,7 @@
   "renewPrompt": "Please renew to keep your membership!",
 
   "familyRenewalWarning": "You are part of a family membership. Contact the person responsible for the payment to renew.",
+  "leaveFamily": "Leave family",
   "familyLeaveHint": "You can also choose to leave the family from your account page.",
   "goToAccount": "Go to account"
 }

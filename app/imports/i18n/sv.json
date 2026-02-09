@@ -344,6 +344,7 @@
   "renewPrompt": "Förnya gärna för att behålla ditt medlemskap!",
 
   "familyRenewalWarning": "Du är en del av ett familjemedlemskap. Kontakta den som ansvarar för betalningen för att förnya.",
+  "leaveFamily": "Lämna familj",
   "familyLeaveHint": "Du kan också välja att lämna familjen från din kontosida.",
   "goToAccount": "Gå till konto"
 }
