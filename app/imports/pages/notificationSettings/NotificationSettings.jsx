@@ -23,6 +23,7 @@ const NotificationSettings = ({
   onRequestPermission,
 }) => {
   const { t } = useTranslation();
+  const disabled = pushPermission !== "granted";
 
   if (loading) {
     return <div className="p-4 text-center text-gray-500">{t("loading")}</div>;
@@ -54,9 +55,10 @@ const NotificationSettings = ({
         )}
 
         {/* Membership expiry toggle */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center">
+        <div className={`bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center${disabled ? " opacity-50" : ""}`}>
           <span className="text-sm font-medium">{t("membershipExpiryNotif")}</span>
           <button
+            disabled={disabled}
             onClick={() => onToggle("membershipExpiry")}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
               prefs.membershipExpiry ? "bg-green-500" : "bg-gray-300"
@@ -73,9 +75,10 @@ const NotificationSettings = ({
         {/* Test notification toggle + send button (admin only) */}
         {isAdmin && (
           <>
-            <div className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center">
+            <div className={`bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center${disabled ? " opacity-50" : ""}`}>
               <span className="text-sm font-medium">{t("testNotificationNotif")}</span>
               <button
+                disabled={disabled}
                 onClick={() => onToggle("testNotification")}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   prefs.testNotification ? "bg-green-500" : "bg-gray-300"
@@ -90,8 +93,9 @@ const NotificationSettings = ({
             </div>
             {prefs.testNotification && (
               <button
+                disabled={disabled}
                 onClick={onSendTest}
-                className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium"
+                className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium disabled:opacity-50"
               >
                 {t("testNotifTitle")}
               </button>

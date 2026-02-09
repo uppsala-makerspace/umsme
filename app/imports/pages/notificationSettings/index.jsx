@@ -11,11 +11,32 @@ export default () => {
   const [pushPermission, setPushPermission] = useState("default");
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Listen for permission changes (Permissions API + custom event fallback)
   useEffect(() => {
     if (typeof Notification !== "undefined") {
       setPushPermission(Notification.permission);
     }
 
+    const onGranted = () => setPushPermission("granted");
+    window.addEventListener("push-permission-granted", onGranted);
+
+    let status;
+    const onPermissionChange = () => setPushPermission(status.state);
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: "notifications" }).then((s) => {
+        status = s;
+        onPermissionChange();
+        status.addEventListener("change", onPermissionChange);
+      }).catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener("push-permission-granted", onGranted);
+      status?.removeEventListener("change", onPermissionChange);
+    };
+  }, []);
+
+  useEffect(() => {
     const fetchPrefs = async () => {
       try {
         const [result, admin] = await Promise.all([
