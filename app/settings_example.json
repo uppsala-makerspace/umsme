@@ -25,6 +25,7 @@
     "vapidPrivateKey": "Some key here",
     "paymentOptionsPath": "config/paymentOptions.json",
     "notificationsPath": "config/notifications.json",
+    "notifyExpiringTime": "at 09:00 am",
     "termsOfPurchaseMembershipEn": "config/termsOfPurchaseMembership.en.md",
     "termsOfPurchaseMembershipSv": "config/termsOfPurchaseMembership.sv.md",
     "slack": {

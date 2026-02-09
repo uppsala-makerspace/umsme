@@ -57,6 +57,8 @@ const notifyExpiringMemberships = async () => {
       const subs = await PushSubs.find({ userId: user._id }).fetchAsync();
       if (subs.length === 0) continue;
 
+      console.log(`Notifying ${member.name} about expiration, notification type:${type}`);
+
       const payload = {
         title: config.title,
         body: config.body,
@@ -78,7 +80,8 @@ const notifyExpiringMemberships = async () => {
 SyncedCron.add({
   name: "Notify expiring memberships",
   schedule(parser) {
-    return parser.text("at 09:00 am");
+    const time = Meteor.settings?.private?.notifyExpiringTime || "at 09:00 am";
+    return parser.text(time);
   },
   async job() {
     console.log("Running expiring membership notification cron job");
