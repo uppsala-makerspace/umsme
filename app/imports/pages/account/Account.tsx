@@ -91,19 +91,6 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
     <div className='flex flex-col min-h-full h-svh flex-1 gap-5'>
       <div className='flex flex-col flex-1 gap-5'>
         <span className="font-bold text-center text-xl"> {member.name}</span>
-        {/*<div className='flex w-full justify-center relative'>
-          <div className='absolute w-full h-full border'>
-            <div className='flex h-1/3'></div>
-            <div className='flex h-1/3 bg-gray-300'></div>
-            <div className='flex h-1/3'></div>
-          </div>
-          <button className="round-prof bg-gray-300">
-            <FontAwesomeIcon
-              className='absolute top-0 right-0 border-4 bg-white border-gray-500 rounded-full w-8 h-8 p-1.5 text-gray-500'
-              icon={faPen} />
-          </button>
-        </div>*/}
-
         <MembershipStatus member={member} status={status} />
       </div>
       {member.infamily ? (
