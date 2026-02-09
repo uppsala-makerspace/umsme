@@ -1,6 +1,4 @@
-//import "./cronjob/notifyExpiring";
-//import "./api/pushMethods.js";
-//import "./api";
+import "./cronjob/notifyExpiring";
 import { Meteor } from "meteor/meteor";
 import "./methods";
 import "./accounts";

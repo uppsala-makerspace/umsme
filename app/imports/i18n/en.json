@@ -326,5 +326,20 @@
   "installAndroidStep2": "Tap \"Install app\" or \"Add to Home screen\"",
   "installAndroidStep3": "Tap \"Install\" to confirm",
   "installDesktopInfo": "The app works fine in a regular browser, but some features like location detection for opening doors may be less accurate on desktop.",
-  "installDesktopQrText": "Scan with your phone to install the app"
+  "installDesktopQrText": "Scan with your phone to install the app",
+
+  "notifications": "Notifications",
+  "notificationSettings": "Notification Settings",
+  "noNotifications": "No notifications yet",
+  "clearAll": "Clear all",
+  "membershipExpiryNotif": "Membership expiry reminders",
+  "testNotificationNotif": "Test notifications",
+  "pushPermissionDenied": "Push notifications blocked. Enable them in your browser settings.",
+  "pushPermissionGranted": "Push notifications enabled",
+  "testNotifTitle": "Test notification",
+  "testNotifBody": "This is a test notification from UMS.",
+  "membershipExpires7days": "Your membership expires in 7 days",
+  "membershipExpiresToday": "Your membership expires today",
+  "membershipExpired7days": "Your membership expired 7 days ago",
+  "renewPrompt": "Please renew to keep your membership!"
 }

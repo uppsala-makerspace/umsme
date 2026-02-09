@@ -8,3 +8,5 @@ import './storage';
 import './liabilityDocuments';
 import './certificates';
 import './texts';
+import './push';
+import './roles';

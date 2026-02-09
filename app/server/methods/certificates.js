@@ -24,7 +24,7 @@ const canCertify = async (memberId, certificate) => {
     const member = await Members.findOneAsync(memberId);
     if (member) {
       const user = Accounts.findUserByEmail(member.email);
-      if (user && Roles.userIsInRole(user._id, certificate.certifierRole)) {
+      if (user && await Roles.userIsInRoleAsync(user._id, certificate.certifierRole)) {
         return true;
       }
     }

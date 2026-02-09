@@ -326,5 +326,20 @@
   "installAndroidStep2": "Tryck på \"Installera app\" eller \"Lägg till på hemskärmen\"",
   "installAndroidStep3": "Tryck på \"Installera\" för att bekräfta",
   "installDesktopInfo": "Appen fungerar bra i en vanlig webbläsare, men vissa funktioner som platsdetektering för att öppna dörrar kan vara mindre exakta på en dator.",
-  "installDesktopQrText": "Skanna med din telefon för att installera appen"
+  "installDesktopQrText": "Skanna med din telefon för att installera appen",
+
+  "notifications": "Aviseringar",
+  "notificationSettings": "Aviseringsinställningar",
+  "noNotifications": "Inga aviseringar ännu",
+  "clearAll": "Rensa alla",
+  "membershipExpiryNotif": "Medlemskapsaviseringar",
+  "testNotificationNotif": "Testaviseringar",
+  "pushPermissionDenied": "Push-aviseringar blockerade. Aktivera dem i webbläsarens inställningar.",
+  "pushPermissionGranted": "Push-aviseringar aktiverade",
+  "testNotifTitle": "Testavisering",
+  "testNotifBody": "Detta är en testavisering från UMS.",
+  "membershipExpires7days": "Ditt medlemskap löper ut om 7 dagar",
+  "membershipExpiresToday": "Ditt medlemskap löper ut idag",
+  "membershipExpired7days": "Ditt medlemskap gick ut för 7 dagar sedan",
+  "renewPrompt": "Förnya gärna för att behålla ditt medlemskap!"
 }

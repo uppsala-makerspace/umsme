@@ -3,11 +3,13 @@ import React, { useState, useEffect } from "react";
 import { Navigate } from 'react-router-dom';
 import Layout from "/imports/components/Layout/Layout";
 import Home from "./Home";
+import { usePushSetup } from "/imports/hooks/pushSetupHook";
 
 /** This view is used if there is no member or no active membership. */
 export default () => {
   const user = useTracker(() => Meteor.user());
   const [memberInfo, setMemberInfo] = useState(null);
+  usePushSetup();
 
   const fetchMemberInfo = async () => {
     try {

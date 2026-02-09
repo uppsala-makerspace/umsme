@@ -1,0 +1,91 @@
+import React from "react";
+import { useTranslation } from "react-i18next";
+import MainContent from "/imports/components/MainContent";
+
+/**
+ * Pure notification settings component.
+ * @param {Object} props
+ * @param {Object} props.prefs - Notification preferences { membershipExpiry: bool, testNotification: bool }
+ * @param {boolean} props.loading - Loading state
+ * @param {string} props.pushPermission - Browser push permission ("granted"|"denied"|"default")
+ * @param {boolean} props.isAdmin - Whether the current user is an admin
+ * @param {function} props.onToggle - Callback when a pref toggle is clicked, receives the pref key
+ * @param {function} props.onSendTest - Callback to send a test notification
+ */
+const NotificationSettings = ({
+  prefs = { membershipExpiry: true },
+  loading = false,
+  pushPermission = "default",
+  isAdmin = false,
+  onToggle,
+  onSendTest,
+}) => {
+  const { t } = useTranslation();
+
+  if (loading) {
+    return <div className="p-4 text-center text-gray-500">{t("loading")}</div>;
+  }
+
+  return (
+    <MainContent>
+      <div className="space-y-4">
+        {/* Push permission status */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-sm text-gray-600">
+            {pushPermission === "granted"
+              ? t("pushPermissionGranted")
+              : t("pushPermissionDenied")}
+          </p>
+        </div>
+
+        {/* Membership expiry toggle */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center">
+          <span className="text-sm font-medium">{t("membershipExpiryNotif")}</span>
+          <button
+            onClick={() => onToggle("membershipExpiry")}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              prefs.membershipExpiry ? "bg-green-500" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                prefs.membershipExpiry ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Test notification toggle + send button (admin only) */}
+        {isAdmin && (
+          <>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center">
+              <span className="text-sm font-medium">{t("testNotificationNotif")}</span>
+              <button
+                onClick={() => onToggle("testNotification")}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  prefs.testNotification ? "bg-green-500" : "bg-gray-300"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    prefs.testNotification ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+            {prefs.testNotification && (
+              <button
+                onClick={onSendTest}
+                className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium"
+              >
+                {t("testNotifTitle")}
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </MainContent>
+  );
+};
+
+export default NotificationSettings;

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
-import { Roles } from "meteor/roles";
 import { Navigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Unlock from "./Unlock";
@@ -18,13 +16,7 @@ export default () => {
   const [locationPermission, setLocationPermission] = useState("pending"); // pending, granted, denied, unavailable
   const [locationError, setLocationError] = useState(null);
   const [proximityRange, setProximityRange] = useState(100);
-
-  // Check if user has admin or admin-locks role
-  const isAdmin = useTracker(() => {
-    const userId = Meteor.userId();
-    if (!userId) return false;
-    return Roles.userIsInRole(userId, ["admin", "admin-locks"]);
-  }, []);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Start geolocation tracking
   useEffect(() => {
@@ -65,10 +57,11 @@ export default () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [doorsResult, memberInfo, certStatus] = await Promise.all([
+        const [doorsResult, memberInfo, certStatus, admin] = await Promise.all([
           Meteor.callAsync("availableDoors"),
           Meteor.callAsync("findInfoForUser"),
-          Meteor.callAsync("certificates.getMandatoryStatus")
+          Meteor.callAsync("certificates.getMandatoryStatus"),
+          Meteor.callAsync("checkIsAdmin"),
         ]);
 
         // Set proximity range and doors from server
@@ -90,6 +83,8 @@ export default () => {
           setMandatoryCertificate(certStatus.certificate);
           setHasMandatoryCertificate(certStatus.hasValidAttestation);
         }
+
+        setIsAdmin(admin);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {

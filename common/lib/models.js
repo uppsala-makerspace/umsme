@@ -145,6 +145,18 @@ export const models = {
       optional: true,
       autoform: { readonly: true },
     },
+    notificationPrefs: {
+      type: Object,
+      optional: true,
+      blackbox: true,
+      autoform: { omit: true },
+    },
+    lastExpiryNotification: {
+      type: Object,
+      optional: true,
+      blackbox: true,
+      autoform: { omit: true },
+    },
   },
   membership: {
     mid: {
