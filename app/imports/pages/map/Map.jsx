@@ -57,14 +57,17 @@ const Map = ({ slackTeam }) => {
         marker.style.visibility = "visible";
         marker.style.opacity = "1";
         marker.style.strokeWidth = "2";
-        floor.addEventListener("click", (e) => {
+        marker.style.cursor = "pointer";
+        const handleRoomClick = (e) => {
           // Only show popup if this floor is active
           if (activeFloorRef.current === floorNumber) {
             e.stopPropagation(); // Prevent floor switching when clicking a room
             setSelectedRoom({ ...rooms[roomId], id: roomId });
           }
           // Otherwise let the click propagate to switch floors
-        });
+        };
+        floor.addEventListener("click", handleRoomClick);
+        marker.addEventListener("click", handleRoomClick);
       }
     });
   };
