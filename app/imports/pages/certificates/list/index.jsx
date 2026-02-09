@@ -14,15 +14,15 @@ export default () => {
   const [pendingToConfirm, setPendingToConfirm] = useState([]);
   const [recentlyConfirmed, setRecentlyConfirmed] = useState([]);
 
+  // Sequential calls to avoid a race condition where parallel Meteor.callAsync
+  // calls can arrive at the server before the DDP login is established.
   const fetchData = useCallback(async () => {
     try {
-      const [allCerts, myAtts, certifierData] = await Promise.all([
-        Meteor.callAsync("certificates.getAll"),
-        Meteor.callAsync("certificates.getMyAttestations"),
-        Meteor.callAsync("certificates.getPendingToConfirm"),
-      ]);
+      const allCerts = await Meteor.callAsync("certificates.getAll");
       setCertificates(allCerts);
+      const myAtts = await Meteor.callAsync("certificates.getMyAttestations");
       setMyAttestations(myAtts);
+      const certifierData = await Meteor.callAsync("certificates.getPendingToConfirm");
 
       // certifierData is null if user is not a certifier, array if they are
       if (certifierData === null) {

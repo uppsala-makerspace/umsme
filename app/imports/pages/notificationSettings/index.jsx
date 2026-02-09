@@ -36,14 +36,14 @@ export default () => {
     };
   }, []);
 
+  // Sequential calls to avoid a race condition where parallel Meteor.callAsync
+  // calls can arrive at the server before the DDP login is established.
   useEffect(() => {
     const fetchPrefs = async () => {
       try {
-        const [result, admin] = await Promise.all([
-          Meteor.callAsync("getNotificationPrefs"),
-          Meteor.callAsync("checkIsAdmin"),
-        ]);
+        const result = await Meteor.callAsync("getNotificationPrefs");
         setPrefs(result);
+        const admin = await Meteor.callAsync("checkIsAdmin");
         setIsAdmin(admin);
       } catch (e) {
         console.error("Error fetching prefs:", e);

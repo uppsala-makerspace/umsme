@@ -91,7 +91,7 @@ Membership types:
 
 **React Components**:
 - Pages use `useTracker` for reactive Meteor data
-- `Meteor.callAsync` for method calls
+- `Meteor.callAsync` for method calls — **always call sequentially** (use `await` between each call), never in parallel with `Promise.all`. Parallel calls can race with the DDP login and arrive at the server before the session is established, resulting in empty responses.
 - Components styled with Tailwind CSS
 
 **Authentication Flow**:

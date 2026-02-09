@@ -26,14 +26,19 @@ export default function PaymentSelectionPage() {
     ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))
     : null;
 
-  // Load payment option from config, member info, and terms
+  // Load payment option from config, member info, and terms.
+  // Sequential calls to avoid a race condition where parallel Meteor.callAsync
+  // calls can arrive at the server before the DDP login is established.
   useEffect(() => {
-    Promise.all([
-      Meteor.callAsync("payment.getOptions"),
-      Meteor.callAsync("findInfoForUser"),
-      Meteor.callAsync("texts.termsOfPurchaseMembership", i18n.language === "sv" ? "sv" : "en").catch(() => null),
-    ])
-      .then(([options, info, terms]) => {
+    (async () => {
+      try {
+        const options = await Meteor.callAsync("payment.getOptions");
+        const info = await Meteor.callAsync("findInfoForUser");
+        let terms = null;
+        try {
+          terms = await Meteor.callAsync("texts.termsOfPurchaseMembership", i18n.language === "sv" ? "sv" : "en");
+        } catch (_) {}
+
         const option = options?.find((o) => o.paymentType === paymentType);
         if (!option) {
           setError("Invalid payment type");
@@ -45,13 +50,13 @@ export default function PaymentSelectionPage() {
         if (terms) {
           setTermsContent(terms);
         }
-        setIsLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Failed to load data:", err);
         setError("Failed to load payment options");
+      } finally {
         setIsLoading(false);
-      });
+      }
+    })();
   }, [paymentType, i18n.language]);
 
   // Handle pay button click

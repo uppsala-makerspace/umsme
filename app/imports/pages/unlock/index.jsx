@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 import { Navigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Unlock from "./Unlock";
 
 export default () => {
+  const userId = useTracker(() => Meteor.userId());
   const [doors, setDoors] = useState([]);
   const [opening, setOpening] = useState({});
   const [loading, setLoading] = useState(true);
@@ -66,20 +68,14 @@ export default () => {
     return () => status?.removeEventListener("change", onChange);
   }, []);
 
-  // Fetch door data and member info
+  // Fetch door data and member info.
+  // Sequential calls to avoid a race condition where parallel Meteor.callAsync
+  // calls can arrive at the server before the DDP login is established.
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [doorsResult, memberInfo, certStatus, admin] = await Promise.all([
-          Meteor.callAsync("availableDoors"),
-          Meteor.callAsync("findInfoForUser"),
-          Meteor.callAsync("certificates.getMandatoryStatus"),
-          Meteor.callAsync("checkIsAdmin"),
-        ]);
-
-        // Set proximity range and doors from server
+        const doorsResult = await Meteor.callAsync("availableDoors");
         setProximityRange(doorsResult.proximityRange || 200);
-
         const doorObjects = doorsResult.doors.map((door) => ({
           id: door.id,
           labelKey: door.id,
@@ -88,29 +84,29 @@ export default () => {
         setDoors(doorObjects);
         setOpening(Object.fromEntries(doorObjects.map((d) => [d.id, false])));
 
+        const memberInfo = await Meteor.callAsync("findInfoForUser");
         setLiabilityDate(memberInfo?.liabilityDate ?? null);
         setLiabilityOutdated(memberInfo?.liabilityOutdated ?? false);
 
-        // Set mandatory certificate status
+        const certStatus = await Meteor.callAsync("certificates.getMandatoryStatus");
         if (certStatus) {
           setMandatoryCertificate(certStatus.certificate);
           setHasMandatoryCertificate(certStatus.hasValidAttestation);
         }
 
+        const admin = await Meteor.callAsync("checkIsAdmin");
         setIsAdmin(admin);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching unlock data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (Meteor.userId()) {
+    if (userId) {
       fetchData();
-    } else {
-      setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   const handleOpenDoor = async (doorId) => {
     setOpening((prev) => ({ ...prev, [doorId]: true }));
@@ -126,7 +122,7 @@ export default () => {
     }, 3000);
   };
 
-  if (!Meteor.userId()) {
+  if (!userId) {
     return <Navigate to="/login" />;
   }
 
