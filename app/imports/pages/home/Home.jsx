@@ -4,8 +4,7 @@ import { Link } from 'react-router-dom';
 import Button from "../../components/Button";
 import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
-
-const msPerDay = 1000 * 60 * 60 * 24;
+import { daysBetween } from "/imports/common/lib/dateUtils";
 
 /**
  * Home view shows current status of a signed in user. Five situations may occur:
@@ -30,9 +29,8 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
 
   let daysLeftOfLab = null;
   if (memberStatus && (memberStatus.labEnd || memberStatus.memberEnd)) {
-    const today = new Date();
-    daysLeftOfLab = Math.floor(
-      (memberStatus.labEnd || memberStatus.memberEnd).getTime() - today.getTime()) / msPerDay;
+    const endDate = memberStatus.labEnd || memberStatus.memberEnd;
+    daysLeftOfLab = daysBetween(new Date(), endDate);
   }
   const timeToRenew = typeof daysLeftOfLab === "number" &&
     daysLeftOfLab >= 0 && daysLeftOfLab < 14;
@@ -88,7 +86,7 @@ export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, on
         <div>
           <p className="flex flex-col items-center text-center mt-5 mb-4">
             {t("AlertEndDate")}
-            {daysLeftOfLab.toFixed(0)} {t("days")}
+            {daysLeftOfLab} {t("days")}
           </p>
           <Link to="/membership" className="w-full block no-underline text-center">
             <Button fullWidth>{t("RenewMembership")}</Button>

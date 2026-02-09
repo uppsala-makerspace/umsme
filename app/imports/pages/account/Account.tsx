@@ -1,6 +1,5 @@
 import { faPen, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import { default as React, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,6 +7,7 @@ import { Link } from 'react-router-dom';
 
 import Memberships from "./Memberships";
 import MembershipStatus from "/imports/components/MembershipStatus";
+import { daysBetween } from "/imports/common/lib/dateUtils";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import MainContent from "../../components/MainContent";
@@ -31,7 +31,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
   const { t } = useTranslation();
 
   const payingFamilyMember = member.family && !member.infamily;
-  const memberDaysRemaining = status.memberEnd ? moment(status.memberEnd).diff(moment.now(), 'days') : null;
+  const memberDaysRemaining = status.memberEnd ? daysBetween(new Date(), status.memberEnd) : null;
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

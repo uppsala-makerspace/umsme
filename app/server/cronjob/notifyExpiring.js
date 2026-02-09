@@ -6,16 +6,11 @@ import { PushSubs } from "/imports/common/collections/pushSubs";
 import { memberStatus } from "/imports/common/lib/utils";
 import { sendPushToSubscriptions } from "/server/methods/push";
 import { loadJson } from "/server/methods/utils";
-
-const daysBetween = (d1, d2) => {
-  const ms = d2.getTime() - d1.getTime();
-  return Math.round(ms / (1000 * 60 * 60 * 24));
-};
+import { daysBetween } from "/imports/common/lib/dateUtils";
 
 const notifyExpiringMemberships = async () => {
   console.log("Checking for expiring memberships");
   const today = new Date();
-  today.setHours(12, 0, 0, 0);
 
 
   const notificationTypes = loadJson("notificationsPath");
@@ -40,10 +35,7 @@ const notifyExpiringMemberships = async () => {
     if (!status.memberEnd) continue;
 
     const memberEnd = new Date(status.memberEnd);
-    memberEnd.setHours(12, 0, 0, 0);
-
     const labEnd = status.labEnd ? new Date(status.labEnd) : null;
-    if (labEnd) labEnd.setHours(12, 0, 0, 0);
 
     const isFamily = !!member.infamily;
     const isLab = labEnd && daysBetween(memberEnd, labEnd) !== 0;

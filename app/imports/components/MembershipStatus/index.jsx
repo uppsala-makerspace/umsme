@@ -1,6 +1,6 @@
 import React from "react";
-import moment from "moment";
 import { useTranslation } from "react-i18next";
+import { daysBetween } from "/imports/common/lib/dateUtils";
 
 /**
  * Format a date according to the current locale
@@ -66,11 +66,12 @@ export default function MembershipStatus({ member, status, showMemberId = true }
   }
 
   const membershipType = getMembershipType(status, member, t);
+  const now = new Date();
   const memberDaysRemaining = status.memberEnd
-    ? moment(status.memberEnd).diff(moment.now(), "days")
+    ? daysBetween(now, status.memberEnd)
     : null;
   const labDaysRemaining = status.labEnd
-    ? moment(status.labEnd).diff(moment.now(), "days")
+    ? daysBetween(now, status.labEnd)
     : null;
   const hasLabAccess = status.labEnd && status.type !== "member";
 
