@@ -12,20 +12,10 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import MainContent from "../../components/MainContent";
 
-interface INewFamilyMember {
-  email?: string;
-}
-
-interface INewFamilyMemberValidation {
-  emailEmpty?: boolean,
-  emailInvalid?: boolean,
-  errorMassages?: string[]
-}
-
 const Account = ({ member, memberships, familyMembers, familyInvites = [], status, paying, addFamilyInvite, cancelFamilyInvite, removeFamilyMember, onLeaveFamily }) => {
   const [addFamilyMemberMode, setAddFamilyMemberMode] = useState(false);
-  const [newFamilyMemberInfo, setNewFamilyMemberInfo] = useState<INewFamilyMember>({});
-  const [newFamilyMemberError, setNewFamilyMemberError] = useState<INewFamilyMemberValidation>({});
+  const [newFamilyMemberInfo, setNewFamilyMemberInfo] = useState({});
+  const [newFamilyMemberError, setNewFamilyMemberError] = useState({});
 
 
   const { t } = useTranslation();
@@ -33,13 +23,13 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
   const payingFamilyMember = member.family && !member.infamily;
   const memberDaysRemaining = status.memberEnd ? daysBetween(new Date(), status.memberEnd) : null;
 
-  const validateEmail = (email: string): boolean => {
+  const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const validateNewFamilyMemberInfo = (): boolean => {
-    const validation: INewFamilyMemberValidation = {
+  const validateNewFamilyMemberInfo = () => {
+    const validation = {
       emailEmpty: false,
       emailInvalid: false,
       errorMassages: []
@@ -76,11 +66,11 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
     setAddFamilyMemberMode(true)
   }
 
-  const handleUpdateNewFamilyMemberEmail = (value: string) => {
+  const handleUpdateNewFamilyMemberEmail = (value) => {
     setNewFamilyMemberInfo({email: value})
   }
 
-  const handleRemoveFamilyMember = (email: string) => {
+  const handleRemoveFamilyMember = (email) => {
     if (removeFamilyMember) {
       removeFamilyMember(email);
     }

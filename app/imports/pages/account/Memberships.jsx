@@ -3,24 +3,10 @@ import { useTranslation } from "react-i18next";
 import PropTypes from 'prop-types';
 import { formatDate } from './util';
 
-interface Membership {
-  _id: string;
-  type: string;
-  start: Date;
-  memberend?: Date;
-  labend?: Date;
-  discount?: boolean;
-  family?: boolean;
-}
-
-interface MembershipsProps {
-  memberships: Membership[];
-}
-
-const Memberships = ({ memberships = [] }: MembershipsProps) => {
+const Memberships = ({ memberships = [] }) => {
   const { t, i18n } = useTranslation();
 
-  const getMembershipTypeLabel = (membership: Membership): string => {
+  const getMembershipTypeLabel = (membership) => {
     const { type, discount, family } = membership;
 
     if (family) {
@@ -45,7 +31,7 @@ const Memberships = ({ memberships = [] }: MembershipsProps) => {
     }
   };
 
-  const getEndDate = (membership: Membership): Date | undefined => {
+  const getEndDate = (membership) => {
     const { type, memberend, labend } = membership;
     if (type === 'lab') {
       return labend;
@@ -67,7 +53,7 @@ const Memberships = ({ memberships = [] }: MembershipsProps) => {
           <div key={membership._id || index} className="flex justify-between text-sm">
             <span className="font-medium">{getMembershipTypeLabel(membership)}</span>
             <span>
-              {formatDate(membership.start, i18n.language)} - {getEndDate(membership) ? formatDate(getEndDate(membership)!, i18n.language) : '-'}
+              {formatDate(membership.start, i18n.language)} - {getEndDate(membership) ? formatDate(getEndDate(membership), i18n.language) : '-'}
             </span>
           </div>
         ))}
