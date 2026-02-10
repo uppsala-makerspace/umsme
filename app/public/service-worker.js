@@ -117,7 +117,7 @@ self.addEventListener("push", (event) => {
     await self.registration.showNotification(title, {
       body,
       icon: "/icons/icon-192x192-v3.png",
-      badge: "/icons/icon-192x192-v3.png",
+      badge: "/icons/badge-96x96.png",
     });
   };
 
