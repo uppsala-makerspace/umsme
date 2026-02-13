@@ -131,19 +131,15 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
       {!isInstalledPWA && platform === 'ios' && <IosInstructions t={t} />}
       {!isInstalledPWA && platform === 'android' && (
         <>
-          {installPromptAvailable ? (
-            <>
-              <AndroidInstallButton t={t} onInstallClick={onInstallClick} />
-              <AndroidManualInstructions t={t} showAlternativeHeader={true} />
-            </>
-          ) : isInstalling ? (
+          {installPromptAvailable && (
+            <AndroidInstallButton t={t} onInstallClick={onInstallClick} />
+          )}
+          {isInstalling ? (
             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
               <p className="font-medium">{t("installAndroidInstalling")}</p>
             </div>
           ) : (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-              <p className="font-medium">{t("installAndroidAlreadyInstalled")}</p>
-            </div>
+            <AndroidManualInstructions t={t} showAlternativeHeader={installPromptAvailable} />
           )}
         </>
       )}
