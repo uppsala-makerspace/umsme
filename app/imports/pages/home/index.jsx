@@ -7,7 +7,7 @@ import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 /** This view is used if there is no member or no active membership. */
 export default () => {
-  const { memberInfo, refetch } = useContext(MemberInfoContext);
+  const { memberInfo, loading, refetch } = useContext(MemberInfoContext);
   const hasMember = !!memberInfo?.member?.name;
   usePushSetup(hasMember);
 
@@ -32,6 +32,7 @@ export default () => {
   return <Layout bottomNav={hasMember} showNotifications={hasMember}>
     {!Meteor.userId() ? <Navigate to="/login" /> : null}
     <Home
+      loading={loading}
       memberName={memberInfo?.member?.name || ""}
       memberStatus={memberInfo?.status}
       verified={memberInfo?.verified ?? false}

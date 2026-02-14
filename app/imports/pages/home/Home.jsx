@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from 'react-router-dom';
 import Button from "../../components/Button";
+import Loader from "../../components/Loader";
 import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
 import { daysBetween } from "/imports/common/lib/dateUtils";
@@ -24,8 +25,15 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily }) => {
+export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily }) => {
   const { t } = useTranslation();
+
+  if (loading) {
+    return <MainContent>
+      <Logo />
+      <Loader />
+    </MainContent>;
+  }
 
   let daysLeftOfLab = null;
   if (memberStatus && (memberStatus.labEnd || memberStatus.memberEnd)) {
