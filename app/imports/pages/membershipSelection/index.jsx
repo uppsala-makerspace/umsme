@@ -8,11 +8,13 @@ import {
   getInitialCheckboxState,
 } from "./availabilityRules";
 import { MemberInfoContext } from "/imports/context/MemberInfoContext";
+import { AppDataContext } from "/imports/context/AppDataContext";
 
 export default function MembershipSelectionPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { memberInfo, loading: memberInfoLoading } = useContext(MemberInfoContext);
+  const { paymentOptions, loading: appDataLoading } = useContext(AppDataContext);
 
   // Get Swish disabled status from public settings
   const swishSettings = Meteor.settings?.public?.swish;
@@ -22,7 +24,6 @@ export default function MembershipSelectionPage() {
     ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))
     : null;
 
-  const [paymentOptions, setPaymentOptions] = useState([]);
   const [error, setError] = useState(null);
   const [isDiscounted, setIsDiscounted] = useState(false);
   const [isFamily, setIsFamily] = useState(false);
@@ -30,14 +31,7 @@ export default function MembershipSelectionPage() {
 
   const member = memberInfo?.member || null;
   const memberStatus = memberInfo?.status || null;
-  const isLoading = memberInfoLoading || paymentOptions.length === 0;
-
-  // Load payment options configuration
-  useEffect(() => {
-    Meteor.callAsync("payment.getOptions")
-      .then((data) => setPaymentOptions(data || []))
-      .catch((err) => console.error("Failed to load payment options:", err));
-  }, []);
+  const isLoading = memberInfoLoading || appDataLoading || !paymentOptions;
 
   // Initialize checkbox state from memberStatus (only once after loading)
   useEffect(() => {
@@ -57,7 +51,7 @@ export default function MembershipSelectionPage() {
   // Compute options with availability rules applied
   const optionsWithAvailability = useMemo(() => {
     return calculateOptionAvailability(
-      paymentOptions,
+      paymentOptions || [],
       memberStatus,
       isFamily
     );

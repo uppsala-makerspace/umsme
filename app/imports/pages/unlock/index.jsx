@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 import { Navigate } from "react-router-dom";
@@ -6,19 +6,37 @@ import Layout from "/imports/components/Layout/Layout";
 import Unlock from "./Unlock";
 import { LocationContext } from "/imports/context/LocationContext";
 import { MemberInfoContext } from "/imports/context/MemberInfoContext";
+import { AppDataContext } from "/imports/context/AppDataContext";
 
 export default () => {
   const userId = useTracker(() => Meteor.userId());
   const { userPosition, locationPermission } = useContext(LocationContext);
   const { memberInfo } = useContext(MemberInfoContext);
-  const [doors, setDoors] = useState([]);
+  const { doors: doorsData, isAdmin, loading: appDataLoading } = useContext(AppDataContext);
   const [opening, setOpening] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [certLoading, setCertLoading] = useState(true);
   const [mandatoryCertificate, setMandatoryCertificate] = useState(null);
   const [hasMandatoryCertificate, setHasMandatoryCertificate] = useState(true);
-  const [proximityRange, setProximityRange] = useState(100);
-  const [isAdmin, setIsAdmin] = useState(false);
   const promptWatchIdRef = useRef(null);
+
+  const proximityRange = doorsData?.proximityRange || 200;
+  const doors = useMemo(() => {
+    if (!doorsData?.doors) return [];
+    return doorsData.doors.map((door) => ({
+      id: door.id,
+      labelKey: door.id,
+      location: door.location,
+    }));
+  }, [doorsData]);
+
+  // Initialize opening state when doors change
+  useEffect(() => {
+    if (doors.length > 0) {
+      setOpening(Object.fromEntries(doors.map((d) => [d.id, false])));
+    }
+  }, [doors]);
+
+  const loading = appDataLoading || certLoading;
 
   // When permission is pending (first visit), trigger the browser prompt via
   // watchPosition. Once the user grants permission, the LocationContext picks
@@ -55,40 +73,23 @@ export default () => {
     };
   }, [locationPermission]);
 
-  // Fetch door data, certificate status, and admin flag.
-  // Sequential calls to avoid a race condition where parallel Meteor.callAsync
-  // calls can arrive at the server before the DDP login is established.
+  // Fetch certificate status
   useEffect(() => {
-    const fetchData = async () => {
+    if (!userId) return;
+    const fetchCertStatus = async () => {
       try {
-        const doorsResult = await Meteor.callAsync("availableDoors");
-        setProximityRange(doorsResult.proximityRange || 200);
-        const doorObjects = doorsResult.doors.map((door) => ({
-          id: door.id,
-          labelKey: door.id,
-          location: door.location,
-        }));
-        setDoors(doorObjects);
-        setOpening(Object.fromEntries(doorObjects.map((d) => [d.id, false])));
-
         const certStatus = await Meteor.callAsync("certificates.getMandatoryStatus");
         if (certStatus) {
           setMandatoryCertificate(certStatus.certificate);
           setHasMandatoryCertificate(certStatus.hasValidAttestation);
         }
-
-        const admin = await Meteor.callAsync("checkIsAdmin");
-        setIsAdmin(admin);
       } catch (error) {
-        console.error("Error fetching unlock data:", error);
+        console.error("Error fetching certificate status:", error);
       } finally {
-        setLoading(false);
+        setCertLoading(false);
       }
     };
-
-    if (userId) {
-      fetchData();
-    }
+    fetchCertStatus();
   }, [userId]);
 
   const handleOpenDoor = async (doorId) => {

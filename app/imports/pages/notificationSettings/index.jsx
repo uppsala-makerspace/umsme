@@ -1,15 +1,16 @@
 import { Meteor } from "meteor/meteor";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Navigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import { subscribeToPush } from "/imports/hooks/pushSetupHook";
+import { AppDataContext } from "/imports/context/AppDataContext";
 import NotificationSettings from "./NotificationSettings";
 
 export default () => {
+  const { isAdmin } = useContext(AppDataContext);
   const [prefs, setPrefs] = useState({ membershipExpiry: true });
   const [loading, setLoading] = useState(true);
   const [pushPermission, setPushPermission] = useState("default");
-  const [isAdmin, setIsAdmin] = useState(false);
 
   // Listen for permission changes (Permissions API + custom event fallback)
   useEffect(() => {
@@ -40,15 +41,11 @@ export default () => {
     };
   }, []);
 
-  // Sequential calls to avoid a race condition where parallel Meteor.callAsync
-  // calls can arrive at the server before the DDP login is established.
   useEffect(() => {
     const fetchPrefs = async () => {
       try {
         const result = await Meteor.callAsync("getNotificationPrefs");
         setPrefs(result);
-        const admin = await Meteor.callAsync("checkIsAdmin");
-        setIsAdmin(admin);
       } catch (e) {
         console.error("Error fetching prefs:", e);
       } finally {

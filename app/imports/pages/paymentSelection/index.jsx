@@ -5,6 +5,7 @@ import Layout from "/imports/components/Layout/Layout";
 import PaymentSelection from "./PaymentSelection";
 import { membershipFromPayment } from "/imports/common/lib/utils";
 import { MemberInfoContext } from "/imports/context/MemberInfoContext";
+import { AppDataContext } from "/imports/context/AppDataContext";
 import { calculateOptionAvailability } from "/imports/pages/membershipSelection/availabilityRules";
 
 export default function PaymentSelectionPage() {
@@ -12,15 +13,15 @@ export default function PaymentSelectionPage() {
   const navigate = useNavigate();
   const { paymentType } = useParams();
   const { memberInfo, refetch } = useContext(MemberInfoContext);
+  const { paymentOptions: contextPaymentOptions } = useContext(AppDataContext);
 
-  const [loadResult, setLoadResult] = useState(null);
   const [termsContent, setTermsContent] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const member = memberInfo?.member || null;
   const memberStatus = memberInfo?.status || null;
-  const paymentOptions = loadResult?.paymentOptions || [];
+  const paymentOptions = contextPaymentOptions || [];
   const paymentOption = paymentOptions.find((o) => o.paymentType === paymentType) || null;
 
   // Check if this payment type is unavailable given the current membership status
@@ -39,35 +40,27 @@ export default function PaymentSelectionPage() {
     ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))
     : null;
 
-  // Load payment option from config and terms.
-  // Sequential calls to avoid a race condition where parallel Meteor.callAsync
-  // calls can arrive at the server before the DDP login is established.
+  // Validate payment type once options are available from context
+  useEffect(() => {
+    if (paymentOptions.length > 0) {
+      if (!paymentOptions.find((o) => o.paymentType === paymentType)) {
+        setError("Invalid payment type");
+      }
+    }
+  }, [paymentOptions, paymentType]);
+
+  // Load terms of purchase
   useEffect(() => {
     (async () => {
       try {
-        const options = await Meteor.callAsync("payment.getOptions");
-        let terms = null;
-        try {
-          terms = await Meteor.callAsync("texts.termsOfPurchaseMembership", i18n.language === "sv" ? "sv" : "en");
-        } catch (_) {}
-
-        if (!options?.find((o) => o.paymentType === paymentType)) {
-          setError("Invalid payment type");
-        }
-        setLoadResult({
-          paymentOptions: options || [],
-        });
+        const terms = await Meteor.callAsync("texts.termsOfPurchaseMembership", i18n.language === "sv" ? "sv" : "en");
         if (terms) {
           setTermsContent(terms);
         }
-      } catch (err) {
-        console.error("Failed to load data:", err);
-        setError("Failed to load payment options");
-      } finally {
-        setIsLoading(false);
-      }
+      } catch (_) {}
+      setIsLoading(false);
     })();
-  }, [paymentType, i18n.language]);
+  }, [i18n.language]);
 
   // Handle pay button click
   const handlePay = useCallback(

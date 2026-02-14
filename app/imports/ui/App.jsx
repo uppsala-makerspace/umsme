@@ -26,6 +26,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { NotificationProvider } from '/imports/context/NotificationContext';
 import { LocationProvider } from '/imports/context/LocationContext';
 import { MemberInfoProvider } from '/imports/context/MemberInfoContext';
+import { AppDataProvider } from '/imports/context/AppDataContext';
 
 export const App = () => (
   <div>
@@ -33,6 +34,7 @@ export const App = () => (
       <LocationProvider>
       <NotificationProvider>
       <MemberInfoProvider>
+      <AppDataProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -59,6 +61,7 @@ export const App = () => (
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/notification-settings" element={<NotificationSettings />} />
         </Routes>
+      </AppDataProvider>
       </MemberInfoProvider>
       </NotificationProvider>
       </LocationProvider>
