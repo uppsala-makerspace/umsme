@@ -239,6 +239,7 @@
   "selectPaymentMethod": "Välj betalningsmetod",
   "waitingForPayment": "Väntar på betalning...",
   "paymentFailed": "Betalningen misslyckades",
+  "paymentStatusChanged": "Din medlemsstatus har ändrats, troligtvis för att en nyligen genomförd betalning just gick igenom. Gå tillbaka för att kontrollera ditt nuvarande medlemskap.",
   "paymentTimeout": "Betalningen tog för lång tid",
   "paymentTimeoutDescription": "Betalningen avbröts på grund av timeout. Försök igen.",
   "tryAgain": "Försök igen",

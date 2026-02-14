@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useContext } from "react";
 import { Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "/imports/components/Layout/Layout";
 import InitiatedPayment from "./InitiatedPayment";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 const POLL_INTERVAL = 2000; // 2 seconds
 const TIMEOUT_MS = 180000; // 3 minutes
@@ -12,6 +13,7 @@ export default function InitiatedPaymentPage() {
   const navigate = useNavigate();
   const { externalId } = useParams();
   const location = useLocation();
+  const { refetch } = useContext(MemberInfoContext);
 
   // Get qrCode from navigation state if provided
   const initialQrCode = location.state?.qrCode || null;
@@ -47,6 +49,7 @@ export default function InitiatedPaymentPage() {
         if (result.status === "PAID") {
           clearTimeouts();
           setStep("success");
+          refetch();
         } else if (
           result.status === "ERROR" ||
           result.status === "CANCELLED" ||

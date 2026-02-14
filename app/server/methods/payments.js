@@ -5,6 +5,7 @@ import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
 import { findMemberForUser, sanitizeForSwish, loadJson } from "/server/methods/utils";
+import { memberStatus } from "/imports/common/lib/utils";
 
 const getPaymentOptions = () => loadJson("paymentOptionsPath");
 
@@ -67,8 +68,12 @@ Meteor.methods({
    * @param {string} paymentType - The type of payment (e.g., "memberBase", "memberLab")
    * @returns {Object} Object with paymentrequesttoken, externalId, and deepLink
    */
-  async "payment.initiate"(paymentType) {
+  async "payment.initiate"(paymentType, expectedStatus) {
     check(paymentType, String);
+    check(expectedStatus, Match.Optional({
+      memberEnd: Match.Optional(Match.OneOf(Date, null, undefined)),
+      labEnd: Match.Optional(Match.OneOf(Date, null, undefined)),
+    }));
 
     // Check if Swish payments are disabled
     if (isSwishDisabled()) {
@@ -88,6 +93,19 @@ Meteor.methods({
 
     if (!member.name) {
       throw new Meteor.Error("no-name", "Member name is required");
+    }
+
+    // Verify that the client's view of membership status is current
+    if (expectedStatus) {
+      const status = await memberStatus(member);
+      const serverMemberEnd = status.memberEnd?.getTime();
+      const serverLabEnd = status.labEnd?.getTime();
+      const clientMemberEnd = expectedStatus.memberEnd?.getTime();
+      const clientLabEnd = expectedStatus.labEnd?.getTime();
+
+      if (serverMemberEnd !== clientMemberEnd || serverLabEnd !== clientLabEnd) {
+        throw new Meteor.Error("status-changed", "Membership status has changed");
+      }
     }
 
     const config = getSwishConfig();

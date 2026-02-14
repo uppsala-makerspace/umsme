@@ -1,30 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useTracker } from "meteor/react-meteor-data";
 import { useTranslation } from "react-i18next";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 export const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const user = useTracker(() => Meteor.user());
-  const [hasMember, setHasMember] = useState(false);
+  const { memberInfo } = useContext(MemberInfoContext);
+  const hasMember = !!memberInfo?.member;
   const menuRef = useRef(null);
-
-  // Load member information
-  useEffect(() => {
-    if (!user) return;
-    const fetchData = async () => {
-      try {
-        const { member } = await Meteor.callAsync("findInfoForUser");
-        setHasMember(!!member);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, [user?._id]);
 
   // Close menu when clicking outside
   useEffect(() => {

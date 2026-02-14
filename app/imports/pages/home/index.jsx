@@ -1,36 +1,20 @@
-import { useTracker } from "meteor/react-meteor-data";
-import React, { useState, useEffect } from "react";
+import React, { useContext } from "react";
 import { Navigate } from 'react-router-dom';
 import Layout from "/imports/components/Layout/Layout";
 import Home from "./Home";
 import { usePushSetup } from "/imports/hooks/pushSetupHook";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 /** This view is used if there is no member or no active membership. */
 export default () => {
-  const user = useTracker(() => Meteor.user());
-  const [memberInfo, setMemberInfo] = useState(null);
+  const { memberInfo, refetch } = useContext(MemberInfoContext);
   const hasMember = !!memberInfo?.member?.name;
   usePushSetup(hasMember);
-
-  const fetchMemberInfo = async () => {
-    try {
-      const info = await Meteor.callAsync("findInfoForUser");
-      setMemberInfo(info);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  // Load member information
-  useEffect(() => {
-    if (!user) return;
-    fetchMemberInfo();
-  }, [user?._id]);
 
   const handleAcceptInvite = async () => {
     try {
       await Meteor.callAsync("acceptFamilyMemberInvite");
-      fetchMemberInfo();
+      refetch();
     } catch (error) {
       console.error("Error accepting invite:", error);
     }
@@ -39,7 +23,7 @@ export default () => {
   const handleDeclineInvite = async () => {
     try {
       await Meteor.callAsync("rejectFamilyMemberInvite");
-      fetchMemberInfo();
+      refetch();
     } catch (error) {
       console.error("Error declining invite:", error);
     }

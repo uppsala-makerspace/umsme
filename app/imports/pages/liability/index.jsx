@@ -1,19 +1,18 @@
 import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Navigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Liability from "./Liability";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 export default () => {
-  const user = useTracker(() => Meteor.user());
+  const { memberInfo, refetch } = useContext(MemberInfoContext);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState(false);
   const [document, setDocument] = useState(null);
-  const [approvedDate, setApprovedDate] = useState(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!memberInfo) return;
 
     const fetchData = async () => {
       try {
@@ -25,12 +24,6 @@ export default () => {
           const fullDoc = await Meteor.callAsync("liabilityDocumentByDate", latestDoc.date);
           setDocument(fullDoc);
         }
-
-        // Fetch member info to get approved liability date
-        const info = await Meteor.callAsync("findInfoForUser");
-        if (info?.liabilityDate) {
-          setApprovedDate(new Date(info.liabilityDate));
-        }
       } catch (error) {
         console.error("Error fetching liability data:", error);
       } finally {
@@ -39,7 +32,7 @@ export default () => {
     };
 
     fetchData();
-  }, [user?._id]);
+  }, [memberInfo?.member?._id]);
 
   const handleApprove = async () => {
     if (!document?.date) return;
@@ -47,13 +40,15 @@ export default () => {
     setApproving(true);
     try {
       await Meteor.callAsync("approveLiability", document.date);
-      setApprovedDate(new Date(document.date));
+      await refetch();
     } catch (error) {
       console.error("Error approving liability:", error);
     } finally {
       setApproving(false);
     }
   };
+
+  const approvedDate = memberInfo?.liabilityDate ? new Date(memberInfo.liabilityDate) : null;
 
   return (
     <Layout>

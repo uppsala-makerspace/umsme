@@ -240,6 +240,7 @@
   "selectPaymentMethod": "Select payment method",
   "waitingForPayment": "Waiting for payment...",
   "paymentFailed": "Payment failed",
+  "paymentStatusChanged": "Your membership status has changed, most likely because a recent payment just went through. Go back to verify your current membership.",
   "paymentTimeout": "Payment timed out",
   "paymentTimeoutDescription": "The payment was cancelled due to timeout. Please try again.",
   "tryAgain": "Try again",

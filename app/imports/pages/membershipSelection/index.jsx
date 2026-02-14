@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useTracker } from "meteor/react-meteor-data";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "/imports/components/Layout/Layout";
@@ -8,11 +7,12 @@ import {
   calculateOptionAvailability,
   getInitialCheckboxState,
 } from "./availabilityRules";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 export default function MembershipSelectionPage() {
   const { t, i18n } = useTranslation();
-  const user = useTracker(() => Meteor.user());
   const navigate = useNavigate();
+  const { memberInfo, loading: memberInfoLoading } = useContext(MemberInfoContext);
 
   // Get Swish disabled status from public settings
   const swishSettings = Meteor.settings?.public?.swish;
@@ -23,15 +23,14 @@ export default function MembershipSelectionPage() {
     : null;
 
   const [paymentOptions, setPaymentOptions] = useState([]);
-  const [memberInfo, setMemberInfo] = useState({
-    member: null,
-    memberStatus: null,
-  });
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDiscounted, setIsDiscounted] = useState(false);
   const [isFamily, setIsFamily] = useState(false);
   const [checkboxInitialized, setCheckboxInitialized] = useState(false);
+
+  const member = memberInfo?.member || null;
+  const memberStatus = memberInfo?.status || null;
+  const isLoading = memberInfoLoading || paymentOptions.length === 0;
 
   // Load payment options configuration
   useEffect(() => {
@@ -40,52 +39,29 @@ export default function MembershipSelectionPage() {
       .catch((err) => console.error("Failed to load payment options:", err));
   }, []);
 
-  // Fetch member info
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchMemberInfo = async () => {
-      try {
-        setIsLoading(true);
-        const result = await Meteor.callAsync("findInfoForUser");
-        setMemberInfo({
-          member: result.member,
-          memberStatus: result.status,
-        });
-      } catch (err) {
-        console.error("Error fetching member info:", err);
-        setError(err.reason || err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMemberInfo();
-  }, [user?._id]);
-
   // Initialize checkbox state from memberStatus (only once after loading)
   useEffect(() => {
-    if (memberInfo.memberStatus && !checkboxInitialized) {
-      const initial = getInitialCheckboxState(memberInfo.memberStatus);
+    if (memberStatus && !checkboxInitialized) {
+      const initial = getInitialCheckboxState(memberStatus);
       setIsFamily(initial.isFamily);
       setIsDiscounted(initial.isDiscounted);
       setCheckboxInitialized(true);
     }
-  }, [memberInfo.memberStatus, checkboxInitialized]);
+  }, [memberStatus, checkboxInitialized]);
 
   // Compute checkbox lock state
   const checkboxState = useMemo(() => {
-    return getInitialCheckboxState(memberInfo.memberStatus);
-  }, [memberInfo.memberStatus]);
+    return getInitialCheckboxState(memberStatus);
+  }, [memberStatus]);
 
   // Compute options with availability rules applied
   const optionsWithAvailability = useMemo(() => {
     return calculateOptionAvailability(
       paymentOptions,
-      memberInfo.memberStatus,
+      memberStatus,
       isFamily
     );
-  }, [paymentOptions, memberInfo.memberStatus, isFamily]);
+  }, [paymentOptions, memberStatus, isFamily]);
 
   const handleSelectOption = (option) => {
     navigate(`/paymentSelection/${option.paymentType}`);
@@ -111,12 +87,12 @@ export default function MembershipSelectionPage() {
       <MembershipSelection
         loading={isLoading}
         error={error}
-        member={memberInfo.member}
-        memberStatus={memberInfo.memberStatus}
+        member={member}
+        memberStatus={memberStatus}
         options={optionsWithAvailability}
         isDiscounted={isDiscounted}
         isFamily={isFamily}
-        isFamilyMember={!!memberInfo.member?.infamily}
+        isFamilyMember={!!member?.infamily}
         familyLocked={checkboxState.familyLocked}
         disabledMessage={disabledMessage}
         onSelectOption={handleSelectOption}

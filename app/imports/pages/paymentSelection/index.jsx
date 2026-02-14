@@ -1,22 +1,35 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useContext } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "/imports/components/Layout/Layout";
 import PaymentSelection from "./PaymentSelection";
 import { membershipFromPayment } from "/imports/common/lib/utils";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
+import { calculateOptionAvailability } from "/imports/pages/membershipSelection/availabilityRules";
 
 export default function PaymentSelectionPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { paymentType } = useParams();
+  const { memberInfo, refetch } = useContext(MemberInfoContext);
 
   const [loadResult, setLoadResult] = useState(null);
   const [termsContent, setTermsContent] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const paymentOption = loadResult?.paymentOption || null;
-  const member = loadResult?.member || null;
+  const member = memberInfo?.member || null;
+  const memberStatus = memberInfo?.status || null;
+  const paymentOptions = loadResult?.paymentOptions || [];
+  const paymentOption = paymentOptions.find((o) => o.paymentType === paymentType) || null;
+
+  // Check if this payment type is unavailable given the current membership status
+  const statusChanged = useMemo(() => {
+    if (!paymentOptions.length || !memberStatus) return false;
+    const withAvailability = calculateOptionAvailability(paymentOptions, memberStatus, !!member?.family);
+    const option = withAvailability.find((o) => o.paymentType === paymentType);
+    return option?.disabled === true;
+  }, [paymentOptions, memberStatus, member?.family, paymentType]);
 
   // Get Swish disabled status from public settings
   const swishSettings = Meteor.settings?.public?.swish;
@@ -26,26 +39,23 @@ export default function PaymentSelectionPage() {
     ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))
     : null;
 
-  // Load payment option from config, member info, and terms.
+  // Load payment option from config and terms.
   // Sequential calls to avoid a race condition where parallel Meteor.callAsync
   // calls can arrive at the server before the DDP login is established.
   useEffect(() => {
     (async () => {
       try {
         const options = await Meteor.callAsync("payment.getOptions");
-        const info = await Meteor.callAsync("findInfoForUser");
         let terms = null;
         try {
           terms = await Meteor.callAsync("texts.termsOfPurchaseMembership", i18n.language === "sv" ? "sv" : "en");
         } catch (_) {}
 
-        const option = options?.find((o) => o.paymentType === paymentType);
-        if (!option) {
+        if (!options?.find((o) => o.paymentType === paymentType)) {
           setError("Invalid payment type");
         }
         setLoadResult({
-          paymentOption: option || null,
-          member: info?.member || null,
+          paymentOptions: options || [],
         });
         if (terms) {
           setTermsContent(terms);
@@ -66,7 +76,10 @@ export default function PaymentSelectionPage() {
       setError(null);
 
       try {
-        const result = await Meteor.callAsync("payment.initiate", paymentType);
+        const result = await Meteor.callAsync("payment.initiate", paymentType, {
+          memberEnd: memberStatus?.memberEnd || null,
+          labEnd: memberStatus?.labEnd || null,
+        });
         const { externalId, paymentrequesttoken } = result;
 
         if (method === "qr") {
@@ -94,7 +107,11 @@ export default function PaymentSelectionPage() {
         }
       } catch (err) {
         console.error("Error initiating payment:", err);
-        setError(err.reason || err.message);
+        if (err.error === "status-changed") {
+          refetch();
+        } else {
+          setError(err.reason || err.message);
+        }
         setIsLoading(false);
       }
     },
@@ -122,7 +139,7 @@ export default function PaymentSelectionPage() {
   return (
     <Layout>
       <PaymentSelection
-        loading={isLoading && !loadResult}
+        loading={!paymentOption || !memberStatus}
         error={error}
         paymentOption={paymentOption}
         membershipDates={membershipDates}
@@ -130,6 +147,7 @@ export default function PaymentSelectionPage() {
         isLoading={isLoading}
         isFamilyMember={!!member?.infamily}
         disabledMessage={disabledMessage}
+        statusChanged={statusChanged}
         onPay={handlePay}
         onCancel={handleCancel}
       />

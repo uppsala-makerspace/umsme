@@ -29,6 +29,7 @@ export default function PaymentSelection({
   isLoading = false,
   isFamilyMember = false,
   disabledMessage,
+  statusChanged = false,
   onPay,
   onCancel,
 }) {
@@ -55,6 +56,19 @@ export default function PaymentSelection({
     return (
       <MainContent>
         <Loader />
+      </MainContent>
+    );
+  }
+
+  if (statusChanged) {
+    return (
+      <MainContent>
+        <div className="flex flex-col gap-4 items-center">
+          <p className="text-blue-700">{t("paymentStatusChanged")}</p>
+          <Button variant="secondary" onClick={onCancel}>
+            {t("cancel")}
+          </Button>
+        </div>
       </MainContent>
     );
   }

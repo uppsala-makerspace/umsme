@@ -1,31 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext } from "react";
 import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
 import { useNavigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Profile from "./Profile";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 export default () => {
   const navigate = useNavigate();
-  const user = useTracker(() => Meteor.user());
-  const [memberInfo, setMemberInfo] = useState(null);
-
-  useEffect(() => {
-    if (!user?._id) return;
-    const fetchData = async () => {
-      try {
-        const info = await Meteor.callAsync("findInfoForUser");
-        setMemberInfo(info);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, [user?._id]);
+  const { memberInfo, refetch } = useContext(MemberInfoContext);
 
   const handleSubmit = async ({ name, mobile, birthyear }) => {
     try {
       await Meteor.callAsync("createOrUpdateProfile", { name, mobile, birthyear });
+      await refetch();
       navigate("/");
     } catch (err) {
       console.error("Failed to save profile:", err);

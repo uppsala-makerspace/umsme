@@ -5,15 +5,15 @@ import { Navigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Unlock from "./Unlock";
 import { LocationContext } from "/imports/context/LocationContext";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 export default () => {
   const userId = useTracker(() => Meteor.userId());
   const { userPosition, locationPermission } = useContext(LocationContext);
+  const { memberInfo } = useContext(MemberInfoContext);
   const [doors, setDoors] = useState([]);
   const [opening, setOpening] = useState({});
   const [loading, setLoading] = useState(true);
-  const [liabilityDate, setLiabilityDate] = useState(null);
-  const [liabilityOutdated, setLiabilityOutdated] = useState(false);
   const [mandatoryCertificate, setMandatoryCertificate] = useState(null);
   const [hasMandatoryCertificate, setHasMandatoryCertificate] = useState(true);
   const [proximityRange, setProximityRange] = useState(100);
@@ -55,7 +55,7 @@ export default () => {
     };
   }, [locationPermission]);
 
-  // Fetch door data and member info.
+  // Fetch door data, certificate status, and admin flag.
   // Sequential calls to avoid a race condition where parallel Meteor.callAsync
   // calls can arrive at the server before the DDP login is established.
   useEffect(() => {
@@ -70,10 +70,6 @@ export default () => {
         }));
         setDoors(doorObjects);
         setOpening(Object.fromEntries(doorObjects.map((d) => [d.id, false])));
-
-        const memberInfo = await Meteor.callAsync("findInfoForUser");
-        setLiabilityDate(memberInfo?.liabilityDate ?? null);
-        setLiabilityOutdated(memberInfo?.liabilityOutdated ?? false);
 
         const certStatus = await Meteor.callAsync("certificates.getMandatoryStatus");
         if (certStatus) {
@@ -120,8 +116,8 @@ export default () => {
           doors={doors}
           opening={opening}
           onOpenDoor={handleOpenDoor}
-          liabilityDate={liabilityDate}
-          liabilityOutdated={liabilityOutdated}
+          liabilityDate={memberInfo?.liabilityDate ?? null}
+          liabilityOutdated={memberInfo?.liabilityOutdated ?? false}
           mandatoryCertificate={mandatoryCertificate}
           hasMandatoryCertificate={hasMandatoryCertificate}
           userPosition={userPosition}
