@@ -4,6 +4,10 @@ import Layout from "/imports/components/Layout/Layout";
 import Calendar from "./Calendar";
 
 const PAST_EVENTS_DAYS = 90; // Fetch past events in 90-day windows
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // Refresh every 5 minutes
+
+// Module-level cache for upcoming events so they survive page navigation
+let upcomingCache = null; // { events, nextPageToken }
 
 const fetchCalendarEvents = async (apiKey, calendarId, mode = "upcoming", pageToken = null, timeWindow = null) => {
   const now = new Date();
@@ -59,12 +63,20 @@ export default () => {
 
   useEffect(() => {
     const loadEvents = async () => {
-      setLoading(true);
       setError("");
-      setEvents([]);
       setNextPageToken(null);
       setHasMorePastEvents(true);
       setOldestFetchedTime(null);
+
+      // Use cached upcoming events if available
+      if (mode === "upcoming" && upcomingCache) {
+        setEvents(upcomingCache.events);
+        setNextPageToken(upcomingCache.nextPageToken);
+        setLoading(false);
+      } else {
+        setLoading(true);
+        setEvents([]);
+      }
 
       const settings = getSettings();
       if (!settings?.apiKey || !settings?.calendarId) {
@@ -78,20 +90,29 @@ export default () => {
         setEvents(result.events);
         setNextPageToken(result.nextPageToken);
 
-        if (mode === "past") {
+        if (mode === "upcoming") {
+          upcomingCache = { events: result.events, nextPageToken: result.nextPageToken };
+        } else if (mode === "past") {
           // Track the oldest time window we've fetched
           const now = new Date();
           setOldestFetchedTime(new Date(now.getTime() - PAST_EVENTS_DAYS * 24 * 60 * 60 * 1000));
         }
       } catch (err) {
-        console.error("Failed to fetch calendar events:", err);
-        setError(err.message);
+        // Only show error if we don't have cached data to show
+        if (!upcomingCache || mode !== "upcoming") {
+          console.error("Failed to fetch calendar events:", err);
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadEvents();
+
+    // Periodic refresh while the page is open
+    const interval = setInterval(loadEvents, REFRESH_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, [mode]);
 
   const handleLoadMore = async () => {
