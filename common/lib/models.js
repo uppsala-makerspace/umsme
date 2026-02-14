@@ -49,6 +49,7 @@ export const models = {
     birthyear: {
       label: "Year of birth", type: Number, optional: true
     },
+    gender: { label: "Gender", type: String, optional: true, allowedValues: ["male", "female", "undisclosed"] },
     email: {
       label: "Email",
       type: String,

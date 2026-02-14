@@ -26,7 +26,7 @@ export default function Input({
   return (
     <div className={`w-full mb-4 ${className}`.trim()}>
       {label && (
-        <label htmlFor={id} className="block mb-1 font-bold text-center">
+        <label htmlFor={id} className="block mb-1 font-bold">
           {label}
         </label>
       )}

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
-import "./storage-page.css";
 
 const STORAGE_LOCATION_OPTIONS = [
   { value: "floor1", key: "storageFloor1Anywhere" },
@@ -106,7 +105,7 @@ const Storage = ({
             <h3 className="text-lg font-medium mb-2">{t("requestBoxChange")}</h3>
             <p className="text-sm text-gray-600 mb-3">{t("requestBoxChangeInfo")}</p>
             <select
-              className="storage-select appearance-none pr-10 w-full p-3 border border-gray-300 rounded-lg bg-white"
+              className="select-chevron appearance-none pr-10 w-full py-2.5 px-3 text-base font-mono bg-surface border border-black rounded box-border focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
               value={selectedRequest}
               onChange={(e) => setSelectedRequest(e.target.value)}
             >
@@ -158,7 +157,7 @@ const Storage = ({
               <h3 className="text-lg font-medium mb-2">{t("boxPreference")}</h3>
               <p className="text-sm text-gray-600 mb-3">{t("boxPreferenceInfo")}</p>
               <select
-                className="storage-select appearance-none pr-10 w-full p-3 border border-gray-300 rounded-lg bg-white"
+                className="select-chevron appearance-none pr-10 w-full py-2.5 px-3 text-base font-mono bg-surface border border-black rounded box-border focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
                 value={selectedRequest}
                 onChange={(e) => setSelectedRequest(e.target.value)}
               >

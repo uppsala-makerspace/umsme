@@ -9,9 +9,9 @@ export default () => {
   const navigate = useNavigate();
   const { memberInfo, refetch } = useContext(MemberInfoContext);
 
-  const handleSubmit = async ({ name, mobile, birthyear }) => {
+  const handleSubmit = async ({ name, mobile, birthyear, gender }) => {
     try {
-      await Meteor.callAsync("createOrUpdateProfile", { name, mobile, birthyear });
+      await Meteor.callAsync("createOrUpdateProfile", { name, mobile, birthyear, gender });
       await refetch();
       navigate("/");
     } catch (err) {
@@ -29,6 +29,7 @@ export default () => {
           initialName={memberInfo.member?.name || ""}
           initialMobile={memberInfo.member?.mobile || ""}
           initialBirthyear={memberInfo.member?.birthyear || ""}
+          initialGender={memberInfo.member?.gender || ""}
         />
       )}
     </Layout>
