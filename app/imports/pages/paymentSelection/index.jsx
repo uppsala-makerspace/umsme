@@ -8,6 +8,9 @@ import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 import { AppDataContext } from "/imports/context/AppDataContext";
 import { calculateOptionAvailability } from "/imports/pages/membershipSelection/availabilityRules";
 
+// Module-level cache for terms content keyed by language
+const termsCache = {};
+
 export default function PaymentSelectionPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -49,12 +52,19 @@ export default function PaymentSelectionPage() {
     }
   }, [paymentOptions, paymentType]);
 
-  // Load terms of purchase
+  // Load terms of purchase (cached per language)
   useEffect(() => {
+    const lang = i18n.language === "sv" ? "sv" : "en";
+    if (termsCache[lang]) {
+      setTermsContent(termsCache[lang]);
+      setIsLoading(false);
+      return;
+    }
     (async () => {
       try {
-        const terms = await Meteor.callAsync("texts.termsOfPurchaseMembership", i18n.language === "sv" ? "sv" : "en");
+        const terms = await Meteor.callAsync("texts.termsOfPurchaseMembership", lang);
         if (terms) {
+          termsCache[lang] = terms;
           setTermsContent(terms);
         }
       } catch (_) {}

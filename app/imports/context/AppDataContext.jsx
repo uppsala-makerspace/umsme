@@ -6,6 +6,8 @@ export const AppDataContext = createContext({
   paymentOptions: null,
   doors: null,
   isAdmin: false,
+  slackChannels: null,
+  mandatoryCertStatus: null,
   loading: true,
 });
 
@@ -15,6 +17,8 @@ export const AppDataProvider = ({ children }) => {
   const [paymentOptions, setPaymentOptions] = useState(null);
   const [doors, setDoors] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [slackChannels, setSlackChannels] = useState(null);
+  const [mandatoryCertStatus, setMandatoryCertStatus] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,6 +26,8 @@ export const AppDataProvider = ({ children }) => {
       setPaymentOptions(null);
       setDoors(null);
       setIsAdmin(false);
+      setSlackChannels(null);
+      setMandatoryCertStatus(null);
       setLoading(false);
       return;
     }
@@ -43,6 +49,14 @@ export const AppDataProvider = ({ children }) => {
         const admin = await Meteor.callAsync("checkIsAdmin");
         if (cancelled) return;
         setIsAdmin(admin);
+
+        const channels = await Meteor.callAsync("data.slackChannels");
+        if (cancelled) return;
+        setSlackChannels(channels);
+
+        const certStatus = await Meteor.callAsync("certificates.getMandatoryStatus");
+        if (cancelled) return;
+        setMandatoryCertStatus(certStatus || null);
       } catch (error) {
         console.error("AppDataContext: Error fetching app data:", error);
       } finally {
@@ -58,7 +72,7 @@ export const AppDataProvider = ({ children }) => {
   }, [userId]);
 
   return (
-    <AppDataContext.Provider value={{ paymentOptions, doors, isAdmin, loading }}>
+    <AppDataContext.Provider value={{ paymentOptions, doors, isAdmin, slackChannels, mandatoryCertStatus, loading }}>
       {children}
     </AppDataContext.Provider>
   );

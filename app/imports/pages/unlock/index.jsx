@@ -12,12 +12,12 @@ export default () => {
   const userId = useTracker(() => Meteor.userId());
   const { userPosition, locationPermission } = useContext(LocationContext);
   const { memberInfo } = useContext(MemberInfoContext);
-  const { doors: doorsData, isAdmin, loading: appDataLoading } = useContext(AppDataContext);
+  const { doors: doorsData, isAdmin, mandatoryCertStatus, loading: appDataLoading } = useContext(AppDataContext);
   const [opening, setOpening] = useState({});
-  const [certLoading, setCertLoading] = useState(true);
-  const [mandatoryCertificate, setMandatoryCertificate] = useState(null);
-  const [hasMandatoryCertificate, setHasMandatoryCertificate] = useState(true);
   const promptWatchIdRef = useRef(null);
+
+  const mandatoryCertificate = mandatoryCertStatus?.certificate || null;
+  const hasMandatoryCertificate = mandatoryCertStatus?.hasValidAttestation ?? true;
 
   const proximityRange = doorsData?.proximityRange || 200;
   const doors = useMemo(() => {
@@ -36,7 +36,7 @@ export default () => {
     }
   }, [doors]);
 
-  const loading = appDataLoading || certLoading;
+  const loading = appDataLoading;
 
   // When permission is pending (first visit), trigger the browser prompt via
   // watchPosition. Once the user grants permission, the LocationContext picks
@@ -72,25 +72,6 @@ export default () => {
       }
     };
   }, [locationPermission]);
-
-  // Fetch certificate status
-  useEffect(() => {
-    if (!userId) return;
-    const fetchCertStatus = async () => {
-      try {
-        const certStatus = await Meteor.callAsync("certificates.getMandatoryStatus");
-        if (certStatus) {
-          setMandatoryCertificate(certStatus.certificate);
-          setHasMandatoryCertificate(certStatus.hasValidAttestation);
-        }
-      } catch (error) {
-        console.error("Error fetching certificate status:", error);
-      } finally {
-        setCertLoading(false);
-      }
-    };
-    fetchCertStatus();
-  }, [userId]);
 
   const handleOpenDoor = async (doorId) => {
     setOpening((prev) => ({ ...prev, [doorId]: true }));
