@@ -16,7 +16,10 @@ export const MemberInfoProvider = ({ children }) => {
   // immediately from localStorage cache, but user() only resolves after the
   // DDP login handshake completes, preventing calls before the server knows
   // who we are.
-  const user = useTracker(() => Meteor.user());
+  const { user, loggingIn } = useTracker(() => ({
+    user: Meteor.user(),
+    loggingIn: Meteor.loggingIn(),
+  }));
   const userId = user?._id;
   const [memberInfo, setMemberInfo] = useState({});
   const [loading, setLoading] = useState(true);
@@ -54,12 +57,12 @@ export const MemberInfoProvider = ({ children }) => {
   useEffect(() => {
     if (userId) {
       fetchMemberInfo();
-    } else {
+    } else if (!loggingIn) {
       setMemberInfo({});
       setLoading(false);
       lastFetchedAtRef.current = null;
     }
-  }, [userId, fetchMemberInfo]);
+  }, [userId, loggingIn, fetchMemberInfo]);
 
   // Periodic staleness check (stale-while-revalidate)
   useEffect(() => {
