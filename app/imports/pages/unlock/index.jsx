@@ -11,7 +11,7 @@ import { AppDataContext } from "/imports/context/AppDataContext";
 export default () => {
   const userId = useTracker(() => Meteor.userId());
   const { userPosition, locationPermission } = useContext(LocationContext);
-  const { memberInfo } = useContext(MemberInfoContext);
+  const { memberInfo, loading: memberInfoLoading } = useContext(MemberInfoContext);
   const { doors: doorsData, isAdmin, mandatoryCertStatus, loading: appDataLoading } = useContext(AppDataContext);
   const [opening, setOpening] = useState({});
   const promptWatchIdRef = useRef(null);
@@ -36,7 +36,7 @@ export default () => {
     }
   }, [doors]);
 
-  const loading = appDataLoading;
+  const loading = appDataLoading || memberInfoLoading;
 
   // When permission is pending (first visit), trigger the browser prompt via
   // watchPosition. Once the user grants permission, the LocationContext picks
@@ -93,21 +93,20 @@ export default () => {
 
   return (
     <Layout>
-      {loading ? null : (
-        <Unlock
-          doors={doors}
-          opening={opening}
-          onOpenDoor={handleOpenDoor}
-          liabilityDate={memberInfo?.liabilityDate ?? null}
-          liabilityOutdated={memberInfo?.liabilityOutdated ?? false}
-          mandatoryCertificate={mandatoryCertificate}
-          hasMandatoryCertificate={hasMandatoryCertificate}
-          userPosition={userPosition}
-          locationPermission={locationPermission}
-          proximityRange={proximityRange}
-          isAdmin={isAdmin}
-        />
-      )}
+      <Unlock
+        loading={loading}
+        doors={doors}
+        opening={opening}
+        onOpenDoor={handleOpenDoor}
+        liabilityDate={memberInfo?.liabilityDate ?? null}
+        liabilityOutdated={memberInfo?.liabilityOutdated ?? false}
+        mandatoryCertificate={mandatoryCertificate}
+        hasMandatoryCertificate={hasMandatoryCertificate}
+        userPosition={userPosition}
+        locationPermission={locationPermission}
+        proximityRange={proximityRange}
+        isAdmin={isAdmin}
+      />
     </Layout>
   );
 };

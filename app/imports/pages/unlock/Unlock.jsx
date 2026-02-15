@@ -4,10 +4,12 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getDistanceTo, formatDistance } from "/imports/utils/location";
 import Button from "../../components/Button";
+import Loader from "../../components/Loader";
 import MainContent from "../../components/MainContent";
 import "./unlockDoors.css";
 
 const Unlock = ({
+  loading,
   doors,
   opening,
   onOpenDoor,
@@ -22,6 +24,10 @@ const Unlock = ({
   isPWAOverride,
 }) => {
   const { t } = useTranslation();
+
+  if (loading) {
+    return <MainContent className="unlock"><Loader /></MainContent>;
+  }
 
   // Detect if running as installed PWA (can be overridden for testing)
   const isPWA =
@@ -142,6 +148,7 @@ Unlock.propTypes = {
   proximityRange: PropTypes.number,
   isAdmin: PropTypes.bool,
   isPWAOverride: PropTypes.bool,
+  loading: PropTypes.bool,
 };
 
 Unlock.defaultProps = {
@@ -150,6 +157,7 @@ Unlock.defaultProps = {
   proximityRange: 100,
   isAdmin: false,
   isPWAOverride: undefined,
+  loading: false,
 };
 
 export default Unlock;

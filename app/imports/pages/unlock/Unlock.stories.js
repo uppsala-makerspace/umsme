@@ -32,6 +32,15 @@ export default {
   component: Unlock,
 };
 
+export const Loading = {
+  args: {
+    loading: true,
+    doors: [],
+    opening: {},
+    onOpenDoor: () => {},
+  },
+};
+
 export const Default = {
   args: {
     doors: defaultDoors,
