@@ -1,13 +1,10 @@
-import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import RoomPopup from "./RoomPopup";
 import "./style.css";
 
-const Map = ({ slackTeam }) => {
+const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
   const { t } = useTranslation();
-  const [roomsConfig, setRoomsConfig] = useState(null);
-  const [slackChannels, setSlackChannels] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [activeFloor, setActiveFloor] = useState(2); // Floor 2 on top by default
   const activeFloorRef = useRef(activeFloor); // Ref to access current floor in event handlers
@@ -18,17 +15,6 @@ const Map = ({ slackTeam }) => {
   useEffect(() => {
     activeFloorRef.current = activeFloor;
   }, [activeFloor]);
-
-  // Load room configuration and slack channels
-  useEffect(() => {
-    Meteor.callAsync("data.rooms")
-      .then((data) => setRoomsConfig(data))
-      .catch((err) => console.error("Failed to load rooms config:", err));
-
-    Meteor.callAsync("data.slackChannels")
-      .then((data) => setSlackChannels(data))
-      .catch((err) => console.error("Failed to load slack channels:", err));
-  }, []);
 
   // Setup click handlers for rooms after SVG loads
   const setupRoomClickHandlers = (svgDoc, floorKey, floorNumber) => {
