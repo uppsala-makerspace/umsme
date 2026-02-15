@@ -6,7 +6,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const STALE_CHECK_INTERVAL_MS = 30 * 1000; // Check every 30 seconds
 
 export const MemberInfoContext = createContext({
-  memberInfo: null,
+  memberInfo: {},
   loading: true,
   refetch: async () => {},
 });
@@ -18,7 +18,7 @@ export const MemberInfoProvider = ({ children }) => {
   // who we are.
   const user = useTracker(() => Meteor.user());
   const userId = user?._id;
-  const [memberInfo, setMemberInfo] = useState(null);
+  const [memberInfo, setMemberInfo] = useState({});
   const [loading, setLoading] = useState(true);
   const lastFetchedAtRef = useRef(null);
   const fetchingRef = useRef(false);
@@ -55,7 +55,7 @@ export const MemberInfoProvider = ({ children }) => {
     if (userId) {
       fetchMemberInfo();
     } else {
-      setMemberInfo(null);
+      setMemberInfo({});
       setLoading(false);
       lastFetchedAtRef.current = null;
     }
