@@ -3,7 +3,7 @@ import { Members } from "/imports/common/collections/members";
 import { findForUser } from "/server/methods/utils";
 
 Meteor.methods({
-  async createOrUpdateProfile({name, mobile, birthyear, gender}) {
+  async createOrUpdateProfile({name, mobile, birthyear, gender, rfid}) {
     const { user, email, member, verified } = await findForUser();
     if (!user) throw new Meteor.Error(
       "no-user",
@@ -15,7 +15,7 @@ Meteor.methods({
       throw new Meteor.Error("name-required", "Name is required");
 
     if (member) {
-      await Members.updateAsync(member._id, {$set: {name, mobile, birthyear, gender}});
+      await Members.updateAsync(member._id, {$set: {name, mobile, birthyear, gender, rfid}});
     } else {
       let mid;
       let foundUniqeId = false;
@@ -30,7 +30,8 @@ Meteor.methods({
         mobile,
         mid,
         birthyear,
-        gender
+        gender,
+        rfid
       };
       await Members.insertAsync(newMember);
     }

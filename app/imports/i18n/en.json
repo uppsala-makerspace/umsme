@@ -65,6 +65,8 @@
   "recommendedFieldsExplanation": "These fields are not required, but we would really appreciate it if you filled them in. Each year the municipality asks us to report on the age and gender balance of our members, and your input helps us provide accurate numbers. Thank you!",
   "names": "First and last name",
   "number": "Phone number",
+  "rfid": "RFID tag",
+  "rfidExplanation": "An RFID tag is used if you have received certification to use machines that require unlocking.",
   "paymentApproved": "Payment approved!",
   "ThankPayment": "Thanks for your payment.",
   "ScanQrCode": "Scan the QR-code to pay",

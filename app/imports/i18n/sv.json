@@ -65,6 +65,8 @@
   "recommendedFieldsExplanation": "Dessa fält är inte obligatoriska, men vi skulle verkligen uppskatta om du fyllde i dem. Varje år ber kommunen oss rapportera ålders- och könsfördelningen bland våra medlemmar, och din information hjälper oss att ge korrekta siffror. Tack!",
   "names": "För och efternamn",
   "number": "Telefonnummer",
+  "rfid": "RFID-tagg",
+  "rfidExplanation": "En RFID-tagg används om du har fått certifiering att använda maskiner som kräver upplåsning.",
   "paymentApproved": "Betalning godkänd!",
   "ThankPayment": "Tack för din betalning.",
   "ScanQrCode": "Skanna Qr-koden för att betala",

@@ -5,19 +5,22 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import MainContent from "../../components/MainContent";
 
-export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthyear = "", initialGender = "" }) => {
+export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthyear = "", initialGender = "", initialRfid = "" }) => {
   const { t } = useTranslation();
   const [name, setName] = useState(initialName);
   const [mobile, setMobile] = useState(initialMobile);
   const [birthyear, setBirthyear] = useState(initialBirthyear);
   const [gender, setGender] = useState(initialGender);
+  const [rfid, setRfid] = useState(initialRfid);
 
   const nameMaxLength = models.member.name.max;
   const mobileMaxLength = models.member.mobile.max;
 
+  const rfidMaxLength = models.member.rfid.max;
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ name, mobile, birthyear, gender });
+    onSubmit({ name, mobile, birthyear, gender, rfid });
   };
 
   return (
@@ -73,6 +76,17 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
         maxLength={mobileMaxLength}
       />
 
+      <Input
+        label={`${t("rfid")} ***`}
+        id="rfid"
+        type="text"
+        placeholder="A1B2C3D4"
+        value={rfid}
+        onChange={(e) => setRfid(e.target.value.toUpperCase())}
+        maxLength={rfidMaxLength}
+        pattern="([0-9A-Fa-f]{2})+"
+      />
+
       <Button type="submit" fullWidth className="mt-8">
         {t("Save")}
       </Button>
@@ -82,6 +96,9 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
       </p>
       <p className="text-sm text-gray-500 mt-2">
         ** {t("recommendedFieldsExplanation")}
+      </p>
+      <p className="text-sm text-gray-500 mt-2">
+        *** {t("rfidExplanation")}
       </p>
     </form>
     </MainContent>

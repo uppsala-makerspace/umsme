@@ -19,6 +19,8 @@ export const WithInitialValues = {
     onSubmit: fn(),
     initialName: 'John Doe',
     initialMobile: '0701234567',
-    initialBirthyear: '1990'
+    initialBirthyear: '1990',
+    initialGender: 'male',
+    initialRfid: 'A1B2C3D4'
   }
 };

@@ -8,7 +8,7 @@ import { models } from "/imports/common/lib/models";
 import { extractor } from "/imports/common/lib/fieldsUtils";
 
 const memberDefaults = {
-  filter: ['storagequeue', 'storagerequest', 'mobile', 'birthyear', 'liabilityDate'],
+  filter: ['storagequeue', 'storagerequest', 'mobile', 'birthyear', 'liabilityDate', 'rfid'],
   enhance: [{
     data: 'mid',
     render(value, type, doc) {

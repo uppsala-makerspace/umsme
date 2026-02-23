@@ -50,6 +50,7 @@ export const models = {
       label: "Year of birth", type: Number, optional: true
     },
     gender: { label: "Gender", type: String, optional: true, allowedValues: ["male", "female", "undisclosed"] },
+    rfid: { label: "RFID", type: String, max: 20, optional: true, regEx: /^([0-9A-Fa-f]{2})+$/ },
     email: {
       label: "Email",
       type: String,
