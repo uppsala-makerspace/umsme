@@ -7,6 +7,7 @@ import '/imports/tabular/payments';
 Template.Payments.onCreated(function() {
   Meteor.subscribe('payments');
   this.state = new ReactiveDict();
+  this.state.set('activeTab', 'manual');
   this.state.set('status', 'unknown');
   this.state.set('image', 'unknown');
   Meteor.call('checkBank', (err, res) => {
@@ -19,6 +20,9 @@ Template.Payments.onCreated(function() {
 });
 
 Template.Payments.helpers({
+  isTab(tabName) {
+    return Template.instance().state.get('activeTab') === tabName;
+  },
   status() {
     const state = Template.instance().state;
     return state.get('status');
@@ -58,6 +62,14 @@ const check = (state) => {
 }
 
 Template.Payments.events({
+  'click .tab-manual'(event, instance) {
+    event.preventDefault();
+    instance.state.set('activeTab', 'manual');
+  },
+  'click .tab-automatic'(event, instance) {
+    event.preventDefault();
+    instance.state.set('activeTab', 'automatic');
+  },
   'click .checkBank': function (event, instance) {
     check(instance.state);
   },

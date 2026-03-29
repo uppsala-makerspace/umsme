@@ -1,11 +1,22 @@
 <template name="Payments">
-    <h1>Bank synchronization</h1>
     {{#if currentUser}}
+    <h1>Payments</h1>
+    <ul class="nav nav-tabs">
+        <li class="{{#if isTab 'manual'}}active{{/if}}">
+            <a href="#" class="tab-manual">Manual</a>
+        </li>
+        <li class="{{#if isTab 'automatic'}}active{{/if}}">
+            <a href="#" class="tab-automatic">Automatic</a>
+        </li>
+    </ul>
+    <div style="margin-top: 15px;">
+        {{#if isTab 'manual'}}
+        <h2>Bank synchronization</h2>
         <form class="personalnumber">
             <label>Personal number: </label> <input type="text" name="pnr" placeholder="Personal number" value="{{pnr}}">
             <button type="submit" class="updatePnr">Update / Save</button>
         </form>
-      {{#if pnr}}
+        {{#if pnr}}
             <div>
                 <label>Bank signin status: </label> {{status}}
             {{#if qr}}
@@ -24,9 +35,16 @@
                 {{> transaction}}
                 {{/each}}
             </ul>
-      {{/if}}
-    <h1>Bank payments</h1>
-    {{> tabular table=TabularTables.Payments class="table table-hover table-striped table-bordered table-condensed paymentList"}}
+        {{/if}}
+        <h2>Manual payments</h2>
+        {{> tabular table=TabularTables.ManualPayments class="table table-hover table-striped table-bordered table-condensed paymentList"}}
+        {{/if}}
+
+        {{#if isTab 'automatic'}}
+        <h2>Automatic payments</h2>
+        {{> tabular table=TabularTables.AutomaticPayments class="table table-hover table-striped table-bordered table-condensed paymentList"}}
+        {{/if}}
+    </div>
     {{/if}}
 </template>
 
