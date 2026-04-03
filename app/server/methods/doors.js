@@ -98,24 +98,25 @@ Meteor.methods({
       }
     }
 
-    // Call Home Assistant API to unlock
-    const config = getHomeAssistantConfig();
-    const service = lock.type === "switch" ? "switch/turn_on" : "lock/unlock";
-    const response = await fetch(`${config.url}/api/services/${service}`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${config.token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ entity_id: lock.entityId }),
-    });
+    // Call Home Assistant API to unlock (skip if no entityId configured)
+    if (lock.entityId) {
+      const config = getHomeAssistantConfig();
+      const service = lock.type === "switch" ? "switch/turn_on" : "lock/unlock";
+      const response = await fetch(`${config.url}/api/services/${service}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${config.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ entity_id: lock.entityId }),
+      });
 
-    if (!response.ok) {
-      console.error(`Failed to unlock ${lockId}: ${response.status} ${response.statusText}`);
-      throw new Meteor.Error("unlock-failed", "Failed to unlock door");
+      if (!response.ok) {
+        console.error(`Failed to unlock ${lockId}: ${response.status} ${response.statusText}`);
+        throw new Meteor.Error("unlock-failed", "Failed to unlock door");
+      }
+      console.log(`Lock ${lockId} (${lock.entityId}) unlocked by user ${Meteor.userId()}`);
     }
-
-    console.log(`Lock ${lockId} (${lock.entityId}) unlocked by user ${Meteor.userId()}`);
 
     return { success: true, message: `Lock ${lockId} unlocked` };
   },

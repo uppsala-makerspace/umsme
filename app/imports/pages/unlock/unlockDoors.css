@@ -52,15 +52,40 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Text label that appears on hover */
+/* Distance label */
 .umsapp .unlock button.door-button span {
   position: absolute;
   bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: 14px;
+  font-weight: bold;
   color: white;
   white-space: nowrap;
+}
+
+/* Unlock rotation animation */
+@keyframes unlock-rotate {
+  0%      { transform: rotate(0deg); }
+  11%     { transform: rotate(-45deg); }
+  22%     { transform: rotate(45deg); }
+  33.3%   { transform: rotate(0deg); }
+  44.3%   { transform: rotate(-45deg); }
+  55.3%   { transform: rotate(45deg); }
+  66.6%   { transform: rotate(0deg); }
+  77.6%   { transform: rotate(-45deg); }
+  88.6%   { transform: rotate(45deg); }
+  100%    { transform: rotate(0deg); }
+}
+
+.umsapp .unlock button.door-button.opening {
+  animation: unlock-rotate 3s ease-in-out;
+  background-color: #096817;
+  cursor: default;
+}
+
+.umsapp .unlock button.door-button.opening:hover {
+  background-color: #096817;
 }
 
 /* Disabled door button (out of range) */
@@ -77,12 +102,6 @@
 .umsapp .unlock button.door-button.disabled:active {
   background-color: #9ca3af;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Distance label on disabled button */
-.umsapp .unlock button.door-button.disabled span {
-  font-size: 14px;
-  font-weight: bold;
 }
 
 @media (max-width: 768px) {

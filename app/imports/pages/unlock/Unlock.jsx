@@ -106,16 +106,16 @@ const Unlock = ({
           <React.Fragment key={door.id}>
             <p className="mb-2.5 font-bold text-center w-full">{t(door.labelKey)}</p>
             <button
-              className={`door-button ${isDisabled ? "disabled" : ""}`}
-              onClick={() => !isDisabled && onOpenDoor(door.id)}
-              disabled={isDisabled}
+              className={`door-button ${isDisabled ? "disabled" : ""} ${opening[door.id] ? "opening" : ""}`}
+              onClick={() => !isDisabled && !opening[door.id] && onOpenDoor(door.id)}
+              disabled={isDisabled || opening[door.id]}
             >
               <span>
-                {opening[door.id]
-                  ? t("isOpening")
-                  : isDisabled && distance !== null
+                {distance !== null
                   ? formatDistance(distance)
-                  : t("openDoor")}
+                  : door.location
+                  ? "..."
+                  : ""}
               </span>
             </button>
           </React.Fragment>
