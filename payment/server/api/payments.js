@@ -75,6 +75,9 @@ export async function processPayment(payment, member, paymentType) {
 
   const membershipId = await Memberships.insertAsync(doc);
 
+  // Link payment to the new membership
+  await Payments.updateAsync(payment._id, { $set: { membership: membershipId } });
+
   // Update denormalized fields on member and family members
   await updateMemberDenormalizedFields(member._id, result);
 
