@@ -63,12 +63,12 @@ export const HamburgerMenu = () => {
           : "hidden"
         }`}>
           {[
-            { to: "/storage", label: "myBox" },
-            { to: "/liability", label: "liability" },
             { to: "/account", label: "myAccount" },
             { to: "/profile", label: "myProfile" },
-            { to: "/contact", label: "contactUs" },
+            { to: "/storage", label: "myBox" },
+            { to: "/liability", label: "liability" },
             { to: "/install", label: "installApp" },
+            { to: "/contact", label: "contactUs" },
           ].map(({ to, label }) => (
             <li key={to} className="text-lg font-bold mx-4 my-2 cursor-pointer">
               {location.pathname === to ? (
