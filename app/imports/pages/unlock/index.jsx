@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 import { Navigate } from "react-router-dom";
@@ -14,7 +14,6 @@ export default () => {
   const { memberInfo, loading: memberInfoLoading } = useContext(MemberInfoContext);
   const { doors: doorsData, isAdmin, mandatoryCertStatus, loading: appDataLoading } = useContext(AppDataContext);
   const [opening, setOpening] = useState({});
-  const promptWatchIdRef = useRef(null);
 
   const mandatoryCertificate = mandatoryCertStatus?.certificate || null;
   const hasMandatoryCertificate = mandatoryCertStatus?.hasValidAttestation ?? true;
@@ -37,41 +36,6 @@ export default () => {
   }, [doors]);
 
   const loading = appDataLoading || memberInfoLoading;
-
-  // When permission is pending (first visit), trigger the browser prompt via
-  // watchPosition. Once the user grants permission, the LocationContext picks
-  // it up and starts global tracking, so we can clear this local watch.
-  useEffect(() => {
-    if (locationPermission !== "pending" || !navigator.geolocation) {
-      // Permission already resolved — clear any prompt watch
-      if (promptWatchIdRef.current != null) {
-        navigator.geolocation.clearWatch(promptWatchIdRef.current);
-        promptWatchIdRef.current = null;
-      }
-      return;
-    }
-
-    promptWatchIdRef.current = navigator.geolocation.watchPosition(
-      () => {
-        // Success — context will handle tracking from here
-        if (promptWatchIdRef.current != null) {
-          navigator.geolocation.clearWatch(promptWatchIdRef.current);
-          promptWatchIdRef.current = null;
-        }
-      },
-      () => {
-        // Error handled by context's permission listener
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
-    );
-
-    return () => {
-      if (promptWatchIdRef.current != null) {
-        navigator.geolocation.clearWatch(promptWatchIdRef.current);
-        promptWatchIdRef.current = null;
-      }
-    };
-  }, [locationPermission]);
 
   const handleOpenDoor = async (doorId) => {
     setOpening((prev) => ({ ...prev, [doorId]: true }));

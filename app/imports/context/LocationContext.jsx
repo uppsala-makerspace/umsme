@@ -26,12 +26,13 @@ export const LocationProvider = ({ children }) => {
           lat: position.coords.latitude,
           long: position.coords.longitude,
         });
-        setLocationPermission("granted");
+        setLocationPermission((prev) => prev !== "granted" ? "granted" : prev);
       },
       (error) => {
         console.error("Geolocation error:", error);
         if (error.code === error.PERMISSION_DENIED) {
           setLocationPermission("denied");
+          stopWatching();
         }
       },
       WATCH_OPTIONS
@@ -51,39 +52,40 @@ export const LocationProvider = ({ children }) => {
       return;
     }
 
-    if (!navigator.permissions) return;
+    // Always start watching immediately — use watchPosition callbacks
+    // as the source of truth for permission state, since
+    // navigator.permissions.query is unreliable on Safari/iOS.
+    startWatching();
 
+    // Optionally listen for permission changes (e.g. user re-grants
+    // after denial via browser settings). This is a supplement, not
+    // the primary mechanism.
     let permissionStatus;
 
-    const onChange = () => {
+    // Listen for permission re-grants after denial (e.g. user changes
+    // browser settings). Supplement only — not all browsers support this.
+    const onPermissionChange = () => {
       if (permissionStatus.state === "granted") {
-        setLocationPermission("granted");
         startWatching();
       } else if (permissionStatus.state === "denied") {
         setLocationPermission("denied");
         stopWatching();
         setUserPosition(null);
-      } else {
-        setLocationPermission("pending");
       }
     };
 
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((status) => {
-        permissionStatus = status;
-        if (status.state === "granted") {
-          setLocationPermission("granted");
-          startWatching();
-        } else if (status.state === "denied") {
-          setLocationPermission("denied");
-        }
-        status.addEventListener("change", onChange);
-      })
-      .catch(() => {});
+    if (navigator.permissions) {
+      navigator.permissions
+        .query({ name: "geolocation" })
+        .then((status) => {
+          permissionStatus = status;
+          status.addEventListener("change", onPermissionChange);
+        })
+        .catch(() => {});
+    }
 
     return () => {
-      permissionStatus?.removeEventListener("change", onChange);
+      permissionStatus?.removeEventListener("change", onPermissionChange);
       stopWatching();
     };
   }, []);
