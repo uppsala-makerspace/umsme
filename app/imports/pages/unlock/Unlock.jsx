@@ -17,6 +17,7 @@ const Unlock = ({
   liabilityOutdated,
   mandatoryCertificate,
   hasMandatoryCertificate,
+  registered,
   userPosition,
   locationPermission,
   proximityRange,
@@ -59,6 +60,16 @@ const Unlock = ({
         <Link to={`/certificates/${mandatoryCertificate._id}`} className="w-full block no-underline text-center">
           <Button fullWidth>{t("unlockMandatoryCertificateButton")}</Button>
         </Link>
+      </MainContent>
+    );
+  }
+
+  if (!registered) {
+    return (
+      <MainContent className="unlock">
+        <p className="flex flex-col items-center text-center mt-5 mb-4">
+          {t("unlockNotRegistered")}
+        </p>
       </MainContent>
     );
   }

@@ -11,4 +11,14 @@ Meteor.methods({
       return Roles.removeUsersFromRolesAsync(id, "admin", null);
     }
   },
+  'addToBoardGroup': async (id) => {
+    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
+      return Roles.addUsersToRolesAsync(id, "board", null);
+    }
+  },
+  'removeFromBoardGroup': async (id) => {
+    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
+      return Roles.removeUsersFromRolesAsync(id, "board", null);
+    }
+  },
 });

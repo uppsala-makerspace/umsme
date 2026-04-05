@@ -20,5 +20,5 @@ new Tabular.Table({
   autoWidth: false,
   collection: Meteor.users,
   columns,
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin')
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board'])
 });

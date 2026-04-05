@@ -35,5 +35,5 @@ new Tabular.Table({
   collection: Mails,
   order: [[6, "desc"]],
   columns: extractor(models.mail, mailDefaults),
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin')
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board'])
 });

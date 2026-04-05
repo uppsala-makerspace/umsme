@@ -178,6 +178,20 @@ export const hasActiveLabMembership = async (member) => {
   return labEnd !== null && labEnd > new Date();
 };
 
+/**
+ * Checks if a member is registered (formally accepted).
+ * For family members, checks the paying member's registration status.
+ * @param {object} member - The member object
+ * @returns {Promise<boolean>}
+ */
+export const isMemberRegistered = async (member) => {
+  if (!member) return false;
+  const paying = member.infamily
+    ? await Members.findOneAsync(member.infamily)
+    : member;
+  return !!paying?.registered;
+};
+
 export const findForUser = async () => {
   let user;
   let email;

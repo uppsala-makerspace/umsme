@@ -25,7 +25,7 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily }) => {
+export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered }) => {
   const { t } = useTranslation();
 
   if (loading) {
@@ -83,6 +83,14 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
           {t("declineInvite")}
         </Button>
       </div>
+    </MainContent>;
+  }
+
+  if (memberName && !registered) {
+    return <MainContent>
+      <Logo />
+      <h3 className="text-center">{t("welcome")} {name}!</h3>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("notRegisteredText")}</p>
     </MainContent>;
   }
 

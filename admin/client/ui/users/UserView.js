@@ -35,6 +35,10 @@ Template.UserView.helpers({
   adminAsync() {
     const id = FlowRouter.getParam('_id');
     return Roles.userIsInRoleAsync(id, 'admin');
+  },
+  boardAsync() {
+    const id = FlowRouter.getParam('_id');
+    return Roles.userIsInRoleAsync(id, 'board');
   }
 });
 
@@ -46,6 +50,14 @@ Template.UserView.events({
   'click .addToAdminGroup': async function (event) {
     const id = FlowRouter.getParam('_id');
     await Meteor.callAsync('addToAdminGroup', id);
+  },
+  'click .removeFromBoardGroup': async function (event) {
+    const id = FlowRouter.getParam('_id');
+    await Meteor.callAsync('removeFromBoardGroup', id);
+  },
+  'click .addToBoardGroup': async function (event) {
+    const id = FlowRouter.getParam('_id');
+    await Meteor.callAsync('addToBoardGroup', id);
   },
   'click .deleteUser': async function (event) {
     const id = FlowRouter.getParam('_id');

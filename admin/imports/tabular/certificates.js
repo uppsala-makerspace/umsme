@@ -16,5 +16,5 @@ new Tabular.Table({
   collection: Certificates,
   order: [[0, "asc"]],
   columns: extractor(models.certificate, certificateDefaults),
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin')
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board'])
 });

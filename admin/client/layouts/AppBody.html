@@ -19,14 +19,14 @@
         </ul>
     </header>
     {{#if currentUser}}
-      {{#if isInRole "admin"}}
+      {{#if isInRole "admin,board"}}
         <div class="admin-panel">
             <div id="main">
                 {{> Template.dynamic template=main}}
             </div>
         </div>
       {{/if}}
-      {{#unless isInRole "admin"}}
+      {{#unless isInRole "admin,board"}}
          <br>
          <br>
         <h1>You are not an admin</h1>

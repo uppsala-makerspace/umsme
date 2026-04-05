@@ -42,6 +42,7 @@ export default () => {
       liabilityDate={memberInfo?.liabilityDate}
       liabilityOutdated={memberInfo?.liabilityOutdated}
       isFamily={!!memberInfo?.member?.infamily}
+      registered={!!memberInfo?.paying?.registered}
     />
   </Layout>;
 };

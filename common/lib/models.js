@@ -147,6 +147,12 @@ export const models = {
       optional: true,
       autoform: { readonly: true },
     },
+    registered: {
+      label: "Registered",
+      type: Boolean,
+      optional: true,
+      autoform: { readonly: true },
+    },
     notificationPrefs: {
       type: Object,
       optional: true,

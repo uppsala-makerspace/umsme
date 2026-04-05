@@ -45,7 +45,7 @@ const tableDefaults = {
   pageLength: 50,
   collection: Payments,
   order: [[2, "desc"]],
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin')
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board'])
 };
 
 new Tabular.Table({

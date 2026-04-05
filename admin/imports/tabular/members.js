@@ -8,7 +8,7 @@ import { models } from "/imports/common/lib/models";
 import { extractor } from "/imports/common/lib/fieldsUtils";
 
 const memberDefaults = {
-  filter: ['storagequeue', 'storagerequest', 'mobile', 'birthyear', 'liabilityDate', 'rfid', 'lastExpiryNotification', 'notificationPrefs', 'paymentError'],
+  filter: ['storagequeue', 'storagerequest', 'mobile', 'birthyear', 'liabilityDate', 'rfid', 'lastExpiryNotification', 'notificationPrefs', 'paymentError', 'registered'],
   enhance: [{
     data: 'mid',
     render(value, type, doc) {
@@ -100,7 +100,7 @@ new Tabular.Table({
   collection: Members,
   order: [[9, "asc"]],
   columns: extractor(models.member, memberDefaults),
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin'),
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board']),
   changeSelector(selector, userId) {
     return selector;
   }

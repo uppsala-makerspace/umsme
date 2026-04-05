@@ -10,10 +10,15 @@ Template.MemberList.onCreated(function() {
   Meteor.subscribe('members');
   this.state = new ReactiveDict();
   this.state.set('reminders', false);
+  this.state.set('awaiting', false);
 });
 
 Template.MemberList.helpers({
   selector() {
+    const awaiting = Template.instance().state.get('awaiting');
+    if (awaiting) {
+      return { registered: { $ne: true }, infamily: { $exists: false } };
+    }
     const reminders = Template.instance().state.get('reminders');
     if (reminders) {
       const intervalStart = new Date();
@@ -84,7 +89,10 @@ Template.MemberList.events({
     forceDownload(rows, 'active_members.csv');
   },
   'click .filterReminders': function (event, instance) {
-    instance.state.set('reminders', event.target.checked );
+    instance.state.set('reminders', event.target.checked);
+  },
+  'click .filterAwaiting': function (event, instance) {
+    instance.state.set('awaiting', event.target.checked);
   },
 
   'click .downloadAll': function () {

@@ -15,7 +15,7 @@ import { Attestations } from '/imports/common/collections/attestations';
 const createAuthFuncFor = (col) => async function () {
   if (
     this.userId &&
-    (await Roles.userIsInRoleAsync(this.userId, 'admin'))
+    (await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))
   ) return col.find();
   this.ready();
 };

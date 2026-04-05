@@ -38,6 +38,16 @@ Template.MemberView.events({
       FlowRouter.go('/members');
     }
   },
+  'click .acceptMember': function () {
+    const id = FlowRouter.getParam('_id');
+    Members.update(id, { $set: { registered: true } });
+  },
+  'click .revokeRegistration': function () {
+    if (confirm('Revoke registration for this member?')) {
+      const id = FlowRouter.getParam('_id');
+      Members.update(id, { $unset: { registered: "" } });
+    }
+  },
   'click .removeFromFamily': function (event) {
     if (confirm('Remove this user from its family, it will remain as an independent member that have to pay for itself.')) {
       const id = FlowRouter.getParam('_id');

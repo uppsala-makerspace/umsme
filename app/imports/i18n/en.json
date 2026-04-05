@@ -50,6 +50,8 @@
   "openDoor": "Open",
   "isOpening": "Opening...",
   "noAvailableDoors": "No available doors. Make sure you have an active lab membership.",
+  "unlockNotRegistered": "Your membership has not been formally accepted yet. A board member needs to approve your registration before you can unlock doors.",
+  "notRegisteredText": "Your account has been created, but your membership has not been formally accepted yet. A board member will review and approve your registration.",
   "locationDenied": "Location access denied. Please enable location to unlock doors.",
   "locationDeniedInstructionsBrowser": "To enable location, tap the lock or settings icon in your browser's address bar, then allow location access for this site.",
   "locationDeniedInstructionsPWA": "To enable location, go to your device Settings, find this app under Privacy & Security or Location Services, and allow location access.",

@@ -51,6 +51,26 @@ Template.AdminConsole.events({
       });
     }
   },
+  'click .acceptAllMembers': function () {
+    const unregistered = Members.find({
+      registered: { $ne: true },
+      infamily: { $exists: false }
+    }).fetch();
+
+    if (unregistered.length === 0) {
+      alert('All paying members are already registered.');
+      return;
+    }
+
+    if (confirm(`Accept ${unregistered.length} paying members as registered?`)) {
+      let count = 0;
+      unregistered.forEach(member => {
+        Members.update(member._id, { $set: { registered: true } });
+        count++;
+      });
+      alert(`Registered ${count} members.`);
+    }
+  },
   'click .grantMandatoryToAll': function (event) {
     const mandatoryCert = Certificates.findOne({ mandatory: true });
     if (!mandatoryCert) {

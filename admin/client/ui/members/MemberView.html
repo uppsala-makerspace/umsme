@@ -1,10 +1,21 @@
 <template name="MemberView">
     <h1>Member <strong>{{member.name}}</strong> <small><a class="deleteMember">Delete</a></small></h1>
     {{> MemberStatus member=id}}
+    {{#unless member.infamily}}
+    <div style="margin-top: 8px; margin-bottom: 10px;">
+        {{#if member.registered}}
+        <span class="label label-success">Registered</span>
+        <button class="btn btn-xs btn-danger revokeRegistration">Revoke registration</button>
+        {{else}}
+        <span class="label label-warning">Not registered</span>
+        <button class="btn btn-xs btn-success acceptMember">Accept member</button>
+        {{/if}}
+    </div>
+    {{/unless}}
     <div class="publicMemberPage">
         <a href="{{publicMemberPage}}">Public member page for {{member.name}}</a>
     </div>
-    {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id" type="update" buttonContent="Update"}}
+    {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id,registered" type="update" buttonContent="Update"}}
     {{#if member.infamily}}
     <h2>Part of family, paying family member is <strong><a href="/member/{{member.infamily}}">{{payingMember.name}}</a></strong> <small><a class="removeFromFamily">Remove from family</a></small></h2>
     {{/if}}

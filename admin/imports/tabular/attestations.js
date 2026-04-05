@@ -128,7 +128,7 @@ new Tabular.Table({
   order: [[0, "desc"]],
   columns: extractor(models.attestation, attestationDefaults),
   extraFields: ['certificateId', 'comment'],
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin'),
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board']),
   changeSelector: createChangeSelector({ members: true })
 });
 
@@ -140,6 +140,6 @@ new Tabular.Table({
   order: [[0, "desc"]],
   columns: extractor(models.attestation, memberAttestationDefaults),
   extraFields: ['memberId', 'comment'],
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin'),
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board']),
   changeSelector: createChangeSelector({ certificates: true, members: true })
 });

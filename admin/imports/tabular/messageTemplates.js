@@ -16,5 +16,5 @@ new Tabular.Table({
   collection: MessageTemplates,
   autoWidth: false,
   columns: extractor(models.template, messageTemplateDefaults),
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin')
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board'])
 });

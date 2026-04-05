@@ -22,5 +22,5 @@ new Tabular.Table({
   collection: Messages,
   order: [[2, "desc"]],
   columns: extractor(models.message, messageDefaults),
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin')
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board'])
 });

@@ -29,5 +29,5 @@ new Tabular.Table({
   collection: Memberships,
   order: [[1, "desc"]],
   columns: extractor(models.membership, membershipDefaults),
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin')
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board'])
 });

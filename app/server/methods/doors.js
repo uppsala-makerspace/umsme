@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import { fetch } from "meteor/fetch";
-import { findForUser, hasActiveLabMembership } from "/server/methods/utils";
+import { findForUser, hasActiveLabMembership, isMemberRegistered } from "/server/methods/utils";
 import { LiabilityDocuments } from "/imports/common/collections/liabilityDocuments";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Attestations } from "/imports/common/collections/attestations";
@@ -35,7 +35,7 @@ Meteor.methods({
     const { member } = await findForUser();
     const hasLab = await hasActiveLabMembership(member);
 
-    if (!hasLab) {
+    if (!hasLab || !(await isMemberRegistered(member))) {
       return { proximityRange, doors: [] };
     }
 
@@ -70,6 +70,10 @@ Meteor.methods({
 
     if (!hasLab) {
       throw new Meteor.Error("not-authorized", "No active lab membership");
+    }
+
+    if (!(await isMemberRegistered(member))) {
+      throw new Meteor.Error("not-registered", "Your membership has not been accepted yet");
     }
 
     // Check if member has approved the latest liability

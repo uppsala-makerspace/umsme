@@ -2,13 +2,19 @@
     <h1>User <small><a class="deleteUser">Delete</a></small></h1>
     {{> quickForm collection=Users schema=userSchema doc=user id="userForm" omitFields="_id" type="update" buttonContent="Update user"}}
     {{#if isNotAdminUser}}
-      {{#let admin=adminAsync}}
+      {{#let admin=adminAsync board=boardAsync}}
         {{#if admin}}
           <button class="removeFromAdminGroup">Remove from admin group</button>
         {{/if}}
-      {{#unless admin}}
-      <button class="addToAdminGroup">Add to admin group</button>
-      {{/unless}}
+        {{#unless admin}}
+          <button class="addToAdminGroup">Add to admin group</button>
+        {{/unless}}
+        {{#if board}}
+          <button class="removeFromBoardGroup">Remove from board</button>
+        {{/if}}
+        {{#unless board}}
+          <button class="addToBoardGroup">Add to board</button>
+        {{/unless}}
       {{/let}}
     {{/if}}
     <label>Password: </label><input id="passwordReset" type="password"><button class="resetPassword">Reset password</button>

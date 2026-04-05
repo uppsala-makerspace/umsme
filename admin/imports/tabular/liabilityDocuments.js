@@ -16,5 +16,5 @@ new Tabular.Table({
   autoWidth: false,
   order: [[1, "desc"]],
   columns: extractor(models.liabilityDocument, liabilityDocumentDefaults),
-  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, 'admin')
+  allow: (userID) => userID && Roles.userIsInRoleAsync(userID, ['admin', 'board'])
 });
