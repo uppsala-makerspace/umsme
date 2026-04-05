@@ -17,5 +17,6 @@ export default async () => {
     adminUser = await Accounts.findUserByUsername('admin');
   }
   await Roles.createRoleAsync('admin', { unlessExists: true });
+  await Roles.createRoleAsync('board', { unlessExists: true });
   await Roles.addUsersToRolesAsync(adminUser._id, 'admin', null);
 };
