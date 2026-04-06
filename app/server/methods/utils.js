@@ -148,7 +148,7 @@ export const sanitizeForSwish = (str) => {
   // Allowed: a-z, A-Z, å, ä, ö, Å, Ä, Ö, 0-9, space, :;.,?!()"-
   result = result.replace(/[^a-zA-ZåäöÅÄÖ0-9 :;.,?!()"-]/g, '');
 
-  return result;
+  return result.substring(0, 50);
 };
 
 /**
