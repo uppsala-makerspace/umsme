@@ -17,6 +17,7 @@ import Certificates from '/imports/pages/certificates';
 import CertificateDetail from '/imports/pages/certificates/detail';
 import CertifierRequestDetail from '/imports/pages/certificates/certifierDetail';
 import MembershipSelection from '/imports/pages/membershipSelection';
+import MembershipDetail from '/imports/pages/membershipDetail';
 import PaymentSelection from '/imports/pages/paymentSelection';
 import InitiatedPayment from '/imports/pages/initiatedPayment';
 import Install from '/imports/pages/install';
@@ -54,6 +55,7 @@ export const App = () => (
           <Route path="/certificates/:certificateId" element={<CertificateDetail />} />
           <Route path="/certifier-requests/:attestationId" element={<CertifierRequestDetail />} />
           <Route path="/membership" element={<MembershipSelection />} />
+          <Route path="/membership/:membershipId" element={<MembershipDetail />} />
           <Route path="/paymentSelection/:paymentType" element={<PaymentSelection />} />
           <Route path="/initiatedPayment/:externalId" element={<InitiatedPayment />} />
           <Route path="/payment" element={<Navigate to="/membership" replace />} />

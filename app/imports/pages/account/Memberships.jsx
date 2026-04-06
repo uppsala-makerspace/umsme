@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import PropTypes from 'prop-types';
 import { formatDate } from './util';
 
@@ -50,12 +51,17 @@ const Memberships = ({ memberships = [] }) => {
       </div>
       <div className="flex flex-col gap-2">
         {memberships.map((membership, index) => (
-          <div key={membership._id || index} className="flex justify-between text-sm">
+          <Link
+            key={membership._id || index}
+            to={`/membership/${membership._id}`}
+            className="flex justify-between items-center text-sm no-underline text-inherit hover:bg-gray-100 rounded px-2 py-1.5 cursor-pointer"
+          >
             <span className="font-medium">{getMembershipTypeLabel(membership)}</span>
-            <span>
+            <span className="flex items-center gap-2">
               {formatDate(membership.start, i18n.language)} - {getEndDate(membership) ? formatDate(getEndDate(membership), i18n.language) : '-'}
+              <span className="text-gray-500 text-lg font-bold">&rsaquo;</span>
             </span>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
