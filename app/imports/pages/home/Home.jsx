@@ -86,20 +86,15 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
     </MainContent>;
   }
 
-  if (memberName && !registered) {
-    return <MainContent>
-      <Logo />
-      <h3 className="text-center">{t("welcome")} {name}!</h3>
-      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("notRegisteredText")}</p>
-    </MainContent>;
-  }
-
   if (activeMembership) {
     const liabilityNeedsAttention = !liabilityDate || liabilityOutdated;
 
     return <MainContent>
       <Logo />
       <h3 className="text-center">{t("greeting2")} {name}!</h3>
+      {!registered && (
+        <p className="flex flex-col items-center text-center mt-5 mb-4">{t("notRegisteredText")}</p>
+      )}
       {timeToRenew && (
         <div>
           <p className="flex flex-col items-center text-center mt-5 mb-4">
