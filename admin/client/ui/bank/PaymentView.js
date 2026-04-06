@@ -2,6 +2,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Payments } from '/imports/common/collections/payments';
 import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
+import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
 import './PaymentView.html';
 import '../comment/CommentList';
 
@@ -9,6 +10,7 @@ Template.PaymentView.onCreated(function() {
   Meteor.subscribe('payments');
   Meteor.subscribe('members');
   Meteor.subscribe('memberships');
+  Meteor.subscribe('initiatedPayments');
 });
 
 Template.PaymentView.helpers({
@@ -58,6 +60,16 @@ Template.PaymentView.helpers({
     const pid = FlowRouter.getParam('_id');
     const payment = Payments.findOne(pid);
     return {$and: [{mid: payment.member, pid: {$exists: false}}]};
+  },
+  initiatedPayments() {
+    return initiatedPayments;
+  },
+  initiatedPayment() {
+    const id = FlowRouter.getParam('_id');
+    const payment = Payments.findOne(id);
+    if (payment && payment.initiatedBy) {
+      return initiatedPayments.findOne(payment.initiatedBy);
+    }
   }
 });
 
@@ -70,6 +82,10 @@ Template.PaymentView.events({
       return;
     }
     if (confirm('Delete this payment?')) {
+      const payment = Payments.findOne(pid);
+      if (payment && payment.initiatedBy) {
+        initiatedPayments.remove(payment.initiatedBy);
+      }
       Payments.remove(pid);
       FlowRouter.go('/payments');
     }

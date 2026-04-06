@@ -3,6 +3,11 @@
 
     {{> quickForm collection=Payments doc=payment id="paymentViewForm" omitFields="_id,member,membership,other" type="readonly"}}
 
+    {{#if initiatedPayment}}
+    <h2>Initiated Payment</h2>
+    {{> quickForm collection=initiatedPayments doc=initiatedPayment id="initiatedPaymentForm" omitFields="_id,member" type="readonly"}}
+    {{/if}}
+
     {{#if payment.other}}
     Not a membership payment <button class="btn btn-primary membershipPayment">switch</button>
     {{/if}}
