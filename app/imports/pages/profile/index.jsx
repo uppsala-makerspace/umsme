@@ -23,7 +23,7 @@ export default () => {
 
   return (
     <Layout bottomNav={hasMember} showNotifications={hasMember}>
-      {memberInfo && (
+      {memberInfo?.verified !== undefined && (
         <Profile
           key={memberInfo.member?._id || "new"}
           onSubmit={handleSubmit}

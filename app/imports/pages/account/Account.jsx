@@ -81,6 +81,9 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
     <div className='flex flex-col min-h-full h-svh flex-1 gap-5'>
       <div className='flex flex-col flex-1 gap-5'>
         <span className="font-bold text-center text-xl"> {member.name}</span>
+        {!paying?.registered && (
+          <p className="flex flex-col items-center text-center text-sm text-gray-600">{t("notRegisteredText")}</p>
+        )}
         <MembershipStatus member={member} status={status} />
       </div>
       {member.infamily ? (

@@ -47,7 +47,7 @@ export default () => {
   return (
     <Layout>
       {!Meteor.userId() ? <Navigate to="/login" /> : null}
-      {memberInfo && (
+      {memberInfo?.member && (
         <Account {...memberInfo} addFamilyInvite={invite} cancelFamilyInvite={cancelInvite} removeFamilyMember={removeFamilyMember} onLeaveFamily={leaveFamily}></Account>
       )}
     </Layout>
