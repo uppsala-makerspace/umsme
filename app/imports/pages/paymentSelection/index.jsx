@@ -35,9 +35,9 @@ export default function PaymentSelectionPage() {
     return option?.disabled === true;
   }, [paymentOptions, memberStatus, member?.family, paymentType]);
 
-  // Get Swish disabled status from public settings
+  // Get Swish disabled status from public settings and allowlist
   const swishSettings = Meteor.settings?.public?.swish;
-  const swishDisabled = swishSettings?.disabled === true;
+  const swishDisabled = swishSettings?.disabled === true || memberInfo?.swishAllowed === false;
   const lang = i18n.language === "sv" ? "sv" : "en";
   const disabledMessage = swishDisabled
     ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))

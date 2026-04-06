@@ -16,9 +16,9 @@ export default function MembershipSelectionPage() {
   const { memberInfo, loading: memberInfoLoading } = useContext(MemberInfoContext);
   const { paymentOptions, loading: appDataLoading } = useContext(AppDataContext);
 
-  // Get Swish disabled status from public settings
+  // Get Swish disabled status from public settings and allowlist
   const swishSettings = Meteor.settings?.public?.swish;
-  const swishDisabled = swishSettings?.disabled === true;
+  const swishDisabled = swishSettings?.disabled === true || memberInfo?.swishAllowed === false;
   const lang = i18n.language === "sv" ? "sv" : "en";
   const disabledMessage = swishDisabled
     ? (swishSettings?.disabledMessage?.[lang] || swishSettings?.disabledMessage?.en || t("paymentsDisabled"))

@@ -95,6 +95,11 @@ Meteor.methods({
       throw new Meteor.Error("no-name", "Member name is required");
     }
 
+    const allowList = Meteor.settings?.private?.swish?.allowList;
+    if (allowList?.length > 0 && !allowList.includes(member.email)) {
+      throw new Meteor.Error("swish-disabled", "Swish payments are not available for your account");
+    }
+
     // Verify that the client's view of membership status is current
     if (expectedStatus) {
       const status = await memberStatus(member);

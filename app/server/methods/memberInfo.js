@@ -81,6 +81,9 @@ Meteor.methods({
       }
     }
 
-    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated});
+    const swishAllowList = Meteor.settings?.private?.swish?.allowList;
+    const swishAllowed = !swishAllowList?.length || swishAllowList.includes(member.email);
+
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed});
   },
 });
