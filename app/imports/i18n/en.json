@@ -20,7 +20,7 @@
   "noNameText2": "Before we proceed we need som more information about you.",
   "addNameButton": "Tell us about yourself",
   "noMembershiptext1": "We couldn't find an active membership linked to your email.",
-  "noMembershiptext2": "If you wish to activate a membership, it's easy to do right here in the app. Just choose the membership you're interested in and complete the payment, you'll get instant access to the space.",
+  "noMembershiptext2": "Choose the membership type you're interested in and pay directly in the app.",
   "getMembership": "Get membership",
   "expiredMembershipText1": "Your membership has expired",
   "expiredMembershipText2": "You can easily renew your membership directly here in the app.",
@@ -243,7 +243,7 @@
   "floor": "Floor",
   "slackChannels": "Slack channels",
 
-  "selectMembership": "Select membership",
+  "selectMembership": "Select membership type",
   "discountedPrice": "Discounted price",
   "discountedPriceInfo": "For students, pensioners, or unemployed. Not available for families.",
   "familyMembershipInfo": "For up to 5 people at the same address",
