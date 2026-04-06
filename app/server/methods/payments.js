@@ -160,7 +160,11 @@ Meteor.methods({
         throw new Meteor.Error("payment-failed", "Failed to create payment request");
       }
     } catch (error) {
-      const errorMessage = `Swish payment initiation error: ${formatError(error.status, error.response.data)}`;
+      if(!error.response) {
+        console.log(error);
+      } else {
+        const errorMessage = `Swish payment initiation error: ${formatError(error.status, error.response.data)}`;
+      }
       console.error(errorMessage);
 
       // Update payment status on error
