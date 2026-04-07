@@ -30,7 +30,7 @@ export const LanguageSwitcher = () => {
     longPressTimer.current = setTimeout(() => {
       didLongPress.current = true;
       toggleCimode();
-    }, 500);
+    }, 2000);
   };
 
   const handleTouchEnd = () => {
