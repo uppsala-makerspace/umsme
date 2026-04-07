@@ -36,3 +36,5 @@ fetch
 session
 chatra:synced-cron
 roles
+accounts-google
+service-configuration
