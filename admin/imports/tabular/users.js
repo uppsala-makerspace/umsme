@@ -9,9 +9,9 @@ const columns = [
     title: 'Username'
   },
   {
-    data: 'emails',
+    data: 'emails.0.address',
     title: 'Email',
-    render: (val) => val && val[0] && val[0].address || ''
+    defaultContent: ''
   }
 ];
 
