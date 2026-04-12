@@ -263,16 +263,7 @@ export const models = {
       autoform: {
         type: "textarea",
       },
-    },
-    sms: {
-      label: "SMS (140 characters)",
-      type: String,
-      max: 140,
-      optional: true,
-      autoform: {
-        type: "textarea",
-      },
-    },
+    }
   },
   mail: {
     from: {
@@ -322,16 +313,7 @@ export const models = {
         type: "textarea",
         rows: 25,
       },
-    },
-    sms: {
-      label: "SMS (140 characters)",
-      type: String,
-      max: 140,
-      optional: true,
-      autoform: {
-        type: "textarea",
-      },
-    },
+    }
   },
   template: {
     name: { label: "Template name", type: String, max: 50 },
@@ -383,15 +365,6 @@ export const models = {
       label: "Text",
       type: String,
       max: 10000,
-      autoform: {
-        type: "textarea",
-      },
-    },
-    sms: {
-      label: "SMS (140 characters)",
-      type: String,
-      max: 140,
-      optional: true,
       autoform: {
         type: "textarea",
       },
