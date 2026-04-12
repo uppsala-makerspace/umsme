@@ -313,7 +313,8 @@ export const models = {
         type: "textarea",
         rows: 25,
       },
-    }
+    },
+    formatted: { label: "Formatted", type: Boolean, optional: true },
   },
   template: {
     name: { label: "Template name", type: String, max: 50 },

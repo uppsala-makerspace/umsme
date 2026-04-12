@@ -4,7 +4,7 @@ import { MessageTemplates } from "/imports/common/collections/templates";
 import { messageData } from "/imports/common/lib/message";
 
 Meteor.methods({
-  async mail(to, subject, text, from) {
+  async mail(to, subject, text, from, html) {
     if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
       throw new Meteor.Error('Not authorized');
     }
@@ -13,12 +13,16 @@ Meteor.methods({
       throw new Meteor.Error(mesg);
     }
     let f = Meteor.settings.from;
-    return Email.sendAsync({
+    const emailOptions = {
       to,
       from: from ? from : Array.isArray(f) ? f[0] : f,
       subject,
       text,
-    })
+    };
+    if (html) {
+      emailOptions.html = html;
+    }
+    return Email.sendAsync(emailOptions)
       .then(() => {
         console.log(`Sent mail to ${to}`);
       })

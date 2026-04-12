@@ -7,13 +7,15 @@ import { Announcements } from '/imports/common/collections/announcements';
 import { models, getFromOptions } from "/imports/common/lib/models";
 import { memberStatus } from '/imports/common/lib/utils';
 import { template } from 'underscore';
+import { marked } from 'marked';
 import './SendMail.html';
 import './Recipients';
 
 const getRecipients = async function(reciever, family) {
   const arr = [];
   const  members = await Members.find().fetchAsync();
-  for (let i=0;i<members.length;i++) {
+//  for (let i=0;i<members.length;i++) {
+  for (let i=0;i<1;i++) {
     const member = members[i];
     const status = await memberStatus(member);
     if (member.email && check(status, reciever)) {
@@ -60,6 +62,7 @@ Template.SendMail.onCreated(function() {
   this.state.set('fromOptions', false);
   this.state.set('tomanual', false);
   this.state.set('message', noFrom);
+  this.state.set('formatMode', 'raw');
   getFromOptions(() => {
     this.state.set('fromOptions', true);
   });
@@ -127,6 +130,15 @@ Template.SendMail.helpers({
   },
   announcementId() {
     return FlowRouter.getQueryParam('announcement');
+  },
+  isMarkdown() {
+    return Template.instance().state.get('formatMode') === 'markdown';
+  },
+  markdownPreview() {
+    Template.instance().state.get('previewTick');
+    const textarea = document.querySelector('#insertMailForm textarea[name="template"]');
+    const text = textarea?.value || '';
+    return new Spacebars.SafeString(marked.parse(text, { breaks: true }));
   }
 });
 
@@ -153,6 +165,19 @@ Template.SendMail.events({
   'click .switchManualTo': function (event, instance) {
     instance.state.set('tomanual', true);
     return false;
+  },
+  'click .setRaw'(event, instance) {
+    event.preventDefault();
+    instance.state.set('formatMode', 'raw');
+  },
+  'click .setMarkdown'(event, instance) {
+    event.preventDefault();
+    instance.state.set('formatMode', 'markdown');
+  },
+  'input textarea[name="template"]'(event, instance) {
+    if (instance.state.get('formatMode') === 'markdown') {
+      instance.state.set('previewTick', Date.now());
+    }
   }
 });
 
@@ -221,11 +246,14 @@ AutoForm.hooks({
       doc.failed = [];
 
       if (confirm(`Send to ${recipients.length} recipients`)) {
+        const isMarkdown = rememberState.get('formatMode') === 'markdown';
         for (let i = 0; i < recipients.length; i++) {
           const data = recipients[i];
           rememberState.set('dontclose', `Sending mail number ${i + 1} of ${recipients.length} to ${data.email}`);
 
-          await Meteor.callAsync('mail', data.email, subjectTemplate(data), messageTemplate(data), doc.from)
+          const messageText = messageTemplate(data);
+          const htmlContent = isMarkdown ? marked.parse(messageText, { breaks: true }) : undefined;
+          await Meteor.callAsync('mail', data.email, subjectTemplate(data), messageText, doc.from, htmlContent)
             .then(() => {
               doc.to.push(data.to);
               console.log(`Sending to ${data.to}`);
@@ -236,6 +264,9 @@ AutoForm.hooks({
         }
 
         rememberState.set('dontclose', 'Done sending mails! Going back in 3 seconds.');
+        if (isMarkdown) {
+          doc.formatted = true;
+        }
         const mailId = Mails.insert(doc);
 
         // Link announcement to the mail record if sending from an announcement

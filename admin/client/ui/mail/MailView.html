@@ -9,6 +9,14 @@
         <button class="btn btn-default extractToAnnouncement">Extract into announcement</button>
     </div>
     {{/with}}
+    {{#if isFormatted}}
+    {{> quickForm collection=Mails doc=mail id="mailForm" omitFields="_id,template" type="readonly" buttonContent="Go back to mail list"}}
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Content (formatted)</strong></div>
+        <div class="panel-body">{{{formattedBody}}}</div>
+    </div>
+    {{else}}
     {{> quickForm collection=Mails doc=mail id="mailForm" omitFields="_id" type="readonly" buttonContent="Go back to mail list"}}
+    {{/if}}
     {{>CommentList about=id}}
 </template>

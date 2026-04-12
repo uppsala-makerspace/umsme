@@ -2,6 +2,7 @@ import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Mails } from "/imports/common/collections/mails";
 import { Announcements } from '/imports/common/collections/announcements';
+import { marked } from 'marked';
 import { Comments } from '/imports/common/collections/comments';
 import './MailView.html';
 import './Recipients';
@@ -31,6 +32,16 @@ Template.MailView.helpers({
   announcement() {
     const id = FlowRouter.getParam('_id');
     return Announcements.findOne({ mailId: id });
+  },
+  isFormatted() {
+    const id = FlowRouter.getParam('_id');
+    const mail = Mails.findOne(id);
+    return mail?.formatted;
+  },
+  formattedBody() {
+    const id = FlowRouter.getParam('_id');
+    const mail = Mails.findOne(id);
+    return mail?.template ? new Spacebars.SafeString(marked.parse(mail.template, { breaks: true })) : '';
   }
 });
 

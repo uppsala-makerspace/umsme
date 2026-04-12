@@ -7,7 +7,7 @@ import { models } from "/imports/common/lib/models";
 import { extractor, dateViewFunction } from "/imports/common/lib/fieldsUtils";
 
 const mailDefaults = {
-  filter: ['template', 'to.$', 'failed.$', 'sms', 'mail'],
+  filter: ['template', 'to.$', 'failed.$', 'sms', 'mail', 'formatted'],
   enhance: [{
     data: 'senddate',
     title: 'Sent date',

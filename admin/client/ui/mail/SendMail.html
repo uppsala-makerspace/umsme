@@ -23,7 +23,24 @@
                         {{/if}}
                     </div>
                     {{> afQuickField name="subject"}}
-                    {{> afQuickField name="template"}}
+                    <div class="form-group" style="margin-bottom: 5px;">
+                        <label class="control-label">Format</label>
+                        <div class="btn-group" style="margin-left: 10px;">
+                            <button type="button" class="btn btn-sm setRaw {{#unless isMarkdown}}btn-primary{{else}}btn-default{{/unless}}">Raw</button>
+                            <button type="button" class="btn btn-sm setMarkdown {{#if isMarkdown}}btn-primary{{else}}btn-default{{/if}}">Markdown</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="{{#if isMarkdown}}col-md-6{{else}}col-md-12{{/if}}">
+                            {{> afQuickField name="template"}}
+                        </div>
+                        {{#if isMarkdown}}
+                        <div class="col-md-6">
+                            <label class="control-label">Preview</label>
+                            <div class="well" style="min-height: 200px; overflow-y: auto;">{{{markdownPreview}}}</div>
+                        </div>
+                        {{/if}}
+                    </div>
                     <div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                         <button type="reset" class="btn btn-default">Reset</button>
