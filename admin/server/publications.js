@@ -11,6 +11,7 @@ import { initiatedPayments } from '/imports/common/collections/initiatedPayments
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
+import { Announcements } from '/imports/common/collections/announcements';
 
 const createAuthFuncFor = (col) => async function () {
   if (
@@ -35,6 +36,7 @@ export default () => {
   Meteor.publish('liabilityDocuments', createAuthFuncFor(LiabilityDocuments));
   Meteor.publish('certificates', createAuthFuncFor(Certificates));
   Meteor.publish('attestations', createAuthFuncFor(Attestations));
+  Meteor.publish('announcements', createAuthFuncFor(Announcements));
 
   Meteor.publish(null, async function () {
     if (this.userId) {

@@ -1,0 +1,18 @@
+<template name="AnnouncementEdit">
+    <h1>Edit announcement</h1>
+    {{#if isSent}}
+    <div class="alert alert-warning">This announcement has already been sent. Any changes will not affect emails that have already been delivered.</div>
+    {{/if}}
+    {{#autoForm collection=Announcements doc=doc id="announcementEditForm" omitFields="_id,status,createdAt,sentAt,mailId" type="normal"}}
+      {{> afQuickField name="type"}}
+      {{> afQuickField name="subjectSv"}}
+      {{> afQuickField name="subjectEn"}}
+      {{> afQuickField name="bodySv"}}
+      {{> afQuickField name="bodyEn"}}
+      <div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-default cancelEdit">Cancel</button>
+      </div>
+    {{/autoForm}}
+    {{> MessageTemplateDocumentation}}
+</template>

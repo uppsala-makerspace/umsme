@@ -3,6 +3,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Members } from '/imports/common/collections/members';
 import { Mails } from '/imports/common/collections/mails';
+import { Announcements } from '/imports/common/collections/announcements';
 import { models, getFromOptions } from "/imports/common/lib/models";
 import { memberStatus } from '/imports/common/lib/utils';
 import { template } from 'underscore';
@@ -43,6 +44,7 @@ const getRecipients = async function(reciever, family) {
 let rememberState;
 let family;
 let recip;
+let separator = '\n---\n\n';
 
 const noFrom = 'You must provide a from address!';
 const noSubject = 'You must provide a message subject!';
@@ -52,6 +54,7 @@ Template.SendMail.onCreated(function() {
   Meteor.subscribe('members');
   Meteor.subscribe('memberships');
   Meteor.subscribe('mails');
+  Meteor.subscribe('announcements');
   this.state = new ReactiveDict();
   rememberState = this.state;
   this.state.set('fromOptions', false);
@@ -73,10 +76,21 @@ Template.SendMail.helpers({
   Mails() {
     return Mails;
   },
-  mail() {
-    return {
-      recipients: 'members'
-    };
+  async mailAsync() {
+    const announcementId = FlowRouter.getQueryParam('announcement');
+    if (announcementId) {
+      const announcement = await Announcements.findOneAsync(announcementId);
+      if (announcement) {
+        const doc = {
+          recipients: 'members',
+          subject: announcement.subjectSv,
+          template: announcement.bodySv + separator + announcement.bodyEn,
+        };
+        console.dir(doc);
+        return doc;
+      }
+    }
+    return { recipients: 'members' };
   },
   tomanual() {
     const state = Template.instance().state;
@@ -110,6 +124,9 @@ Template.SendMail.helpers({
   dontclose() {
     const state = Template.instance().state;
     return state.get('dontclose');
+  },
+  announcementId() {
+    return FlowRouter.getQueryParam('announcement');
   }
 });
 
@@ -135,6 +152,7 @@ const check = (status, recipients) => {
 Template.SendMail.events({
   'click .switchManualTo': function (event, instance) {
     instance.state.set('tomanual', true);
+    return false;
   }
 });
 
@@ -217,14 +235,25 @@ AutoForm.hooks({
           });
         }
 
-        rememberState.set('dontclose', 'Done sending mails! Going back to list in 3 seconds.');
-        Mails.insert(doc);
-        this.done();
+        rememberState.set('dontclose', 'Done sending mails! Going back in 3 seconds.');
+        const mailId = Mails.insert(doc);
+
+        // Link announcement to the mail record if sending from an announcement
+        const announcementId = FlowRouter.getQueryParam('announcement');
+        if (announcementId) {
+          Announcements.update(announcementId, {
+            $set: { status: 'sent', sentAt: new Date(), mailId }
+          });
+        }
         setTimeout(() => {
           rememberState.set('dontclose', '');
-          FlowRouter.go(`/mail`);
-        }, 3000)
+          FlowRouter.go(announcementId ? `/announcement/${announcementId}` : '/mail');
+          this.done();
+        }, 3000);
+      } else {
+        this.done();
       }
+      return false;
     }
   }
 });

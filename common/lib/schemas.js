@@ -22,4 +22,5 @@ export const schemas = {
   liabilityDocument: new SimpleSchema(models.liabilityDocument),
   certificate: new SimpleSchema(models.certificate),
   attestation: new SimpleSchema(models.attestation),
+  announcement: new SimpleSchema(models.announcement),
 };

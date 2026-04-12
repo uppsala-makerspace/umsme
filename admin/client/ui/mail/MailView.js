@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Mails } from "/imports/common/collections/mails";
+import { Announcements } from '/imports/common/collections/announcements';
 import { Comments } from '/imports/common/collections/comments';
 import './MailView.html';
 import './Recipients';
@@ -9,6 +10,7 @@ import '../comment/CommentList';
 
 Template.MailView.onCreated(function() {
   Meteor.subscribe('mails');
+  Meteor.subscribe('announcements');
 });
 Template.MailView.helpers({
   Mails() {
@@ -25,10 +27,31 @@ Template.MailView.helpers({
   },
   id() {
     return FlowRouter.getParam('_id');
+  },
+  announcement() {
+    const id = FlowRouter.getParam('_id');
+    return Announcements.findOne({ mailId: id });
   }
 });
 
 Template.MailView.events({
+  'click .extractToAnnouncement': function () {
+    const mailId = FlowRouter.getParam('_id');
+    const mail = Mails.findOne(mailId);
+    if (!mail) return;
+    const announcementId = Announcements.insert({
+      type: 'newsletter',
+      subjectSv: mail.subject,
+      subjectEn: mail.subject,
+      bodySv: mail.template,
+      bodyEn: mail.template,
+      status: 'sent',
+      createdAt: mail.senddate,
+      sentAt: mail.senddate,
+      mailId,
+    });
+    FlowRouter.go(`/announcement/${announcementId}`);
+  },
   'click .deleteMail': function (event) {
     const mid = FlowRouter.getParam('_id');
     if (confirm('Delete this mail')) {

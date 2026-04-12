@@ -320,6 +320,7 @@ export const models = {
       max: 10000,
       autoform: {
         type: "textarea",
+        rows: 25,
       },
     },
     sms: {
@@ -706,6 +707,58 @@ export const models = {
       type: Date,
       optional: true,
       autoform: { omit: true },
+    },
+  },
+  announcement: {
+    type: {
+      label: "Type",
+      type: String,
+      max: 20,
+      autoform: {
+        type: "select",
+        options: {
+          newsletter: "Newsletter",
+          information: "Information",
+        },
+      },
+    },
+    subjectSv: { label: "Ämne (Svenska)", type: String, max: 200 },
+    subjectEn: { label: "Subject (English)", type: String, max: 200 },
+    bodySv: {
+      label: "Innehåll (Svenska)",
+      type: String,
+      max: 50000,
+      autoform: { type: "textarea", rows: 25 },
+    },
+    bodyEn: {
+      label: "Content (English)",
+      type: String,
+      max: 50000,
+      autoform: { type: "textarea", rows: 25 },
+    },
+    status: {
+      label: "Status",
+      type: String,
+      max: 10,
+      autoform: { readonly: true },
+    },
+    createdAt: {
+      label: "Created",
+      type: Date,
+      autoform: { readonly: true, type: "datetime-local" },
+    },
+    sentAt: {
+      label: "Sent",
+      type: Date,
+      optional: true,
+      autoform: { readonly: true, type: "datetime-local" },
+    },
+    mailId: {
+      label: "Mail",
+      type: String,
+      max: 20,
+      optional: true,
+      autoform: { readonly: true },
     },
   },
 };

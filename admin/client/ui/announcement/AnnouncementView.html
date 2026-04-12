@@ -1,0 +1,61 @@
+<template name="AnnouncementView">
+    {{#with announcement}}
+    <h1>{{subjectSv}}
+        {{#if isSent}}
+        <span class="label label-success">Sent</span>
+        {{else}}
+        <span class="label label-default">Draft</span>
+        {{/if}}
+    </h1>
+    {{#if mailId}}
+    <div style="margin-bottom: 10px;">
+        <a href="/mail/{{mailId}}">View sent mail &rarr;</a>
+    </div>
+    {{/if}}
+
+    <div class="row">
+        <div class="col-md-6">
+            <dl>
+                <dt>Type</dt>
+                <dd>{{type}}</dd>
+                <dt>Created</dt>
+                <dd>{{formatDate createdAt}}</dd>
+                {{#if sentAt}}
+                <dt>Sent</dt>
+                <dd>{{formatDate sentAt}}</dd>
+                {{/if}}
+            </dl>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Svenska</strong></div>
+                <div class="panel-body">
+                    <h4>{{subjectSv}}</h4>
+                    <div class="well">{{{markdown bodySv}}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>English</strong></div>
+                <div class="panel-body">
+                    <h4>{{subjectEn}}</h4>
+                    <div class="well">{{{markdown bodyEn}}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 10px;">
+        <a class="btn btn-primary" href="/announcement/{{_id}}/edit">Edit</a>
+        {{#unless isSent}}
+        <a class="btn btn-success sendAnnouncement" href="#">Send</a>
+        {{/unless}}
+        <a class="btn btn-danger deleteAnnouncement" href="#">Delete</a>
+    </div>
+
+    {{/with}}
+</template>

@@ -1,5 +1,14 @@
 <template name="MailView">
     <h1>Sent mail <small><a class="deleteMail">Delete</a></small></h1>
+    {{#with announcement}}
+    <div style="margin-bottom: 10px;">
+        <a href="/announcement/{{_id}}">View announcement: {{subjectSv}} &rarr;</a>
+    </div>
+    {{else}}
+    <div style="margin-bottom: 10px;">
+        <button class="btn btn-default extractToAnnouncement">Extract into announcement</button>
+    </div>
+    {{/with}}
     {{> quickForm collection=Mails doc=mail id="mailForm" omitFields="_id" type="readonly" buttonContent="Go back to mail list"}}
     {{>CommentList about=id}}
 </template>

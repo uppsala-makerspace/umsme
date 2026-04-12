@@ -1,8 +1,12 @@
 <template name="SendMail">
     <h1>Send mail</h1>
+    {{#if announcementId}}
+    <div class="alert alert-info">Sending from announcement. <a href="/announcement/{{announcementId}}">Back to announcement</a></div>
+    {{/if}}
     {{#if Template.subscriptionsReady}}
         {{#if fromOptions}}
           {{#let to=toAsync}}
+            {{#let mail=mailAsync}}
               {{#autoForm collection=Mails doc=mail id="insertMailForm" type="normal" validation="keyup"}}
                 <fieldset>
                     {{> afQuickField name="from"}}
@@ -26,6 +30,7 @@
                     </div>
                 </fieldset>
               {{/autoForm}}
+            {{/let}}
           {{/let}}
         {{/if}}
     {{else}}
