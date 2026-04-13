@@ -11,3 +11,4 @@ import './texts';
 import './push';
 import './roles';
 import './membershipDetail';
+import './messages';

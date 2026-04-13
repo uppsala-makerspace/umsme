@@ -23,11 +23,14 @@ import InitiatedPayment from '/imports/pages/initiatedPayment';
 import Install from '/imports/pages/install';
 import Notifications from '/imports/pages/notifications';
 import NotificationSettings from '/imports/pages/notificationSettings';
+import Messages from '/imports/pages/messages';
+import MessageDetail from '/imports/pages/messages/detail';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { NotificationProvider } from '/imports/context/NotificationContext';
 import { LocationProvider } from '/imports/context/LocationContext';
 import { MemberInfoProvider } from '/imports/context/MemberInfoContext';
 import { AppDataProvider } from '/imports/context/AppDataContext';
+import { MessagesProvider } from '/imports/context/MessagesContext';
 
 export const App = () => (
   <div>
@@ -35,6 +38,7 @@ export const App = () => (
       <LocationProvider>
       <NotificationProvider>
       <MemberInfoProvider>
+      <MessagesProvider>
       <AppDataProvider>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -60,10 +64,13 @@ export const App = () => (
           <Route path="/initiatedPayment/:externalId" element={<InitiatedPayment />} />
           <Route path="/payment" element={<Navigate to="/membership" replace />} />
           <Route path="/install" element={<Install />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages/:kind/:id" element={<MessageDetail />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/notification-settings" element={<NotificationSettings />} />
         </Routes>
       </AppDataProvider>
+      </MessagesProvider>
       </MemberInfoProvider>
       </NotificationProvider>
       </LocationProvider>

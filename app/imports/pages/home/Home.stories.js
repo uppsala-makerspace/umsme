@@ -19,6 +19,10 @@ memberEndClose.setDate(memberEndClose.getDate()+2);
 const memberName = "John Doe";
 const liabilityDate = new Date('2024-01-15');
 const oldLiabilityDate = new Date('2023-06-01');
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+const lastMonth = new Date();
+lastMonth.setMonth(lastMonth.getMonth() - 1);
 
 export const EmailNotVerified = {
   args: {
@@ -84,13 +88,50 @@ export const FamilyMemberTimeToRenew = {
   },
 };
 
-export const MemberPaying = {
+export const MemberPayingNotRegistered = {
   args: {
     memberName,
     memberStatus: { memberStart, memberEnd },
     verified: true,
     liabilityDate,
-    liabilityOutdated: false
+    liabilityOutdated: false,
+    registered: false
+  },
+};
+
+export const MemberPayingWithNewMessages = {
+  args: {
+    memberName,
+    memberStatus: { memberStart, memberEnd },
+    verified: true,
+    registered: true,
+    liabilityDate,
+    liabilityOutdated: false,
+    messageCount: 3,
+    announcementCount: 2,
+    latestMessageDate: yesterday,
+    latestAnnouncementDate: lastMonth,
+    hasNewMessage: true,
+    hasNewAnnouncement: false,
+    hasNewMessages: true,
+  },
+};
+
+export const MemberPayingWithMessages = {
+  args: {
+    memberName,
+    memberStatus: { memberStart, memberEnd },
+    verified: true,
+    registered: true,
+    liabilityDate,
+    liabilityOutdated: false,
+    messageCount: 3,
+    announcementCount: 2,
+    latestMessageDate: lastMonth,
+    latestAnnouncementDate: lastMonth,
+    hasNewMessage: false,
+    hasNewAnnouncement: false,
+    hasNewMessages: false,
   },
 };
 

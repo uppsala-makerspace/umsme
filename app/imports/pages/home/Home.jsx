@@ -25,8 +25,8 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered }) => {
-  const { t } = useTranslation();
+export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement }) => {
+  const { t, i18n } = useTranslation();
 
   if (loading) {
     return <MainContent>
@@ -92,6 +92,49 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
     return <MainContent>
       <Logo />
       <h3 className="text-center">{t("greeting2")} {name}!</h3>
+      {(messageCount > 0 || announcementCount > 0) && (
+        <Link
+          to="/messages"
+          className={`block mt-4 mb-2 px-4 py-3 rounded-lg no-underline text-inherit border ${hasNewMessages ? "border-brand-green bg-green-50" : "border-gray-200 bg-gray-50"} hover:shadow-sm`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-medium">{t("viewMessages")}</span>
+            {hasNewMessages && (
+              <span className="text-xs font-bold uppercase px-2 py-0.5 rounded bg-brand-green text-white">
+                {t("newIndicator")}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col gap-1 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                {hasNewAnnouncement && (
+                  <span className="inline-block w-2 h-2 rounded-full bg-brand-green flex-shrink-0"></span>
+                )}
+                <span className="text-gray-700">{t("tagAnnouncements")} ({announcementCount})</span>
+              </span>
+              {latestAnnouncementDate && (
+                <span className="text-xs text-gray-500">
+                  {new Date(latestAnnouncementDate).toLocaleDateString(i18n.language === "sv" ? "sv-SE" : "en-US")}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                {hasNewMessage && (
+                  <span className="inline-block w-2 h-2 rounded-full bg-brand-green flex-shrink-0"></span>
+                )}
+                <span className="text-gray-700">{t("tagPrivateMessages")} ({messageCount})</span>
+              </span>
+              {latestMessageDate && (
+                <span className="text-xs text-gray-500">
+                  {new Date(latestMessageDate).toLocaleDateString(i18n.language === "sv" ? "sv-SE" : "en-US")}
+                </span>
+              )}
+            </div>
+          </div>
+        </Link>
+      )}
       {!registered && (
         <p className="flex flex-col items-center text-center mt-5 mb-4">{t("notRegisteredText")}</p>
       )}
