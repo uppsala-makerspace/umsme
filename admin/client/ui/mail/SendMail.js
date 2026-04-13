@@ -87,8 +87,8 @@ Template.SendMail.helpers({
       if (announcement) {
         const doc = {
           recipients: 'members',
-          subject: announcement.subjectSv,
-          template: announcement.bodySv + separator + announcement.bodyEn,
+          subject: announcement.subjectEn ? `${announcement.subjectSv} / ${announcement.subjectEn}` : announcement.subjectSv,
+          template: announcement.bodyEn ? announcement.bodySv + separator + announcement.bodyEn : announcement.bodySv,
         };
         console.dir(doc);
         return doc;

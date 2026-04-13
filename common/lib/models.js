@@ -697,7 +697,7 @@ export const models = {
       },
     },
     subjectSv: { label: "Ämne (Svenska)", type: String, max: 200 },
-    subjectEn: { label: "Subject (English)", type: String, max: 200 },
+    subjectEn: { label: "Subject (English)", type: String, max: 200, optional: true },
     bodySv: {
       label: "Innehåll (Svenska)",
       type: String,
@@ -708,6 +708,7 @@ export const models = {
       label: "Content (English)",
       type: String,
       max: 50000,
+      optional: true,
       autoform: { type: "textarea", rows: 25 },
     },
     status: {
