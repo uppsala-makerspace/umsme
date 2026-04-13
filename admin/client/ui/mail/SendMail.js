@@ -8,6 +8,7 @@ import { models, getFromOptions } from "/imports/common/lib/models";
 import { memberStatus } from '/imports/common/lib/utils';
 import { template } from 'underscore';
 import { marked } from 'marked';
+import removeMd from 'remove-markdown';
 import './SendMail.html';
 import './Recipients';
 
@@ -131,14 +132,31 @@ Template.SendMail.helpers({
   announcementId() {
     return FlowRouter.getQueryParam('announcement');
   },
+  isRaw() {
+    return Template.instance().state.get('formatMode') === 'raw';
+  },
   isMarkdown() {
     return Template.instance().state.get('formatMode') === 'markdown';
   },
-  markdownPreview() {
+  isPlaintext() {
+    return Template.instance().state.get('formatMode') === 'plaintext';
+  },
+  hasPreview() {
+    const mode = Template.instance().state.get('formatMode');
+    return mode === 'markdown' || mode === 'plaintext';
+  },
+  formatPreview() {
     Template.instance().state.get('previewTick');
     const textarea = document.querySelector('#insertMailForm textarea[name="template"]');
     const text = textarea?.value || '';
-    return new Spacebars.SafeString(marked.parse(text, { breaks: true }));
+    const mode = Template.instance().state.get('formatMode');
+    if (mode === 'markdown') {
+      return new Spacebars.SafeString(marked.parse(text, { breaks: true }));
+    }
+    if (mode === 'plaintext') {
+      return removeMd(text, { stripListLeaders: false });
+    }
+    return '';
   }
 });
 
@@ -174,8 +192,12 @@ Template.SendMail.events({
     event.preventDefault();
     instance.state.set('formatMode', 'markdown');
   },
+  'click .setPlaintext'(event, instance) {
+    event.preventDefault();
+    instance.state.set('formatMode', 'plaintext');
+  },
   'input textarea[name="template"]'(event, instance) {
-    if (instance.state.get('formatMode') === 'markdown') {
+    if (instance.state.get('formatMode') !== 'raw') {
       instance.state.set('previewTick', Date.now());
     }
   }
@@ -246,13 +268,14 @@ AutoForm.hooks({
       doc.failed = [];
 
       if (confirm(`Send to ${recipients.length} recipients`)) {
-        const isMarkdown = rememberState.get('formatMode') === 'markdown';
+        const formatMode = rememberState.get('formatMode');
         for (let i = 0; i < recipients.length; i++) {
           const data = recipients[i];
           rememberState.set('dontclose', `Sending mail number ${i + 1} of ${recipients.length} to ${data.email}`);
 
-          const messageText = messageTemplate(data);
-          const htmlContent = isMarkdown ? marked.parse(messageText, { breaks: true }) : undefined;
+          const rawText = messageTemplate(data);
+          const messageText = formatMode === 'plaintext' ? removeMd(rawText, { stripListLeaders: false }) : rawText;
+          const htmlContent = formatMode === 'markdown' ? marked.parse(rawText, { breaks: true }) : undefined;
           await Meteor.callAsync('mail', data.email, subjectTemplate(data), messageText, doc.from, htmlContent)
             .then(() => {
               doc.to.push(data.to);
@@ -264,8 +287,11 @@ AutoForm.hooks({
         }
 
         rememberState.set('dontclose', 'Done sending mails! Going back in 3 seconds.');
-        if (isMarkdown) {
+        if (formatMode === 'markdown') {
           doc.formatted = true;
+        }
+        if (formatMode === 'plaintext') {
+          doc.template = removeMd(doc.template, { stripListLeaders: false });
         }
         const mailId = Mails.insert(doc);
 
