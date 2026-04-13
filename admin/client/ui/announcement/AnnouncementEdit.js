@@ -39,7 +39,17 @@ AutoForm.hooks({
     onSubmit(doc) {
       const id = FlowRouter.getParam('_id');
       const { status, createdAt, sentAt, mailId, ...fields } = doc;
-      Announcements.update(id, { $set: fields });
+      const modifier = { $set: fields };
+      const unset = {};
+      ['subjectEn', 'bodyEn'].forEach((key) => {
+        if (fields[key] === undefined) {
+          unset[key] = '';
+        }
+      });
+      if (Object.keys(unset).length > 0) {
+        modifier.$unset = unset;
+      }
+      Announcements.update(id, modifier);
       this.done();
       FlowRouter.go(`/announcement/${id}`);
       return false;
