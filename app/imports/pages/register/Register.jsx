@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { LogRegSwitcher } from "/imports/components/LogRegSwitch/LogRegSwitcher";
 import { useTranslation } from "react-i18next";
 import { LoginButton } from "../login/LoginButton";
@@ -41,10 +42,10 @@ export default ({onSubmit, google, facebook}) => {
     <form onSubmit={handleSubmit}>
       <Logo />
 
-      <p className="flex items-start gap-2 text-sm text-gray-700 mb-4">
+      <Link to="/check-email" className="flex items-start gap-2 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded p-3 mb-4 no-underline hover:bg-yellow-100">
         <WarningIcon />
-        {t("useExistingEmailInfo")}
-      </p>
+        <span>{t("useExistingEmailInfo")} <span className="underline">{t("checkEmailLink")}</span></span>
+      </Link>
 
       <LogRegSwitcher/>
 

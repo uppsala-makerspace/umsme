@@ -21,6 +21,7 @@ import MembershipDetail from '/imports/pages/membershipDetail';
 import PaymentSelection from '/imports/pages/paymentSelection';
 import InitiatedPayment from '/imports/pages/initiatedPayment';
 import Install from '/imports/pages/install';
+import CheckEmail from '/imports/pages/checkEmail';
 import Notifications from '/imports/pages/notifications';
 import NotificationSettings from '/imports/pages/notificationSettings';
 import Messages from '/imports/pages/messages';
@@ -44,6 +45,7 @@ export const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/check-email" element={<CheckEmail />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/resetPassword/:token" element={<ResetPassword />} />
           <Route path="/waitforemailverification" element={<Verification />} />
