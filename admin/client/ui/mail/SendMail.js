@@ -15,8 +15,7 @@ import './Recipients';
 const getRecipients = async function(reciever, family) {
   const arr = [];
   const  members = await Members.find().fetchAsync();
-//  for (let i=0;i<members.length;i++) {
-  for (let i=0;i<1;i++) {
+  for (let i=0;i<members.length;i++) {
     const member = members[i];
     const status = await memberStatus(member);
     if (member.email && check(status, reciever)) {
