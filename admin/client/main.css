@@ -100,6 +100,16 @@ body {
   background-color: #900;
   text-decoration: none;
 }
+#menu li.menu-heading {
+  padding: 12px 20px 4px;
+  color: #ccc;
+  font-size: 0.85em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+#menu li.menu-sub a {
+  padding-left: 32px;
+}
 
 /* Responsive: narrow screens */
 @media (max-width: 768px) {
