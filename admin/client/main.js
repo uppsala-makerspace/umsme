@@ -19,6 +19,7 @@ import './ui/users';
 import './ui/liability';
 import './ui/certificates';
 import './ui/announcement';
+import './ui/pending';
 import './layouts/AppBody.js';
 import './layouts/Home.html';
 import { Accounts } from 'meteor/accounts-base';

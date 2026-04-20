@@ -1,0 +1,25 @@
+<template name="PendingMembers">
+    <h1>Pending Members</h1>
+    {{#each m in pendingMembers}}
+    <div class="panel panel-default pending-card">
+        <div class="panel-body">
+            <h4 style="display: flex; justify-content: space-between; align-items: center;">
+                <span>
+                    <a href="/member/{{m._id}}">{{m.name}}</a>
+                    {{#with linkedUser m.email}}
+                    &nbsp;|&nbsp;<a href="/user/{{_id}}">User account</a>
+                    {{/with}}
+                </span>
+                <button class="btn btn-success btn-sm acceptMember" data-id="{{m._id}}">Accept member</button>
+            </h4>
+            <p>{{m.email}}</p>
+            {{> MemberStatus member=m._id}}
+            <p style="margin-top: 8px;">
+                Total paid: <strong>{{totalPaid m._id}} SEK</strong>
+            </p>
+        </div>
+    </div>
+    {{else}}
+    <p>No pending members.</p>
+    {{/each}}
+</template>
