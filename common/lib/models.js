@@ -338,28 +338,30 @@ export const models = {
       type: String,
       max: 15,
       autoform: {
-        noselect: true,
         type: "select-radio-inline",
         options: {
+          "": "Any",
           member: "Member",
           lab: "Lab",
           labandmember: "Lab and member",
         },
       },
+      optional: true
     },
     membertype: {
       label: "Member type",
       type: String,
       max: 15,
       autoform: {
-        noselect: true,
         type: "select-radio-inline",
         options: {
+          "": "Any",
           normal: "Member",
           family: "Family",
           youth: "Youth",
         },
       },
+      optional: true
     },
     subject: { label: "Subject", type: String, max: 100 },
     messagetext: {

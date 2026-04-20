@@ -13,6 +13,30 @@ const niceDate = (date) => {
   return '';
 };
 
+/**
+ * Find the best matching non-deprecated message template.
+ * Priority: 1) exact match on membertype + membershiptype,
+ *           2) match on membershiptype only,
+ *           3) any template matching type and auto flag.
+ *
+ * @param {Object} params
+ * @param {boolean} params.auto - Whether to match auto templates
+ * @param {string} params.type - Message type (welcome, confirmation, reminder, status)
+ * @param {string} params.membershiptype - Membership type (member, lab, labandmember)
+ * @param {string} params.membertype - Member type (normal, family, youth)
+ * @returns {Object|null} The best matching template, or null
+ */
+export const findBestTemplate = async (params) => {
+  const { auto, type, membershiptype, membertype } = params;
+  const base = { type, deprecated: false };
+  if (auto !== undefined) base.auto = auto;
+
+  return await MessageTemplates.findOneAsync({ ...base, membertype, membershiptype })
+    || await MessageTemplates.findOneAsync({ ...base, membershiptype })
+    || await MessageTemplates.findOneAsync(base)
+    || null;
+};
+
 export const messageData = async (memberId, templateId, membershipId) => {
   let familyMembers = [];
   await Members.find({infamily: memberId}).forEachAsync((m) => familyMembers.push(m.name));
@@ -35,7 +59,7 @@ export const messageData = async (memberId, templateId, membershipId) => {
     memberStartDate: niceDate(status.memberStart),
     memberEndDate: niceDate(member.member),
     labStartDate: niceDate(status.labStart),
-    labEndDate: niceDate(member.lab),
+    labEndDate: niceDate(member.lab)
   };
   if (membershipId) {
     const membership = await Memberships.findOneAsync(membershipId);
