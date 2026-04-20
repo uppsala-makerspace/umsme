@@ -4,11 +4,12 @@ import { Navigate } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import { subscribeToPush } from "/imports/hooks/pushSetupHook";
 import { AppDataContext } from "/imports/context/AppDataContext";
+import { getDefaultNotificationPrefs } from "/imports/lib/notificationCategories";
 import NotificationSettings from "./NotificationSettings";
 
 export default () => {
   const { isAdmin } = useContext(AppDataContext);
-  const [prefs, setPrefs] = useState({ membershipExpiry: true });
+  const [prefs, setPrefs] = useState(getDefaultNotificationPrefs());
   const [loading, setLoading] = useState(true);
   const [pushPermission, setPushPermission] = useState("default");
 

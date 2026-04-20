@@ -301,6 +301,9 @@ AutoForm.hooks({
           Announcements.update(announcementId, {
             $set: { status: 'sent', sentAt: new Date(), mailId }
           });
+          // Send push notifications only for announcement-triggered mails
+          Meteor.callAsync('announcements.sendPush', announcementId)
+            .catch((err) => console.error('Failed to send announcement push:', err));
         }
         setTimeout(() => {
           rememberState.set('dontclose', '');

@@ -2,42 +2,15 @@ import { Meteor } from "meteor/meteor";
 import { Roles } from "meteor/roles";
 import { PushSubs } from "/imports/common/collections/pushSubs";
 import { Members } from "/imports/common/collections/members";
-import webpush from "web-push";
 import { findMemberForUser } from "./utils";
+import { applyDefaults } from "/imports/lib/notificationCategories";
+import { initPush, sendPushToSubscriptions } from "/imports/common/server/push";
 
 Meteor.startup(() => {
-  if (Meteor.settings.public?.vapidPublicKey && Meteor.settings.private?.vapidPrivateKey) {
-    webpush.setVapidDetails(
-      "mailto:admin@uppsalamakerspace.se",
-      Meteor.settings.public.vapidPublicKey,
-      Meteor.settings.private.vapidPrivateKey
-    );
-  } else {
-    console.warn("VAPID keys not configured, push notifications disabled.");
-  }
+  initPush();
 });
 
-export const sendPushToSubscriptions = async (subs, payload) => {
-  const payloadStr = JSON.stringify(payload);
-  for (const sub of subs) {
-    try {
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          expirationTime: sub.expirationTime,
-          keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth },
-        },
-        payloadStr
-      );
-    } catch (err) {
-      if (err.statusCode === 410 || err.statusCode === 404) {
-        await PushSubs.removeAsync({ endpoint: sub.endpoint });
-      } else {
-        console.error("Push error to", sub.endpoint, err.statusCode || err.message);
-      }
-    }
-  }
-};
+export { sendPushToSubscriptions };
 
 Meteor.methods({
   async savePushSubscription(sub) {
@@ -89,10 +62,7 @@ Meteor.methods({
       throw new Meteor.Error("not-authorized");
     }
     const member = await findMemberForUser();
-    if (!member) {
-      return { membershipExpiry: true };
-    }
-    return member.notificationPrefs || { membershipExpiry: true };
+    return applyDefaults(member?.notificationPrefs);
   },
 
   async sendTestNotification() {

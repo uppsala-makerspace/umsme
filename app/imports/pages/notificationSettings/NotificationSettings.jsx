@@ -2,20 +2,21 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import MainContent from "/imports/components/MainContent";
+import { NOTIFICATION_CATEGORIES } from "/imports/lib/notificationCategories";
 
 /**
  * Pure notification settings component.
  * @param {Object} props
- * @param {Object} props.prefs - Notification preferences { membershipExpiry: bool, testNotification: bool }
+ * @param {Object} props.prefs - Notification preferences keyed by category
  * @param {boolean} props.loading - Loading state
- * @param {string} props.pushPermission - Browser push permission ("granted"|"denied"|"default")
+ * @param {string} props.pushPermission - Browser push permission ("granted"|"denied"|"default"|"unsupported")
  * @param {boolean} props.isAdmin - Whether the current user is an admin
  * @param {function} props.onToggle - Callback when a pref toggle is clicked, receives the pref key
  * @param {function} props.onSendTest - Callback to send a test notification
  * @param {function} props.onRequestPermission - Callback to request push notification permission
  */
 const NotificationSettings = ({
-  prefs = { membershipExpiry: true },
+  prefs = {},
   loading = false,
   pushPermission = "default",
   isAdmin = false,
@@ -29,6 +30,8 @@ const NotificationSettings = ({
   if (loading) {
     return <div className="p-4 text-center text-gray-500">{t("loading")}</div>;
   }
+
+  const visibleCategories = NOTIFICATION_CATEGORIES.filter((c) => !c.adminOnly || isAdmin);
 
   return (
     <MainContent>
@@ -65,53 +68,37 @@ const NotificationSettings = ({
           </div>
         )}
 
-        {/* Membership expiry toggle */}
-        <div className={`bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center${disabled ? " opacity-50" : ""}`}>
-          <span className="text-sm font-medium">{t("membershipExpiryNotif")}</span>
+        {visibleCategories.map((cat) => (
+          <div
+            key={cat.key}
+            className={`bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center${disabled ? " opacity-50" : ""}`}
+          >
+            <span className="text-sm font-medium">{t(cat.labelKey)}</span>
+            <button
+              disabled={disabled}
+              onClick={() => onToggle(cat.key)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                prefs[cat.key] ? "bg-green-500" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  prefs[cat.key] ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+        ))}
+
+        {/* Test notification send button (admin only) */}
+        {isAdmin && prefs.testNotification && (
           <button
             disabled={disabled}
-            onClick={() => onToggle("membershipExpiry")}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              prefs.membershipExpiry ? "bg-green-500" : "bg-gray-300"
-            }`}
+            onClick={onSendTest}
+            className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium disabled:opacity-50"
           >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                prefs.membershipExpiry ? "translate-x-6" : "translate-x-1"
-              }`}
-            />
+            {t("testNotifTitle")}
           </button>
-        </div>
-
-        {/* Test notification toggle + send button (admin only) */}
-        {isAdmin && (
-          <>
-            <div className={`bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center${disabled ? " opacity-50" : ""}`}>
-              <span className="text-sm font-medium">{t("testNotificationNotif")}</span>
-              <button
-                disabled={disabled}
-                onClick={() => onToggle("testNotification")}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  prefs.testNotification ? "bg-green-500" : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    prefs.testNotification ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-            {prefs.testNotification && (
-              <button
-                disabled={disabled}
-                onClick={onSendTest}
-                className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium disabled:opacity-50"
-              >
-                {t("testNotifTitle")}
-              </button>
-            )}
-          </>
         )}
       </div>
     </MainContent>

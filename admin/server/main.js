@@ -9,6 +9,7 @@ import './methods/check';
 import './methods/update';
 import './methods/admin';
 import './methods/user';
+import './methods/push';
 import '/imports/tabular/index';
 import adminAvailable from './adminAvailable';
 import publications from './publications';
