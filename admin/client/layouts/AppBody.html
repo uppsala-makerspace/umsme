@@ -1,7 +1,9 @@
 <template name="AppBody">
-    <header>
-
+    <header id="topbar">
+        <button id="hamburger" class="hamburger-btn">&#9776;</button>
         {{> loginButtons align="right"}}
+    </header>
+    <nav id="sidebar">
         <ul id="menu">
             <li><a href="/">Home</a></li>
             <li><a href="/members">Members</a></li>
@@ -18,7 +20,7 @@
             <li><a href="/users">Users</a></li>
             <li><a href="/admin">Admin</a></li>
         </ul>
-    </header>
+    </nav>
     {{#if currentUser}}
       {{#if isInRole "admin,board"}}
         <div class="admin-panel">
