@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Comments } from '/imports/common/collections/comments';
+import { Members } from '/imports/common/collections/members';
 import { schemas } from '/imports/common/lib/schemas';
 import { Roles } from 'meteor/roles';
 
@@ -11,6 +12,7 @@ import '../comment/CommentList';
 Template.UserView.onCreated(function() {
   Meteor.subscribe('users');
   Meteor.subscribe('roles');
+  Meteor.subscribe('members');
 });
 
 Template.UserView.helpers({
@@ -39,6 +41,14 @@ Template.UserView.helpers({
   boardAsync() {
     const id = FlowRouter.getParam('_id');
     return Roles.userIsInRoleAsync(id, 'board');
+  },
+  linkedMember() {
+    const id = FlowRouter.getParam('_id');
+    const user = Meteor.users.findOne(id);
+    const email = user?.emails?.[0]?.address;
+    if (email) {
+      return Members.findOne({ email });
+    }
   }
 });
 

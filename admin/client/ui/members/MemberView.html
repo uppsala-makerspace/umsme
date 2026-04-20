@@ -14,6 +14,9 @@
     {{/unless}}
     <div class="publicMemberPage">
         <a href="{{publicMemberPage}}">Public member page for {{member.name}}</a>
+        {{#with linkedUser}}
+        &nbsp;|&nbsp;<a href="/user/{{_id}}">User account: {{username}}</a>
+        {{/with}}
     </div>
     {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id,registered" type="update" buttonContent="Update"}}
     {{#if member.infamily}}

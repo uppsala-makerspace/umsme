@@ -1,5 +1,10 @@
 <template name="UserView">
     <h1>User <small><a class="deleteUser">Delete</a></small></h1>
+    {{#with linkedMember}}
+    <div style="margin-bottom: 10px;">
+        <a href="/member/{{_id}}">Member: {{name}}</a>
+    </div>
+    {{/with}}
     {{> quickForm collection=Users schema=userSchema doc=user id="userForm" omitFields="_id" type="update" buttonContent="Update user"}}
     {{#if isNotAdminUser}}
       {{#let admin=adminAsync board=boardAsync}}

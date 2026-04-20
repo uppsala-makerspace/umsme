@@ -18,6 +18,7 @@ Template.MemberView.onCreated(function() {
   Meteor.subscribe('members');
   Meteor.subscribe('memberships');
   Meteor.subscribe('messages');
+  Meteor.subscribe('users');
 });
 
 Template.MemberView.events({
@@ -78,5 +79,11 @@ Template.MemberView.helpers({
   payingMember: function() {
     const member = Members.findOne(FlowRouter.getParam('_id'));
     return Members.findOne(member.infamily);
+  },
+  linkedUser() {
+    const member = Members.findOne(FlowRouter.getParam('_id'));
+    if (member?.email) {
+      return Meteor.users.findOne({ 'emails.address': member.email });
+    }
   }
 });
