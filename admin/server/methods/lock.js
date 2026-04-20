@@ -1,6 +1,7 @@
 import { fetch, Headers } from 'meteor/fetch';
 import { Unlocks } from '/imports/common/collections/unlocks';
-import { Email } from 'meteor/email'
+import { Email } from 'meteor/email';
+import { isEmailAllowed } from '/imports/common/server/emailGuard';
 
 let assumeUser;
 let lockid;
@@ -124,6 +125,10 @@ Meteor.methods({
 
     const log = unlocks.map(t => `${t.timestamp.toISOString()} ${t.user}`).join("\n");
     const message = `${unlocks.length} låsöppningar av ytterdörren från ${yesterday.toISOString()} till ${today.toISOString()}\n\n${log}`;
+    if (!isEmailAllowed('mpalmer@gmail.com')) {
+      console.log('Lock history email blocked by whitelist');
+      return message;
+    }
     return Email.sendAsync({to: 'mpalmer@gmail.com', from: 'ums@uppsalamakerspace.se', subject: 'Låsöppningar UMS', text: message })
   },
   'lockHistory': async () => {

@@ -2,6 +2,7 @@ import { Unlocks } from '/imports/common/collections/unlocks';
 import { Email } from 'meteor/email'
 import { authenticate, syncUnlocks } from "../methods/lock";
 import { SyncedCron } from 'meteor/chatra:synced-cron';
+import { isEmailAllowed } from '/imports/common/server/emailGuard';
 
 if (Meteor.isServer) {
   SyncedCron.add({
@@ -24,18 +25,19 @@ if (Meteor.isServer) {
 
       const log = unlocks.map(t => `${t.timestamp.toISOString()} ${t.user}`).join("\n");
       const message = `${unlocks.length} låsöppningar av ytterdörren från ${yesterday.toISOString()} till ${today.toISOString()}\n\n${log}`;
-      await Email.sendAsync({
-        to: 'pass@ekebyindustrihus.com',
-        from: 'kansliet@uppsalamakerspace.se',
-        subject: 'Låsöppningar UMS',
-        text: message
-      });
-      await Email.sendAsync({
-        to: 'mpalmer@gmail.com',
-        from: 'kansliet@uppsalamakerspace.se',
-        subject: 'Låsöppningar UMS',
-        text: message
-      });
+      const recipients = ['pass@ekebyindustrihus.com', 'mpalmer@gmail.com'];
+      for (const to of recipients) {
+        if (isEmailAllowed(to)) {
+          await Email.sendAsync({
+            to,
+            from: 'kansliet@uppsalamakerspace.se',
+            subject: 'Låsöppningar UMS',
+            text: message
+          });
+        } else {
+          console.log(`Cronjob email to ${to} blocked by whitelist`);
+        }
+      }
       return message;
     }
   });

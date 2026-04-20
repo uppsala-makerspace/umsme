@@ -2,6 +2,7 @@ import { Email } from "meteor/email";
 import { Members } from "/imports/common/collections/members.js";
 import { MessageTemplates } from "/imports/common/collections/templates";
 import { messageData } from "/imports/common/lib/message";
+import { isEmailAllowed } from "/imports/common/server/emailGuard";
 
 Meteor.methods({
   async mail(to, subject, text, from, html) {
@@ -11,6 +12,10 @@ Meteor.methods({
     if (!Meteor.settings.deliverMails) {
       const mesg = `Flag deliverMail in settings not set, cannot send mail to ${to}`;
       throw new Meteor.Error(mesg);
+    }
+    if (!isEmailAllowed(to)) {
+      console.log(`Email to ${to} blocked by whitelist`);
+      return;
     }
     let f = Meteor.settings.from;
     const emailOptions = {
@@ -40,6 +45,10 @@ Meteor.methods({
     });
 
     if (mb && template) {
+      if (!isEmailAllowed(email)) {
+        console.log(`Email to ${email} blocked by whitelist`);
+        return;
+      }
       const data = await messageData(mb._id, template._id);
       console.log(data.messagetext);
       const from = Meteor.settings.noreply || "no-reply@uppsalamakerspace.se";

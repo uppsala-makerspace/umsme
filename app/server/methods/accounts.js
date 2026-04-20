@@ -3,6 +3,7 @@ import { Accounts } from "meteor/accounts-base";
 import { Email } from "meteor/email";
 import { check } from "meteor/check";
 import { Members } from "/imports/common/collections/members";
+import { isEmailAllowed } from "/imports/common/server/emailGuard";
 
 Meteor.methods({
   sendVerificationEmail: async () => {
@@ -21,6 +22,10 @@ Meteor.methods({
 
     const member = await Members.findOneAsync({ email });
     if (member) {
+      if (!isEmailAllowed(email)) {
+        console.log(`checkMemberEmail to ${email} blocked by whitelist`);
+        return;
+      }
       const appUrl = Meteor.absoluteUrl();
       await Email.sendAsync({
         to: email,
