@@ -1,4 +1,8 @@
 {
+  "private": {
+    "mailUrl": "smtp://user:password@smtp.example.com:587"
+  },
+  "noreply": "no-reply@uppsalamakerspace.se",
   "swish": {
     "expectedCallbackIdentifier": "optional-swish-identifier"
   },

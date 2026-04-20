@@ -56,6 +56,7 @@ export const messageData = async (memberId, templateId, membershipId) => {
     familyMembers,
     youth: member.youth === true,
     liability: member.liability === true,
+    pending: !member.registered,
     memberStartDate: niceDate(status.memberStart),
     memberEndDate: niceDate(member.member),
     labStartDate: niceDate(status.labStart),

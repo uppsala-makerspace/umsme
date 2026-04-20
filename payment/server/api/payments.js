@@ -3,10 +3,14 @@
  * This module handles payment records, membership creation, and member updates.
  */
 
+import { Email } from "meteor/email";
 import { Payments } from "/imports/common/collections/payments";
 import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
+import { Messages } from "/imports/common/collections/messages";
 import { membershipFromPayment } from "/imports/common/lib/utils";
+import { findBestTemplate, messageData } from "/imports/common/lib/message";
+import { isEmailAllowed } from "/imports/common/server/emailGuard";
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -81,6 +85,9 @@ export async function processPayment(payment, member, paymentType) {
   // Update denormalized fields on member and family members
   await updateMemberDenormalizedFields(member._id, result);
 
+  // Send automatic confirmation email
+  await sendConfirmationEmail(member, membershipId, result.type);
+
   return {
     id: membershipId,
     mid: doc.mid,
@@ -138,5 +145,50 @@ async function updateMemberDenormalizedFields(memberId, result) {
         { multi: true }
       );
     }
+  }
+}
+
+/**
+ * Send automatic confirmation email after membership creation.
+ * Fails silently — email errors should not break payment processing.
+ */
+async function sendConfirmationEmail(member, membershipId, membershipType) {
+  try {
+    const membertype = member.family ? 'family' : (member.youth ? 'youth' : 'normal');
+    const tpl = await findBestTemplate({
+      auto: true, type: 'confirmation', membershiptype: membershipType, membertype
+    });
+    if (!tpl) {
+      console.log(`[Email] No auto confirmation template found for ${membershipType}/${membertype}`);
+      return;
+    }
+
+    const data = await messageData(member._id, tpl._id, membershipId);
+    if (!data.to) {
+      console.log(`[Email] No email address for member ${member._id}`);
+      return;
+    }
+
+    if (!isEmailAllowed(data.to)) {
+      console.log(`[Email] Confirmation to ${data.to} blocked by whitelist`);
+      return;
+    }
+
+    const from = Meteor.settings?.noreply || "no-reply@uppsalamakerspace.se";
+    await Email.sendAsync({ to: data.to, from, subject: data.subject, text: data.messagetext });
+    console.log(`[Email] Confirmation sent to ${data.to}`);
+
+    await Messages.insertAsync({
+      template: tpl._id,
+      member: member._id,
+      membership: membershipId,
+      type: 'confirmation',
+      to: data.to,
+      subject: data.subject,
+      senddate: new Date(),
+      messagetext: data.messagetext,
+    });
+  } catch (err) {
+    console.error('[Email] Failed to send confirmation:', err);
   }
 }
