@@ -37,6 +37,7 @@ const getRecipients = async function(reciever, family) {
         memberEndDate: niceDate(member.member),
         labStartDate: niceDate(status.labStart),
         labEndDate: niceDate(member.lab),
+        pending: !member.registered,
       });
     }
   }
