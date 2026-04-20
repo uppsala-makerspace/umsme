@@ -371,6 +371,7 @@ export const models = {
       },
     },
     deprecated: { label: "Deprecated", type: Boolean },
+    auto: { label: "Automatic", type: Boolean, optional: true },
     created: {
       label: "Created",
       type: Date,

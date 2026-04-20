@@ -109,7 +109,7 @@ The central entity representing a makerspace member.
 | `liability` | Boolean | Whether the member has accepted the liability document |
 | `liabilityDate` | Date | Timestamp of the liability document version accepted |
 | `reminder` | Date | When the last reminder was sent |
-| `registered` | Boolean | Whether the member has created a user account |
+| `registered` | Boolean | Whether the member has been formally accepted by a board member or admin |
 | `storage` | Number | Assigned storage box number |
 | `storagequeue` | Boolean | Whether the member is in the storage queue |
 | `storagerequest` | String (max 30) | Location preference for storage (see [Storage](#5-storage)) |
@@ -246,7 +246,6 @@ Individual emails sent to specific members (welcome messages, confirmations, rem
 | `subject` | String (max 200) | Email subject |
 | `senddate` | Date | When the message was sent |
 | `messagetext` | String (max 10000) | Email body |
-| `sms` | String (max 140) | Optional SMS text |
 
 ---
 
@@ -264,7 +263,7 @@ Bulk email campaigns sent to groups of members.
 | `subject` | String (max 200) | Email subject |
 | `senddate` | Date | When the mail was sent |
 | `template` | String (max 10000) | Email body text |
-| `sms` | String (max 140) | Optional SMS text |
+| `formatted` | Boolean | Whether the email was sent as formatted HTML (optional) |
 
 **Note**: Unlike Messages, Mails are not linked to individual members. They store the full recipient list in the `to` array.
 
@@ -282,12 +281,32 @@ Reusable templates for member communications. Selected based on message type, me
 | `membertype` | String (max 15) | `normal`, `family`, or `youth` |
 | `subject` | String (max 100) | Email subject template |
 | `messagetext` | String (max 10000) | Email body template |
-| `sms` | String (max 140) | Optional SMS template |
 | `deprecated` | Boolean | Whether the template is retired |
+| `auto` | Boolean | Whether the template is sent automatically (optional, defaults to false/manual) |
 | `created` | Date | Creation timestamp |
 | `modified` | Date | Last modification timestamp |
 
-**Template selection**: Templates are matched by the combination of `type` + `membershiptype` + `membertype` to select the right template for each situation.
+**Template selection**: Templates are matched by the combination of `type` + `membershiptype` + `membertype` to select the right template for each situation. Templates marked as `auto` are intended for automatic sending (e.g., triggered by payment callbacks), while non-auto templates are sent manually by admins.
+
+---
+
+### Announcements (`announcements`)
+
+Bilingual board-to-member communications (newsletters, information). Created in the admin UI and sent as email via the mail system.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | String (max 20) | `newsletter` or `information` |
+| `subjectSv` | String (max 200) | Swedish subject line |
+| `subjectEn` | String (max 200) | English subject line (optional) |
+| `bodySv` | String (max 50000) | Swedish content (markdown) |
+| `bodyEn` | String (max 50000) | English content (markdown, optional) |
+| `status` | String (max 10) | `draft` or `sent` |
+| `createdAt` | Date | Creation timestamp |
+| `sentAt` | Date | When the announcement was sent (optional) |
+| `mailId` | String (max 20) | References `Mail._id` after sending (optional) |
+
+**Sending flow**: When an announcement is sent, it navigates to the SendMail view with pre-filled subject and body. After sending, the announcement is linked to the resulting Mail record via `mailId`.
 
 ---
 
