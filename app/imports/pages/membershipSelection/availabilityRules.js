@@ -1,3 +1,5 @@
+import { MEMBERSHIP_RENEWAL_WINDOW_DAYS } from "/imports/common/lib/timeConstants.js";
+
 /**
  * Calculate availability for each membership option based on member status.
  *
@@ -8,8 +10,8 @@
  */
 export function calculateOptionAvailability(options, memberStatus, isFamily) {
   const now = new Date();
-  const fourteenDaysFromNow = new Date(now);
-  fourteenDaysFromNow.setDate(fourteenDaysFromNow.getDate() + 14);
+  const renewalWindowEnd = new Date(now);
+  renewalWindowEnd.setDate(renewalWindowEnd.getDate() + MEMBERSHIP_RENEWAL_WINDOW_DAYS);
 
   const { type, memberEnd, labEnd, quarterly, family } = memberStatus || {};
 
@@ -18,9 +20,9 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
   const isExpiredMember = memberEnd && memberEnd < now;
   const isActiveMember = memberEnd && memberEnd > now;
   const isWithinMemberRenewalWindow =
-    isActiveMember && memberEnd <= fourteenDaysFromNow;
+    isActiveMember && memberEnd <= renewalWindowEnd;
   const isWithinLabRenewalWindow =
-    labEnd && labEnd > now && labEnd <= fourteenDaysFromNow;
+    labEnd && labEnd > now && labEnd <= renewalWindowEnd;
 
   // Check if labEnd equals memberEnd (Q4 scenario)
   const labEndEqualsMemberEnd =
@@ -60,7 +62,7 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
         return result;
       }
 
-      // If has quarterly lab, check if within 14-day window before labEnd
+      // If has quarterly lab, check if within renewal window before labEnd
       if (quarterly && labEnd && labEnd > now && !isWithinLabRenewalWindow) {
         result.disabled = true;
         result.disabledReason = "disabledTooEarlyToRenew";
@@ -78,7 +80,7 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
       return result;
     }
 
-    // Active members outside 14-day window cannot renew yet
+    // Active members outside the renewal window cannot renew yet
     if (isActiveMember && !isWithinMemberRenewalWindow) {
       result.disabled = true;
       result.disabledReason = "disabledTooEarlyToRenew";
@@ -98,8 +100,8 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
  */
 export function getInitialCheckboxState(memberStatus) {
   const now = new Date();
-  const fourteenDaysFromNow = new Date(now);
-  fourteenDaysFromNow.setDate(fourteenDaysFromNow.getDate() + 14);
+  const renewalWindowEnd = new Date(now);
+  renewalWindowEnd.setDate(renewalWindowEnd.getDate() + MEMBERSHIP_RENEWAL_WINDOW_DAYS);
 
   const { family, discounted, memberEnd, type } = memberStatus || {};
 
@@ -107,7 +109,7 @@ export function getInitialCheckboxState(memberStatus) {
   const isExpiredMember = memberEnd && memberEnd < now;
   const isActiveMember = memberEnd && memberEnd > now;
   const isWithinRenewalWindow =
-    isActiveMember && memberEnd <= fourteenDaysFromNow;
+    isActiveMember && memberEnd <= renewalWindowEnd;
 
   // Family checkbox can be changed for new/expired members or within renewal window
   const familyLocked =

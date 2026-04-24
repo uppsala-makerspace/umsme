@@ -1,5 +1,9 @@
 import { Members } from '/imports/common/collections/members.js';
 import { Memberships } from '/imports/common/collections/memberships.js';
+import {
+  MEMBERSHIP_RENEWAL_WINDOW_DAYS,
+  FIRST_TIME_MEMBER_GRACE_DAYS,
+} from '/imports/common/lib/timeConstants.js';
 
 /**
  * Detect start and end dates for the regular and lab memberships for a specific member.
@@ -121,13 +125,13 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
   const hasActiveLab = member.lab && member.lab > now;
   const isCurrentlyFamily = member.family === true;
 
-  // Check if within 14 days of memberend
-  const fourteenDaysBeforeMemberend = member.member ? new Date(member.member) : null;
-  if (fourteenDaysBeforeMemberend) {
-    fourteenDaysBeforeMemberend.setDate(fourteenDaysBeforeMemberend.getDate() - 14);
+  // Check if within the renewal window before memberend
+  const renewalWindowStart = member.member ? new Date(member.member) : null;
+  if (renewalWindowStart) {
+    renewalWindowStart.setDate(renewalWindowStart.getDate() - MEMBERSHIP_RENEWAL_WINDOW_DAYS);
   }
-  const isWithin14DaysOfMemberend = !hasActiveMembership ||
-    (fourteenDaysBeforeMemberend && now >= fourteenDaysBeforeMemberend);
+  const isWithinRenewalWindow = !hasActiveMembership ||
+    (renewalWindowStart && now >= renewalWindowStart);
 
   // Check if memberend > now + 2 months
   const twoMonthsFromNow = new Date(now);
@@ -144,8 +148,8 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
   const isSwitchingToFamily = !isCurrentlyFamily && isFamilyPayment;
   const isSwitchingFromFamily = isCurrentlyFamily && !isFamilyPayment;
 
-  // Grace period: 14 days for first-time members only (for certification)
-  const graceDays = isFirstTime ? 14 : 0;
+  // Grace period for first-time members only (for certification)
+  const graceDays = isFirstTime ? FIRST_TIME_MEMBER_GRACE_DAYS : 0;
 
   // === ERROR CHECKS ===
 
@@ -154,13 +158,13 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
     return { error: 'QUARTERLY_WITHOUT_BASE_MEMBERSHIP' };
   }
 
-  // S3: Regular -> Family more than 14 days before memberend
-  if (isSwitchingToFamily && hasActiveMembership && !isWithin14DaysOfMemberend) {
+  // S3: Regular -> Family outside the renewal window
+  if (isSwitchingToFamily && hasActiveMembership && !isWithinRenewalWindow) {
     return { error: 'FAMILY_UPGRADE_TOO_EARLY' };
   }
 
-  // S4: Family -> Regular more than 14 days before memberend
-  if (isSwitchingFromFamily && hasActiveMembership && !isWithin14DaysOfMemberend) {
+  // S4: Family -> Regular outside the renewal window
+  if (isSwitchingFromFamily && hasActiveMembership && !isWithinRenewalWindow) {
     return { error: 'FAMILY_DOWNGRADE_TOO_EARLY' };
   }
 
@@ -199,7 +203,6 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
     case 'memberBase':
     case 'memberDiscountedBase':
     case 'familyBase':
-      labend = undefined;
       // S2: If has active lab, labend unchanged (kept from initialization)
       // memberend extends from current or now + grace
       if (hasActiveMembership) {

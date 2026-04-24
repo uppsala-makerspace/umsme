@@ -120,7 +120,7 @@ export const NewMemberFamily = {
 
 // === ACTIVE MEMBER - TOO EARLY TO RENEW ===
 
-// Active member with >14 days remaining - all options disabled
+// Active member outside the renewal window - all options disabled
 const activeMemberTooEarlyStatus = {
   type: "member",
   memberEnd: daysFromNow(90),
@@ -139,7 +139,7 @@ export const ActiveMemberTooEarlyToRenew = {
 
 // === ACTIVE MEMBER - WITHIN RENEWAL WINDOW ===
 
-// Active member within 14 days of expiry - can renew
+// Active member within the renewal window of expiry - can renew
 const activeMemberRenewalWindowStatus = {
   type: "member",
   memberEnd: daysFromNow(10),

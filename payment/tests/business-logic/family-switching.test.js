@@ -4,12 +4,12 @@
  * Tests for S3-S4 family switching scenarios from MEMBERSHIP_RULES.md.
  *
  * S3: Regular -> Family
- *   - Allowed: Payment within 14 days of memberend
- *   - ERROR if > 14 days before memberend: FAMILY_UPGRADE_TOO_EARLY
+ *   - Allowed: Payment within the renewal window before memberend
+ *   - ERROR if earlier than the renewal window: FAMILY_UPGRADE_TOO_EARLY
  *
  * S4: Family -> Regular
- *   - Allowed: Payment within 14 days of memberend
- *   - ERROR if > 14 days before memberend: FAMILY_DOWNGRADE_TOO_EARLY
+ *   - Allowed: Payment within the renewal window before memberend
+ *   - ERROR if earlier than the renewal window: FAMILY_DOWNGRADE_TOO_EARLY
  */
 
 import assert from 'assert';
@@ -45,8 +45,8 @@ describe('Family Switching Tests', function () {
     await clearTestData();
   });
 
-  it('FAMILY-001 (S3 allowed): Regular->Family within 14 days of memberend succeeds', async function () {
-    // Regular member with membership ending in 10 days (within 14 day window)
+  it('FAMILY-001 (S3 allowed): Regular->Family within renewal window of memberend succeeds', async function () {
+    // Regular member with membership ending in 10 days (within renewal window)
     const memberEnd = addDays(new Date(), 10);
     const memberId = await createTestMember({ member: memberEnd, family: false });
 
@@ -56,8 +56,8 @@ describe('Family Switching Tests', function () {
     assert.strictEqual(membership.family, true, 'Should be family membership');
   });
 
-  it('FAMILY-002 (S3 error): Regular->Family > 14 days before memberend returns error', async function () {
-    // Regular member with membership ending in 6 months (way more than 14 days)
+  it('FAMILY-002 (S3 error): Regular->Family earlier than renewal window returns error', async function () {
+    // Regular member with membership ending in 6 months (well outside the renewal window)
     const memberEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd, family: false });
 
@@ -71,8 +71,8 @@ describe('Family Switching Tests', function () {
     assert.strictEqual(member.paymentError, 'FAMILY_UPGRADE_TOO_EARLY');
   });
 
-  it('FAMILY-003 (S4 allowed): Family->Regular within 14 days of memberend succeeds', async function () {
-    // Family member with membership ending in 10 days (within 14 day window)
+  it('FAMILY-003 (S4 allowed): Family->Regular within renewal window of memberend succeeds', async function () {
+    // Family member with membership ending in 10 days (within renewal window)
     const memberEnd = addDays(new Date(), 10);
     const memberId = await createTestMember({ member: memberEnd, family: true });
 
@@ -82,8 +82,8 @@ describe('Family Switching Tests', function () {
     assert.strictEqual(membership.family, false, 'Should not be family membership');
   });
 
-  it('FAMILY-004 (S4 error): Family->Regular > 14 days before memberend returns error', async function () {
-    // Family member with membership ending in 6 months (way more than 14 days)
+  it('FAMILY-004 (S4 error): Family->Regular earlier than renewal window returns error', async function () {
+    // Family member with membership ending in 6 months (well outside the renewal window)
     const memberEnd = addMonths(new Date(), 6);
     const memberId = await createTestMember({ member: memberEnd, family: true });
 

@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import MembershipStatus from "/imports/components/MembershipStatus";
+import { MEMBERSHIP_RENEWAL_WINDOW_DAYS } from "/imports/common/lib/timeConstants.js";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
@@ -89,12 +90,13 @@ export default function MembershipSelection({
     .filter((opt) => !opt.disabled)
     .reduce((max, opt) => (opt.amount > (max?.amount || 0) ? opt : max), null);
 
-  // Show "Renew membership" if membership is expired or expiring within 14 days
+  // Show "Renew membership" if membership is expired or within the renewal window
   const isRenewal = (() => {
     if (!memberStatus?.memberEnd) return false;
     const now = new Date();
-    const fourteenDaysFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
-    return memberStatus.memberEnd < fourteenDaysFromNow;
+    const renewalWindowEnd = new Date(now);
+    renewalWindowEnd.setDate(renewalWindowEnd.getDate() + MEMBERSHIP_RENEWAL_WINDOW_DAYS);
+    return memberStatus.memberEnd < renewalWindowEnd;
   })();
 
   if (loading) {
