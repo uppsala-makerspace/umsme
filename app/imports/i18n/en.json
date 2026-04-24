@@ -125,6 +125,7 @@
   "filter": "Filter",
   "myProfile": "My Profile",
   "upcomingEvents": "Upcoming",
+  "addToCalendar": "Add to calendar",
   "pastEvents": "Past",
   "noUpcomingEvents": "No upcoming events",
   "noPastEvents": "No past events",
