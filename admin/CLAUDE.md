@@ -72,6 +72,17 @@ The `imports/common` symlink points to `../../common/` containing:
 - Templates use `Template.dynamic` for dynamic rendering
 - Forms generated from schemas using AutoForm
 
+## Dev gotchas
+
+**AutoForm hook accumulation during hot-code-push (dev only):**
+`AutoForm.hooks({ formId: {...} })` at module scope registers ADDITIVELY — each
+call appends to the hook list, it does not replace. When Meteor's hot-code-push
+re-evaluates a client module after a file save, the form gets an additional set
+of hooks. After N reloads, a single submit fires N `onSubmit` handlers (N mails
+sent, N Messages inserted, etc.). Does not affect production, where the bundle
+loads once. Workaround: refresh the browser before testing form submissions after
+file changes.
+
 **External Integrations:**
 - Swedbank bank API via separate proxy service (umsme-bank)
 - Door lock system API (lock credentials in settings)
