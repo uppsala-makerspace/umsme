@@ -11,6 +11,7 @@ import { Messages } from "/imports/common/collections/messages";
 import { membershipFromPayment } from "/imports/common/lib/utils";
 import { findBestTemplate, messageData } from "/imports/common/lib/message";
 import { isEmailAllowed } from "/imports/common/server/emailGuard";
+import { pushMessage } from "/imports/common/server/push";
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -178,7 +179,7 @@ async function sendConfirmationEmail(member, membershipId, membershipType) {
     await Email.sendAsync({ to: data.to, from, subject: data.subject, text: data.messagetext });
     console.log(`[Email] Confirmation sent to ${data.to}`);
 
-    await Messages.insertAsync({
+    const messageId = await Messages.insertAsync({
       template: tpl._id,
       member: member._id,
       membership: membershipId,
@@ -188,6 +189,8 @@ async function sendConfirmationEmail(member, membershipId, membershipType) {
       senddate: new Date(),
       messagetext: data.messagetext,
     });
+
+    await pushMessage(messageId);
   } catch (err) {
     console.error('[Email] Failed to send confirmation:', err);
   }

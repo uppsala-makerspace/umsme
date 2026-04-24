@@ -3,7 +3,7 @@ import { Roles } from "meteor/roles";
 import { PushSubs } from "/imports/common/collections/pushSubs";
 import { Members } from "/imports/common/collections/members";
 import { findMemberForUser } from "./utils";
-import { applyDefaults } from "/imports/lib/notificationCategories";
+import { applyDefaults, NotificationCategory } from "/imports/lib/notificationCategories";
 import { initPush, sendPushToSubscriptions } from "/imports/common/server/push";
 
 Meteor.startup(() => {
@@ -85,7 +85,7 @@ Meteor.methods({
         sv: "Detta är en testavisering från UMS.",
         en: "This is a test notification from UMS.",
       },
-      category: "testNotification",
+      category: NotificationCategory.testNotification,
       timestamp: Date.now(),
     };
 

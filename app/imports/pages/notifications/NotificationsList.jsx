@@ -21,6 +21,13 @@ const resolve = (value, lang) => {
   return value || "";
 };
 
+const readMoreHref = (n) => {
+  if (!n.entityId) return null;
+  if (n.category === "privateMessages") return `/messages/message/${n.entityId}`;
+  if (n.category === "announcements") return `/messages/announcement/${n.entityId}`;
+  return null;
+};
+
 /**
  * Pure notification list component.
  * @param {Object} props
@@ -71,17 +78,25 @@ const NotificationsList = ({
         <p className="text-center text-gray-500 mt-8">{t("noNotifications")}</p>
       ) : (
         <div className="space-y-3">
-          {notifications.map((n) => (
-            <div key={n.id} className={`rounded-lg p-4 shadow-sm ${cardClasses(n.id)}`}>
-              <div className="flex justify-between items-start">
-                <h3 className="font-medium text-sm">{resolve(n.title, lang)}</h3>
-                <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                  {timeAgo(n.timestamp, t)}
-                </span>
+          {notifications.map((n) => {
+            const href = readMoreHref(n);
+            return (
+              <div key={n.id} className={`rounded-lg p-4 shadow-sm ${cardClasses(n.id)}`}>
+                <div className="flex justify-between items-start">
+                  <h3 className="font-medium text-sm">{resolve(n.title, lang)}</h3>
+                  <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                    {timeAgo(n.timestamp, t)}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">{resolve(n.body, lang)}</p>
+                {href && (
+                  <Link to={href} className="text-sm text-brand-green mt-2 inline-block">
+                    {t("readMore")} &rarr;
+                  </Link>
+                )}
               </div>
-              <p className="text-sm text-gray-600 mt-1">{resolve(n.body, lang)}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </MainContent>

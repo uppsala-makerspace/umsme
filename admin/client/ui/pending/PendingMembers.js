@@ -55,7 +55,7 @@ Template.PendingMembers.events({
     try {
       const data = await messageData(id, tpl._id);
       await Meteor.callAsync('mail', data.to, data.subject, data.messagetext);
-      Messages.insert({
+      const messageId = Messages.insert({
         template: tpl._id,
         member: id,
 //      membership: latestMembership?._id,
@@ -65,6 +65,8 @@ Template.PendingMembers.events({
         senddate: new Date(),
         messagetext: data.messagetext,
       });
+      Meteor.callAsync('messages.sendPush', messageId)
+        .catch((err) => console.error('Failed to send welcome push:', err));
     } catch (err) {
       console.error('Failed to send welcome message:', err);
     }

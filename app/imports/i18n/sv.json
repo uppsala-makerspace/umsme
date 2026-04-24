@@ -322,6 +322,7 @@
   "notifMembershipExpiry": "Medlemskapsaviseringar",
   "notifPrivateMessages": "Privata meddelanden",
   "notifAnnouncements": "Utskick",
+  "readMore": "Läs mer",
   "notifTestNotification": "Testaviseringar",
   "pushPermissionDefault": "Push-aviseringar är inte aktiverade.",
   "pushPermissionAllow": "Tillåt aviseringar",

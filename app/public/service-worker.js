@@ -94,6 +94,7 @@ self.addEventListener("push", (event) => {
       const db = await openDB();
       await dbPut(db, ITEMS_STORE, {
         id: timestamp,
+        entityId: data.id || null,
         title: titleObj,
         body: bodyObj,
         category: data.category || "general",

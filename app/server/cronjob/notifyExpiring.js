@@ -7,6 +7,7 @@ import { memberStatus } from "/imports/common/lib/utils";
 import { sendPushToSubscriptions } from "/server/methods/push";
 import { loadJson } from "/server/methods/utils";
 import { daysBetween } from "/imports/common/lib/dateUtils";
+import { NotificationCategory } from "/imports/lib/notificationCategories";
 
 const notifyExpiringMemberships = async () => {
   console.log("Checking for expiring memberships");
@@ -62,7 +63,7 @@ const notifyExpiringMemberships = async () => {
       const payload = {
         title: config.title,
         body: config.body,
-        category: "membershipExpiry",
+        category: NotificationCategory.membershipExpiry,
         timestamp: Date.now(),
       };
 

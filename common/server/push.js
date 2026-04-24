@@ -1,5 +1,16 @@
 import webpush from "web-push";
 import { PushSubs } from "/imports/common/collections/pushSubs";
+import { Members } from "/imports/common/collections/members";
+import { Messages } from "/imports/common/collections/messages";
+import { Announcements } from "/imports/common/collections/announcements";
+import { NotificationCategory } from "/imports/common/lib/notificationCategories";
+
+const PUSH_BODY_MAX = 140;
+
+const truncate = (text, max = PUSH_BODY_MAX) => {
+  if (!text || text.length <= max) return text;
+  return text.slice(0, max - 1).trimEnd() + "…";
+};
 
 /**
  * Initialize web-push with VAPID keys from settings.
@@ -45,4 +56,79 @@ export const sendPushToSubscriptions = async (subs, payload) => {
       }
     }
   }
+};
+
+/**
+ * Build a bilingual payload and send push to the member if they have:
+ *  - opted in (notificationPrefs[category] !== false)
+ *  - a verified email
+ *  - at least one push subscription
+ *
+ * English falls back to Swedish when not provided.
+ * Fails silently — errors are logged but not thrown.
+ */
+const sendCategoryPush = async (member, category, id, subjectSv, bodySv, subjectEn, bodyEn) => {
+  try {
+    if (!member) return;
+    if (member.notificationPrefs?.[category] === false) return;
+    if (!member.email) return;
+
+    const user = await Meteor.users.findOneAsync({ "emails.address": member.email });
+    if (!user) return;
+
+    const subs = await PushSubs.find({ userId: user._id }).fetchAsync();
+    if (subs.length === 0) return;
+
+    const payload = {
+      title: { sv: subjectSv, en: subjectEn || subjectSv },
+      body: { sv: truncate(bodySv), en: truncate(bodyEn) || truncate(bodySv) },
+      category,
+      timestamp: Date.now(),
+    };
+    if (id) payload.id = id;
+
+    await sendPushToSubscriptions(subs, payload);
+  } catch (err) {
+    console.error(`Failed to send ${category} push:`, err);
+  }
+};
+
+/**
+ * Push a private-message notification.
+ * Looks up the Messages document and recipient member by id.
+ *
+ * @param {string} messageId - The Messages document _id
+ */
+export const pushMessage = async (messageId) => {
+  const message = await Messages.findOneAsync(messageId);
+  if (!message?.member) return;
+  const member = await Members.findOneAsync(message.member);
+  return sendCategoryPush(
+    member,
+    NotificationCategory.privateMessages,
+    messageId,
+    message.subject,
+    message.messagetext
+  );
+};
+
+/**
+ * Push an announcement notification to a specific member.
+ * Looks up the announcement by id.
+ *
+ * @param {Object} member - The recipient member object
+ * @param {string} announcementId - The Announcements document _id
+ */
+export const pushAnnouncement = async (member, announcementId) => {
+  const announcement = await Announcements.findOneAsync(announcementId);
+  if (!announcement) return;
+  return sendCategoryPush(
+    member,
+    NotificationCategory.announcements,
+    announcementId,
+    announcement.subjectSv,
+    announcement.bodySv,
+    announcement.subjectEn,
+    announcement.bodyEn
+  );
 };

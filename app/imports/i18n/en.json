@@ -323,6 +323,7 @@
   "notifMembershipExpiry": "Membership expiry reminders",
   "notifPrivateMessages": "Private messages",
   "notifAnnouncements": "Announcements",
+  "readMore": "Read more",
   "notifTestNotification": "Test notifications",
   "pushPermissionDefault": "Push notifications are not enabled.",
   "pushPermissionAllow": "Allow notifications",

@@ -59,11 +59,13 @@ AutoForm.hooks({
       // Send message as mail.
       const memberId = FlowRouter.getQueryParam('member');
       Meteor.callAsync('mail', doc.to, doc.subject, doc.messagetext).then(() => {
-        Messages.insert(doc);
+        const messageId = Messages.insert(doc);
         this.done();
         if (doc.type === 'reminder') {
           Members.update(memberId, {$set: {reminder: new Date()}});
         }
+        Meteor.callAsync('messages.sendPush', messageId)
+          .catch((err) => console.error('Failed to send message push:', err));
         FlowRouter.go(`/member/${memberId}`);
       }).catch((err) => {
         alert(`Could not send email: ${err}`);
