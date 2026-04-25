@@ -26,20 +26,12 @@ Template.MessageView.helpers({
 });
 
 Template.MessageView.events({
-  'click .gobacktoMember': function (event) {
+  'click .deleteMessage': function (event) {
+    if (!confirm('Delete this message? This cannot be undone.')) return;
     const id = FlowRouter.getParam('_id');
     const message = Messages.findOne(id);
-    FlowRouter.go(`/member/${message.mid}`);
-  }
-});
-
-AutoForm.hooks({
-  messageViewForm: {
-    endSubmit: function (doc) {
-      debugger;
-      const id = FlowRouter.getParam('_id');
-      const message = Messages.findOne(id);
-      FlowRouter.go(`/member/${message.mid}`);
-    }
-  }
+    if (!message) return;
+    Messages.remove(id);
+    FlowRouter.go(`/member/${message.member}`);
+  },
 });

@@ -16,8 +16,10 @@ const RECENT_REMINDER_DAYS = 30;
 // to suppress an upcoming yearly-membership reminder for the same member.
 const SAME_DAY_GUARD_DAYS = 1;
 
-// Days before memberend / labend that triggers the reminder.
-const REMINDER_LEAD_DAYS = 14;
+// Maximum days remaining on memberend / labend that puts a member in the
+// cron's candidate set. Anyone with <= this many days left (and not already
+// expired) is eligible; dedup ensures only one reminder per renewal cycle.
+const REMINDER_HORIZON_DAYS = 14;
 
 const reminderHour = () => Meteor.settings?.reminderCron?.hour ?? 9;
 const reminderMinute = () => Meteor.settings?.reminderCron?.minute ?? 0;
@@ -28,26 +30,30 @@ const fromAddress = () => {
   return f || 'no-reply@uppsalamakerspace.se';
 };
 
+const iso = (d) => (d instanceof Date ? d.toISOString() : String(d));
+
 export async function runReminderJob() {
+  console.log(`[Reminder cron] Job invoked at ${new Date().toISOString()}; deliverMails=${Meteor.settings.deliverMails}`);
   if (!Meteor.settings.deliverMails) {
     return 'Reminder cron skipped: deliverMails is false.';
   }
 
   const now = new Date();
-  const windowStart = new Date(now);
-  windowStart.setDate(windowStart.getDate() + REMINDER_LEAD_DAYS);
-  const windowEnd = new Date(now);
-  windowEnd.setDate(windowEnd.getDate() + REMINDER_LEAD_DAYS + 1);
+  const reminderHorizon = new Date(now);
+  reminderHorizon.setDate(reminderHorizon.getDate() + REMINDER_HORIZON_DAYS);
   const recentCutoff = new Date(now);
   recentCutoff.setDate(recentCutoff.getDate() - RECENT_REMINDER_DAYS);
   const sameDayCutoff = new Date(now);
   sameDayCutoff.setDate(sameDayCutoff.getDate() - SAME_DAY_GUARD_DAYS);
 
+  console.log(`[Reminder cron] Cron-trigger horizon: member|lab in (${iso(now)}, ${iso(reminderHorizon)}]`);
+  console.log(`[Reminder cron] Cutoffs: per-template=${iso(recentCutoff)} (${RECENT_REMINDER_DAYS}d), same-day=${iso(sameDayCutoff)} (${SAME_DAY_GUARD_DAYS}d)`);
+
   const candidates = await Members.find({
     infamily: { $exists: false },
     $or: [
-      { member: { $gte: windowStart, $lt: windowEnd } },
-      { lab:    { $gte: windowStart, $lt: windowEnd } },
+      { member: { $gt: now, $lte: reminderHorizon } },
+      { lab:    { $gt: now, $lte: reminderHorizon } },
     ],
   }).fetchAsync();
 
@@ -60,13 +66,15 @@ export async function runReminderJob() {
       skippedRecent++;
       continue;
     }
-    const status = await sendReminder(mb, windowStart, windowEnd, recentCutoff);
+    const status = await sendReminder(mb, now, reminderHorizon, recentCutoff);
     if (status === 'sent') sent++;
     else if (status === 'skipped') skippedRecent++;
     else failed++;
   }
 
-  return `Reminders: ${sent} sent, ${skippedRecent} skipped (recent), ${failed} failed; ${candidates.length} in 14-day window.`;
+  const summary = `Reminders: ${sent} sent, ${skippedRecent} skipped (recent), ${failed} failed; ${candidates.length} in 14-day horizon.`;
+  console.log(`[Reminder cron] ${summary}`);
+  return summary;
 }
 
 if (Meteor.isServer) {
@@ -81,10 +89,10 @@ if (Meteor.isServer) {
 
 // Returns one of: 'sent', 'skipped' (a reminder using this same template was sent recently),
 // or 'failed' (template missing, no email, blocked by whitelist, or exception).
-async function sendReminder(mb, windowStart, windowEnd, recentCutoff) {
+async function sendReminder(mb, now, reminderHorizon, recentCutoff) {
   try {
-    const memberDue = mb.member && mb.member >= windowStart && mb.member < windowEnd;
-    const labDue    = mb.lab    && mb.lab    >= windowStart && mb.lab    < windowEnd;
+    const memberDue = mb.member && mb.member > now && mb.member <= reminderHorizon;
+    const labDue    = mb.lab    && mb.lab    > now && mb.lab    <= reminderHorizon;
     const membershiptype = (memberDue && labDue) ? 'labandmember' : (memberDue ? 'member' : 'lab');
     const membertype = mb.family === true ? 'family' : (mb.youth === true ? 'youth' : 'normal');
 
