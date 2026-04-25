@@ -35,16 +35,18 @@ const MessageDetail = ({ loading, kind, item }) => {
     return <MainContent><Loader /></MainContent>;
   }
 
+  const isMessage = kind === "message";
+  const backTo = `/messages?tab=${isMessage ? "messages" : "announcements"}`;
+
   if (!item) {
     return (
       <MainContent>
-        <Link to="/messages" className="text-sm text-gray-600 no-underline">&larr; {t("back")}</Link>
+        <Link to={backTo} className="text-sm text-gray-600 no-underline">&larr; {t("back")}</Link>
         <p className="text-center text-gray-600 mt-5">{t("noMessages")}</p>
       </MainContent>
     );
   }
 
-  const isMessage = kind === "message";
   const lang = i18n.language === "en" ? "en" : "sv";
   const subject = isMessage
     ? item.subject
@@ -62,7 +64,7 @@ const MessageDetail = ({ loading, kind, item }) => {
 
   return (
     <MainContent>
-      <Link to="/messages" className="text-sm text-gray-600 no-underline">&larr; {t("back")}</Link>
+      <Link to={backTo} className="text-sm text-gray-600 no-underline">&larr; {t("back")}</Link>
       <h1 className="mt-3 mb-2 text-2xl font-bold">{subject}</h1>
       <div className="flex items-center gap-2 mb-4">
         <span className={`text-xs px-2 py-0.5 rounded ${tagClass}`}>{tagLabel}</span>

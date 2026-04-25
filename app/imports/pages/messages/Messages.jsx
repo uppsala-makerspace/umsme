@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Tabs from "../../components/Tabs/Tabs";
@@ -26,7 +26,10 @@ const getTagClass = (item) => {
 
 const Messages = ({ loading, items, lastSeen }) => {
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState("announcements");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") === "messages" ? "messages" : "announcements"
+  );
 
   const announcementCount = useMemo(
     () => items.filter((i) => i.kind === "announcement").length,
