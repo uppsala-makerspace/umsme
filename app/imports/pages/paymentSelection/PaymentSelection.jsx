@@ -30,6 +30,7 @@ export default function PaymentSelection({
   isFamilyMember = false,
   disabledMessage,
   statusChanged = false,
+  otherPaymentOptionsUrl,
   onPay,
   onCancel,
 }) {
@@ -181,6 +182,21 @@ export default function PaymentSelection({
       <Button variant="secondary" fullWidth onClick={onCancel}>
         {t("cancel")}
       </Button>
+
+      {otherPaymentOptionsUrl && (
+        <p className="text-sm text-gray-600 text-center">
+          {t("otherPaymentOptionsText")}{" "}
+          <a
+            href={otherPaymentOptionsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-green underline"
+          >
+            {t("otherPaymentOptionsLink")}
+          </a>
+          .
+        </p>
+      )}
 
       {/* Terms of Purchase Dialog */}
       {showTermsDialog && (

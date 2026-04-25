@@ -77,6 +77,8 @@ const baseActions = {
   onCancel: fn(),
 };
 
+const otherPaymentOptionsUrl = "https://www.uppsalamakerspace.se/bli-medlem/";
+
 // Default state with "on this device" preselected (new member)
 export const Default = {
   args: {
@@ -84,6 +86,7 @@ export const Default = {
     membershipDates: newMemberDates,
     termsContent: sampleTermsContent,
     isLoading: false,
+    otherPaymentOptionsUrl,
     ...baseActions,
   },
 };
@@ -95,6 +98,7 @@ export const Renewal = {
     membershipDates: renewalDates,
     termsContent: sampleTermsContent,
     isLoading: false,
+    otherPaymentOptionsUrl,
     ...baseActions,
   },
 };
@@ -106,6 +110,7 @@ export const LabMembership = {
     membershipDates: labMembershipDates,
     termsContent: sampleTermsContent,
     isLoading: false,
+    otherPaymentOptionsUrl,
     ...baseActions,
   },
 };
@@ -117,6 +122,7 @@ export const LabRenewal = {
     membershipDates: labRenewalDates,
     termsContent: sampleTermsContent,
     isLoading: false,
+    otherPaymentOptionsUrl,
     ...baseActions,
   },
 };
@@ -127,6 +133,7 @@ export const NoDates = {
     paymentOption,
     membershipDates: null,
     isLoading: false,
+    otherPaymentOptionsUrl,
     ...baseActions,
   },
 };
@@ -138,6 +145,7 @@ export const Loading = {
     membershipDates: newMemberDates,
     termsContent: sampleTermsContent,
     isLoading: true,
+    otherPaymentOptionsUrl,
     ...baseActions,
   },
 };
@@ -149,6 +157,7 @@ export const WithoutTerms = {
     membershipDates: newMemberDates,
     termsContent: null,
     isLoading: false,
+    otherPaymentOptionsUrl,
     ...baseActions,
   },
 };
@@ -161,6 +170,7 @@ export const FamilyMemberBlocked = {
     termsContent: sampleTermsContent,
     isLoading: false,
     isFamilyMember: true,
+    otherPaymentOptionsUrl,
     ...baseActions,
   },
 };

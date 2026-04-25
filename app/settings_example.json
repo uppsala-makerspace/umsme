@@ -8,6 +8,7 @@
         "en": "Swish payments are temporarily disabled."
       }
     },
+    "otherPaymentOptionsUrl": "https://www.uppsalamakerspace.se/bli-medlem/",
     "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc",
     "googleCalendar": {
       "apiKey": "placeholder-for-google-calendar-api-key",

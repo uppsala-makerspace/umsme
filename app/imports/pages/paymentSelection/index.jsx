@@ -139,6 +139,10 @@ export default function PaymentSelectionPage() {
     return <Navigate to="/login" />;
   }
 
+  const otherPaymentOptionsUrl =
+    Meteor.settings?.public?.otherPaymentOptionsUrl
+    || "https://www.uppsalamakerspace.se/bli-medlem/";
+
   return (
     <Layout>
       <PaymentSelection
@@ -151,6 +155,7 @@ export default function PaymentSelectionPage() {
         isFamilyMember={!!member?.infamily}
         disabledMessage={disabledMessage}
         statusChanged={statusChanged}
+        otherPaymentOptionsUrl={otherPaymentOptionsUrl}
         onPay={handlePay}
         onCancel={handleCancel}
       />
