@@ -15,26 +15,58 @@ const niceDate = (date) => {
 
 /**
  * Find the best matching non-deprecated message template.
- * Priority: 1) exact match on membertype + membershiptype,
- *           2) match on membershiptype only,
- *           3) any template matching type and auto flag.
+ *
+ * The auto flag is asymmetric:
+ *   - `auto: false` (or omitted) is the manual-send path. Templates flagged
+ *     `auto: true` are reserved for automation and must NEVER surface here,
+ *     so we hard-filter them out before scoring.
+ *   - `auto: true` is the automation path. Auto templates are preferred but
+ *     a non-auto template is an acceptable fallback.
+ *
+ * Among the remaining candidates, specificity wins first and auto-flag
+ * agreement breaks ties:
+ *
+ *   1. membertype + membershiptype match + auto matches
+ *   2. membertype + membershiptype match + auto reversed (auto=true callers only)
+ *   3. membershiptype matches              + auto matches
+ *   4. membershiptype matches              + auto reversed (auto=true callers only)
+ *   5. any                                 + auto matches
+ *   6. any                                 + auto reversed (auto=true callers only)
  *
  * @param {Object} params
- * @param {boolean} params.auto - Whether to match auto templates
+ * @param {boolean} [params.auto=false] - Preferred value of the template's auto flag
  * @param {string} params.type - Message type (welcome, confirmation, reminder, status)
  * @param {string} params.membershiptype - Membership type (member, lab, labandmember)
  * @param {string} params.membertype - Member type (normal, family, youth)
- * @returns {Object|null} The best matching template, or null
+ * @returns {Object|null} The best matching template, or null if none exist
  */
 export const findBestTemplate = async (params) => {
-  const { auto, type, membershiptype, membertype } = params;
-  const base = { type, deprecated: false };
-  if (auto !== undefined) base.auto = auto;
+  const { auto = false, type, membershiptype, membertype } = params;
 
-  return await MessageTemplates.findOneAsync({ ...base, membertype, membershiptype })
-    || await MessageTemplates.findOneAsync({ ...base, membershiptype })
-    || await MessageTemplates.findOneAsync(base)
-    || null;
+  let candidates = await MessageTemplates.find({ type, deprecated: false }).fetchAsync();
+  if (!auto) {
+    // Manual path: hide automation-only templates from the manual flow entirely.
+    candidates = candidates.filter((tpl) => !tpl.auto);
+  }
+  if (candidates.length === 0) return null;
+
+  const score = (tpl) => {
+    const fullMatch = tpl.membertype === membertype && tpl.membershiptype === membershiptype;
+    const membershipMatch = tpl.membershiptype === membershiptype;
+    const autoMatch = !!tpl.auto === auto;
+
+    if (fullMatch && autoMatch) return 6;
+    if (fullMatch) return 5;
+    if (membershipMatch && autoMatch) return 4;
+    if (membershipMatch) return 3;
+    if (autoMatch) return 2;
+    return 1;
+  };
+
+  return candidates.reduce(
+    (best, tpl) => (score(tpl) > score(best) ? tpl : best),
+    candidates[0]
+  );
 };
 
 export const messageData = async (memberId, templateId, membershipId) => {
