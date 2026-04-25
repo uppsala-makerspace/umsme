@@ -1,4 +1,3 @@
-import "./cronjob/notifyExpiring";
 import { Meteor } from "meteor/meteor";
 import "./methods";
 import "./accounts";

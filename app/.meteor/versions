@@ -14,7 +14,6 @@ binary-heap@1.0.12
 boilerplate-generator@2.0.2
 caching-compiler@2.0.1
 callback-hook@1.6.1
-chatra:synced-cron@1.0.2
 check@1.4.4
 core-runtime@1.0.0
 ddp@1.4.2

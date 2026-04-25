@@ -4,29 +4,26 @@ import { SyncedCron } from "meteor/chatra:synced-cron";
 import { Members } from "/imports/common/collections/members";
 import { PushSubs } from "/imports/common/collections/pushSubs";
 import { memberStatus } from "/imports/common/lib/utils";
-import { sendPushToSubscriptions } from "/server/methods/push";
-import { loadJson } from "/server/methods/utils";
 import { daysBetween } from "/imports/common/lib/dateUtils";
-import { NotificationCategory } from "/imports/lib/notificationCategories";
+import { NotificationCategory } from "/imports/common/lib/notificationCategories";
+import { sendPushToSubscriptions } from "/imports/common/server/push";
+import { loadJson } from "/imports/common/server/configLoader";
 
 const notifyExpiringMemberships = async () => {
   console.log("Checking for expiring memberships");
   const today = new Date();
 
-
-  const notificationTypes = await loadJson("notificationsPath");
+  const notificationTypes = await loadJson("notificationsPath", "notifications.json");
 
   let members = await Members.find({
     "notificationPrefs.membershipReminders": { $ne: false },
   }).fetchAsync();
-  members = members.filter(m => m.email);
+  members = members.filter((m) => m.email);
 
   for (const member of members) {
-    // Find the user linked to this member's email
     const user = await Accounts.findUserByEmail(member.email);
     if (!user) continue;
 
-    // Get paying member for family memberships
     const paying = member.infamily
       ? await Members.findOneAsync(member.infamily)
       : member;
@@ -49,7 +46,6 @@ const notifyExpiringMemberships = async () => {
       if (!isLab && config.lab) continue;
       if (daysBetween(today, endDate) !== config.remaining) continue;
 
-      // Check for duplicate
       const last = member.lastExpiryNotification;
       if (last && last.type === type && daysBetween(new Date(last.date), today) === 0) {
         continue;
@@ -73,21 +69,21 @@ const notifyExpiringMemberships = async () => {
         $set: { lastExpiryNotification: { date: today, type } },
       });
 
-      break; // Only send one type per member per run
+      break;
     }
   }
 };
 
-SyncedCron.add({
-  name: "Notify expiring memberships",
-  schedule(parser) {
-    const time = Meteor.settings?.private?.notifyExpiringTime || "at 09:00 am";
-    return parser.text(time);
-  },
-  async job() {
-    console.log("Running expiring membership notification cron job");
-    await notifyExpiringMemberships();
-  },
-});
-
-SyncedCron.start();
+if (Meteor.isServer) {
+  SyncedCron.add({
+    name: "Notify expiring memberships",
+    schedule(parser) {
+      const time = Meteor.settings?.private?.notifyExpiringTime || "at 09:00 am";
+      return parser.text(time);
+    },
+    async job() {
+      console.log("Running expiring membership notification cron job");
+      await notifyExpiringMemberships();
+    },
+  });
+}

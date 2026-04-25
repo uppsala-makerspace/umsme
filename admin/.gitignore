@@ -4,5 +4,4 @@ node_modules/
 backup/*
 settings.json
 start.sh
-private
 .DS_Store

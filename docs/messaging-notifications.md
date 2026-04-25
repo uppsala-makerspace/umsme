@@ -193,7 +193,7 @@ Runs daily. The time is configured via `Meteor.settings.private.notifyExpiringTi
 
 ### Notification Types
 
-Defined in `app/private/notifications.json`. Each entry specifies when and to whom the notification is sent:
+Defined in `admin/private/notifications.json`. Each entry specifies when and to whom the notification is sent:
 
 | Key | `remaining` | `lab` | `family` | Description |
 |-----|-------------|-------|----------|-------------|
@@ -213,7 +213,7 @@ Family notification bodies tell the member to ask the paying family member to re
 
 ### Processing Logic
 
-For each member with `notificationPrefs.membershipExpiry` not explicitly set to false:
+For each member with `notificationPrefs.membershipReminders` not explicitly set to false:
 
 1. Look up the Meteor user account linked to the member's email.
 2. Determine the paying member: if the member has `infamily` set, use that member's dates; otherwise use their own.
@@ -230,9 +230,9 @@ For each member with `notificationPrefs.membershipExpiry` not explicitly set to 
 
 ### Opt-out
 
-Members can opt out by setting `notificationPrefs.membershipExpiry` to `false` via the `updateNotificationPrefs` method. The cron job's query explicitly filters out members where this is `false`. The default is opt-in (the preference defaults to `true` when not set).
+Members can opt out by setting `notificationPrefs.membershipReminders` to `false` via the `updateNotificationPrefs` method. The cron job's query explicitly filters out members where this is `false`. The default is opt-in (the preference defaults to `true` when not set).
 
-**Source:** `app/server/cronjob/notifyExpiring.js`, `app/private/notifications.json`
+**Source:** `admin/server/cronjob/notifyExpiring.js`, `admin/private/notifications.json`
 
 ---
 

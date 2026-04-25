@@ -263,12 +263,8 @@ All apps use `chatra:synced-cron` for scheduled tasks. SyncedCron uses a shared 
 |----------------------------------|--------------------|----------------------------------------------|----------------------------------------------------------------|
 | Sync unlocks and send a mail     | Daily at 03:00     | `admin/server/cronjob/syncAndMailUnlocks.js`  | Syncs door unlock history from Danalock, emails daily log to building management and admin |
 | Cleanup pending attestations | Every 20 minutes | `admin/server/cronjob/cleanupPendingAttestations.js` | See [certificates.md](certificates.md#8-auto-cleanup-of-pending-attestations) |
-
-### App Cron Jobs
-
-| Job                              | Schedule                  | File                                        | Purpose                                                     |
-|----------------------------------|---------------------------|---------------------------------------------|-------------------------------------------------------------|
-| Notify expiring memberships      | Daily at 09:00 (configurable) | `app/server/cronjob/notifyExpiring.js`   | Sends push notifications to members whose membership or lab access is about to expire. Respects per-member notification preferences and family membership structure. |
+| Send membership reminder mails | Daily at 09:00 (configurable) | `admin/server/cronjob/sendReminders.js` | Mirrors the manual "Send reminder" button: looks up a non-deprecated reminder template, sends mail, inserts a Messages row, and pushes. Per-template Messages-row dedup prevents double sends. |
+| Notify expiring memberships    | Daily at 09:00 (configurable) | `admin/server/cronjob/notifyExpiring.js` | Sends push notifications to members whose membership or lab access is about to expire. Respects per-member notification preferences and family membership structure. |
 
 ### Payment Cron Jobs
 

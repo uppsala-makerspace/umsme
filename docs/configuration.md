@@ -28,6 +28,8 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `syncNrOfTransactions`| Number of bank transactions to sync          |
 | `public.checkPath`   | Base URL for member QR check                 |
 | `public.vapidPublicKey` | VAPID key for push notifications          |
+| `private.notificationsPath` | Path to notification types JSON (default: bundled `private/notifications.json`) |
+| `private.notifyExpiringTime` | Cron time for expiry notifications (e.g. `"at 09:00 am"`) |
 | `swishCallback`      | Swish callback URL                           |
 | `serviceConfigurations` | OAuth credentials (Google, Facebook)      |
 
@@ -44,8 +46,6 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `public.oauth`                    | Enabled OAuth providers                    |
 | `private.vapidPrivateKey`         | VAPID private key for push                 |
 | `private.paymentOptionsPath`      | Path to payment options JSON               |
-| `private.notificationsPath`       | Path to notification types JSON            |
-| `private.notifyExpiringTime`      | Cron time for expiry notifications (e.g. `"at 09:00 am"`) |
 | `private.mailUrl`                 | SMTP connection URL                        |
 | `private.homeAssistant`           | Home Assistant URL, token, lock configs (see below) |
 | `private.swish`                   | Swish API config (see below)               |

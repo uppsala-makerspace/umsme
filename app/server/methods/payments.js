@@ -4,10 +4,11 @@ import { getSwishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
-import { findMemberForUser, sanitizeForSwish, loadJson } from "/server/methods/utils";
+import { findMemberForUser, sanitizeForSwish } from "/server/methods/utils";
+import { loadJson } from "/imports/common/server/configLoader";
 import { memberStatus } from "/imports/common/lib/utils";
 
-const getPaymentOptions = () => loadJson("paymentOptionsPath");
+const getPaymentOptions = () => loadJson("paymentOptionsPath", "paymentOptions.json");
 
 /**
  * Get payment types as a map of paymentType -> option object.
