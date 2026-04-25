@@ -112,6 +112,8 @@ export default function PaymentSelectionPage() {
         console.error("Error initiating payment:", err);
         if (err.error === "status-changed") {
           refetch();
+        } else if (err.error === "payment-service-unavailable") {
+          setError(t("paymentServiceUnavailable"));
         } else {
           setError(err.reason || err.message);
         }

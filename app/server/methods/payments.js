@@ -1,4 +1,5 @@
 import { Meteor } from "meteor/meteor";
+import { fetch } from "meteor/fetch";
 import { v4 as uuidv4 } from "uuid";
 import { getSwishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
@@ -7,6 +8,52 @@ import { initiatedPayments } from "/imports/common/collections/initiatedPayments
 import { findMemberForUser, sanitizeForSwish } from "/server/methods/utils";
 import { loadJson } from "/imports/common/server/configLoader";
 import { memberStatus } from "/imports/common/lib/utils";
+
+const PAYMENT_SERVICE_TIMEOUT_MS = 3000;
+
+/**
+ * Probe the payment service's /status endpoint, derived from the same host
+ * Swish would call back into. Throws Meteor.Error('payment-service-unavailable')
+ * if the service is unreachable, slow, or returns a non-2xx response. Called
+ * at the top of payment.initiate so the user gets a clean "try later" message
+ * instead of paying through Swish and having the callback land on a dead host.
+ */
+const checkPaymentServiceAlive = async () => {
+  const config = getSwishConfig();
+  if (!config.callbackUrl) {
+    throw new Meteor.Error(
+      "payment-service-unavailable",
+      "No callback URL configured"
+    );
+  }
+  let statusUrl;
+  try {
+    statusUrl = new URL("/status", new URL(config.callbackUrl).origin).toString();
+  } catch (err) {
+    throw new Meteor.Error(
+      "payment-service-unavailable",
+      `Invalid callback URL: ${err.message}`
+    );
+  }
+  try {
+    const res = await fetch(statusUrl, {
+      method: "GET",
+      signal: AbortSignal.timeout(PAYMENT_SERVICE_TIMEOUT_MS),
+    });
+    if (!res.ok) {
+      throw new Meteor.Error(
+        "payment-service-unavailable",
+        `Status ${res.status}`
+      );
+    }
+  } catch (err) {
+    if (err instanceof Meteor.Error) throw err;
+    throw new Meteor.Error(
+      "payment-service-unavailable",
+      err?.message || "Unreachable"
+    );
+  }
+};
 
 const getPaymentOptions = () => loadJson("paymentOptionsPath", "paymentOptions.json");
 
@@ -75,6 +122,10 @@ Meteor.methods({
       memberEnd: Match.Optional(Match.OneOf(Date, null, undefined)),
       labEnd: Match.Optional(Match.OneOf(Date, null, undefined)),
     }));
+
+    // Refuse to initiate if the payment service isn't responding — otherwise
+    // Swish's callback would land on a dead host after the user has paid.
+    await checkPaymentServiceAlive();
 
     // Check if Swish payments are disabled
     if (isSwishDisabled()) {

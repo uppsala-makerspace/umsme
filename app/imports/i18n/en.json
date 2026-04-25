@@ -88,6 +88,7 @@
   "rfid": "RFID tag",
   "rfidExplanation": "An RFID tag is used if you have received certification to use machines that require unlocking.",
   "paymentApproved": "Payment approved!",
+  "paymentServiceUnavailable": "Payment service is unavailable right now. Please try again in a few minutes.",
   "otherPaymentOptionsText": "For other payment options, see",
   "otherPaymentOptionsLink": "our website",
   "ScanQrCode": "Scan the QR-code to pay",

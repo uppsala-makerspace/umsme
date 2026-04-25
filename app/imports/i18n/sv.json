@@ -88,6 +88,7 @@
   "rfid": "RFID-tagg",
   "rfidExplanation": "En RFID-tagg används om du har fått certifiering att använda maskiner som kräver upplåsning.",
   "paymentApproved": "Betalning godkänd!",
+  "paymentServiceUnavailable": "Betalningstjänsten är inte tillgänglig just nu. Försök igen om några minuter.",
   "otherPaymentOptionsText": "För andra betalningsalternativ, se",
   "otherPaymentOptionsLink": "vår hemsida",
   "ScanQrCode": "Skanna Qr-koden för att betala",
