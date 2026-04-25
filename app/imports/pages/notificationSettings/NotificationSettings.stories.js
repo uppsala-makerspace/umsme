@@ -7,7 +7,7 @@ export default {
 
 export const Default = {
   args: {
-    prefs: { membershipExpiry: true },
+    prefs: { membershipReminders: true, accountAndPayments: true, announcements: true },
     loading: false,
     pushPermission: "granted",
     isAdmin: false,
@@ -18,7 +18,7 @@ export const Default = {
 
 export const Loading = {
   args: {
-    prefs: { membershipExpiry: true },
+    prefs: { membershipReminders: true, accountAndPayments: true, announcements: true },
     loading: true,
     pushPermission: "default",
     isAdmin: false,
@@ -29,7 +29,7 @@ export const Loading = {
 
 export const PushDefault = {
   args: {
-    prefs: { membershipExpiry: true },
+    prefs: { membershipReminders: true, accountAndPayments: true, announcements: true },
     loading: false,
     pushPermission: "default",
     isAdmin: false,
@@ -41,7 +41,7 @@ export const PushDefault = {
 
 export const PushUnsupported = {
   args: {
-    prefs: { membershipExpiry: true },
+    prefs: { membershipReminders: true, accountAndPayments: true, announcements: true },
     loading: false,
     pushPermission: "unsupported",
     isAdmin: false,
@@ -52,7 +52,7 @@ export const PushUnsupported = {
 
 export const PushDenied = {
   args: {
-    prefs: { membershipExpiry: true },
+    prefs: { membershipReminders: true, accountAndPayments: true, announcements: true },
     loading: false,
     pushPermission: "denied",
     isAdmin: false,
@@ -63,7 +63,7 @@ export const PushDenied = {
 
 export const AdminView = {
   args: {
-    prefs: { membershipExpiry: true, testNotification: true },
+    prefs: { membershipReminders: true, accountAndPayments: true, announcements: true, testNotification: true },
     loading: false,
     pushPermission: "granted",
     isAdmin: true,
@@ -74,7 +74,7 @@ export const AdminView = {
 
 export const AllTogglesOff = {
   args: {
-    prefs: { membershipExpiry: false, testNotification: false },
+    prefs: { membershipReminders: false, accountAndPayments: false, announcements: false, testNotification: false },
     loading: false,
     pushPermission: "granted",
     isAdmin: true,

@@ -17,7 +17,7 @@ const notifyExpiringMemberships = async () => {
   const notificationTypes = await loadJson("notificationsPath");
 
   let members = await Members.find({
-    "notificationPrefs.membershipExpiry": { $ne: false },
+    "notificationPrefs.membershipReminders": { $ne: false },
   }).fetchAsync();
   members = members.filter(m => m.email);
 
@@ -63,7 +63,7 @@ const notifyExpiringMemberships = async () => {
       const payload = {
         title: config.title,
         body: config.body,
-        category: NotificationCategory.membershipExpiry,
+        category: NotificationCategory.membershipReminders,
         timestamp: Date.now(),
       };
 

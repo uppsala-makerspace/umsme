@@ -3,7 +3,7 @@ import { PushSubs } from "/imports/common/collections/pushSubs";
 import { Members } from "/imports/common/collections/members";
 import { Messages } from "/imports/common/collections/messages";
 import { Announcements } from "/imports/common/collections/announcements";
-import { NotificationCategory } from "/imports/common/lib/notificationCategories";
+import { NotificationCategory, messageTypeToCategory } from "/imports/common/lib/notificationCategories";
 
 const PUSH_BODY_MAX = 140;
 
@@ -105,7 +105,7 @@ export const pushMessage = async (messageId) => {
   const member = await Members.findOneAsync(message.member);
   return sendCategoryPush(
     member,
-    NotificationCategory.privateMessages,
+    messageTypeToCategory(message.type),
     messageId,
     message.subject,
     message.messagetext

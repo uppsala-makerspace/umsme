@@ -23,7 +23,11 @@ const resolve = (value, lang) => {
 
 const readMoreHref = (n) => {
   if (!n.entityId) return null;
-  if (n.category === "privateMessages") return `/messages/message/${n.entityId}`;
+  // Anything originating from a Messages row (reminder / welcome / confirmation /
+  // status) carries the entityId and lives behind the message detail page.
+  if (n.category === "membershipReminders" || n.category === "accountAndPayments") {
+    return `/messages/message/${n.entityId}`;
+  }
   if (n.category === "announcements") return `/messages/announcement/${n.entityId}`;
   return null;
 };
