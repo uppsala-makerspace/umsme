@@ -11,6 +11,7 @@ import './methods/update';
 import './methods/admin';
 import './methods/user';
 import './methods/push';
+import './methods/reminders';
 import '/imports/tabular/index';
 import adminAvailable from './adminAvailable';
 import publications from './publications';

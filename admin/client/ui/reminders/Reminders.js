@@ -34,4 +34,17 @@ Template.Reminders.events({
       FlowRouter.go(`/member/${rowData._id}`);
     }
   },
+  async 'click .runReminderJob'(event) {
+    const button = event.currentTarget;
+    if (!confirm("Run the reminder job now? Mails will be sent to anyone in the 14-day window who hasn't already received this reminder.")) return;
+    button.disabled = true;
+    try {
+      const result = await Meteor.callAsync('reminders.runNow');
+      alert(result);
+    } catch (err) {
+      alert(`Failed: ${err.reason || err.message}`);
+    } finally {
+      button.disabled = false;
+    }
+  },
 });
