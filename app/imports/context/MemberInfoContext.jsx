@@ -41,9 +41,12 @@ export const MemberInfoProvider = ({ children }) => {
     } catch (error) {
       console.error("MemberInfoContext: Error fetching member info:", error);
     } finally {
-      if (!background) {
-        setLoading(false);
-      }
+      // Always clear the spinner once any fetch completes — handles the
+      // reload race where a background refetch grabs fetchingRef before
+      // the userId effect's foreground fetch can start, so the foreground's
+      // setLoading(false) would otherwise never run. Same pattern as
+      // MessagesContext.
+      setLoading(false);
       fetchingRef.current = false;
     }
   }, []);
@@ -64,20 +67,47 @@ export const MemberInfoProvider = ({ children }) => {
     }
   }, [userId, loggingIn, fetchMemberInfo]);
 
-  // Periodic staleness check (stale-while-revalidate)
+  // Visibility-aware staleness check (stale-while-revalidate). Polls every
+  // STALE_CHECK_INTERVAL_MS while the tab is visible AND the user is logged
+  // in, refetching in the background once CACHE_TTL_MS has elapsed since the
+  // last fetch. Pauses entirely while hidden, and refreshes immediately on
+  // resume so a user who was away for > TTL sees fresh data without waiting
+  // for the next tick.
   useEffect(() => {
     if (!userId) return;
-
-    const interval = setInterval(() => {
+    let interval = null;
+    const tickIfStale = () => {
       if (
         lastFetchedAtRef.current &&
         Date.now() - lastFetchedAtRef.current > CACHE_TTL_MS
       ) {
         fetchMemberInfo({ background: true });
       }
-    }, STALE_CHECK_INTERVAL_MS);
-
-    return () => clearInterval(interval);
+    };
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(tickIfStale, STALE_CHECK_INTERVAL_MS);
+    };
+    const stop = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        tickIfStale();
+        start();
+      } else {
+        stop();
+      }
+    };
+    if (document.visibilityState === "visible") start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      stop();
+    };
   }, [userId, fetchMemberInfo]);
 
   return (
