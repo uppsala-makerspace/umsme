@@ -5,6 +5,7 @@ import './syncAndMailUnlocks';
 import './cleanupPendingAttestations';
 import './sendReminders';
 import './notifyExpiring';
+import './expireInitiatedPayments';
 
 if (Meteor.isServer) {
   SyncedCron.start();

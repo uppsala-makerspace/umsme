@@ -33,11 +33,9 @@ The server will now accept HTTP POST calls on:
 payment/
 ├── server/
 │   ├── main.js              # Application entry point
-│   ├── api/
-│   │   ├── swish.js         # Swish HTTP callback handler
-│   │   └── payments.js      # Shared payment processing logic
-│   └── cronjob/
-│       └── expireInitiatedPayments.js  # Background job for stale payments
+│   └── api/
+│       ├── swish.js         # Swish HTTP callback handler
+│       └── payments.js      # Shared payment processing logic
 ├── imports/
 │   └── common -> ../../common   # Shared collections (symlink)
 ├── tests/
@@ -45,7 +43,7 @@ payment/
 │   ├── settings.json        # Test-specific settings
 │   ├── test-helpers.js      # Shared test utilities
 │   ├── swish/               # HTTP endpoint tests
-│   ├── cronjob/             # Background job tests
+│   ├── cronjob/             # Tests for the stale-payment expiry helper
 │   └── business-logic/      # Payment processing tests
 ├── settings_example.json    # Configuration template
 └── MEMBERSHIP_RULES.md      # Business rules documentation
@@ -59,22 +57,13 @@ payment/
 {
   "swish": {
     "expectedCallbackIdentifier": "optional-swish-identifier"
-  },
-  "expireInitiatedPayments": [
-    {
-      "paymentType": "swish",
-      "expiry": 360,
-      "recurrence": 60
-    }
-  ]
+  }
 }
 ```
 
 - `expectedCallbackIdentifier`: Optional Swish callback identifier for validation. If set, callbacks without matching `callbackIdentifier` will be rejected with 403.
-- `expireInitiatedPayments`: Array of expiration job configurations:
-  - `paymentType`: Payment type to expire (e.g., "swish")
-  - `expiry`: Seconds after which to mark stale payments as EXPIRED
-  - `recurrence`: Seconds between job runs
+
+> The cron job that expires stale initiated payments runs in the admin app, configured under `Meteor.settings.expireInitiatedPayments` there. The expiry helper itself lives at `common/server/expireInitiatedPayments.js` and is unit-tested under `tests/cronjob/expiration.test.js`.
 
 ## API Endpoint
 

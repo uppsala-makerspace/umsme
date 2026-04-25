@@ -265,12 +265,7 @@ All apps use `chatra:synced-cron` for scheduled tasks. SyncedCron uses a shared 
 | Cleanup pending attestations | Every 20 minutes | `admin/server/cronjob/cleanupPendingAttestations.js` | See [certificates.md](certificates.md#8-auto-cleanup-of-pending-attestations) |
 | Send membership reminder mails | Daily at 09:00 (configurable) | `admin/server/cronjob/sendReminders.js` | Mirrors the manual "Send reminder" button: looks up a non-deprecated reminder template, sends mail, inserts a Messages row, and pushes. Per-template Messages-row dedup prevents double sends. |
 | Notify expiring memberships    | Daily at 09:00 (configurable) | `admin/server/cronjob/notifyExpiring.js` | Sends push notifications to members whose membership or lab access is about to expire. Respects per-member notification preferences and family membership structure. |
-
-### Payment Cron Jobs
-
-| Job                                      | Schedule (configurable)    | File                                              | Purpose                                                  |
-|------------------------------------------|----------------------------|---------------------------------------------------|----------------------------------------------------------|
-| Expire stale initiated payments          | Every N seconds (default: 60s) | `payment/server/cronjob/expireInitiatedPayments.js` | Marks InitiatedPayments as EXPIRED if they remain in INITIATED status past the configured timeout (default: 360s for Swish) |
+| Expire stale initiated payments | Every N seconds (default: 60s) | `admin/server/cronjob/expireInitiatedPayments.js` | Marks InitiatedPayments as EXPIRED if they remain in INITIATED status past the configured timeout (default: 360s for Swish). One job is registered per entry in `Meteor.settings.expireInitiatedPayments`. The expiry logic itself lives in `common/server/expireInitiatedPayments.js`. |
 
 ---
 

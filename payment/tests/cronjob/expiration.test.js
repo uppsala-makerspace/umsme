@@ -1,36 +1,34 @@
 /**
- * Expiration Cron Job Tests (EXP)
+ * Expiration tests (EXP)
  *
- * Tests for the background job that expires stale initiated payments.
- * Uses a test-specific payment type "testPayment" configured in tests/settings.json.
- *
- * Test settings use:
- * - paymentType: "testPayment"
- * - expiryMs: 2000 (2 seconds)
- * - recurrenceSeconds: 1 (every second)
+ * Tests for the function that expires stale initiated payments
+ * (`expireStaleInitiatedPayments` in /imports/common/server/expireInitiatedPayments).
+ * The function is invoked here directly. The corresponding cron registration
+ * lives in admin/server/cronjob/expireInitiatedPayments.js and is verified
+ * separately in admin's runtime.
  */
 
 import assert from 'assert';
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
+import { expireStaleInitiatedPayments } from '/imports/common/server/expireInitiatedPayments';
 import {
   clearTestData,
   createTestMember,
   createInitiatedPaymentWithDate,
-  sleep,
 } from './helpers';
 
-// Payment type configured for expiration in test settings
 const TEST_PAYMENT_TYPE = 'testPayment';
 const OTHER_PAYMENT_TYPE = 'otherPayment';
+const EXPIRY_SECONDS = 2;
 
-describe('Expiration Cron Job Tests', function () {
+describe('Expiration Tests', function () {
   this.timeout(10000);
 
   beforeEach(async function () {
     await clearTestData();
   });
 
-  it('EXP-001: Stale initiated payment gets expired by cron job', async function () {
+  it('EXP-001: Stale initiated payment gets expired', async function () {
     const memberId = await createTestMember();
     const externalId = 'exp-001-' + Date.now();
 
@@ -38,14 +36,14 @@ describe('Expiration Cron Job Tests', function () {
     const oldDate = new Date(Date.now() - 5000);
     await createInitiatedPaymentWithDate(memberId, externalId, TEST_PAYMENT_TYPE, oldDate);
 
-    // Verify it starts as INITIATED
     let initiated = await initiatedPayments.findOneAsync({ externalId });
     assert.strictEqual(initiated.status, 'INITIATED');
 
-    // Wait for cron job to run (configured for 1 second recurrence, 2 second expiry)
-    await sleep(3000);
+    await expireStaleInitiatedPayments({
+      paymentType: TEST_PAYMENT_TYPE,
+      expirySeconds: EXPIRY_SECONDS,
+    });
 
-    // Verify it's now EXPIRED
     initiated = await initiatedPayments.findOneAsync({ externalId });
     assert.strictEqual(initiated.status, 'EXPIRED', 'Stale payment should be expired');
     assert.ok(initiated.resolvedAt, 'resolvedAt should be set');
@@ -55,18 +53,17 @@ describe('Expiration Cron Job Tests', function () {
     const memberId = await createTestMember();
     const externalId = 'exp-002-' + Date.now();
 
-    // Create an initiated payment of a different type with old createdAt
     const oldDate = new Date(Date.now() - 5000);
     await createInitiatedPaymentWithDate(memberId, externalId, OTHER_PAYMENT_TYPE, oldDate);
 
-    // Verify it starts as INITIATED
     let initiated = await initiatedPayments.findOneAsync({ externalId });
     assert.strictEqual(initiated.status, 'INITIATED');
 
-    // Wait for cron job to run
-    await sleep(3000);
+    await expireStaleInitiatedPayments({
+      paymentType: TEST_PAYMENT_TYPE,
+      expirySeconds: EXPIRY_SECONDS,
+    });
 
-    // Verify it's still INITIATED (not expired because it's not the configured type)
     initiated = await initiatedPayments.findOneAsync({ externalId });
     assert.strictEqual(initiated.status, 'INITIATED', 'Payment of other type should not be expired');
     assert.ok(!initiated.resolvedAt, 'resolvedAt should not be set');
@@ -76,19 +73,19 @@ describe('Expiration Cron Job Tests', function () {
     const memberId = await createTestMember();
     const externalId = 'exp-003-' + Date.now();
 
-    // Create an initiated payment with current timestamp (not stale)
+    // createdAt = now → newer than (now - expirySeconds)
     await createInitiatedPaymentWithDate(memberId, externalId, TEST_PAYMENT_TYPE, new Date());
 
-    // Verify it starts as INITIATED
     let initiated = await initiatedPayments.findOneAsync({ externalId });
     assert.strictEqual(initiated.status, 'INITIATED');
 
-    // Wait for cron job to run (but not long enough for the payment to become stale)
-    await sleep(1500);
+    await expireStaleInitiatedPayments({
+      paymentType: TEST_PAYMENT_TYPE,
+      expirySeconds: EXPIRY_SECONDS,
+    });
 
-    // Verify it's still INITIATED (not expired because it's too recent)
     initiated = await initiatedPayments.findOneAsync({ externalId });
-    assert.strictEqual(initiated.status, 'INITIATED', 'Recent payment should not be expired yet');
+    assert.strictEqual(initiated.status, 'INITIATED', 'Recent payment should not be expired');
     assert.ok(!initiated.resolvedAt, 'resolvedAt should not be set');
   });
 
@@ -96,7 +93,6 @@ describe('Expiration Cron Job Tests', function () {
     const memberId = await createTestMember();
     const externalId = 'exp-004-' + Date.now();
 
-    // Create an initiated payment that's already PAID
     const oldDate = new Date(Date.now() - 5000);
     const resolvedDate = new Date(Date.now() - 4000);
     await initiatedPayments.insertAsync({
@@ -109,12 +105,17 @@ describe('Expiration Cron Job Tests', function () {
       resolvedAt: resolvedDate,
     });
 
-    // Wait for cron job to run
-    await sleep(3000);
+    await expireStaleInitiatedPayments({
+      paymentType: TEST_PAYMENT_TYPE,
+      expirySeconds: EXPIRY_SECONDS,
+    });
 
-    // Verify it's still PAID (not changed to EXPIRED)
     const initiated = await initiatedPayments.findOneAsync({ externalId });
     assert.strictEqual(initiated.status, 'PAID', 'Already resolved payment should not be changed');
-    assert.strictEqual(initiated.resolvedAt.getTime(), resolvedDate.getTime(), 'resolvedAt should not be changed');
+    assert.strictEqual(
+      initiated.resolvedAt.getTime(),
+      resolvedDate.getTime(),
+      'resolvedAt should not be changed'
+    );
   });
 });

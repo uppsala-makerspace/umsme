@@ -30,6 +30,10 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `public.vapidPublicKey` | VAPID key for push notifications          |
 | `private.notificationsPath` | Path to notification types JSON (default: bundled `private/notifications.json`) |
 | `private.notifyExpiringTime` | Cron time for expiry notifications (e.g. `"at 09:00 am"`) |
+| `expireInitiatedPayments`              | Array of stale-payment expiry job configs |
+| `expireInitiatedPayments[].paymentType`| Payment type to expire (e.g. `"swish"`)   |
+| `expireInitiatedPayments[].expiry`     | Seconds before expiration                 |
+| `expireInitiatedPayments[].recurrence` | Job run interval in seconds               |
 | `swishCallback`      | Swish callback URL                           |
 | `serviceConfigurations` | OAuth credentials (Google, Facebook)      |
 
@@ -61,10 +65,8 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | Key                                    | Purpose                                |
 |----------------------------------------|----------------------------------------|
 | `swish.expectedCallbackIdentifier`     | Optional Swish callback validation     |
-| `expireInitiatedPayments`              | Array of expiry job configs            |
-| `expireInitiatedPayments[].paymentType`| Payment type to expire (e.g. `"swish"`) |
-| `expireInitiatedPayments[].expiry`     | Seconds before expiration              |
-| `expireInitiatedPayments[].recurrence` | Job run interval in seconds            |
+
+The expiry of stale initiated payments runs in the admin app, not the payment app. See `expireInitiatedPayments` under Admin Settings above.
 
 ---
 

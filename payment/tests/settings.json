@@ -1,11 +1,4 @@
 {
   "swish": {
-  },
-  "expireInitiatedPayments": [
-    {
-      "paymentType": "testPayment",
-      "expiry": 2,
-      "recurrence": 1
-    }
-  ]
+  }
 }

@@ -1,5 +1,5 @@
 /**
- * Test helpers for cron job tests
+ * Test helpers for expiration tests
  */
 
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
@@ -19,11 +19,4 @@ export async function createInitiatedPaymentWithDate(memberId, externalId, payme
     status: 'INITIATED',
     createdAt,
   });
-}
-
-/**
- * Wait for a specified number of milliseconds
- */
-export function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

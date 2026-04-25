@@ -8,7 +8,6 @@ import '/imports/common/collections/messages';
 import '/imports/common/collections/templates';
 import '/imports/common/collections/pushSubs';
 import './api/swish';
-import './cronjob/expireInitiatedPayments';
 import { initPush } from '/imports/common/server/push';
 
 if (Meteor.settings.private?.mailUrl) {
