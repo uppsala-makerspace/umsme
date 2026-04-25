@@ -120,6 +120,14 @@ const Install = ({ platform, isInstalledPWA, isDismissed, qrCodeUrl, installProm
         </div>
       )}
 
+      {/* Supported browsers warning (mobile only) */}
+      {!isInstalledPWA && platform !== 'desktop' && (
+        <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded text-sm">
+          <p className="font-semibold">{t("installSupportedBrowsersTitle")}</p>
+          <p>{t("installSupportedBrowsersBody")}</p>
+        </div>
+      )}
+
       {/* Hint for iOS users who may have already installed */}
       {!isInstalledPWA && platform === 'ios' && (
         <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded text-sm">
