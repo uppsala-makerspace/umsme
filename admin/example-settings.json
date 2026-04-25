@@ -22,7 +22,7 @@
     {
       "paymentType": "swish",
       "expiry": 360,
-      "recurrence": 60
+      "recurrence": "every 1 minute"
     }
   ],
   "swishCallback": "placeholder-swishCallback",

@@ -4,8 +4,9 @@
  *
  * Each entry in the array should have:
  * - paymentType: The type of payment to expire (e.g. "swish")
- * - expiry: Time in seconds after which to expire (e.g. 360 for 6 minutes)
- * - recurrence: How often to run the job in seconds (e.g. 60 for every minute)
+ * - expiry:     Time in seconds after which to expire (e.g. 360 for 6 minutes)
+ * - recurrence: later.js text-parser schedule, e.g. "every 1 hour" or
+ *               "every 30 seconds". Same syntax as `notifyExpiringTime`.
  */
 
 import { Meteor } from "meteor/meteor";
@@ -26,7 +27,7 @@ if (Meteor.isServer) {
     SyncedCron.add({
       name: `Expire stale ${paymentType} initiated payments`,
       schedule(parser) {
-        return parser.recur().every(recurrence).second();
+        return parser.text(recurrence);
       },
       async job() {
         const result = await expireStaleInitiatedPayments({
@@ -41,7 +42,7 @@ if (Meteor.isServer) {
     });
 
     console.log(
-      `[Cron] Registered expiry job for ${paymentType}: expiry=${expiry}s, recurrence=${recurrence}s`
+      `[Cron] Registered expiry job for ${paymentType}: expiry=${expiry}s, recurrence=${recurrence}`
     );
   });
 }

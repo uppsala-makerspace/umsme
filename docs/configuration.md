@@ -33,7 +33,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `expireInitiatedPayments`              | Array of stale-payment expiry job configs |
 | `expireInitiatedPayments[].paymentType`| Payment type to expire (e.g. `"swish"`)   |
 | `expireInitiatedPayments[].expiry`     | Seconds before expiration                 |
-| `expireInitiatedPayments[].recurrence` | Job run interval in seconds               |
+| `expireInitiatedPayments[].recurrence` | later.js text schedule, e.g. `"every 1 hour"` or `"every 30 seconds"` |
 | `swishCallback`      | Swish callback URL                           |
 | `serviceConfigurations` | OAuth credentials (Google, Facebook)      |
 
