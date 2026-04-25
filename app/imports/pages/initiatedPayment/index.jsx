@@ -13,7 +13,9 @@ export default function InitiatedPaymentPage() {
   const navigate = useNavigate();
   const { externalId } = useParams();
   const location = useLocation();
-  const { refetch } = useContext(MemberInfoContext);
+  const { memberInfo, refetch } = useContext(MemberInfoContext);
+  const awaitingApproval =
+    !memberInfo?.member?.registered || !memberInfo?.liabilityDate;
 
   // Get qrCode from navigation state if provided
   const initialQrCode = location.state?.qrCode || null;
@@ -100,6 +102,7 @@ export default function InitiatedPaymentPage() {
         step={step}
         qrCode={qrCode}
         error={error}
+        awaitingApproval={awaitingApproval}
         onRetry={handleRetry}
         onCancel={handleCancel}
         onBackToStart={handleBackToStart}

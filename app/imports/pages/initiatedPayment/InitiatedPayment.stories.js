@@ -34,12 +34,24 @@ export const ProcessingQrCode = {
   },
 };
 
-// Payment success
+// Payment success — renewing / approved member with signed liability
 export const Success = {
   args: {
     step: "success",
     qrCode: null,
     error: null,
+    awaitingApproval: false,
+    ...baseActions,
+  },
+};
+
+// Payment success — new member: board hasn't approved yet, or liability not signed
+export const SuccessAwaitingApproval = {
+  args: {
+    step: "success",
+    qrCode: null,
+    error: null,
+    awaitingApproval: true,
     ...baseActions,
   },
 };

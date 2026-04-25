@@ -19,6 +19,7 @@ export default function InitiatedPayment({
   step = "processing",
   qrCode = null,
   error = null,
+  awaitingApproval = false,
   onRetry,
   onCancel,
   onBackToStart,
@@ -79,8 +80,7 @@ export default function InitiatedPayment({
           </svg>
         </div>
         <h3 className="text-center">{t("paymentApproved")}</h3>
-        <p className="flex flex-col items-center text-center mt-5 mb-4">{t("ThankPayment")}</p>
-        <p className="flex flex-col items-center text-center mt-5 mb-4">{t("MembershipRegistered")}</p>
+        <p className="flex flex-col items-center text-center mt-5 mb-4">{t(awaitingApproval ? "MembershipRegisteredAwaitingApproval" : "MembershipRegistered")}</p>
 
         <Button onClick={onBackToStart}>
           {t("BackToStart")}
