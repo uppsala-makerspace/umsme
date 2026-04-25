@@ -3,8 +3,10 @@ import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 
 const LAST_SEEN_KEY = "messagesLastSeen";
+// "Stale-after" horizon. Used by refetchIfStale to decide whether to refresh
+// on tab-resume or page mount. Polling on /messages happens independently in
+// the page itself.
 const CACHE_TTL_MS = 5 * 60 * 1000;
-const STALE_CHECK_INTERVAL_MS = 30 * 1000;
 
 export const MessagesContext = createContext({
   messages: [],
@@ -14,6 +16,7 @@ export const MessagesContext = createContext({
   latestDate: null,
   markAsSeen: () => {},
   refetch: async () => {},
+  refetchIfStale: () => {},
 });
 
 export const MessagesProvider = ({ children }) => {
@@ -44,10 +47,22 @@ export const MessagesProvider = ({ children }) => {
     } catch (err) {
       console.error("MessagesContext: Error fetching:", err);
     } finally {
-      if (!background) setLoading(false);
+      // Always clear the spinner once any fetch completes — handles the
+      // reload-on-/messages race where the page's background refetchIfStale
+      // grabs fetchingRef before the userId effect's foreground fetch can
+      // start, so the foreground's setLoading(false) would otherwise never run.
+      setLoading(false);
       fetchingRef.current = false;
     }
   }, []);
+
+  const refetchIfStale = useCallback(() => {
+    if (fetchingRef.current) return;
+    const last = lastFetchedAtRef.current;
+    if (last == null || Date.now() - last > CACHE_TTL_MS) {
+      fetch({ background: true });
+    }
+  }, [fetch]);
 
   useEffect(() => {
     if (userId) {
@@ -60,18 +75,36 @@ export const MessagesProvider = ({ children }) => {
     }
   }, [userId, loggingIn, fetch]);
 
+  // Refresh eagerly when the service worker reports a new push notification.
   useEffect(() => {
     if (!userId) return;
-    const interval = setInterval(() => {
-      if (
-        lastFetchedAtRef.current &&
-        Date.now() - lastFetchedAtRef.current > CACHE_TTL_MS
-      ) {
-        fetch({ background: true });
-      }
-    }, STALE_CHECK_INTERVAL_MS);
-    return () => clearInterval(interval);
+    let channel;
+    try {
+      channel = new BroadcastChannel("notifications");
+      channel.onmessage = (event) => {
+        if (event.data?.type === "NEW_NOTIFICATION") {
+          fetch({ background: true });
+        }
+      };
+    } catch (e) {
+      // BroadcastChannel may not be supported.
+    }
+    return () => {
+      if (channel) channel.close();
+    };
   }, [userId, fetch]);
+
+  // Refresh when the tab/app becomes visible again, but only if stale.
+  // Catches the "user denied notifications, came back after a while" case
+  // without polling while we're hidden.
+  useEffect(() => {
+    if (!userId) return;
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refetchIfStale();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [userId, refetchIfStale]);
 
   const allDates = [
     ...messages.map((m) => m.senddate),
@@ -92,7 +125,7 @@ export const MessagesProvider = ({ children }) => {
 
   return (
     <MessagesContext.Provider
-      value={{ messages, announcements, loading, hasNew, latestDate, lastSeen, markAsSeen, refetch: fetch }}
+      value={{ messages, announcements, loading, hasNew, latestDate, lastSeen, markAsSeen, refetch: fetch, refetchIfStale }}
     >
       {children}
     </MessagesContext.Provider>

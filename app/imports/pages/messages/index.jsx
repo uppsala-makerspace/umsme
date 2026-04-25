@@ -5,13 +5,29 @@ import Layout from "/imports/components/Layout/Layout";
 import Messages from "./Messages";
 import { MessagesContext } from "/imports/context/MessagesContext";
 
+const POLL_INTERVAL_MS = 30 * 1000;
+
 export default () => {
-  const { messages, announcements, loading, lastSeen, markAsSeen } = useContext(MessagesContext);
+  const { messages, announcements, loading, lastSeen, markAsSeen, refetch, refetchIfStale } =
+    useContext(MessagesContext);
   const { i18n } = useTranslation();
 
   useEffect(() => {
     markAsSeen();
-  }, [markAsSeen]);
+    refetchIfStale();
+  }, [markAsSeen, refetchIfStale]);
+
+  // Poll while the messages page is mounted AND visible. Other pages (and the
+  // hidden tab case) rely on the context's push + visibilitychange triggers.
+  useEffect(() => {
+    if (!Meteor.userId()) return;
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refetch({ background: true });
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [refetch]);
 
   const items = useMemo(() => {
     const lang = i18n.language === "sv" ? "sv" : "en";
