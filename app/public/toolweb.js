@@ -73,7 +73,7 @@ window.__entryscape_config = (window.__entryscape_config || []).concat([{
       extends: "searchList",
       rdftype: "schema:Product",
       dependencyproperties: "schema:category",
-      limit: 10,
+      limit: 6,
       listplaceholder: "no matches",
       namedclick: "tool",
       rowhead: `
