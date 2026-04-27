@@ -66,6 +66,7 @@ export const HamburgerMenu = () => {
             { to: "/account", label: "myAccount" },
             { to: "/profile", label: "myProfile" },
             { to: "/messages", label: "messages" },
+            { to: "/tool", label: "viewTools" },
             { to: "/storage", label: "myBox" },
             { to: "/liability", label: "liability" },
             { to: "/install", label: "installApp" },

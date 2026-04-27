@@ -26,6 +26,8 @@ import Notifications from '/imports/pages/notifications';
 import NotificationSettings from '/imports/pages/notificationSettings';
 import Messages from '/imports/pages/messages';
 import MessageDetail from '/imports/pages/messages/detail';
+import Tool from '/imports/pages/tool';
+import ToolDetail from '/imports/pages/tool/detail';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { NotificationProvider } from '/imports/context/NotificationContext';
 import { LocationProvider } from '/imports/context/LocationContext';
@@ -70,6 +72,8 @@ export const App = () => (
           <Route path="/messages/:kind/:id" element={<MessageDetail />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/notification-settings" element={<NotificationSettings />} />
+          <Route path="/tool" element={<Tool />} />
+          <Route path="/tool/:id" element={<ToolDetail />} />
         </Routes>
       </AppDataProvider>
       </MessagesProvider>

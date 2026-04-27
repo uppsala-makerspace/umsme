@@ -1,0 +1,206 @@
+.esbRowMain {
+  display: flex;
+  height: inherit;
+}
+
+.entryscape .esbRowMain h2 {
+  font-size: 18px;
+  font-weight: bold;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 0.2rem;
+  line-height: 1;
+}
+
+.entryscape .esbRowExpanded .esbRowMain h2 {
+  white-space: normal;
+}
+
+.entryscape .esbRowHead {
+  max-height: 90px;
+}
+
+.toolMain {
+  width: calc(100% - 120px);
+}
+.toolImage {
+  width: 100px;
+  min-width: 100px;
+  max-height: 150px;
+  margin-right: 20px;
+}
+.entryscape .toolImage img {
+  max-width: 100px;
+  object-fit: cover;
+  position: relative;
+  transition-property: all;
+  transition-duration: 0.8s;
+  transition-timing-function: ease-in-out;
+  transition-delay: 0s;
+  padding: 0;
+}
+
+.toolCategory {
+  float: right;
+}
+
+.fas {
+  color: #6c757d;
+  margin-right: 5px;
+}
+
+.entryscape.block_searchInput input {
+  margin-bottom: 6px;
+}
+
+.toolDescription {
+  font-size: 18px;
+}
+
+.entryscape p.toolViewDescription {
+  font-size: 22px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.entryscape .esbRowExpand p.toolViewDescription {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.entryscape p.toolViewInstructions {
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+.toolDescription .rdformsLanguage {
+  display: none;
+}
+
+.entryscape .toolDescription .compact .rdformsTopLevel>.rdformsFields>.rdformsField {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.toolViewWrapper {
+  display: flex;
+}
+
+.toolViewCol1 {
+  width: calc(60% - 20px);
+  margin-right: 20px;
+}
+.toolViewCol2 {
+  width: 40%;
+}
+
+.entryscape .toolViewCol1 h2 {
+  font-size: 50px;
+}
+
+.toolPlacement {
+  background: #f7f5e7;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.additionalImage {
+  margin: 35px;
+}
+
+.toolViewWrapper .rdformsLanguage {
+  display: none;
+}
+
+.entryscape a.backToSearchButton:not([href]) {
+  color: white;
+}
+
+.entryscape a.backToSearchButton:not([href]):hover {
+  color: white;
+}
+
+.locationDetails {
+  color: grey;
+  font-style: italic;
+  margin-bottom: 5px;
+}
+
+.umsEditExpand .esbExpandHead {
+  float: right;
+}
+
+.umslocation {
+  white-space: nowrap;
+}
+
+.umslocation > span {
+  white-space: normal;
+}
+
+@media screen and (min-width:320px) and (max-width:680px) {
+  body .esbRowHead {
+    max-height: 110px;
+  }
+  .toolCategory {
+    float: none;
+    margin-bottom: 5px;
+  }
+  .block_searchInput {
+    margin: 0 5px;
+    display: block;
+  }
+  .umsMargins {
+    padding: 0 5px;
+    width: calc( 100% - 10px );
+  }
+  body .esbFilterResults.umsMobileFiltersResults {
+    display: flex;
+  }
+  body .esbFilterResults {
+    display: none;
+  }
+}
+
+.umsHeader {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  margin-top: 40px;
+}
+
+.umsFacets_mobile {
+  background: white;
+  padding: 5px 10px 0px 15px;
+  margin-bottom: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+}
+
+.entryscape.umsFacets_mobile label {
+  margin-bottom: 0.2rem;
+}
+
+.umsFacets_mobile .esbExpandButton {
+  font-size: large;
+}
+
+.umsFacets_mobile .esbExpandButton i {
+  color: black;
+  margin-right: 0.5em;
+}
+
+.esbExpanded .esbExpandBody {
+  margin-bottom: 10px;
+}
+
+.entryscape.umsFacets_mobile h2 {
+  font-size: 1.5rem;
+}
+
+/* Make the cards white */
+.entryscape .esbRow,
+.entryscape .escoList .entryList>div:nth-child(odd) {
+  background-color: white;
+}
