@@ -51,10 +51,6 @@
   margin-right: 5px;
 }
 
-.entryscape.block_searchInput input {
-  margin-bottom: 6px;
-}
-
 .toolSearchResultDescription {
   font-size: 18px;
 }
@@ -133,12 +129,6 @@
     padding: 0 5px;
     width: calc( 100% - 10px );
   }
-  body .esbFilterResults.umsMobileFiltersResults {
-    display: flex;
-  }
-  body .esbFilterResults {
-    display: none;
-  }
 }
 
 .toolDetailHeader {
@@ -147,37 +137,115 @@
   margin-top: 40px;
 }
 
-.toolSearchFiltersPanel {
-  background: white;
-  padding: 5px 10px 0px 15px;
-  margin-bottom: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
+.toolSearchRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.entryscape.toolSearchFiltersPanel label {
-  margin-bottom: 0.2rem;
+.toolSearchRow > [data-entryscape="toolSearchFilters"],
+.toolSearchFiltersPanel {
+  display: contents;
 }
 
 .toolSearchFiltersPanel .esbExpandButton {
-  font-size: large;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  height: calc(1.5em + 0.75rem + 2px);
+  padding: 0 0.75rem;
+  margin-bottom: 0;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  background: white;
+  cursor: pointer;
+  white-space: nowrap;
+  color: #6b7280;
 }
 
-.toolSearchFiltersPanel .esbExpandButton i {
-  color: black;
-  margin-right: 0.5em;
+.esbCollapsed .esbExpandBody {
+  display: none;
 }
 
-.esbExpanded .esbExpandBody {
-  margin-bottom: 10px;
+.entryscape .toolSearchFiltersPanel .esbExpandButton .fas {
+  color: inherit;
+  margin-right: 0;
+}
+
+.toolSearchFiltersPanel .esbExpandButton::before {
+  --filter-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='black'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.005.917-1.096A48.32 48.32 0 0 1 12 3Z'/></svg>");
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask-image: var(--filter-icon);
+  mask-image: var(--filter-icon);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.toolSearchFiltersPanel .esbExpandBody {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  background: white;
+  padding: 10px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
 }
 
 .entryscape.toolSearchFiltersPanel h2 {
   font-size: 1.5rem;
 }
 
-/* Make the cards white */
+.entryscape .esbFilterResults {
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.entryscape .esbFilterResults__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.entryscape .esbFilterResults__removeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+}
+
+.entryscape .esbFilterResults__removeButton:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* Make the cards white and without shadow*/
 .entryscape .esbRow,
 .entryscape .escoList .entryList>div:nth-child(odd) {
   background-color: white;
+  box-shadow: none;
+}
+
+.entryscape .esbRowExpand {
+  background: white;
 }

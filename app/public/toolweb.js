@@ -51,13 +51,13 @@ window.__entryscape_config = (window.__entryscape_config || []).concat([{
     },
   ],
   blocks: [
-    // Collapsible "Filtrera" panel that toggles the facet checkboxes.
+    // Filter icon button placed next to the search input; opens a dropdown panel of facet checkboxes.
     {
       block: "toolSearchFilters",
       extends: "expand",
       class: "toolSearchFiltersPanel",
-      expandhead: `<label class="esbExpandButton esbCollapsed"><i class="fas fa-chevron-down"></i>Filtrera</label>
-<label class="esbExpandButton esbExpanded"><i class="fas fa-chevron-up"></i>Stäng filter</label>`,
+      expandhead: `<label class="esbExpandButton esbCollapsed" title="Filtrera"><i class="fas fa-chevron-down"></i></label>
+<label class="esbExpandButton esbExpanded" title="Stäng filter"><i class="fas fa-chevron-up"></i></label>`,
       expandbody: '{{facets hl="2"}}',
     },
     // Free-text search input for tool names and descriptions.

@@ -14,8 +14,11 @@ export default function Tool() {
     <Layout>
       <MainContent>
         <h1 className="text-2xl font-bold mb-4">{t("toolsTitle")}</h1>
-        <div data-entryscape="toolSearchInput" />
-        <div data-entryscape="toolSearchFilters" />
+        <div className="toolSearchRow">
+          <div data-entryscape="toolSearchInput" />
+          <div data-entryscape="toolSearchFilters" />
+        </div>
+        <div data-entryscape="filterResults" />
         <div data-entryscape="toolSearchResults" />
       </MainContent>
     </Layout>
