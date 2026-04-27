@@ -22,7 +22,7 @@
   max-height: 90px;
 }
 
-.toolMain {
+.toolSearchResultBody {
   width: calc(100% - 120px);
 }
 .toolImage {
@@ -42,11 +42,11 @@
   padding: 0;
 }
 
-.toolCategory {
+.toolCategoryBadge {
   float: right;
 }
 
-.fas {
+.entryscape .fas {
   color: #6c757d;
   margin-right: 5px;
 }
@@ -55,31 +55,31 @@
   margin-bottom: 6px;
 }
 
-.toolDescription {
+.toolSearchResultDescription {
   font-size: 18px;
 }
 
-.entryscape p.toolViewDescription {
+.entryscape p.toolDetailDescription {
   font-size: 22px;
   margin-top: 40px;
   margin-bottom: 40px;
 }
 
-.entryscape .esbRowExpand p.toolViewDescription {
+.entryscape .esbRowExpand p.toolDetailDescription {
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-.entryscape p.toolViewInstructions {
+.entryscape p.toolDetailInstructions {
   font-size: 18px;
   margin-top: 20px;
 }
 
-.toolDescription .rdformsLanguage {
+.toolSearchResultDescription .rdformsLanguage {
   display: none;
 }
 
-.entryscape .toolDescription .compact .rdformsTopLevel>.rdformsFields>.rdformsField {
+.entryscape .toolSearchResultDescription .compact .rdformsTopLevel>.rdformsFields>.rdformsField {
   margin-left: 0;
   padding-left: 0;
 }
@@ -92,21 +92,12 @@
   width: calc(60% - 20px);
   margin-right: 20px;
 }
-.toolViewCol2 {
-  width: 40%;
-}
 
 .entryscape .toolViewCol1 h2 {
   font-size: 50px;
 }
 
-.toolPlacement {
-  background: #f7f5e7;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-.additionalImage {
+.toolDetailAdditionalImages {
   margin: 35px;
 }
 
@@ -114,29 +105,15 @@
   display: none;
 }
 
-.entryscape a.backToSearchButton:not([href]) {
-  color: white;
-}
-
-.entryscape a.backToSearchButton:not([href]):hover {
-  color: white;
-}
-
-.locationDetails {
-  color: grey;
-  font-style: italic;
-  margin-bottom: 5px;
-}
-
 .umsEditExpand .esbExpandHead {
   float: right;
 }
 
-.umslocation {
+.toolLocation {
   white-space: nowrap;
 }
 
-.umslocation > span {
+.toolLocation > span {
   white-space: normal;
 }
 
@@ -144,7 +121,7 @@
   body .esbRowHead {
     max-height: 110px;
   }
-  .toolCategory {
+  .toolCategoryBadge {
     float: none;
     margin-bottom: 5px;
   }
@@ -164,13 +141,13 @@
   }
 }
 
-.umsHeader {
+.toolDetailHeader {
   padding-bottom: 10px;
   margin-bottom: 10px;
   margin-top: 40px;
 }
 
-.umsFacets_mobile {
+.toolSearchFiltersPanel {
   background: white;
   padding: 5px 10px 0px 15px;
   margin-bottom: 10px;
@@ -178,15 +155,15 @@
   border-radius: 0.25rem;
 }
 
-.entryscape.umsFacets_mobile label {
+.entryscape.toolSearchFiltersPanel label {
   margin-bottom: 0.2rem;
 }
 
-.umsFacets_mobile .esbExpandButton {
+.toolSearchFiltersPanel .esbExpandButton {
   font-size: large;
 }
 
-.umsFacets_mobile .esbExpandButton i {
+.toolSearchFiltersPanel .esbExpandButton i {
   color: black;
   margin-right: 0.5em;
 }
@@ -195,7 +172,7 @@
   margin-bottom: 10px;
 }
 
-.entryscape.umsFacets_mobile h2 {
+.entryscape.toolSearchFiltersPanel h2 {
   font-size: 1.5rem;
 }
 

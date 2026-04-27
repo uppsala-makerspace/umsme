@@ -21,7 +21,7 @@ export default function ToolDetail() {
           &larr; {t("back")}
         </Link>
         <div
-          data-entryscape="toolView"
+          data-entryscape="toolDetail"
           data-entryscape-entry={id}
           data-entryscape-context={TOOLWEB_CONTEXT}
           className="mt-3"

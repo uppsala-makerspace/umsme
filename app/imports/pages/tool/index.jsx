@@ -14,9 +14,9 @@ export default function Tool() {
     <Layout>
       <MainContent>
         <h1 className="text-2xl font-bold mb-4">{t("toolsTitle")}</h1>
-        <div data-entryscape="umsSearchBox" />
-        <div data-entryscape="umsFacets_mobile" />
-        <div data-entryscape="umsSearchResultList" />
+        <div data-entryscape="toolSearchInput" />
+        <div data-entryscape="toolSearchFilters" />
+        <div data-entryscape="toolSearchResults" />
       </MainContent>
     </Layout>
   );
