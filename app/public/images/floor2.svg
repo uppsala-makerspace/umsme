@@ -103,9 +103,26 @@
       <circle
          id="textiles_workshop-marker"
          cx="603.75"
-         cy="925"
+         cy="839"
          r="6.2499986"
          class="marker" />
+    </g>
+    <g id="studio_workshop" class="quilt1">
+      <path
+         d="m 735,940 v 175 H 475 v -10 -40 -125 z"
+         id="studio_workshop-floor"
+         class="floor" />
+      <ellipse
+         id="studio_workshop-marker"
+         cx="603.75"
+         cy="1025"
+         class="marker"
+         rx="6.25"
+         ry="6.2499986" />
+      <path
+         d="M 475,1065 V 940 m 0,0 h 260 v 175 H 475 v -10"
+         id="studio_workshop-walls"
+         class="walls" />
     </g>
     <g
        id="oven_room" class="quilt1">

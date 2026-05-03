@@ -16,6 +16,30 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
     activeFloorRef.current = activeFloor;
   }, [activeFloor]);
 
+  // Place an icon overlay centered on a marker circle in the floor SVG.
+  // Uses <image> with an external SVG href so the icon stays vector but is
+  // sandboxed (its own styles don't bleed into the floor SVG).
+  const placeIcon = (svgDoc, markerId, iconUrl, size = 120) => {
+    const marker = svgDoc.getElementById(markerId);
+    if (!marker || marker.dataset.iconPlaced) return;
+    const cx = parseFloat(marker.getAttribute("cx"));
+    const cy = parseFloat(marker.getAttribute("cy"));
+    if (Number.isNaN(cx) || Number.isNaN(cy)) return;
+    const ns = "http://www.w3.org/2000/svg";
+    const img = svgDoc.createElementNS(ns, "image");
+    img.setAttributeNS("http://www.w3.org/1999/xlink", "href", iconUrl);
+    img.setAttribute("href", iconUrl);
+    img.setAttribute("x", cx - size / 2);
+    img.setAttribute("y", cy - size / 2);
+    img.setAttribute("width", size);
+    img.setAttribute("height", size);
+    img.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    img.style.pointerEvents = "none";
+    marker.parentNode.appendChild(img);
+    marker.dataset.iconPlaced = "true";
+    marker.style.display = "none";
+  };
+
   // Setup click handlers for rooms after SVG loads
   const setupRoomClickHandlers = (svgDoc, floorKey, floorNumber) => {
     if (!svgDoc || !roomsConfig) return;
@@ -38,12 +62,15 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
       if (marker && floor && !floor.dataset.handlersSetup) {
         floor.dataset.handlersSetup = "true";
         floor.style.cursor = "pointer";
-        // Set marker base styles (visibility controlled by activeFloor effect)
-        marker.style.display = "block";
-        marker.style.visibility = "visible";
-        marker.style.opacity = "1";
-        marker.style.strokeWidth = "2";
-        marker.style.cursor = "pointer";
+        // Set marker base styles (visibility controlled by activeFloor effect).
+        // Skip if the marker has been replaced by an icon overlay.
+        if (!marker.dataset.iconPlaced) {
+          marker.style.display = "block";
+          marker.style.visibility = "visible";
+          marker.style.opacity = "1";
+          marker.style.strokeWidth = "2";
+          marker.style.cursor = "pointer";
+        }
         const handleRoomClick = (e) => {
           // Only show popup if this floor is active
           if (activeFloorRef.current === floorNumber) {
@@ -58,12 +85,24 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
     });
   };
 
+  // Apply icon placements for a specific floor — reads `icon` (and optional
+  // `iconSize`) from each room entry in roomsConfig.
+  const applyIconsForFloor = (svgDoc, floorKey) => {
+    if (!svgDoc || !roomsConfig) return;
+    const rooms = roomsConfig[floorKey] || {};
+    Object.entries(rooms).forEach(([roomId, room]) => {
+      if (!room.icon) return;
+      placeIcon(svgDoc, `${roomId}-marker`, `/mapicons/${room.icon}`, room.iconSize);
+    });
+  };
+
   // Handle SVG load for floor 1
   const handleFloor1Load = () => {
     const obj = floor1Ref.current;
     if (obj) {
       const svgDoc = obj.contentDocument;
       setupRoomClickHandlers(svgDoc, "floor1", 1);
+      applyIconsForFloor(svgDoc, "floor1");
     }
   };
 
@@ -73,10 +112,11 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
     if (obj) {
       const svgDoc = obj.contentDocument;
       setupRoomClickHandlers(svgDoc, "floor2", 2);
+      applyIconsForFloor(svgDoc, "floor2");
     }
   };
 
-  // Re-setup handlers when config loads
+  // Re-setup handlers when rooms config loads
   useEffect(() => {
     if (roomsConfig) {
       handleFloor1Load();
@@ -90,6 +130,7 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
       if (!svgDoc) return;
       const markers = svgDoc.querySelectorAll('[id$="-marker"]');
       markers.forEach((marker) => {
+        if (marker.dataset.iconPlaced) return;
         if (isActive) {
           // Show markers with fade-in after 1 second delay
           marker.style.display = "block";
