@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = __dirname;
 const dist = resolve(root, "dist");
 
-const TUTORIALS = ["newMembers", "existingMembers", "renewMembership"];
+const TUTORIALS = ["newMembers", "existingMembers", "renewMembership", "manageFamily"];
 
 const LANGS = {
   en: { switcherLabel: "SV", siteTitle: "Tutorials", tocTitle: "Contents" },

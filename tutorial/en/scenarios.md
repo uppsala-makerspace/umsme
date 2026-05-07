@@ -23,3 +23,9 @@
 * A board member approves the new member and the system sends a welcome email
 * Member approves the latest version of the liability agreement
 * Member can open doors (if they have a lab membership)
+
+# Manage family members
+* Send invites to family members under my account via email
+* Family member gets an email, goes to the app and creates an account
+* Family member accepts invite
+* Family member can leave family

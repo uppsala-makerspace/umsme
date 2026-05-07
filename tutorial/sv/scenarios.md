@@ -23,3 +23,11 @@
 * Styrelsemedlem godkänner ny medlem och välkomstmail skickas av systemet 
 * Medlem godkänner senaste versionen av ansvarsförbindelsen 
 * Medlem kan öppna dörrar (om labbmedlemskap)
+
+# Hantera familjemedlemmar
+* Skicka inbjudningar till familjemedlemmar under mitt konto via mejl
+* Familjemedlemmen får ett mejl, går till appen och skapar ett konto
+* Familjemedlemmen accepterar inbjudan
+* Familjemedlemmen kan lämna familjen
+
+# Installera
