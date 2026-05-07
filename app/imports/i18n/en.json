@@ -115,9 +115,9 @@
 
   "myAccount": "My Account",
   "messages": "Messages",
-  "messagesPageTitle": "Private messages and announcements",
-  "tagPrivate": "Private",
-  "tagPrivateMessages": "Private messages",
+  "messagesPageTitle": "Personal messages and announcements",
+  "tagPrivate": "Personal",
+  "tagPrivateMessages": "Personal messages",
   "tagAnnouncements": "Announcements",
   "tagNewsletter": "Newsletter",
   "tagInformation": "Information",
