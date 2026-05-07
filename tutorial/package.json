@@ -1,0 +1,12 @@
+{
+  "name": "umsme-tutorial",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "npx --yes http-server dist -p 8000 -c-1"
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0"
+  }
+}

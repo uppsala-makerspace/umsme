@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="{{cssUrl}}">
+</head>
+<body class="{{bodyClass}}">
+  <header class="site-header">
+    <a class="site-title" href="{{homeUrl}}">{{siteTitle}}</a>
+    <div class="header-actions">
+      {{tocButton}}
+      <a class="lang-switcher" href="{{otherLangUrl}}" hreflang="{{otherLang}}">{{otherLangLabel}}</a>
+    </div>
+  </header>
+  <div class="layout">
+    {{aside}}
+    <main class="content">
+      {{content}}
+    </main>
+  </div>
+  <script>
+    // Auto-close the mobile TOC after tapping a link.
+    document.querySelectorAll('.toc-list a').forEach(a => {
+      a.addEventListener('click', () => {
+        const cb = document.getElementById('toc-toggle');
+        if (cb && matchMedia('(max-width: 768px)').matches) cb.checked = false;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -6,3 +6,4 @@ backup/*
 *storybook.log
 storybook-static
 .claude
+tutorial/dist/
