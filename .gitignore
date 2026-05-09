@@ -7,4 +7,3 @@ backup/*
 storybook-static
 .claude
 tutorial/dist/
-tutorial/screens-generated/

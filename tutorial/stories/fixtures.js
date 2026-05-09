@@ -3,13 +3,13 @@
 // new value, so all generated screens stay coherent.
 
 export const member = {
-  name: "Matthias Palmer",
-  firstName: "Matthias",
-  email: "mpalmer@example.com",
+  name: "Sven Svensson",
+  firstName: "Sven",
+  email: "sven@example.com",
   phone: "0701234567",
   rfid: "A1B2C3D4",
-  mid: 13728,
-  _id: "matthias-id",
+  mid: 12345,
+  _id: "sven-id",
   family: false,
 };
 
@@ -20,14 +20,18 @@ export const partnerMember = {
   mid: 25322,
   _id: "partner-id",
   family: false,
-  infamily: "matthias-id",
+  infamily: "sven-id",
 };
 
+const today = new Date();
+const inAyear = new Date();
+inAyear.setFullYear(inAyear.getFullYear() + 1);
+
 export const dates = {
-  memberStart: new Date("2026-05-05"),
-  memberEnd: new Date("2027-05-19"),
-  labEnd: new Date("2027-05-19"),
-  liabilityApprovedDate: new Date("2026-05-05"),
+  memberStart: today,
+  memberEnd: inAyear,
+  labEnd: inAyear,
+  liabilityApprovedDate: today,
   liabilityDocumentDate: new Date("2024-01-15"),
 };
 
@@ -158,7 +162,10 @@ export const membershipOptions = [
     paymentType: "memberDiscountedBase",
     amount: 100,
     period: "year",
-    label: { en: "Yearly Basic membership (discounted)", sv: "Årligt Medlemskap Bas (rabatterat)" },
+    label: {
+      en: "Yearly Basic membership (discounted)",
+      sv: "Årligt Medlemskap Bas (rabatterat)",
+    },
     description: {
       en: "For students, pensioners, or unemployed.",
       sv: "För studenter, pensionärer eller arbetslösa.",
@@ -170,14 +177,23 @@ export const membershipOptions = [
     amount: 1600,
     period: "year",
     label: { en: "Yearly Lab Membership", sv: "Årligt Medlemskap Labb" },
-    description: { en: "24/7 access to the Makerspace.", sv: "24/7 tillgång till Makerspace." },
+    description: {
+      en: "24/7 access to the Makerspace.",
+      sv: "24/7 tillgång till Makerspace.",
+    },
   },
   {
     paymentType: "memberDiscountedLab",
     amount: 1200,
     period: "year",
-    label: { en: "Yearly Lab Membership (discounted)", sv: "Årligt Medlemskap Labb (rabatterat)" },
-    description: { en: "24/7 access at a reduced price.", sv: "24/7 tillgång till reducerat pris." },
+    label: {
+      en: "Yearly Lab Membership (discounted)",
+      sv: "Årligt Medlemskap Labb (rabatterat)",
+    },
+    description: {
+      en: "24/7 access at a reduced price.",
+      sv: "24/7 tillgång till reducerat pris.",
+    },
     discountedOnly: true,
   },
   {
@@ -185,7 +201,10 @@ export const membershipOptions = [
     amount: 450,
     period: "quarter",
     label: { en: "Quarterly Lab Access", sv: "Kvartalsvis Labbåtkomst" },
-    description: { en: "24/7 access for three months.", sv: "24/7 tillgång i tre månader." },
+    description: {
+      en: "24/7 access for three months.",
+      sv: "24/7 tillgång i tre månader.",
+    },
   },
 ];
 
@@ -195,13 +214,26 @@ export const termsContent = {
   sv: `# Köpvillkor\n\n## Medlemskap\nGenom att köpa ett medlemskap åtar du dig att följa Uppsala Makerspace regler.`,
 };
 
-export const otherPaymentOptionsUrl = "https://www.uppsalamakerspace.se/bli-medlem/";
+export const otherPaymentOptionsUrl =
+  "https://www.uppsalamakerspace.se/bli-medlem/";
 
 // Doors list for the doors screen (out-of-range so distance label appears).
 export const doorsList = [
-  { id: "outerDoor", labelKey: "outerDoor", location: { lat: 59.858, long: 17.639 } },
-  { id: "upperFloor", labelKey: "upperFloor", location: { lat: 59.858, long: 17.639 } },
-  { id: "lowerFloor", labelKey: "lowerFloor", location: { lat: 59.858, long: 17.639 } },
+  {
+    id: "outerDoor",
+    labelKey: "outerDoor",
+    location: { lat: 59.858, long: 17.639 },
+  },
+  {
+    id: "upperFloor",
+    labelKey: "upperFloor",
+    location: { lat: 59.858, long: 17.639 },
+  },
+  {
+    id: "lowerFloor",
+    labelKey: "lowerFloor",
+    location: { lat: 59.858, long: 17.639 },
+  },
 ];
 
 // Far-away user position (~196 km from Uppsala) so the doors page shows the
