@@ -121,7 +121,8 @@ a:hover { color: var(--brand-green); }
 
 .content img {
   display: block;
-  max-width: 100%;
+  width: 100%;
+  max-width: 408px;
   height: auto;
   margin: 1.2rem auto;
   border: 1px solid var(--border);

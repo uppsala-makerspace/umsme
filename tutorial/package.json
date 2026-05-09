@@ -4,9 +4,11 @@
   "type": "module",
   "scripts": {
     "build": "node build.js",
-    "serve": "npx --yes http-server dist -p 8000 -c-1"
+    "serve": "npx --yes http-server dist -p 8000 -c-1",
+    "shoot": "node screenshot.js"
   },
   "dependencies": {
-    "markdown-it": "^14.1.0"
+    "markdown-it": "^14.1.0",
+    "ws": "^8.18.0"
   }
 }

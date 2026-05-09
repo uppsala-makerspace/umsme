@@ -9,6 +9,12 @@ const dist = resolve(root, "dist");
 
 const TUTORIALS = ["newMembers", "existingMembers", "renewMembership", "manageFamily"];
 
+// Always pull these specific files from screens-manual/, even when a
+// generated counterpart exists. Used for screens where the live runtime
+// (e.g. browser geolocation taking time to settle into an accurate
+// distance) makes the Storybook capture unreliable.
+const FORCE_MANUAL = ["doors-en.png", "doors-sv.png"];
+
 const LANGS = {
   en: { switcherLabel: "SV", siteTitle: "Tutorials", tocTitle: "Contents" },
   sv: { switcherLabel: "EN", siteTitle: "Guider", tocTitle: "Innehåll" },
@@ -203,7 +209,15 @@ for (const lang of ["en", "sv"]) {
 
 writeRootIndex();
 
-cpSync(resolve(root, "screens"), resolve(dist, "screens"), { recursive: true });
+// Lay manual captures down first so any frame not yet covered by Storybook
+// stories falls through to the original PNG; then overlay the symlinked
+// screens-generated dir which wins on name collisions; finally re-overlay
+// the FORCE_MANUAL files so they always come from screens-manual.
+cpSync(resolve(root, "screens-manual"), resolve(dist, "screens"), { recursive: true });
+cpSync(resolve(root, "screens"), resolve(dist, "screens"), { recursive: true, dereference: true });
+for (const f of FORCE_MANUAL) {
+  cpSync(resolve(root, "screens-manual", f), resolve(dist, "screens", f));
+}
 cpSync(resolve(root, "site.css"), resolve(dist, "site.css"));
 
 console.log(
