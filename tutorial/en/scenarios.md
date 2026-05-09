@@ -29,3 +29,8 @@
 * Family member gets an email, goes to the app and creates an account
 * Family member accepts invite
 * Family member can leave family
+
+# Install the app
+* Member opens the Install page from the side menu or the green "Install app" button
+* Member follows the platform-specific steps (iOS share sheet / Android install prompt / desktop QR code)
+* Member opens the installed app from the home screen and signs in

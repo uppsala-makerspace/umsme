@@ -30,4 +30,7 @@
 * Familjemedlemmen accepterar inbjudan
 * Familjemedlemmen kan lämna familjen
 
-# Installera
+# Installera appen
+* Medlem öppnar Installera-sidan från sidomenyn eller den gröna "Installera appen"-knappen
+* Medlem följer de plattformsspecifika stegen (iOS share-meny / Androids installationsdialog / dator-QR-kod)
+* Medlem öppnar den installerade appen från hemskärmen och loggar in

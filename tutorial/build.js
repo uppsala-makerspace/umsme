@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = __dirname;
 const dist = resolve(root, "dist");
 
-const TUTORIALS = ["newMembers", "existingMembers", "renewMembership", "manageFamily"];
+const TUTORIALS = ["installApp", "existingMembers", "newMembers", "renewMembership", "manageFamily"];
 
 // Always pull these specific files from screens-manual/, even when a
 // generated counterpart exists. Used for screens where the live runtime
@@ -36,6 +36,19 @@ const escapeHtml = (s) =>
     .replace(/"/g, "&quot;");
 
 const md = new MarkdownIt({ html: false, linkify: true, typographer: false });
+
+// Open external links in a new tab.
+const defaultLinkOpen =
+  md.renderer.rules.link_open ||
+  ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
+md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+  const href = tokens[idx].attrGet("href") ?? "";
+  if (/^https?:\/\//.test(href)) {
+    tokens[idx].attrSet("target", "_blank");
+    tokens[idx].attrSet("rel", "noopener noreferrer");
+  }
+  return defaultLinkOpen(tokens, idx, options, env, self);
+};
 
 md.core.ruler.push("add_heading_ids", (state) => {
   for (let i = 0; i < state.tokens.length; i++) {

@@ -8,11 +8,11 @@ import { member as memberFixture } from "./fixtures";
 
 // Browser-API stubs for tutorial screenshots. These run once per session
 // when the first tutorial story loads.
-//   - Pre-dismiss the install banner so TopBar's InstallButton returns null.
 //   - Pretend notification permission is granted so NotificationBell shows
 //     the count badge instead of the amber "!" warning.
+//   - Override matchMedia for the PWA-mode query, with the answer driven
+//     per-story by window.__TUTORIAL_PWA__ (set in withLayout below).
 if (typeof window !== "undefined") {
-  try { localStorage.setItem("pwa-install-dismissed", "true"); } catch {}
   Object.defineProperty(window, "Notification", {
     value: {
       permission: "granted",
@@ -32,6 +32,31 @@ if (typeof window !== "undefined") {
         removeEventListener: () => {},
       });
   }
+  const originalMatchMedia =
+    typeof window.matchMedia === "function" ? window.matchMedia.bind(window) : null;
+  window.__TUTORIAL_PWA__ = false;
+  window.matchMedia = (query) => {
+    if (query === "(display-mode: standalone)") {
+      return {
+        matches: !!window.__TUTORIAL_PWA__,
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+      };
+    }
+    return originalMatchMedia
+      ? originalMatchMedia(query)
+      : {
+          matches: false,
+          media: query,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          addListener: () => {},
+          removeListener: () => {},
+        };
+  };
 }
 
 // Mirrors imports/components/Layout/Layout but skips ConnectivityBanner —
@@ -73,10 +98,26 @@ const Navigator = ({ to }) => {
  *   showNotifications   show the bell icon, default true
  *   hasMember           whether HamburgerMenu should render, default true
  *   unreadCount         bell badge count, default 0
+ *   showInstallButton   keep TopBar's "Install app" prompt visible
+ *                       (default false — most stories want it hidden)
+ *   isPWA               render as if we're inside the installed PWA, so
+ *                       TopBar shows the InstalledIcon instead of the
+ *                       Install button (default false)
  *   file                filename stem for the screenshot script
  */
 export const withLayout = (Story, ctx) => {
   const t = ctx.parameters.tutorial ?? {};
+  // Per-story state that drives TopBar's Install button / InstalledIcon
+  // logic. We refresh these at every render so navigating between stories
+  // in Storybook resets state predictably.
+  if (typeof window !== "undefined") {
+    if (t.showInstallButton) {
+      try { localStorage.removeItem("pwa-install-dismissed"); } catch {}
+    } else {
+      try { localStorage.setItem("pwa-install-dismissed", "true"); } catch {}
+    }
+    window.__TUTORIAL_PWA__ = !!t.isPWA;
+  }
   return (
     <Providers unreadCount={t.unreadCount} hasMember={t.hasMember !== false}>
       <Navigator to={t.path ?? "/"} />

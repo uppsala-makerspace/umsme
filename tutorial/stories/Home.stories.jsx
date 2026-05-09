@@ -125,6 +125,38 @@ export const RenewMembership = {
   parameters: { tutorial: { path: "/", file: "renew-membership" } },
 };
 
+// Filename: install-entry-{lang}.png — same as Ready, but the green
+// "Install app" button is left visible in the top bar so the install
+// tutorial can point readers at it.
+export const InstallEntry = {
+  args: {
+    ...baseHomeArgs,
+    memberStatus: activeLabStatus,
+    liabilityDate: dates.liabilityApprovedDate,
+    liabilityOutdated: false,
+    registered: true,
+    ...messages,
+    messageCount: 2,
+  },
+  parameters: { tutorial: { path: "/", file: "install-entry", showInstallButton: true } },
+};
+
+// Filename: installed-home-{lang}.png — same as Ready, but viewed as if
+// the user is inside the installed PWA, so TopBar shows the InstalledIcon
+// (phone-shaped icon) instead of the Install button.
+export const InstalledHome = {
+  args: {
+    ...baseHomeArgs,
+    memberStatus: activeLabStatus,
+    liabilityDate: dates.liabilityApprovedDate,
+    liabilityOutdated: false,
+    registered: true,
+    ...messages,
+    messageCount: 2,
+  },
+  parameters: { tutorial: { path: "/", file: "installed-home", isPWA: true } },
+};
+
 // Filename: family-invite-{lang}.png — pending family invite welcome.
 export const FamilyInvite = {
   args: {
