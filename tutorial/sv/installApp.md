@@ -61,4 +61,23 @@ Första gången du öppnar den loggar du in med samma e-post och lösenord (elle
 
 Du ser direkt att du är i den installerade versionen: toppraden visar en liten telefonikon bredvid klockan, där den gröna **Installera appen**-knappen brukade vara.
 
+## 4. Tillåt notiser och plats
+
+När appen (eller telefonens system) frågar rekommenderar vi att du tillåter två behörigheter:
+
+- **Notiser** — så att appen kan påminna dig cirka 14 dagar innan ditt medlemskap går ut, och berätta när det kommit ett nytt utskick eller personligt meddelande från styrelsen.
+- **Plats** — behövs när du trycker på en dörrbricka för att låsa upp: makerspacet kontrollerar att du verkligen står vid entrén innan låset öppnas. Utan platsbehörighet kommer dörrbrickorna att visa *utanför räckvidd* oavsett var du är.
+
+Du får systemfrågor för var och en. Båda går att ändra senare i telefonens inställningar om du ångrar dig.
+
+## Felsökning: dörrarna går inte att öppna
+
+Om du trycker på en dörrbricka och den blir grå med texten *utanför räckvidd* trots att du står på makerspacet, är det mest troligt att appen inte har tillstånd att använda din plats. Så här rättar du till det:
+
+**På Android:** håll fingret nedtryckt på UMS-ikonen på hemskärmen, tryck på **Appinfo** (ⓘ-knappen i pop-upen), sedan **Behörigheter** → **Plats**, och välj **Tillåt endast när appen används**. Du kan också gå via *Inställningar* → *Appar* → *UMS* → *Behörigheter*.
+
+**På iPhone/iPad:** öppna *Inställningar* → *Safari* → *Plats* och se till att det inte står på **Neka**. Står det på **Fråga** ska nästa tryck på en dörrbricka i appen trigga en ny förfrågan — tryck på **Tillåt** när du ser den. (iOS hanterar webbappar på hemskärmen som en del av Safari, så platsbehörigheten ligger under Safari i stället för under en separat UMS-post i applistan.)
+
+När behörigheten är godkänd, uppdatera Dörrar-sidan eller tryck på en dörrbricka igen. Den grå texten *utanför räckvidd* ska bli en tryckbar grön cirkel.
+
 Det var det — välkommen till appen på din hemskärm!

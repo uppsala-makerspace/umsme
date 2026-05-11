@@ -61,4 +61,23 @@ The first time you open it, sign in with the email and password (or Google) you 
 
 You can tell at a glance that you're in the installed version: the top bar shows a small phone icon next to the bell, where the green **Install app** button used to be.
 
+## 4. Allow notifications and location
+
+When the app (or your phone's system) asks, we recommend allowing two permissions:
+
+- **Notifications** — so the app can remind you about 14 days before your membership expires, and let you know when there's a new announcement or a personal message from the board.
+- **Location** — needed when you tap a door tile to unlock it: the makerspace verifies that you're actually standing at the entrance before opening the lock. Without location access, the door tiles will read *out of range* no matter where you are.
+
+You'll see system prompts asking for each. Both can be changed later in your phone's settings if you change your mind.
+
+## Troubleshooting: the doors won't open
+
+If you tap a door tile and it stays grey with an *out of range* label even though you're standing at the makerspace, the most likely cause is that the app doesn't have permission to use your location. Here's how to fix that:
+
+**On Android:** long-press the UMS icon on your home screen, tap **App info** (the ⓘ button on the popup), then **Permissions** → **Location**, and pick **Allow only while using the app**. You can also reach it via *Settings* → *Apps* → *UMS* → *Permissions*.
+
+**On iPhone/iPad:** open *Settings* → *Safari* → *Location* and make sure it isn't set to **Deny**. If it's set to **Ask**, the next tap on a door tile in the app should trigger a fresh permission prompt — tap **Allow** when you see it. (iOS treats Home Screen web apps as part of Safari, so location permission lives under Safari rather than under a separate UMS entry in the app list.)
+
+Once permission is granted, refresh the Doors page or tap a door tile again. The grey *out of range* label should turn into a tappable green circle.
+
 That's it — welcome to the app on your home screen!
