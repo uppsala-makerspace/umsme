@@ -27,7 +27,29 @@ Email is sent from the admin application. See [configuration.md](configuration.m
 
 Templates define the content of messages sent to individual members. They are stored in the `MessageTemplates` collection. See [data-model.md](data-model.md) for the full schema.
 
-Templates are selected by matching `type` + `membershiptype` + `membertype` against available non-deprecated templates. The `mailAboutMemberShip()` method uses a simpler lookup: it finds the first non-deprecated template with `type: "status"`.
+Templates are selected by matching `type` + `membershiptype` + `membertype` against available non-deprecated templates.
+
+### Template Selection
+
+`findBestTemplate()` in `common/lib/message.js` picks the best non-deprecated template for a given `type`. The `auto` flag on a template marks it as automation-only, and the lookup is asymmetric depending on who's calling:
+
+- **Manual path (`auto: false`, the default)** — admin sends a message from the UI. Templates with `auto: true` are reserved for automation and are filtered out before scoring; they never surface from a manual send.
+- **Automation path (`auto: true`)** — cron jobs and other server code send messages without admin interaction. Auto-flagged templates are preferred, but a non-auto template is an acceptable fallback if no auto template fits.
+
+Among the remaining candidates, **auto-flag agreement wins first, specificity breaks ties**. So an automation caller exhausts every auto-flagged candidate (in specificity order) before falling back to any non-auto template — even a non-auto template that would be a more specific match on `membertype` / `membershiptype`.
+
+| Rank | `auto: true` caller | `auto: false` caller (after filter) |
+|------|---------------------|--------------------------------------|
+| 6 | auto + membertype + membershiptype | membertype + membershiptype |
+| 5 | auto + membershiptype | membershiptype |
+| 4 | auto (any) | any |
+| 3 | non-auto + membertype + membershiptype | — |
+| 2 | non-auto + membershiptype | — |
+| 1 | non-auto (any) | — |
+
+The lower three ranks are unreachable on the manual path because the filter has already removed every non-auto-matching template before scoring runs.
+
+`mailAboutMemberShip()` does not use this scoring. It performs a simpler lookup that returns the first non-deprecated template with `type: "status"`.
 
 ### Template Variable Substitution
 

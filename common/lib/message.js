@@ -23,15 +23,20 @@ const niceDate = (date) => {
  *   - `auto: true` is the automation path. Auto templates are preferred but
  *     a non-auto template is an acceptable fallback.
  *
- * Among the remaining candidates, specificity wins first and auto-flag
- * agreement breaks ties:
+ * Auto-flag agreement wins first, specificity breaks ties. So for an
+ * `auto: true` caller we exhaust all auto-flagged candidates by specificity
+ * before falling back to any non-auto template:
  *
- *   1. membertype + membershiptype match + auto matches
- *   2. membertype + membershiptype match + auto reversed (auto=true callers only)
- *   3. membershiptype matches              + auto matches
- *   4. membershiptype matches              + auto reversed (auto=true callers only)
- *   5. any                                 + auto matches
- *   6. any                                 + auto reversed (auto=true callers only)
+ *   1. auto matches  + membertype + membershiptype
+ *   2. auto matches  + membershiptype
+ *   3. auto matches  + any
+ *   4. auto reversed + membertype + membershiptype  (auto=true callers only)
+ *   5. auto reversed + membershiptype               (auto=true callers only)
+ *   6. auto reversed + any                          (auto=true callers only)
+ *
+ * For `auto: false` callers the lower three ranks aren't reachable because
+ * auto-flagged templates have already been filtered out — the ranking
+ * collapses to pure specificity over the non-auto pool.
  *
  * @param {Object} params
  * @param {boolean} [params.auto=false] - Preferred value of the template's auto flag
@@ -55,11 +60,13 @@ export const findBestTemplate = async (params) => {
     const membershipMatch = tpl.membershiptype === membershiptype;
     const autoMatch = !!tpl.auto === auto;
 
-    if (fullMatch && autoMatch) return 6;
-    if (fullMatch) return 5;
-    if (membershipMatch && autoMatch) return 4;
-    if (membershipMatch) return 3;
-    if (autoMatch) return 2;
+    // Auto-flag agreement is the outer ranking; specificity is the
+    // tie-breaker inside each half.
+    if (autoMatch && fullMatch) return 6;
+    if (autoMatch && membershipMatch) return 5;
+    if (autoMatch) return 4;
+    if (fullMatch) return 3;
+    if (membershipMatch) return 2;
     return 1;
   };
 
