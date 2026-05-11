@@ -1,6 +1,13 @@
 <template name="MessageTemplateView">
     <h1>Message template <small><a class="deleteTemplate">Delete</a></small></h1>
     {{> quickForm collection=MessageTemplates doc=messageTemplate id="messageTemplateViewForm" omitFields="_id" type="update" buttonContent="Update and go back to templates"}}
+    <div style="margin-top: 1em;">
+        <button type="button" class="btn btn-default testTemplates">Test templates</button>
+        <small class="text-muted" style="margin-left: 0.5em;">Compile and render the current form values with sample data so you catch syntax errors before sending.</small>
+    </div>
+    {{#if testResult}}
+        <div class="alert alert-{{testResultClass}}" style="margin-top: 1em; white-space: pre-wrap; font-family: monospace; font-size: 13px;">{{testResult}}</div>
+    {{/if}}
     {{>CommentList about=id}}
     {{>MessageTemplateDocumentation}}
 </template>
