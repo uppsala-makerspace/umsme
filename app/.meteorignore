@@ -4,6 +4,9 @@ dist/
 playwright-report/
 test-results/
 
+# Storybook static build (used by tutorial/npm run shoot, not Meteor)
+storybook-static/
+
 # Claude Code session data
 .claude/
 
