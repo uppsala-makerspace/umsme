@@ -1,41 +1,30 @@
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import { template as _template } from 'underscore';
 import { MessageTemplates } from '/imports/common/collections/templates';
+import { testTemplates } from './templateTesting';
 import './MessageTemplateDocumentation.html';
 import './MessageTemplateView.html';
 import '../comment/CommentList';
 
-// Mirrors every variable surfaced by common/lib/message.js → messageData().
-// Used by the "Test templates" button so the admin can render the template
-// with realistic-looking data without sending a real message.
-const SAMPLE_DATA = {
-  id: 'sample-id',
-  mid: 'M-001',
-  name: 'Sample Member',
-  email: 'sample@example.com',
-  family: false,
-  familyMembers: '',
-  youth: false,
-  liability: true,
-  pending: false,
-  memberStartDate: '2025-05-11',
-  memberEndDate: '2026-05-11',
-  labStartDate: '2025-05-11',
-  labEndDate: '2026-05-11',
-  amount: 1600,
-  type: 'lab',
-  discount: false,
-  startPeriod: '2026-05-11',
-  endMemberPeriod: '2027-05-11',
-  endLabPeriod: '2027-05-11',
+// Module-level reactive state for the inline test-result panel. Cleared on
+// every onCreated so navigating away and back doesn't leak the prior result.
+const testResult = new ReactiveVar(null);
+const testHasError = new ReactiveVar(false);
+
+const setTestResult = ({ hasError, message }) => {
+  testHasError.set(hasError);
+  testResult.set(message);
+};
+
+const clearTestResult = () => {
+  testHasError.set(false);
+  testResult.set(null);
 };
 
 Template.MessageTemplateView.onCreated(function() {
   Meteor.subscribe('templates');
-  this.testResult = new ReactiveVar(null);
-  this.testHasError = new ReactiveVar(false);
+  clearTestResult();
 });
 
 Template.MessageTemplateView.helpers({
@@ -50,15 +39,15 @@ Template.MessageTemplateView.helpers({
     return MessageTemplates.findOne(id);
   },
   testResult() {
-    return Template.instance().testResult.get();
+    return testResult.get();
   },
   testResultClass() {
-    return Template.instance().testHasError.get() ? 'danger' : 'success';
+    return testHasError.get() ? 'danger' : 'success';
   },
 });
 
-// Read the current form values from AutoForm so the test reflects unsaved
-// edits, falling back to the saved doc if the form isn't queryable yet.
+// Pull the current form values from quickForm if available, falling back to
+// the saved doc — so the test reflects unsaved edits.
 const currentValues = () => {
   const id = FlowRouter.getParam('_id');
   const saved = MessageTemplates.findOne(id) ?? {};
@@ -66,7 +55,7 @@ const currentValues = () => {
   try {
     live = AutoForm.getFormValues('messageTemplateViewForm')?.insertDoc ?? null;
   } catch (_) {
-    // AutoForm not ready — fall through to saved values.
+    // AutoForm not ready yet — fall through to the saved doc.
   }
   return { ...saved, ...(live ?? {}) };
 };
@@ -79,42 +68,35 @@ Template.MessageTemplateView.events({
       FlowRouter.go(`/templates`);
     }
   },
-  'click .testTemplates': function (event, instance) {
+  'click .testTemplates': function (event) {
     event.preventDefault();
-    const doc = currentValues();
-    const errors = [];
-    const renders = [];
-    for (const field of ['subject', 'messagetext', 'sms']) {
-      const src = doc[field];
-      if (!src) continue;
-      try {
-        const out = _template(src)(SAMPLE_DATA);
-        renders.push(`--- ${field} ---\n${out}`);
-      } catch (err) {
-        errors.push(`${field}: ${err.message}`);
-      }
-    }
-    if (errors.length) {
-      instance.testHasError.set(true);
-      instance.testResult.set(`Errors:\n\n${errors.join('\n\n')}`);
-    } else if (renders.length === 0) {
-      instance.testHasError.set(true);
-      instance.testResult.set('No template fields are set — nothing to test.');
-    } else {
-      instance.testHasError.set(false);
-      instance.testResult.set(`All templates rendered with sample data.\n\n${renders.join('\n\n')}`);
-    }
+    setTestResult(testTemplates(currentValues()));
   },
 });
 
 AutoForm.hooks({
   messageTemplateViewForm: {
-    beginSubmit: function() {
+    // Validate before the update runs. If any template field fails to
+    // compile, surface the error inline and cancel the save.
+    before: {
+      update: function (modifier) {
+        const result = testTemplates(currentValues());
+        if (result.hasError) {
+          setTestResult(result);
+          this.result(false);
+          return;
+        }
+        return modifier;
+      },
+    },
+    beginSubmit: function () {
       this.updateDoc.$set.modified = new Date();
     },
-
-    endSubmit: function (doc) {
+    // Navigate away only on a successful save — endSubmit fires even when
+    // before.update cancels, so using it here would leave the page after a
+    // failed validation, hiding the inline error.
+    onSuccess: function () {
       FlowRouter.go('/templates');
-    }
-  }
+    },
+  },
 });

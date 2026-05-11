@@ -2,6 +2,13 @@
     <a href="../templates" style="float: right">Back to template list</a>
     <h1>Template Add</h1>
     {{> quickForm collection=MessageTemplates id="insertTemplateForm" type="normal" validation="keyup" omitFields="deprecated,created,modified"}}
+    <div style="margin-top: 1em;">
+        <button type="button" class="btn btn-default testTemplates">Test templates</button>
+        <small class="text-muted" style="margin-left: 0.5em;">Compile and render the current form values with sample data. The template can't be created until all fields compile.</small>
+    </div>
+    {{#if testResult}}
+        <div class="alert alert-{{testResultClass}}" style="margin-top: 1em; white-space: pre-wrap; font-family: monospace; font-size: 13px;">{{testResult}}</div>
+    {{/if}}
 
     {{>MessageTemplateDocumentation}}
 </template>
