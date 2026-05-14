@@ -19,6 +19,19 @@ Template.AdminConsole.onCreated(function() {
 });
 
 Template.AdminConsole.events({
+  'click .forceSyncDoorUnlocks': function (event) {
+    if (!confirm('Run the Danalock unlock sync now?')) return;
+    const button = event.currentTarget;
+    button.disabled = true;
+    Meteor.call('forceSyncDoorUnlocks', (err, res) => {
+      button.disabled = false;
+      if (err) {
+        alert(`Sync failed: ${err.reason || err.message || err}`);
+      } else {
+        alert(res || 'Sync done.');
+      }
+    });
+  },
   'click .updateMembers': function (event) {
     if (confirm('Update dates from membership information?')) {
       Meteor.call('updateMembers');
