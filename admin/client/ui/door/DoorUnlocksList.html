@@ -1,4 +1,7 @@
 <template name="DoorUnlocksList">
     <h1>Door unlocks</h1>
-    {{> tabular table=TabularTables.DoorUnlocks class="table table-hover table-striped table-bordered table-condensed"}}
+    <p>
+        <label><input type="checkbox" class="toggleNames"> Show names</label>
+    </p>
+    {{> tabular table=TabularTables.DoorUnlocks class="table table-hover table-striped table-bordered table-condensed doorUnlocksTable"}}
 </template>

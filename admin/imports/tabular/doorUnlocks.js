@@ -18,11 +18,19 @@ const doorUnlockDefaults = {
     },
   }, {
     data: 'memberid',
-    title: 'Member',
+    title: 'Member ID',
+    render(value) {
+      return new Spacebars.SafeString(`<a target="_blank" href="/member/${value}">${value}</a>`);
+    },
+  }],
+  append: [{
+    data: 'memberid',
+    name: 'memberName',
+    title: 'Name',
+    visible: false,
     render(value) {
       const m = Members.findOne(value);
-      const label = m ? `${m.name} ↗` : value;
-      return new Spacebars.SafeString(`<a target="_blank" href="/member/${value}">${label}</a>`);
+      return m ? m.name : '';
     },
   }],
 };
