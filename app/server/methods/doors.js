@@ -127,6 +127,7 @@ Meteor.methods({
       timestamp: new Date(),
       door: lockId,
       memberid: member._id,
+      method: 'app',
     });
 
     return { success: true, message: `Lock ${lockId} unlocked` };

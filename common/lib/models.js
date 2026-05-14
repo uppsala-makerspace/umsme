@@ -488,6 +488,7 @@ export const models = {
     timestamp: { label: "Timestamp", type: Date },
     door: { label: "Door", type: String, max: 50 },
     memberid: { label: "Member ID", type: String, max: 25 },
+    method: { label: "Method", type: String, allowedValues: ['app', 'danalock'] },
   },
   comment: {
     text: { label: "Text", type: String, max: 2000, optional: true },

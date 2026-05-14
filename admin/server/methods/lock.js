@@ -101,7 +101,7 @@ export const syncUnlocks = async () => {
       continue;
     }
 
-    await DoorUnlocks.insertAsync({ timestamp, door: 'frontDoor', memberid: member._id });
+    await DoorUnlocks.insertAsync({ timestamp, door: 'frontDoor', memberid: member._id, method: 'danalock' });
     importedCount += 1;
   }
   return importedCount;
