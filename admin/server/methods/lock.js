@@ -1,5 +1,6 @@
 import { fetch, Headers } from 'meteor/fetch';
-import { Unlocks } from '/imports/common/collections/unlocks';
+import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
+import { Members } from '/imports/common/collections/members';
 import { Email } from 'meteor/email';
 import { isEmailAllowed } from '/imports/common/server/emailGuard';
 
@@ -89,13 +90,19 @@ export const syncUnlocks = async () => {
   for(let i=0; i<lockLog.length;i++) {
     const event = lockLog[i];
     const timestamp = new Date(event.timestamp);
-    const unlock = await Unlocks.findOneAsync({ timestamp });
-    if (!unlock) {
-      const colonLocation = event.username.lastIndexOf(':')
-      const username = colonLocation === -1 ? event.username : event.username.substr(0, colonLocation + 1);
-      await Unlocks.insertAsync({timestamp: timestamp, username: username, user: event.user});
-      importedCount += 1;
+    const existing = await DoorUnlocks.findOneAsync({ timestamp, door: 'frontDoor' });
+    if (existing) continue;
+
+    const colonLocation = event.username.lastIndexOf(':');
+    const email = colonLocation === -1 ? event.username : event.username.substring(0, colonLocation);
+    const member = await Members.findOneAsync({ email });
+    if (!member) {
+      console.warn(`syncUnlocks: skipping event at ${event.timestamp} — no member with email "${email}" (raw username "${event.username}")`);
+      continue;
     }
+
+    await DoorUnlocks.insertAsync({ timestamp, door: 'frontDoor', memberid: member._id });
+    importedCount += 1;
   }
   return importedCount;
 };
@@ -116,14 +123,14 @@ Meteor.methods({
     const today = new Date();
     const yesterday = new Date();
     yesterday.setHours(-25);
-    const unlocks = Unlocks.find({
+    const unlocks = await DoorUnlocks.find({
       'timestamp': {
         $gte: yesterday,
         $lt: today
       }
-    }).fetch();
+    }).fetchAsync();
 
-    const log = unlocks.map(t => `${t.timestamp.toISOString()} ${t.user}`).join("\n");
+    const log = unlocks.map(t => `${t.timestamp.toISOString()} ${t.door} ${t.memberid}`).join("\n");
     const message = `${unlocks.length} låsöppningar av ytterdörren från ${yesterday.toISOString()} till ${today.toISOString()}\n\n${log}`;
     if (!isEmailAllowed('mpalmer@gmail.com')) {
       console.log('Lock history email blocked by whitelist');

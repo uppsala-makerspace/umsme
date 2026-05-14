@@ -484,6 +484,11 @@ export const models = {
     username: { label: "Username", type: String, max: 50 },
     user: { label: "User", type: String, max: 25 },
   },
+  doorunlocks: {
+    timestamp: { label: "Timestamp", type: Date },
+    door: { label: "Door", type: String, max: 50 },
+    memberid: { label: "Member ID", type: String, max: 25 },
+  },
   comment: {
     text: { label: "Text", type: String, max: 2000, optional: true },
     created: { label: "Date", type: Date },

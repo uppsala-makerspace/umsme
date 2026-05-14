@@ -4,6 +4,7 @@ import { findForUser, hasActiveLabMembership, isMemberRegistered } from "/server
 import { LiabilityDocuments } from "/imports/common/collections/liabilityDocuments";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Attestations } from "/imports/common/collections/attestations";
+import { DoorUnlocks } from "/imports/common/collections/doorunlocks";
 
 const getHomeAssistantConfig = () => {
   const config = Meteor.settings.private?.homeAssistant;
@@ -121,6 +122,12 @@ Meteor.methods({
       }
       console.log(`Lock ${lockId} (${lock.entityId}) unlocked by user ${Meteor.userId()}`);
     }
+
+    await DoorUnlocks.insertAsync({
+      timestamp: new Date(),
+      door: lockId,
+      memberid: member._id,
+    });
 
     return { success: true, message: `Lock ${lockId} unlocked` };
   },

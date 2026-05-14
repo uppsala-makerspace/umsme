@@ -17,6 +17,7 @@ export const schemas = {
   mails: new SimpleSchema(models.mail),
   comments: new SimpleSchema(models.comment),
   unlocks: new SimpleSchema(models.unlocks),
+  doorunlocks: new SimpleSchema(models.doorunlocks),
   users: new SimpleSchema(models.users),
   initiatedPayments: new SimpleSchema(models.initiatedPayments),
   liabilityDocument: new SimpleSchema(models.liabilityDocument),

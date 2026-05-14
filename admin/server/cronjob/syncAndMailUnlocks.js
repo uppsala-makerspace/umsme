@@ -1,4 +1,4 @@
-import { Unlocks } from '/imports/common/collections/unlocks';
+import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { Email } from 'meteor/email'
 import { authenticate, syncUnlocks } from "../methods/lock";
 import { SyncedCron } from 'meteor/chatra:synced-cron';
@@ -16,21 +16,27 @@ if (Meteor.isServer) {
       const today = new Date();
       const yesterday = new Date();
       yesterday.setHours(-23);
-      const unlocks = await Unlocks.find({
+      const unlocks = await DoorUnlocks.find({
         'timestamp': {
           $gte: yesterday,
           $lt: today
         }
       }).fetchAsync();
 
-      const log = unlocks.map(t => `${t.timestamp.toISOString()} ${t.user}`).join("\n");
-      const message = `${unlocks.length} låsöppningar av ytterdörren från ${yesterday.toISOString()} till ${today.toISOString()}\n\n${log}`;
-      const recipients = ['pass@ekebyindustrihus.com', 'mpalmer@gmail.com'];
+      const log = unlocks.map(t => `${t.timestamp.toISOString()} ${t.door} ${t.memberid}`).join("\n");
+      const message = `${unlocks.length} låsöppningar från ${yesterday.toISOString()} till ${today.toISOString()}\n\n${log}`;
+
+      const mailConfig = Meteor.settings.private?.doorunlockMail;
+      if (!mailConfig?.enabled) {
+        return message;
+      }
+      const recipients = mailConfig.recipients || [];
+      const from = mailConfig.from || 'kansliet@uppsalamakerspace.se';
       for (const to of recipients) {
         if (isEmailAllowed(to)) {
           await Email.sendAsync({
             to,
-            from: 'kansliet@uppsalamakerspace.se',
+            from,
             subject: 'Låsöppningar UMS',
             text: message
           });

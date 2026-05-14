@@ -7,6 +7,7 @@ import { Payments } from '/imports/common/collections/payments';
 import { Mails } from '/imports/common/collections/mails';
 import { Comments } from '/imports/common/collections/comments';
 import { Unlocks } from '/imports/common/collections/unlocks';
+import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Certificates } from '/imports/common/collections/certificates';
@@ -30,6 +31,7 @@ export default () => {
   Meteor.publish('payments', createAuthFuncFor(Payments));
   Meteor.publish('comments', createAuthFuncFor(Comments));
   Meteor.publish('unlocks', createAuthFuncFor(Unlocks));
+  Meteor.publish('doorunlocks', createAuthFuncFor(DoorUnlocks));
   Meteor.publish('users', createAuthFuncFor(Meteor.users));
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
   Meteor.publish('initiatedPayments', createAuthFuncFor(initiatedPayments));
