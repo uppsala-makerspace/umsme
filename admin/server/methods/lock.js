@@ -90,7 +90,7 @@ export const syncUnlocks = async () => {
   for(let i=0; i<lockLog.length;i++) {
     const event = lockLog[i];
     const timestamp = new Date(event.timestamp);
-    const existing = await DoorUnlocks.findOneAsync({ timestamp, door: 'frontDoor' });
+    const existing = await DoorUnlocks.findOneAsync({ timestamp, door: 'outerDoor' });
     if (existing) continue;
 
     const colonLocation = event.username.lastIndexOf(':');
@@ -101,7 +101,7 @@ export const syncUnlocks = async () => {
       continue;
     }
 
-    await DoorUnlocks.insertAsync({ timestamp, door: 'frontDoor', memberid: member._id, method: 'danalock' });
+    await DoorUnlocks.insertAsync({ timestamp, door: 'outerDoor', memberid: member._id, method: 'danalock' });
     importedCount += 1;
   }
   return importedCount;
