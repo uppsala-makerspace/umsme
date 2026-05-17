@@ -25,6 +25,8 @@
     {{#if patron}}
     <h2>Family members <small><a href="/member/{{id}}/add">Add existing</a> <a href="/members/add?infamily={{id}}">Add new</a></small></h2>
     {{> FamilyList patron=id}}
+    <h2>Pending invites</h2>
+    {{> FamilyInviteList patron=id}}
     {{/if}}
     {{#unless member.infamily}}
     <h2>Memberships <small><a href="/memberships/add?member={{id}}">Add</a></small></h2>

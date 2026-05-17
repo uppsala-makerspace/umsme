@@ -11,6 +11,7 @@ import './MemberStatus';
 import '../message/MessageList';
 import '../membership/MembershipList';
 import '../family/FamilyList';
+import '../family/FamilyInviteList';
 import '../message/ReminderMessage';
 import '../certificates/MemberAttestations';
 
@@ -19,6 +20,7 @@ Template.MemberView.onCreated(function() {
   Meteor.subscribe('memberships');
   Meteor.subscribe('messages');
   Meteor.subscribe('users');
+  Meteor.subscribe('invites');
 });
 
 Template.MemberView.events({

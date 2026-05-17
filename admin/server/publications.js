@@ -13,6 +13,7 @@ import { LiabilityDocuments } from '/imports/common/collections/liabilityDocumen
 import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
 import { Announcements } from '/imports/common/collections/announcements';
+import Invites from '/imports/common/collections/Invites';
 
 const createAuthFuncFor = (col) => async function () {
   if (
@@ -39,6 +40,7 @@ export default () => {
   Meteor.publish('certificates', createAuthFuncFor(Certificates));
   Meteor.publish('attestations', createAuthFuncFor(Attestations));
   Meteor.publish('announcements', createAuthFuncFor(Announcements));
+  Meteor.publish('invites', createAuthFuncFor(Invites));
 
   Meteor.publish(null, async function () {
     if (this.userId) {
