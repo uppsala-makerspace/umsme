@@ -66,6 +66,12 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
     setAddFamilyMemberMode(true)
   }
 
+  const cancelNewMember = () => {
+    setNewFamilyMemberInfo({})
+    setNewFamilyMemberError({})
+    setAddFamilyMemberMode(false)
+  }
+
   const handleUpdateNewFamilyMemberEmail = (value) => {
     setNewFamilyMemberInfo({email: value})
   }
@@ -168,7 +174,10 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
                 error={newFamilyMemberError.errorMassages?.join(", ")}
               />
             </form>
-            <Button fullWidth onClick={saveNewMember}><FontAwesomeIcon icon={faPaperPlane} /> {t("SendInvite")}</Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" className="flex-1" onClick={cancelNewMember}>{t("cancel")}</Button>
+              <Button className="flex-1" onClick={saveNewMember}><FontAwesomeIcon icon={faPaperPlane} /> {t("SendInvite")}</Button>
+            </div>
           </>
           :
           payingFamilyMember && (familyMembers?.length || 0) + (familyInvites?.length || 0) < 4 && (
