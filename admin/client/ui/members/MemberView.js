@@ -12,6 +12,7 @@ import '../message/MessageList';
 import '../membership/MembershipList';
 import '../family/FamilyList';
 import '../family/FamilyInviteList';
+import '../family/MemberInvitesReceived';
 import '../message/ReminderMessage';
 import '../certificates/MemberAttestations';
 

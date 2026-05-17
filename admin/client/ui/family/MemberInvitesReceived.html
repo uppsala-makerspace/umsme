@@ -1,0 +1,14 @@
+<template name="MemberInvitesReceived">
+    {{#if invites.length}}
+        <h2>Invitations to other families</h2>
+        <ul class="memberInvitesReceived">
+            {{#each invite in invites}}
+            <li>
+                From
+                <a href="/member/{{invite.infamily}}">{{#if invite.inviter}}{{invite.inviter.name}}{{else}}{{invite.infamily}}{{/if}}</a>
+                <small><a class="declineInvite" href="#" data-id="{{invite._id}}">Decline</a></small>
+            </li>
+            {{/each}}
+        </ul>
+    {{/if}}
+</template>

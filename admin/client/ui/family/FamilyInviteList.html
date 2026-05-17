@@ -1,9 +1,13 @@
 <template name="FamilyInviteList">
-    {{#if invites.count}}
+    {{#if invites.length}}
         <ul class="familyInviteList">
             {{#each invite in invites}}
             <li>
-                {{invite.email}}
+                {{#if invite.invitee}}
+                    <a href="/member/{{invite.invitee._id}}">{{invite.invitee.name}}</a> {{invite.email}}
+                {{else}}
+                    {{invite.email}}
+                {{/if}}
                 <small><a class="cancelInvite" href="#" data-id="{{invite._id}}">Cancel</a></small>
             </li>
             {{/each}}

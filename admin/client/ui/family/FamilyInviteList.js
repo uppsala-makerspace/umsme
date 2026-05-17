@@ -1,5 +1,6 @@
 import { Template } from 'meteor/templating';
 import Invites from '/imports/common/collections/Invites';
+import { Members } from '/imports/common/collections/members';
 import './FamilyInviteList.html';
 
 Template.FamilyInviteList.onCreated(function () {
@@ -8,7 +9,10 @@ Template.FamilyInviteList.onCreated(function () {
 
 Template.FamilyInviteList.helpers({
   invites() {
-    return Invites.find({ infamily: this.patron });
+    return Invites.find({ infamily: this.patron }).map(invite => ({
+      ...invite,
+      invitee: Members.findOne({ email: invite.email }),
+    }));
   },
 });
 
