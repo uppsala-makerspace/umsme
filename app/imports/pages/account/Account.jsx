@@ -1,4 +1,4 @@
-import { faPen, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { default as React, useState } from "react";
@@ -168,7 +168,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
                 error={newFamilyMemberError.errorMassages?.join(", ")}
               />
             </form>
-            <Button fullWidth onClick={saveNewMember}><FontAwesomeIcon icon={faSave} /> {t("Save")}</Button>
+            <Button fullWidth onClick={saveNewMember}><FontAwesomeIcon icon={faPaperPlane} /> {t("SendInvite")}</Button>
           </>
           :
           payingFamilyMember && (familyMembers?.length || 0) + (familyInvites?.length || 0) < 4 && (

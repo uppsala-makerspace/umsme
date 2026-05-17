@@ -144,6 +144,7 @@
   "MembershipID": "Membership ID:",
   "BackToStart": "Back to start",
   "AddFamilyMember": "Add family member",
+  "SendInvite": "Send invite",
   "familyInviteText": "You have been invited to join a family. Would you like to accept or decline?",
   "acceptInvite": "Accept invite",
   "declineInvite": "Decline invite",
