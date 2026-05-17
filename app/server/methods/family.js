@@ -1,6 +1,11 @@
 import { Meteor } from "meteor/meteor";
+import { Accounts } from "meteor/accounts-base";
+import { Email } from "meteor/email";
 import Invites from "/imports/common/collections/Invites";
 import { Members } from "/imports/common/collections/members";
+import { Messages } from "/imports/common/collections/messages";
+import { findBestTemplate, messageData } from "/imports/common/lib/message";
+import { isEmailAllowed } from "/imports/common/server/emailGuard";
 import {findMemberForUser} from "/server/methods/utils";
 
 Meteor.methods({
@@ -39,7 +44,34 @@ Meteor.methods({
     }
 
     await Invites.insertAsync({email, infamily: member._id});
-    // TODO send email.
+
+    const tpl = await findBestTemplate({ type: 'invite' });
+    if (!tpl) {
+      console.warn(`inviteFamilyMember: no 'invite' template configured — invite saved but no email sent to ${email}.`);
+      return true;
+    }
+    if (!isEmailAllowed(email)) {
+      console.log(`inviteFamilyMember: email to ${email} blocked by whitelist; invite saved.`);
+      return true;
+    }
+
+    const data = await messageData(member._id, tpl._id);
+    const from = Accounts.emailTemplates.from || "no-reply@uppsalamakerspace.se";
+
+    await Email.sendAsync({ to: email, from, subject: data.subject, text: data.messagetext });
+
+    await Messages.insertAsync({
+      template: tpl._id,
+      member: member._id,
+      type: 'invite',
+      to: email,
+      subject: data.subject,
+      senddate: new Date(),
+      messagetext: data.messagetext,
+    });
+
+    console.log(`inviteFamilyMember: ${member.name} <${member.email}> sent invite to ${email}.`);
+
     return true;
   },
 
