@@ -51,6 +51,40 @@ a:hover { color: var(--brand-green); }
   color: var(--text);
 }
 
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.breadcrumb a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--brand-green-dark);
+}
+
+.breadcrumb .breadcrumb-sep {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.breadcrumb .breadcrumb-current {
+  font-weight: 400;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
 .lang-switcher {
   display: inline-block;
   padding: 4px 10px;
@@ -76,15 +110,12 @@ a:hover { color: var(--brand-green); }
   padding: 32px 20px 64px;
 }
 
-.page-tutorial .layout {
+.page-tutorial .layout,
+.page-landing .layout {
   display: grid;
   grid-template-columns: 240px 1fr;
   gap: 40px;
   align-items: start;
-}
-
-.page-landing .layout {
-  max-width: 720px;
 }
 
 /* --- Content --- */
@@ -237,6 +268,13 @@ a:hover { color: var(--brand-green); }
   border-left-color: var(--brand-green);
 }
 
+.toc-list a.active {
+  background: var(--bg);
+  color: var(--brand-green-dark);
+  border-left-color: var(--brand-green);
+  font-weight: 600;
+}
+
 .toc-h3 a { padding-left: 22px; font-size: 0.86rem; }
 
 /* Hamburger button — lives in the header, hidden on wide screens */
@@ -280,7 +318,8 @@ a:hover { color: var(--brand-green); }
 /* --- Narrow screens: hamburger in header replaces sidebar --- */
 
 @media (max-width: 768px) {
-  .page-tutorial .layout {
+  .page-tutorial .layout,
+  .page-landing .layout {
     display: block;
   }
   .toc-button {
