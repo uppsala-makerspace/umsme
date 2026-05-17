@@ -487,7 +487,8 @@ export const models = {
   doorunlocks: {
     timestamp: { label: "Timestamp", type: Date },
     door: { label: "Door", type: String, max: 50 },
-    memberid: { label: "Member ID", type: String, max: 25 },
+    memberid: { label: "Member ID", type: String, max: 25, optional: true },
+    extid: { label: "External ID", type: String, max: 100, optional: true },
     method: { label: "Method", type: String, allowedValues: ['app', 'danalock'] },
   },
   comment: {

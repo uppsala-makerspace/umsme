@@ -20,7 +20,13 @@ const doorUnlockDefaults = {
     data: 'memberid',
     title: 'Member ID',
     render(value) {
+      if (!value) return '';
       return new Spacebars.SafeString(`<a target="_blank" href="/member/${value}">${value}</a>`);
+    },
+  }, {
+    data: 'extid',
+    render(value) {
+      return value || '';
     },
   }],
   append: [{

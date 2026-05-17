@@ -4,6 +4,10 @@
         <p class="text-muted">Runs the same sync as the cron job: pulls recent Danalock unlocks into doorunlocks and (if enabled in settings) sends the daily summary email.</p>
         <button class="forceSyncDoorUnlocks btn btn-primary">Sync now</button>
 
+        <h1>Migrate legacy unlocks to doorunlocks</h1>
+        <p class="text-muted">Copies every row in the legacy <code>unlocks</code> collection into <code>doorunlocks</code> and then empties <code>unlocks</code>. Re-runnable: rows already in <code>doorunlocks</code> are skipped. Usernames that don't match a member's email are stored in an <code>extid</code> field instead of <code>memberid</code>.</p>
+        <button class="migrateUnlocks btn btn-primary">Migrate now</button>
+
         <h1>Update members with correct dates</h1>
         <button class="updateMembers">Update now!</button>
         <h1>Detect mobile numbers in payments</h1>

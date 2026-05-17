@@ -32,6 +32,19 @@ Template.AdminConsole.events({
       }
     });
   },
+  'click .migrateUnlocks': function (event) {
+    if (!confirm('Migrate the legacy unlocks collection into doorunlocks (and empty it)?')) return;
+    const button = event.currentTarget;
+    button.disabled = true;
+    Meteor.call('migrateUnlocksToDoorUnlocks', (err, res) => {
+      button.disabled = false;
+      if (err) {
+        alert(`Migration failed: ${err.reason || err.message || err}`);
+      } else {
+        alert(`Scanned ${res.scanned}: ${res.withMember} matched a member, ${res.withExtid} stored as extid, ${res.skipped} already present.`);
+      }
+    });
+  },
   'click .updateMembers': function (event) {
     if (confirm('Update dates from membership information?')) {
       Meteor.call('updateMembers');

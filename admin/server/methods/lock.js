@@ -96,12 +96,14 @@ export const syncUnlocks = async () => {
     const colonLocation = event.username.lastIndexOf(':');
     const email = colonLocation === -1 ? event.username : event.username.substring(0, colonLocation);
     const member = await Members.findOneAsync({ email });
-    if (!member) {
-      console.warn(`syncUnlocks: skipping event at ${event.timestamp} — no member with email "${email}" (raw username "${event.username}")`);
-      continue;
+    const doc = { timestamp, door: 'outerDoor', method: 'danalock' };
+    if (member) {
+      doc.memberid = member._id;
+    } else {
+      doc.extid = `${event.user}-${email}`;
+      console.warn(`syncUnlocks: no member with email "${email}" (raw "${event.username}", user "${event.user}") — storing as extid "${doc.extid}"`);
     }
-
-    await DoorUnlocks.insertAsync({ timestamp, door: 'outerDoor', memberid: member._id, method: 'danalock' });
+    await DoorUnlocks.insertAsync(doc);
     importedCount += 1;
   }
   return importedCount;
