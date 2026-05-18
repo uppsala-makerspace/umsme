@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import { ReactiveVar } from 'meteor/reactive-var';
 import { Members } from '/imports/common/collections/members.js';
 import { Memberships } from "/imports/common/collections/memberships";
 import { Payments } from "/imports/common/collections/payments";
@@ -14,6 +15,7 @@ Template.MembershipView.onCreated(function() {
   Meteor.subscribe('memberships');
   Meteor.subscribe('members');
   Meteor.subscribe('payments');
+  this.familyUnchecked = new ReactiveVar(false);
 });
 Template.MembershipView.helpers({
   Members() {
@@ -54,9 +56,20 @@ Template.MembershipView.helpers({
       return Members.findOne(membership.mid);
     }
   },
+  familyDependentsWarning() {
+    if (!Template.instance().familyUnchecked.get()) return null;
+    const id = FlowRouter.getParam('_id');
+    const ms = Memberships.findOne(id);
+    if (!ms) return null;
+    const names = Members.find({ infamily: ms.mid }).map((m) => m.name);
+    return names.length ? names.join(', ') : null;
+  },
 });
 
 Template.MembershipView.events({
+  'change [name="family"]'(event, instance) {
+    instance.familyUnchecked.set(!event.currentTarget.checked);
+  },
   'click .deleteMembership': function (event) {
     if (confirm('Delete this membership record')) {
       const id = FlowRouter.getParam('_id');

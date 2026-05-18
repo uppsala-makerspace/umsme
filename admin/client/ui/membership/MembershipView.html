@@ -2,6 +2,11 @@
     <h1>Membership for <a href="/member/{{member._id}}">{{member.name}}</a></h1>
     <a class="deleteMembership">Delete</a>
     {{> quickForm collection=Memberships doc=membership id="membershipViewForm" omitFields="_id" type="update" buttonContent="Update and go back to member"}}
+    {{#if familyDependentsWarning}}
+    <div class="alert alert-warning">
+      The following family members will loose access immediately: {{familyDependentsWarning}}
+    </div>
+    {{/if}}
 
     {{#if payment}}
     <h2><a href="/payment/{{payment._id}}">Bank payment</a> <small><a class="removePaymentFromMembership">Disconnect</a></small></h2>

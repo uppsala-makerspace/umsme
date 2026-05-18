@@ -31,6 +31,7 @@ export default function MembershipSelectionPage() {
 
   const member = memberInfo?.member || null;
   const memberStatus = memberInfo?.status || null;
+  const familyMembers = memberInfo?.familyMembers || [];
   const isLoading = memberInfoLoading || appDataLoading || !paymentOptions;
 
   // Initialize checkbox state from memberStatus (only once after loading)
@@ -88,6 +89,7 @@ export default function MembershipSelectionPage() {
         isFamily={isFamily}
         isFamilyMember={!!member?.infamily}
         familyLocked={checkboxState.familyLocked}
+        familyMembers={familyMembers}
         disabledMessage={disabledMessage}
         onSelectOption={handleSelectOption}
         onDiscountedChange={setIsDiscounted}

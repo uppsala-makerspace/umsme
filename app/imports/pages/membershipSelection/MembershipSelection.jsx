@@ -35,6 +35,7 @@ export default function MembershipSelection({
   isFamily = false,
   isFamilyMember = false,
   familyLocked = false,
+  familyMembers = [],
   disabledMessage,
   onSelectOption,
   onDiscountedChange,
@@ -185,6 +186,14 @@ export default function MembershipSelection({
               </span>
             </div>
           </label>
+        )}
+
+        {!isFamily && memberStatus?.family && familyMembers.length > 0 && (
+          <div className="p-3 bg-yellow-100 border border-yellow-400 rounded text-yellow-800 text-sm">
+            {t("familyDowngradeWarning", {
+              names: familyMembers.map((m) => m.name).join(", "),
+            })}
+          </div>
         )}
       </div>
 

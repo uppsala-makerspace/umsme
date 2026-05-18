@@ -298,6 +298,7 @@
   "disabledHasYearlyLab": "Du har redan ett årslabbmedlemskap",
   "disabledRenewYearlyFirst": "Förnya årsmedlemskapet först",
   "familyLockedUntilRenewal": "Familjestatus kan endast ändras vid förnyelse",
+  "familyDowngradeWarning": "Följande familjemedlemmar kommer omedelbart att förlora åtkomst: {{names}}",
 
   "installApp": "Installera appen",
   "installed": "Installerad",

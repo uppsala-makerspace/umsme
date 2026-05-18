@@ -299,6 +299,7 @@
   "disabledHasYearlyLab": "You already have a yearly lab membership",
   "disabledRenewYearlyFirst": "Renew yearly membership first",
   "familyLockedUntilRenewal": "Family status can only be changed during renewal",
+  "familyDowngradeWarning": "The following family members will loose access immediately: {{names}}",
 
   "installApp": "Install app",
   "installed": "Installed",
