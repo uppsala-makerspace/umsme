@@ -38,3 +38,4 @@ chatra:synced-cron
 roles
 accounts-google
 service-configuration
+matb33:collection-hooks@2.1.0

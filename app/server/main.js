@@ -1,4 +1,5 @@
 import { Meteor } from "meteor/meteor";
+import "/imports/common/server/familyCascade";
 import "./methods";
 import "./accounts";
 

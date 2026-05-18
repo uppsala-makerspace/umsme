@@ -129,24 +129,14 @@ async function updateMemberDenormalizedFields(memberId, result) {
   // Clear any previous payment error
   updateFields.paymentError = null;
 
-  // Update the primary member
+  // Update the primary member. The family-cascade hook
+  // (common/server/familyCascade.js) propagates member/lab/family to any
+  // dependents (Members with infamily === memberId), so no explicit
+  // multi-update is needed here.
   await Members.updateAsync(
     { _id: memberId },
     { $set: updateFields }
   );
-
-  // If this is a family membership, also update all family members
-  // Family members are those with infamily pointing to this member
-  if (family) {
-    const familyMemberCount = await Members.find({ infamily: memberId }).countAsync();
-    if (familyMemberCount > 0) {
-      await Members.updateAsync(
-        { infamily: memberId },
-        { $set: updateFields },
-        { multi: true }
-      );
-    }
-  }
 }
 
 /**

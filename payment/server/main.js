@@ -7,6 +7,7 @@ import '/imports/common/collections/memberships';
 import '/imports/common/collections/messages';
 import '/imports/common/collections/templates';
 import '/imports/common/collections/pushSubs';
+import '/imports/common/server/familyCascade';
 import './api/swish';
 import './api/status';
 import { initPush } from '/imports/common/server/push';
