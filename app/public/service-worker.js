@@ -6,6 +6,11 @@ const ITEMS_STORE = "items";
 const SETTINGS_STORE = "settings";
 const CHANNEL_NAME = "notifications";
 
+const CACHE_VERSION = 1;
+const SHELL_CACHE = `umsme-shell-v${CACHE_VERSION}`;
+const ASSETS_CACHE = `umsme-assets-v${CACHE_VERSION}`;
+const ASSET_PATH_RE = /\.(?:js|mjs|css|svg|png|jpg|jpeg|webp|ico|woff2?)$/;
+
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -48,11 +53,59 @@ self.addEventListener("install", () => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async () => {
+    const keep = new Set([SHELL_CACHE, ASSETS_CACHE]);
+    for (const name of await caches.keys()) {
+      if (name.startsWith("umsme-") && !keep.has(name)) {
+        await caches.delete(name);
+      }
+    }
+    await self.clients.claim();
+  })());
 });
 
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(SHELL_CACHE);
+  const cached = await cache.match(request);
+  const networkFetch = fetch(request)
+    .then((response) => {
+      if (response && response.ok) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    })
+    .catch(() => undefined);
+  return cached || (await networkFetch) || Response.error();
+}
+
+async function cacheFirst(request) {
+  const cache = await caches.open(ASSETS_CACHE);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response && response.ok) {
+    cache.put(request, response.clone());
+  }
+  return response;
+}
+
 self.addEventListener("fetch", (event) => {
-  event.respondWith(fetch(event.request));
+  const { request } = event;
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith("/sockjs/")) return;
+  if (url.pathname.startsWith("/__meteor__/")) return;
+
+  if (request.mode === "navigate") {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  if (ASSET_PATH_RE.test(url.pathname) || url.pathname === "/manifest.json") {
+    event.respondWith(cacheFirst(request));
+  }
 });
 
 self.addEventListener("push", (event) => {
