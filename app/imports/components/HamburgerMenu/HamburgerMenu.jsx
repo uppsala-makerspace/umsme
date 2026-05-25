@@ -71,15 +71,46 @@ export const HamburgerMenu = () => {
             { to: "/liability", label: "liability" },
             { to: "/install", label: "installApp" },
             { to: "/contact", label: "contactUs" },
-          ].map(({ to, label }) => (
-            <li key={to} className="text-lg font-bold mx-4 my-2 cursor-pointer">
-              {location.pathname === to ? (
-                <span className="text-brand-green cursor-default">{t(label)}</span>
-              ) : (
-                <Link to={to} className="no-underline text-black">{t(label)}</Link>
-              )}
-            </li>
-          ))}
+          ].flatMap(({ to, label }) => {
+            const item = (
+              <li key={to} className="text-lg font-bold mx-4 my-2 cursor-pointer">
+                {location.pathname === to ? (
+                  <span className="text-brand-green cursor-default">{t(label)}</span>
+                ) : (
+                  <Link to={to} className="no-underline text-black">{t(label)}</Link>
+                )}
+              </li>
+            );
+            if (to !== "/tool") return item;
+            return [
+              item,
+              <li key="tutorials" className="text-lg font-bold mx-4 my-2 cursor-pointer">
+                <a
+                  href="https://tutorial.uppsalamakerspace.se"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="no-underline text-black inline-flex items-center gap-2"
+                >
+                  {t("tutorials")}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-4 h-4 text-gray-500"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                    />
+                  </svg>
+                </a>
+              </li>,
+            ];
+          })}
           <li className="text-lg font-bold mx-4 my-2 cursor-pointer">
             <button onClick={handleLogout} className="all-unset text-black cursor-pointer bg-transparent border-none p-0 font-bold text-lg">
               {t("logout")}

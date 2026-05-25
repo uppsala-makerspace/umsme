@@ -115,6 +115,48 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
           {t("viewTools")}
         </span>
       </Link>
+      <a
+        href="https://tutorial.uppsalamakerspace.se"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block mt-4 mb-2 px-4 py-3 rounded-lg no-underline text-inherit border border-gray-200 bg-gray-50 hover:shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 font-medium">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5 flex-shrink-0"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
+              />
+            </svg>
+            {t("readTutorials")}
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-4 h-4 flex-shrink-0 text-gray-500"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+            />
+          </svg>
+        </div>
+      </a>
       {(messageCount > 0 || announcementCount > 0) && (
         <Link
           to="/messages"
