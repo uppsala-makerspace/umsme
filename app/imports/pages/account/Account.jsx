@@ -1,5 +1,4 @@
-import { faPaperPlane, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { PaperAirplaneIcon, TrashIcon } from '@heroicons/react/24/outline';
 import PropTypes from 'prop-types';
 import { default as React, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -132,7 +131,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
                       <span className="font-bold">{`${fm.name}`}</span>
                       <span className='text-sm'>{fm.email ? `${fm.email}` : ''}</span>
                     </div>
-                    <FontAwesomeIcon className='cursor-pointer text-gray-600 hover:text-gray-800' icon={faTrash} onClick={() => handleRemoveFamilyMember(fm.email)} />
+                    <TrashIcon className='w-5 h-5 cursor-pointer text-gray-600 hover:text-gray-800' onClick={() => handleRemoveFamilyMember(fm.email)} />
                   </div>
                 ))}
               </div>
@@ -148,9 +147,8 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
                       <div className='flex flex-col'>
                         <span className='text-sm'>{invite.email}</span>
                       </div>
-                      <FontAwesomeIcon
-                        className='cursor-pointer text-gray-600 hover:text-gray-800'
-                        icon={faTrash}
+                      <TrashIcon
+                        className='w-5 h-5 cursor-pointer text-gray-600 hover:text-gray-800'
                         onClick={() => cancelFamilyInvite && cancelFamilyInvite(invite.email)}
                       />
                     </div>
@@ -176,7 +174,7 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
             </form>
             <div className="flex gap-2">
               <Button variant="secondary" className="flex-1" onClick={cancelNewMember}>{t("cancel")}</Button>
-              <Button className="flex-1" onClick={saveNewMember}><FontAwesomeIcon icon={faPaperPlane} /> {t("SendInvite")}</Button>
+              <Button className="flex-1" onClick={saveNewMember}><PaperAirplaneIcon className="w-4 h-4 inline" /> {t("SendInvite")}</Button>
             </div>
           </>
           :
