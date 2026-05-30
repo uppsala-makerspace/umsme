@@ -12,6 +12,7 @@ import { membershipFromPayment } from "/imports/common/lib/utils";
 import { findBestTemplate, messageData } from "/imports/common/lib/message";
 import { isEmailAllowed } from "/imports/common/server/emailGuard";
 import { pushMessage } from "/imports/common/server/push";
+import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -88,6 +89,27 @@ export async function processPayment(payment, member, paymentType) {
 
   // Send automatic confirmation email
   await sendConfirmationEmail(member, membershipId, result.type);
+
+  // Tell the manager-events dispatcher (quarterly-lab beats first/renewal
+  // because it's the more specific signal the dedicated subscriber wants).
+  const priorMemberships = await Memberships.find({
+    mid: member._id,
+    _id: { $ne: membershipId },
+  }).countAsync();
+  const eventType = paymentType === "memberQuarterlyLab"
+    ? ManagerEventType.QUARTERLY_LAB_PAYMENT
+    : priorMemberships === 0
+      ? ManagerEventType.NEW_MEMBER_PAYMENT
+      : ManagerEventType.MEMBERSHIP_RENEWED;
+  const subjects = {
+    [ManagerEventType.NEW_MEMBER_PAYMENT]: "New member payment",
+    [ManagerEventType.MEMBERSHIP_RENEWED]: "Membership renewed",
+    [ManagerEventType.QUARTERLY_LAB_PAYMENT]: "Quarterly lab paid",
+  };
+  await publishManagerEvent(eventType, {
+    subject: subjects[eventType],
+    body: `*${member.name}* (${member.email || "no email"}) paid ${payment.amount} kr — \`${paymentType}\`.`,
+  });
 
   return {
     id: membershipId,

@@ -33,6 +33,16 @@
       "botToken": "xoxb-your-slack-bot-token"
     },
     "mailUrl": "smtp://user:password@smtp.example.com:587",
+    "managerEvents": {
+      "channels": [
+        {
+          "name": "storage",
+          "type": "slack",
+          "webhookUrl": "https://hooks.slack.com/services/XXX/YYY/ZZZ",
+          "subscriptions": ["boxRequest"]
+        }
+      ]
+    },
     "homeAssistant": {
       "url": "http://homeassistant.local:8123",
       "token": "your-long-lived-access-token",

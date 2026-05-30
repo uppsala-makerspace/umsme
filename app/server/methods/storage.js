@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
 import { findForUser, hasActiveLabMembership } from "/server/methods/utils";
+import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
 
 Meteor.methods({
   /**
@@ -70,6 +71,11 @@ Meteor.methods({
     }
 
     await Members.updateAsync(member._id, { $set });
+
+    await publishManagerEvent(ManagerEventType.BOX_REQUEST, {
+      subject: `Box request from ${member.name}`,
+      body: `queue: \`${storagequeue ?? "—"}\`, request: \`${storagerequest ?? "—"}\``,
+    });
 
     return { success: true };
   },

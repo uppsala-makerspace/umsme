@@ -60,6 +60,38 @@ When working on this monorepo:
 - **Door Lock API** - Custom integration for facility access
 - **OAuth** - Google and Facebook login
 
+## Manager events
+
+Server-side dispatcher in `common/server/managerEvents/` posts operational
+signals (a new payment, a renewal, a storage request) to subscribed
+channels — Slack today, more transports later. Distinct from
+`common/server/push.js` which delivers push notifications to members.
+
+Call sites use:
+
+```js
+import { publishManagerEvent, ManagerEventType } from '/imports/common/server/managerEvents';
+await publishManagerEvent(ManagerEventType.NEW_MEMBER_PAYMENT, {
+  subject: 'New member payment',
+  body: '*Alice* paid 700 kr — `memberBase`.',
+});
+```
+
+Adding a new event type is three steps:
+1. Add an entry to `ManagerEventType` in `common/server/managerEvents/index.js`.
+2. Call `publishManagerEvent(...)` from the relevant server code.
+3. List the type in the appropriate channel's `subscriptions` array under
+   `private.managerEvents.channels` in the app's `settings.json`.
+
+Settings live per-app because Meteor settings are per-app:
+- `payment/settings.json` for payment-related events (where
+  `processPayment` fires).
+- `app/settings.json` for PWA-triggered events (e.g. box requests).
+- `admin/settings.json` if admin-side events get wired later.
+
+Dev tip: set `"webhookUrl": "console:dev"` on a channel to log the
+formatted payload to stdout instead of POSTing to Slack.
+
 ## Git Commits
 
 Do not include "Generated with Claude Code" or "Co-Authored-By" footers in commit messages.

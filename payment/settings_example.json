@@ -1,6 +1,20 @@
 {
   "private": {
-    "mailUrl": "smtp://user:password@smtp.example.com:587"
+    "mailUrl": "smtp://user:password@smtp.example.com:587",
+    "managerEvents": {
+      "channels": [
+        {
+          "name": "payments",
+          "type": "slack",
+          "webhookUrl": "https://hooks.slack.com/services/AAA/BBB/CCC",
+          "subscriptions": [
+            "newMemberPayment",
+            "membershipRenewed",
+            "quarterlyLabPayment"
+          ]
+        }
+      ]
+    }
   },
   "noreply": "no-reply@uppsalamakerspace.se",
   "swish": {
