@@ -18,7 +18,7 @@ Template.PendingMembers.onCreated(function () {
 Template.PendingMembers.helpers({
   pendingMembers() {
     return Members.find(
-      { registered: { $ne: true }, infamily: { $exists: false }, member: { $exists: true } },
+      { registered: { $ne: true }, excluded: { $ne: true }, infamily: { $exists: false }, member: { $exists: true } },
       { sort: { name: 1 } }
     );
   },

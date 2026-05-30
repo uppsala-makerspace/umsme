@@ -67,6 +67,11 @@ Meteor.methods({
     }
 
     const { member } = await findForUser();
+
+    if (member?.excluded) {
+      throw new Meteor.Error("member-excluded", "membership-suspended");
+    }
+
     const hasLab = await hasActiveLabMembership(member);
 
     if (!hasLab) {

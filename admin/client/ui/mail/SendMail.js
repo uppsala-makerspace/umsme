@@ -17,6 +17,7 @@ const getRecipients = async function(reciever, family) {
   const  members = await Members.find().fetchAsync();
   for (let i=0;i<members.length;i++) {
     const member = members[i];
+    if (member.excluded) continue;
     const status = await memberStatus(member);
     if (member.email && check(status, reciever)) {
       if (!family && member.infamily) {

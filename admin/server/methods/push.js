@@ -22,7 +22,10 @@ Meteor.methods({
     }
 
     // All members — pushAnnouncement handles opt-out and missing data
-    const members = await Members.find({ email: { $exists: true } }).fetchAsync();
+    const members = await Members.find({
+      email: { $exists: true },
+      excluded: { $ne: true },
+    }).fetchAsync();
 
     for (const member of members) {
       await pushAnnouncement(member, announcementId);

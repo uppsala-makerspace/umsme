@@ -51,6 +51,7 @@ export async function runReminderJob() {
 
   const candidates = await Members.find({
     infamily: { $exists: false },
+    excluded: { $ne: true },
     $or: [
       { member: { $gt: now, $lte: reminderHorizon } },
       { lab:    { $gt: now, $lte: reminderHorizon } },

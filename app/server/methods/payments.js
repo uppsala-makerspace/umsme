@@ -143,6 +143,10 @@ Meteor.methods({
       throw new Meteor.Error("member-not-found", "No member record found");
     }
 
+    if (member.excluded) {
+      throw new Meteor.Error("member-excluded", "membership-suspended");
+    }
+
     if (!member.name) {
       throw new Meteor.Error("no-name", "Member name is required");
     }

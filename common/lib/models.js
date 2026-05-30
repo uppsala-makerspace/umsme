@@ -153,6 +153,12 @@ export const models = {
       optional: true,
       autoform: { readonly: true },
     },
+    excluded: {
+      label: "Excluded",
+      type: Boolean,
+      optional: true,
+      autoform: { omit: true },
+    },
     notificationPrefs: {
       type: Object,
       optional: true,

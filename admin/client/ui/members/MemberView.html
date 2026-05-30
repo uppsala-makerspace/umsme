@@ -10,6 +10,13 @@
         <span class="label label-warning">Not registered</span>
         <button class="btn btn-xs btn-success acceptMember">Accept member</button>
         {{/if}}
+        &nbsp;
+        {{#if member.excluded}}
+        <span class="label label-danger">Excluded</span>
+        <button class="btn btn-xs btn-success reinstateMember">Reinstate</button>
+        {{else}}
+        <button class="btn btn-xs btn-danger excludeMember">Exclude</button>
+        {{/if}}
     </div>
     {{/unless}}
     <div class="publicMemberPage">

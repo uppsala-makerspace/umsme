@@ -17,6 +17,7 @@ const notifyExpiringMemberships = async () => {
 
   let members = await Members.find({
     "notificationPrefs.membershipReminders": { $ne: false },
+    excluded: { $ne: true },
   }).fetchAsync();
   members = members.filter((m) => m.email);
 

@@ -18,6 +18,7 @@ const Unlock = ({
   mandatoryCertificate,
   hasMandatoryCertificate,
   registered,
+  excluded,
   userPosition,
   locationPermission,
   proximityRange,
@@ -60,6 +61,19 @@ const Unlock = ({
         <Link to={`/certificates/${mandatoryCertificate._id}`} className="w-full block no-underline text-center">
           <Button fullWidth>{t("unlockMandatoryCertificateButton")}</Button>
         </Link>
+      </MainContent>
+    );
+  }
+
+  if (excluded) {
+    return (
+      <MainContent className="unlock">
+        <p className="flex flex-col items-center text-center mt-5 mb-4">
+          {t("membershipSuspended")}
+        </p>
+        <p className="flex flex-col items-center text-center mt-2 mb-4 text-sm text-gray-600">
+          {t("suspendedContactBoard")}
+        </p>
       </MainContent>
     );
   }

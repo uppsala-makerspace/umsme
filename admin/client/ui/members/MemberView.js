@@ -52,6 +52,16 @@ Template.MemberView.events({
       Members.update(id, { $unset: { registered: "" } });
     }
   },
+  'click .excludeMember': function () {
+    if (confirm('Exclude this member? They will lose door access and payment ability, and will be skipped by reminders, mails, and notifications.')) {
+      const id = FlowRouter.getParam('_id');
+      Members.update(id, { $set: { excluded: true } });
+    }
+  },
+  'click .reinstateMember': function () {
+    const id = FlowRouter.getParam('_id');
+    Members.update(id, { $unset: { excluded: "" } });
+  },
   'click .removeFromFamily': function (event) {
     if (confirm('Remove this user from its family, it will remain as an independent member that have to pay for itself.')) {
       const id = FlowRouter.getParam('_id');

@@ -70,6 +70,8 @@
   "initiatedPaymentInfo": "Betalningsförfrågan",
   "back": "Tillbaka",
   "notRegisteredText": "Ditt konto har skapats, men ditt medlemskap har inte formellt godkänts ännu. En styrelsemedlem kommer att granska och godkänna din registrering.",
+  "membershipSuspended": "Ditt medlemskap har pausats",
+  "suspendedContactBoard": "Kontakta styrelsen om du har frågor.",
   "locationDenied": "Platsåtkomst nekad. Aktivera platsdelning för att låsa upp dörrar.",
   "locationDeniedInstructionsBrowser": "För att aktivera plats, tryck på lås- eller inställningsikonen i webbläsarens adressfält och tillåt platsåtkomst för denna webbplats.",
   "locationDeniedInstructionsPWA": "För att aktivera plats, gå till enhetens Inställningar, hitta denna app under Integritet & Säkerhet eller Platstjänster, och tillåt platsåtkomst.",

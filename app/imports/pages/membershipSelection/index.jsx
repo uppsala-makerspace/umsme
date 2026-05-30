@@ -9,6 +9,7 @@ import {
 } from "./availabilityRules";
 import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 import { AppDataContext } from "/imports/context/AppDataContext";
+import MainContent from "/imports/components/MainContent";
 
 export default function MembershipSelectionPage() {
   const { t, i18n } = useTranslation();
@@ -75,6 +76,21 @@ export default function MembershipSelectionPage() {
   // Redirect if not logged in
   if (!Meteor.userId()) {
     return <Navigate to="/login" />;
+  }
+
+  if (memberInfo?.member?.excluded) {
+    return (
+      <Layout>
+        <MainContent>
+          <p className="flex flex-col items-center text-center mt-5 mb-4">
+            {t("membershipSuspended")}
+          </p>
+          <p className="flex flex-col items-center text-center mt-2 mb-4 text-sm text-gray-600">
+            {t("suspendedContactBoard")}
+          </p>
+        </MainContent>
+      </Layout>
+    );
   }
 
   return (

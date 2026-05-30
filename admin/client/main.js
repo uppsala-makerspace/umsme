@@ -21,6 +21,7 @@ import './ui/certificates';
 import './ui/announcement';
 import './ui/pending';
 import './ui/reminders';
+import './ui/excluded';
 import './layouts/AppBody.js';
 import './layouts/Home.html';
 import { Accounts } from 'meteor/accounts-base';

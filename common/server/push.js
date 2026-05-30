@@ -70,6 +70,7 @@ export const sendPushToSubscriptions = async (subs, payload) => {
 const sendCategoryPush = async (member, category, id, subjectSv, bodySv, subjectEn, bodyEn) => {
   try {
     if (!member) return;
+    if (member.excluded) return;
     if (member.notificationPrefs?.[category] === false) return;
     if (!member.email) return;
 

@@ -25,13 +25,23 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement }) => {
+export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement }) => {
   const { t, i18n } = useTranslation();
 
   if (loading) {
     return <MainContent>
       <Logo />
       <Loader />
+    </MainContent>;
+  }
+
+  if (excluded) {
+    const name = memberName?.split(" ")[0];
+    return <MainContent>
+      <Logo />
+      <h3 className="text-center">{name ? `${t("welcome")} ${name}!` : `${t("welcome")}!`}</h3>
+      <p className="flex flex-col items-center text-center mt-5 mb-4">{t("membershipSuspended")}</p>
+      <p className="flex flex-col items-center text-center mt-2 mb-4 text-sm text-gray-600">{t("suspendedContactBoard")}</p>
     </MainContent>;
   }
 

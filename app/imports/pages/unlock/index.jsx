@@ -67,6 +67,7 @@ export default () => {
         mandatoryCertificate={mandatoryCertificate}
         hasMandatoryCertificate={hasMandatoryCertificate}
         registered={!!memberInfo?.paying?.registered}
+        excluded={!!memberInfo?.member?.excluded}
         userPosition={userPosition}
         locationPermission={locationPermission}
         proximityRange={proximityRange}

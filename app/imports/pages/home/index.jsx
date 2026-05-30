@@ -35,7 +35,8 @@ export default () => {
   const hasNewMessage = latestMessageDate && (!lastSeen || latestMessageDate > lastSeen);
   const hasNewAnnouncement = latestAnnouncementDate && (!lastSeen || latestAnnouncementDate > lastSeen);
   const hasMember = !!memberInfo?.member?.name;
-  usePushSetup(hasMember);
+  const excluded = !!memberInfo?.member?.excluded;
+  usePushSetup(hasMember && !excluded);
 
   const handleAcceptInvite = async () => {
     try {
@@ -69,6 +70,7 @@ export default () => {
       liabilityOutdated={memberInfo?.liabilityOutdated}
       isFamily={!!memberInfo?.member?.infamily}
       registered={!!memberInfo?.paying?.registered}
+      excluded={excluded}
       hasNewMessages={hasNewMessages}
       messageCount={messageCount}
       announcementCount={announcementCount}
