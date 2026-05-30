@@ -327,6 +327,9 @@
 
   "notifications": "Aviseringar",
   "notificationSettings": "Aviseringsinställningar",
+  "settings": "Inställningar",
+  "defaultPage": "Standardsida",
+  "defaultPageInfo": "Sida att öppna när du startar appen",
   "noNotifications": "Inga aviseringar ännu",
   "clearAll": "Rensa alla",
   "notifMembershipReminders": "Påminnelser om medlemskap",

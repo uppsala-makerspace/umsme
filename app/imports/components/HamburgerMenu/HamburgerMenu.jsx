@@ -70,6 +70,7 @@ export const HamburgerMenu = () => {
             { to: "/storage", label: "myBox" },
             { to: "/liability", label: "liability" },
             { to: "/install", label: "installApp" },
+            { to: "/settings", label: "settings" },
             { to: "/contact", label: "contactUs" },
           ].flatMap(({ to, label }) => {
             const item = (

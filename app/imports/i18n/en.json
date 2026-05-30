@@ -328,6 +328,9 @@
 
   "notifications": "Notifications",
   "notificationSettings": "Notification Settings",
+  "settings": "Settings",
+  "defaultPage": "Default page",
+  "defaultPageInfo": "Page to open when you launch the app",
   "noNotifications": "No notifications yet",
   "clearAll": "Clear all",
   "notifMembershipReminders": "Membership reminders",

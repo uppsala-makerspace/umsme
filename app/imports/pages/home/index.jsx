@@ -1,13 +1,27 @@
-import React, { useContext } from "react";
-import { Navigate } from 'react-router-dom';
+import React, { useContext, useEffect } from "react";
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Layout from "/imports/components/Layout/Layout";
 import Home from "./Home";
 import { usePushSetup } from "/imports/hooks/pushSetupHook";
 import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 import { MessagesContext } from "/imports/context/MessagesContext";
+import { getDefaultPage, defaultPagePath } from "/imports/lib/userPrefs";
 
 /** This view is used if there is no member or no active membership. */
 export default () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    // Honour the user's preferred landing page only on the very first
+    // navigation after the app starts (cold start / PWA launch). React
+    // Router's location.key === 'default' marks that initial entry; later
+    // visits to "/" via in-app navigation get a fresh key and skip this.
+    if (location.key !== "default") return;
+    const pref = getDefaultPage();
+    if (pref === "home") return;
+    navigate(defaultPagePath(pref), { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const { memberInfo, loading, refetch } = useContext(MemberInfoContext);
   const { hasNew: hasNewMessages, messages, announcements, lastSeen } = useContext(MessagesContext);
   const messageCount = messages?.length || 0;

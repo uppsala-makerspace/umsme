@@ -36,6 +36,7 @@ const Messages = lazy(() => import('/imports/pages/messages'));
 const MessageDetail = lazy(() => import('/imports/pages/messages/detail'));
 const Tool = lazy(() => import('/imports/pages/tool'));
 const ToolDetail = lazy(() => import('/imports/pages/tool/detail'));
+const Settings = lazy(() => import('/imports/pages/settings'));
 
 export const App = () => (
   <div>
@@ -77,6 +78,7 @@ export const App = () => (
             <Route path="/notification-settings" element={<NotificationSettings />} />
             <Route path="/tool" element={<Tool />} />
             <Route path="/tool/:id" element={<ToolDetail />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </Suspense>
       </AppDataProvider>
