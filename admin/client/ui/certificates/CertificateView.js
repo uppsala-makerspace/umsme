@@ -4,8 +4,10 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
 import { Members } from '/imports/common/collections/members';
+import { wouldCreateCycle } from '/imports/common/lib/rules';
 import '/imports/tabular/members';
 import '/imports/tabular/attestations';
+import '/imports/tabular/certificates';
 import './CertificateView.html';
 
 Template.CertificateView.onCreated(function() {
@@ -17,6 +19,7 @@ Template.CertificateView.onCreated(function() {
   this.showCertifierSelector = new ReactiveVar(false);
   this.selectedCertifierId = new ReactiveVar(null);
   this.showAttestationCertifierSelector = new ReactiveVar(false);
+  this.showPrerequisiteSelector = new ReactiveVar(false);
   this.availableTests = new ReactiveVar([]);
   Meteor.call('tests.getIndex', (err, res) => {
     if (err) {
@@ -96,6 +99,39 @@ Template.CertificateView.helpers({
   hasCertifiers() {
     const cert = Certificates.findOne(FlowRouter.getParam('_id'));
     return cert && cert.certifiers && cert.certifiers.length > 0;
+  },
+  showPrerequisiteSelector() {
+    return Template.instance().showPrerequisiteSelector.get();
+  },
+  prerequisites() {
+    const cert = Certificates.findOne(FlowRouter.getParam('_id'));
+    if (cert && cert.prerequisites && cert.prerequisites.length > 0) {
+      return cert.prerequisites.map(prereqId => {
+        const prereq = Certificates.findOne(prereqId);
+        return {
+          _id: prereqId,
+          name: prereq ? (prereq.name.sv || prereq.name.en || prereqId) : prereqId,
+        };
+      });
+    }
+    return [];
+  },
+  hasPrerequisites() {
+    const cert = Certificates.findOne(FlowRouter.getParam('_id'));
+    return cert && cert.prerequisites && cert.prerequisites.length > 0;
+  },
+  prerequisiteSelector() {
+    const certId = FlowRouter.getParam('_id');
+    const cert = Certificates.findOne(certId);
+    const certificatesById = {};
+    Certificates.find().forEach(c => { certificatesById[c._id] = c; });
+    const excluded = new Set([certId, ...((cert && cert.prerequisites) || [])]);
+    for (const candidateId of Object.keys(certificatesById)) {
+      if (wouldCreateCycle(certId, candidateId, certificatesById)) {
+        excluded.add(candidateId);
+      }
+    }
+    return { _id: { $nin: Array.from(excluded) } };
   },
   selectedCertifierId() {
     return Template.instance().selectedCertifierId.get();
@@ -223,6 +259,43 @@ Template.CertificateView.events({
     const certifierId = event.currentTarget.dataset.id;
     const certId = FlowRouter.getParam('_id');
     Certificates.update(certId, { $pull: { certifiers: certifierId } });
+  },
+  'click .showPrerequisiteSelector': function (event, template) {
+    template.showPrerequisiteSelector.set(true);
+  },
+  'click .hidePrerequisiteSelector': function (event, template) {
+    template.showPrerequisiteSelector.set(false);
+  },
+  'click .prerequisiteList tbody tr': function (event, template) {
+    if (event.target.nodeName !== 'A') {
+      event.preventDefault();
+      const dataTable = $(event.target).closest('table').DataTable();
+      const rowData = dataTable.row(event.currentTarget).data();
+      if (!rowData) return;
+
+      const certId = FlowRouter.getParam('_id');
+      if (rowData._id === certId) {
+        alert('A certificate cannot depend on itself.');
+        return;
+      }
+      const certificatesById = {};
+      Certificates.find().forEach(c => { certificatesById[c._id] = c; });
+      if (wouldCreateCycle(certId, rowData._id, certificatesById)) {
+        alert('Adding this prerequisite would create a dependency cycle.');
+        return;
+      }
+      const cert = Certificates.findOne(certId);
+      const current = (cert && cert.prerequisites) || [];
+      if (!current.includes(rowData._id)) {
+        Certificates.update(certId, { $push: { prerequisites: rowData._id } });
+      }
+      template.showPrerequisiteSelector.set(false);
+    }
+  },
+  'click .removePrerequisite': function (event) {
+    const prereqId = event.currentTarget.dataset.id;
+    const certId = FlowRouter.getParam('_id');
+    Certificates.update(certId, { $pull: { prerequisites: prereqId } });
   },
   'click .attestationList .revokeAttestation': function (event) {
     const attestationId = event.currentTarget.dataset.id;

@@ -9,6 +9,7 @@ import Markdown from "../../../components/Markdown";
 import { getLocalized, formatDate, formatDateTime } from "../utils";
 import BackLink from "../components/BackLink";
 import StatusBadge from "../components/StatusBadge";
+import CertificateItem from "../components/CertificateItem";
 
 const CertificateDetail = ({
   loading,
@@ -55,13 +56,15 @@ const CertificateDetail = ({
     return null;
   }
 
-  const { certificate, myAttestation } = data;
+  const { certificate, myAttestation, prerequisiteStatus = [] } = data;
   const now = new Date();
   const isExpired = myAttestation?.isConfirmed && myAttestation?.endDate && new Date(myAttestation.endDate) <= now;
   const isValid = myAttestation?.isConfirmed && (!myAttestation?.endDate || new Date(myAttestation.endDate) > now);
   const isPending = myAttestation?.isPending;
   const canRequest = !myAttestation || isExpired;
   const isTestCertificate = !!certificate.test;
+  const unmetPrereqs = prerequisiteStatus.filter((p) => !p.met);
+  const hasUnmetPrereqs = unmetPrereqs.length > 0;
 
   return (
     <MainContent>
@@ -88,6 +91,29 @@ const CertificateDetail = ({
           <span className="text-sm font-medium text-yellow-800">{t("mandatoryCertificateNotice")}</span>
           <span className="text-xl">⭐</span>
         </div>
+      )}
+
+      {/* Missing prerequisites notice */}
+      {canRequest && hasUnmetPrereqs && (
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">🔒</span>
+            <h3 className="text-lg text-gray-700 m-0">{t("needToCompleteFirst")}</h3>
+          </div>
+          <ul className="list-none p-0 m-0">
+            {unmetPrereqs.map((p) => (
+              <CertificateItem
+                key={p.certificateId}
+                to={`/certificates/${p.certificateId}`}
+                status="available"
+              >
+                <span className="flex items-center font-semibold leading-snug">
+                  {getLocalized(p.name, lang) || p.certificateId}
+                </span>
+              </CertificateItem>
+            ))}
+          </ul>
+        </section>
       )}
 
       {/* My Status */}
@@ -151,7 +177,7 @@ const CertificateDetail = ({
               <div className="flex flex-wrap gap-2 mt-3">
                 <Button
                   onClick={() => handleAction(onRequest)}
-                  disabled={actionLoading}
+                  disabled={actionLoading || hasUnmetPrereqs}
                 >
                   {t("requestCertificate")}
                 </Button>
@@ -238,7 +264,7 @@ const CertificateDetail = ({
             <p className="mb-4">{t("canRequestCertificate")}</p>
             <Button
               onClick={() => handleAction(onRequest)}
-              disabled={actionLoading}
+              disabled={actionLoading || hasUnmetPrereqs}
             >
               {t("requestCertificate")}
             </Button>

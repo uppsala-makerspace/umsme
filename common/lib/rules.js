@@ -112,6 +112,40 @@ export const membershipFromPayment = (paymentDate, amount, first, potentialLabPa
   }
 };
 
+export const metCertificateIds = (attestations, now = new Date()) => {
+  const ids = new Set();
+  for (const att of attestations || []) {
+    if (!att.certifierId) continue;
+    if (att.endDate && new Date(att.endDate) <= now) continue;
+    ids.add(att.certificateId);
+  }
+  return ids;
+};
+
+export const findMissingPrerequisites = (certificate, metIds) => {
+  const prereqs = (certificate && certificate.prerequisites) || [];
+  return prereqs.filter(id => !metIds.has(id));
+};
+
+export const wouldCreateCycle = (certId, candidateId, certificatesById) => {
+  if (!certId || !candidateId) return false;
+  if (certId === candidateId) return true;
+  const visited = new Set();
+  const stack = [candidateId];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (visited.has(current)) continue;
+    visited.add(current);
+    if (current === certId) return true;
+    const cert = certificatesById[current];
+    const prereqs = (cert && cert.prerequisites) || [];
+    for (const p of prereqs) {
+      if (!visited.has(p)) stack.push(p);
+    }
+  }
+  return false;
+};
+
 export const reminderState = (obj) => {
   if (obj.infamily) {
     return new Spacebars.SafeString('');

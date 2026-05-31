@@ -9,6 +9,7 @@ import { getLocalized, formatDate } from "../utils";
 import BackLink from "../components/BackLink";
 import StatusBadge from "../components/StatusBadge";
 import CertificateItem from "../components/CertificateItem";
+import { metCertificateIds, findMissingPrerequisites } from "/imports/common/lib/rules";
 
 const Certificates = ({
   loading,
@@ -42,9 +43,24 @@ const Certificates = ({
   // Get certificates available to request
   const myPendingCertIds = myPending.map((a) => a.certificateId);
   const myValidCertIds = myValid.map((a) => a.certificateId);
-  const availableCertificates = certificates.filter(
+  const certificatesById = Object.fromEntries(certificates.map((c) => [c._id, c]));
+  const metIds = metCertificateIds(myAttestations, now);
+  const candidateCertificates = certificates.filter(
     (c) => !myPendingCertIds.includes(c._id) && !myValidCertIds.includes(c._id)
   );
+  const availableCertificates = [];
+  const lockedCertificates = [];
+  for (const cert of candidateCertificates) {
+    const missing = findMissingPrerequisites(cert, metIds);
+    if (missing.length > 0) {
+      lockedCertificates.push({
+        cert,
+        missingNames: missing.map((id) => getLocalized(certificatesById[id]?.name, lang) || id),
+      });
+    } else {
+      availableCertificates.push(cert);
+    }
+  }
 
   // Count pending requests for certifier badge
   const pendingRequestsCount = pendingToConfirm.length;
@@ -137,6 +153,26 @@ const Certificates = ({
                     <span className="flex items-center font-semibold leading-snug">
                       {getLocalized(cert.name, lang)}
                       {cert.mandatory && <span className="inline-flex items-center ml-2 text-sm leading-none" title={t("mandatoryCertificate")}>⭐</span>}
+                    </span>
+                  </CertificateItem>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Locked Certificates */}
+          {lockedCertificates.length > 0 && (
+            <section className="mb-8">
+              <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("lockedCertificates")} 🔒</h3>
+              <ul className="list-none p-0 m-0">
+                {lockedCertificates.map(({ cert, missingNames }) => (
+                  <CertificateItem key={cert._id} to={`/certificates/${cert._id}`} status="locked">
+                    <span className="flex items-center font-semibold leading-snug text-gray-700">
+                      {getLocalized(cert.name, lang)}
+                      <span className="inline-flex items-center ml-2 text-sm leading-none" title={t("locked")}>🔒</span>
+                    </span>
+                    <span className="block text-xs text-gray-500 mt-1">
+                      {t("requires")} {missingNames.join(", ")}
                     </span>
                   </CertificateItem>
                 ))}

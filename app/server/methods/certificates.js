@@ -5,6 +5,7 @@ import { Certificates } from "/imports/common/collections/certificates";
 import { Attestations } from "/imports/common/collections/attestations";
 import { Members } from "/imports/common/collections/members";
 import { findMemberForUser } from "./utils";
+import { findMissingPrerequisites, metCertificateIds } from "/imports/common/lib/rules";
 
 /**
  * Check if a member can certify a given certificate.
@@ -133,12 +134,31 @@ Meteor.methods({
       };
     }
 
+    // Build prerequisite status for the UI: each prereq cert + whether the
+    // member has it as a confirmed, non-expired attestation.
+    let prerequisiteStatus = [];
+    if (certificate.prerequisites && certificate.prerequisites.length > 0) {
+      const memberAttestations = await Attestations.find({ memberId: member._id }).fetchAsync();
+      const metIds = metCertificateIds(memberAttestations);
+      prerequisiteStatus = await Promise.all(
+        certificate.prerequisites.map(async (prereqId) => {
+          const prereq = await Certificates.findOneAsync(prereqId);
+          return {
+            certificateId: prereqId,
+            name: prereq ? prereq.name : null,
+            met: metIds.has(prereqId),
+          };
+        })
+      );
+    }
+
     return {
       certificate,
       myAttestation: sanitizedAttestation,
       userCanCertify,
       pendingRequests,
       recentlyConfirmed,
+      prerequisiteStatus,
     };
   },
 
@@ -326,6 +346,20 @@ Meteor.methods({
       const now = new Date();
       if (!existingConfirmed.endDate || existingConfirmed.endDate > now) {
         throw new Meteor.Error("already-certified", "You already have this certificate");
+      }
+    }
+
+    // Block the request when prerequisite certificates are not held.
+    if (certificate.prerequisites && certificate.prerequisites.length > 0) {
+      const memberAttestations = await Attestations.find({ memberId: member._id }).fetchAsync();
+      const metIds = metCertificateIds(memberAttestations);
+      const missing = findMissingPrerequisites(certificate, metIds);
+      if (missing.length > 0) {
+        throw new Meteor.Error(
+          "missing-prerequisites",
+          "You need to complete other certificates first",
+          { missing }
+        );
       }
     }
 

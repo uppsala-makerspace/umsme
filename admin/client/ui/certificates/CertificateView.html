@@ -88,6 +88,36 @@
 
     <hr>
 
+    <h2>Prerequisite certificates <small><a class="showPrerequisiteSelector">Add</a></small></h2>
+    <p class="text-muted">Other certificates a member must already hold before they can request this one.</p>
+
+    {{#if showPrerequisiteSelector}}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Add prerequisite <a class="hidePrerequisiteSelector pull-right">Cancel</a></h3>
+        </div>
+        <div class="panel-body">
+            <p>Select a certificate that must be held first:</p>
+            {{> tabular table=TabularTables.Certificates selector=prerequisiteSelector class="table table-hover table-striped table-bordered table-condensed prerequisiteList"}}
+        </div>
+    </div>
+    {{/if}}
+
+    {{#if hasPrerequisites}}
+    <ul class="list-group">
+        {{#each prerequisites}}
+        <li class="list-group-item">
+            <a href="/certificate/{{_id}}">{{name}}</a>
+            <a class="removePrerequisite pull-right text-danger" data-id="{{_id}}">Remove</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No prerequisites. This certificate can be requested without holding any other certificate first.</em></p>
+    {{/if}}
+
+    <hr>
+
     <h2>Certificate Holders</h2>
 
     <p>
