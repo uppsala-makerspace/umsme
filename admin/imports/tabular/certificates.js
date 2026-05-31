@@ -7,7 +7,7 @@ import { models } from "/imports/common/lib/models";
 import { extractor } from "/imports/common/lib/fieldsUtils";
 
 const certificateDefaults = {
-  filter: ['name', 'description', 'description.sv', 'description.en', 'prerequisites', 'prerequisites.$', 'certifiers', 'certifiers.$', 'certifierRole']
+  filter: ['name', 'description', 'description.sv', 'description.en', 'prerequisites', 'prerequisites.$', 'certifiers', 'certifiers.$', 'certifierRole', 'test', 'test.maxAttempts', 'test.maxErrors']
 };
 
 new Tabular.Table({

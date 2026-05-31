@@ -16,6 +16,22 @@ Template.MemberAttestations.onCreated(function() {
   this.selectedCertificateId = new ReactiveVar(null);
   this.selectedCertifierId = new ReactiveVar(null);
   this.showCertifierSelector = new ReactiveVar(false);
+  this.testAttempts = new ReactiveVar([]);
+  this.refreshTestAttempts = () => {
+    const memberId = Template.currentData()?.member;
+    if (!memberId) return;
+    Meteor.call('tests.listAttemptsForMember', memberId, (err, res) => {
+      if (err) {
+        console.error('tests.listAttemptsForMember failed', err);
+        return;
+      }
+      this.testAttempts.set(res || []);
+    });
+  };
+  this.autorun(() => {
+    const data = Template.currentData();
+    if (data?.member) this.refreshTestAttempts();
+  });
 
   // Set default certifier to current user's member record
   this.autorun(() => {
@@ -74,7 +90,35 @@ Template.MemberAttestations.helpers({
   },
   defaultStartDate() {
     return new Date();
-  }
+  },
+  hasTestAttempts() {
+    return (Template.instance().testAttempts.get() || []).length > 0;
+  },
+  testAttemptGroups() {
+    const attempts = Template.instance().testAttempts.get() || [];
+    const byCert = new Map();
+    for (const a of attempts) {
+      if (!byCert.has(a.certificateId)) {
+        byCert.set(a.certificateId, { attempts: [], testId: a.testId });
+      }
+      byCert.get(a.certificateId).attempts.push(a);
+    }
+    const groups = [];
+    for (const [certificateId, group] of byCert) {
+      const cert = Certificates.findOne(certificateId);
+      const sorted = group.attempts.slice().sort(
+        (a, b) => new Date(b.startedAt) - new Date(a.startedAt)
+      );
+      groups.push({
+        certificateId,
+        certificateName: cert?.name?.sv || cert?.name?.en || certificateId,
+        testId: group.testId,
+        attemptCount: group.attempts.length,
+        lastState: sorted[0]?.state || '',
+      });
+    }
+    return groups;
+  },
 });
 
 Template.MemberAttestations.events({
@@ -134,7 +178,20 @@ Template.MemberAttestations.events({
     if (confirm('Revoke this attestation?')) {
       Attestations.remove(attestationId);
     }
-  }
+  },
+  'click .resetAttempts': function (event, template) {
+    const certificateId = event.currentTarget.dataset.certificateId;
+    const memberId = template.data?.member;
+    if (!certificateId || !memberId) return;
+    if (!confirm('Reset all test attempts for this certificate? Any system-issued attestation will also be removed.')) return;
+    Meteor.call('tests.resetAttempts', memberId, certificateId, (err) => {
+      if (err) {
+        alert('Reset failed: ' + err.message);
+        return;
+      }
+      template.refreshTestAttempts();
+    });
+  },
 });
 
 // Store template instance for access in AutoForm hooks

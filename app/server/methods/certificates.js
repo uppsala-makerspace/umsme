@@ -66,11 +66,15 @@ Meteor.methods({
 
     // If confirmed, enrich with certifier name
     if (myAttestation && myAttestation.certifierId) {
-      const certifier = await Members.findOneAsync(myAttestation.certifierId);
-      myAttestation = {
-        ...myAttestation,
-        certifierName: certifier?.name || "Unknown",
-      };
+      if (myAttestation.certifierId === "__system__") {
+        myAttestation = { ...myAttestation, certifierName: null };
+      } else {
+        const certifier = await Members.findOneAsync(myAttestation.certifierId);
+        myAttestation = {
+          ...myAttestation,
+          certifierName: certifier?.name || "Unknown",
+        };
+      }
     }
 
     // Get pending requests (for certifiers)
@@ -290,6 +294,13 @@ Meteor.methods({
     const certificate = await Certificates.findOneAsync(certificateId);
     if (!certificate) {
       throw new Meteor.Error("not-found", "Certificate not found");
+    }
+
+    if (certificate.test) {
+      throw new Meteor.Error(
+        "is-test-certificate",
+        "This certificate must be obtained via the test flow"
+      );
     }
 
     // Check if there's already a pending request for this certificate

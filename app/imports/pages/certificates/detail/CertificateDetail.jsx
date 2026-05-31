@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Button from "../../../components/Button";
 import MainContent from "../../../components/MainContent";
@@ -13,6 +14,7 @@ const CertificateDetail = ({
   loading,
   error,
   data,
+  testStatus,
   onRequest,
   onCancel,
   onReRequest,
@@ -59,6 +61,7 @@ const CertificateDetail = ({
   const isValid = myAttestation?.isConfirmed && (!myAttestation?.endDate || new Date(myAttestation.endDate) > now);
   const isPending = myAttestation?.isPending;
   const canRequest = !myAttestation || isExpired;
+  const isTestCertificate = !!certificate.test;
 
   return (
     <MainContent>
@@ -144,14 +147,35 @@ const CertificateDetail = ({
                 <p className="m-0 text-sm text-[#1e3a5f] leading-relaxed">{myAttestation.comment}</p>
               </div>
             )}
-            <div className="flex flex-wrap gap-2 mt-3">
-              <Button
-                onClick={() => handleAction(onRequest)}
-                disabled={actionLoading}
+            {!isTestCertificate && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Button
+                  onClick={() => handleAction(onRequest)}
+                  disabled={actionLoading}
+                >
+                  {t("requestCertificate")}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {isTestCertificate && !isValid && !isPending && testStatus && (
+          <div className="p-4 rounded-lg border border-gray-200 border-l-4 border-l-blue-500 bg-blue-50 mt-3">
+            <p className="mb-2 font-semibold text-gray-700">{t("testCertificateInfo")}</p>
+            <p className="mb-4 text-sm text-gray-600">
+              {t("testAttemptsLeft", { left: testStatus.attemptsLeft, max: testStatus.maxAttempts })}
+            </p>
+            {testStatus.attemptsLeft > 0 || testStatus.hasActiveSession ? (
+              <Link
+                to={`/certificates/${certificate._id}/test`}
+                className="inline-flex items-center justify-center font-mono text-base py-2.5 px-4 rounded bg-brand-green text-surface hover:bg-brand-green-dark no-underline"
               >
-                {t("requestCertificate")}
-              </Button>
-            </div>
+                {testStatus.hasActiveSession ? t("continueTest") : t("startTest")}
+              </Link>
+            ) : (
+              <p className="text-sm text-red-700">{t("testNoAttemptsLeft")}</p>
+            )}
           </div>
         )}
 
@@ -209,7 +233,7 @@ const CertificateDetail = ({
           </div>
         )}
 
-        {canRequest && !isExpired && (
+        {canRequest && !isExpired && !isTestCertificate && (
           <div className="p-4 rounded-lg border border-gray-200 border-l-4 border-l-blue-500 bg-blue-50">
             <p className="mb-4">{t("canRequestCertificate")}</p>
             <Button
@@ -232,6 +256,7 @@ CertificateDetail.propTypes = {
     certificate: PropTypes.object,
     myAttestation: PropTypes.object,
   }),
+  testStatus: PropTypes.object,
   onRequest: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   onReRequest: PropTypes.func.isRequired,

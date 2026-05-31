@@ -274,6 +274,21 @@
 
   "pendingRequestWaiting": "Väntar på att en certifierare ska bekräfta, neka eller ge feedback. Om ingen åtgärd vidtas inom ungefär 2 timmar kommer förfrågan att tas bort.",
 
+  "startTest": "Starta test",
+  "continueTest": "Fortsätt test",
+  "testAttemptsLeft": "Försök kvar: {{left}} av {{max}}",
+  "testNoAttemptsLeft": "Du har använt alla tillåtna försök. Kontakta en administratör för att nollställa.",
+  "testCertificateInfo": "Det här certifikatet utfärdas via ett kunskapstest.",
+  "testQuestionOf": "Fråga {{current}} av {{total}}",
+  "testNext": "Nästa",
+  "testPrevious": "Föregående",
+  "testSubmit": "Lämna in",
+  "testPassed": "Godkänt!",
+  "testFailed": "Underkänt",
+  "testResultSummary": "{{correct}} av {{total}} rätt (max {{maxErrors}} fel tillåtna)",
+  "testBackToCertificate": "Tillbaka till certifikatet",
+  "testUnansweredWarning": "Du har obesvarade frågor. Vill du lämna in ändå?",
+
   "navHome": "Hem",
   "navDoors": "Dörrar",
   "navMap": "Karta",

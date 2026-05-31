@@ -23,6 +23,7 @@ const Map = lazy(() => import('/imports/pages/map'));
 const Contact = lazy(() => import('/imports/pages/contact'));
 const Certificates = lazy(() => import('/imports/pages/certificates'));
 const CertificateDetail = lazy(() => import('/imports/pages/certificates/detail'));
+const CertificateTest = lazy(() => import('/imports/pages/certificates/test'));
 const CertifierRequestDetail = lazy(() => import('/imports/pages/certificates/certifierDetail'));
 const MembershipSelection = lazy(() => import('/imports/pages/membershipSelection'));
 const MembershipDetail = lazy(() => import('/imports/pages/membershipDetail'));
@@ -65,6 +66,7 @@ export const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/certificates/:certificateId" element={<CertificateDetail />} />
+            <Route path="/certificates/:certificateId/test" element={<CertificateTest />} />
             <Route path="/certifier-requests/:attestationId" element={<CertifierRequestDetail />} />
             <Route path="/membership" element={<MembershipSelection />} />
             <Route path="/membership/:membershipId" element={<MembershipDetail />} />

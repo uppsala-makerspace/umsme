@@ -44,4 +44,24 @@
 
     {{> tabular table=TabularTables.MemberAttestations selector=attestationSelector class="table table-hover table-striped table-bordered table-condensed memberAttestationList"}}
 
+    {{#if hasTestAttempts}}
+    <h3>Test attempts</h3>
+    <table class="table table-hover table-striped table-bordered table-condensed">
+        <thead>
+            <tr><th>Certificate</th><th>Test id</th><th>Attempts</th><th>Last state</th><th></th></tr>
+        </thead>
+        <tbody>
+            {{#each testAttemptGroups}}
+            <tr>
+                <td><a href="/certificate/{{certificateId}}">{{certificateName}}</a></td>
+                <td><code>{{testId}}</code></td>
+                <td>{{attemptCount}}</td>
+                <td>{{lastState}}</td>
+                <td><button class="btn btn-warning btn-xs resetAttempts" data-certificate-id="{{certificateId}}">Reset attempts</button></td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/if}}
+
 </template>

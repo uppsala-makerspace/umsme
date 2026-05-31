@@ -10,6 +10,7 @@ export default () => {
   const user = useTracker(() => Meteor.user());
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const [testStatus, setTestStatus] = useState(null);
   const [error, setError] = useState(null);
 
   const fetchData = useCallback(async () => {
@@ -17,6 +18,12 @@ export default () => {
       setLoading(true);
       const result = await Meteor.callAsync("certificates.getDetails", certificateId);
       setData(result);
+      if (result?.certificate?.test) {
+        const status = await Meteor.callAsync("tests.getStatus", certificateId);
+        setTestStatus(status);
+      } else {
+        setTestStatus(null);
+      }
       setError(null);
     } catch (err) {
       console.error("Error fetching certificate details:", err);
@@ -71,6 +78,7 @@ export default () => {
         loading={loading}
         error={error}
         data={data}
+        testStatus={testStatus}
         onRequest={handleRequest}
         onCancel={handleCancel}
         onReRequest={handleReRequest}

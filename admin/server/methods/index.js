@@ -10,3 +10,4 @@ import './push';
 import './reminders';
 import './doorunlocks';
 import './invites';
+import './tests';

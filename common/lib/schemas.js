@@ -24,4 +24,5 @@ export const schemas = {
   certificate: new SimpleSchema(models.certificate),
   attestation: new SimpleSchema(models.attestation),
   announcement: new SimpleSchema(models.announcement),
+  testAttempt: new SimpleSchema(models.testAttempt),
 };

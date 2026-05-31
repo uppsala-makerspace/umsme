@@ -20,6 +20,44 @@
 
     <hr>
 
+    <h2>Test Settings</h2>
+    <p class="text-muted">Configure this certificate to be awarded via a test instead of manual certification.</p>
+
+    {{#if certificate.test}}
+        <div class="alert alert-info">
+            <strong>Test certificate.</strong>
+            Test id: <code>{{certificate.test.testId}}</code>,
+            max attempts: <code>{{certificate.test.maxAttempts}}</code>,
+            max errors: <code>{{certificate.test.maxErrors}}</code>.
+        </div>
+    {{/if}}
+
+    <form class="form-inline testSettingsForm">
+        <div class="form-group">
+            <label>Test id</label>
+            <select class="form-control testId">
+                <option value="">(none)</option>
+                {{#each availableTests}}
+                <option value="{{testId}}" {{selectedAttr testId}}>{{testId}} ({{categoryCount}} categories)</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Max attempts</label>
+            <input type="number" min="1" class="form-control maxAttempts" value="{{currentMaxAttempts}}">
+        </div>
+        <div class="form-group">
+            <label>Max errors</label>
+            <input type="number" min="0" class="form-control maxErrors" value="{{currentMaxErrors}}">
+        </div>
+        <button type="button" class="btn btn-primary saveTestSettings">Save</button>
+        {{#if certificate.test}}
+        <button type="button" class="btn btn-default clearTestSettings">Clear</button>
+        {{/if}}
+    </form>
+
+    <hr>
+
     <h2>Certifiers <small><a class="showCertifierSelector">Add</a></small></h2>
     <p class="text-muted">Members who are allowed to grant this certificate (in addition to those with the certifier role).</p>
 

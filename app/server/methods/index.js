@@ -7,6 +7,7 @@ import './doors';
 import './storage';
 import './liabilityDocuments';
 import './certificates';
+import './tests';
 import './texts';
 import './push';
 import './roles';

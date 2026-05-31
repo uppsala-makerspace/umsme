@@ -17,6 +17,14 @@ Template.CertificateView.onCreated(function() {
   this.showCertifierSelector = new ReactiveVar(false);
   this.selectedCertifierId = new ReactiveVar(null);
   this.showAttestationCertifierSelector = new ReactiveVar(false);
+  this.availableTests = new ReactiveVar([]);
+  Meteor.call('tests.getIndex', (err, res) => {
+    if (err) {
+      console.error('tests.getIndex failed', err);
+      return;
+    }
+    this.availableTests.set(res || []);
+  });
 
   // Set default certifier to current user's member record
   this.autorun(() => {
@@ -108,7 +116,25 @@ Template.CertificateView.helpers({
   },
   attestationSelector() {
     return { certificateId: FlowRouter.getParam('_id') };
-  }
+  },
+  availableTests() {
+    return Template.instance().availableTests.get().map(t => ({
+      testId: t.testId,
+      categoryCount: t.categories.length,
+    }));
+  },
+  selectedAttr(testId) {
+    const cert = Certificates.findOne(FlowRouter.getParam('_id'));
+    return cert?.test?.testId === testId ? 'selected' : '';
+  },
+  currentMaxAttempts() {
+    const cert = Certificates.findOne(FlowRouter.getParam('_id'));
+    return cert?.test?.maxAttempts || 3;
+  },
+  currentMaxErrors() {
+    const cert = Certificates.findOne(FlowRouter.getParam('_id'));
+    return cert?.test?.maxErrors ?? 1;
+  },
 });
 
 Template.CertificateView.events({
@@ -203,6 +229,37 @@ Template.CertificateView.events({
     if (confirm('Revoke this attestation?')) {
       Attestations.remove(attestationId);
     }
+  },
+  'click .saveTestSettings': function (event, template) {
+    const certId = FlowRouter.getParam('_id');
+    const root = template.find('.testSettingsForm');
+    const testId = root.querySelector('.testId').value;
+    const maxAttempts = parseInt(root.querySelector('.maxAttempts').value, 10);
+    const maxErrors = parseInt(root.querySelector('.maxErrors').value, 10);
+    if (!testId) {
+      alert('Select a test id (or use Clear to remove test settings).');
+      return;
+    }
+    if (!(maxAttempts >= 1)) {
+      alert('Max attempts must be at least 1.');
+      return;
+    }
+    if (!(maxErrors >= 0)) {
+      alert('Max errors must be 0 or greater.');
+      return;
+    }
+    Certificates.update(certId, {
+      $set: { test: { testId, maxAttempts, maxErrors } },
+    }, (err) => {
+      if (err) alert('Save failed: ' + err.message);
+    });
+  },
+  'click .clearTestSettings': function (event) {
+    if (!confirm('Remove test settings from this certificate?')) return;
+    const certId = FlowRouter.getParam('_id');
+    Certificates.update(certId, { $unset: { test: '' } }, (err) => {
+      if (err) alert('Clear failed: ' + err.message);
+    });
   },
   'click .markMandatory': function (event) {
     if (confirm('Mark this certificate as mandatory for membership? This action cannot be undone.')) {

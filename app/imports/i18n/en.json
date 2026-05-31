@@ -275,6 +275,21 @@
 
   "pendingRequestWaiting": "Waiting for a certifier to confirm, deny, or provide feedback. If no action is taken within roughly 2 hours, the request will be removed.",
 
+  "startTest": "Start test",
+  "continueTest": "Continue test",
+  "testAttemptsLeft": "Attempts left: {{left}} of {{max}}",
+  "testNoAttemptsLeft": "You have used all allowed attempts. Contact an administrator to reset.",
+  "testCertificateInfo": "This certificate is issued via a knowledge test.",
+  "testQuestionOf": "Question {{current}} of {{total}}",
+  "testNext": "Next",
+  "testPrevious": "Previous",
+  "testSubmit": "Submit",
+  "testPassed": "Passed!",
+  "testFailed": "Failed",
+  "testResultSummary": "{{correct}} of {{total}} correct (max {{maxErrors}} errors allowed)",
+  "testBackToCertificate": "Back to certificate",
+  "testUnansweredWarning": "You have unanswered questions. Submit anyway?",
+
   "navHome": "Home",
   "navDoors": "Doors",
   "navMap": "Map",

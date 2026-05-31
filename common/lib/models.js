@@ -643,6 +643,27 @@ export const models = {
         omit: true,
       },
     },
+    test: {
+      label: "Test settings",
+      type: Object,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "test.testId": {
+      label: "Test id",
+      type: String,
+      max: 100,
+    },
+    "test.maxAttempts": {
+      label: "Max attempts",
+      type: Number,
+      min: 1,
+    },
+    "test.maxErrors": {
+      label: "Max errors allowed",
+      type: Number,
+      min: 0,
+    },
   },
   attestation: {
     certificateId: {
@@ -753,5 +774,17 @@ export const models = {
       optional: true,
       autoform: { readonly: true },
     },
+  },
+  testAttempt: {
+    memberId: { type: String, max: 50 },
+    certificateId: { type: String, max: 50 },
+    testId: { type: String, max: 100 },
+    attemptNumber: { type: Number, min: 1 },
+    state: { type: String, allowedValues: ["active", "passed", "failed"] },
+    startedAt: { type: Date },
+    completedAt: { type: Date, optional: true },
+    usedQuestionIds: { type: Object, blackbox: true },
+    session: { type: Object, blackbox: true, optional: true },
+    result: { type: Object, blackbox: true, optional: true },
   },
 };

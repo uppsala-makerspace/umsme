@@ -3,6 +3,13 @@ import { marked } from "marked";
 import DOMPurify from "dompurify";
 import "./markdownStyle.css";
 
+DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+  if (node.tagName === "A") {
+    node.setAttribute("target", "_blank");
+    node.setAttribute("rel", "noopener noreferrer");
+  }
+});
+
 const Markdown = ({ children, className, startLevel = 1 }) => {
   if (!children) return null;
 
