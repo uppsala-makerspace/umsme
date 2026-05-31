@@ -24,8 +24,12 @@ const addCookie = async (headerOptions) => {
   return headerOptions;
 };
 
-const excludeTransactions = (transactions) => transactions.filter(tr =>
-  tr.details.transactionType === 'Insättning');
+const excludeTransactions = (transactions) => {
+  const automaticSwishNumber = Meteor.settings.automaticSwishNumber;
+  return transactions.filter(tr =>
+    tr.details.transactionType === 'Insättning'
+    && (!automaticSwishNumber || tr.details.reference !== automaticSwishNumber));
+};
 
 const extractTransactions = (transactions) => transactions.map(tr => {
   let hash = `${tr.amount}${tr.date}${tr.accountingBalance.amount}`.replace(/[\s-\.,]/g, '');

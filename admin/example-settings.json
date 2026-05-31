@@ -4,6 +4,7 @@
   "noreply": "no-reply@uppsalamakerspace.se",
   "bankproxy": "https://uppsalamakerspace.se/bank/",
   "syncNrOfTransactions": 20,
+  "automaticSwishNumber": "1235536230",
   "deliverMails": true,
   "lockUsername": "umsme@uppsalamakerspace.se",
   "lockPassword": "????",
