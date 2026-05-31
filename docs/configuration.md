@@ -211,7 +211,69 @@ If VAPID keys are not configured, the server logs a warning and push notificatio
 
 ---
 
-## 11. Development Setup
+## 11. Manager Events
+
+Operational signals (a new payment, a renewal, a storage request) are fanned out to subscribed channels by the dispatcher in `common/server/managerEvents/`. They are distinct from push notifications (`common/server/push.js`): push notifications go to members on their phones, manager events go to the people running the org via ops channels. Slack is the only adapter today.
+
+### Config shape
+
+Channels live under `private.managerEvents.channels`:
+
+```json
+{
+  "private": {
+    "managerEvents": {
+      "channels": [
+        {
+          "name": "boxes",
+          "type": "slack",
+          "webhookUrl": "https://hooks.slack.com/services/...",
+          "subscriptions": ["boxRequest"]
+        }
+      ]
+    }
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `name` | Free-form label, used in dispatcher log lines |
+| `type` | Channel adapter — only `"slack"` today |
+| `webhookUrl` | Slack incoming-webhook URL. Use `"console:dev"` to log the formatted payload to stdout instead of posting |
+| `subscriptions` | Array of `ManagerEventType` values this channel should receive |
+
+### Event types
+
+Defined in `common/server/managerEvents/index.js`:
+
+| Type | Published from |
+|------|----------------|
+| `newMemberPayment`     | `payment/server/api/payments.js` |
+| `membershipRenewed`    | `payment/server/api/payments.js` |
+| `quarterlyLabPayment`  | `payment/server/api/payments.js` |
+| `boxRequest`           | `app/server/methods/storage.js` |
+
+### Per-app placement (gotcha)
+
+`Meteor.settings` is per-app, and so is the `managerEvents` block — it must live in the same app's `settings.json` as the publisher. A channel listed in `admin/settings.json` is parsed but never fires, because admin doesn't emit any manager events today.
+
+| Event | Where to configure the channel |
+|-------|-------------------------------|
+| `newMemberPayment`, `membershipRenewed`, `quarterlyLabPayment` | `payment/settings.json` |
+| `boxRequest` | `app/settings.json` |
+
+Add the same channel to both files if a single Slack channel should receive events from both publishers.
+
+### Adding a new event type
+
+1. Add an entry to `ManagerEventType` in `common/server/managerEvents/index.js`.
+2. Call `publishManagerEvent(...)` from the relevant server code.
+3. List the type under `subscriptions` in the channel config of the app whose process publishes it.
+
+---
+
+## 12. Development Setup
 
 ### Prerequisites
 
@@ -258,7 +320,7 @@ npm run storybook
 
 ---
 
-## 12. Deployment
+## 13. Deployment
 
 ### Building
 
