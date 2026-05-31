@@ -171,6 +171,10 @@ Template.CertificateView.helpers({
     const cert = Certificates.findOne(FlowRouter.getParam('_id'));
     return cert?.test?.maxErrors ?? 1;
   },
+  rfidEndpointUrl() {
+    const id = FlowRouter.getParam('_id');
+    return `/api/certificates/${id}/rfid`;
+  },
 });
 
 Template.CertificateView.events({
