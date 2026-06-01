@@ -127,6 +127,85 @@ Comments can be added in two ways:
 
 Note: When a member calls `certificates.reRequest()`, any existing `comment` is cleared (unset) from the attestation. The `privateComment` is preserved.
 
+## 7b. Test-Based Certificates
+
+A certificate can be configured to be awarded automatically when the member passes a multiple-choice test in the app, instead of going through the manual request/confirm flow. This is opt-in per certificate.
+
+### Enabling
+
+In the certificate view in admin, the **Test Settings** panel attaches:
+
+| Field | Description |
+|-------|-------------|
+| `testId` | Identifier of the test (matches a subdirectory name in the questions root, see below) |
+| `maxAttempts` | How many submitted attempts a member may make before being blocked |
+| `maxErrors` | The maximum number of wrong answers a member may have and still pass |
+
+When `test` is set on a certificate, the manual `certificates.request` flow is refused for that certificate -- members must take the test instead.
+
+### Question file layout
+
+Questions live on disk, outside the repo, in a directory pointed to by `Meteor.settings.tests.path` (see [configuration.md](configuration.md)). The expected layout:
+
+```
+<root>/
+  <testId>/
+    <categoryId>.json
+    <categoryId>.json
+  <testId>/
+    ...
+```
+
+A category file contains:
+
+```json
+{
+  "questions": [
+    {
+      "id": "stable-question-id",
+      "question": { "sv": "...", "en": "..." },
+      "options": [
+        { "id": "a", "text": { "sv": "...", "en": "..." }, "correct": false },
+        { "id": "b", "text": { "sv": "...", "en": "..." }, "correct": true }
+      ]
+    }
+  ]
+}
+```
+
+Rules enforced at load time: question IDs unique within a category, exactly one option per question marked `correct: true`, both `sv` and `en` text required. Files that fail validation are skipped with an error logged; the previously loaded version of that category is kept so a bad file does not wipe the index.
+
+The IDs `testId`, `categoryId`, and question `id` must be stable -- they are stored in `TestAttempts` documents to track which questions a member has already seen.
+
+### Synchronization (how the in-memory index is refreshed)
+
+Questions are not stored in the database. Each server holds them in memory and re-reads the directory on a schedule. The upstream Google-Sheets-to-JSON sync runs on the hour, so both servers reload at **HH:05 every hour** to give that sync time to settle.
+
+| App | Mechanism | File |
+|-----|-----------|------|
+| Admin | `chatra:synced-cron` with `cron('5 * * * *')`, plus a one-shot load at `Meteor.startup` | `admin/server/cronjob/loadTests.js` |
+| App | One-shot `Meteor.setTimeout` to the next `:05`, then hourly `Meteor.setInterval`, plus a one-shot load at `Meteor.startup` | `app/server/tests/init.js` |
+
+Both apps use the same loader (`common/server/tests/loader.js`). It builds a `Map<testId, Map<categoryId, Map<questionId, question>>>` and exposes `getTestIndex()` (used by the admin form's test-id dropdown), `getQuestion()`, `pickQuestion()`, and `isCorrectAnswer()`.
+
+To force a reload outside the normal schedule, restart the relevant server.
+
+### Test flow
+
+1. **Start** -- The member opens the certificate page and clicks "Start test". `tests.start` creates a `TestAttempts` document with `state: "active"` and a session containing one randomly chosen question per category. Questions the member has previously been shown for this test are excluded; if a category has been fully exhausted across attempts, its pool is restarted.
+2. **Answer** -- Selecting an option updates local UI state only. Clicking **Next** or **Submit** sends the current question's selection to the server via `tests.answer`. This means a refresh resumes from the last *saved* answer, not necessarily what the member had clicked just before navigating away.
+3. **Resume** -- `tests.resume` returns the active session (questions + already-saved answers) so the member can continue from the first unanswered question after a reload or device switch.
+4. **Submit** -- `tests.submit` scores the attempt, marks it `passed` or `failed`, and accumulates the served question IDs into `usedQuestionIds`. On pass it creates an `Attestations` document with `certifierId = "__system__"`, `confirmedAt = now`, the standard `endDate` calculation, and a bilingual comment, e.g. `Godkänt via test: 9 av 10 rätt / Passed via test: 9 of 10 correct`.
+
+### Test history (`TestAttempts` collection)
+
+Separate from `Attestations` so the pending-attestation cleanup cron does not touch it. One document per attempt, persisted forever (or until an admin resets the member). Indexed on `{memberId, certificateId}`. Key fields: `attemptNumber`, `state`, `usedQuestionIds`, `session` (only while active), `result`. See [data-model.md](data-model.md).
+
+### Admin operations on test certificates
+
+- **Configure** -- The Test Settings panel on the certificate view (testId dropdown, max attempts, max errors).
+- **Reset attempts for a member** -- From the member's detail page, a per-test-certificate "Reset attempts" button calls `tests.resetAttempts(memberId, certificateId)`, which deletes the member's `TestAttempts` for that certificate *and* removes any system-issued `Attestations`. Use this when a member has exhausted their attempts and you want them to try again.
+
 ## 8. Auto-Cleanup of Pending Attestations
 
 A cron job defined in `admin/server/cronjob/cleanupPendingAttestations.js` automatically removes stale pending requests:

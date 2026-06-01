@@ -36,6 +36,8 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `expireInitiatedPayments[].recurrence` | later.js text schedule, e.g. `"every 1 hour"` or `"every 30 seconds"` |
 | `swishCallback`      | Swish callback URL                           |
 | `serviceConfigurations` | OAuth credentials (Google, Facebook)      |
+| `tests.path`         | Absolute path to the test-questions root (see [certificates.md](certificates.md#7b-test-based-certificates) for layout). Same setting in app's `settings.json`. |
+| `private.certificateRfidApi.allowedIps` | IPs allowed to call `GET /api/certificates/:id/rfid`. Empty/missing = denied. |
 
 ---
 
@@ -57,6 +59,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `private.slackChannelsPath`       | Path to Slack channels JSON                |
 | `private.slack.botToken`          | Slack bot token                            |
 | `serviceConfigurations`           | OAuth credentials (Google, Facebook)       |
+| `tests.path`                      | Absolute path to the test-questions root. Same setting in admin's `settings.json`. See [certificates.md](certificates.md#7b-test-based-certificates). |
 
 ---
 
