@@ -1,28 +1,11 @@
-import { Meteor } from "meteor/meteor";
 import { WebApp } from "meteor/webapp";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Attestations } from "/imports/common/collections/attestations";
 import { Members } from "/imports/common/collections/members";
 
-const PATH_PREFIX = "/api/certificates/";
-const PATH_SUFFIX = "/rfid";
-
-const allowedIps = () =>
-  (Meteor.settings?.private?.certificateRfidApi?.allowedIps || []).map(ip => ip.trim()).filter(Boolean);
-
-const normalizeIp = (ip) => {
-  if (!ip) return "";
-  // IPv6-mapped IPv4 like "::ffff:127.0.0.1"
-  return ip.replace(/^::ffff:/, "").trim();
-};
-
-const requestIp = (req) => {
-  const fwd = req.headers["x-forwarded-for"];
-  if (fwd) {
-    return normalizeIp(String(fwd).split(",")[0]);
-  }
-  return normalizeIp(req.socket?.remoteAddress || "");
-};
+// Access control for this endpoint is enforced upstream in nginx via
+// `allow`/`deny` directives on the location block. Anything reaching the
+// app process has already been vetted at the network layer.
 
 const sendJson = (res, status, body) => {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
@@ -41,15 +24,6 @@ WebApp.handlers.use("/api/certificates", async (req, res) => {
   if (req.method !== "GET") {
     res.writeHead(405);
     res.end("Only GET is supported");
-    return;
-  }
-
-  const ip = requestIp(req);
-  const allow = allowedIps();
-  if (allow.length === 0 || !allow.includes(ip)) {
-    console.warn(`[certificatesRfid] denied request from ip="${ip}"`);
-    res.writeHead(403);
-    res.end();
     return;
   }
 
