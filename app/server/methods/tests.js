@@ -12,6 +12,21 @@ import {
   isCorrectAnswer,
 } from "/imports/common/server/tests/loader";
 import { findMemberForUser } from "./utils";
+import { findMissingPrerequisites, metCertificateIds } from "/imports/common/lib/rules";
+
+const requirePrerequisites = async (member, certificate) => {
+  if (!certificate.prerequisites || certificate.prerequisites.length === 0) return;
+  const memberAttestations = await Attestations.find({ memberId: member._id }).fetchAsync();
+  const metIds = metCertificateIds(memberAttestations);
+  const missing = findMissingPrerequisites(certificate, metIds);
+  if (missing.length > 0) {
+    throw new Meteor.Error(
+      "missing-prerequisites",
+      "You need to complete other certificates first",
+      { missing }
+    );
+  }
+};
 
 export const SYSTEM_CERTIFIER_ID = "__system__";
 
@@ -93,6 +108,8 @@ Meteor.methods({
       throw new Meteor.Error("already-certified", "You already have this certificate");
     }
 
+    await requirePrerequisites(member, certificate);
+
     const existingActive = await TestAttempts.findOneAsync({
       memberId: member._id,
       certificateId: certificate._id,
@@ -157,6 +174,7 @@ Meteor.methods({
   "tests.resume": async (certificateId) => {
     const member = await requireMember();
     const certificate = await requireTestCertificate(certificateId);
+    await requirePrerequisites(member, certificate);
     const active = await TestAttempts.findOneAsync({
       memberId: member._id,
       certificateId: certificate._id,

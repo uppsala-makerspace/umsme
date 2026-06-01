@@ -193,12 +193,21 @@ const CertificateDetail = ({
               {t("testAttemptsLeft", { left: testStatus.attemptsLeft, max: testStatus.maxAttempts })}
             </p>
             {testStatus.attemptsLeft > 0 || testStatus.hasActiveSession ? (
-              <Link
-                to={`/certificates/${certificate._id}/test`}
-                className="inline-flex items-center justify-center font-mono text-base py-2.5 px-4 rounded bg-brand-green text-surface hover:bg-brand-green-dark no-underline"
-              >
-                {testStatus.hasActiveSession ? t("continueTest") : t("startTest")}
-              </Link>
+              hasUnmetPrereqs ? (
+                <span
+                  aria-disabled="true"
+                  className="inline-flex items-center justify-center font-mono text-base py-2.5 px-4 rounded bg-gray-300 text-gray-500 cursor-not-allowed"
+                >
+                  {testStatus.hasActiveSession ? t("continueTest") : t("startTest")}
+                </span>
+              ) : (
+                <Link
+                  to={`/certificates/${certificate._id}/test`}
+                  className="inline-flex items-center justify-center font-mono text-base py-2.5 px-4 rounded bg-brand-green text-surface hover:bg-brand-green-dark no-underline"
+                >
+                  {testStatus.hasActiveSession ? t("continueTest") : t("startTest")}
+                </Link>
+              )
             ) : (
               <p className="text-sm text-red-700">{t("testNoAttemptsLeft")}</p>
             )}
