@@ -59,6 +59,12 @@ export const models = {
         type: "email",
       },
       optional: true,
+      autoValue: function () {
+        if (this.isSet && typeof this.value === "string") {
+          const lower = this.value.toLowerCase();
+          if (lower !== this.value) return lower;
+        }
+      },
     },
     family: {
       label: "Family",

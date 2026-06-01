@@ -97,6 +97,19 @@ Template.AdminConsole.events({
       alert(`Registered ${count} members.`);
     }
   },
+  'click .lowercaseMemberEmails': function (event) {
+    if (!confirm('Lowercase every member email? Members whose lowercased email already belongs to another member are skipped and logged.')) return;
+    const button = event.currentTarget;
+    button.disabled = true;
+    Meteor.call('lowercaseMemberEmails', (err, res) => {
+      button.disabled = false;
+      if (err) {
+        alert(`Failed: ${err.reason || err.message || err}`);
+      } else {
+        alert(`Scanned ${res.scanned}: ${res.updated} updated, ${res.conflicts} skipped due to conflicts (see server log).`);
+      }
+    });
+  },
   'click .grantMandatoryToAll': function (event) {
     const mandatoryCert = Certificates.findOne({ mandatory: true });
     if (!mandatoryCert) {

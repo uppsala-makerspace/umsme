@@ -19,6 +19,7 @@ Meteor.methods({
 
   checkMemberEmail: async (email) => {
     check(email, String);
+    email = email.toLowerCase();
 
     const member = await Members.findOneAsync({ email });
     if (member) {

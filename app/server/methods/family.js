@@ -170,6 +170,7 @@ Meteor.methods({
       );
     }
 
+    email = email?.toLowerCase();
     const familyMember = await Members.findOneAsync({email, infamily: member._id});
     if (!familyMember) {
       throw new Meteor.Error(

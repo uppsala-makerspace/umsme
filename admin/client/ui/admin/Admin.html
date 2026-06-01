@@ -19,6 +19,10 @@
         <p class="text-muted">Sets all paying members (not family dependents) as registered. Use this to avoid having to individually accept all existing members.</p>
         <button class="acceptAllMembers btn btn-primary">Accept all</button>
 
+        <h1>Lowercase member emails</h1>
+        <p class="text-muted">Rewrites every member's <code>email</code> field to lowercase so user-to-member lookups stop missing on case mismatches. Skips members whose lowercased email would collide with another existing member.</p>
+        <button class="lowercaseMemberEmails btn btn-primary">Lowercase now</button>
+
         <h1>Grant mandatory certificate to all members</h1>
         {{#if mandatoryCertificate}}
         <p>Mandatory certificate: <strong>{{mandatoryCertificate.name.sv}}</strong></p>

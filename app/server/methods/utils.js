@@ -127,13 +127,13 @@ export const findForUser = async () => {
     const firstEmail = user?.emails?.[0];
     const firstService = user?.service?.[0];
     if (firstEmail) {
-      email = firstEmail?.address;
+      email = firstEmail?.address?.toLowerCase();
       verified = firstEmail.verified;
       if (verified) {
         member = await Members.findOneAsync({email});
       }
     } else if (firstService) {
-      email = firstService.email;
+      email = firstService.email?.toLowerCase();
       verified = true;
     }
   }
