@@ -4,6 +4,7 @@ import path from 'path';
 
 const ID_RE = /^[a-z0-9-]+$/;
 const TESTS = new Map();
+const TEST_META = new Map();
 
 const validateLocalized = (obj) => {
   if (!obj || typeof obj !== 'object') return 'not an object';
@@ -46,14 +47,20 @@ const loadCategoryFile = (filePath) => {
   if (!parsed || !Array.isArray(parsed.questions)) {
     throw new Error(`${filePath}: missing "questions" array`);
   }
-  const map = new Map();
+  let title = null;
+  if (parsed.title !== undefined) {
+    const tErr = validateLocalized(parsed.title);
+    if (tErr) throw new Error(`${filePath}: title: ${tErr}`);
+    title = parsed.title;
+  }
+  const questions = new Map();
   for (const q of parsed.questions) {
     const err = validateQuestion(q);
     if (err) throw new Error(`${filePath}: ${err}`);
-    if (map.has(q.id)) throw new Error(`${filePath}: duplicate question id ${q.id}`);
-    map.set(q.id, q);
+    if (questions.has(q.id)) throw new Error(`${filePath}: duplicate question id ${q.id}`);
+    questions.set(q.id, q);
   }
-  return map;
+  return { title, questions };
 };
 
 const getRoot = () => Meteor.settings?.tests?.path || null;
@@ -68,7 +75,8 @@ export const loadAllTests = () => {
     console.warn(`[tests/loader] tests root does not exist: ${root}`);
     return;
   }
-  const next = new Map();
+  const nextTests = new Map();
+  const nextMeta = new Map();
   const testDirs = fs.readdirSync(root, { withFileTypes: true }).filter(d => d.isDirectory());
   for (const td of testDirs) {
     if (!ID_RE.test(td.name)) {
@@ -77,6 +85,7 @@ export const loadAllTests = () => {
     }
     const testPath = path.join(root, td.name);
     const categories = new Map();
+    const metaForTest = new Map();
     const files = fs.readdirSync(testPath).filter(f => f.endsWith('.json'));
     for (const f of files) {
       const categoryId = f.slice(0, -'.json'.length);
@@ -85,34 +94,50 @@ export const loadAllTests = () => {
         continue;
       }
       try {
-        const questions = loadCategoryFile(path.join(testPath, f));
+        const { title, questions } = loadCategoryFile(path.join(testPath, f));
         categories.set(categoryId, questions);
+        metaForTest.set(categoryId, { title });
       } catch (e) {
         console.error(`[tests/loader] ${td.name}/${f}: ${e.message}`);
         // keep existing data for this category if present
         const existing = TESTS.get(td.name)?.get(categoryId);
-        if (existing) categories.set(categoryId, existing);
+        if (existing) {
+          categories.set(categoryId, existing);
+          const existingMeta = TEST_META.get(td.name)?.get(categoryId);
+          if (existingMeta) metaForTest.set(categoryId, existingMeta);
+        }
       }
     }
-    if (categories.size > 0) next.set(td.name, categories);
+    if (categories.size > 0) {
+      nextTests.set(td.name, categories);
+      nextMeta.set(td.name, metaForTest);
+    }
   }
   TESTS.clear();
-  for (const [k, v] of next) TESTS.set(k, v);
+  TEST_META.clear();
+  for (const [k, v] of nextTests) TESTS.set(k, v);
+  for (const [k, v] of nextMeta) TEST_META.set(k, v);
   console.log(`[tests/loader] loaded ${TESTS.size} tests`);
 };
 
 export const getTestIndex = () => {
   const out = [];
   for (const [testId, categories] of TESTS) {
+    const meta = TEST_META.get(testId);
     out.push({
       testId,
       categories: Array.from(categories, ([categoryId, qs]) => ({
         categoryId,
         questionCount: qs.size,
+        title: meta?.get(categoryId)?.title || null,
       })),
     });
   }
   return out;
+};
+
+export const getCategoryTitle = (testId, categoryId) => {
+  return TEST_META.get(testId)?.get(categoryId)?.title || null;
 };
 
 export const hasTest = (testId) => TESTS.has(testId);

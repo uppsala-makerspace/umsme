@@ -10,6 +10,7 @@ import {
   sanitizeQuestion,
   pickQuestion,
   isCorrectAnswer,
+  getCategoryTitle,
 } from "/imports/common/server/tests/loader";
 import { findMemberForUser } from "./utils";
 import { findMissingPrerequisites, metCertificateIds } from "/imports/common/lib/rules";
@@ -119,6 +120,7 @@ Meteor.methods({
       const questions = existingActive.session.items.map(item => ({
         ...sanitizeQuestion(getQuestion(certificate.test.testId, item.categoryId, item.questionId)),
         categoryId: item.categoryId,
+        categoryTitle: getCategoryTitle(certificate.test.testId, item.categoryId),
         answeredOptionId: item.answeredOptionId || null,
       }));
       return { attemptId: existingActive._id, questions };
@@ -166,6 +168,7 @@ Meteor.methods({
     const questions = items.map(item => ({
       ...sanitizeQuestion(getQuestion(certificate.test.testId, item.categoryId, item.questionId)),
       categoryId: item.categoryId,
+      categoryTitle: getCategoryTitle(certificate.test.testId, item.categoryId),
       answeredOptionId: null,
     }));
     return { attemptId, questions };
@@ -184,6 +187,7 @@ Meteor.methods({
     const questions = active.session.items.map(item => ({
       ...sanitizeQuestion(getQuestion(certificate.test.testId, item.categoryId, item.questionId)),
       categoryId: item.categoryId,
+      categoryTitle: getCategoryTitle(certificate.test.testId, item.categoryId),
       answeredOptionId: item.answeredOptionId || null,
     }));
     return { attemptId: active._id, questions };

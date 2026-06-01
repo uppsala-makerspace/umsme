@@ -121,6 +121,9 @@ const TestRunner = ({
       <p className="text-sm text-gray-500 mb-2">
         {t("testQuestionOf", { current: currentIdx + 1, total: questions.length })}
       </p>
+      <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
+        {getLocalized(q.categoryTitle, lang) || q.categoryId}
+      </p>
       <h2 className="text-xl mb-6 text-gray-800">{getLocalized(q.question, lang)}</h2>
       <div className="space-y-3 mb-6">
         {q.options.map((opt) => {

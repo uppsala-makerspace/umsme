@@ -160,6 +160,7 @@ A category file contains:
 
 ```json
 {
+  "title": { "sv": "...", "en": "..." },
   "questions": [
     {
       "id": "stable-question-id",
@@ -173,7 +174,9 @@ A category file contains:
 }
 ```
 
-Rules enforced at load time: question IDs unique within a category, exactly one option per question marked `correct: true`, both `sv` and `en` text required. Files that fail validation are skipped with an error logged; the previously loaded version of that category is kept so a bad file does not wipe the index.
+The optional top-level `title` is shown above each question in the test runner — useful when a question reads ambiguously without category context (e.g. "what is required to use the saw?" when the category identifies which saw). When absent, the category id (filename without `.json`) is shown instead.
+
+Rules enforced at load time: question IDs unique within a category, exactly one option per question marked `correct: true`, `sv` text required on `title`, `question`, and each option's `text`, with `en` optional on all of them. Files that fail validation are skipped with an error logged; the previously loaded version of that category is kept so a bad file does not wipe the index.
 
 The IDs `testId`, `categoryId`, and question `id` must be stable -- they are stored in `TestAttempts` documents to track which questions a member has already seen.
 
