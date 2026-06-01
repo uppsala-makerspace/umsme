@@ -5,12 +5,18 @@ import path from 'path';
 const ID_RE = /^[a-z0-9-]+$/;
 const TESTS = new Map();
 
+const validateLocalized = (obj) => {
+  if (!obj || typeof obj !== 'object') return 'not an object';
+  if (typeof obj.sv !== 'string' || !obj.sv) return 'missing sv text';
+  if (obj.en !== undefined && typeof obj.en !== 'string') return 'en must be a string';
+  return null;
+};
+
 const validateQuestion = (q) => {
   if (!q || typeof q !== 'object') return 'not an object';
   if (typeof q.id !== 'string' || !q.id) return 'missing id';
-  if (!q.question || typeof q.question.sv !== 'string' || typeof q.question.en !== 'string') {
-    return `question ${q.id}: missing sv/en text`;
-  }
+  const qErr = validateLocalized(q.question);
+  if (qErr) return `question ${q.id}: ${qErr}`;
   if (!Array.isArray(q.options) || q.options.length < 2) {
     return `question ${q.id}: needs at least 2 options`;
   }
@@ -24,9 +30,8 @@ const validateQuestion = (q) => {
       return `question ${q.id}: duplicate option id ${o.id}`;
     }
     optionIds.add(o.id);
-    if (!o.text || typeof o.text.sv !== 'string' || typeof o.text.en !== 'string') {
-      return `question ${q.id}: option ${o.id} missing sv/en text`;
-    }
+    const oErr = validateLocalized(o.text);
+    if (oErr) return `question ${q.id}: option ${o.id} ${oErr}`;
     if (o.correct === true) correctCount += 1;
   }
   if (correctCount !== 1) {
