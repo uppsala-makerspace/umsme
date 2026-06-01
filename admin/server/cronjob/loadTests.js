@@ -8,7 +8,7 @@ if (Meteor.isServer) {
   SyncedCron.add({
     name: 'Reload test questions from disk',
     schedule: function (parser) {
-      return parser.recur().every(1).hour();
+      return parser.cron('5 * * * *');
     },
     job: function () {
       loadAllTests();
