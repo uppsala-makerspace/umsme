@@ -318,6 +318,7 @@
   "termsOfPurchase": "Terms of purchase",
 
   "disabledTooEarlyToRenew": "Too early to renew",
+  "upgradeToLab": "Upgrade to lab",
   "disabledNoBaseMembership": "Not available without base membership",
   "disabledHasYearlyLab": "You already have a yearly lab membership",
   "disabledRenewYearlyFirst": "Renew yearly membership first",

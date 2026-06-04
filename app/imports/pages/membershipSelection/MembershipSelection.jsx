@@ -220,6 +220,11 @@ export default function MembershipSelection({
                     {t(option.disabledReason)}
                   </span>
                 )}
+                {!isDisabled && option.note && (
+                  <span className="text-sm text-red-600">
+                    {t(option.note)}
+                  </span>
+                )}
               </div>
             </Button>
           );

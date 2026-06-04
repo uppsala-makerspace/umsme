@@ -226,15 +226,17 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
       // S1: Upgrading from base membership (no current lab) to lab
       if (hasActiveMembership && !hasActiveLab) {
         if (memberendMoreThan2MonthsAway) {
-          // memberend > now + 2 months: labend = memberend = now + 14 months
+          // memberend > now + 2 months: starts today, labend = memberend =
+          // now + 14 months (the extra 2 months compensates for the membership
+          // value given up by upgrading mid-period).
           start = new Date(now);
-          start.setMonth(start.getMonth() + 2);
           memberend = new Date(now);
           memberend.setMonth(memberend.getMonth() + 14);
           labend = new Date(memberend);
         } else {
-          // memberend <= now + 2 months: labend = memberend = memberend + 1 year
-          start = new Date(member.member);
+          // memberend <= now + 2 months: starts today, labend = memberend =
+          // memberend + 1 year
+          start = new Date(now);
           memberend = new Date(member.member);
           memberend.setFullYear(memberend.getFullYear() + 1);
           labend = new Date(memberend);

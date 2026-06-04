@@ -80,6 +80,19 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
       return result;
     }
 
+    // S1: a member with an active base membership and no active lab can
+    // upgrade to lab at any time (server: hasActiveMembership && !hasActiveLab,
+    // which is exactly type === "member"). This is an upgrade, not a renewal,
+    // so it is not gated by the renewal window.
+    const isYearlyLabUpgrade =
+      option.paymentType === "memberLab" ||
+      option.paymentType === "memberDiscountedLab" ||
+      option.paymentType === "familyLab";
+    if (isYearlyLabUpgrade && type === "member") {
+      result.note = "upgradeToLab";
+      return result;
+    }
+
     // Active members outside the renewal window cannot renew yet
     if (isActiveMember && !isWithinMemberRenewalWindow) {
       result.disabled = true;

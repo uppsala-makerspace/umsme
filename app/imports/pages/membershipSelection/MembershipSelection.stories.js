@@ -137,6 +137,25 @@ export const ActiveMemberTooEarlyToRenew = {
   },
 };
 
+// Active family base member outside the renewal window - familyLab is an
+// upgrade (S1), enabled with "Upgrade to lab"; familyBase stays too-early.
+const activeFamilyBaseStatus = {
+  type: "member",
+  memberEnd: daysFromNow(90),
+  family: true,
+};
+export const ActiveFamilyMemberUpgradeToLab = {
+  args: {
+    member: { name: "The Smiths", mid: 12353, family: true },
+    memberStatus: activeFamilyBaseStatus,
+    options: calculateOptionAvailability(allOptions, activeFamilyBaseStatus, true),
+    isDiscounted: false,
+    isFamily: true,
+    familyLocked: true,
+    ...baseActions,
+  },
+};
+
 // === ACTIVE MEMBER - WITHIN RENEWAL WINDOW ===
 
 // Active member within the renewal window of expiry - can renew
