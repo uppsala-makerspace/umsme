@@ -8,32 +8,11 @@ Template.Storage.onCreated(() => {
   Meteor.subscribe('comments');
 });
 
-const wallDefinitions = [
-  {
-    name: 'Floor 1, Wall 1',
-    start: 1,
-    end: 108,
-    shelfSize: 12
-  },
-  {
-    name: 'Floor 1, Wall 2',
-    start: 109,
-    end: 204,
-    shelfSize: 12
-  },
-  {
-    name: 'Floor 2, Wall 1',
-    start: 2001,
-    end: 2108,
-    shelfSize: 12
-  }
-];
+const getWallDefinitions = () =>
+  (Meteor.settings.public.storageWalls || []).map(wall => ({ ...wall }));
 
 let allBoxes = [];
 
-const maxBoxes = 204;
-const wallSize = 108;
-const shelfSize = 12;
 
 const getComments = () => {
   const box2Comment = {};
@@ -60,6 +39,7 @@ const enrichDefinitionsWithBoxes = () => {
   });
   const box2comments = getComments();
   allBoxes = [];
+  const wallDefinitions = getWallDefinitions();
   wallDefinitions.forEach(wallDef => {
     wallDef.boxes = [];
     for (let i = wallDef.start; i <= wallDef.end; i++) {
@@ -75,6 +55,7 @@ const enrichDefinitionsWithBoxes = () => {
     }
     allBoxes = allBoxes.concat(wallDef.boxes);
   });
+  return wallDefinitions;
 };
 
 Template.Storage.onCreated(function() {
@@ -106,33 +87,8 @@ Template.Storage.helpers({
       free: boxes.filter(box => !box.occupied && !box.comment).length,
     };
   },
-  walls_old: () => {
-    const boxes = getBoxes();
-    const walls = [];
-    const amountOfWalls = Math.ceil(boxes.length / wallSize);
-    for (let wallCount = 0; wallCount < amountOfWalls ; wallCount++) {
-      const shelves = [];
-      walls.push({
-        name: `Wall ${wallCount + 1}`,
-        shelves
-      });
-      const wallBoxes = boxes.slice(wallCount * wallSize, wallCount * wallSize + wallSize);
-      const amountOfShelves = Math.ceil(wallBoxes.length / shelfSize);
-      for (let shelfCount = 0; shelfCount < amountOfShelves ; shelfCount++) {
-        const shelfBoxes = wallBoxes.slice(shelfCount * shelfSize,shelfCount * shelfSize + shelfSize);
-        const col1 = [];
-        const col2 = [];
-        for (let boxCount = 0; boxCount < shelfBoxes.length; boxCount += 2) {
-          col1.push(shelfBoxes[boxCount]);
-          col2.push(shelfBoxes[boxCount + 1]);
-        }
-        shelves.push({col1, col2});
-      }
-    }
-    return walls;
-  },
   walls: () => {
-    enrichDefinitionsWithBoxes();
+    const wallDefinitions = enrichDefinitionsWithBoxes();
     const walls = [];
     wallDefinitions.forEach(wallDef => {
       const shelves = [];
@@ -140,9 +96,9 @@ Template.Storage.helpers({
         name: wallDef.name,
         shelves
       });
-      const amountOfShelves = Math.ceil(wallDef.end - wallDef.start / shelfSize);
+      const amountOfShelves = Math.ceil(wallDef.end - wallDef.start / wallDef.shelfSize);
       for (let shelfCount = 0; shelfCount < amountOfShelves ; shelfCount++) {
-        const shelfBoxes = wallDef.boxes.slice(shelfCount * shelfSize,shelfCount * shelfSize + shelfSize);
+        const shelfBoxes = wallDef.boxes.slice(shelfCount * wallDef.shelfSize,shelfCount * wallDef.shelfSize + wallDef.shelfSize);
         const col1 = [];
         const col2 = [];
         for (let boxCount = 0; boxCount < shelfBoxes.length; boxCount += 2) {

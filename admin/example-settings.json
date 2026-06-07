@@ -12,12 +12,23 @@
   "groupLockName": "UMSLockGroup",
   "public": {
     "checkPath": "http://example.com#",
-    "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc"
+    "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc",
+    "storageWalls": [
+      { "name": "Floor 1, Wall 1", "start": 1, "end": 108, "shelfSize": 12 },
+      { "name": "Floor 1, Wall 2", "start": 109, "end": 204, "shelfSize": 12 },
+      { "name": "Floor 2, Wall 1", "start": 2001, "end": 2108, "shelfSize": 12 }
+    ]
   },
   "private": {
     "vapidPrivateKey": "F7hcqyRl7P27b3dALstLwz__2lK-NHNZRgxqzCL9HUo",
     "notificationsPath": "private/notifications.json",
-    "notifyExpiringTime": "at 09:00 am"
+    "notifyExpiringTime": "at 09:00 am",
+    "googleDrive": {
+      "backend": "drive",
+      "keyFile": "config/expense-service-account.json",
+      "sharedDriveId": "REPLACE_WITH_SHARED_DRIVE_ID",
+      "rootFolder": "Receipts"
+    }
   },
   "expireInitiatedPayments": [
     {
