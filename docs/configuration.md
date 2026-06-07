@@ -25,6 +25,9 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `from`               | Allowed email sender addresses (string or array) |
 | `noreply`            | No-reply sender address (default: `no-reply@uppsalamakerspace.se`) |
 | `deliverMails`       | Enable/disable email delivery (must be truthy to send) |
+| `reminderCron.enabled` | **Must be explicitly `true`** for the membership-reminder cron to send any mail or push. Unset or `false` => the job does nothing. Keep `false` in dev/staging so a copied member database never triggers reminders. |
+| `reminderCron.hour`  | Hour of day the reminder cron runs (default: `9`) |
+| `reminderCron.minute`| Minute the reminder cron runs (default: `0`)  |
 | `syncNrOfTransactions`| Number of bank transactions to sync          |
 | `public.checkPath`   | Base URL for member QR check                 |
 | `public.vapidPublicKey` | VAPID key for push notifications          |
@@ -199,6 +202,23 @@ Email requires:
 2. `Meteor.settings.deliverMails` must be truthy in the admin app. If not set, all email sending methods will refuse to send.
 
 Sender addresses are configured via `Meteor.settings.from` (string or array) and `Meteor.settings.noreply`.
+
+### Membership reminder cron
+
+The daily reminder job (`admin/server/cronjob/sendReminders.js`) sends renewal
+reminders — both email and push — to members within 14 days of expiry. It is
+gated behind two independent flags and runs only when **both** hold:
+
+1. `reminderCron.enabled === true` (the explicit opt-in guard).
+2. `deliverMails` is truthy.
+
+There is no environment auto-detection: the job will not fire unless
+`reminderCron.enabled` is explicitly set to `true`. In dev/staging — including
+when running against a copy of the production member database — leave it unset
+or `false` so reminders can never be sent to real members. Only the production
+admin app's `settings.json` should set it to `true`. The manual "Run now"
+trigger (`reminders.runNow`) goes through the same job and is therefore subject
+to the same guard.
 
 ---
 

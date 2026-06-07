@@ -95,6 +95,7 @@ Copy `example-settings.json` to `settings.json` and configure:
 - `bankproxy` - URL to umsme-bank service
 - `lockUsername/lockPassword` - Door lock API credentials
 - `deliverMails` - Set false to disable email sending
+- `reminderCron.enabled` - Must be explicitly `true` to send membership-expiry reminders (mail + push). Leave unset/false in dev so a copied member DB never triggers reminders.
 
 Email requires `MAIL_URL` environment variable (see example-start.sh).
 

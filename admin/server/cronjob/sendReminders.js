@@ -24,6 +24,13 @@ const REMINDER_HORIZON_DAYS = 14;
 const reminderHour = () => Meteor.settings?.reminderCron?.hour ?? 9;
 const reminderMinute = () => Meteor.settings?.reminderCron?.minute ?? 0;
 
+// Explicit opt-in guard. The reminder cron sends real mail AND push to real
+// members, so it must never fire against a copied database in a dev/staging
+// environment. There is no environment auto-detection here on purpose:
+// reminders run only when reminderCron.enabled is explicitly true in this
+// app's settings.json. Unset or false => nothing is delivered.
+const reminderEnabled = () => Meteor.settings?.reminderCron?.enabled === true;
+
 const fromAddress = () => {
   const f = Meteor.settings?.noreply;
   if (Array.isArray(f)) return f[0];
@@ -33,7 +40,10 @@ const fromAddress = () => {
 const iso = (d) => (d instanceof Date ? d.toISOString() : String(d));
 
 export async function runReminderJob() {
-  console.log(`[Reminder cron] Job invoked at ${new Date().toISOString()}; deliverMails=${Meteor.settings.deliverMails}`);
+  console.log(`[Reminder cron] Job invoked at ${new Date().toISOString()}; reminderCron.enabled=${Meteor.settings?.reminderCron?.enabled}, deliverMails=${Meteor.settings.deliverMails}`);
+  if (!reminderEnabled()) {
+    return 'Reminder cron skipped: reminderCron.enabled is not true.';
+  }
   if (!Meteor.settings.deliverMails) {
     return 'Reminder cron skipped: deliverMails is false.';
   }
