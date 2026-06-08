@@ -1,0 +1,15 @@
+<template name="ExpenseAccountView">
+    <a href="/expenses/accounts" style="float: right">Back to expense accounts</a>
+    <h1>Expense account: {{account.name}}</h1>
+
+    {{#if isUsed}}
+    <div class="alert alert-info">
+        This account is used by one or more expenses and can no longer be deleted.
+    </div>
+    {{else}}
+    <p><button class="btn btn-danger deleteExpenseAccount">Delete account</button></p>
+    {{/if}}
+
+    <h2>Edit</h2>
+    {{> quickForm collection=ExpenseAccounts doc=account id="editExpenseAccountForm" type="update" omitFields="createdAt" buttonContent="Update"}}
+</template>

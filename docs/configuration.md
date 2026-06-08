@@ -29,6 +29,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `reminderCron.hour`  | Hour of day the reminder cron runs (default: `9`) |
 | `reminderCron.minute`| Minute the reminder cron runs (default: `0`)  |
 | `syncNrOfTransactions`| Number of bank transactions to sync          |
+| `public.adminUrl`    | Public base URL of the admin app (e.g. `https://umsme.uppsalamakerspace.se`; `http://localhost:3000` in dev). Used to build absolute links into admin — set explicitly because `Meteor.absoluteUrl()` is unreliable behind the reverse proxy. |
 | `public.checkPath`   | Base URL for member QR check                 |
 | `public.vapidPublicKey` | VAPID key for push notifications          |
 | `private.notificationsPath` | Path to notification types JSON (default: bundled `private/notifications.json`) |
@@ -40,6 +41,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `swishCallback`      | Swish callback URL                           |
 | `serviceConfigurations` | OAuth credentials (Google, Facebook)      |
 | `tests.path`         | Absolute path to the test-questions root (see [certificates.md](certificates.md#7b-test-based-certificates) for layout). Same setting in app's `settings.json`. |
+| `private.googleDrive` | Receipt storage for expenses; same block as the app (see section 12). Admin uses it to download receipts for review. |
 
 ---
 
@@ -48,6 +50,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | Key                               | Purpose                                    |
 |-----------------------------------|--------------------------------------------|
 | `public.swish.disabled`           | Kill switch for Swish payments             |
+| `public.adminUrl`                 | Public base URL of the admin app, used to build links into admin (e.g. expense manager events). Same value as admin's own `public.adminUrl`. |
 | `public.vapidPublicKey`           | VAPID public key for push                  |
 | `public.googleCalendar`           | Google Calendar API integration            |
 | `public.slack.team`               | Slack team ID                              |
@@ -60,6 +63,8 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `private.roomsPath`               | Path to rooms config JSON                  |
 | `private.slackChannelsPath`       | Path to Slack channels JSON                |
 | `private.slack.botToken`          | Slack bot token                            |
+| `private.googleDrive`             | Receipt storage for expenses (see section 12) |
+| `private.expenses.allowList`      | Member emails permitted to use the expenses feature (see section 12). Absent/empty => nobody. |
 | `serviceConfigurations`           | OAuth credentials (Google, Facebook)       |
 | `tests.path`                      | Absolute path to the test-questions root. Same setting in admin's `settings.json`. See [certificates.md](certificates.md#7b-test-based-certificates). |
 
@@ -275,17 +280,24 @@ Defined in `common/server/managerEvents/index.js`:
 | `membershipRenewed`    | `payment/server/api/payments.js` |
 | `quarterlyLabPayment`  | `payment/server/api/payments.js` |
 | `boxRequest`           | `app/server/methods/storage.js` |
+| `expenseSubmitted`     | `app/server/methods/expenses.js` |
+| `expenseRetracted`     | `app/server/methods/expenses.js` |
+| `expenseConfirmed`     | `admin/server/methods/expenses.js` |
+| `expenseRejected`      | `admin/server/methods/expenses.js` (includes the rejection reason) |
+| `expenseReimbursed`    | `admin/server/methods/expenses.js` |
+| `expenseUnreimbursed`  | `admin/server/methods/expenses.js` |
 
 ### Per-app placement (gotcha)
 
-`Meteor.settings` is per-app, and so is the `managerEvents` block — it must live in the same app's `settings.json` as the publisher. A channel listed in `admin/settings.json` is parsed but never fires, because admin doesn't emit any manager events today.
+`Meteor.settings` is per-app, and so is the `managerEvents` block — it must live in the same app's `settings.json` as the publisher.
 
 | Event | Where to configure the channel |
 |-------|-------------------------------|
 | `newMemberPayment`, `membershipRenewed`, `quarterlyLabPayment` | `payment/settings.json` |
-| `boxRequest` | `app/settings.json` |
+| `boxRequest`, `expenseSubmitted`, `expenseRetracted` | `app/settings.json` |
+| `expenseConfirmed`, `expenseRejected`, `expenseReimbursed`, `expenseUnreimbursed` | `admin/settings.json` |
 
-Add the same channel to both files if a single Slack channel should receive events from both publishers.
+Add the same channel to more than one file if a single Slack channel should receive events from multiple publishers (e.g. an "expenses" channel subscribing to `expenseSubmitted` in `app/settings.json` and to `expenseConfirmed`/`expenseReimbursed` in `admin/settings.json`).
 
 ### Adding a new event type
 
@@ -295,7 +307,73 @@ Add the same channel to both files if a single Slack channel should receive even
 
 ---
 
-## 12. Development Setup
+## 12. Expense Receipt Storage (Google Drive)
+
+Receipt photos for the expense feature are stored via `common/server/googleDrive.js`, which treats a Google **shared drive** as object storage (one folder per year under a root folder). Both the **app** (uploads, on submission) and the **admin** app (downloads, for review) read the same config, so the block must exist in both `app/settings.json` and `admin/settings.json` under `private.googleDrive`.
+
+```json
+{
+  "private": {
+    "googleDrive": {
+      "backend": "drive",
+      "keyFile": "config/expense-service-account.json",
+      "sharedDriveId": "0AById...",
+      "rootFolder": "Receipts"
+    }
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `backend` | `"drive"` for Google Drive, or `"local"` for development (see below) |
+| `keyFile` | Path (relative to the app's working dir) to the service-account JSON key. Alternatively use `credentials` with an inline `{ client_email, private_key }` object |
+| `credentials` | Inline service-account credentials, if not using `keyFile` |
+| `sharedDriveId` | The ID of the shared drive (from its URL: `drive.google.com/drive/folders/<id>`) |
+| `rootFolder` | Name of the folder created inside the shared drive to hold year subfolders (default `Receipts`) |
+
+### Local backend (development / testing)
+
+To run the expense feature without any Google setup, use the local backend — images are written to a directory on disk:
+
+```json
+{
+  "private": {
+    "googleDrive": { "backend": "local", "localPath": "/tmp/umsme-receipts" }
+  }
+}
+```
+
+`fileId` becomes a path relative to `localPath` (`<year>/<filename>`). This is what the checked-in `app/settings.json` and `admin/settings.json` use by default.
+
+### Google Cloud setup (drive backend)
+
+1. In Google Cloud, create a project and **enable the Google Drive API**.
+2. Create a **service account**; generate a JSON key and save it to the `keyFile` path (do not commit it).
+3. In Google Drive, create (or pick) a **shared drive**, then add the service account's email (`...@...iam.gserviceaccount.com`) as a **member with Content manager** access.
+4. Put the shared drive's ID in `sharedDriveId`. The root/year folders are created automatically on first upload.
+
+Admins/treasurer view receipts proxied through the admin server (a method returns the image as a data URI), so they do **not** need their own Google access.
+
+### Who can submit expenses (`app/settings.json`)
+
+The member-facing expenses feature is gated by an allowlist of member emails:
+
+```json
+{
+  "private": {
+    "expenses": { "allowList": ["treasurer@example.com", "board-member@example.com"] }
+  }
+}
+```
+
+Only listed members see the Expenses entry (Home card + hamburger menu) and may call the expense methods — the server enforces the same list, so it is a real restriction, not just hidden UI. **An absent or empty `allowList` means nobody**: the feature stays disabled until at least one email is configured. Emails are matched against the member's `Members.email`.
+
+The "Open in admin" links in the expense manager events are built from `public.adminUrl` (see below) — both the app's `expenseSubmitted` event and the admin's `expenseConfirmed`/`expenseReimbursed` events use it. If `public.adminUrl` is unset, the message is still sent without a link.
+
+---
+
+## 13. Development Setup
 
 ### Prerequisites
 
@@ -342,7 +420,7 @@ npm run storybook
 
 ---
 
-## 13. Deployment
+## 14. Deployment
 
 ### Building
 

@@ -84,6 +84,11 @@ Meteor.methods({
     const swishAllowList = Meteor.settings?.private?.swish?.allowList;
     const swishAllowed = !swishAllowList?.length || swishAllowList.includes(member.email);
 
-    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed});
+    // Expenses is restricted to an explicit allowlist. Absent/empty list =>
+    // nobody (the feature stays hidden until emails are configured).
+    const expenseAllowList = Meteor.settings?.private?.expenses?.allowList;
+    const expensesAllowed = !!expenseAllowList?.length && expenseAllowList.includes(member.email);
+
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed});
   },
 });

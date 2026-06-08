@@ -1,6 +1,7 @@
 {
   "public": {
     "checkPath": "http://example.com#",
+    "adminUrl": "https://umsme.uppsalamakerspace.se",
     "swish": {
       "disabled": false,
       "disabledMessage": {
@@ -24,6 +25,25 @@
   },
   "private": {
     "vapidPrivateKey": "Some key here",
+    "googleDrive": {
+      "backend": "drive",
+      "keyFile": "config/expense-service-account.json",
+      "sharedDriveId": "REPLACE_WITH_SHARED_DRIVE_ID",
+      "rootFolder": "Receipts"
+    },
+    "expenses": {
+      "allowList": ["treasurer@example.com", "board-member@example.com"]
+    },
+    "managerEvents": {
+      "channels": [
+        {
+          "name": "expenses",
+          "type": "slack",
+          "webhookUrl": "https://hooks.slack.com/services/...",
+          "subscriptions": ["expenseSubmitted", "expenseRetracted"]
+        }
+      ]
+    },
     "paymentOptionsPath": "private/paymentOptions.json",
     "termsOfPurchaseMembershipEn": "private/termsOfPurchaseMembership.en.md",
     "termsOfPurchaseMembershipSv": "private/termsOfPurchaseMembership.sv.md",

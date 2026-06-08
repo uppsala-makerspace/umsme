@@ -25,7 +25,7 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement }) => {
+export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, expensesAllowed, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement }) => {
   const { t, i18n } = useTranslation();
 
   if (loading) {
@@ -125,6 +125,31 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
           {t("viewTools")}
         </span>
       </Link>
+      {expensesAllowed && (
+      <Link
+        to="/expenses"
+        className="block mt-4 mb-2 px-4 py-3 rounded-lg no-underline text-inherit border border-gray-200 bg-gray-50 hover:shadow-sm"
+      >
+        <span className="flex items-center gap-2 font-medium">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-5 h-5 flex-shrink-0"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"
+            />
+          </svg>
+          {t("expenses")}
+        </span>
+      </Link>
+      )}
       <a
         href="https://tutorial.uppsalamakerspace.se"
         target="_blank"

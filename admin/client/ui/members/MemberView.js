@@ -3,6 +3,7 @@ import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
 import { Messages } from '/imports/common/collections/messages';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { userSelectorForMember } from '/imports/common/lib/memberMatch';
 import 'meteor/aldeed:autoform/static'
 
 import '../comment/CommentList';
@@ -96,7 +97,7 @@ Template.MemberView.helpers({
   linkedUser() {
     const member = Members.findOne(FlowRouter.getParam('_id'));
     if (member?.email) {
-      return Meteor.users.findOne({ 'emails.address': member.email });
+      return Meteor.users.findOne(userSelectorForMember(member));
     }
   }
 });

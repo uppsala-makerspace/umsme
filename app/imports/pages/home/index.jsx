@@ -71,6 +71,7 @@ export default () => {
       isFamily={!!memberInfo?.member?.infamily}
       registered={!!memberInfo?.paying?.registered}
       excluded={excluded}
+      expensesAllowed={!!memberInfo?.expensesAllowed}
       hasNewMessages={hasNewMessages}
       messageCount={messageCount}
       announcementCount={announcementCount}

@@ -7,7 +7,7 @@
     {{/with}}
     {{> quickForm collection=Users schema=userSchema doc=user id="userForm" omitFields="_id" type="update" buttonContent="Update user"}}
     {{#if isNotAdminUser}}
-      {{#let admin=adminAsync board=boardAsync}}
+      {{#let admin=adminAsync board=boardAsync treasurer=treasurerAsync}}
         {{#if admin}}
           <button class="removeFromAdminGroup">Remove from admin group</button>
         {{/if}}
@@ -19,6 +19,12 @@
         {{/if}}
         {{#unless board}}
           <button class="addToBoardGroup">Add to board</button>
+        {{/unless}}
+        {{#if treasurer}}
+          <button class="removeFromTreasurerGroup">Remove from treasurer</button>
+        {{/if}}
+        {{#unless treasurer}}
+          <button class="addToTreasurerGroup">Add to treasurer</button>
         {{/unless}}
       {{/let}}
     {{/if}}

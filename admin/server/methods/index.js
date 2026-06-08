@@ -11,3 +11,4 @@ import './reminders';
 import './doorunlocks';
 import './invites';
 import './tests';
+import './expenses';

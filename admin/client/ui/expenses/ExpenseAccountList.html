@@ -1,0 +1,6 @@
+<template name="ExpenseAccountList">
+    <a href="/expenses" style="float: right">Back to expenses</a>
+    <h1>Expense accounts</h1>
+    <a href="/expenses/accounts/add">Add expense account</a>
+    {{> tabular table=TabularTables.ExpenseAccounts class="table table-hover table-striped table-bordered table-condensed expenseAccountList"}}
+</template>

@@ -3,6 +3,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Comments } from '/imports/common/collections/comments';
 import { Members } from '/imports/common/collections/members';
 import { schemas } from '/imports/common/lib/schemas';
+import { memberSelectorForUser } from '/imports/common/lib/memberMatch';
 import { Roles } from 'meteor/roles';
 
 import './UserView.html';
@@ -42,12 +43,15 @@ Template.UserView.helpers({
     const id = FlowRouter.getParam('_id');
     return Roles.userIsInRoleAsync(id, 'board');
   },
+  treasurerAsync() {
+    const id = FlowRouter.getParam('_id');
+    return Roles.userIsInRoleAsync(id, 'treasurer');
+  },
   linkedMember() {
     const id = FlowRouter.getParam('_id');
     const user = Meteor.users.findOne(id);
-    const email = user?.emails?.[0]?.address;
-    if (email) {
-      return Members.findOne({ email });
+    if (user) {
+      return Members.findOne(memberSelectorForUser(user));
     }
   }
 });
@@ -68,6 +72,14 @@ Template.UserView.events({
   'click .addToBoardGroup': async function (event) {
     const id = FlowRouter.getParam('_id');
     await Meteor.callAsync('addToBoardGroup', id);
+  },
+  'click .removeFromTreasurerGroup': async function (event) {
+    const id = FlowRouter.getParam('_id');
+    await Meteor.callAsync('removeFromTreasurerGroup', id);
+  },
+  'click .addToTreasurerGroup': async function (event) {
+    const id = FlowRouter.getParam('_id');
+    await Meteor.callAsync('addToTreasurerGroup', id);
   },
   'click .deleteUser': async function (event) {
     const id = FlowRouter.getParam('_id');

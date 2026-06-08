@@ -10,6 +10,7 @@ export const HamburgerMenu = () => {
   const location = useLocation();
   const { memberInfo } = useContext(MemberInfoContext);
   const hasMember = !!memberInfo?.member;
+  const expensesAllowed = !!memberInfo?.expensesAllowed;
   const menuRef = useRef(null);
 
   // Close menu when clicking outside
@@ -68,6 +69,7 @@ export const HamburgerMenu = () => {
             { to: "/messages", label: "messages" },
             { to: "/tool", label: "viewTools" },
             { to: "/storage", label: "myBox" },
+            ...(expensesAllowed ? [{ to: "/expenses", label: "expenses" }] : []),
             { to: "/liability", label: "liability" },
             { to: "/install", label: "installApp" },
             { to: "/settings", label: "settings" },

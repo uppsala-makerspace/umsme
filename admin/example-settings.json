@@ -16,6 +16,7 @@
   "lockAssumeUser": "lock@uppsalamakerspace.se",
   "groupLockName": "UMSLockGroup",
   "public": {
+    "adminUrl": "https://umsme.uppsalamakerspace.se",
     "checkPath": "http://example.com#",
     "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc",
     "storageWalls": [
@@ -33,6 +34,16 @@
       "keyFile": "config/expense-service-account.json",
       "sharedDriveId": "REPLACE_WITH_SHARED_DRIVE_ID",
       "rootFolder": "Receipts"
+    },
+    "managerEvents": {
+      "channels": [
+        {
+          "name": "expenses",
+          "type": "slack",
+          "webhookUrl": "https://hooks.slack.com/services/...",
+          "subscriptions": ["expenseConfirmed", "expenseRejected", "expenseReimbursed", "expenseUnreimbursed"]
+        }
+      ]
     }
   },
   "expireInitiatedPayments": [

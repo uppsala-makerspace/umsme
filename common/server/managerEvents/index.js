@@ -2,6 +2,14 @@ import { Meteor } from "meteor/meteor";
 import * as slackChannel from "./slackChannel";
 
 /**
+ * Format text as a Slack blockquote. Slack's `>` only quotes the line it is on,
+ * so every line of a multi-line value must be prefixed individually. Returns ''
+ * for empty input.
+ */
+export const blockquote = (text) =>
+  text ? String(text).split("\n").map((line) => `> ${line}`).join("\n") : "";
+
+/**
  * Catalogue of manager-facing operational events. Add new entries here
  * (kebab-case-ish strings) and reference them by name in each app's
  * `Meteor.settings.private.managerEvents.channels[*].subscriptions`.
@@ -15,6 +23,12 @@ export const ManagerEventType = {
   MEMBERSHIP_RENEWED: "membershipRenewed",
   QUARTERLY_LAB_PAYMENT: "quarterlyLabPayment",
   BOX_REQUEST: "boxRequest",
+  EXPENSE_SUBMITTED: "expenseSubmitted",
+  EXPENSE_RETRACTED: "expenseRetracted",
+  EXPENSE_CONFIRMED: "expenseConfirmed",
+  EXPENSE_REJECTED: "expenseRejected",
+  EXPENSE_REIMBURSED: "expenseReimbursed",
+  EXPENSE_UNREIMBURSED: "expenseUnreimbursed",
 };
 
 const CHANNEL_ADAPTERS = {

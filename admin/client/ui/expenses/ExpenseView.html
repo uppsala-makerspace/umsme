@@ -1,0 +1,71 @@
+<template name="ExpenseView">
+    <a href="/expenses" style="float: right">Back to expenses</a>
+    <h1>Expense <span class="label label-{{statusClass}}">{{expense.status}}</span></h1>
+
+    {{#if expense}}
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table table-condensed">
+                <tbody>
+                    <tr><th>Member</th><td><a href="/member/{{expense.memberId}}" target="_blank">{{memberName}}&nbsp;↗</a></td></tr>
+                    <tr><th>Date</th><td>{{formatDate expense.date}}</td></tr>
+                    <tr><th>Amount</th><td>{{#if expense.amount}}{{expense.amount}} kr{{else}}<em>—</em>{{/if}}</td></tr>
+                    <tr><th>Account</th><td>{{accountName}}{{#if account.accountNumber}} <code>{{account.accountNumber}}</code>{{/if}}</td></tr>
+                    <tr><th>Note</th><td>{{#if expense.note}}{{expense.note}}{{else}}<em>—</em>{{/if}}</td></tr>
+                    <tr><th>Created</th><td>{{formatDate expense.createdAt}}</td></tr>
+                </tbody>
+            </table>
+
+            {{#if expense.rejectionReason}}
+            <div class="alert alert-warning">
+                <strong>Rejection reason:</strong> {{expense.rejectionReason}}
+            </div>
+            {{/if}}
+
+            <div class="btn-toolbar">
+                {{#if isSubmitted}}
+                <button class="btn btn-success confirmExpense">Confirm</button>
+                <button class="btn btn-danger rejectExpense">Reject…</button>
+                {{/if}}
+                {{#if isConfirmed}}
+                <button class="btn btn-success reimburseExpense">Mark as reimbursed</button>
+                <button class="btn btn-danger rejectExpense">Reject…</button>
+                {{/if}}
+                {{#if isReimbursed}}
+                <button class="btn btn-default unreimburseExpense">Undo "mark as reimbursed"</button>
+                {{/if}}
+            </div>
+
+            {{#if rejecting}}
+            <div class="panel panel-default" style="margin-top: 12px;">
+                <div class="panel-body">
+                    <label for="rejectReason">Reason for rejection (the member will see this)</label>
+                    <textarea id="rejectReason" class="form-control rejectReason" rows="4"></textarea>
+                    <div style="margin-top: 8px;">
+                        <button class="btn btn-danger confirmReject">Reject expense</button>
+                        <button class="btn btn-default cancelReject">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+
+        <div class="col-md-6">
+            {{#if receipt}}
+            <img src="{{receipt}}" alt="Receipt" class="receiptThumb" style="max-width: 100%; border: 1px solid #ddd; cursor: zoom-in;" title="Click to enlarge">
+            {{else}}
+            <p class="text-muted">Loading receipt…</p>
+            {{/if}}
+        </div>
+    </div>
+    {{else}}
+    <p>Expense not found.</p>
+    {{/if}}
+
+    {{#if receiptOpen}}
+    <div class="receiptOverlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1050; overflow: auto; text-align: center;">
+        <button class="closeReceipt btn btn-default" style="position: fixed; top: 15px; right: 15px; z-index: 1060;">Close ✕</button>
+        <img src="{{receipt}}" alt="Receipt" class="receiptFull" style="{{receiptFullStyle}}">
+    </div>
+    {{/if}}
+</template>

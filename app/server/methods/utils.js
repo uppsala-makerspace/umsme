@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
 import { memberStatus } from "/imports/common/lib/utils";
+import { memberForUser } from "/imports/common/server/memberForUser";
 
 /**
  * Character mappings for accented characters not in the Swedish alphabet.
@@ -129,13 +130,12 @@ export const findForUser = async () => {
     if (firstEmail) {
       email = firstEmail?.address?.toLowerCase();
       verified = firstEmail.verified;
-      if (verified) {
-        member = await Members.findOneAsync({email});
-      }
     } else if (firstService) {
       email = firstService.email?.toLowerCase();
       verified = true;
     }
+    // Resolve the member by matching ANY verified email, not just emails[0].
+    member = await memberForUser(user);
   }
   return {user, email, verified, member};
 };

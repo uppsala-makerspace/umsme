@@ -14,14 +14,17 @@ import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
 import { Announcements } from '/imports/common/collections/announcements';
 import Invites from '/imports/common/collections/Invites';
+import { Expenses } from '/imports/common/collections/expenses';
+import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 
-const createAuthFuncFor = (col) => async function () {
-  if (
-    this.userId &&
-    (await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))
-  ) return col.find();
+const createAuthFuncForRoles = (col, roles) => async function () {
+  if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
+    return col.find();
+  }
   this.ready();
 };
+
+const createAuthFuncFor = (col) => createAuthFuncForRoles(col, ['admin', 'board']);
 
 export default () => {
   Meteor.publish('members', createAuthFuncFor(Members));
@@ -41,6 +44,8 @@ export default () => {
   Meteor.publish('attestations', createAuthFuncFor(Attestations));
   Meteor.publish('announcements', createAuthFuncFor(Announcements));
   Meteor.publish('invites', createAuthFuncFor(Invites));
+  Meteor.publish('expenses', createAuthFuncForRoles(Expenses, ['admin', 'board', 'treasurer']));
+  Meteor.publish('expenseAccounts', createAuthFuncForRoles(ExpenseAccounts, ['admin', 'board', 'treasurer']));
 
   Meteor.publish(null, async function () {
     if (this.userId) {

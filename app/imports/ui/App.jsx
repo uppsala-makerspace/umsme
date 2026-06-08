@@ -38,6 +38,9 @@ const MessageDetail = lazy(() => import('/imports/pages/messages/detail'));
 const Tool = lazy(() => import('/imports/pages/tool'));
 const ToolDetail = lazy(() => import('/imports/pages/tool/detail'));
 const Settings = lazy(() => import('/imports/pages/settings'));
+const Expenses = lazy(() => import('/imports/pages/expenses/list'));
+const ExpenseDetail = lazy(() => import('/imports/pages/expenses/detail'));
+const ExpenseNew = lazy(() => import('/imports/pages/expenses/new'));
 
 export const App = () => (
   <div>
@@ -81,6 +84,9 @@ export const App = () => (
             <Route path="/tool" element={<Tool />} />
             <Route path="/tool/:id" element={<ToolDetail />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/expenses" element={<Expenses />} />
+            <Route path="/expenses/new" element={<ExpenseNew />} />
+            <Route path="/expenses/:expenseId" element={<ExpenseDetail />} />
           </Routes>
         </Suspense>
       </AppDataProvider>

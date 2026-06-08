@@ -51,4 +51,14 @@ Meteor.methods({
       return Roles.removeUsersFromRolesAsync(id, "board", null);
     }
   },
+  'addToTreasurerGroup': async (id) => {
+    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
+      return Roles.addUsersToRolesAsync(id, "treasurer", null);
+    }
+  },
+  'removeFromTreasurerGroup': async (id) => {
+    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
+      return Roles.removeUsersFromRolesAsync(id, "treasurer", null);
+    }
+  },
 });
