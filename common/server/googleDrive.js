@@ -55,7 +55,10 @@ const driveClient = () => {
   }
   _client = new JWT({
     email: creds.client_email,
-    key: creds.private_key,
+    // Tolerate keys whose newlines arrived escaped (literal "\n"), which is
+    // common when the key is pasted into JSON/env. A real PEM needs actual
+    // line breaks or OpenSSL fails with "DECODER routines::unsupported".
+    key: creds.private_key.replace(/\\n/g, "\n"),
     scopes: ["https://www.googleapis.com/auth/drive"],
   });
   return _client;
@@ -143,11 +146,16 @@ const driveDownload = async (fileId) => {
   return Buffer.from(res.data);
 };
 
+// Trash rather than permanently delete: on a shared drive, files.delete
+// requires the Manager/organizer role, whereas a Content manager (the least
+// privilege we need for upload/read) is allowed to trash. Trashed files leave
+// the folder and the shared-drive trash auto-purges after 30 days.
 const driveDelete = async (fileId) => {
   await driveRequest({
     url: `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}`,
-    method: "DELETE",
+    method: "PATCH",
     params: { supportsAllDrives: true },
+    data: { trashed: true },
   });
 };
 
