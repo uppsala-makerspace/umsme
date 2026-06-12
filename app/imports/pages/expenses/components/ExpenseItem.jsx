@@ -19,7 +19,7 @@ const ExpenseItem = ({ to, status, children }) => {
         to={to}
         className="flex justify-between items-center p-4 no-underline text-inherit transition-colors hover:bg-gray-50"
       >
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 min-w-0">{children}</div>
         <span className="text-gray-400 text-xl ml-2">&rarr;</span>
       </Link>
     </li>

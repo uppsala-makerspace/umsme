@@ -11,6 +11,7 @@
                     <tr><th>Date</th><td>{{formatDate expense.date}}</td></tr>
                     <tr><th>Amount</th><td>{{#if expense.amount}}{{expense.amount}} kr{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Account</th><td>{{accountName}}{{#if account.accountNumber}} <code>{{account.accountNumber}}</code>{{/if}}</td></tr>
+                    <tr><th>Place</th><td>{{#if expense.place}}{{expense.place}}{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Note</th><td>{{#if expense.note}}{{expense.note}}{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Created</th><td>{{formatDate expense.createdAt}}</td></tr>
                 </tbody>

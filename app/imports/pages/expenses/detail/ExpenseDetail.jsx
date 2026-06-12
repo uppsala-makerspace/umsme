@@ -7,6 +7,7 @@ import Loader from "../../../components/Loader";
 import Button from "../../../components/Button";
 import BackLink from "../../certificates/components/BackLink";
 import ReceiptCapture from "../components/ReceiptCapture";
+import PlaceAutocomplete from "../components/PlaceAutocomplete";
 import { isEditable, formatDate, toDateInputValue } from "../utils";
 
 const ExpenseDetail = ({
@@ -14,7 +15,8 @@ const ExpenseDetail = ({
   error,
   expense,
   accounts,
-  receiptDataUri,
+  placeSuggestions,
+  receiptUrl,
   onSave,
   onSubmit,
   onRetract,
@@ -25,6 +27,7 @@ const ExpenseDetail = ({
   const lang = i18n.language || "sv";
   const [amount, setAmount] = useState("");
   const [expenseAccountId, setExpenseAccountId] = useState("");
+  const [place, setPlace] = useState("");
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
@@ -33,6 +36,7 @@ const ExpenseDetail = ({
     if (expense) {
       setAmount(expense.amount != null ? String(expense.amount) : "");
       setExpenseAccountId(expense.expenseAccountId || "");
+      setPlace(expense.place || "");
       setDate(toDateInputValue(expense.date));
       setNote(expense.note || "");
     }
@@ -70,6 +74,7 @@ const ExpenseDetail = ({
   const formFields = () => ({
     amount: amount === "" ? null : Number(amount),
     expenseAccountId: expenseAccountId || null,
+    place,
     date: date ? new Date(date) : undefined,
     note,
   });
@@ -94,11 +99,11 @@ const ExpenseDetail = ({
         </div>
       )}
 
-      {receiptDataUri ? (
+      {receiptUrl ? (
         <div className="relative mb-6">
-          <a href={receiptDataUri} target="_blank" rel="noreferrer">
+          <a href={receiptUrl} target="_blank" rel="noreferrer">
             <img
-              src={receiptDataUri}
+              src={receiptUrl}
               alt={t("expenseReceipt")}
               className="w-full rounded-lg border border-gray-200"
             />
@@ -147,6 +152,17 @@ const ExpenseDetail = ({
                 {accounts.find((a) => a._id === expenseAccountId)?.explanation}
               </span>
             )}
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">{t("expensePlace")}</span>
+            <PlaceAutocomplete
+              value={place}
+              onChange={setPlace}
+              suggestions={placeSuggestions}
+              placeholder={t("expensePlacePlaceholder")}
+              className="border border-gray-300 rounded p-3 w-full"
+            />
           </label>
 
           <label className="flex flex-col gap-1">
@@ -204,6 +220,7 @@ const ExpenseDetail = ({
         <div className="flex flex-col gap-2 text-sm text-gray-700">
           <div><span className="font-semibold">{t("expenseAmount")}:</span> {expense.amount} kr</div>
           <div><span className="font-semibold">{t("expenseAccount")}:</span> {expense.accountName || "—"}</div>
+          {expense.place && <div><span className="font-semibold">{t("expensePlace")}:</span> {expense.place}</div>}
           <div><span className="font-semibold">{t("expenseDate")}:</span> {formatDate(expense.date, lang)}</div>
           {expense.note && <div><span className="font-semibold">{t("expenseNote")}:</span> {expense.note}</div>}
 
@@ -236,7 +253,8 @@ ExpenseDetail.propTypes = {
   error: PropTypes.string,
   expense: PropTypes.object,
   accounts: PropTypes.array,
-  receiptDataUri: PropTypes.string,
+  placeSuggestions: PropTypes.array,
+  receiptUrl: PropTypes.string,
   onSave: PropTypes.func,
   onSubmit: PropTypes.func,
   onRetract: PropTypes.func,
@@ -249,7 +267,8 @@ ExpenseDetail.defaultProps = {
   error: null,
   expense: null,
   accounts: [],
-  receiptDataUri: null,
+  placeSuggestions: [],
+  receiptUrl: null,
   onSave: () => {},
   onSubmit: () => {},
   onRetract: () => {},

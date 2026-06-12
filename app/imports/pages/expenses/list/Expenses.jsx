@@ -8,6 +8,17 @@ import Button from "../../../components/Button";
 import ExpenseItem from "../components/ExpenseItem";
 import { EXPENSE_STATUSES, formatDate } from "../utils";
 
+// Which timestamp to show (right-aligned, with a label) per status.
+const statusDate = (e) => {
+  switch (e.status) {
+    case "submitted": return { labelKey: "expenseDateLabelSubmitted", value: e.submittedAt || e.date };
+    case "confirmed": return { labelKey: "expenseDateLabelConfirmed", value: e.confirmedAt || e.date };
+    case "rejected": return { labelKey: "expenseDateLabelRejected", value: e.rejectedAt || e.date };
+    case "reimbursed": return { labelKey: "expenseDateLabelReimbursed", value: e.reimbursedAt || e.date };
+    default: return { labelKey: "expenseDateLabelDate", value: e.date };
+  }
+};
+
 const Expenses = ({ loading, error, expenses }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -55,16 +66,26 @@ const Expenses = ({ loading, error, expenses }) => {
               {t(`expenseStatus_${status}`)}
             </h3>
             <ul className="list-none p-0 m-0">
-              {byStatus[status].map((e) => (
-                <ExpenseItem key={e._id} to={`/expenses/${e._id}`} status={e.status}>
-                  <span className="flex items-center font-semibold leading-snug">
-                    {e.accountName || t("expenseDraft")}
-                  </span>
-                  <span className="block text-sm text-gray-500 mt-1">
-                    {e.amount ? `${e.amount} kr` : t("expenseNoAmount")} · {formatDate(e.date, lang)}
-                  </span>
-                </ExpenseItem>
-              ))}
+              {byStatus[status].map((e) => {
+                const dated = statusDate(e);
+                return (
+                  <ExpenseItem key={e._id} to={`/expenses/${e._id}`} status={e.status}>
+                    <span className="block font-semibold leading-snug truncate">
+                      {e.note || t("expenseUntitled", { date: formatDate(e.date, lang) })}
+                    </span>
+                    <span className="inline-block rounded-full bg-gray-100 text-gray-700 text-xs px-2 py-1 mt-1">
+                      {e.accountName || t("expenseDraft")}
+                    </span>
+                    <div className="flex justify-between gap-3 text-sm text-gray-500 mt-1">
+                      <span>{e.amount ? `${e.amount} kr` : t("expenseNoAmount")}</span>
+                      <span className="whitespace-nowrap text-gray-600">
+                        <span className="text-gray-400">{t(dated.labelKey)}</span>{" "}
+                        {formatDate(dated.value, lang)}
+                      </span>
+                    </div>
+                  </ExpenseItem>
+                );
+              })}
             </ul>
           </section>
         ) : null

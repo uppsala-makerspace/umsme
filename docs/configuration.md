@@ -42,6 +42,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `serviceConfigurations` | OAuth credentials (Google, Facebook)      |
 | `tests.path`         | Absolute path to the test-questions root (see [certificates.md](certificates.md#7b-test-based-certificates) for layout). Same setting in app's `settings.json`. |
 | `private.googleDrive` | Receipt storage for expenses; same block as the app (see section 12). Admin uses it to download receipts for review. |
+| `private.receiptTokenSecret` | Secret for signing receipt-image URLs (see section 12). If unset, a random per-process secret is used. |
 
 ---
 
@@ -65,6 +66,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `private.slack.botToken`          | Slack bot token                            |
 | `private.googleDrive`             | Receipt storage for expenses (see section 12) |
 | `private.expenses.allowList`      | Member emails permitted to use the expenses feature (see section 12). Absent/empty => nobody. |
+| `private.receiptTokenSecret`      | Secret for signing receipt-image URLs (see section 12). If unset, a random per-process secret is used. |
 | `serviceConfigurations`           | OAuth credentials (Google, Facebook)       |
 | `tests.path`                      | Absolute path to the test-questions root. Same setting in admin's `settings.json`. See [certificates.md](certificates.md#7b-test-based-certificates). |
 
@@ -353,7 +355,13 @@ To run the expense feature without any Google setup, use the local backend — i
 3. In Google Drive, create (or pick) a **shared drive**, then add the service account's email (`...@...iam.gserviceaccount.com`) as a **member with Content manager** access.
 4. Put the shared drive's ID in `sharedDriveId`. The root/year folders are created automatically on first upload.
 
-Admins/treasurer view receipts proxied through the admin server (a method returns the image as a data URI), so they do **not** need their own Google access.
+### How receipts are served
+
+Receipt images are served by an HTTP endpoint (`GET /api/expenses/<id>/receipt?v=<fileId>&t=<token>`) registered in both the app and admin server processes, which streams the bytes from storage with `Content-Type`, `ETag`, and `Cache-Control` so browsers cache them. Admins/treasurer still go through the server (no Google access needed); they never hit Drive directly.
+
+Because an `<img>` request carries no login session, the URL is authorized by a signed token minted by a method only after the normal authz check (the owner in the app, an admin/board/treasurer role in admin). The token is an HMAC keyed by `private.receiptTokenSecret`, scoped to the exact photo version and valid for ~48h. **Set `receiptTokenSecret` in production** (a long random string), and use the **same** value across instances if the app is load-balanced; if unset, a random per-process secret is generated at startup (fine for a single instance/dev, but URLs break on restart and across instances).
+
+nginx must proxy `/api/expenses` to both the app and admin upstreams (it already proxies `/api/certificates` for the admin RFID endpoint).
 
 ### Who can submit expenses (`app/settings.json`)
 

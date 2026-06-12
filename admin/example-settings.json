@@ -35,6 +35,7 @@
       "sharedDriveId": "REPLACE_WITH_SHARED_DRIVE_ID",
       "rootFolder": "Receipts"
     },
+    "receiptTokenSecret": "a-long-random-string",
     "managerEvents": {
       "channels": [
         {

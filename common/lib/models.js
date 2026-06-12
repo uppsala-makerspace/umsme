@@ -833,6 +833,12 @@ export const models = {
       max: 50,
       optional: true,
     },
+    place: {
+      label: "Place of purchase",
+      type: String,
+      max: 200,
+      optional: true,
+    },
     note: {
       label: "Note",
       type: String,

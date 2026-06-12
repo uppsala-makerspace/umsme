@@ -3,10 +3,10 @@ import { Roles } from 'meteor/roles';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
-import { downloadImage } from '/imports/common/server/googleDrive';
 import { memberForUser } from '/imports/common/server/memberForUser';
 import { publishManagerEvent, ManagerEventType, blockquote } from '/imports/common/server/managerEvents';
 import { adminLink } from '/imports/common/lib/links';
+import { receiptUrlFor } from '/imports/common/server/receiptToken';
 
 // Build a Slack-mrkdwn description of an expense for manager events, with a
 // link back to the admin app (settings.public.adminUrl; omitted if unset).
@@ -152,12 +152,11 @@ Meteor.methods({
   },
 
   /**
-   * Return a receipt image as a data URI for the admin review UI.
+   * Return a signed, same-origin receipt URL for the admin review UI.
    */
-  'expenses.adminGetReceipt': async (expenseId) => {
+  'expenses.adminGetReceiptUrl': async (expenseId) => {
     await requireRole(['admin', 'board', 'treasurer']);
     const expense = await getExpense(expenseId);
-    const buffer = await downloadImage(expense.driveFileId);
-    return { dataUri: `data:${expense.mimeType};base64,${buffer.toString('base64')}` };
+    return { url: receiptUrlFor(expense._id, expense.driveFileId) };
   },
 });

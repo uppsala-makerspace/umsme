@@ -1,9 +1,10 @@
 import { Meteor } from "meteor/meteor";
 import { Expenses } from "/imports/common/collections/expenses";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
-import { uploadImage, downloadImage, deleteImage } from "/imports/common/server/googleDrive";
+import { uploadImage, deleteImage } from "/imports/common/server/googleDrive";
 import { publishManagerEvent, ManagerEventType, blockquote } from "/imports/common/server/managerEvents";
 import { adminLink } from "/imports/common/lib/links";
+import { receiptUrlFor } from "/imports/common/server/receiptToken";
 import { findMemberForUser } from "./utils";
 
 const EDITABLE_STATES = ["pending", "rejected"];
@@ -75,7 +76,7 @@ Meteor.methods({
   /**
    * Update editable fields of an own draft/submitted/rejected expense.
    */
-  "expenses.update": async (expenseId, { amount, expenseAccountId, date, note } = {}) => {
+  "expenses.update": async (expenseId, { amount, expenseAccountId, place, date, note } = {}) => {
     const member = await requireMember();
     const expense = await requireOwnExpense(expenseId, member);
     if (!EDITABLE_STATES.includes(expense.status)) {
@@ -100,6 +101,9 @@ Meteor.methods({
         if (!account) throw new Meteor.Error("not-found", "Expense account not found");
         $set.expenseAccountId = expenseAccountId;
       }
+    }
+    if (place !== undefined) {
+      if (place) $set.place = place; else $unset.place = "";
     }
     if (date !== undefined) $set.date = new Date(date);
     if (note !== undefined) {
@@ -232,7 +236,11 @@ Meteor.methods({
       const account = await ExpenseAccounts.findOneAsync(expense.expenseAccountId);
       accountName = account?.name || null;
     }
-    return { ...expense, accountName };
+    return {
+      ...expense,
+      accountName,
+      receiptUrl: receiptUrlFor(expense._id, expense.driveFileId),
+    };
   },
 
   /**
@@ -250,12 +258,14 @@ Meteor.methods({
   },
 
   /**
-   * Return the receipt image as a data URI (own expense only).
+   * Distinct places of purchase across all expenses, for autocomplete
+   * suggestions. Place names (store names) are not sensitive.
    */
-  "expenses.getReceipt": async (expenseId) => {
-    const member = await requireMember();
-    const expense = await requireOwnExpense(expenseId, member);
-    const buffer = await downloadImage(expense.driveFileId);
-    return { dataUri: `data:${expense.mimeType};base64,${buffer.toString("base64")}` };
+  "expenses.getPlaces": async () => {
+    await requireMember();
+    const places = await Expenses.rawCollection().distinct("place", {
+      place: { $exists: true, $ne: "" },
+    });
+    return places.sort((a, b) => a.localeCompare(b));
   },
 });

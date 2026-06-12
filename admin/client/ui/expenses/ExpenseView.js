@@ -25,12 +25,12 @@ Template.ExpenseView.onCreated(function () {
   this.zoomed = new ReactiveVar(false);
   this.rejecting = new ReactiveVar(false);
   const id = FlowRouter.getParam('_id');
-  Meteor.call('expenses.adminGetReceipt', id, (err, res) => {
+  Meteor.call('expenses.adminGetReceiptUrl', id, (err, res) => {
     if (err) {
-      console.error('adminGetReceipt failed', err);
+      console.error('adminGetReceiptUrl failed', err);
       return;
     }
-    this.receipt.set(res?.dataUri || null);
+    this.receipt.set(res?.url || null);
   });
 });
 

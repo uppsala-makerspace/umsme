@@ -14,6 +14,7 @@ const accounts = [
 ];
 
 const baseActions = {
+  placeSuggestions: ["Biltema", "Bauhaus", "Clas Ohlson, Uppsala", "Slöjd-Detaljer"],
   onSave: fn(),
   onSubmit: fn(),
   onRetract: fn(),

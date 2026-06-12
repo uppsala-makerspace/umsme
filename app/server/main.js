@@ -3,6 +3,7 @@ import "/imports/common/server/familyCascade";
 import "./methods";
 import "./accounts";
 import "./tests/init";
+import "./api/expenseReceipt";
 
 // Set MAIL_URL from settings if configured
 if (Meteor.settings.private?.mailUrl) {

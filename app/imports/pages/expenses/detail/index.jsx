@@ -12,7 +12,7 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const [expense, setExpense] = useState(null);
   const [accounts, setAccounts] = useState([]);
-  const [receiptDataUri, setReceiptDataUri] = useState(null);
+  const [placeSuggestions, setPlaceSuggestions] = useState([]);
   const [error, setError] = useState(null);
 
   const fetchData = useCallback(async () => {
@@ -22,8 +22,8 @@ export default () => {
       setExpense(exp);
       const accs = await Meteor.callAsync("expenses.getAccounts");
       setAccounts(accs);
-      const receipt = await Meteor.callAsync("expenses.getReceipt", expenseId);
-      setReceiptDataUri(receipt?.dataUri || null);
+      const places = await Meteor.callAsync("expenses.getPlaces");
+      setPlaceSuggestions(places);
       setError(null);
     } catch (err) {
       console.error("Error fetching expense:", err);
@@ -71,7 +71,8 @@ export default () => {
         error={error}
         expense={expense}
         accounts={accounts}
-        receiptDataUri={receiptDataUri}
+        placeSuggestions={placeSuggestions}
+        receiptUrl={expense?.receiptUrl || null}
         onSave={onSave}
         onSubmit={onSubmit}
         onRetract={onRetract}
