@@ -73,6 +73,7 @@ const computeStatus = async (member, certificate) => {
     maxAttempts,
     maxErrors: certificate.test.maxErrors,
     testId: certificate.test.testId,
+    certificateName: certificate.name,
     isBlocked: !passed && usedCount >= maxAttempts,
     hasActiveSession: !!active,
     activeAttemptId: active?._id || null,

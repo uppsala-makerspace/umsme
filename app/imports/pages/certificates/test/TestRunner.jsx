@@ -18,6 +18,7 @@ const TestRunner = ({
   questions,
   result,
   maxErrors,
+  certificateName,
   onAnswer,
   onSubmit,
   onBack,
@@ -118,11 +119,13 @@ const TestRunner = ({
 
   return (
     <MainContent>
-      <p className="text-sm text-gray-500 mb-2">
-        {t("testQuestionOf", { current: currentIdx + 1, total: questions.length })}
+      <p className="text-sm font-semibold text-gray-600 mb-1">
+        {[getLocalized(certificateName, lang), getLocalized(q.categoryTitle, lang) || q.categoryId]
+          .filter(Boolean)
+          .join(" › ")}
       </p>
-      <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
-        {getLocalized(q.categoryTitle, lang) || q.categoryId}
+      <p className="text-sm text-gray-500 mb-6">
+        {t("testQuestionOf", { current: currentIdx + 1, total: questions.length })}
       </p>
       <h2 className="text-xl mb-6 text-gray-800">{getLocalized(q.question, lang)}</h2>
       <div className="space-y-3 mb-6">

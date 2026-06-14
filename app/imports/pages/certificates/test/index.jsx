@@ -16,6 +16,7 @@ export default () => {
   const [attemptId, setAttemptId] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [maxErrors, setMaxErrors] = useState(0);
+  const [certificateName, setCertificateName] = useState(null);
   const [result, setResult] = useState(null);
 
   const initialize = useCallback(async () => {
@@ -24,6 +25,7 @@ export default () => {
     try {
       const status = await Meteor.callAsync("tests.getStatus", certificateId);
       setMaxErrors(status.maxErrors);
+      setCertificateName(status.certificateName);
       let session = await Meteor.callAsync("tests.resume", certificateId);
       if (!session) {
         session = await Meteor.callAsync("tests.start", certificateId);
@@ -77,6 +79,7 @@ export default () => {
         questions={questions}
         result={result}
         maxErrors={maxErrors}
+        certificateName={certificateName}
         onAnswer={handleAnswer}
         onSubmit={handleSubmit}
         onBack={handleBack}
