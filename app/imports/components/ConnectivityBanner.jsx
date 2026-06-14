@@ -13,7 +13,12 @@ export default function ConnectivityBanner() {
       setShow(false);
       return;
     }
-    const timer = setTimeout(() => setShow(true), 3000);
+    const timer = setTimeout(() => {
+      setShow(true);
+      // Force an immediate reconnect attempt instead of waiting out DDP's
+      // backoff (covers a foreground drop with no visibility/focus event).
+      if (!Meteor.status().connected) Meteor.reconnect();
+    }, 3000);
     return () => clearTimeout(timer);
   }, [connected]);
 

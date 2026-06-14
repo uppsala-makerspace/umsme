@@ -6,6 +6,7 @@ import { MemberInfoProvider } from '/imports/context/MemberInfoContext';
 import { AppDataProvider } from '/imports/context/AppDataContext';
 import { MessagesProvider } from '/imports/context/MessagesContext';
 import Loader from '/imports/components/Loader/Loader';
+import useAutoReconnect from '/imports/hooks/useAutoReconnect';
 
 const Login = lazy(() => import('/imports/pages/login'));
 const Register = lazy(() => import('/imports/pages/register'));
@@ -42,7 +43,9 @@ const Expenses = lazy(() => import('/imports/pages/expenses/list'));
 const ExpenseDetail = lazy(() => import('/imports/pages/expenses/detail'));
 const ExpenseNew = lazy(() => import('/imports/pages/expenses/new'));
 
-export const App = () => (
+export const App = () => {
+  useAutoReconnect();
+  return (
   <div>
     <Router>
       <LocationProvider>
@@ -96,3 +99,4 @@ export const App = () => (
       </LocationProvider>
     </Router>
   </div>);
+};
