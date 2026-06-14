@@ -5,13 +5,16 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import MainContent from "../../components/MainContent";
 
-export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthyear = "", initialGender = "", initialRfid = "" }) => {
+export default ({ onSubmit, showBank = false, initialName = "", initialMobile = "", initialBirthyear = "", initialGender = "", initialRfid = "", initialBankName = "", initialBankClearing = "", initialBankAccountNumber = "" }) => {
   const { t } = useTranslation();
   const [name, setName] = useState(initialName);
   const [mobile, setMobile] = useState(initialMobile);
   const [birthyear, setBirthyear] = useState(initialBirthyear);
   const [gender, setGender] = useState(initialGender);
   const [rfid, setRfid] = useState(initialRfid);
+  const [bankName, setBankName] = useState(initialBankName);
+  const [bankClearing, setBankClearing] = useState(initialBankClearing);
+  const [bankAccountNumber, setBankAccountNumber] = useState(initialBankAccountNumber);
 
   const nameMaxLength = models.member.name.max;
   const mobileMaxLength = models.member.mobile.max;
@@ -20,7 +23,13 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ name, mobile, birthyear, gender, rfid });
+    const payload = { name, mobile, birthyear, gender, rfid };
+    if (showBank) {
+      payload.bankName = bankName.trim();
+      payload.bankClearing = bankClearing.trim();
+      payload.bankAccountNumber = bankAccountNumber.trim();
+    }
+    onSubmit(payload);
   };
 
   return (
@@ -86,6 +95,42 @@ export default ({ onSubmit, initialName = "", initialMobile = "", initialBirthye
         maxLength={rfidMaxLength}
         pattern="([0-9A-Fa-f]{2})+"
       />
+
+      {showBank && (
+        <div className="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <h3 className="text-lg font-bold mb-1">{t("bankAccountSection")}</h3>
+          <p className="text-sm text-gray-500 mb-4">{t("bankAccountHint")}</p>
+          <Input
+            label={t("bankName")}
+            id="bankName"
+            type="text"
+            placeholder="Swedbank"
+            value={bankName}
+            onChange={(e) => setBankName(e.target.value)}
+            maxLength={models.member.bankName.max}
+          />
+          <Input
+            label={t("bankClearing")}
+            id="bankClearing"
+            type="text"
+            inputMode="numeric"
+            placeholder="8327-9"
+            value={bankClearing}
+            onChange={(e) => setBankClearing(e.target.value)}
+            maxLength={models.member.bankClearing.max}
+          />
+          <Input
+            label={t("bankAccountNumber")}
+            id="bankAccountNumber"
+            type="text"
+            inputMode="numeric"
+            placeholder="1234567"
+            value={bankAccountNumber}
+            onChange={(e) => setBankAccountNumber(e.target.value)}
+            maxLength={models.member.bankAccountNumber.max}
+          />
+        </div>
+      )}
 
       <Button type="submit" fullWidth className="mt-8">
         {t("Save")}

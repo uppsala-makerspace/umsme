@@ -9,9 +9,9 @@ export default () => {
   const navigate = useNavigate();
   const { memberInfo, refetch } = useContext(MemberInfoContext);
 
-  const handleSubmit = async ({ name, mobile, birthyear, gender, rfid }) => {
+  const handleSubmit = async (payload) => {
     try {
-      await Meteor.callAsync("createOrUpdateProfile", { name, mobile, birthyear, gender, rfid });
+      await Meteor.callAsync("createOrUpdateProfile", payload);
       await refetch();
       navigate("/");
     } catch (err) {
@@ -27,11 +27,15 @@ export default () => {
         <Profile
           key={memberInfo.member?._id || "new"}
           onSubmit={handleSubmit}
+          showBank={!!memberInfo?.expensesAllowed}
           initialName={memberInfo.member?.name || ""}
           initialMobile={memberInfo.member?.mobile || ""}
           initialBirthyear={memberInfo.member?.birthyear || ""}
           initialGender={memberInfo.member?.gender || ""}
           initialRfid={memberInfo.member?.rfid || ""}
+          initialBankName={memberInfo.member?.bankName || ""}
+          initialBankClearing={memberInfo.member?.bankClearing || ""}
+          initialBankAccountNumber={memberInfo.member?.bankAccountNumber || ""}
         />
       )}
     </Layout>

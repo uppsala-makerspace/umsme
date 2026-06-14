@@ -27,7 +27,9 @@ const createAuthFuncForRoles = (col, roles) => async function () {
 const createAuthFuncFor = (col) => createAuthFuncForRoles(col, ['admin', 'board']);
 
 export default () => {
-  Meteor.publish('members', createAuthFuncFor(Members));
+  // Treasurer included so a treasurer-only account can see member name + bank
+  // details when reimbursing an expense.
+  Meteor.publish('members', createAuthFuncForRoles(Members, ['admin', 'board', 'treasurer']));
   Meteor.publish('memberships', createAuthFuncFor(Memberships));
   Meteor.publish('templates', createAuthFuncFor(MessageTemplates));
   Meteor.publish('messages', createAuthFuncFor(Messages));

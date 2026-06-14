@@ -14,6 +14,19 @@
                     <tr><th>Place</th><td>{{#if expense.place}}{{expense.place}}{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Note</th><td>{{#if expense.note}}{{expense.note}}{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Created</th><td>{{formatDate expense.createdAt}}</td></tr>
+                    <tr>
+                        <th>Bank account</th>
+                        <td>
+                            {{#if hasBankAccount}}
+                                {{#if bank.name}}<strong>{{bank.name}}</strong> — {{/if}}clearing <code>{{bank.clearing}}</code>, account <code>{{bank.number}}</code>
+                                <div class="text-muted" style="margin-top: 4px;">
+                                    combined: <code>{{bank.combined}}</code> <small>(verify format in your bank)</small>
+                                </div>
+                            {{else}}
+                                <em>no bank account on file</em>
+                            {{/if}}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 

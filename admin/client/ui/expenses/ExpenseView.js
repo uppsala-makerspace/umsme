@@ -58,6 +58,22 @@ Template.ExpenseView.helpers({
     const m = e && Members.findOne(e.memberId);
     return m ? m.name : e?.memberId;
   },
+  hasBankAccount() {
+    const e = currentExpense();
+    const m = e && Members.findOne(e.memberId);
+    return !!(m && (m.bankClearing || m.bankAccountNumber));
+  },
+  bank() {
+    const e = currentExpense();
+    const m = e && Members.findOne(e.memberId);
+    if (!m) return null;
+    const clearing = (m.bankClearing || '').trim();
+    const number = (m.bankAccountNumber || '').trim();
+    // Plain concatenation as a convenience; the treasurer's bank validates and
+    // applies any required zero-padding (account numbers carry check digits).
+    const combined = `${clearing.replace(/\D/g, '')}${number.replace(/\D/g, '')}`;
+    return { name: (m.bankName || '').trim(), clearing: clearing || '—', number: number || '—', combined };
+  },
   account() {
     const e = currentExpense();
     return e?.expenseAccountId ? ExpenseAccounts.findOne(e.expenseAccountId) : null;
