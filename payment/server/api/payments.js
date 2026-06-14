@@ -8,7 +8,7 @@ import { Payments } from "/imports/common/collections/payments";
 import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
 import { Messages } from "/imports/common/collections/messages";
-import { membershipFromPayment } from "/imports/common/lib/utils";
+import { membershipFromPayment, memberStatus } from "/imports/common/lib/utils";
 import { findBestTemplate, messageData } from "/imports/common/lib/message";
 import { isEmailAllowed } from "/imports/common/server/emailGuard";
 import { pushMessage } from "/imports/common/server/push";
@@ -47,10 +47,14 @@ export async function addPayment(paymentData) {
  * @returns {Promise<Object|null>} Result with membership id, or error, or null if unknown type
  */
 export async function processPayment(payment, member, paymentType) {
+  // quarterly: a quarterly-lab member upgrading to yearly lab is treated as an
+  // S1 upgrade (see membershipFromPayment).
+  const { quarterly } = await memberStatus(member);
   const result = membershipFromPayment(
     payment.date,
     paymentType,
-    member
+    member,
+    { quarterly }
   );
 
   // If paymentType wasn't recognized, don't create membership

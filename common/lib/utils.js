@@ -133,7 +133,7 @@ export const updateMember = async (mb) => {
  * @param {Object} member - The member object with current member/lab end dates
  * @returns {Object|null} Membership parameters or null/error
  */
-export function membershipFromPayment(paymentDate, paymentType, member) {
+export function membershipFromPayment(paymentDate, paymentType, member, { quarterly = false } = {}) {
   const now = new Date(paymentDate);
   const isFirstTime = member.member == null;
   const hasActiveMembership = member.member && member.member > now;
@@ -238,8 +238,9 @@ export function membershipFromPayment(paymentDate, paymentType, member) {
     case 'familyLab':
       type = 'labandmember';
 
-      // S1: Upgrading from base membership (no current lab) to lab
-      if (hasActiveMembership && !hasActiveLab) {
+      // S1: Upgrading to lab — from a base membership with no active lab, or
+      // from an active *quarterly* lab (the quarter is replaced by a full year).
+      if (hasActiveMembership && (!hasActiveLab || quarterly)) {
         if (memberendMoreThan2MonthsAway) {
           // memberend > now + 2 months: starts today, labend = memberend =
           // now + 14 months (the extra 2 months compensates for the membership

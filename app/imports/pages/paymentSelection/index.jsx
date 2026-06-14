@@ -131,10 +131,10 @@ export default function PaymentSelectionPage() {
   // Calculate membership dates based on payment type and member status
   const membershipDates = useMemo(() => {
     if (!paymentOption?.paymentType || !member) return null;
-    const result = membershipFromPayment(new Date(), paymentOption.paymentType, member);
+    const result = membershipFromPayment(new Date(), paymentOption.paymentType, member, { quarterly: memberStatus?.quarterly });
     if (!result || result.error) return null;
     return result;
-  }, [paymentOption?.paymentType, member]);
+  }, [paymentOption?.paymentType, member, memberStatus?.quarterly]);
 
   // Redirect if not logged in
   if (!Meteor.userId()) {
