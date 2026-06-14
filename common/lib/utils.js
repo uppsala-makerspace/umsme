@@ -3,7 +3,10 @@ import { Memberships } from '/imports/common/collections/memberships.js';
 import {
   MEMBERSHIP_RENEWAL_WINDOW_DAYS,
   FIRST_TIME_MEMBER_GRACE_DAYS,
+  QUARTERLY_LAB_MAX_DAYS,
 } from '/imports/common/lib/timeConstants.js';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Detect start and end dates for the regular and lab memberships for a specific member.
@@ -79,7 +82,19 @@ export const memberStatus = async (mb) => {
   } else if (member > now) {
     type = 'member';
   }
-  const quarterly = labms && labms.type === 'lab';
+  // The controlling lab membership is "quarterly" when it is a dedicated
+  // quarterly-lab doc (type 'lab'), or a legacy combined "yearly base +
+  // quarterly lab" doc (type 'labandmember') whose lab span is short — i.e.
+  // a quarter, not a year. Lab spans are only ever ~3 or ~12 months, so the
+  // duration cleanly distinguishes them (and isn't fooled by a yearly lab
+  // renewed on a different date than the base).
+  const labDays = labms && labms.start && labms.labend
+    ? (labms.labend.getTime() - labms.start.getTime()) / DAY_MS
+    : null;
+  const quarterly = !!labms && (
+    labms.type === 'lab' ||
+    (labDays !== null && labDays < QUARTERLY_LAB_MAX_DAYS)
+  );
   return { memberEnd: member, memberStart, labEnd: lab, labStart, family, type, discounted, quarterly};
 };
 
