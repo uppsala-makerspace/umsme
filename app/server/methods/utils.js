@@ -1,7 +1,20 @@
 import { Meteor } from "meteor/meteor";
+import { Roles } from "meteor/roles";
 import { Members } from "/imports/common/collections/members";
 import { memberStatus } from "/imports/common/lib/utils";
 import { memberForUser } from "/imports/common/server/memberForUser";
+
+/**
+ * Whether the current user may see/use the expenses feature: either their
+ * member email is on the configured allowlist, or their account is in the
+ * admin/board group (which always has access, regardless of the allowlist).
+ */
+export const expenseAccessAllowed = async (member) => {
+  const allowList = Meteor.settings?.private?.expenses?.allowList;
+  if (member?.email && allowList?.length && allowList.includes(member.email)) return true;
+  const userId = Meteor.userId();
+  return !!userId && (await Roles.userIsInRoleAsync(userId, ["admin", "board"]));
+};
 
 /**
  * Character mappings for accented characters not in the Swedish alphabet.

@@ -5,23 +5,16 @@ import { uploadImage, deleteImage } from "/imports/common/server/googleDrive";
 import { publishManagerEvent, ManagerEventType, blockquote } from "/imports/common/server/managerEvents";
 import { adminLink } from "/imports/common/lib/links";
 import { receiptUrlFor } from "/imports/common/server/receiptToken";
-import { findMemberForUser } from "./utils";
+import { findMemberForUser, expenseAccessAllowed } from "./utils";
 
 const EDITABLE_STATES = ["pending", "rejected"];
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB safety ceiling (client downscales)
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
-// Expenses is restricted to an explicit allowlist of member emails. An absent
-// or empty list means nobody — the feature stays disabled until configured.
-const isExpenseAllowed = (member) => {
-  const allowList = Meteor.settings?.private?.expenses?.allowList;
-  return !!allowList?.length && allowList.includes(member.email);
-};
-
 const requireMember = async () => {
   const member = await findMemberForUser();
   if (!member) throw new Meteor.Error("not-found", "Member not found");
-  if (!isExpenseAllowed(member)) {
+  if (!(await expenseAccessAllowed(member))) {
     throw new Meteor.Error("not-authorized", "Expenses are not enabled for this account");
   }
   return member;

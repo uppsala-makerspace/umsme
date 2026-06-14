@@ -3,7 +3,7 @@ import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
 import { LiabilityDocuments } from "/imports/common/collections/liabilityDocuments";
 import { memberStatus } from '/imports/common/lib/utils';
-import { findMemberForUser, findForUser } from "/server/methods/utils";
+import { findMemberForUser, findForUser, expenseAccessAllowed } from "/server/methods/utils";
 import Invites from "/imports/common/collections/Invites";
 
 Meteor.methods({
@@ -84,10 +84,9 @@ Meteor.methods({
     const swishAllowList = Meteor.settings?.private?.swish?.allowList;
     const swishAllowed = !swishAllowList?.length || swishAllowList.includes(member.email);
 
-    // Expenses is restricted to an explicit allowlist. Absent/empty list =>
-    // nobody (the feature stays hidden until emails are configured).
-    const expenseAllowList = Meteor.settings?.private?.expenses?.allowList;
-    const expensesAllowed = !!expenseAllowList?.length && expenseAllowList.includes(member.email);
+    // Expenses are allowed for allowlisted emails, plus anyone in the
+    // admin/board group (regardless of the allowlist).
+    const expensesAllowed = await expenseAccessAllowed(member);
 
     return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed});
   },
