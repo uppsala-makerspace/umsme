@@ -12,6 +12,20 @@ FlowRouter.route('/expenses', {
   },
 });
 
+FlowRouter.route('/expenses/confirm', {
+  name: 'expensesConfirm',
+  action() {
+    this.render('AppBody', { main: 'ExpenseList' });
+  },
+});
+
+FlowRouter.route('/expenses/reimburse', {
+  name: 'expensesReimburse',
+  action() {
+    this.render('AppBody', { main: 'ExpenseList' });
+  },
+});
+
 FlowRouter.route('/expense/:_id', {
   name: 'expenseview',
   action() {

@@ -1,4 +1,4 @@
 <template name="ExpenseList">
-    <h1>Expenses</h1>
-    {{> tabular table=TabularTables.Expenses class="table table-hover table-striped table-bordered table-condensed expenseList"}}
+    <h1>{{heading}}</h1>
+    {{> tabular table=TabularTables.Expenses selector=selector class="table table-hover table-striped table-bordered table-condensed expenseList"}}
 </template>

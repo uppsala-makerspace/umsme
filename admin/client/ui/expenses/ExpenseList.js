@@ -4,10 +4,26 @@ import '/imports/tabular/expenses';
 
 import './ExpenseList.html';
 
+// Work-queue views keyed by route name: filter the Expenses table by status.
+const MODES = {
+  expensesConfirm: { status: 'submitted', heading: 'Expenses to confirm' },
+  expensesReimburse: { status: 'confirmed', heading: 'Expenses to reimburse' },
+};
+
 Template.ExpenseList.onCreated(function () {
   Meteor.subscribe('expenses');
   Meteor.subscribe('expenseAccounts');
   Meteor.subscribe('members');
+});
+
+Template.ExpenseList.helpers({
+  heading() {
+    return MODES[FlowRouter.getRouteName()]?.heading || 'Expenses';
+  },
+  selector() {
+    const mode = MODES[FlowRouter.getRouteName()];
+    return mode ? { status: mode.status } : {};
+  },
 });
 
 Template.ExpenseList.events({
