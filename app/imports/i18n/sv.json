@@ -229,6 +229,7 @@
   "locked": "Låst",
   "requires": "Kräver:",
   "needToCompleteFirst": "Ta dessa certifikat först",
+  "prerequisites": "Förkunskapskrav",
   "requestsToConfirm": "Förfrågningar att bekräfta",
   "requestCertificate": "Be om bekräftelse",
   "cancelRequest": "Avbryt",

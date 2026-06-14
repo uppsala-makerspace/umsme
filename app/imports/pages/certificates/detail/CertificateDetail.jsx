@@ -93,21 +93,20 @@ const CertificateDetail = ({
         </div>
       )}
 
-      {/* Missing prerequisites notice */}
-      {canRequest && hasUnmetPrereqs && (
+      {/* Prerequisites — always shown (with met/unmet markers) when the
+          certificate has any, so they stay visible even once fulfilled. */}
+      {prerequisiteStatus.length > 0 && (
         <section className="mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-xl">🔒</span>
-            <h3 className="text-lg text-gray-700 m-0">{t("needToCompleteFirst")}</h3>
-          </div>
+          <h3 className="text-lg text-gray-700 mb-3">{t("prerequisites")}</h3>
           <ul className="list-none p-0 m-0">
-            {unmetPrereqs.map((p) => (
+            {prerequisiteStatus.map((p) => (
               <CertificateItem
                 key={p.certificateId}
                 to={`/certificates/${p.certificateId}`}
-                status="available"
+                status={p.met ? "valid" : "available"}
               >
-                <span className="flex items-center font-semibold leading-snug">
+                <span className="flex items-center gap-2 font-semibold leading-snug">
+                  <span>{p.met ? "✓" : "🔒"}</span>
                   {getLocalized(p.name, lang) || p.certificateId}
                 </span>
               </CertificateItem>
