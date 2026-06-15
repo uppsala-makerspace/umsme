@@ -1,5 +1,7 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ChunkErrorBoundary from '/imports/components/ChunkErrorBoundary';
+import { lazyWithRetry } from '/imports/lib/lazyWithRetry';
 import { NotificationProvider } from '/imports/context/NotificationContext';
 import { LocationProvider } from '/imports/context/LocationContext';
 import { MemberInfoProvider } from '/imports/context/MemberInfoContext';
@@ -8,40 +10,40 @@ import { MessagesProvider } from '/imports/context/MessagesContext';
 import Loader from '/imports/components/Loader/Loader';
 import useAutoReconnect from '/imports/hooks/useAutoReconnect';
 
-const Login = lazy(() => import('/imports/pages/login'));
-const Register = lazy(() => import('/imports/pages/register'));
-const Home = lazy(() => import('/imports/pages/home'));
-const Profile = lazy(() => import('/imports/pages/profile'));
-const Unlock = lazy(() => import('/imports/pages/unlock'));
-const Storage = lazy(() => import('/imports/pages/storage'));
-const Liability = lazy(() => import('/imports/pages/liability'));
-const Account = lazy(() => import('/imports/pages/account'));
-const Verification = lazy(() => import('/imports/pages/emailVerification'));
-const ForgotPassword = lazy(() => import('/imports/pages/forgotPassword'));
-const ResetPassword = lazy(() => import('/imports/pages/resetPassword'));
-const Calendar = lazy(() => import('/imports/pages/calendar'));
-const Map = lazy(() => import('/imports/pages/map'));
-const Contact = lazy(() => import('/imports/pages/contact'));
-const Certificates = lazy(() => import('/imports/pages/certificates'));
-const CertificateDetail = lazy(() => import('/imports/pages/certificates/detail'));
-const CertificateTest = lazy(() => import('/imports/pages/certificates/test'));
-const CertifierRequestDetail = lazy(() => import('/imports/pages/certificates/certifierDetail'));
-const MembershipSelection = lazy(() => import('/imports/pages/membershipSelection'));
-const MembershipDetail = lazy(() => import('/imports/pages/membershipDetail'));
-const PaymentSelection = lazy(() => import('/imports/pages/paymentSelection'));
-const InitiatedPayment = lazy(() => import('/imports/pages/initiatedPayment'));
-const Install = lazy(() => import('/imports/pages/install'));
-const CheckEmail = lazy(() => import('/imports/pages/checkEmail'));
-const Notifications = lazy(() => import('/imports/pages/notifications'));
-const NotificationSettings = lazy(() => import('/imports/pages/notificationSettings'));
-const Messages = lazy(() => import('/imports/pages/messages'));
-const MessageDetail = lazy(() => import('/imports/pages/messages/detail'));
-const Tool = lazy(() => import('/imports/pages/tool'));
-const ToolDetail = lazy(() => import('/imports/pages/tool/detail'));
-const Settings = lazy(() => import('/imports/pages/settings'));
-const Expenses = lazy(() => import('/imports/pages/expenses/list'));
-const ExpenseDetail = lazy(() => import('/imports/pages/expenses/detail'));
-const ExpenseNew = lazy(() => import('/imports/pages/expenses/new'));
+const Login = lazyWithRetry(() => import('/imports/pages/login'));
+const Register = lazyWithRetry(() => import('/imports/pages/register'));
+const Home = lazyWithRetry(() => import('/imports/pages/home'));
+const Profile = lazyWithRetry(() => import('/imports/pages/profile'));
+const Unlock = lazyWithRetry(() => import('/imports/pages/unlock'));
+const Storage = lazyWithRetry(() => import('/imports/pages/storage'));
+const Liability = lazyWithRetry(() => import('/imports/pages/liability'));
+const Account = lazyWithRetry(() => import('/imports/pages/account'));
+const Verification = lazyWithRetry(() => import('/imports/pages/emailVerification'));
+const ForgotPassword = lazyWithRetry(() => import('/imports/pages/forgotPassword'));
+const ResetPassword = lazyWithRetry(() => import('/imports/pages/resetPassword'));
+const Calendar = lazyWithRetry(() => import('/imports/pages/calendar'));
+const Map = lazyWithRetry(() => import('/imports/pages/map'));
+const Contact = lazyWithRetry(() => import('/imports/pages/contact'));
+const Certificates = lazyWithRetry(() => import('/imports/pages/certificates'));
+const CertificateDetail = lazyWithRetry(() => import('/imports/pages/certificates/detail'));
+const CertificateTest = lazyWithRetry(() => import('/imports/pages/certificates/test'));
+const CertifierRequestDetail = lazyWithRetry(() => import('/imports/pages/certificates/certifierDetail'));
+const MembershipSelection = lazyWithRetry(() => import('/imports/pages/membershipSelection'));
+const MembershipDetail = lazyWithRetry(() => import('/imports/pages/membershipDetail'));
+const PaymentSelection = lazyWithRetry(() => import('/imports/pages/paymentSelection'));
+const InitiatedPayment = lazyWithRetry(() => import('/imports/pages/initiatedPayment'));
+const Install = lazyWithRetry(() => import('/imports/pages/install'));
+const CheckEmail = lazyWithRetry(() => import('/imports/pages/checkEmail'));
+const Notifications = lazyWithRetry(() => import('/imports/pages/notifications'));
+const NotificationSettings = lazyWithRetry(() => import('/imports/pages/notificationSettings'));
+const Messages = lazyWithRetry(() => import('/imports/pages/messages'));
+const MessageDetail = lazyWithRetry(() => import('/imports/pages/messages/detail'));
+const Tool = lazyWithRetry(() => import('/imports/pages/tool'));
+const ToolDetail = lazyWithRetry(() => import('/imports/pages/tool/detail'));
+const Settings = lazyWithRetry(() => import('/imports/pages/settings'));
+const Expenses = lazyWithRetry(() => import('/imports/pages/expenses/list'));
+const ExpenseDetail = lazyWithRetry(() => import('/imports/pages/expenses/detail'));
+const ExpenseNew = lazyWithRetry(() => import('/imports/pages/expenses/new'));
 
 export const App = () => {
   useAutoReconnect();
@@ -53,6 +55,7 @@ export const App = () => {
       <MemberInfoProvider>
       <MessagesProvider>
       <AppDataProvider>
+        <ChunkErrorBoundary>
         <Suspense fallback={<Loader />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -92,6 +95,7 @@ export const App = () => {
             <Route path="/expenses/:expenseId" element={<ExpenseDetail />} />
           </Routes>
         </Suspense>
+        </ChunkErrorBoundary>
       </AppDataProvider>
       </MessagesProvider>
       </MemberInfoProvider>

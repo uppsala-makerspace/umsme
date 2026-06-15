@@ -64,18 +64,21 @@ self.addEventListener("activate", (event) => {
   })());
 });
 
-async function staleWhileRevalidate(request) {
+// Network-first for navigations so a fresh deploy is picked up on the next load
+// instead of booting a stale index.html (which would pin the client to an old
+// bundle and break version-pinned dynamic imports). Falls back to the last good
+// cached shell when offline.
+async function networkFirst(request) {
   const cache = await caches.open(SHELL_CACHE);
-  const cached = await cache.match(request);
-  const networkFetch = fetch(request)
-    .then((response) => {
-      if (response && response.ok) {
-        cache.put(request, response.clone());
-      }
-      return response;
-    })
-    .catch(() => undefined);
-  return cached || (await networkFetch) || Response.error();
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (e) {
+    return (await cache.match(request)) || Response.error();
+  }
 }
 
 async function cacheFirst(request) {
@@ -99,7 +102,7 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/__meteor__/")) return;
 
   if (request.mode === "navigate") {
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(networkFirst(request));
     return;
   }
 
