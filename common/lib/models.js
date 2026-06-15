@@ -54,6 +54,7 @@ export const models = {
     bankName: { label: "Bank", type: String, max: 100, optional: true },
     bankClearing: { label: "Clearing number", type: String, max: 6, optional: true },
     bankAccountNumber: { label: "Account number", type: String, max: 20, optional: true },
+    bankAccountHolder: { label: "Account holder", type: String, max: 200, optional: true },
     email: {
       label: "Email",
       type: String,

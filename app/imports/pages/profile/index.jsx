@@ -36,6 +36,7 @@ export default () => {
           initialBankName={memberInfo.member?.bankName || ""}
           initialBankClearing={memberInfo.member?.bankClearing || ""}
           initialBankAccountNumber={memberInfo.member?.bankAccountNumber || ""}
+          initialBankAccountHolder={memberInfo.member?.bankAccountHolder || ""}
         />
       )}
     </Layout>

@@ -8,7 +8,7 @@ import { models } from "/imports/common/lib/models";
 import { extractor } from "/imports/common/lib/fieldsUtils";
 
 const memberDefaults = {
-  filter: ['storagequeue', 'storagerequest', 'mobile', 'birthyear', 'liabilityDate', 'rfid', 'lastExpiryNotification', 'notificationPrefs', 'paymentError', 'registered', 'excluded', 'bankName', 'bankClearing', 'bankAccountNumber'],
+  filter: ['storagequeue', 'storagerequest', 'mobile', 'birthyear', 'liabilityDate', 'rfid', 'lastExpiryNotification', 'notificationPrefs', 'paymentError', 'registered', 'excluded', 'bankName', 'bankClearing', 'bankAccountNumber', 'bankAccountHolder'],
   enhance: [{
     data: 'mid',
     render(value, type, doc) {

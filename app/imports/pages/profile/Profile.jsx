@@ -5,7 +5,7 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import MainContent from "../../components/MainContent";
 
-export default ({ onSubmit, showBank = false, initialName = "", initialMobile = "", initialBirthyear = "", initialGender = "", initialRfid = "", initialBankName = "", initialBankClearing = "", initialBankAccountNumber = "" }) => {
+export default ({ onSubmit, showBank = false, initialName = "", initialMobile = "", initialBirthyear = "", initialGender = "", initialRfid = "", initialBankName = "", initialBankClearing = "", initialBankAccountNumber = "", initialBankAccountHolder = "" }) => {
   const { t } = useTranslation();
   const [name, setName] = useState(initialName);
   const [mobile, setMobile] = useState(initialMobile);
@@ -15,6 +15,7 @@ export default ({ onSubmit, showBank = false, initialName = "", initialMobile = 
   const [bankName, setBankName] = useState(initialBankName);
   const [bankClearing, setBankClearing] = useState(initialBankClearing);
   const [bankAccountNumber, setBankAccountNumber] = useState(initialBankAccountNumber);
+  const [bankAccountHolder, setBankAccountHolder] = useState(initialBankAccountHolder);
 
   const nameMaxLength = models.member.name.max;
   const mobileMaxLength = models.member.mobile.max;
@@ -28,6 +29,7 @@ export default ({ onSubmit, showBank = false, initialName = "", initialMobile = 
       payload.bankName = bankName.trim();
       payload.bankClearing = bankClearing.trim();
       payload.bankAccountNumber = bankAccountNumber.trim();
+      payload.bankAccountHolder = bankAccountHolder.trim();
     }
     onSubmit(payload);
   };
@@ -128,6 +130,15 @@ export default ({ onSubmit, showBank = false, initialName = "", initialMobile = 
             value={bankAccountNumber}
             onChange={(e) => setBankAccountNumber(e.target.value)}
             maxLength={models.member.bankAccountNumber.max}
+          />
+          <Input
+            label={t("bankAccountHolder")}
+            id="bankAccountHolder"
+            type="text"
+            placeholder={t("bankAccountHolderPlaceholder")}
+            value={bankAccountHolder}
+            onChange={(e) => setBankAccountHolder(e.target.value)}
+            maxLength={models.member.bankAccountHolder.max}
           />
         </div>
       )}

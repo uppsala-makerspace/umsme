@@ -94,6 +94,8 @@
   "bankName": "Bank",
   "bankClearing": "Clearingnummer",
   "bankAccountNumber": "Kontonummer",
+  "bankAccountHolder": "Kontoinnehavare",
+  "bankAccountHolderPlaceholder": "Om annan än ditt eget namn",
   "paymentApproved": "Betalning godkänd!",
   "paymentServiceUnavailable": "Betalningstjänsten är inte tillgänglig just nu. Försök igen om några minuter.",
   "otherPaymentOptionsText": "För andra betalningsalternativ, se",

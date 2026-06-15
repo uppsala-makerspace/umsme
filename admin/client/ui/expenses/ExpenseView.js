@@ -72,7 +72,7 @@ Template.ExpenseView.helpers({
     // Plain concatenation as a convenience; the treasurer's bank validates and
     // applies any required zero-padding (account numbers carry check digits).
     const combined = `${clearing.replace(/\D/g, '')}${number.replace(/\D/g, '')}`;
-    return { name: (m.bankName || '').trim(), clearing: clearing || '—', number: number || '—', combined };
+    return { name: (m.bankName || '').trim(), holder: (m.bankAccountHolder || '').trim(), clearing: clearing || '—', number: number || '—', combined };
   },
   account() {
     const e = currentExpense();

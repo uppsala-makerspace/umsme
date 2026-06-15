@@ -94,6 +94,8 @@
   "bankName": "Bank",
   "bankClearing": "Clearing number",
   "bankAccountNumber": "Account number",
+  "bankAccountHolder": "Account holder",
+  "bankAccountHolderPlaceholder": "If different from your own name",
   "paymentApproved": "Payment approved!",
   "paymentServiceUnavailable": "Payment service is unavailable right now. Please try again in a few minutes.",
   "otherPaymentOptionsText": "For other payment options, see",

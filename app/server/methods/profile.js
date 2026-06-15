@@ -3,7 +3,7 @@ import { Members } from "/imports/common/collections/members";
 import { findForUser } from "/server/methods/utils";
 
 Meteor.methods({
-  async createOrUpdateProfile({name, mobile, birthyear, gender, rfid, bankName, bankClearing, bankAccountNumber}) {
+  async createOrUpdateProfile({name, mobile, birthyear, gender, rfid, bankName, bankClearing, bankAccountNumber, bankAccountHolder}) {
     const { user, email, member, verified } = await findForUser();
     if (!user) throw new Meteor.Error(
       "no-user",
@@ -21,6 +21,7 @@ Meteor.methods({
     if (bankName !== undefined) bankFields.bankName = bankName;
     if (bankClearing !== undefined) bankFields.bankClearing = bankClearing;
     if (bankAccountNumber !== undefined) bankFields.bankAccountNumber = bankAccountNumber;
+    if (bankAccountHolder !== undefined) bankFields.bankAccountHolder = bankAccountHolder;
 
     if (member) {
       await Members.updateAsync(member._id, {$set: {name, mobile, birthyear, gender, rfid, ...bankFields}});

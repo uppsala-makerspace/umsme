@@ -19,6 +19,9 @@
                         <td>
                             {{#if hasBankAccount}}
                                 {{#if bank.name}}<strong>{{bank.name}}</strong> — {{/if}}clearing <code>{{bank.clearing}}</code>, account <code>{{bank.number}}</code>
+                                {{#if bank.holder}}
+                                    <div style="margin-top: 4px;">account holder: <strong>{{bank.holder}}</strong></div>
+                                {{/if}}
                                 <div class="text-muted" style="margin-top: 4px;">
                                     combined: <code>{{bank.combined}}</code> <small>(verify format in your bank)</small>
                                 </div>
