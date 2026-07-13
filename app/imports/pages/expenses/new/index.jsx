@@ -36,7 +36,7 @@ export default () => {
         <BackLink to="/expenses">{t("expenseBack")}</BackLink>
         <h2 className="text-2xl mb-3">{t("expenseNew")}</h2>
         <p className="text-gray-600 mb-6">{t("expenseNewIntro")}</p>
-        <ReceiptCapture onCapture={handleCapture} busy={busy} label={t("expenseTakePhoto")} />
+        <ReceiptCapture onCapture={handleCapture} busy={busy} />
       </MainContent>
     </Layout>
   );

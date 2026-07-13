@@ -111,7 +111,6 @@ const ExpenseDetail = ({
           {editable && (
             <ReceiptCapture
               overlay
-              label={t("expenseReplacePhoto")}
               busy={actionLoading}
               onCapture={(img) => run(onReplacePhoto, img)}
             />
