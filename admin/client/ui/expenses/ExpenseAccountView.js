@@ -3,6 +3,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Expenses } from '/imports/common/collections/expenses';
 import './ExpenseAccountView.html';
+import { readDimensionInputs } from './ExpenseAccountDimensions';
 
 Template.ExpenseAccountView.onCreated(function () {
   Meteor.subscribe('expenseAccounts');
@@ -37,6 +38,21 @@ Template.ExpenseAccountView.events({
 
 AutoForm.hooks({
   editExpenseAccountForm: {
+    // Merge the custom dimension inputs into the update modifier; unset the
+    // whole map when the treasurer clears every object field.
+    before: {
+      update: function (modifier) {
+        const dims = readDimensionInputs();
+        if (Object.keys(dims).length) {
+          modifier.$set = modifier.$set || {};
+          modifier.$set.dimensions = dims;
+        } else {
+          modifier.$unset = modifier.$unset || {};
+          modifier.$unset.dimensions = '';
+        }
+        return modifier;
+      },
+    },
     onSuccess: function () {
       FlowRouter.go('/expenses/accounts');
     },

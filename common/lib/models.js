@@ -805,7 +805,16 @@ export const models = {
       max: 2000,
       autoform: { type: "textarea", rows: 5 },
     },
-    accountNumber: { label: "Account number", type: String, max: 50 },
+    // Dimension → object-code map for SIE tagging (Phase 2), e.g. { "1": "MEDLEM" }.
+    // Keys are the dimension numbers configured in settings.accounting.dimensions;
+    // the admin UI builds and validates this, so it's blackbox + omitted from AutoForm.
+    dimensions: {
+      label: "Dimensions",
+      type: Object,
+      optional: true,
+      blackbox: true,
+      autoform: { omit: true },
+    },
     createdAt: {
       label: "Created",
       type: Date,
@@ -864,5 +873,12 @@ export const models = {
     rejectedBy: { label: "Rejected by", type: String, max: 50, optional: true, autoform: { omit: true } },
     reimbursedAt: { label: "Reimbursed at", type: Date, optional: true, autoform: { omit: true } },
     reimbursedBy: { label: "Reimbursed by", type: String, max: 50, optional: true, autoform: { omit: true } },
+    // Chosen BAS ledger account for this expense, set by the treasurer at
+    // reimbursement (from settings.accounting.expense.accountOptions). Distinct
+    // from expenseAccountId, which references the ExpenseAccount category.
+    bookkeepingAccount: { label: "Bookkeeping account", type: String, max: 50, optional: true, autoform: { omit: true } },
+    // Actual reimbursement payment date (the Phase 2 verification date), set by
+    // the treasurer at reimbursement. Distinct from the reimbursedAt audit timestamp.
+    reimbursedDate: { label: "Reimbursed date", type: Date, optional: true, autoform: { omit: true } },
   },
 };

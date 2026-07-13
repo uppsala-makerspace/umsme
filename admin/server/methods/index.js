@@ -12,3 +12,4 @@ import './doorunlocks';
 import './invites';
 import './tests';
 import './expenses';
+import './accounting';

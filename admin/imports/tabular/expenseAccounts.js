@@ -7,7 +7,7 @@ import { models } from '/imports/common/lib/models';
 import { extractor } from '/imports/common/lib/fieldsUtils';
 
 const accountDefaults = {
-  filter: ['createdAt'],
+  filter: ['createdAt', 'dimensions'],
 };
 
 new Tabular.Table({

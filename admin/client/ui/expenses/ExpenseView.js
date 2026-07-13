@@ -24,6 +24,10 @@ Template.ExpenseView.onCreated(function () {
   this.receiptOpen = new ReactiveVar(false);
   this.zoomed = new ReactiveVar(false);
   this.rejecting = new ReactiveVar(false);
+  this.accounting = new ReactiveVar(null);
+  Meteor.call('accounting.config', (err, res) => {
+    if (!err) this.accounting.set(res);
+  });
   const id = FlowRouter.getParam('_id');
   Meteor.call('expenses.adminGetReceiptUrl', id, (err, res) => {
     if (err) {
@@ -82,6 +86,33 @@ Template.ExpenseView.helpers({
     const e = currentExpense();
     const a = e?.expenseAccountId && ExpenseAccounts.findOne(e.expenseAccountId);
     return a ? a.name : '—';
+  },
+  accountDimensions() {
+    const e = currentExpense();
+    const a = e?.expenseAccountId && ExpenseAccounts.findOne(e.expenseAccountId);
+    const dims = a?.dimensions;
+    if (!dims) return '';
+    return Object.keys(dims)
+      .sort()
+      .map((nr) => `${nr}:${dims[nr]}`)
+      .join(', ');
+  },
+  accountOptions() {
+    return Template.instance().accounting.get()?.expense?.accountOptions || [];
+  },
+  selectedAccount(account) {
+    return currentExpense()?.bookkeepingAccount === account;
+  },
+  defaultReimburseDate() {
+    const e = currentExpense();
+    return moment(e?.reimbursedDate || new Date()).format('YYYY-MM-DD');
+  },
+  bookkeepingAccountLabel() {
+    const acc = currentExpense()?.bookkeepingAccount;
+    if (!acc) return '';
+    const opt = (Template.instance().accounting.get()?.expense?.accountOptions || [])
+      .find((o) => o.account === acc);
+    return opt ? `${acc} — ${opt.name}` : acc;
   },
   receipt() {
     return Template.instance().receipt.get();
@@ -151,10 +182,22 @@ Template.ExpenseView.events({
       instance.rejecting.set(false);
     });
   },
-  'click .reimburseExpense': function () {
+  'click .reimburseExpense': function (event, instance) {
     const id = FlowRouter.getParam('_id');
+    const account = instance.find('.reimburseAccount')?.value || '';
+    const dateStr = instance.find('.reimburseDate')?.value || '';
+    if (!account) {
+      alert('Select a bookkeeping account first.');
+      return;
+    }
+    if (!dateStr) {
+      alert('Pick a reimbursement date.');
+      return;
+    }
     if (!confirm('Mark this expense as reimbursed?')) return;
-    Meteor.call('expenses.reimburse', id, (err) => {
+    // Interpret the date input as a local calendar date.
+    const date = new Date(`${dateStr}T00:00:00`);
+    Meteor.call('expenses.reimburse', id, account, date, (err) => {
       if (err) alert('Reimburse failed: ' + err.reason);
     });
   },

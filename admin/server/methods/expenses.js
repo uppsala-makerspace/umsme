@@ -110,18 +110,34 @@ Meteor.methods({
   },
 
   /**
-   * Mark a confirmed expense as reimbursed (treasurer, not the submitter).
+   * Mark a confirmed expense as reimbursed (treasurer, not the submitter). The
+   * treasurer picks the BAS bookkeeping account (from settings) and the actual
+   * reimbursement payment date (the Phase 2 verification date) in the same step.
    */
-  'expenses.reimburse': async (expenseId) => {
+  'expenses.reimburse': async (expenseId, bookkeepingAccount, reimbursedDate) => {
     await requireRole(['treasurer', 'admin']);
     const expense = await getExpense(expenseId);
     if (expense.status !== 'confirmed') {
       throw new Meteor.Error('bad-state', 'Only confirmed expenses can be reimbursed');
     }
+    const account = String(bookkeepingAccount || '').trim();
+    const options = Meteor.settings.accounting?.expense?.accountOptions || [];
+    if (!options.some((o) => o.account === account)) {
+      throw new Meteor.Error('bad-account', 'Select a valid bookkeeping account');
+    }
+    const date = reimbursedDate ? new Date(reimbursedDate) : new Date();
+    if (Number.isNaN(date.getTime())) {
+      throw new Meteor.Error('bad-date', 'Invalid reimbursement date');
+    }
     const me = await actingMemberId();
     assertNotOwnExpense(expense, me);
     await Expenses.updateAsync(expenseId, {
-      $set: withActor({ status: 'reimbursed', reimbursedAt: new Date() }, 'reimbursedBy', me),
+      $set: withActor({
+        status: 'reimbursed',
+        reimbursedAt: new Date(),
+        bookkeepingAccount: account,
+        reimbursedDate: date,
+      }, 'reimbursedBy', me),
     });
     await publishManagerEvent(ManagerEventType.EXPENSE_REIMBURSED, {
       subject: 'Expense reimbursed',

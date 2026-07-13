@@ -11,6 +11,23 @@
     "hour": 9,
     "minute": 0
   },
+  "accounting": {
+    "company": { "orgNo": "000000-0000", "name": "Föreningen" },
+    "bankAccount": "1930",
+    "dimensions": [
+      { "nr": 1, "name": "Kostnadsställe" },
+      { "nr": 6, "name": "Projekt" }
+    ],
+    "expense": {
+      "series": "U",
+      "accountOptions": [
+        { "account": "5010", "name": "Lokalkostnader" },
+        { "account": "6110", "name": "Kontorsmateriel" }
+      ]
+    },
+    "memberPayment": { "series": "M", "account": "3110", "dimension": { "1": "MEDLEM" } },
+    "standardIncome": { "series": "S", "codes": [] }
+  },
   "lockUsername": "umsme@uppsalamakerspace.se",
   "lockPassword": "????",
   "lockAssumeUser": "lock@uppsalamakerspace.se",

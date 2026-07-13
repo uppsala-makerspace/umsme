@@ -1,0 +1,18 @@
+<template name="expenseAccountDimensions">
+    {{#if ready}}
+    <div class="form-group">
+        <label>Dimensions</label>
+        <p class="help-block" style="margin-top: 0;">Optional object code per dimension (used to tag bookkeeping entries).</p>
+        {{#each dims}}
+        <div style="margin-bottom: 8px;">
+            <label for="dim-{{nr}}" style="font-weight: normal;">{{name}} <span class="text-muted">(dim {{nr}})</span></label>
+            <input type="text" class="form-control js-dim-input" id="dim-{{nr}}" data-dim="{{nr}}"
+                   list="dimlist-{{nr}}" value="{{value}}" placeholder="Object (optional)" autocomplete="off">
+            <datalist id="dimlist-{{nr}}">
+                {{#each suggestions}}<option value="{{this}}"></option>{{/each}}
+            </datalist>
+        </div>
+        {{/each}}
+    </div>
+    {{/if}}
+</template>

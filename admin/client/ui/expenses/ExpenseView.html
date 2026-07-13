@@ -10,10 +10,16 @@
                     <tr><th>Member</th><td><a href="/member/{{expense.memberId}}" target="_blank">{{memberName}}&nbsp;↗</a></td></tr>
                     <tr><th>Date</th><td>{{formatDate expense.date}}</td></tr>
                     <tr><th>Amount</th><td>{{#if expense.amount}}{{expense.amount}} kr{{else}}<em>—</em>{{/if}}</td></tr>
-                    <tr><th>Account</th><td>{{accountName}}{{#if account.accountNumber}} <code>{{account.accountNumber}}</code>{{/if}}</td></tr>
+                    <tr><th>Account</th><td>{{accountName}}{{#if accountDimensions}} <small class="text-muted">[{{accountDimensions}}]</small>{{/if}}</td></tr>
                     <tr><th>Place</th><td>{{#if expense.place}}{{expense.place}}{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Note</th><td>{{#if expense.note}}{{expense.note}}{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Created</th><td>{{formatDate expense.createdAt}}</td></tr>
+                    {{#if expense.bookkeepingAccount}}
+                    <tr><th>Bookkeeping account</th><td><code>{{bookkeepingAccountLabel}}</code></td></tr>
+                    {{/if}}
+                    {{#if expense.reimbursedDate}}
+                    <tr><th>Reimbursed date</th><td>{{formatDate expense.reimbursedDate}}</td></tr>
+                    {{/if}}
                     <tr>
                         <th>Bank account</th>
                         <td>
@@ -45,13 +51,33 @@
                 <button class="btn btn-danger rejectExpense">Reject…</button>
                 {{/if}}
                 {{#if isConfirmed}}
-                <button class="btn btn-success reimburseExpense">Mark as reimbursed</button>
                 <button class="btn btn-danger rejectExpense">Reject…</button>
                 {{/if}}
                 {{#if isReimbursed}}
                 <button class="btn btn-default unreimburseExpense">Undo "mark as reimbursed"</button>
                 {{/if}}
             </div>
+
+            {{#if isConfirmed}}
+            <div class="panel panel-default" style="margin-top: 12px;">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="reimburseAccount">Bookkeeping account</label>
+                        <select id="reimburseAccount" class="form-control reimburseAccount">
+                            <option value="">— select account —</option>
+                            {{#each opt in accountOptions}}
+                            <option value="{{opt.account}}" selected={{selectedAccount opt.account}}>{{opt.account}} — {{opt.name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reimburseDate">Reimbursement date</label>
+                        <input type="date" id="reimburseDate" class="form-control reimburseDate" value="{{defaultReimburseDate}}">
+                    </div>
+                    <button class="btn btn-success reimburseExpense">Mark as reimbursed</button>
+                </div>
+            </div>
+            {{/if}}
 
             {{#if rejecting}}
             <div class="panel panel-default" style="margin-top: 12px;">

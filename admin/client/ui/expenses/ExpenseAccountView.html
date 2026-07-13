@@ -11,5 +11,10 @@
     {{/if}}
 
     <h2>Edit</h2>
-    {{> quickForm collection=ExpenseAccounts doc=account id="editExpenseAccountForm" type="update" omitFields="createdAt" buttonContent="Update"}}
+    {{#autoForm collection=ExpenseAccounts doc=account id="editExpenseAccountForm" type="update"}}
+        {{> afQuickField name="name"}}
+        {{> afQuickField name="explanation"}}
+        {{> expenseAccountDimensions account=account}}
+        <button type="submit" class="btn btn-primary">Update</button>
+    {{/autoForm}}
 </template>

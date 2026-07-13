@@ -20,7 +20,7 @@ const expenseDefaults = {
   filter: [
     'driveFileId', 'mimeType', 'note', 'rejectionReason', 'createdAt',
     'submittedAt', 'confirmedAt', 'confirmedBy', 'rejectedAt', 'rejectedBy',
-    'reimbursedAt', 'reimbursedBy',
+    'reimbursedAt', 'reimbursedBy', 'bookkeepingAccount', 'reimbursedDate',
   ],
   enhance: [
     { data: 'date', sortOrder: 0, sortDirection: 'descending', render: dateViewFunction(true) },
