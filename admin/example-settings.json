@@ -14,6 +14,7 @@
   "accounting": {
     "company": { "orgNo": "000000-0000", "name": "Föreningen" },
     "bankAccount": "1930",
+    "matchWindowDays": 5,
     "dimensions": [
       { "nr": 1, "name": "Kostnadsställe" },
       { "nr": 6, "name": "Projekt" }
@@ -26,7 +27,12 @@
       ]
     },
     "memberPayment": { "series": "M", "account": "3110", "dimension": { "1": "MEDLEM" } },
-    "standardIncome": { "series": "S", "codes": [] }
+    "standardIncome": {
+      "series": "S",
+      "codes": [
+        { "code": "LERA", "account": "3010", "dimension": { "6": "VERK" } }
+      ]
+    }
   },
   "lockUsername": "umsme@uppsalamakerspace.se",
   "lockPassword": "????",

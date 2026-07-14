@@ -1,4 +1,5 @@
 import assert from "assert";
+import "./accounting.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

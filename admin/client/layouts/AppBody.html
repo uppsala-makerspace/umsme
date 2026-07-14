@@ -22,6 +22,8 @@
             <li class="menu-sub"><a href="/expenses/confirm">Confirm</a></li>
             <li class="menu-sub"><a href="/expenses/reimburse">Reimburse</a></li>
             <li class="menu-sub"><a href="/expenses/accounts">Expense accounts</a></li>
+            <li class="menu-heading">Accounting</li>
+            <li class="menu-sub"><a href="/accounting/bankexport">Bank export</a></li>
             <li class="menu-heading">Messages</li>
             <li class="menu-sub"><a href="/mail">Mail</a></li>
             <li class="menu-sub"><a href="/templates">Templates</a></li>
@@ -34,14 +36,14 @@
         </ul>
     </nav>
     {{#if currentUser}}
-      {{#if isInRole "admin,board"}}
+      {{#if isInRole "admin,board,treasurer"}}
         <div class="admin-panel">
             <div id="main">
                 {{> Template.dynamic template=main}}
             </div>
         </div>
       {{/if}}
-      {{#unless isInRole "admin,board"}}
+      {{#unless isInRole "admin,board,treasurer"}}
          <br>
          <br>
         <h1>You are not an admin</h1>

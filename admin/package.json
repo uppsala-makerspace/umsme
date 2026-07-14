@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "build": "meteor build dist --architecture os.linux.x86_64",
-    "start": "meteor run --settings settings.json"
+    "start": "meteor run --settings settings.json",
+    "test": "TEST_CLIENT=0 TEST_SERVER=1 meteor test --once --port 3100 --driver-package meteortesting:mocha"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.9",
@@ -14,6 +15,7 @@
     "chartjs-adapter-moment": "^1.0.1",
     "datatables.net-bs": "^2.2.2",
     "google-auth-library": "^9.15.0",
+    "iconv-lite": "^0.7.3",
     "jquery": "^3.7.1",
     "marked": "^18.0.0",
     "meteor-node-stubs": "^1.2.1",

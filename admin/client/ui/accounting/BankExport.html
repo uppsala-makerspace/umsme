@@ -1,0 +1,84 @@
+<template name="BankExport">
+    <h1>Bank export</h1>
+    <p class="text-muted">
+        Upload a bank transaction report (CSV from Swedbank). Recognized transactions
+        (expense reimbursements, member payments, standard income) are turned into a
+        SIE file for import into the bookkeeping system; everything else is returned
+        as a smaller CSV in the same format for manual entry. Nothing is stored —
+        running the same file twice gives the same result twice.
+    </p>
+
+    <div class="form-group">
+        <label for="bankFile">Bank file (CSV)</label>
+        <input type="file" id="bankFile" class="bankFile" accept=".csv,text/csv">
+    </div>
+
+    {{#if busy}}
+    <p><em>Processing…</em></p>
+    {{/if}}
+
+    {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+
+    {{#with result}}
+    <h2>Summary</h2>
+    <table class="table table-condensed" style="max-width: 640px;">
+        <thead>
+            <tr><th>Category</th><th class="text-right">Rows</th><th class="text-right">Sum (kr)</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Expense reimbursements (U)</td><td class="text-right">{{summary.expenses.count}}</td><td class="text-right">{{summary.expenses.sum}}</td></tr>
+            <tr><td>Member payments (M)</td><td class="text-right">{{summary.memberPayments.count}}</td><td class="text-right">{{summary.memberPayments.sum}}</td></tr>
+            <tr><td>Standard income (S)</td><td class="text-right">{{summary.standardIncome.count}}</td><td class="text-right">{{summary.standardIncome.sum}}</td></tr>
+            <tr><td>Not recognized (remaining CSV)</td><td class="text-right">{{summary.remaining.count}}</td><td class="text-right">{{summary.remaining.sum}}</td></tr>
+            <tr class="active"><td><strong>Total in file</strong></td><td class="text-right"><strong>{{summary.totalRows}}</strong></td><td class="text-right"><strong>{{summary.totalSum}}</strong></td></tr>
+        </tbody>
+    </table>
+
+    <p>
+        Control: SIE bank legs {{summary.control.bankLegs}} + remaining {{summary.control.remainingSum}}
+        = file total {{summary.totalSum}} —
+        {{#if summary.control.holds}}
+        <span class="label label-success">OK</span>
+        {{else}}
+        <span class="label label-danger">MISMATCH — do not import</span>
+        {{/if}}
+    </p>
+
+    <p class="text-muted">
+        Candidates considered: {{summary.pools.reimbursedExpenses}} reimbursed expenses
+        ({{summary.pools.expensesMissingReimbursedDate}} without reimbursement date,
+        {{summary.pools.expensesMissingAccount}} without bookkeeping account),
+        {{summary.pools.callbackPayments}} Swish-callback payments,
+        {{summary.pools.bankImportPayments}} bank-synced payments.
+    </p>
+
+    {{#if flags.length}}
+    <h3>Needs attention</h3>
+    <ul>
+        {{#each flags}}
+        <li><strong>Row {{rowNr}}</strong> — {{reason}}: {{detail}}</li>
+        {{/each}}
+    </ul>
+    <p class="text-muted">Flagged rows are left in the remaining CSV for manual handling.</p>
+    {{/if}}
+
+    {{#if diagnostics.length}}
+    <h3>Why rows didn't match</h3>
+    <table class="table table-condensed">
+        <thead><tr><th>Row</th><th>Transaction</th><th class="text-right">Amount</th><th>Reason</th></tr></thead>
+        <tbody>
+            {{#each diagnostics}}
+            <tr><td>{{rowNr}}</td><td>{{text}}</td><td class="text-right">{{belopp}}</td><td>{{why}}</td></tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/if}}
+
+    <div class="btn-toolbar" style="margin-top: 12px;">
+        <button class="btn btn-primary downloadSie">Download SIE file</button>
+        <button class="btn btn-default downloadRemaining">Download remaining CSV</button>
+    </div>
+    {{/with}}
+</template>

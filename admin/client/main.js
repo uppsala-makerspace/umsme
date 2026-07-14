@@ -19,6 +19,7 @@ import './ui/users';
 import './ui/liability';
 import './ui/certificates';
 import './ui/expenses';
+import './ui/accounting';
 import './ui/announcement';
 import './ui/pending';
 import './ui/reminders';
