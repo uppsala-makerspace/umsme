@@ -50,6 +50,8 @@ same data layer and business rules.
 | [data-model.md](data-model.md)                    | All collections, schemas, and relationships       |
 | [business-rules.md](business-rules.md)            | Membership types, pricing, renewals, family rules |
 | [payments.md](payments.md)                        | Swish and Bankgiro payment flows                  |
+| [expenses.md](expenses.md)                        | Expense reimbursement workflow and receipts       |
+| [accounting.md](accounting.md)                    | Bank statement matching and SIE export for bookkeeping |
 | [door-access.md](door-access.md)                  | Door unlocking via Home Assistant and legacy Danalock |
 | [certificates.md](certificates.md)                | Certificate types and attestation workflow         |
 | [messaging-notifications.md](messaging-notifications.md) | Email, push notifications, templates       |
