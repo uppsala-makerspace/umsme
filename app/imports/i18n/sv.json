@@ -430,13 +430,13 @@
 
   "navWorkshops": "Verkstäder",
   "workshops": "Verkstäder",
+  "workshop": "Verkstad",
   "noWorkshops": "Inga verkstäder ännu.",
   "workshopStatusEstablished": "Etablerad",
   "workshopStatusTrial": "På prov",
   "workshopStatusForming": "Blivande",
   "workshopStatusDecommissioned": "Avvecklad",
   "workshopCertificates": "Certifikat för verkstaden",
-  "responsibleForWorkshop": "Ansvarar för verkstaden",
 
   "groups": "Grupper",
   "noGroups": "Inga grupper ännu.",

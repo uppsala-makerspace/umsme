@@ -431,13 +431,13 @@
 
   "navWorkshops": "Workshops",
   "workshops": "Workshops",
+  "workshop": "Workshop",
   "noWorkshops": "No workshops yet.",
   "workshopStatusEstablished": "Established",
   "workshopStatusTrial": "On trial",
   "workshopStatusForming": "Forming",
   "workshopStatusDecommissioned": "Decommissioned",
   "workshopCertificates": "Workshop certificates",
-  "responsibleForWorkshop": "Responsible for workshop",
 
   "groups": "Groups",
   "noGroups": "No groups yet.",

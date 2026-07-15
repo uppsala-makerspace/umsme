@@ -7,54 +7,15 @@ import {
   HashtagIcon,
   MagnifyingGlassIcon,
   BookOpenIcon,
-  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
+import InfoCard from "../../../components/InfoCard";
 import BackLink from "../../certificates/components/BackLink";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
-
-// One tile in the 2-per-row card grid: an icon, a title, an optional second
-// line, and an internal or external link target. External web links get an
-// open-in-new indicator, matching the guides button on the home page.
-const InfoCard = ({ to, href, Icon, title, subtitle }) => {
-  const external = !!href && href.startsWith("http");
-  const content = (
-    <>
-      <Icon className="w-6 h-6 flex-shrink-0 text-gray-500" aria-hidden="true" />
-      <span className="min-w-0">
-        <span className="block font-semibold leading-snug">{title}</span>
-        {subtitle && <span className="block text-xs text-gray-500 mt-1 truncate">{subtitle}</span>}
-      </span>
-      {external && (
-        <ArrowTopRightOnSquareIcon
-          className="w-4 h-4 flex-shrink-0 ml-auto text-gray-500"
-          aria-hidden="true"
-        />
-      )}
-    </>
-  );
-  const className =
-    "flex items-center gap-3 p-4 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50";
-  if (to) {
-    return (
-      <Link to={to} className={className}>
-        {content}
-      </Link>
-    );
-  }
-  if (href) {
-    return (
-      <a href={href} target={external ? "_blank" : undefined} rel="noopener noreferrer" className={className}>
-        {content}
-      </a>
-    );
-  }
-  return <div className={className}>{content}</div>;
-};
 
 const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
   const { t, i18n } = useTranslation();

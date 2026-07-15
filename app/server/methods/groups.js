@@ -149,7 +149,13 @@ Meteor.methods({
       { sort: { "name.sv": 1 } }
     ).fetchAsync();
 
-    const workshop = await Workshops.findOneAsync({ groupId });
+    // The group's workshop: directly for workshop groups, via the parent
+    // workshop group for responsibility subgroups (e.g. Ugnsgruppen shows
+    // Keramikverkstaden).
+    let workshop = await Workshops.findOneAsync({ groupId });
+    if (!workshop && group.parentGroupId) {
+      workshop = await Workshops.findOneAsync({ groupId: group.parentGroupId });
+    }
 
     const userCanApprove = await canApprove(group, member);
     let pendingRequests = [];

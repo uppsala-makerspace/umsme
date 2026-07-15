@@ -2,9 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { HashtagIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
+import InfoCard from "../../../components/InfoCard";
 import BackLink from "../../certificates/components/BackLink";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
@@ -141,6 +143,28 @@ const GroupDetail = ({
         )}
       </section>
 
+      {/* Card grid, same pattern as the workshop page */}
+      {(workshop || group.slackChannel) && (
+        <section className="mb-6 grid grid-cols-2 gap-3">
+          {workshop && (
+            <InfoCard
+              to={`/workshops/${workshop._id}`}
+              Icon={WrenchScrewdriverIcon}
+              title={t("workshop")}
+              subtitle={localized(workshop.name, lang)}
+            />
+          )}
+          {group.slackChannel && (
+            <InfoCard
+              href={slackUrl}
+              Icon={HashtagIcon}
+              title={t("slackChannel")}
+              subtitle={`#${group.slackChannel}`}
+            />
+          )}
+        </section>
+      )}
+
       {/* Pending requests (approvers only) */}
       {canApprove && pendingRequests.length > 0 && (
         <section className="mb-6">
@@ -187,21 +211,6 @@ const GroupDetail = ({
             <li>
               <span className="text-gray-500">{t("responsibleSpace")}:</span>{" "}
               {group.responsibleSpace}
-            </li>
-          )}
-          {slackUrl && (
-            <li>
-              <a href={slackUrl} className="text-brand-green no-underline hover:underline">
-                {t("slackChannel")}: #{group.slackChannel}
-              </a>
-            </li>
-          )}
-          {workshop && (
-            <li>
-              <span className="text-gray-500">{t("responsibleForWorkshop")}:</span>{" "}
-              <Link to={`/workshops/${workshop._id}`} className="text-brand-green no-underline hover:underline">
-                {localized(workshop.name, lang)}
-              </Link>
             </li>
           )}
         </ul>
