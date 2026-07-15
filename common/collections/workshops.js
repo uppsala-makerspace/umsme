@@ -24,10 +24,12 @@ Workshops.deny({
   },
   // A workshop that certificates belong to must not be removable, and the
   // image must be removed first (its stored file would otherwise be orphaned —
-  // deletion goes through the adminWorkshops.removeImage method).
+  // deletion goes through the adminWorkshops.removeImage method). The doc
+  // handed to deny callbacks contains only _id, so fetch the current one.
   async remove(userId, doc) {
     if (await notAdminish(userId)) return true;
-    if (doc.imageFileId) return true;
+    const current = (await Workshops.findOneAsync(doc._id)) || doc;
+    if (current.imageFileId) return true;
     const used = await Certificates.findOneAsync({ workshopId: doc._id });
     return !!used;
   },

@@ -45,21 +45,27 @@ const violatesGroupRules = async ({ linkedRole, joinPolicy, type, parentGroupId 
 
 Groups.deny({
   async insert(userId, doc) {
+    // Insert callbacks get the full candidate document.
     return (await notAdminish(userId)) || violatesGroupRules(doc, null);
   },
   async update(userId, doc, fields, modifier) {
     if (await notAdminish(userId)) return true;
+    // Meteor hands update/remove deny callbacks a doc containing only _id
+    // (fields are only fetched when declared up front, which proved
+    // unreliable), so read the current document ourselves.
+    const current = (await Groups.findOneAsync(doc._id)) || doc;
     return violatesGroupRules(
       {
-        linkedRole: nextValue(doc, modifier, 'linkedRole'),
-        joinPolicy: nextValue(doc, modifier, 'joinPolicy'),
-        type: nextValue(doc, modifier, 'type'),
-        parentGroupId: nextValue(doc, modifier, 'parentGroupId'),
+        linkedRole: nextValue(current, modifier, 'linkedRole'),
+        joinPolicy: nextValue(current, modifier, 'joinPolicy'),
+        type: nextValue(current, modifier, 'type'),
+        parentGroupId: nextValue(current, modifier, 'parentGroupId'),
       },
-      doc._id
+      current._id
     );
   },
-  // A group that anything still references must not be removable.
+  // A group that anything still references must not be removable. Only needs
+  // doc._id, which the callback always receives.
   async remove(userId, doc) {
     if (await notAdminish(userId)) return true;
     const referenced =

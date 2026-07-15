@@ -7,26 +7,26 @@ export const Certificates = new Mongo.Collection('certificates');
 Certificates.attachSchema(schemas.certificate);
 allow(Certificates);
 
-// Deny rules for mandatory certificate protection
+// Deny rules for mandatory certificate protection. The doc handed to deny
+// callbacks contains only _id, so the rules fetch the current document.
 Certificates.deny({
   // Prevent deleting a mandatory certificate
-  remove(userId, doc) {
-    if (doc.mandatory) {
-      return true;
-    }
-    return false;
+  async remove(userId, doc) {
+    const current = (await Certificates.findOneAsync(doc._id)) || doc;
+    return !!current.mandatory;
   },
   // Prevent unmarking a mandatory certificate or marking a second one as mandatory
   async update(userId, doc, fields, modifier) {
+    const current = (await Certificates.findOneAsync(doc._id)) || doc;
     // If trying to set mandatory to true, check if another certificate is already mandatory
-    if (modifier.$set && modifier.$set.mandatory === true && !doc.mandatory) {
+    if (modifier.$set && modifier.$set.mandatory === true && !current.mandatory) {
       const existingMandatory = await Certificates.findOneAsync({ mandatory: true });
       if (existingMandatory) {
         return true;
       }
     }
     // If this certificate is mandatory, prevent unsetting the mandatory flag
-    if (doc.mandatory) {
+    if (current.mandatory) {
       if (modifier.$set && modifier.$set.mandatory === false) {
         return true;
       }
