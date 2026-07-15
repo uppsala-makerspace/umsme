@@ -1,7 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from 'react-router-dom';
+import {
+  MagnifyingGlassIcon,
+  DocumentTextIcon,
+  BookOpenIcon,
+} from "@heroicons/react/24/outline";
 import Button from "../../components/Button";
+import InfoCard from "../../components/InfoCard";
 import Loader from "../../components/Loader";
 import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
@@ -102,96 +108,17 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
     return <MainContent>
       <Logo />
       <h3 className="text-center">{t("greeting2")} {name}!</h3>
-      <Link
-        to="/tool"
-        className="block mt-4 mb-2 px-4 py-3 rounded-lg no-underline text-inherit border border-gray-200 bg-gray-50 hover:shadow-sm"
-      >
-        <span className="flex items-center gap-2 font-medium">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-5 h-5 flex-shrink-0"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-            />
-          </svg>
-          {t("viewTools")}
-        </span>
-      </Link>
-      {expensesAllowed && (
-      <Link
-        to="/expenses"
-        className="block mt-4 mb-2 px-4 py-3 rounded-lg no-underline text-inherit border border-gray-200 bg-gray-50 hover:shadow-sm"
-      >
-        <span className="flex items-center gap-2 font-medium">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-5 h-5 flex-shrink-0"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z"
-            />
-          </svg>
-          {t("expenses")}
-        </span>
-      </Link>
-      )}
-      <a
-        href="https://tutorial.uppsalamakerspace.se"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block mt-4 mb-2 px-4 py-3 rounded-lg no-underline text-inherit border border-gray-200 bg-gray-50 hover:shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 font-medium">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5 flex-shrink-0"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
-              />
-            </svg>
-            {t("readTutorials")}
-          </span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-4 h-4 flex-shrink-0 text-gray-500"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-            />
-          </svg>
-        </div>
-      </a>
+      <section className="mt-4 mb-2 grid grid-cols-2 gap-3">
+        <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />
+        {expensesAllowed && (
+          <InfoCard to="/expenses" Icon={DocumentTextIcon} title={t("expenses")} />
+        )}
+        <InfoCard
+          href="https://tutorial.uppsalamakerspace.se"
+          Icon={BookOpenIcon}
+          title={t("tutorials")}
+        />
+      </section>
       {(messageCount > 0 || announcementCount > 0) && (
         <Link
           to="/messages"
