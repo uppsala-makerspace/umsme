@@ -13,3 +13,5 @@ import './invites';
 import './tests';
 import './expenses';
 import './accounting';
+import './groups';
+import './workshops';

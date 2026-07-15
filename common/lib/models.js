@@ -21,6 +21,12 @@ export const getRoleOptions = () => {
   return [];
 };
 
+// Roles a group may sync its membership to. The admin role is excluded: it is
+// bootstrap-managed (see admin/server/adminAvailable.js) and must never be
+// granted through group membership.
+export const getLinkableRoleOptions = () =>
+  getRoleOptions().filter((o) => o.value !== "admin");
+
 export const models = {
   initiatedPayments: {
     externalId: {
@@ -645,6 +651,15 @@ export const models = {
         options: getRoleOptions,
       },
     },
+    // Workshop (verkstad) this certificate belongs to, e.g. the laser
+    // certificate under the wood workshop. Picked in admin, so omitted here.
+    workshopId: {
+      label: "Workshop",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
     mandatory: {
       label: "Mandatory for membership",
       type: Boolean,
@@ -815,6 +830,24 @@ export const models = {
       blackbox: true,
       autoform: { omit: true },
     },
+    // Group (grupp) this account belongs to. Optional until existing accounts
+    // are backfilled; the guideline ultimately requires exactly one group.
+    groupId: {
+      label: "Group",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
+    // Members allowed to approve expenses on this account (guideline: at least
+    // two). Stored now; the approval flow itself is still role-based.
+    approverMemberIds: {
+      label: "Expense approvers",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "approverMemberIds.$": { type: String, autoform: { omit: true } },
     createdAt: {
       label: "Created",
       type: Date,
@@ -880,5 +913,239 @@ export const models = {
     // Actual reimbursement payment date (the Phase 2 verification date), set by
     // the treasurer at reimbursement. Distinct from the reimbursedAt audit timestamp.
     reimbursedDate: { label: "Reimbursed date", type: Date, optional: true, autoform: { omit: true } },
+  },
+  // A group (grupp) per the workshops-and-groups guideline: an organised set
+  // of members with a shared responsibility or interest. Workshop groups own
+  // a workshop; responsibility groups are subgroups of a workshop group.
+  group: {
+    name: {
+      label: "Name",
+      type: Object,
+      blackbox: true,
+    },
+    "name.sv": {
+      label: "Name (Swedish)",
+      type: String,
+      max: 100,
+    },
+    "name.en": {
+      label: "Name (English)",
+      type: String,
+      max: 100,
+      optional: true,
+    },
+    description: {
+      label: "Description",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "description.sv": {
+      label: "Description (Swedish, markdown)",
+      type: String,
+      max: 5000,
+      optional: true,
+      autoform: { type: "textarea", rows: 10 },
+    },
+    "description.en": {
+      label: "Description (English, markdown)",
+      type: String,
+      max: 5000,
+      optional: true,
+      autoform: { type: "textarea", rows: 10 },
+    },
+    type: {
+      label: "Type",
+      type: String,
+      allowedValues: ["workshop", "function", "interest", "responsibility"],
+      autoform: {
+        type: "select",
+        firstOption: "(Select a type)",
+        options: [
+          { label: "Workshop group (verkstadsgrupp)", value: "workshop" },
+          { label: "Function group (funktionsgrupp)", value: "function" },
+          { label: "Interest group (intressegrupp)", value: "interest" },
+          { label: "Responsibility group (ansvarsgrupp)", value: "responsibility" },
+        ],
+      },
+    },
+    slackChannel: {
+      label: "Slack channel",
+      type: String,
+      max: 80,
+      optional: true,
+    },
+    responsibleSpace: {
+      label: "Responsible space",
+      type: String,
+      max: 200,
+      optional: true,
+    },
+    // The one person responsible for the group (gruppansvarig). Picked with a
+    // member selector in admin, so omitted from AutoForm.
+    responsibleMemberId: {
+      label: "Group responsible",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
+    // Required for responsibility groups; must reference a workshop group.
+    // Enforced by deny rules on the collection (schema can't do async checks).
+    parentGroupId: {
+      label: "Parent group",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
+    joinPolicy: {
+      label: "Join policy",
+      type: String,
+      allowedValues: ["open", "request-any", "request-responsible"],
+      defaultValue: "request-responsible",
+      autoform: {
+        type: "select",
+        options: [
+          { label: "Open — anyone can join", value: "open" },
+          { label: "Request — any group member approves", value: "request-any" },
+          { label: "Request — only group responsible approves", value: "request-responsible" },
+        ],
+      },
+    },
+    // Meteor role kept in sync from this group's active membership (the group
+    // is the source of truth; see common/server/linkedRoleSync.js). Never
+    // 'admin', and not allowed together with an open join policy — enforced
+    // by deny rules on the collection.
+    linkedRole: {
+      label: "Linked role",
+      type: String,
+      max: 100,
+      optional: true,
+      autoform: {
+        type: "select",
+        firstOption: "(No linked role)",
+        options: getLinkableRoleOptions,
+      },
+    },
+    createdAt: {
+      label: "Created",
+      type: Date,
+      optional: true,
+      autoform: { omit: true },
+    },
+  },
+  // A workshop (verkstad): a space with tools and machines for a certain kind
+  // of making. Always cared for by exactly one workshop group.
+  workshop: {
+    name: {
+      label: "Name",
+      type: Object,
+      blackbox: true,
+    },
+    "name.sv": {
+      label: "Name (Swedish)",
+      type: String,
+      max: 100,
+    },
+    "name.en": {
+      label: "Name (English)",
+      type: String,
+      max: 100,
+      optional: true,
+    },
+    description: {
+      label: "Description",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "description.sv": {
+      label: "Description (Swedish, markdown)",
+      type: String,
+      max: 5000,
+      optional: true,
+      autoform: { type: "textarea", rows: 10 },
+    },
+    "description.en": {
+      label: "Description (English, markdown)",
+      type: String,
+      max: 5000,
+      optional: true,
+      autoform: { type: "textarea", rows: 10 },
+    },
+    status: {
+      label: "Status",
+      type: String,
+      allowedValues: ["established", "trial", "forming", "decommissioned"],
+      defaultValue: "forming",
+      autoform: {
+        type: "select",
+        options: [
+          { label: "Established (etablerad)", value: "established" },
+          { label: "Trial (på prov)", value: "trial" },
+          { label: "Forming (blivande)", value: "forming" },
+          { label: "Decommissioned (avvecklad)", value: "decommissioned" },
+        ],
+      },
+    },
+    slackChannel: {
+      label: "Slack channel",
+      type: String,
+      max: 80,
+      optional: true,
+    },
+    // The responsible workshop group (1:1). Optional in the schema so a
+    // workshop can be drafted first; required for completeness (groupRules).
+    groupId: {
+      label: "Responsible group",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
+    // Representative image, stored via common/server/workshopImageStore.js.
+    imageFileId: {
+      label: "Image file id",
+      type: String,
+      max: 200,
+      optional: true,
+      autoform: { omit: true },
+    },
+    imageMimeType: {
+      label: "Image mime type",
+      type: String,
+      max: 100,
+      optional: true,
+      autoform: { omit: true },
+    },
+    guidesUrl: {
+      label: "Guides URL",
+      type: String,
+      max: 500,
+      optional: true,
+    },
+    createdAt: {
+      label: "Created",
+      type: Date,
+      optional: true,
+      autoform: { omit: true },
+    },
+  },
+  // Member <-> group link with a join/approval workflow, mirroring how
+  // attestations link members to certificates.
+  groupMembership: {
+    groupId: { label: "Group", type: String, max: 50 },
+    memberId: { label: "Member", type: String, max: 50 },
+    state: {
+      label: "State",
+      type: String,
+      allowedValues: ["pending", "active"],
+      defaultValue: "pending",
+    },
+    requestedAt: { label: "Requested at", type: Date },
+    approvedAt: { label: "Approved at", type: Date, optional: true },
+    // memberId of the approver, or '__system__' for open joins / admin edits.
+    approvedBy: { label: "Approved by", type: String, max: 50, optional: true },
   },
 };

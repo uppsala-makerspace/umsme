@@ -1,5 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
+import { syncLinkedRolesForUser } from "/imports/common/server/linkedRoleSync";
 
 /**
  * If a user has already been created, and used their Google email, this will
@@ -29,6 +30,16 @@ Accounts.onLogin(async function (loginInfo) {
         username: email
       },
     });
+  }
+
+  // Grant roles linked to the member's groups (linkedRole). Catches members
+  // who were approved into a role-linked group before their account existed
+  // or their email was verified. Never blocks the login.
+  try {
+    const user = await Meteor.users.findOneAsync(loginInfo.user._id);
+    await syncLinkedRolesForUser(user);
+  } catch (err) {
+    console.error("[linkedRoleSync] onLogin sync failed:", err);
   }
 });
 

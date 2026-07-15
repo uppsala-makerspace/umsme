@@ -1,0 +1,24 @@
+<template name="WorkshopAdd">
+    <a href="/workshops" style="float: right">Back to workshops</a>
+    <h1>Add workshop</h1>
+    <p class="text-muted">The Swedish name should end in <em>verkstad</em> or <em>verkstaden</em> (e.g. Träverkstad, Träverkstaden). The image is uploaded from the workshop page after creation.</p>
+    {{#autoForm collection=Workshops id="insertWorkshopForm" type="normal" validation="keyup"}}
+        {{> afQuickField name="name.sv"}}
+        {{> afQuickField name="name.en"}}
+        {{> afQuickField name="description.sv"}}
+        {{> afQuickField name="description.en"}}
+        {{> afQuickField name="status"}}
+        <div class="form-group">
+            <label class="control-label">Responsible group (workshop group)</label>
+            <select class="form-control workshopGroupSelect">
+                <option value="">(Select later)</option>
+                {{#each workshopGroups}}
+                <option value="{{_id}}">{{name.sv}}</option>
+                {{/each}}
+            </select>
+        </div>
+        {{> afQuickField name="slackChannel"}}
+        {{> afQuickField name="guidesUrl"}}
+        <button type="submit" class="btn btn-primary">Add workshop</button>
+    {{/autoForm}}
+</template>

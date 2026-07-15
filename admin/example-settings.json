@@ -58,6 +58,9 @@
       "sharedDriveId": "REPLACE_WITH_SHARED_DRIVE_ID",
       "rootFolder": "Receipts"
     },
+    "workshopImages": {
+      "localPath": "/srv/umsme/workshop-images"
+    },
     "receiptTokenSecret": "a-long-random-string",
     "managerEvents": {
       "channels": [

@@ -1,0 +1,138 @@
+<template name="GroupView">
+    <a href="/groups" style="float: right">Back to groups</a>
+    <h1>Group: {{group.name.sv}}{{#if group.name.en}} / {{group.name.en}}{{/if}}
+        {{#if completeness.complete}}
+            <span class="label label-success">Complete</span>
+        {{else}}
+            <span class="label label-warning">Incomplete</span>
+        {{/if}}
+    </h1>
+
+    {{#unless completeness.complete}}
+    <div class="alert alert-warning">
+        Missing per the guideline: {{missingList}}
+    </div>
+    {{/unless}}
+
+    {{#if isReferenced}}
+    <div class="alert alert-info">
+        This group is referenced (workshop, members, expense accounts or a child group) and can not be deleted.
+    </div>
+    {{else}}
+    <p><button class="btn btn-danger deleteGroup">Delete group</button></p>
+    {{/if}}
+
+    <h2>Edit</h2>
+    {{> quickForm collection=Groups doc=group id="groupViewForm" omitFields="_id" type="update" buttonContent="Update"}}
+
+    <hr>
+
+    <h2>Group responsible (gruppansvarig)</h2>
+    <p class="text-muted">The one person responsible for the group. Assigning also makes them an active member.</p>
+    {{#if responsibleMember}}
+        <p><strong><a href="/member/{{responsibleMember._id}}">{{responsibleMember.name}}</a></strong>
+            <small><a class="showResponsibleSelector">Change</a></small>
+            <small><a class="clearResponsible text-danger">Clear</a></small>
+        </p>
+    {{else}}
+        <p><em>No group responsible assigned.</em> <small><a class="showResponsibleSelector">Set</a></small></p>
+    {{/if}}
+
+    {{#if showResponsibleSelector}}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Select group responsible <a class="hideResponsibleSelector pull-right">Cancel</a></h3>
+        </div>
+        <div class="panel-body">
+            {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed responsibleList"}}
+        </div>
+    </div>
+    {{/if}}
+
+    <hr>
+
+    <h2>Parent group</h2>
+    <p class="text-muted">Required for responsibility groups (ansvarsgrupper); the parent must be a workshop group.</p>
+    <form class="form-inline">
+        <select class="form-control parentGroupSelect">
+            <option value="" {{noParentSelected}}>(No parent group)</option>
+            {{#each workshopGroups}}
+            <option value="{{_id}}" {{parentSelected _id}}>{{name.sv}}</option>
+            {{/each}}
+        </select>
+        <button type="button" class="btn btn-default saveParentGroup">Save</button>
+        {{#if parentGroup}}
+            <a href="/group/{{parentGroup._id}}">Open {{parentGroup.name.sv}}</a>
+        {{/if}}
+    </form>
+
+    <hr>
+
+    <h2>Members <small><a class="showMemberSelector">Add</a></small></h2>
+
+    {{#if showMemberSelector}}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Add member <a class="hideMemberSelector pull-right">Cancel</a></h3>
+        </div>
+        <div class="panel-body">
+            {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed addMemberList"}}
+        </div>
+    </div>
+    {{/if}}
+
+    {{#if hasPendingMembers}}
+    <h3>Pending requests</h3>
+    <ul class="list-group">
+        {{#each pendingMembers}}
+        <li class="list-group-item">
+            <a href="/member/{{memberId}}">{{name}}</a>
+            <span class="pull-right">
+                <a class="approveMember" data-id="{{memberId}}">Approve</a>
+                &nbsp;
+                <a class="rejectMember text-danger" data-id="{{memberId}}">Reject</a>
+            </span>
+        </li>
+        {{/each}}
+    </ul>
+    {{/if}}
+
+    {{#if hasActiveMembers}}
+    <ul class="list-group">
+        {{#each activeMembers}}
+        <li class="list-group-item">
+            <a href="/member/{{memberId}}">{{name}}</a>
+            {{#if isResponsible}}<span class="label label-primary">Responsible</span>{{/if}}
+            <a class="removeMember pull-right text-danger" data-id="{{memberId}}">Remove</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No members yet.</em></p>
+    {{/if}}
+
+    <hr>
+
+    <h2>Related</h2>
+    {{#if workshop}}
+    <p>Responsible for workshop: <a href="/workshop/{{workshop._id}}">{{workshop.name.sv}}</a></p>
+    {{/if}}
+    {{#if hasChildGroups}}
+    <p>Responsibility groups:</p>
+    <ul>
+        {{#each childGroups}}
+        <li><a href="/group/{{_id}}">{{name.sv}}</a></li>
+        {{/each}}
+    </ul>
+    {{/if}}
+    {{#if hasExpenseAccounts}}
+    <p>Expense accounts:</p>
+    <ul>
+        {{#each expenseAccounts}}
+        <li><a href="/expenseaccount/{{_id}}">{{name}}</a></li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No expense accounts linked to this group.</em> <a href="/expenses/accounts">Manage expense accounts</a></p>
+    {{/if}}
+</template>

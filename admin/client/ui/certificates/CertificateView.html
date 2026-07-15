@@ -20,6 +20,23 @@
 
     <hr>
 
+    <h2>Workshop</h2>
+    <p class="text-muted">The workshop (verkstad) this certificate belongs to, shown on the workshop's page in the app.</p>
+    <form class="form-inline">
+        <select class="form-control certificateWorkshopSelect">
+            <option value="" {{noWorkshopSelected}}>(No workshop)</option>
+            {{#each allWorkshops}}
+            <option value="{{_id}}" {{workshopSelected _id}}>{{name.sv}}</option>
+            {{/each}}
+        </select>
+        <button type="button" class="btn btn-default saveWorkshop">Save</button>
+        {{#if certificateWorkshop}}
+            <a href="/workshop/{{certificateWorkshop._id}}">Open {{certificateWorkshop.name.sv}}</a>
+        {{/if}}
+    </form>
+
+    <hr>
+
     <h2>Test Settings</h2>
     <p class="text-muted">Configure this certificate to be awarded via a test instead of manual certification.</p>
 

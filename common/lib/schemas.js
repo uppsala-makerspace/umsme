@@ -27,4 +27,7 @@ export const schemas = {
   testAttempt: new SimpleSchema(models.testAttempt),
   expenseAccount: new SimpleSchema(models.expenseAccount),
   expense: new SimpleSchema(models.expense),
+  group: new SimpleSchema(models.group),
+  workshop: new SimpleSchema(models.workshop),
+  groupMembership: new SimpleSchema(models.groupMembership),
 };

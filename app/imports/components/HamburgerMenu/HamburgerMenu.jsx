@@ -67,6 +67,8 @@ export const HamburgerMenu = () => {
             { to: "/account", label: "myAccount" },
             { to: "/profile", label: "myProfile" },
             { to: "/messages", label: "messages" },
+            { to: "/certificates", label: "certificates" },
+            { to: "/groups", label: "groups" },
             { to: "/tool", label: "viewTools" },
             { to: "/storage", label: "myBox" },
             ...(expensesAllowed ? [{ to: "/expenses", label: "expenses" }] : []),

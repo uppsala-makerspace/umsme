@@ -44,6 +44,10 @@ const Settings = lazyWithRetry(() => import('/imports/pages/settings'));
 const Expenses = lazyWithRetry(() => import('/imports/pages/expenses/list'));
 const ExpenseDetail = lazyWithRetry(() => import('/imports/pages/expenses/detail'));
 const ExpenseNew = lazyWithRetry(() => import('/imports/pages/expenses/new'));
+const Workshops = lazyWithRetry(() => import('/imports/pages/workshops'));
+const WorkshopDetail = lazyWithRetry(() => import('/imports/pages/workshops/detail'));
+const Groups = lazyWithRetry(() => import('/imports/pages/groups'));
+const GroupDetail = lazyWithRetry(() => import('/imports/pages/groups/detail'));
 
 export const App = () => {
   useAutoReconnect();
@@ -93,6 +97,10 @@ export const App = () => {
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/expenses/new" element={<ExpenseNew />} />
             <Route path="/expenses/:expenseId" element={<ExpenseDetail />} />
+            <Route path="/workshops" element={<Workshops />} />
+            <Route path="/workshops/:workshopId" element={<WorkshopDetail />} />
+            <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/:groupId" element={<GroupDetail />} />
           </Routes>
         </Suspense>
         </ChunkErrorBoundary>

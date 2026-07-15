@@ -14,7 +14,52 @@
     {{#autoForm collection=ExpenseAccounts doc=account id="editExpenseAccountForm" type="update"}}
         {{> afQuickField name="name"}}
         {{> afQuickField name="explanation"}}
+        <div class="form-group">
+            <label class="control-label">Group</label>
+            <select class="form-control expenseAccountGroupSelect">
+                <option value="" {{noGroupSelected}}>(No group)</option>
+                {{#each allGroups}}
+                <option value="{{_id}}" {{groupSelected _id}}>{{name.sv}}</option>
+                {{/each}}
+            </select>
+            <span class="help-block">The group this account belongs to.
+                {{#if accountGroup}}<a href="/group/{{accountGroup._id}}">Open {{accountGroup.name.sv}}</a>{{/if}}
+            </span>
+        </div>
         {{> expenseAccountDimensions account=account}}
         <button type="submit" class="btn btn-primary">Update</button>
     {{/autoForm}}
+
+    <hr>
+
+    <h2>Expense approvers <small><a class="showApproverSelector">Add</a></small></h2>
+    <p class="text-muted">Members who may approve expenses on this account (the guideline requires at least two).
+        Stored for the upcoming in-app approval flow; confirmation is still done here by admin/board for now.</p>
+
+    {{#if showApproverSelector}}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Add approver <a class="hideApproverSelector pull-right">Cancel</a></h3>
+        </div>
+        <div class="panel-body">
+            {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed approverList"}}
+        </div>
+    </div>
+    {{/if}}
+
+    {{#if hasApprovers}}
+    <ul class="list-group">
+        {{#each approvers}}
+        <li class="list-group-item">
+            <a href="/member/{{_id}}">{{name}}</a>
+            <a class="removeApprover pull-right text-danger" data-id="{{_id}}">Remove</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{#if tooFewApprovers}}
+    <div class="alert alert-warning">Only one approver — the guideline requires at least two.</div>
+    {{/if}}
+    {{else}}
+    <p><em>No approvers assigned.</em></p>
+    {{/if}}
 </template>

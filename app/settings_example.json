@@ -31,6 +31,9 @@
       "sharedDriveId": "REPLACE_WITH_SHARED_DRIVE_ID",
       "rootFolder": "Receipts"
     },
+    "workshopImages": {
+      "localPath": "/srv/umsme/workshop-images"
+    },
     "expenses": {
       "allowList": ["treasurer@example.com", "board-member@example.com"]
     },
@@ -41,7 +44,7 @@
           "name": "expenses",
           "type": "slack",
           "webhookUrl": "https://hooks.slack.com/services/...",
-          "subscriptions": ["expenseSubmitted", "expenseRetracted"]
+          "subscriptions": ["expenseSubmitted", "expenseRetracted", "groupJoinRequested", "groupJoinApproved"]
         }
       ]
     },

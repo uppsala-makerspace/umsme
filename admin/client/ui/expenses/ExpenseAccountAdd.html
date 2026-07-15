@@ -4,6 +4,16 @@
     {{#autoForm collection=ExpenseAccounts id="insertExpenseAccountForm" type="normal" validation="keyup"}}
         {{> afQuickField name="name"}}
         {{> afQuickField name="explanation"}}
+        <div class="form-group">
+            <label class="control-label">Group</label>
+            <select class="form-control expenseAccountGroupSelect">
+                <option value="">(No group)</option>
+                {{#each allGroups}}
+                <option value="{{_id}}">{{name.sv}}</option>
+                {{/each}}
+            </select>
+            <span class="help-block">The group this account belongs to. Approvers are managed from the account page after creation.</span>
+        </div>
         {{> expenseAccountDimensions}}
         <button type="submit" class="btn btn-primary">Add expense account</button>
     {{/autoForm}}

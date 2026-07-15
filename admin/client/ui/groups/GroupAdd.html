@@ -1,0 +1,25 @@
+<template name="GroupAdd">
+    <a href="/groups" style="float: right">Back to groups</a>
+    <h1>Add group</h1>
+    {{#autoForm collection=Groups id="insertGroupForm" type="normal" validation="keyup"}}
+        {{> afQuickField name="name.sv"}}
+        {{> afQuickField name="name.en"}}
+        {{> afQuickField name="description.sv"}}
+        {{> afQuickField name="description.en"}}
+        {{> afQuickField name="type"}}
+        <div class="form-group">
+            <label class="control-label">Parent group (required for responsibility groups)</label>
+            <select class="form-control parentGroupSelect">
+                <option value="">(No parent group)</option>
+                {{#each workshopGroups}}
+                <option value="{{_id}}">{{name.sv}}</option>
+                {{/each}}
+            </select>
+        </div>
+        {{> afQuickField name="slackChannel"}}
+        {{> afQuickField name="responsibleSpace"}}
+        {{> afQuickField name="joinPolicy"}}
+        {{> afQuickField name="linkedRole"}}
+        <button type="submit" class="btn btn-primary">Add group</button>
+    {{/autoForm}}
+</template>

@@ -1,0 +1,76 @@
+<template name="WorkshopView">
+    <a href="/workshops" style="float: right">Back to workshops</a>
+    <h1>Workshop: {{workshop.name.sv}}{{#if workshop.name.en}} / {{workshop.name.en}}{{/if}}
+        {{#if completeness.complete}}
+            <span class="label label-success">Complete</span>
+        {{else}}
+            <span class="label label-warning">Incomplete</span>
+        {{/if}}
+    </h1>
+
+    {{#unless completeness.complete}}
+    <div class="alert alert-warning">
+        Missing per the guideline: {{missingList}}
+    </div>
+    {{/unless}}
+    {{#if nameSuffixWarning}}
+    <div class="alert alert-warning">
+        The Swedish name should end in <em>verkstad</em> or <em>verkstaden</em> (e.g. Träverkstad, Träverkstaden).
+    </div>
+    {{/if}}
+
+    {{#if isDeletable}}
+    <p><button class="btn btn-danger deleteWorkshop">Delete workshop</button></p>
+    {{else}}
+    <div class="alert alert-info">
+        Remove the image and any certificates linked to this workshop before it can be deleted.
+    </div>
+    {{/if}}
+
+    <h2>Image</h2>
+    {{#if workshop.imageFileId}}
+        <p><img src="{{imageUrl}}" alt="{{workshop.name.sv}}" style="max-width: 400px; max-height: 300px;"></p>
+        <p><button class="btn btn-default removeImage">Remove image</button></p>
+    {{else}}
+        <p><em>No image uploaded. A representative image is required by the guideline.</em></p>
+    {{/if}}
+    <form class="form-inline imageUploadForm">
+        <input type="file" class="imageFileInput" accept="image/jpeg,image/png,image/webp,image/heic">
+        <button type="button" class="btn btn-primary uploadImage" {{uploadingAttr}}>
+            {{#if uploading}}Uploading…{{else}}Upload image{{/if}}
+        </button>
+    </form>
+
+    <h2>Edit</h2>
+    {{> quickForm collection=Workshops doc=workshop id="workshopViewForm" omitFields="_id" type="update" buttonContent="Update"}}
+
+    <hr>
+
+    <h2>Responsible group</h2>
+    <p class="text-muted">Every workshop is cared for by exactly one workshop group (with at least two members).</p>
+    <form class="form-inline">
+        <select class="form-control workshopGroupSelect">
+            <option value="" {{noGroupSelected}}>(No group)</option>
+            {{#each workshopGroups}}
+            <option value="{{_id}}" {{groupSelected _id}}>{{name.sv}}</option>
+            {{/each}}
+        </select>
+        <button type="button" class="btn btn-default saveGroup">Save</button>
+        {{#if group}}
+            <a href="/group/{{group._id}}">Open {{group.name.sv}}</a> ({{activeMemberCount}} active members)
+        {{/if}}
+    </form>
+
+    <hr>
+
+    <h2>Certificates</h2>
+    {{#if hasCertificates}}
+    <ul>
+        {{#each certificates}}
+        <li><a href="/certificate/{{_id}}">{{name.sv}}</a></li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No certificates linked to this workshop.</em> Link them from each certificate's page under <a href="/certificates">Certificates</a>.</p>
+    {{/if}}
+</template>

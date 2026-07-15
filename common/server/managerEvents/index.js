@@ -29,6 +29,8 @@ export const ManagerEventType = {
   EXPENSE_REJECTED: "expenseRejected",
   EXPENSE_REIMBURSED: "expenseReimbursed",
   EXPENSE_UNREIMBURSED: "expenseUnreimbursed",
+  GROUP_JOIN_REQUESTED: "groupJoinRequested",
+  GROUP_JOIN_APPROVED: "groupJoinApproved",
 };
 
 const CHANNEL_ADAPTERS = {

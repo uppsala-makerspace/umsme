@@ -200,6 +200,8 @@ Role assignment is managed from the admin app's user view (`admin/client/ui/user
 
 Only users with the `admin` role can modify role assignments. The `board` role does not grant role management privileges.
 
+**Linked roles are group-managed.** A Group (see groups/workshops) can set `linkedRole` (e.g. `board`); its active membership is then the source of truth for that role and `common/server/linkedRoleSync.js` overwrites manual assignments on every sync (membership edits, group form saves, and user login). For a linked role, manage people through the group's member list instead of the buttons above. The `admin` role can never be linked.
+
 ### Bootstrap Admin Account
 
 On admin app startup (`admin/server/adminAvailable.js`), the system ensures an `admin` user exists:

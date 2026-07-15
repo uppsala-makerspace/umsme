@@ -31,3 +31,18 @@ export const userSelectorForMember = (member) => {
   if (!member?.email) return { _id: { $in: [] } };
   return { "emails.address": { $regex: `^${escapeRegExp(member.email)}$`, $options: "i" } };
 };
+
+// Like userSelectorForMember, but only matches when the address is verified.
+// Use for identity/security decisions (e.g. granting roles from group
+// membership), mirroring memberForUser's verified-only rule.
+export const verifiedUserSelectorForMember = (member) => {
+  if (!member?.email) return { _id: { $in: [] } };
+  return {
+    emails: {
+      $elemMatch: {
+        address: { $regex: `^${escapeRegExp(member.email)}$`, $options: "i" },
+        verified: true,
+      },
+    },
+  };
+};

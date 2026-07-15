@@ -5,6 +5,7 @@ import './cronjob';
 import './methods';
 import './api/certificatesRfid';
 import './api/expenseReceipt';
+import './api/workshopImage';
 import '/imports/tabular/index';
 import adminAvailable from './adminAvailable';
 import publications from './publications';

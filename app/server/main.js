@@ -4,6 +4,7 @@ import "./methods";
 import "./accounts";
 import "./tests/init";
 import "./api/expenseReceipt";
+import "./api/workshopImage";
 
 // Set MAIL_URL from settings if configured
 if (Meteor.settings.private?.mailUrl) {

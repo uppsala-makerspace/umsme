@@ -16,6 +16,9 @@ import { Announcements } from '/imports/common/collections/announcements';
 import Invites from '/imports/common/collections/Invites';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
+import { Groups } from '/imports/common/collections/groups';
+import { Workshops } from '/imports/common/collections/workshops';
+import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 
 const createAuthFuncForRoles = (col, roles) => async function () {
   if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
@@ -48,6 +51,9 @@ export default () => {
   Meteor.publish('invites', createAuthFuncFor(Invites));
   Meteor.publish('expenses', createAuthFuncForRoles(Expenses, ['admin', 'board', 'treasurer']));
   Meteor.publish('expenseAccounts', createAuthFuncForRoles(ExpenseAccounts, ['admin', 'board', 'treasurer']));
+  Meteor.publish('groups', createAuthFuncFor(Groups));
+  Meteor.publish('workshops', createAuthFuncFor(Workshops));
+  Meteor.publish('groupMemberships', createAuthFuncFor(GroupMemberships));
 
   Meteor.publish(null, async function () {
     if (this.userId) {

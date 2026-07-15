@@ -14,3 +14,5 @@ import './push';
 import './roles';
 import './membershipDetail';
 import './messages';
+import './groups';
+import './workshops';

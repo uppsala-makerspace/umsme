@@ -4,6 +4,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
 import { Members } from '/imports/common/collections/members';
+import { Workshops } from '/imports/common/collections/workshops';
 import { wouldCreateCycle } from '/imports/common/lib/rules';
 import '/imports/tabular/members';
 import '/imports/tabular/attestations';
@@ -14,6 +15,7 @@ Template.CertificateView.onCreated(function() {
   Meteor.subscribe('certificates');
   Meteor.subscribe('attestations');
   Meteor.subscribe('members');
+  Meteor.subscribe('workshops');
   this.showAttestationForm = new ReactiveVar(false);
   this.selectedMemberId = new ReactiveVar(null);
   this.showCertifierSelector = new ReactiveVar(false);
@@ -175,9 +177,34 @@ Template.CertificateView.helpers({
     const id = FlowRouter.getParam('_id');
     return `/api/certificates/${id}/rfid`;
   },
+  allWorkshops() {
+    return Workshops.find({}, { sort: { 'name.sv': 1 } });
+  },
+  certificateWorkshop() {
+    const cert = Certificates.findOne(FlowRouter.getParam('_id'));
+    return cert?.workshopId ? Workshops.findOne(cert.workshopId) : null;
+  },
+  workshopSelected(id) {
+    const cert = Certificates.findOne(FlowRouter.getParam('_id'));
+    return cert?.workshopId === id ? 'selected' : '';
+  },
+  noWorkshopSelected() {
+    const cert = Certificates.findOne(FlowRouter.getParam('_id'));
+    return cert?.workshopId ? '' : 'selected';
+  },
 });
 
 Template.CertificateView.events({
+  'click .saveWorkshop': function (event, template) {
+    const certId = FlowRouter.getParam('_id');
+    const value = template.find('.certificateWorkshopSelect').value;
+    const modifier = value
+      ? { $set: { workshopId: value } }
+      : { $unset: { workshopId: '' } };
+    Certificates.update(certId, modifier, (err) => {
+      if (err) alert('Save failed: ' + err.message);
+    });
+  },
   'click .deleteCertificate': function (event) {
     if (confirm('Delete this certificate? All attestations for this certificate will remain but be orphaned.')) {
       const id = FlowRouter.getParam('_id');
