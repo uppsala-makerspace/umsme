@@ -131,6 +131,24 @@ export const isMemberRegistered = async (member) => {
   return !!paying?.registered;
 };
 
+/**
+ * Checks if a member is an active makerspace member: not excluded, formally
+ * accepted (registered), and holding a current paid base or lab membership.
+ * For family members, resolves via the paying member. Used to gate access to
+ * other members' data (e.g. group member lists).
+ * @param {object} member - The member object
+ * @returns {Promise<boolean>}
+ */
+export const isActiveMember = async (member) => {
+  if (!member || member.excluded) return false;
+  if (!(await isMemberRegistered(member))) return false;
+  const paying = member.infamily
+    ? await Members.findOneAsync(member.infamily)
+    : member;
+  const { type } = await memberStatus(paying);
+  return !!type && type !== "none";
+};
+
 export const findForUser = async () => {
   let user;
   let email;

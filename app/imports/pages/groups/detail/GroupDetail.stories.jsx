@@ -25,6 +25,8 @@ const baseData = {
   parentGroup: null,
   childGroups: [{ _id: "grp6", name: { sv: "Ugnsgruppen" } }],
   workshop: { _id: "ws1", name: { sv: "Träverkstad" } },
+  canSeeMembers: true,
+  canJoin: true,
   canApprove: false,
   pendingRequests: [],
 };
@@ -37,9 +39,18 @@ export default {
 export const NotMember = {
   args: {
     loading: false,
-    data: baseData,
+    // Non-members don't get the member list from the server, only the count.
+    data: { ...baseData, members: [], canSeeMembers: false },
     slackTeam: "T123",
     slackChannelIds: { "träverkstaden": "C123" },
+  },
+};
+
+export const NotActiveMember = {
+  args: {
+    loading: false,
+    // No active makerspace membership: join button disabled, no member list.
+    data: { ...baseData, members: [], canSeeMembers: false, canJoin: false },
   },
 };
 
@@ -48,6 +59,8 @@ export const PendingRequest = {
     loading: false,
     data: {
       ...baseData,
+      members: [],
+      canSeeMembers: false,
       group: { ...baseData.group, myState: "pending" },
     },
   },
@@ -83,6 +96,8 @@ export const ResponsibilitySubgroup = {
     loading: false,
     data: {
       ...baseData,
+      members: [],
+      canSeeMembers: false,
       group: {
         ...baseData.group,
         _id: "grp6",

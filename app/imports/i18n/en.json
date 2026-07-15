@@ -452,6 +452,7 @@
   "groupResponsible": "Group responsible",
   "groupMembers": "Members",
   "noGroupMembers": "No members yet.",
+  "membersHidden": "The member list is only visible to group members with an active membership.",
   "memberSingular": "member",
   "memberPlural": "members",
   "memberChip": "Member",

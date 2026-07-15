@@ -6,7 +6,7 @@ import { Workshops } from "/imports/common/collections/workshops";
 import { Members } from "/imports/common/collections/members";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
-import { findMemberForUser } from "./utils";
+import { findMemberForUser, isActiveMember } from "./utils";
 
 const requireMember = async () => {
   const member = await findMemberForUser();
@@ -30,16 +30,19 @@ const isAdminish = async () =>
 /**
  * Whether a member may approve/reject join requests for a group, per its join
  * policy: request-any → any active group member; request-responsible → only
- * the group responsible. Admin/board may always.
+ * the group responsible. Admin/board may always. Since approving means seeing
+ * other members' names, it additionally requires an active makerspace
+ * membership (registered + paid, not expired).
  */
-const canApprove = async (group, memberId) => {
+const canApprove = async (group, member) => {
   if (await isAdminish()) return true;
+  if (!(await isActiveMember(member))) return false;
   if (group.joinPolicy === "request-responsible") {
-    return group.responsibleMemberId === memberId;
+    return group.responsibleMemberId === member._id;
   }
   const membership = await GroupMemberships.findOneAsync({
     groupId: group._id,
-    memberId,
+    memberId: member._id,
     state: "active",
   });
   return !!membership;
@@ -110,18 +113,28 @@ Meteor.methods({
 
     const summary = await groupSummary(group, member._id);
 
-    const activeMemberships = await GroupMemberships.find(
-      { groupId, state: "active" },
-      { sort: { requestedAt: 1 } }
-    ).fetchAsync();
+    const activeCaller = await isActiveMember(member);
+
+    // Member names are only for active makerspace members (registered + paid,
+    // not expired) that have joined this group, or admin/board. The group
+    // responsible's NAME is public; everyone always gets the member count.
+    const canSeeMembers =
+      (await isAdminish()) || (summary.myState === "active" && activeCaller);
+
     const members = [];
-    for (const membership of activeMemberships) {
-      const m = await Members.findOneAsync(membership.memberId);
-      members.push({
-        memberId: membership.memberId,
-        name: m?.name || "Unknown",
-        isResponsible: group.responsibleMemberId === membership.memberId,
-      });
+    if (canSeeMembers) {
+      const activeMemberships = await GroupMemberships.find(
+        { groupId, state: "active" },
+        { sort: { requestedAt: 1 } }
+      ).fetchAsync();
+      for (const membership of activeMemberships) {
+        const m = await Members.findOneAsync(membership.memberId);
+        members.push({
+          memberId: membership.memberId,
+          name: m?.name || "Unknown",
+          isResponsible: group.responsibleMemberId === membership.memberId,
+        });
+      }
     }
 
     const responsible = group.responsibleMemberId
@@ -138,7 +151,7 @@ Meteor.methods({
 
     const workshop = await Workshops.findOneAsync({ groupId });
 
-    const userCanApprove = await canApprove(group, member._id);
+    const userCanApprove = await canApprove(group, member);
     let pendingRequests = [];
     if (userCanApprove) {
       const pending = await GroupMemberships.find(
@@ -164,6 +177,8 @@ Meteor.methods({
         : null,
       childGroups: childGroups.map((g) => ({ _id: g._id, name: g.name })),
       workshop: workshop ? { _id: workshop._id, name: workshop.name } : null,
+      canSeeMembers,
+      canJoin: activeCaller,
       canApprove: userCanApprove,
       pendingRequests,
     };
@@ -175,6 +190,14 @@ Meteor.methods({
    */
   "groups.join": async (groupId) => {
     const member = await requireMember();
+    // Joining (open or by request) requires an active makerspace membership:
+    // registered + paid, not expired. Leaving is always allowed.
+    if (!(await isActiveMember(member))) {
+      throw new Meteor.Error(
+        "not-active-member",
+        "An active membership is required to join groups"
+      );
+    }
     const group = await getGroup(groupId);
 
     const existing = await GroupMemberships.findOneAsync({ groupId, memberId: member._id });
@@ -245,7 +268,7 @@ Meteor.methods({
   "groups.approve": async (groupId, memberId) => {
     const member = await requireMember();
     const group = await getGroup(groupId);
-    if (!(await canApprove(group, member._id))) {
+    if (!(await canApprove(group, member))) {
       throw new Meteor.Error("not-authorized", "You may not approve requests for this group");
     }
     const membership = await GroupMemberships.findOneAsync({ groupId, memberId, state: "pending" });
@@ -271,7 +294,7 @@ Meteor.methods({
   "groups.reject": async (groupId, memberId) => {
     const member = await requireMember();
     const group = await getGroup(groupId);
-    if (!(await canApprove(group, member._id))) {
+    if (!(await canApprove(group, member))) {
       throw new Meteor.Error("not-authorized", "You may not reject requests for this group");
     }
     const removed = await GroupMemberships.removeAsync({ groupId, memberId, state: "pending" });

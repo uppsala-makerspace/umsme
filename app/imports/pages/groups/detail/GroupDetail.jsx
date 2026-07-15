@@ -55,6 +55,8 @@ const GroupDetail = ({
     parentGroup,
     childGroups,
     workshop,
+    canSeeMembers,
+    canJoin,
     canApprove,
     pendingRequests,
   } = data;
@@ -97,12 +99,18 @@ const GroupDetail = ({
         </div>
       )}
 
-      {/* Own membership actions */}
+      {/* Own membership actions. The join button is disabled without an
+          active makerspace membership (the server enforces the same rule). */}
       <section className="mb-6">
         {group.myState === null && (
           <button
             onClick={onJoin}
-            className="w-full py-3 px-4 rounded-lg bg-brand-green text-white font-semibold border-none cursor-pointer hover:opacity-90"
+            disabled={!canJoin}
+            className={`w-full py-3 px-4 rounded-lg font-semibold border-none ${
+              canJoin
+                ? "bg-brand-green text-white cursor-pointer hover:opacity-90"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
           >
             {joinLabel}
           </button>
@@ -199,12 +207,16 @@ const GroupDetail = ({
         </ul>
       </section>
 
-      {/* Members */}
+      {/* Members: the list is only shown to active makerspace members that
+          have joined the group (the server withholds the names otherwise);
+          the count and the group responsible's name are public. */}
       <section className="mb-6">
         <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
-          {t("groupMembers")} ({members.length})
+          {t("groupMembers")} ({group.memberCount})
         </h3>
-        {members.length === 0 ? (
+        {!canSeeMembers ? (
+          <p className="text-center text-gray-500 p-4 italic">{t("membersHidden")}</p>
+        ) : members.length === 0 ? (
           <p className="text-center text-gray-500 p-4 italic">{t("noGroupMembers")}</p>
         ) : (
           <ul className="list-none p-0 m-0">
