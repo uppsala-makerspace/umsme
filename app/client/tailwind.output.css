@@ -1006,6 +1006,10 @@ video {
   max-width: 60%;
 }
 
+.max-w-md {
+  max-width: 28rem;
+}
+
 .max-w-xl {
   max-width: 36rem;
 }
@@ -1855,6 +1859,11 @@ video {
 .text-brand-green {
   --tw-text-opacity: 1;
   color: rgb(95 200 111 / var(--tw-text-opacity, 1));
+}
+
+.text-gray-300 {
+  --tw-text-opacity: 1;
+  color: rgb(209 213 219 / var(--tw-text-opacity, 1));
 }
 
 .text-gray-400 {
