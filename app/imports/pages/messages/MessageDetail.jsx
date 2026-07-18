@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Markdown from "../../components/Markdown";
@@ -36,12 +35,10 @@ const MessageDetail = ({ loading, kind, item }) => {
   }
 
   const isMessage = kind === "message";
-  const backTo = `/messages?tab=${isMessage ? "messages" : "announcements"}`;
 
   if (!item) {
     return (
       <MainContent>
-        <Link to={backTo} className="text-sm text-gray-600 no-underline">&larr; {t("back")}</Link>
         <p className="text-center text-gray-600 mt-5">{t("noMessages")}</p>
       </MainContent>
     );
@@ -64,8 +61,7 @@ const MessageDetail = ({ loading, kind, item }) => {
 
   return (
     <MainContent>
-      <Link to={backTo} className="text-sm text-gray-600 no-underline">&larr; {t("back")}</Link>
-      <h1 className="mt-3 mb-2 text-2xl font-bold">{subject}</h1>
+      <h1 className="mt-0 mb-2 text-2xl font-bold">{subject}</h1>
       <div className="flex items-center gap-2 mb-4">
         <span className={`text-xs px-2 py-0.5 rounded ${tagClass}`}>{tagLabel}</span>
         <span className="text-xs text-gray-500">{formatDate(date, i18n.language)}</span>

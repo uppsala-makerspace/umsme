@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate, matchPath } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { HamburgerMenu } from "../HamburgerMenu/HamburgerMenu";
 import { LanguageSwitcher } from "../LanguageSwitcher/langueSwitcher";
 import { NotificationContext } from "/imports/context/NotificationContext";
@@ -147,16 +148,60 @@ const PAGE_TITLES = {
   "/workshops": "workshops",
 };
 
+// Drill-down pages get a back arrow in the top bar (top-level pages never
+// do). The arrow goes back in the app's history — a detail page can be
+// reached from several places — and falls back to the listed route (with
+// optional state) when the page was opened directly. The payment flow
+// (/membership, /paymentSelection, /initiatedPayment) deliberately has no
+// arrow: mid-flow back navigation is handled by the flow itself.
+const DETAIL_PAGES = [
+  { pattern: "/workshops/:workshopId", fallback: "/workshops" },
+  { pattern: "/groups/:groupId", fallback: "/groups" },
+  { pattern: "/certificates/:certificateId", fallback: "/certificates" },
+  { pattern: "/certificates/:certificateId/test", fallback: "/certificates" },
+  { pattern: "/certifier-requests/:attestationId", fallback: "/certificates", state: { tab: "requests" } },
+  { pattern: "/expenses/new", fallback: "/expenses" },
+  { pattern: "/expenses/:expenseId", fallback: "/expenses" },
+  { pattern: "/messages/:kind/:id", fallback: "/messages" },
+  { pattern: "/notification-settings", fallback: "/settings" },
+];
+
+const BackButton = ({ fallback, state }) => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const handleClick = () => {
+    // react-router keeps an index in history.state; 0 means this is the
+    // first in-app location (e.g. a deep link) and there is nothing to go
+    // back to within the app.
+    if (window.history.state?.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate(fallback, { state });
+    }
+  };
+  return (
+    <button
+      onClick={handleClick}
+      aria-label={t("back")}
+      className="bg-transparent border-none p-0 w-7 cursor-pointer text-gray-700 flex items-center justify-center"
+    >
+      <ArrowLeftIcon className="w-6 h-6" aria-hidden="true" />
+    </button>
+  );
+};
+
 export const TopBar = ({ showNotifications = true }) => {
   const { t } = useTranslation();
   const location = useLocation();
   const showInstall = ["/", "/home", "/login", "/register"].includes(location.pathname);
   const isInstalledPWA = isPWA();
   const titleKey = PAGE_TITLES[location.pathname];
+  const detailPage = DETAIL_PAGES.find((p) => matchPath(p.pattern, location.pathname));
 
   return (
     <header className="flex justify-between items-center pl-4 pr-2 sm:pr-4 py-2 bg-white border-b border-gray-200 min-h-[44px]">
       <div className="flex items-center gap-2 min-w-0">
+        {detailPage && <BackButton fallback={detailPage.fallback} state={detailPage.state} />}
         <HamburgerMenu />
         {titleKey && <span className="text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">{t(titleKey)}</span>}
       </div>

@@ -6,7 +6,6 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import { getLocalized, formatDate, formatDateTime } from "../utils";
-import BackLink from "../components/BackLink";
 
 const CertifierRequestDetail = ({
   loading,
@@ -58,7 +57,6 @@ const CertifierRequestDetail = ({
     return (
       <MainContent>
         <p className="text-red-600 text-center p-8">{error}</p>
-        <BackLink state={{ tab: "requests" }}>{t("backToRequests")}</BackLink>
       </MainContent>
     );
   }
@@ -72,7 +70,6 @@ const CertifierRequestDetail = ({
 
   return (
     <MainContent>
-      <BackLink state={{ tab: "requests" }}>{t("backToRequests")}</BackLink>
 
       {/* Certificate Info */}
       <section className="mb-8 pb-4 border-b-2 border-gray-200">

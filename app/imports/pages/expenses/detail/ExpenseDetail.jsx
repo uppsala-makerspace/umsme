@@ -5,7 +5,6 @@ import { PaperAirplaneIcon, InformationCircleIcon } from "@heroicons/react/24/ou
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Button from "../../../components/Button";
-import BackLink from "../../certificates/components/BackLink";
 import ReceiptCapture from "../components/ReceiptCapture";
 import PlaceAutocomplete from "../components/PlaceAutocomplete";
 import { isEditable, formatDate, toDateInputValue } from "../utils";
@@ -54,7 +53,6 @@ const ExpenseDetail = ({
     return (
       <MainContent>
         <p className="text-red-600 text-center p-8">{error || t("expenseNotFound")}</p>
-        <BackLink to="/expenses">{t("expenseBack")}</BackLink>
       </MainContent>
     );
   }
@@ -86,7 +84,6 @@ const ExpenseDetail = ({
 
   return (
     <MainContent>
-      <BackLink to="/expenses">{t("expenseBack")}</BackLink>
       <h2 className="text-2xl mb-1">{t("expense")}</h2>
       <p className="text-sm text-gray-500 mb-4">{t(`expenseStatus_${expense.status}`)}</p>
 

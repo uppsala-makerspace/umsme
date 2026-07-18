@@ -7,7 +7,6 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import InfoCard from "../../../components/InfoCard";
-import BackLink from "../../certificates/components/BackLink";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 
@@ -44,7 +43,6 @@ const GroupDetail = ({
   if (error || !data?.group) {
     return (
       <MainContent>
-        <BackLink to="/groups">{t("groups")}</BackLink>
         <p className="text-center text-red-600 p-8">{error || t("noGroups")}</p>
       </MainContent>
     );
@@ -70,8 +68,7 @@ const GroupDetail = ({
   const joinLabel = group.joinPolicy === "open" ? t("joinGroup") : t("requestJoinGroup");
 
   return (
-    <MainContent topPadding={false}>
-      <BackLink to="/groups">{t("groups")}</BackLink>
+    <MainContent>
 
       {group.imageUrl && (
         <img

@@ -245,8 +245,6 @@
   "attemptNumber": "Attempt {{number}}",
   "confirmed": "Confirmed",
   "recentlyConfirmed": "Recently Confirmed",
-  "backToCertificates": "Back to certificates",
-  "backToRequests": "Back to requests",
   "requesterInfo": "Requester Information",
   "requester": "Requester",
   "attempt": "Attempt",
@@ -426,7 +424,6 @@
   "expenseReceiptLoading": "Loading receipt…",
   "expenseNotFound": "Expense not found.",
   "expenseLocked": "This expense can no longer be edited.",
-  "expenseBack": "Back to expenses",
 
   "navWorkshops": "Workshops",
   "workshops": "Workshops",
@@ -443,6 +440,10 @@
 
   "groups": "Groups",
   "noGroups": "No groups yet.",
+  "noGroupsFound": "No groups match the search.",
+  "searchGroups": "Search groups",
+  "lessInfo": "Show less information",
+  "moreInfo": "Show more information",
   "groupsSectionResponsibility": "Responsibility groups",
   "groupTypeWorkshop": "Workshop group",
   "groupTypeFunction": "Function group",

@@ -7,7 +7,6 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import { getLocalized, formatDate, formatDateTime } from "../utils";
-import BackLink from "../components/BackLink";
 import StatusBadge from "../components/StatusBadge";
 import CertificateItem from "../components/CertificateItem";
 
@@ -47,7 +46,6 @@ const CertificateDetail = ({
     return (
       <MainContent>
         <p className="text-red-600 text-center p-8">{error}</p>
-        <BackLink>{t("backToCertificates")}</BackLink>
       </MainContent>
     );
   }
@@ -68,7 +66,6 @@ const CertificateDetail = ({
 
   return (
     <MainContent>
-      <BackLink>{t("backToCertificates")}</BackLink>
 
       {/* Certificate Info */}
       <section className="mb-8 pb-4 border-b-2 border-gray-200">

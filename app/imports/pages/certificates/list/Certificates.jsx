@@ -6,7 +6,6 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Tabs from "../../../components/Tabs";
 import { getLocalized, formatDate } from "../utils";
-import BackLink from "../components/BackLink";
 import StatusBadge from "../components/StatusBadge";
 import CertificateItem from "../components/CertificateItem";
 import { metCertificateIds, findMissingPrerequisites } from "/imports/common/lib/rules";

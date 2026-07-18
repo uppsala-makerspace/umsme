@@ -12,7 +12,6 @@ import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import InfoCard from "../../../components/InfoCard";
 import GroupTypeTag from "../../../components/GroupTypeTag";
-import BackLink from "../../certificates/components/BackLink";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
@@ -75,7 +74,6 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
   if (error || !data?.workshop) {
     return (
       <MainContent>
-        <BackLink to="/workshops">{t("workshops")}</BackLink>
         <p className="text-center text-red-600 p-8">{error || t("noWorkshops")}</p>
       </MainContent>
     );
@@ -87,8 +85,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     : undefined;
 
   return (
-    <MainContent topPadding={false}>
-      <BackLink to="/workshops">{t("workshops")}</BackLink>
+    <MainContent>
 
       {workshop.imageUrl && (
         <img

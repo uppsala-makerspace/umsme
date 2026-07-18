@@ -244,8 +244,6 @@
   "attemptNumber": "Försök {{number}}",
   "confirmed": "Bekräftat",
   "recentlyConfirmed": "Nyligen bekräftade",
-  "backToCertificates": "Tillbaka till certifikat",
-  "backToRequests": "Tillbaka till förfrågningar",
   "requesterInfo": "Information om sökande",
   "requester": "Sökande",
   "attempt": "Försök",
@@ -425,7 +423,6 @@
   "expenseReceiptLoading": "Laddar kvitto…",
   "expenseNotFound": "Utlägget hittades inte.",
   "expenseLocked": "Detta utlägg kan inte längre ändras.",
-  "expenseBack": "Tillbaka till utlägg",
 
   "navWorkshops": "Verkstäder",
   "workshops": "Verkstäder",
@@ -442,6 +439,10 @@
 
   "groups": "Grupper",
   "noGroups": "Inga grupper ännu.",
+  "noGroupsFound": "Inga grupper matchar sökningen.",
+  "searchGroups": "Sök grupper",
+  "lessInfo": "Visa mindre information",
+  "moreInfo": "Visa mer information",
   "groupsSectionResponsibility": "Ansvarsgrupper",
   "groupTypeWorkshop": "Verkstadsgrupp",
   "groupTypeFunction": "Funktionsgrupp",
