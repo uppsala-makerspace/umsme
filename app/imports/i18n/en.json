@@ -439,6 +439,8 @@
   "groupTypeActivity": "Activity group",
 
   "groups": "Groups",
+  "groupsCountSubtitle_one": "{{count}} group",
+  "groupsCountSubtitle_other": "{{count}} groups",
   "noGroups": "No groups yet.",
   "noGroupsFound": "No groups match the search.",
   "searchGroups": "Search groups",

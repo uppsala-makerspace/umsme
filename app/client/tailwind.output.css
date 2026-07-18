@@ -612,21 +612,12 @@ video {
   inset: 0px;
 }
 
-.inset-x-0 {
-  left: 0px;
-  right: 0px;
-}
-
 .-right-1 {
   right: -0.25rem;
 }
 
 .-top-1 {
   top: -0.25rem;
-}
-
-.bottom-2 {
-  bottom: 0.5rem;
 }
 
 .bottom-3 {
@@ -641,8 +632,8 @@ video {
   right: 0.75rem;
 }
 
-.top-2 {
-  top: 0.5rem;
+.top-3 {
+  top: 0.75rem;
 }
 
 .top-full {
@@ -1078,10 +1069,6 @@ video {
 
 .shrink-0 {
   flex-shrink: 0;
-}
-
-.grow {
-  flex-grow: 1;
 }
 
 .translate-x-1 {

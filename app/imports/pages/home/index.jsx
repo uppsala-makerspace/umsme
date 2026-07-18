@@ -79,6 +79,8 @@ export default () => {
       latestAnnouncementDate={latestAnnouncementDate}
       hasNewMessage={hasNewMessage}
       hasNewAnnouncement={hasNewAnnouncement}
+      groupCount={memberInfo?.groupCounts?.total}
+      myGroupCount={memberInfo?.groupCounts?.mine}
     />
   </Layout>;
 };

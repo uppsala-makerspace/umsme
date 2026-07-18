@@ -2,6 +2,8 @@ import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
 import { LiabilityDocuments } from "/imports/common/collections/liabilityDocuments";
+import { Groups } from "/imports/common/collections/groups";
+import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { memberStatus } from '/imports/common/lib/utils';
 import { findMemberForUser, findForUser, expenseAccessAllowed } from "/server/methods/utils";
 import Invites from "/imports/common/collections/Invites";
@@ -88,6 +90,16 @@ Meteor.methods({
     // admin/board group (regardless of the allowlist).
     const expensesAllowed = await expenseAccessAllowed(member);
 
-    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed});
+    // Group counters for the home screen's Groups card. Rides along in this
+    // response (cached by MemberInfoContext) instead of a method of its own.
+    const groupCounts = {
+      total: await Groups.find({}).countAsync(),
+      mine: await GroupMemberships.find({
+        memberId: member._id,
+        state: "active",
+      }).countAsync(),
+    };
+
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed, groupCounts});
   },
 });

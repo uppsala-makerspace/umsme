@@ -7,12 +7,19 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
  * pages): an icon, a title, an optional second line, and an internal or
  * external link target. External web links open in a new tab and get an
  * open-in-new indicator, matching the guides button on the home page.
- * A disabled card is rendered grayed out and without its link.
+ * A disabled card is rendered grayed out and without its link. `badge`
+ * renders a green counter bubble in the card's top-right corner (hidden
+ * when falsy/zero).
  */
-const InfoCard = ({ to, href, Icon, title, subtitle, disabled }) => {
+const InfoCard = ({ to, href, Icon, title, subtitle, disabled, badge }) => {
   const external = !disabled && !!href && href.startsWith("http");
   const content = (
     <>
+      {badge > 0 && (
+        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-brand-green text-white text-xs font-bold flex items-center justify-center">
+          {badge}
+        </span>
+      )}
       <Icon
         className={`w-6 h-6 flex-shrink-0 ${disabled ? "text-gray-300" : "text-gray-500"}`}
         aria-hidden="true"
@@ -33,7 +40,7 @@ const InfoCard = ({ to, href, Icon, title, subtitle, disabled }) => {
       )}
     </>
   );
-  const className = `flex items-center gap-3 p-4 rounded-lg border border-gray-200 ${
+  const className = `relative flex items-center gap-3 p-4 rounded-lg border border-gray-200 ${
     disabled
       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
       : "bg-white no-underline text-inherit hover:bg-gray-50"

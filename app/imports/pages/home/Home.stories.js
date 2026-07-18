@@ -135,6 +135,32 @@ export const MemberPayingWithMessages = {
   },
 };
 
+export const MemberPayingWithGroups = {
+  args: {
+    memberName,
+    memberStatus: { memberStart, memberEnd },
+    verified: true,
+    registered: true,
+    liabilityDate,
+    liabilityOutdated: false,
+    groupCount: 12,
+    myGroupCount: 3,
+  },
+};
+
+export const MemberPayingNotInAnyGroup = {
+  args: {
+    memberName,
+    memberStatus: { memberStart, memberEnd },
+    verified: true,
+    registered: true,
+    liabilityDate,
+    liabilityOutdated: false,
+    groupCount: 12,
+    myGroupCount: 0,
+  },
+};
+
 export const LiabilityNotApproved = {
   args: {
     memberName,

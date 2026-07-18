@@ -438,6 +438,8 @@
   "groupTypeActivity": "Aktivitetsgrupp",
 
   "groups": "Grupper",
+  "groupsCountSubtitle_one": "{{count}} grupp",
+  "groupsCountSubtitle_other": "{{count}} grupper",
   "noGroups": "Inga grupper ännu.",
   "noGroupsFound": "Inga grupper matchar sökningen.",
   "searchGroups": "Sök grupper",
