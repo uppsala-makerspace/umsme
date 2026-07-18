@@ -6,6 +6,7 @@ const sampleGroups = [
     name: { sv: "Trägruppen", en: "Wood group" },
     type: "workshop",
     joinPolicy: "request-any",
+    imageUrl: "https://placehold.co/600x300?text=Tr%C3%A4gruppen",
     memberCount: 5,
     myState: "active",
     myIsResponsible: false,

@@ -70,6 +70,7 @@ Template.GroupView.onCreated(function () {
   Meteor.subscribe('members');
   this.showResponsibleSelector = new ReactiveVar(false);
   this.showMemberSelector = new ReactiveVar(false);
+  this.uploading = new ReactiveVar(false);
 });
 
 Template.GroupView.helpers({
@@ -85,14 +86,26 @@ Template.GroupView.helpers({
   missingList() {
     return groupCompleteness(Groups.findOne(groupId())).missing.join(', ');
   },
-  isReferenced() {
+  isDeletable() {
     const id = groupId();
-    return !!(
+    if (Groups.findOne(id)?.imageFileId) return false;
+    return !(
       Workshops.findOne({ groupId: id }) ||
       GroupMemberships.findOne({ groupId: id }) ||
       ExpenseAccounts.findOne({ groupId: id }) ||
       Groups.findOne({ parentGroupId: id })
     );
+  },
+  imageUrl() {
+    const group = Groups.findOne(groupId());
+    if (!group?.imageFileId) return '';
+    return `/api/groups/${group._id}/image?v=${encodeURIComponent(group.imageFileId)}`;
+  },
+  uploading() {
+    return Template.instance().uploading.get();
+  },
+  uploadingAttr() {
+    return Template.instance().uploading.get() ? 'disabled' : '';
   },
   responsibleMember() {
     const group = Groups.findOne(groupId());
@@ -119,6 +132,17 @@ Template.GroupView.helpers({
   },
   noParentSelected() {
     return Groups.findOne(groupId())?.parentGroupId ? '' : 'selected';
+  },
+  relatedWorkshops() {
+    const ids = Groups.findOne(groupId())?.relatedWorkshopIds || [];
+    return Workshops.find({ _id: { $in: ids } }, { sort: { 'name.sv': 1 } });
+  },
+  hasRelatedWorkshops() {
+    return (Groups.findOne(groupId())?.relatedWorkshopIds || []).length > 0;
+  },
+  addableWorkshops() {
+    const ids = Groups.findOne(groupId())?.relatedWorkshopIds || [];
+    return Workshops.find({ _id: { $nin: ids } }, { sort: { 'name.sv': 1 } });
   },
   activeMembers() {
     return membershipWithNames('active');
@@ -160,6 +184,39 @@ Template.GroupView.events({
       FlowRouter.go('/groups');
     });
   },
+  'click .uploadImage': function (event, template) {
+    const input = template.find('.imageFileInput');
+    const file = input.files && input.files[0];
+    if (!file) {
+      alert('Choose an image file first.');
+      return;
+    }
+    template.uploading.set(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      // reader.result is a data: URL; the method wants raw base64.
+      const base64 = String(reader.result).split(',')[1] || '';
+      Meteor.call('adminGroups.uploadImage', groupId(), base64, file.type, (err) => {
+        template.uploading.set(false);
+        if (err) {
+          alert('Upload failed: ' + err.message);
+          return;
+        }
+        input.value = '';
+      });
+    };
+    reader.onerror = () => {
+      template.uploading.set(false);
+      alert('Could not read the file.');
+    };
+    reader.readAsDataURL(file);
+  },
+  'click .removeImage': function () {
+    if (!confirm('Remove the group image?')) return;
+    Meteor.call('adminGroups.removeImage', groupId(), (err) => {
+      if (err) alert('Remove failed: ' + err.message);
+    });
+  },
   'click .showResponsibleSelector': function (event, template) {
     template.showResponsibleSelector.set(true);
   },
@@ -191,6 +248,18 @@ Template.GroupView.events({
       ? { $set: { parentGroupId: value } }
       : { $unset: { parentGroupId: '' } };
     Groups.update(groupId(), modifier, (err) => {
+      if (err) alert('Update failed: ' + err.message);
+    });
+  },
+  'click .addRelatedWorkshop': function (event, template) {
+    const value = template.find('.relatedWorkshopSelect').value;
+    if (!value) return;
+    Groups.update(groupId(), { $addToSet: { relatedWorkshopIds: value } }, (err) => {
+      if (err) alert('Update failed: ' + err.message);
+    });
+  },
+  'click .removeRelatedWorkshop': function (event) {
+    Groups.update(groupId(), { $pull: { relatedWorkshopIds: event.currentTarget.dataset.id } }, (err) => {
       if (err) alert('Update failed: ' + err.message);
     });
   },

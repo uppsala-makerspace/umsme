@@ -5,6 +5,7 @@ import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Workshops } from "/imports/common/collections/workshops";
 import { Members } from "/imports/common/collections/members";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
+import { groupImageUrlFor } from "/imports/common/server/workshopImage";
 import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
 import { findMemberForUser, isActiveMember } from "./utils";
 
@@ -66,6 +67,7 @@ const groupSummary = async (group, memberId) => {
     responsibleSpace: group.responsibleSpace,
     joinPolicy: group.joinPolicy,
     parentGroupId: group.parentGroupId,
+    imageUrl: groupImageUrlFor(group),
     memberCount,
     myState: myMembership?.state || null,
     myIsResponsible: group.responsibleMemberId === memberId,

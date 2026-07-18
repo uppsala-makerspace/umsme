@@ -999,6 +999,15 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // Workshops this group is related to (e.g. an interest group that partly
+    // operates in a workshop). Listed on those workshops' pages in the app.
+    relatedWorkshopIds: {
+      label: "Related workshops",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "relatedWorkshopIds.$": { type: String, autoform: { omit: true } },
     joinPolicy: {
       label: "Join policy",
       type: String,
@@ -1012,6 +1021,22 @@ export const models = {
           { label: "Request — only group responsible approves", value: "request-responsible" },
         ],
       },
+    },
+    // Representative image, stored via common/server/workshopImageStore.js
+    // (the same local store as workshop images).
+    imageFileId: {
+      label: "Image file id",
+      type: String,
+      max: 200,
+      optional: true,
+      autoform: { omit: true },
+    },
+    imageMimeType: {
+      label: "Image mime type",
+      type: String,
+      max: 100,
+      optional: true,
+      autoform: { omit: true },
     },
     // Meteor role kept in sync from this group's active membership (the group
     // is the source of truth; see common/server/linkedRoleSync.js). Never

@@ -12,6 +12,7 @@ const baseData = {
     slackChannel: "träverkstaden",
     responsibleSpace: "Träverkstaden, plan 1",
     joinPolicy: "request-responsible",
+    imageUrl: "https://placehold.co/800x400?text=Tr%C3%A4gruppen",
     memberCount: 3,
     myState: null,
     myIsResponsible: false,

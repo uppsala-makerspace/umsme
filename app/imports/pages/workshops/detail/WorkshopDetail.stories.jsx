@@ -16,9 +16,17 @@ const sampleData = {
   group: {
     _id: "grp1",
     name: { sv: "Trägruppen", en: "Wood group" },
+    type: "workshop",
     memberCount: 5,
-    myState: null,
+    myState: "active",
   },
+  responsibilityGroups: [
+    { _id: "grp2", name: { sv: "Svarvgruppen" }, type: "responsibility", memberCount: 2, myState: null },
+    { _id: "grp3", name: { sv: "Verktygsvårdsgruppen" }, type: "responsibility", memberCount: 3, myState: "pending" },
+  ],
+  relatedGroups: [
+    { _id: "grp4", name: { sv: "Cykelgruppen", en: "Bike kitchen" }, type: "interest", memberCount: 7, myState: null },
+  ],
   certificates: [
     { _id: "cert1", name: { sv: "Bandsåg", en: "Band saw" } },
     { _id: "cert2", name: { sv: "Planhyvel", en: "Planer" } },
@@ -50,6 +58,8 @@ export const WithoutImageAndGroup = {
         status: "forming",
       },
       group: null,
+      responsibilityGroups: [],
+      relatedGroups: [],
       certificates: [],
     },
   },

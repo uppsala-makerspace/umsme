@@ -14,6 +14,21 @@ const requireMember = async () => {
   return member;
 };
 
+// Group summary for the workshop page's group lists: active member count and
+// the caller's own membership state, like groups.list provides.
+const groupSummary = async (groupDoc, memberId) => ({
+  _id: groupDoc._id,
+  name: groupDoc.name,
+  type: groupDoc.type,
+  memberCount: await GroupMemberships.find({
+    groupId: groupDoc._id,
+    state: "active",
+  }).countAsync(),
+  myState:
+    (await GroupMemberships.findOneAsync({ groupId: groupDoc._id, memberId }))
+      ?.state || null,
+});
+
 const publicWorkshopFields = (workshop) => ({
   _id: workshop._id,
   name: workshop.name,
@@ -46,25 +61,33 @@ Meteor.methods({
       throw new Meteor.Error("not-found", "Workshop not found");
     }
 
+    // The responsible workshop group and its responsibility subgroups, for
+    // the "get involved" list.
     let group = null;
+    const responsibilityGroups = [];
     if (workshop.groupId) {
       const groupDoc = await Groups.findOneAsync(workshop.groupId);
       if (groupDoc) {
-        const memberCount = await GroupMemberships.find({
-          groupId: groupDoc._id,
-          state: "active",
-        }).countAsync();
-        const myMembership = await GroupMemberships.findOneAsync({
-          groupId: groupDoc._id,
-          memberId: member._id,
-        });
-        group = {
-          _id: groupDoc._id,
-          name: groupDoc.name,
-          memberCount,
-          myState: myMembership?.state || null,
-        };
+        group = await groupSummary(groupDoc, member._id);
+        const children = await Groups.find(
+          { parentGroupId: groupDoc._id },
+          { sort: { "name.sv": 1 } }
+        ).fetchAsync();
+        for (const child of children) {
+          responsibilityGroups.push(await groupSummary(child, member._id));
+        }
       }
+    }
+
+    // Groups that declared this workshop as related (e.g. an interest group
+    // that partly operates here).
+    const relatedGroups = [];
+    const related = await Groups.find(
+      { relatedWorkshopIds: workshopId },
+      { sort: { "name.sv": 1 } }
+    ).fetchAsync();
+    for (const relatedGroup of related) {
+      relatedGroups.push(await groupSummary(relatedGroup, member._id));
     }
 
     const certificates = (
@@ -74,6 +97,8 @@ Meteor.methods({
     return {
       workshop: publicWorkshopFields(workshop),
       group,
+      responsibilityGroups,
+      relatedGroups,
       certificates,
     };
   },

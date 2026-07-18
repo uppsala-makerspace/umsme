@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  UsersIcon,
   HashtagIcon,
   MagnifyingGlassIcon,
   BookOpenIcon,
@@ -12,10 +11,54 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import InfoCard from "../../../components/InfoCard";
+import GroupTypeTag from "../../../components/GroupTypeTag";
 import BackLink from "../../certificates/components/BackLink";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
+
+// One group row in the "get involved" / "related groups" lists, in the same
+// style as the groups list page. The responsible workshop group is rendered
+// highlighted with a green accent since it is the central one. All rows show
+// the shared group-type tag.
+const GroupRow = ({ group, highlighted }) => {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || "sv";
+  return (
+    <li
+      className={`mb-3 rounded-lg border border-gray-200 ${
+        highlighted ? "border-l-4 border-l-[#5fc86f] bg-green-50" : "bg-white"
+      }`}
+    >
+      <Link
+        to={`/groups/${group._id}`}
+        className="flex justify-between items-center p-4 no-underline text-inherit transition-colors hover:bg-gray-50"
+      >
+        <div className="flex-1">
+          <span className="flex items-center gap-2 font-semibold leading-snug">
+            {localized(group.name, lang)}
+            <GroupTypeTag type={group.type} />
+            {group.myState === "active" && (
+              <span className="inline-block text-xs font-semibold rounded-full py-0.5 px-2 bg-green-100 text-green-800">
+                {t("memberChip")}
+              </span>
+            )}
+            {group.myState === "pending" && (
+              <span className="inline-block text-xs font-semibold rounded-full py-0.5 px-2 bg-amber-100 text-amber-800">
+                {t("pendingChip")}
+              </span>
+            )}
+          </span>
+          <span className="block text-xs text-gray-500 mt-0.5">
+            {group.memberCount}{" "}
+            {group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}
+          </span>
+        </div>
+        <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+      </Link>
+    </li>
+  );
+};
 
 const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
   const { t, i18n } = useTranslation();
@@ -38,13 +81,10 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     );
   }
 
-  const { workshop, group, certificates } = data;
+  const { workshop, group, responsibilityGroups = [], relatedGroups = [], certificates } = data;
   const slackUrl = workshop.slackChannel
     ? getSlackChannelUrl(workshop.slackChannel, slackTeam, slackChannelIds)
     : undefined;
-  const memberCountText = group
-    ? `${group.memberCount} ${group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}`
-    : "";
 
   return (
     <MainContent topPadding={false}>
@@ -70,14 +110,6 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
       )}
 
       <section className="mb-6 grid grid-cols-2 gap-3">
-        {group && (
-          <InfoCard
-            to={`/groups/${group._id}`}
-            Icon={UsersIcon}
-            title={t("groupTypeWorkshop")}
-            subtitle={memberCountText}
-          />
-        )}
         {workshop.slackChannel && (
           <InfoCard
             href={slackUrl}
@@ -113,6 +145,32 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
         </section>
       )}
 
+      {group && (
+        <section className="mb-6">
+          <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
+            {t("engageInWorkshop")}
+          </h3>
+          <ul className="list-none p-0 m-0">
+            <GroupRow group={group} highlighted />
+            {responsibilityGroups.map((subGroup) => (
+              <GroupRow key={subGroup._id} group={subGroup} />
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {relatedGroups.length > 0 && (
+        <section className="mb-6">
+          <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
+            {t("relatedGroups")}
+          </h3>
+          <ul className="list-none p-0 m-0">
+            {relatedGroups.map((relatedGroup) => (
+              <GroupRow key={relatedGroup._id} group={relatedGroup} />
+            ))}
+          </ul>
+        </section>
+      )}
     </MainContent>
   );
 };

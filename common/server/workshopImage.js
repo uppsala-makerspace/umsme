@@ -1,18 +1,20 @@
 import { Workshops } from "/imports/common/collections/workshops";
+import { Groups } from "/imports/common/collections/groups";
 import { workshopImageStore } from "./workshopImageStore";
 
 /**
- * A WebApp.handlers callback (mounted at /api/workshops) that streams a
- * workshop's representative image. Tokenless on purpose: workshop images are
- * public content (they will also feed the public website), and the file served
- * is always looked up from the workshop document — never from the request —
- * so the endpoint cannot be used to read arbitrary files.
+ * WebApp.handlers callbacks that stream a workshop's or group's
+ * representative image. Tokenless on purpose: the images are public content
+ * (they will also feed the public website), and the file served is always
+ * looked up from the entity document — never from the request — so the
+ * endpoints cannot be used to read arbitrary files.
  *
- * URL shape: /api/workshops/<workshopId>/image[?v=<imageFileId>]
- * `v` is ignored by the handler; callers append it so a replaced image gets a
- * new URL and browser caches never go stale (the same trick receipt URLs use).
+ * URL shapes (the `v` query is ignored by the handler; callers append it so
+ * a replaced image gets a new URL and browser caches never go stale):
+ *   /api/workshops/<workshopId>/image[?v=<imageFileId>]
+ *   /api/groups/<groupId>/image[?v=<imageFileId>]
  */
-export const makeWorkshopImageHandler = () => async (req, res) => {
+const makeImageHandler = (findDoc) => async (req, res) => {
   const [path] = req.url.split("?");
   const match = path.match(/^\/([^/]+)\/image\/?$/);
   if (!match) {
@@ -26,14 +28,14 @@ export const makeWorkshopImageHandler = () => async (req, res) => {
     return;
   }
 
-  const workshop = await Workshops.findOneAsync(decodeURIComponent(match[1]));
-  if (!workshop?.imageFileId) {
+  const doc = await findDoc(decodeURIComponent(match[1]));
+  if (!doc?.imageFileId) {
     res.writeHead(404);
     res.end();
     return;
   }
 
-  const etag = `"${workshop.imageFileId}"`;
+  const etag = `"${doc.imageFileId}"`;
   if (req.headers["if-none-match"] === etag) {
     res.writeHead(304, { ETag: etag, "Cache-Control": "public, max-age=86400" });
     res.end();
@@ -42,16 +44,16 @@ export const makeWorkshopImageHandler = () => async (req, res) => {
 
   let buffer;
   try {
-    buffer = await workshopImageStore.downloadImage(workshop.imageFileId);
+    buffer = await workshopImageStore.downloadImage(doc.imageFileId);
   } catch (err) {
-    console.error(`[workshopImage] download failed for ${workshop.imageFileId}:`, err.message);
+    console.error(`[entityImage] download failed for ${doc.imageFileId}:`, err.message);
     res.writeHead(404);
     res.end();
     return;
   }
 
   res.writeHead(200, {
-    "Content-Type": workshop.imageMimeType || "application/octet-stream",
+    "Content-Type": doc.imageMimeType || "application/octet-stream",
     "Content-Length": buffer.length,
     "Cache-Control": "public, max-age=86400",
     ETag: etag,
@@ -59,9 +61,18 @@ export const makeWorkshopImageHandler = () => async (req, res) => {
   res.end(buffer);
 };
 
-// Relative (same-origin) URL for a workshop's image, or null when it has none.
-export const workshopImageUrlFor = (workshop) =>
-  workshop?.imageFileId
-    ? `/api/workshops/${encodeURIComponent(workshop._id)}/image` +
-      `?v=${encodeURIComponent(workshop.imageFileId)}`
+export const makeWorkshopImageHandler = () =>
+  makeImageHandler((id) => Workshops.findOneAsync(id));
+
+export const makeGroupImageHandler = () =>
+  makeImageHandler((id) => Groups.findOneAsync(id));
+
+// Relative (same-origin) URL for an entity's image, or null when it has none.
+const imageUrlFor = (basePath, doc) =>
+  doc?.imageFileId
+    ? `${basePath}/${encodeURIComponent(doc._id)}/image` +
+      `?v=${encodeURIComponent(doc.imageFileId)}`
     : null;
+
+export const workshopImageUrlFor = (workshop) => imageUrlFor("/api/workshops", workshop);
+export const groupImageUrlFor = (group) => imageUrlFor("/api/groups", group);

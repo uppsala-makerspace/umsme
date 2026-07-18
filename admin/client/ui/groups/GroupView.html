@@ -14,13 +14,27 @@
     </div>
     {{/unless}}
 
-    {{#if isReferenced}}
-    <div class="alert alert-info">
-        This group is referenced (workshop, members, expense accounts or a child group) and can not be deleted.
-    </div>
-    {{else}}
+    {{#if isDeletable}}
     <p><button class="btn btn-danger deleteGroup">Delete group</button></p>
+    {{else}}
+    <div class="alert alert-info">
+        This group is referenced (workshop, members, expense accounts or a child group) or has an image, and can not be deleted. Remove references and the image first.
+    </div>
     {{/if}}
+
+    <h2>Image</h2>
+    {{#if group.imageFileId}}
+        <p><img src="{{imageUrl}}" alt="{{group.name.sv}}" style="max-width: 400px; max-height: 300px;"></p>
+        <p><button class="btn btn-default removeImage">Remove image</button></p>
+    {{else}}
+        <p><em>No image uploaded.</em></p>
+    {{/if}}
+    <form class="form-inline imageUploadForm">
+        <input type="file" class="imageFileInput" accept="image/jpeg,image/png,image/webp,image/heic">
+        <button type="button" class="btn btn-primary uploadImage" {{uploadingAttr}}>
+            {{#if uploading}}Uploading…{{else}}Upload image{{/if}}
+        </button>
+    </form>
 
     <h2>Edit</h2>
     {{> quickForm collection=Groups doc=group id="groupViewForm" omitFields="_id" type="update" buttonContent="Update"}}
@@ -64,6 +78,32 @@
         {{#if parentGroup}}
             <a href="/group/{{parentGroup._id}}">Open {{parentGroup.name.sv}}</a>
         {{/if}}
+    </form>
+
+    <hr>
+
+    <h2>Related workshops</h2>
+    <p class="text-muted">Workshops this group is related to (e.g. an interest group that partly operates in a workshop). Shown as "Relaterade grupper" on those workshops' pages in the app.</p>
+    {{#if hasRelatedWorkshops}}
+    <ul class="list-group">
+        {{#each relatedWorkshops}}
+        <li class="list-group-item">
+            <a href="/workshop/{{_id}}">{{name.sv}}</a>
+            <a class="removeRelatedWorkshop pull-right text-danger" data-id="{{_id}}">Remove</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No related workshops.</em></p>
+    {{/if}}
+    <form class="form-inline">
+        <select class="form-control relatedWorkshopSelect">
+            <option value="">(Select a workshop)</option>
+            {{#each addableWorkshops}}
+            <option value="{{_id}}">{{name.sv}}</option>
+            {{/each}}
+        </select>
+        <button type="button" class="btn btn-default addRelatedWorkshop">Add</button>
     </form>
 
     <hr>

@@ -135,6 +135,7 @@ const PAGE_TITLES = {
   "/install": "installApp",
   "/notifications": "notifications",
   "/notification-settings": "notificationSettings",
+  "/groups": "groups",
 };
 
 export const TopBar = ({ showNotifications = true }) => {

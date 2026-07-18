@@ -73,6 +73,14 @@ const GroupDetail = ({
     <MainContent topPadding={false}>
       <BackLink to="/groups">{t("groups")}</BackLink>
 
+      {group.imageUrl && (
+        <img
+          src={group.imageUrl}
+          alt={localized(group.name, lang)}
+          className="w-full max-h-64 object-cover rounded-lg mb-4"
+        />
+      )}
+
       <div className="flex items-center gap-3 mb-1">
         <h2 className="text-2xl m-0">{localized(group.name, lang)}</h2>
       </div>

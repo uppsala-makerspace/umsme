@@ -64,10 +64,13 @@ Groups.deny({
       current._id
     );
   },
-  // A group that anything still references must not be removable. Only needs
-  // doc._id, which the callback always receives.
+  // A group that anything still references must not be removable, and the
+  // image must be removed first (its stored file would otherwise be orphaned —
+  // deletion goes through the adminGroups.removeImage method).
   async remove(userId, doc) {
     if (await notAdminish(userId)) return true;
+    const current = (await Groups.findOneAsync(doc._id)) || doc;
+    if (current.imageFileId) return true;
     const referenced =
       (await Workshops.findOneAsync({ groupId: doc._id })) ||
       (await GroupMemberships.findOneAsync({ groupId: doc._id })) ||

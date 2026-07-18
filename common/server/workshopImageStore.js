@@ -2,7 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { createImageStore } from "./imageStore";
 
 /**
- * Workshop (verkstad) image storage, configured via
+ * Workshop (verkstad) and group (grupp) image storage, configured via
  * `Meteor.settings.private.workshopImages`:
  *
  *   { "localPath": "/srv/umsme/workshop-images" }
