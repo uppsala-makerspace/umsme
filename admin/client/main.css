@@ -100,14 +100,34 @@ body {
   background-color: #900;
   text-decoration: none;
 }
-#menu li.menu-heading {
+#menu .menu-heading {
   padding: 12px 20px 4px;
   color: #ccc;
   font-size: 0.85em;
   font-weight: bold;
   text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
 }
-#menu li.menu-sub a {
+#menu .menu-heading:hover {
+  background-color: #900;
+}
+#menu .menu-heading::after {
+  content: "\25be"; /* ▾ */
+  float: right;
+}
+#menu .menu-section.menu-collapsed .menu-heading::after {
+  content: "\25b8"; /* ▸ */
+}
+#menu .menu-items {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+#menu .menu-section.menu-collapsed .menu-items {
+  display: none;
+}
+#menu .menu-items a {
   padding-left: 32px;
 }
 

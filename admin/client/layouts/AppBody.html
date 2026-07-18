@@ -6,37 +6,61 @@
     <nav id="sidebar">
         <ul id="menu">
             <li><a href="/">Home</a></li>
-            <li class="menu-heading">Members</li>
-            <li class="menu-sub"><a href="/members">All</a></li>
-            <li class="menu-sub"><a href="/history">History</a></li>
-            <li class="menu-sub"><a href="/lock">Lock</a></li>
-            <li class="menu-sub"><a href="/pending">Pending</a></li>
-            <li class="menu-sub"><a href="/reminders">Reminders</a></li>
-            <li class="menu-sub"><a href="/excluded">Excluded</a></li>
-            <li class="menu-heading">Operation</li>
-            <li class="menu-sub"><a href="/workshops">Workshops</a></li>
-            <li class="menu-sub"><a href="/groups">Groups</a></li>
-            <li class="menu-sub"><a href="/spaces">Spaces</a></li>
-            <li class="menu-sub"><a href="/certificates">Certificates</a></li>
-            <li class="menu-sub"><a href="/liability">Liability</a></li>
-            <li class="menu-sub"><a href="/storage">Storage</a></li>
-            <li><a href="/payments">Payments</a></li>
-            <li class="menu-heading">Expenses</li>
-            <li class="menu-sub"><a href="/expenses">All</a></li>
-            <li class="menu-sub"><a href="/expenses/confirm">Confirm</a></li>
-            <li class="menu-sub"><a href="/expenses/reimburse">Reimburse</a></li>
-            <li class="menu-sub"><a href="/expenses/accounts">Expense accounts</a></li>
-            <li class="menu-heading">Accounting</li>
-            <li class="menu-sub"><a href="/accounting/bankexport">Bank export</a></li>
-            <li class="menu-heading">Messages</li>
-            <li class="menu-sub"><a href="/mail">Mail</a></li>
-            <li class="menu-sub"><a href="/templates">Templates</a></li>
-            <li class="menu-sub"><a href="/announcements">Announcements</a></li>
-            <li class="menu-heading">Statistics</li>
-            <li class="menu-sub"><a href="/stats">Memberships</a></li>
-            <li class="menu-sub"><a href="/doorunlocks">Door unlocks</a></li>
-            <li><a href="/users">Users</a></li>
-            <li><a href="/admin">Admin</a></li>
+            <li class="menu-section" data-section="members">
+                <div class="menu-heading">Members</div>
+                <ul class="menu-items">
+                    <li><a href="/members">All</a></li>
+                    <li><a href="/history">History</a></li>
+                    <li><a href="/lock">Lock</a></li>
+                    <li><a href="/pending">Pending</a></li>
+                    <li><a href="/reminders">Reminders</a></li>
+                    <li><a href="/excluded">Excluded</a></li>
+                </ul>
+            </li>
+            <li class="menu-section" data-section="operation">
+                <div class="menu-heading">Operation</div>
+                <ul class="menu-items">
+                    <li><a href="/workshops">Workshops</a></li>
+                    <li><a href="/groups">Groups</a></li>
+                    <li><a href="/spaces">Spaces</a></li>
+                    <li><a href="/certificates">Certificates</a></li>
+                    <li><a href="/liability">Liability</a></li>
+                    <li><a href="/storage">Storage</a></li>
+                </ul>
+            </li>
+            <li class="menu-section" data-section="economy">
+                <div class="menu-heading">Economy</div>
+                <ul class="menu-items">
+                    <li><a href="/payments">Payments</a></li>
+                    <li><a href="/expenses">Expenses</a></li>
+                    <li><a href="/expenses/confirm">Confirm expenses</a></li>
+                    <li><a href="/expenses/reimburse">Reimburse expenses</a></li>
+                    <li><a href="/expenses/accounts">Expense accounts</a></li>
+                    <li><a href="/accounting/bankexport">Bank export</a></li>
+                </ul>
+            </li>
+            <li class="menu-section" data-section="messages">
+                <div class="menu-heading">Messages</div>
+                <ul class="menu-items">
+                    <li><a href="/mail">Mail</a></li>
+                    <li><a href="/templates">Templates</a></li>
+                    <li><a href="/announcements">Announcements</a></li>
+                </ul>
+            </li>
+            <li class="menu-section" data-section="statistics">
+                <div class="menu-heading">Statistics</div>
+                <ul class="menu-items">
+                    <li><a href="/stats">Memberships</a></li>
+                    <li><a href="/doorunlocks">Door unlocks</a></li>
+                </ul>
+            </li>
+            <li class="menu-section" data-section="admin">
+                <div class="menu-heading">Admin</div>
+                <ul class="menu-items">
+                    <li><a href="/users">Users</a></li>
+                    <li><a href="/admin">Batch operations</a></li>
+                </ul>
+            </li>
         </ul>
     </nav>
     {{#if currentUser}}
