@@ -4,7 +4,10 @@ import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Spaces } from "/imports/common/collections/spaces";
-import { workshopImageUrlFor } from "/imports/common/server/workshopImage";
+import {
+  workshopImageUrlFor,
+  spaceIconUrlFor,
+} from "/imports/common/server/workshopImage";
 import { findMemberForUser } from "./utils";
 
 const requireMember = async () => {
@@ -95,21 +98,30 @@ Meteor.methods({
       await Certificates.find({ workshopId }, { sort: { "name.sv": 1 } }).fetchAsync()
     ).map((c) => ({ _id: c._id, name: c.name, mandatory: c.mandatory }));
 
-    // Data for the mini map: the primary space's floor with the map keys of
-    // every linked space on that floor (secondary spaces on another floor are
-    // ignored — the mini map shows a single floor).
+    // Data for the mini map and the space-icon cards: every linked space with
+    // its map key and icon, primary first, in the stored secondary order.
+    // `onFloor` tells the mini map which ones it can draw — it only shows the
+    // primary space's floor. The client assigns each space its color, shared
+    // between the icon card and the map fill.
     let mapView = null;
     if (workshop.primarySpaceId) {
       const primary = await Spaces.findOneAsync(workshop.primarySpaceId);
       if (primary) {
-        const secondaries = await Spaces.find({
+        const secondaryDocs = await Spaces.find({
           _id: { $in: workshop.secondarySpaceIds || [] },
-          floor: primary.floor,
         }).fetchAsync();
+        const byId = new Map(secondaryDocs.map((s) => [s._id, s]));
+        const secondaries = (workshop.secondarySpaceIds || [])
+          .map((id) => byId.get(id))
+          .filter(Boolean);
         mapView = {
           floor: primary.floor,
-          spaceIds: [primary.spaceId, ...secondaries.map((s) => s.spaceId)],
           primarySpaceId: primary.spaceId,
+          spaces: [primary, ...secondaries].map((s) => ({
+            spaceId: s.spaceId,
+            onFloor: s.floor === primary.floor,
+            iconUrl: spaceIconUrlFor(s),
+          })),
         };
       }
     }

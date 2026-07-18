@@ -3,7 +3,14 @@ import { useTranslation } from "react-i18next";
 import RoomPopup from "./RoomPopup";
 import "./style.css";
 
-const Map = ({ slackTeam, roomsConfig, slackChannels, highlightedSpaceId, onSpaceSelected }) => {
+const Map = ({
+  slackTeam,
+  roomsConfig,
+  slackChannels,
+  highlightedSpaceId,
+  highlightColor = "#5fc86f",
+  onSpaceSelected,
+}) => {
   const { t } = useTranslation();
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [activeFloor, setActiveFloor] = useState(2); // Floor 2 on top by default
@@ -24,6 +31,10 @@ const Map = ({ slackTeam, roomsConfig, slackChannels, highlightedSpaceId, onSpac
   useEffect(() => {
     highlightedSpaceIdRef.current = highlightedSpaceId;
   }, [highlightedSpaceId]);
+  const highlightColorRef = useRef(highlightColor);
+  useEffect(() => {
+    highlightColorRef.current = highlightColor;
+  }, [highlightColor]);
 
   // Deep link (?space=<spaceId>): once the rooms config has loaded, switch to
   // the space's floor. The space itself is highlighted on the floor SVG (see
@@ -125,10 +136,11 @@ const Map = ({ slackTeam, roomsConfig, slackChannels, highlightedSpaceId, onSpac
   };
 
   // Highlight the space in ?space=<spaceId> on its floor SVG by pulsing the
-  // room's background fill between its own color and the brand green.
-  // (Keyframes with only a 50% step animate from the element's base fill and
-  // back.) Clears any previous highlight so the pulse follows the URL when
-  // another room is clicked.
+  // room's background fill between its own color and the highlight color
+  // (green by default; ?color=<name> lets the workshop page keep its space
+  // colors when linking here). Keyframes with only a 50% step animate from
+  // the element's base fill and back. Clears any previous highlight so the
+  // pulse follows the URL when another room is clicked.
   const applyHighlightForFloor = (svgDoc, floorKey) => {
     if (!svgDoc || !roomsConfig) return;
     const spaceId = highlightedSpaceIdRef.current;
@@ -140,19 +152,21 @@ const Map = ({ slackTeam, roomsConfig, slackChannels, highlightedSpaceId, onSpac
     });
     if (!spaceId || !(roomsConfig[floorKey] || {})[spaceId]) return;
     const floorEl = svgDoc.getElementById(`${spaceId}-floor`);
-    if (!floorEl || floorEl.dataset.spaceHighlighted) return;
-    floorEl.dataset.spaceHighlighted = "true";
-    if (!svgDoc.getElementById("space-highlight-style")) {
-      const style = svgDoc.createElementNS("http://www.w3.org/2000/svg", "style");
+    if (!floorEl) return;
+    let style = svgDoc.getElementById("space-highlight-style");
+    if (!style) {
+      style = svgDoc.createElementNS("http://www.w3.org/2000/svg", "style");
       style.id = "space-highlight-style";
-      style.textContent =
-        "@keyframes spaceHighlightPulse { 50% { fill: #5fc86f; } }";
       svgDoc.documentElement.appendChild(style);
     }
-    floorEl.style.animation = "spaceHighlightPulse 1.6s ease-in-out infinite";
+    style.textContent = `@keyframes spaceHighlightPulse { 50% { fill: ${highlightColorRef.current}; } }`;
+    if (!floorEl.dataset.spaceHighlighted) {
+      floorEl.dataset.spaceHighlighted = "true";
+      floorEl.style.animation = "spaceHighlightPulse 1.6s ease-in-out infinite";
+    }
   };
 
-  // Move the highlight when the URL parameter changes.
+  // Move the highlight when the URL parameters change.
   useEffect(() => {
     if (floor1Ref.current?.contentDocument) {
       applyHighlightForFloor(floor1Ref.current.contentDocument, "floor1");
@@ -160,7 +174,7 @@ const Map = ({ slackTeam, roomsConfig, slackChannels, highlightedSpaceId, onSpac
     if (floor2Ref.current?.contentDocument) {
       applyHighlightForFloor(floor2Ref.current.contentDocument, "floor2");
     }
-  }, [highlightedSpaceId, roomsConfig]);
+  }, [highlightedSpaceId, highlightColor, roomsConfig]);
 
   // Handle SVG load for floor 1
   const handleFloor1Load = () => {

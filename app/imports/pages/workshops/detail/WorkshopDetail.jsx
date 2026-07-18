@@ -15,6 +15,11 @@ import InfoCard from "../../../components/InfoCard";
 import GroupTypeTag from "../../../components/GroupTypeTag";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
+import {
+  SPACE_COLORS,
+  spaceColorName,
+  spaceMapUrl,
+} from "/imports/utils/spaceColors";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
 import WorkshopMiniMap from "../components/WorkshopMiniMap";
 
@@ -61,6 +66,66 @@ const GroupRow = ({ group, highlighted }) => {
   );
 };
 
+// A colored card with the space's icon on top, echoing how the workshop's
+// spaces look on the mini map. Links to the full map with the space selected
+// and pulsing in the same color.
+const SpaceIcon = ({ spaceId, iconUrl, color, colorName, className }) => (
+  <Link
+    to={spaceMapUrl(spaceId, colorName)}
+    className={`flex items-center justify-center rounded-lg no-underline hover:opacity-80 ${className}`}
+    style={{ backgroundColor: color }}
+  >
+    <img src={iconUrl} alt="" className="w-3/4 h-3/4 object-contain" />
+  </Link>
+);
+
+// The workshop's space icons, primary first. One or two icons sit side by
+// side at full size; with more, the primary goes on top and the secondaries
+// share a row below at up to half the primary's size, shrinking further if
+// needed to stay on one row.
+const SpaceIcons = ({ spaces }) => {
+  const [primary, ...secondaries] = spaces;
+  if (spaces.length <= 2) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-2">
+        {spaces.map((space) => (
+          <SpaceIcon
+            key={space.spaceId}
+            spaceId={space.spaceId}
+            iconUrl={space.iconUrl}
+            color={space.color}
+            colorName={space.colorName}
+            className="w-28 h-28"
+          />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col items-center gap-2 py-2">
+      <SpaceIcon
+        spaceId={primary.spaceId}
+        iconUrl={primary.iconUrl}
+        color={primary.color}
+        colorName={primary.colorName}
+        className="w-28 h-28"
+      />
+      <div className="flex justify-center gap-2 w-full">
+        {secondaries.map((space) => (
+          <SpaceIcon
+            key={space.spaceId}
+            spaceId={space.spaceId}
+            iconUrl={space.iconUrl}
+            color={space.color}
+            colorName={space.colorName}
+            className="w-14 h-14 min-w-0"
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
@@ -92,6 +157,15 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
   const slackUrl = workshop.slackChannel
     ? getSlackChannelUrl(workshop.slackChannel, slackTeam, slackChannelIds)
     : undefined;
+  // Primary space first (green), secondaries cycle through the palette; the
+  // same color follows a space onto its icon card, the mini map and — via
+  // the color name in the map URL — the full map's highlight pulse.
+  const coloredSpaces = (mapView?.spaces || []).map((space, index) => ({
+    ...space,
+    colorName: spaceColorName(index),
+    color: SPACE_COLORS[spaceColorName(index)],
+  }));
+  const spaceIcons = coloredSpaces.filter((space) => space.iconUrl);
   return (
     <MainContent>
 
@@ -118,6 +192,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
           spaces highlighted on the right (plain map card without spaces). */}
       <section className="mb-6 grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-3">
+          {spaceIcons.length > 0 && <SpaceIcons spaces={spaceIcons} />}
           {workshop.slackChannel && (
             <InfoCard
               href={slackUrl}
@@ -134,7 +209,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
         {mapView ? (
           <WorkshopMiniMap
             floor={mapView.floor}
-            spaceIds={mapView.spaceIds}
+            spaces={coloredSpaces.filter((space) => space.onFloor)}
             primarySpaceId={mapView.primarySpaceId}
           />
         ) : (

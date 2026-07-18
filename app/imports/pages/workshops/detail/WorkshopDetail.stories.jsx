@@ -33,8 +33,19 @@ const sampleData = {
   ],
   mapView: {
     floor: "floor1",
-    spaceIds: ["woodworkshop", "CNCworkshop"],
     primarySpaceId: "woodworkshop",
+    spaces: [
+      {
+        spaceId: "woodworkshop",
+        onFloor: true,
+        iconUrl: "https://placehold.co/96x96?text=primary",
+      },
+      {
+        spaceId: "CNCworkshop",
+        onFloor: true,
+        iconUrl: "https://placehold.co/96x96?text=secondary",
+      },
+    ],
   },
 };
 
@@ -47,6 +58,47 @@ export const Default = {
   args: {
     loading: false,
     data: sampleData,
+    slackTeam: "T123",
+    slackChannelIds: { "träverkstaden": "C123" },
+  },
+};
+
+export const ManySpaceIcons = {
+  args: {
+    loading: false,
+    data: {
+      ...sampleData,
+      mapView: {
+        ...sampleData.mapView,
+        spaces: [
+          {
+            spaceId: "woodworkshop",
+            onFloor: true,
+            iconUrl: "https://placehold.co/96x96?text=primary",
+          },
+          {
+            spaceId: "CNCworkshop",
+            onFloor: true,
+            iconUrl: "https://placehold.co/96x96?text=sec1",
+          },
+          {
+            spaceId: "3dworkshop",
+            onFloor: true,
+            iconUrl: "https://placehold.co/96x96?text=sec2",
+          },
+          {
+            spaceId: "metalworkshop",
+            onFloor: true,
+            iconUrl: "https://placehold.co/96x96?text=sec3",
+          },
+          {
+            spaceId: "textileroom",
+            onFloor: false,
+            iconUrl: "https://placehold.co/96x96?text=sec4",
+          },
+        ],
+      },
+    },
     slackTeam: "T123",
     slackChannelIds: { "träverkstaden": "C123" },
   },

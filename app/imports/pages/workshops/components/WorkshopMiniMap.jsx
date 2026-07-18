@@ -1,22 +1,32 @@
 import React, { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import {
+  DEFAULT_SPACE_COLOR_NAME,
+  spaceMapUrl,
+} from "/imports/utils/spaceColors";
 
 const FLOOR_SUFFIX = "-floor";
 
 /**
  * Small map preview on the workshop page: the floor plan with the workshop's
- * spaces filled green and every other space toned down in gray. Clicking a
- * highlighted space opens the full map with that space selected; clicking
- * anywhere else falls back to the primary space. Only one floor is shown
- * (the primary space's).
+ * spaces filled in their assigned colors (primary green, secondaries in the
+ * distinguishing palette shared with the space-icon cards) and every other
+ * space toned down in gray. Clicking a highlighted space opens the full map
+ * with that space selected; clicking anywhere else falls back to the primary
+ * space. Only one floor is shown (the primary space's).
  */
-const WorkshopMiniMap = ({ floor, spaceIds = [], primarySpaceId }) => {
+const WorkshopMiniMap = ({ floor, spaces = [], primarySpaceId }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const objectRef = useRef(null);
 
-  const mapUrl = (spaceId) => `/map?space=${encodeURIComponent(spaceId)}`;
+  const spaceBySpaceId = new Map(spaces.map((s) => [s.spaceId, s]));
+  const mapUrl = (spaceId) =>
+    spaceMapUrl(
+      spaceId,
+      spaceBySpaceId.get(spaceId)?.colorName || DEFAULT_SPACE_COLOR_NAME
+    );
 
   const handleLoad = () => {
     const svgDoc = objectRef.current?.contentDocument;
@@ -28,7 +38,7 @@ const WorkshopMiniMap = ({ floor, spaceIds = [], primarySpaceId }) => {
     });
     svgDoc.querySelectorAll(`[id$="${FLOOR_SUFFIX}"]`).forEach((floorEl) => {
       const spaceId = floorEl.id.slice(0, -FLOOR_SUFFIX.length);
-      floorEl.style.fill = spaceIds.includes(spaceId) ? "#5fc86f" : "#e5e7eb";
+      floorEl.style.fill = spaceBySpaceId.get(spaceId)?.color || "#e5e7eb";
     });
     // Clicks land inside the <object>'s own document and never reach the
     // surrounding Link, so navigation is wired up here instead.
@@ -36,7 +46,7 @@ const WorkshopMiniMap = ({ floor, spaceIds = [], primarySpaceId }) => {
     svgDoc.addEventListener("click", (event) => {
       const floorEl = event.target.closest?.(`[id$="${FLOOR_SUFFIX}"]`);
       const spaceId = floorEl?.id.slice(0, -FLOOR_SUFFIX.length);
-      navigate(mapUrl(spaceIds.includes(spaceId) ? spaceId : primarySpaceId));
+      navigate(mapUrl(spaceBySpaceId.has(spaceId) ? spaceId : primarySpaceId));
     });
   };
 

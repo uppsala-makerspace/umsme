@@ -3,6 +3,10 @@ import { Meteor } from "meteor/meteor";
 import { Navigate, useSearchParams } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Map from "./Map";
+import {
+  SPACE_COLORS,
+  DEFAULT_SPACE_COLOR_NAME,
+} from "/imports/utils/spaceColors";
 
 export default () => {
   const slackTeam = Meteor.settings?.public?.slack?.team;
@@ -31,6 +35,13 @@ export default () => {
         roomsConfig={roomsConfig}
         slackChannels={slackChannels}
         highlightedSpaceId={searchParams.get("space")}
+        highlightColor={
+          // ?color=<name> is resolved against the whitelist; anything else
+          // (including no parameter) falls back to green. Map clicks write
+          // only ?space=, so the color resets to green from then on.
+          SPACE_COLORS[searchParams.get("color")] ||
+          SPACE_COLORS[DEFAULT_SPACE_COLOR_NAME]
+        }
         onSpaceSelected={(spaceId) => setSearchParams({ space: spaceId }, { replace: true })}
       />
     </Layout>
