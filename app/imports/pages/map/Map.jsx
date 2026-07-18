@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import RoomPopup from "./RoomPopup";
 import "./style.css";
 
-const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
+const Map = ({ slackTeam, roomsConfig, slackChannels, highlightedSpaceId, onSpaceSelected }) => {
   const { t } = useTranslation();
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [activeFloor, setActiveFloor] = useState(2); // Floor 2 on top by default
@@ -11,10 +11,35 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
   const floor1Ref = useRef(null);
   const floor2Ref = useRef(null);
 
-  // Keep ref in sync with state
+  // Keep refs in sync with state/props (SVG click handlers are attached once
+  // and must not close over stale values).
   useEffect(() => {
     activeFloorRef.current = activeFloor;
   }, [activeFloor]);
+  const onSpaceSelectedRef = useRef(onSpaceSelected);
+  useEffect(() => {
+    onSpaceSelectedRef.current = onSpaceSelected;
+  }, [onSpaceSelected]);
+  const highlightedSpaceIdRef = useRef(highlightedSpaceId);
+  useEffect(() => {
+    highlightedSpaceIdRef.current = highlightedSpaceId;
+  }, [highlightedSpaceId]);
+
+  // Deep link (?space=<spaceId>): once the rooms config has loaded, switch to
+  // the space's floor. The space itself is highlighted on the floor SVG (see
+  // applyHighlightForFloor) rather than opening its popup. Only the initial
+  // URL switches floors — later clicks update the URL themselves.
+  const initialAppliedRef = useRef(false);
+  useEffect(() => {
+    if (!roomsConfig || !highlightedSpaceId || initialAppliedRef.current) return;
+    initialAppliedRef.current = true;
+    for (const [floorKey, rooms] of Object.entries(roomsConfig)) {
+      if (rooms[highlightedSpaceId]) {
+        setActiveFloor(floorKey === "floor1" ? 1 : 2);
+        return;
+      }
+    }
+  }, [roomsConfig, highlightedSpaceId]);
 
   // Place an icon overlay centered on a marker circle in the floor SVG.
   // Uses <image> with an external SVG href so the icon stays vector but is
@@ -76,6 +101,8 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
           if (activeFloorRef.current === floorNumber) {
             e.stopPropagation(); // Prevent floor switching when clicking a room
             setSelectedRoom({ ...rooms[roomId], id: roomId });
+            // Reflect the room in the URL (?space=...) and move the highlight.
+            onSpaceSelectedRef.current?.(roomId);
           }
           // Otherwise let the click propagate to switch floors
         };
@@ -97,6 +124,44 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
     });
   };
 
+  // Highlight the space in ?space=<spaceId> on its floor SVG by pulsing the
+  // room's background fill between its own color and the brand green.
+  // (Keyframes with only a 50% step animate from the element's base fill and
+  // back.) Clears any previous highlight so the pulse follows the URL when
+  // another room is clicked.
+  const applyHighlightForFloor = (svgDoc, floorKey) => {
+    if (!svgDoc || !roomsConfig) return;
+    const spaceId = highlightedSpaceIdRef.current;
+    svgDoc.querySelectorAll("[data-space-highlighted]").forEach((el) => {
+      if (!spaceId || el.id !== `${spaceId}-floor`) {
+        el.style.animation = "";
+        delete el.dataset.spaceHighlighted;
+      }
+    });
+    if (!spaceId || !(roomsConfig[floorKey] || {})[spaceId]) return;
+    const floorEl = svgDoc.getElementById(`${spaceId}-floor`);
+    if (!floorEl || floorEl.dataset.spaceHighlighted) return;
+    floorEl.dataset.spaceHighlighted = "true";
+    if (!svgDoc.getElementById("space-highlight-style")) {
+      const style = svgDoc.createElementNS("http://www.w3.org/2000/svg", "style");
+      style.id = "space-highlight-style";
+      style.textContent =
+        "@keyframes spaceHighlightPulse { 50% { fill: #5fc86f; } }";
+      svgDoc.documentElement.appendChild(style);
+    }
+    floorEl.style.animation = "spaceHighlightPulse 1.6s ease-in-out infinite";
+  };
+
+  // Move the highlight when the URL parameter changes.
+  useEffect(() => {
+    if (floor1Ref.current?.contentDocument) {
+      applyHighlightForFloor(floor1Ref.current.contentDocument, "floor1");
+    }
+    if (floor2Ref.current?.contentDocument) {
+      applyHighlightForFloor(floor2Ref.current.contentDocument, "floor2");
+    }
+  }, [highlightedSpaceId, roomsConfig]);
+
   // Handle SVG load for floor 1
   const handleFloor1Load = () => {
     const obj = floor1Ref.current;
@@ -104,6 +169,7 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
       const svgDoc = obj.contentDocument;
       setupRoomClickHandlers(svgDoc, "floor1", 1);
       applyIconsForFloor(svgDoc, "floor1");
+      applyHighlightForFloor(svgDoc, "floor1");
     }
   };
 
@@ -114,6 +180,7 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
       const svgDoc = obj.contentDocument;
       setupRoomClickHandlers(svgDoc, "floor2", 2);
       applyIconsForFloor(svgDoc, "floor2");
+      applyHighlightForFloor(svgDoc, "floor2");
     }
   };
 

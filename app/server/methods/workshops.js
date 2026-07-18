@@ -3,6 +3,7 @@ import { Workshops } from "/imports/common/collections/workshops";
 import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Certificates } from "/imports/common/collections/certificates";
+import { Spaces } from "/imports/common/collections/spaces";
 import { workshopImageUrlFor } from "/imports/common/server/workshopImage";
 import { findMemberForUser } from "./utils";
 
@@ -94,12 +95,21 @@ Meteor.methods({
       await Certificates.find({ workshopId }, { sort: { "name.sv": 1 } }).fetchAsync()
     ).map((c) => ({ _id: c._id, name: c.name, mandatory: c.mandatory }));
 
+    // The primary map space, for the map card's deep link.
+    const spaceDoc = workshop.primarySpaceId
+      ? await Spaces.findOneAsync(workshop.primarySpaceId)
+      : null;
+    const primarySpace = spaceDoc
+      ? { spaceId: spaceDoc.spaceId, name: spaceDoc.name }
+      : null;
+
     return {
       workshop: publicWorkshopFields(workshop),
       group,
       responsibilityGroups,
       relatedGroups,
       certificates,
+      primarySpace,
     };
   },
 });

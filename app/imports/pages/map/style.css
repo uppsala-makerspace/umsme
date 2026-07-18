@@ -125,11 +125,16 @@
   width: 100%;
   position: relative;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  /* Workshop/group preview cards can make the content tall */
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 .room-popup-close {
   position: absolute;
-  top: 0.75rem;
+  /* Vertically aligned with the popup title (which starts at the 1.5rem
+     content padding). */
+  top: 1.35rem;
   right: 0.75rem;
   background: none;
   border: none;

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Meteor } from "meteor/meteor";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Map from "./Map";
 
 export default () => {
   const slackTeam = Meteor.settings?.public?.slack?.team;
+  const [searchParams, setSearchParams] = useSearchParams();
   const [roomsConfig, setRoomsConfig] = useState(null);
   const [slackChannels, setSlackChannels] = useState(null);
 
@@ -29,6 +30,8 @@ export default () => {
         slackTeam={slackTeam}
         roomsConfig={roomsConfig}
         slackChannels={slackChannels}
+        highlightedSpaceId={searchParams.get("space")}
+        onSpaceSelected={(spaceId) => setSearchParams({ space: spaceId }, { replace: true })}
       />
     </Layout>
   );

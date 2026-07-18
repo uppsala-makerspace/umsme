@@ -6,6 +6,7 @@ import {
   HashtagIcon,
   MagnifyingGlassIcon,
   BookOpenIcon,
+  MapIcon,
 } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
@@ -79,10 +80,20 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     );
   }
 
-  const { workshop, group, responsibilityGroups = [], relatedGroups = [], certificates } = data;
+  const {
+    workshop,
+    group,
+    responsibilityGroups = [],
+    relatedGroups = [],
+    certificates,
+    primarySpace,
+  } = data;
   const slackUrl = workshop.slackChannel
     ? getSlackChannelUrl(workshop.slackChannel, slackTeam, slackChannelIds)
     : undefined;
+  const mapTo = primarySpace
+    ? `/map?space=${encodeURIComponent(primarySpace.spaceId)}`
+    : "/map";
 
   return (
     <MainContent>
@@ -119,6 +130,12 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
         {workshop.guidesUrl && (
           <InfoCard href={workshop.guidesUrl} Icon={BookOpenIcon} title={t("tutorials")} />
         )}
+        <InfoCard
+          to={mapTo}
+          Icon={MapIcon}
+          title={t("navMap")}
+          subtitle={primarySpace ? localized(primarySpace.name, lang) : undefined}
+        />
       </section>
 
       {certificates.length > 0 && (
