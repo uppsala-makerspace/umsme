@@ -21,6 +21,7 @@ import './ui/certificates';
 import './ui/expenses';
 import './ui/groups';
 import './ui/workshops';
+import './ui/spaces';
 import './ui/accounting';
 import './ui/announcement';
 import './ui/pending';

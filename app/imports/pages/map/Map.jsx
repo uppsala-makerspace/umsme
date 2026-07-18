@@ -85,14 +85,15 @@ const Map = ({ slackTeam, roomsConfig, slackChannels }) => {
     });
   };
 
-  // Apply icon placements for a specific floor — reads `icon` (and optional
-  // `iconSize`) from each room entry in roomsConfig.
+  // Apply icon placements for a specific floor — reads `iconUrl` (and
+  // optional `iconSize`) from each room entry in roomsConfig. The URL points
+  // at the space icon endpoint (/api/spaces/:id/icon).
   const applyIconsForFloor = (svgDoc, floorKey) => {
     if (!svgDoc || !roomsConfig) return;
     const rooms = roomsConfig[floorKey] || {};
     Object.entries(rooms).forEach(([roomId, room]) => {
-      if (!room.icon) return;
-      placeIcon(svgDoc, `${roomId}-marker`, `/mapicons/${room.icon}`, room.iconSize);
+      if (!room.iconUrl) return;
+      placeIcon(svgDoc, `${roomId}-marker`, room.iconUrl, room.iconSize);
     });
   };
 

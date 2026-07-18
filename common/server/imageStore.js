@@ -34,6 +34,7 @@ const extFor = (mimeType) => {
   if (mimeType === "image/png") return "png";
   if (mimeType === "image/webp") return "webp";
   if (mimeType === "image/heic") return "heic";
+  if (mimeType === "image/svg+xml") return "svg";
   return "jpg";
 };
 

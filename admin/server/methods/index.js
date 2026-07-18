@@ -15,3 +15,4 @@ import './expenses';
 import './accounting';
 import './groups';
 import './workshops';
+import './spaces';

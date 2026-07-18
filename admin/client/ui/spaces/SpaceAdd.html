@@ -1,0 +1,19 @@
+<template name="SpaceAdd">
+    <a href="/spaces" style="float: right">Back to spaces</a>
+    <h1>Add space</h1>
+    <p class="text-muted">The space id must match the map SVG elements (<code>&lt;id&gt;-marker</code> / <code>&lt;id&gt;-floor</code>). The map icon is uploaded from the space page after creation.</p>
+    {{#autoForm collection=Spaces id="insertSpaceForm" type="normal" validation="keyup"}}
+        {{> afQuickField name="spaceId"}}
+        {{> afQuickField name="floor"}}
+        {{> afQuickField name="name.sv"}}
+        {{> afQuickField name="name.en"}}
+        {{> afQuickField name="description.sv"}}
+        {{> afQuickField name="description.en"}}
+        <div class="form-group">
+            <label class="control-label">Slack channels (comma separated)</label>
+            <input type="text" class="form-control slackChannelsInput" placeholder="#träverkstaden, #cnc">
+        </div>
+        {{> afQuickField name="iconSize"}}
+        <button type="submit" class="btn btn-primary">Add space</button>
+    {{/autoForm}}
+</template>

@@ -1,0 +1,59 @@
+<template name="SpaceView">
+    <a href="/spaces" style="float: right">Back to spaces</a>
+    <h1>Space: {{space.name.sv}}{{#if space.name.en}} / {{space.name.en}}{{/if}}</h1>
+
+    {{#if isDeletable}}
+    <p><button class="btn btn-danger deleteSpace">Delete space</button></p>
+    {{else}}
+    <div class="alert alert-info">
+        This space is linked from a workshop or group, or has an icon, and can not be deleted. Remove links and the icon first.
+    </div>
+    {{/if}}
+
+    <h2>Icon</h2>
+    <p class="text-muted">Shown on the map, centered on the space's marker. SVG or PNG.</p>
+    {{#if space.iconFileId}}
+        <p><img src="{{iconUrl}}" alt="{{space.name.sv}}" style="max-width: 120px; max-height: 120px;"></p>
+        <p><button class="btn btn-default removeIcon">Remove icon</button></p>
+    {{else}}
+        <p><em>No icon uploaded.</em></p>
+    {{/if}}
+    <form class="form-inline iconUploadForm">
+        <input type="file" class="iconFileInput" accept="image/svg+xml,image/png">
+        <button type="button" class="btn btn-primary uploadIcon" {{uploadingAttr}}>
+            {{#if uploading}}Uploading…{{else}}Upload icon{{/if}}
+        </button>
+    </form>
+
+    <h2>Edit</h2>
+    {{#autoForm collection=Spaces doc=space id="editSpaceForm" type="update"}}
+        {{> afQuickField name="spaceId"}}
+        {{> afQuickField name="floor"}}
+        {{> afQuickField name="name.sv"}}
+        {{> afQuickField name="name.en"}}
+        {{> afQuickField name="description.sv"}}
+        {{> afQuickField name="description.en"}}
+        <div class="form-group">
+            <label class="control-label">Slack channels (comma separated)</label>
+            <input type="text" class="form-control slackChannelsInput" value="{{slackChannelsValue}}" placeholder="#träverkstaden, #cnc">
+        </div>
+        {{> afQuickField name="iconSize"}}
+        <button type="submit" class="btn btn-primary">Update</button>
+    {{/autoForm}}
+
+    <hr>
+
+    <h2>Linked from</h2>
+    {{#if hasLinks}}
+    <ul class="list-group">
+        {{#each linkedWorkshops}}
+        <li class="list-group-item"><a href="/workshop/{{_id}}">{{name.sv}}</a> <span class="text-muted">(workshop{{#if isPrimary}}, primary{{/if}})</span></li>
+        {{/each}}
+        {{#each linkedGroups}}
+        <li class="list-group-item"><a href="/group/{{_id}}">{{name.sv}}</a> <span class="text-muted">(group{{#if isPrimary}}, primary{{/if}})</span></li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No workshops or groups are linked to this space.</em></p>
+    {{/if}}
+</template>

@@ -1,0 +1,41 @@
+<template name="entitySpaces">
+    <h2>Spaces</h2>
+    <p class="text-muted">The primary space on the map, and any secondary spaces.</p>
+
+    <form class="form-inline">
+        <label>Primary:&nbsp;</label>
+        <select class="form-control primarySpaceSelect">
+            <option value="" {{noPrimarySelected}}>(No primary space)</option>
+            {{#each allSpaces}}
+            <option value="{{_id}}" {{primarySelected _id}}>{{name.sv}} ({{floor}})</option>
+            {{/each}}
+        </select>
+        <button type="button" class="btn btn-default savePrimarySpace">Save</button>
+        {{#if primarySpace}}
+            <a href="/space/{{primarySpace._id}}">Open {{primarySpace.name.sv}}</a>
+        {{/if}}
+    </form>
+
+    <h4>Secondary spaces</h4>
+    {{#if hasSecondarySpaces}}
+    <ul class="list-group">
+        {{#each secondarySpaces}}
+        <li class="list-group-item">
+            <a href="/space/{{_id}}">{{name.sv}}</a> <span class="text-muted">({{floor}})</span>
+            <a class="removeSecondarySpace pull-right text-danger" data-id="{{_id}}">Remove</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No secondary spaces.</em></p>
+    {{/if}}
+    <form class="form-inline">
+        <select class="form-control secondarySpaceSelect">
+            <option value="">(Select a space)</option>
+            {{#each addableSpaces}}
+            <option value="{{_id}}">{{name.sv}} ({{floor}})</option>
+            {{/each}}
+        </select>
+        <button type="button" class="btn btn-default addSecondarySpace">Add</button>
+    </form>
+</template>

@@ -8,6 +8,7 @@ import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
 import { groupCompleteness } from '/imports/common/lib/groupRules';
 import '/imports/tabular/members';
+import '../spaces/EntitySpaces';
 import './GroupView.html';
 
 const groupId = () => FlowRouter.getParam('_id');
@@ -68,6 +69,7 @@ Template.GroupView.onCreated(function () {
   Meteor.subscribe('workshops');
   Meteor.subscribe('expenseAccounts');
   Meteor.subscribe('members');
+  Meteor.subscribe('spaces');
   this.showResponsibleSelector = new ReactiveVar(false);
   this.showMemberSelector = new ReactiveVar(false);
   this.uploading = new ReactiveVar(false);
@@ -76,6 +78,9 @@ Template.GroupView.onCreated(function () {
 Template.GroupView.helpers({
   Groups() {
     return Groups;
+  },
+  groupIdValue() {
+    return groupId();
   },
   group() {
     return Groups.findOne(groupId());

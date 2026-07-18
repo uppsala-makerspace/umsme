@@ -6,6 +6,7 @@ import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Certificates } from '/imports/common/collections/certificates';
 import { workshopCompleteness } from '/imports/common/lib/groupRules';
+import '../spaces/EntitySpaces';
 import './WorkshopView.html';
 
 const workshopId = () => FlowRouter.getParam('_id');
@@ -24,12 +25,16 @@ Template.WorkshopView.onCreated(function () {
   Meteor.subscribe('groups');
   Meteor.subscribe('groupMemberships');
   Meteor.subscribe('certificates');
+  Meteor.subscribe('spaces');
   this.uploading = new ReactiveVar(false);
 });
 
 Template.WorkshopView.helpers({
   Workshops() {
     return Workshops;
+  },
+  workshopIdValue() {
+    return workshopId();
   },
   workshop() {
     return Workshops.findOne(workshopId());

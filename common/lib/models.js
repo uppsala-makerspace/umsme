@@ -1038,6 +1038,22 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // Map spaces (ytor) this group is responsible for or active in: one
+    // primary and any number of secondary. Picked in admin.
+    primarySpaceId: {
+      label: "Primary space",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
+    secondarySpaceIds: {
+      label: "Secondary spaces",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "secondarySpaceIds.$": { type: String, autoform: { omit: true } },
     // Meteor role kept in sync from this group's active membership (the group
     // is the source of truth; see common/server/linkedRoleSync.js). Never
     // 'admin', and not allowed together with an open join policy — enforced
@@ -1148,6 +1164,117 @@ export const models = {
       label: "Guides URL",
       type: String,
       max: 500,
+      optional: true,
+    },
+    // Map spaces (ytor) this workshop occupies: one primary and any number of
+    // secondary. Picked in admin, so omitted from AutoForm.
+    primarySpaceId: {
+      label: "Primary space",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
+    secondarySpaceIds: {
+      label: "Secondary spaces",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "secondarySpaceIds.$": { type: String, autoform: { omit: true } },
+    createdAt: {
+      label: "Created",
+      type: Date,
+      optional: true,
+      autoform: { omit: true },
+    },
+  },
+  // A space (yta) in the premises, shown on the app's map. Imported from
+  // rooms.json once and managed in admin thereafter. spaceId + floor tie the
+  // space to the map: the floor SVGs contain elements named
+  // `${spaceId}-marker` and `${spaceId}-floor`.
+  space: {
+    spaceId: {
+      label: "Space id (map key)",
+      type: String,
+      max: 100,
+    },
+    floor: {
+      label: "Floor",
+      type: String,
+      allowedValues: ["floor1", "floor2"],
+      autoform: {
+        type: "select",
+        options: [
+          { label: "Floor 1", value: "floor1" },
+          { label: "Floor 2", value: "floor2" },
+        ],
+      },
+    },
+    name: {
+      label: "Name",
+      type: Object,
+      blackbox: true,
+    },
+    "name.sv": {
+      label: "Name (Swedish)",
+      type: String,
+      max: 100,
+    },
+    "name.en": {
+      label: "Name (English)",
+      type: String,
+      max: 100,
+      optional: true,
+    },
+    description: {
+      label: "Description",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "description.sv": {
+      label: "Description (Swedish)",
+      type: String,
+      max: 2000,
+      optional: true,
+      autoform: { type: "textarea", rows: 5 },
+    },
+    "description.en": {
+      label: "Description (English)",
+      type: String,
+      max: 2000,
+      optional: true,
+      autoform: { type: "textarea", rows: 5 },
+    },
+    // Channel names with or without '#', as in rooms.json. Edited via a
+    // comma-separated field in admin, so omitted from AutoForm.
+    slackChannels: {
+      label: "Slack channels",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "slackChannels.$": { type: String, autoform: { omit: true } },
+    // Uploaded map icon (SVG/PNG), stored via common/server/mapIconStore.js,
+    // and its rendered size on the map.
+    iconFileId: {
+      label: "Icon file id",
+      type: String,
+      max: 200,
+      optional: true,
+      autoform: { omit: true },
+    },
+    iconMimeType: {
+      label: "Icon mime type",
+      type: String,
+      max: 100,
+      optional: true,
+      autoform: { omit: true },
+    },
+    iconSize: {
+      label: "Icon size",
+      type: Number,
       optional: true,
     },
     createdAt: {

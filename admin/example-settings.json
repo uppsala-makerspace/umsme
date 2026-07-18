@@ -61,6 +61,9 @@
     "workshopImages": {
       "localPath": "/srv/umsme/workshop-images"
     },
+    "mapIcons": {
+      "localPath": "/srv/umsme/map-icons"
+    },
     "receiptTokenSecret": "a-long-random-string",
     "managerEvents": {
       "channels": [

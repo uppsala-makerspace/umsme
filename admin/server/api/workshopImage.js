@@ -2,6 +2,7 @@ import { WebApp } from "meteor/webapp";
 import {
   makeWorkshopImageHandler,
   makeGroupImageHandler,
+  makeSpaceIconHandler,
 } from "/imports/common/server/workshopImage";
 
 // Serves workshop and group images (public, tokenless — see common/server/
@@ -9,3 +10,4 @@ import {
 // render them; the same URLs will later feed the public website.
 WebApp.handlers.use("/api/workshops", makeWorkshopImageHandler());
 WebApp.handlers.use("/api/groups", makeGroupImageHandler());
+WebApp.handlers.use("/api/spaces", makeSpaceIconHandler());

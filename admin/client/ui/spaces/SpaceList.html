@@ -1,0 +1,12 @@
+<template name="SpaceList">
+    <h1>Spaces</h1>
+    <p>
+        <a href="/spaces/add">Add space</a>
+        &nbsp;·&nbsp;
+        <a class="importSpaces" href="#">Import from rooms.json</a>
+        {{#if importResult}}
+            <span class="text-muted">— imported {{importResult.imported}}, skipped {{importResult.skipped}} already existing, {{importResult.icons}} icons uploaded</span>
+        {{/if}}
+    </p>
+    {{> tabular table=TabularTables.Spaces class="table table-hover table-striped table-bordered table-condensed spaceList"}}
+</template>

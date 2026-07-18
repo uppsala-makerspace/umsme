@@ -34,6 +34,9 @@
     "workshopImages": {
       "localPath": "/srv/umsme/workshop-images"
     },
+    "mapIcons": {
+      "localPath": "/srv/umsme/map-icons"
+    },
     "expenses": {
       "allowList": ["treasurer@example.com", "board-member@example.com"]
     },
@@ -51,7 +54,6 @@
     "paymentOptionsPath": "private/paymentOptions.json",
     "termsOfPurchaseMembershipEn": "private/termsOfPurchaseMembership.en.md",
     "termsOfPurchaseMembershipSv": "private/termsOfPurchaseMembership.sv.md",
-    "roomsPath": "private/rooms.json",
     "slackChannelsPath": "private/slack-channels.json",
     "slack": {
       "botToken": "xoxb-your-slack-bot-token"

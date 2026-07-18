@@ -15,5 +15,6 @@ import './expenses';
 import './expenseAccounts';
 import './groups';
 import './workshops';
+import './spaces';
 
 

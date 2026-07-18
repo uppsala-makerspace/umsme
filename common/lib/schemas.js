@@ -30,4 +30,5 @@ export const schemas = {
   group: new SimpleSchema(models.group),
   workshop: new SimpleSchema(models.workshop),
   groupMembership: new SimpleSchema(models.groupMembership),
+  space: new SimpleSchema(models.space),
 };
