@@ -95,13 +95,24 @@ Meteor.methods({
       await Certificates.find({ workshopId }, { sort: { "name.sv": 1 } }).fetchAsync()
     ).map((c) => ({ _id: c._id, name: c.name, mandatory: c.mandatory }));
 
-    // The primary map space, for the map card's deep link.
-    const spaceDoc = workshop.primarySpaceId
-      ? await Spaces.findOneAsync(workshop.primarySpaceId)
-      : null;
-    const primarySpace = spaceDoc
-      ? { spaceId: spaceDoc.spaceId, name: spaceDoc.name }
-      : null;
+    // Data for the mini map: the primary space's floor with the map keys of
+    // every linked space on that floor (secondary spaces on another floor are
+    // ignored — the mini map shows a single floor).
+    let mapView = null;
+    if (workshop.primarySpaceId) {
+      const primary = await Spaces.findOneAsync(workshop.primarySpaceId);
+      if (primary) {
+        const secondaries = await Spaces.find({
+          _id: { $in: workshop.secondarySpaceIds || [] },
+          floor: primary.floor,
+        }).fetchAsync();
+        mapView = {
+          floor: primary.floor,
+          spaceIds: [primary.spaceId, ...secondaries.map((s) => s.spaceId)],
+          primarySpaceId: primary.spaceId,
+        };
+      }
+    }
 
     return {
       workshop: publicWorkshopFields(workshop),
@@ -109,7 +120,7 @@ Meteor.methods({
       responsibilityGroups,
       relatedGroups,
       certificates,
-      primarySpace,
+      mapView,
     };
   },
 });

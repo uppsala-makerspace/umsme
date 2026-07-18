@@ -31,7 +31,11 @@ const sampleData = {
     { _id: "cert1", name: { sv: "Bandsåg", en: "Band saw" } },
     { _id: "cert2", name: { sv: "Planhyvel", en: "Planer" } },
   ],
-  primarySpace: { spaceId: "woodworkshop", name: { sv: "Träverkstad", en: "Wood Workshop" } },
+  mapView: {
+    floor: "floor1",
+    spaceIds: ["woodworkshop", "CNCworkshop"],
+    primarySpaceId: "woodworkshop",
+  },
 };
 
 export default {

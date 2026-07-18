@@ -16,6 +16,7 @@ import GroupTypeTag from "../../../components/GroupTypeTag";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
+import WorkshopMiniMap from "../components/WorkshopMiniMap";
 
 // One group row in the "get involved" / "related groups" lists, in the same
 // style as the groups list page. The responsible workshop group is rendered
@@ -86,15 +87,11 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     responsibilityGroups = [],
     relatedGroups = [],
     certificates,
-    primarySpace,
+    mapView,
   } = data;
   const slackUrl = workshop.slackChannel
     ? getSlackChannelUrl(workshop.slackChannel, slackTeam, slackChannelIds)
     : undefined;
-  const mapTo = primarySpace
-    ? `/map?space=${encodeURIComponent(primarySpace.spaceId)}`
-    : "/map";
-
   return (
     <MainContent>
 
@@ -117,25 +114,32 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
         </Markdown>
       )}
 
+      {/* Three stacked cards on the left, a mini map with the workshop's
+          spaces highlighted on the right (plain map card without spaces). */}
       <section className="mb-6 grid grid-cols-2 gap-3">
-        {workshop.slackChannel && (
-          <InfoCard
-            href={slackUrl}
-            Icon={HashtagIcon}
-            title={t("slackChannel")}
-            subtitle={`#${workshop.slackChannel}`}
+        <div className="flex flex-col gap-3">
+          {workshop.slackChannel && (
+            <InfoCard
+              href={slackUrl}
+              Icon={HashtagIcon}
+              title={t("slackChannel")}
+              subtitle={`#${workshop.slackChannel}`}
+            />
+          )}
+          <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />
+          {workshop.guidesUrl && (
+            <InfoCard href={workshop.guidesUrl} Icon={BookOpenIcon} title={t("tutorials")} />
+          )}
+        </div>
+        {mapView ? (
+          <WorkshopMiniMap
+            floor={mapView.floor}
+            spaceIds={mapView.spaceIds}
+            primarySpaceId={mapView.primarySpaceId}
           />
+        ) : (
+          <InfoCard to="/map" Icon={MapIcon} title={t("navMap")} />
         )}
-        <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />
-        {workshop.guidesUrl && (
-          <InfoCard href={workshop.guidesUrl} Icon={BookOpenIcon} title={t("tutorials")} />
-        )}
-        <InfoCard
-          to={mapTo}
-          Icon={MapIcon}
-          title={t("navMap")}
-          subtitle={primarySpace ? localized(primarySpace.name, lang) : undefined}
-        />
       </section>
 
       {certificates.length > 0 && (
