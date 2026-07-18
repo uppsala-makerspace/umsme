@@ -23,8 +23,12 @@ export default function Input({
     focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/20
   `.replace(/\s+/g, " ").trim();
 
+  // Default bottom margin, unless the caller sets their own mb-* class
+  // (Tailwind resolves conflicts by stylesheet order, not class order, so
+  // "mb-0" in className would otherwise lose against the default "mb-4").
+  const margin = /(^|\s)mb-/.test(className) ? "" : "mb-4";
   return (
-    <div className={`w-full mb-4 ${className}`.trim()}>
+    <div className={`w-full ${margin} ${className}`.replace(/\s+/g, " ").trim()}>
       {label && (
         <label htmlFor={id} className="block mb-1 font-bold">
           {label}

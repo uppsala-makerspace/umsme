@@ -3,6 +3,7 @@ import Groups from "./Groups";
 const sampleGroups = [
   {
     _id: "grp1",
+    description: { sv: "Vi tar hand om **träverkstaden**: underhåll av maskiner, påfyllning av material och utbildning. En ganska lång beskrivning som ska trunkeras med ellipsis i listan." },
     name: { sv: "Trägruppen", en: "Wood group" },
     type: "workshop",
     joinPolicy: "request-any",
@@ -13,6 +14,7 @@ const sampleGroups = [
   },
   {
     _id: "grp2",
+    description: { sv: "Ansvarar för keramikverkstaden med drejskivor och ugn." },
     name: { sv: "Keramikgruppen" },
     type: "workshop",
     joinPolicy: "request-responsible",
@@ -22,6 +24,7 @@ const sampleGroups = [
   },
   {
     _id: "grp3",
+    description: { sv: "Sköter föreningens IT: medlemssystemet, nätverk och [verktygswebben](https://example.com)." },
     name: { sv: "IT-gruppen", en: "IT group" },
     type: "function",
     joinPolicy: "request-responsible",
@@ -40,6 +43,7 @@ const sampleGroups = [
   },
   {
     _id: "grp5",
+    description: { sv: "Vi bygger modelljärnväg i skala H0 och arrangerar körkvällar." },
     name: { sv: "Modelljärnvägsgruppen" },
     type: "interest",
     joinPolicy: "open",
