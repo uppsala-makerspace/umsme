@@ -18,8 +18,6 @@ export default ({ defaultPage, onChangeDefaultPage }) => {
   return (
     <MainContent>
       <div className="flex flex-col gap-6">
-        <h3 className="text-center">{t("settings")}</h3>
-
         <section>
           <h4 className="font-bold mb-1">{t("defaultPage")}</h4>
           <p className="text-sm text-gray-600 mb-3">{t("defaultPageInfo")}</p>

@@ -21,8 +21,7 @@ const Workshops = ({ loading, workshops }) => {
   }
 
   return (
-    <MainContent topPadding={false}>
-      <h2 className="text-2xl mb-6 text-center">{t("workshops")}</h2>
+    <MainContent>
       {workshops.length === 0 ? (
         <p className="text-center text-gray-500 p-8 italic">{t("noWorkshops")}</p>
       ) : (

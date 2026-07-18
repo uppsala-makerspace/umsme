@@ -67,8 +67,8 @@ const Certificates = ({
 
   return (
     <MainContent topPadding={false}>
-      {/* Show tabs only for certifiers, otherwise just a heading */}
-      {isCertifier ? (
+      {/* Tabs are only shown for certifiers; the page title lives in the top bar */}
+      {isCertifier && (
         <Tabs
           tabs={[
             { key: "my", label: t("myCertificatesTab") },
@@ -77,8 +77,6 @@ const Certificates = ({
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
-      ) : (
-        <h2 className="text-2xl mb-6 text-center">{t("certificates")}</h2>
       )}
 
       {/* My Certificates Tab */}

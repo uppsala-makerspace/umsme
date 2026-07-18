@@ -136,6 +136,15 @@ const PAGE_TITLES = {
   "/notifications": "notifications",
   "/notification-settings": "notificationSettings",
   "/groups": "groups",
+  "/certificates": "certificates",
+  "/tool": "toolsTitle",
+  "/expenses": "expenses",
+  "/settings": "settings",
+  "/messages": "messages",
+  "/unlock": "navDoors",
+  "/map": "navMap",
+  "/calendar": "navCalendar",
+  "/workshops": "workshops",
 };
 
 export const TopBar = ({ showNotifications = true }) => {

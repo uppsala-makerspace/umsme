@@ -46,9 +46,7 @@ const Expenses = ({ loading, error, expenses }) => {
   }
 
   return (
-    <MainContent topPadding={false}>
-      <h2 className="text-2xl mb-6 text-center">{t("expenses")}</h2>
-
+    <MainContent>
       <div className="mb-8">
         <Button fullWidth onClick={() => navigate("/expenses/new")}>
           {t("expenseNew")}
