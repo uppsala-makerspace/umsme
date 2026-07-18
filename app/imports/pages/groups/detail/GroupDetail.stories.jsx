@@ -36,12 +36,12 @@ const baseData = {
     spaces: [
       {
         spaceId: "woodworkshop",
-        onFloor: true,
+        floor: "floor1",
         iconUrl: "https://placehold.co/96x96?text=primary",
       },
       {
         spaceId: "CNCworkshop",
-        onFloor: true,
+        floor: "floor1",
         iconUrl: "https://placehold.co/96x96?text=secondary",
       },
     ],

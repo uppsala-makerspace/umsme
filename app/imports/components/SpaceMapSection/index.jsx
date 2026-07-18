@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { MapIcon } from "@heroicons/react/24/outline";
 import InfoCard from "../InfoCard";
-import SpaceMiniMap from "./SpaceMiniMap";
+import FloorMap from "../FloorMap";
 import {
   SPACE_COLORS,
   spaceColorName,
@@ -14,9 +14,9 @@ import {
 // A colored card with the space's icon on top, echoing how the entity's
 // spaces look on the mini map. Links to the full map with the space selected
 // and pulsing in the same color.
-const SpaceIcon = ({ spaceId, iconUrl, color, colorName, className }) => (
+const SpaceIcon = ({ spaceId, iconUrl, color, colorName, floor, className }) => (
   <Link
-    to={spaceMapUrl(spaceId, colorName)}
+    to={spaceMapUrl(spaceId, colorName, floor)}
     className={`flex items-center justify-center rounded-lg no-underline hover:opacity-80 ${className}`}
     style={{ backgroundColor: color }}
   >
@@ -40,6 +40,7 @@ const SpaceIcons = ({ spaces }) => {
             iconUrl={space.iconUrl}
             color={space.color}
             colorName={space.colorName}
+            floor={space.floor}
             className="w-28 h-28"
           />
         ))}
@@ -53,6 +54,7 @@ const SpaceIcons = ({ spaces }) => {
         iconUrl={primary.iconUrl}
         color={primary.color}
         colorName={primary.colorName}
+        floor={primary.floor}
         className="w-28 h-28"
       />
       <div className="flex justify-center gap-2 w-full">
@@ -63,6 +65,7 @@ const SpaceIcons = ({ spaces }) => {
             iconUrl={space.iconUrl}
             color={space.color}
             colorName={space.colorName}
+            floor={space.floor}
             className="w-14 h-14 min-w-0"
           />
         ))}
@@ -96,11 +99,11 @@ const SpaceMapSection = ({ mapView, children }) => {
         {children}
       </div>
       {mapView ? (
-        <SpaceMiniMap
-          floor={mapView.floor}
-          spaces={coloredSpaces.filter((space) => space.onFloor)}
-          primarySpaceId={mapView.primarySpaceId}
-        />
+        <div className="relative rounded-lg bg-white border border-gray-200 overflow-hidden h-full min-h-[10rem]">
+          <FloorMap
+            mini={{ spaces: coloredSpaces, initialFloor: mapView.floor }}
+          />
+        </div>
       ) : (
         <InfoCard to="/map" Icon={MapIcon} title={t("navMap")} />
       )}
@@ -115,7 +118,7 @@ SpaceMapSection.propTypes = {
     spaces: PropTypes.arrayOf(
       PropTypes.shape({
         spaceId: PropTypes.string,
-        onFloor: PropTypes.bool,
+        floor: PropTypes.string,
         iconUrl: PropTypes.string,
       })
     ),

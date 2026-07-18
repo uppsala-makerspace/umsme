@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Meteor } from "meteor/meteor";
 import { Navigate, useSearchParams } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
-import Map from "./Map";
+import FloorMap from "/imports/components/FloorMap";
 import {
   SPACE_COLORS,
   DEFAULT_SPACE_COLOR_NAME,
@@ -30,19 +30,26 @@ export default () => {
 
   return (
     <Layout scroll={false}>
-      <Map
+      <FloorMap
         slackTeam={slackTeam}
         roomsConfig={roomsConfig}
         slackChannels={slackChannels}
         highlightedSpaceId={searchParams.get("space")}
+        highlightedFloor={
+          // spaceId is only unique per floor (e.g. "kitchen" exists on
+          // both), so ?floor= pins the highlight to a single room.
+          searchParams.get("floor")
+        }
         highlightColor={
           // ?color=<name> is resolved against the whitelist; anything else
-          // (including no parameter) falls back to green. Map clicks write
-          // only ?space=, so the color resets to green from then on.
+          // (including no parameter) falls back to green. Map clicks reset
+          // the color to green from then on.
           SPACE_COLORS[searchParams.get("color")] ||
           SPACE_COLORS[DEFAULT_SPACE_COLOR_NAME]
         }
-        onSpaceSelected={(spaceId) => setSearchParams({ space: spaceId }, { replace: true })}
+        onSpaceSelected={(spaceId, floorKey) =>
+          setSearchParams({ space: spaceId, floor: floorKey }, { replace: true })
+        }
       />
     </Layout>
   );

@@ -101,6 +101,38 @@
   }
 }
 
+/* Mini variant (workshop/group pages): fills its card instead of the
+   viewport, with small floor offsets so both floors fit. The floors get
+   explicit insets (rather than content-driven size) so the percentage
+   dimensions on the <object> resolve — replaced elements otherwise fall
+   back to their intrinsic size. */
+.map-container.map-mini {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  padding: 0;
+}
+.map-mini .map-floors-container {
+  width: 100%;
+  height: 100%;
+}
+.map-mini .map-floor {
+  inset: 8px;
+  max-height: none;
+}
+.map-mini .map-svg {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+}
+.map-mini .map-floor.active {
+  transform: translate(4px, -4px) scale(1);
+}
+.map-mini .map-floor.inactive {
+  transform: translate(-4px, 8px) scale(0.95);
+}
+
 /* Room popup overlay */
 .room-popup-overlay {
   position: fixed;

@@ -37,12 +37,12 @@ const sampleData = {
     spaces: [
       {
         spaceId: "woodworkshop",
-        onFloor: true,
+        floor: "floor1",
         iconUrl: "https://placehold.co/96x96?text=primary",
       },
       {
         spaceId: "CNCworkshop",
-        onFloor: true,
+        floor: "floor1",
         iconUrl: "https://placehold.co/96x96?text=secondary",
       },
     ],
@@ -73,27 +73,27 @@ export const ManySpaceIcons = {
         spaces: [
           {
             spaceId: "woodworkshop",
-            onFloor: true,
+            floor: "floor1",
             iconUrl: "https://placehold.co/96x96?text=primary",
           },
           {
             spaceId: "CNCworkshop",
-            onFloor: true,
+            floor: "floor1",
             iconUrl: "https://placehold.co/96x96?text=sec1",
           },
           {
             spaceId: "3dworkshop",
-            onFloor: true,
+            floor: "floor1",
             iconUrl: "https://placehold.co/96x96?text=sec2",
           },
           {
             spaceId: "metalworkshop",
-            onFloor: true,
+            floor: "floor1",
             iconUrl: "https://placehold.co/96x96?text=sec3",
           },
           {
-            spaceId: "textileroom",
-            onFloor: false,
+            spaceId: "textiles_workshop",
+            floor: "floor2",
             iconUrl: "https://placehold.co/96x96?text=sec4",
           },
         ],

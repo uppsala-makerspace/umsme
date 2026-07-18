@@ -180,11 +180,11 @@ export const findMemberForUser = async () => {
 
 /**
  * Mini-map data for an entity (workshop or group) linked to spaces via
- * primarySpaceId/secondarySpaceIds: every linked space with its map key and
- * icon, primary first, in the stored secondary order. `onFloor` tells the
- * mini map which ones it can draw — it only shows the primary space's floor.
- * The client assigns each space its color, shared between the icon card and
- * the map fill. Null when the entity has no primary space.
+ * primarySpaceId/secondarySpaceIds: every linked space with its map key,
+ * floor and icon, primary first, in the stored secondary order. The mini map
+ * starts on the primary space's floor (`floor`) and can switch floors. The
+ * client assigns each space its color, shared between the icon card and the
+ * map fill. Null when the entity has no primary space.
  */
 export const spacesMapView = async (entity) => {
   if (!entity.primarySpaceId) return null;
@@ -202,7 +202,7 @@ export const spacesMapView = async (entity) => {
     primarySpaceId: primary.spaceId,
     spaces: [primary, ...secondaries].map((s) => ({
       spaceId: s.spaceId,
-      onFloor: s.floor === primary.floor,
+      floor: s.floor,
       iconUrl: spaceIconUrlFor(s),
     })),
   };

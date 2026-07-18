@@ -1,4 +1,4 @@
-import Map from "./Map";
+import FloorMap from "./index";
 
 const mockRoomsConfig = {
   floor1: {
@@ -23,8 +23,8 @@ const mockSlackChannels = {
 };
 
 export default {
-  title: "Pages/Map",
-  component: Map,
+  title: "Components/FloorMap",
+  component: FloorMap,
   parameters: {
     layout: "fullscreen",
   },

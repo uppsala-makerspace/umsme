@@ -2,9 +2,9 @@ import { HashtagIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import SpaceMapSection from "./index";
 import InfoCard from "../InfoCard";
 
-const space = (spaceId, label, onFloor = true) => ({
+const space = (spaceId, label, floor = "floor1") => ({
   spaceId,
-  onFloor,
+  floor,
   iconUrl: `https://placehold.co/96x96?text=${label}`,
 });
 
@@ -52,8 +52,8 @@ export const FiveSpaces = {
         space("CNCworkshop", "sec1"),
         space("3dworkshop", "sec2"),
         space("metalworkshop", "sec3"),
-        // On another floor: gets an icon card but is not drawn on the map.
-        space("textileroom", "sec4", false),
+        // On the other floor: shown after switching floors in the mini map.
+        space("textiles_workshop", "sec4", "floor2"),
       ],
     },
     children: cards,

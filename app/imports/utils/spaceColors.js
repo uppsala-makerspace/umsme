@@ -20,5 +20,9 @@ export const spaceColorName = (index) =>
     ? DEFAULT_SPACE_COLOR_NAME
     : SECONDARY_COLOR_NAMES[(index - 1) % SECONDARY_COLOR_NAMES.length];
 
-export const spaceMapUrl = (spaceId, colorName) =>
-  `/map?space=${encodeURIComponent(spaceId)}&color=${encodeURIComponent(colorName)}`;
+// spaceId is only unique per floor (e.g. "kitchen" exists on both), so deep
+// links carry the floor to pin the highlight to a single room.
+export const spaceMapUrl = (spaceId, colorName, floor) =>
+  `/map?space=${encodeURIComponent(spaceId)}` +
+  (floor ? `&floor=${encodeURIComponent(floor)}` : "") +
+  `&color=${encodeURIComponent(colorName)}`;
