@@ -1,8 +1,9 @@
 const KEY = "default-page";
-const ALLOWED = ["home", "unlock", "map", "calendar"];
+const ALLOWED = ["home", "unlock", "workshops", "map", "calendar"];
 const PATHS = {
   home: "/",
   unlock: "/unlock",
+  workshops: "/workshops",
   map: "/map",
   calendar: "/calendar",
 };

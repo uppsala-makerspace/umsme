@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
 
+// Mirrors the bottom navigation's tabs and order.
 const PAGE_OPTIONS = [
   { value: "home", labelKey: "navHome" },
   { value: "unlock", labelKey: "navDoors" },
+  { value: "workshops", labelKey: "navWorkshops" },
   { value: "map", labelKey: "navMap" },
   { value: "calendar", labelKey: "navCalendar" },
 ];
