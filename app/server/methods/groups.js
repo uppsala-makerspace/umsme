@@ -7,7 +7,7 @@ import { Members } from "/imports/common/collections/members";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { groupImageUrlFor } from "/imports/common/server/workshopImage";
 import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
-import { findMemberForUser, isActiveMember } from "./utils";
+import { findMemberForUser, isActiveMember, spacesMapView } from "./utils";
 
 const requireMember = async () => {
   const member = await findMemberForUser();
@@ -189,6 +189,7 @@ Meteor.methods({
       canJoin: activeCaller,
       canApprove: userCanApprove,
       pendingRequests,
+      mapView: await spacesMapView(group),
     };
   },
 

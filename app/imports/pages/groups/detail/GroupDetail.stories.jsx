@@ -30,6 +30,22 @@ const baseData = {
   canJoin: true,
   canApprove: false,
   pendingRequests: [],
+  mapView: {
+    floor: "floor1",
+    primarySpaceId: "woodworkshop",
+    spaces: [
+      {
+        spaceId: "woodworkshop",
+        onFloor: true,
+        iconUrl: "https://placehold.co/96x96?text=primary",
+      },
+      {
+        spaceId: "CNCworkshop",
+        onFloor: true,
+        iconUrl: "https://placehold.co/96x96?text=secondary",
+      },
+    ],
+  },
 };
 
 export default {

@@ -9,14 +9,14 @@ import {
 const FLOOR_SUFFIX = "-floor";
 
 /**
- * Small map preview on the workshop page: the floor plan with the workshop's
- * spaces filled in their assigned colors (primary green, secondaries in the
- * distinguishing palette shared with the space-icon cards) and every other
- * space toned down in gray. Clicking a highlighted space opens the full map
- * with that space selected; clicking anywhere else falls back to the primary
- * space. Only one floor is shown (the primary space's).
+ * Small map preview: the floor plan with the entity's spaces filled in their
+ * assigned colors (primary green, secondaries in the distinguishing palette
+ * shared with the space-icon cards) and every other space toned down in
+ * gray. Clicking a highlighted space opens the full map with that space
+ * selected; clicking anywhere else falls back to the primary space. Only one
+ * floor is shown (the primary space's).
  */
-const WorkshopMiniMap = ({ floor, spaces = [], primarySpaceId }) => {
+const SpaceMiniMap = ({ floor, spaces = [], primarySpaceId }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const objectRef = useRef(null);
@@ -75,4 +75,4 @@ const WorkshopMiniMap = ({ floor, spaces = [], primarySpaceId }) => {
   );
 };
 
-export default WorkshopMiniMap;
+export default SpaceMiniMap;

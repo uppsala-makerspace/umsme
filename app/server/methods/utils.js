@@ -1,8 +1,10 @@
 import { Meteor } from "meteor/meteor";
 import { Roles } from "meteor/roles";
 import { Members } from "/imports/common/collections/members";
+import { Spaces } from "/imports/common/collections/spaces";
 import { memberStatus } from "/imports/common/lib/utils";
 import { memberForUser } from "/imports/common/server/memberForUser";
+import { spaceIconUrlFor } from "/imports/common/server/workshopImage";
 
 /**
  * Whether the current user may see/use the expenses feature: either their
@@ -174,4 +176,34 @@ export const findForUser = async () => {
 export const findMemberForUser = async () => {
   const { member } = await findForUser();
   return member;
+};
+
+/**
+ * Mini-map data for an entity (workshop or group) linked to spaces via
+ * primarySpaceId/secondarySpaceIds: every linked space with its map key and
+ * icon, primary first, in the stored secondary order. `onFloor` tells the
+ * mini map which ones it can draw — it only shows the primary space's floor.
+ * The client assigns each space its color, shared between the icon card and
+ * the map fill. Null when the entity has no primary space.
+ */
+export const spacesMapView = async (entity) => {
+  if (!entity.primarySpaceId) return null;
+  const primary = await Spaces.findOneAsync(entity.primarySpaceId);
+  if (!primary) return null;
+  const secondaryDocs = await Spaces.find({
+    _id: { $in: entity.secondarySpaceIds || [] },
+  }).fetchAsync();
+  const byId = new Map(secondaryDocs.map((s) => [s._id, s]));
+  const secondaries = (entity.secondarySpaceIds || [])
+    .map((id) => byId.get(id))
+    .filter(Boolean);
+  return {
+    floor: primary.floor,
+    primarySpaceId: primary.spaceId,
+    spaces: [primary, ...secondaries].map((s) => ({
+      spaceId: s.spaceId,
+      onFloor: s.floor === primary.floor,
+      iconUrl: spaceIconUrlFor(s),
+    })),
+  };
 };

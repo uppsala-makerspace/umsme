@@ -7,6 +7,7 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import InfoCard from "../../../components/InfoCard";
+import SpaceMapSection from "../../../components/SpaceMapSection";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 
@@ -59,6 +60,7 @@ const GroupDetail = ({
     canJoin,
     canApprove,
     pendingRequests,
+    mapView,
   } = data;
 
   const slackUrl = group.slackChannel
@@ -148,9 +150,10 @@ const GroupDetail = ({
         )}
       </section>
 
-      {/* Card grid, same pattern as the workshop page */}
-      {(workshop || group.slackChannel) && (
-        <section className="mb-6 grid grid-cols-2 gap-3">
+      {/* Space icons + cards on the left, mini map on the right — the same
+          shared section as the workshop page. */}
+      {(workshop || group.slackChannel || mapView) && (
+        <SpaceMapSection mapView={mapView}>
           {workshop && (
             <InfoCard
               to={`/workshops/${workshop._id}`}
@@ -167,7 +170,7 @@ const GroupDetail = ({
               subtitle={`#${group.slackChannel}`}
             />
           )}
-        </section>
+        </SpaceMapSection>
       )}
 
       {/* Pending requests (approvers only) */}
