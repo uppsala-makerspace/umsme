@@ -155,7 +155,9 @@ const PAGE_TITLES = {
 // (/membership, /paymentSelection, /initiatedPayment) deliberately has no
 // arrow: mid-flow back navigation is handled by the flow itself.
 const DETAIL_PAGES = [
+  { pattern: "/workshops/:workshopId/edit", fallback: "/workshops" },
   { pattern: "/workshops/:workshopId", fallback: "/workshops" },
+  { pattern: "/groups/:groupId/edit", fallback: "/groups" },
   { pattern: "/groups/:groupId", fallback: "/groups" },
   { pattern: "/certificates/:certificateId", fallback: "/certificates" },
   { pattern: "/certificates/:certificateId/test", fallback: "/certificates" },

@@ -4,7 +4,13 @@ import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Certificates } from "/imports/common/collections/certificates";
 import { workshopImageUrlFor } from "/imports/common/server/workshopImage";
-import { findMemberForUser, spacesMapView } from "./utils";
+import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
+import {
+  findMemberForUser,
+  isWorkshopResponsible,
+  applyWhitelistedUpdate,
+  spacesMapView,
+} from "./utils";
 
 const requireMember = async () => {
   const member = await findMemberForUser();
@@ -101,6 +107,62 @@ Meteor.methods({
       relatedGroups,
       certificates,
       mapView: await spacesMapView(workshop),
+      canEdit: await isWorkshopResponsible(member, workshop),
     };
+  },
+
+  /**
+   * Edit descriptive fields of a workshop. Only the responsible of the
+   * workshop's own group may do this, and only the whitelisted fields
+   * (description, Slack channel, guides URL); name, status and spaces are
+   * off limits.
+   */
+  "workshops.updateByResponsible": async (workshopId, patch) => {
+    const member = await requireMember();
+    const workshop = await Workshops.findOneAsync(workshopId);
+    if (!workshop) {
+      throw new Meteor.Error("not-found", "Workshop not found");
+    }
+    if (!(await isWorkshopResponsible(member, workshop))) {
+      throw new Meteor.Error("not-authorized", "You are not responsible for this workshop");
+    }
+    const p = patch || {};
+    await applyWhitelistedUpdate(Workshops, workshopId, {
+      "description.sv": p.description?.sv,
+      "description.en": p.description?.en,
+      slackChannel: p.slackChannel,
+      guidesUrl: p.guidesUrl,
+    });
+    return true;
+  },
+
+  /** Set/replace the workshop's image (workshop group responsible only). */
+  "workshops.uploadImageByResponsible": async (workshopId, imageBase64, mimeType) => {
+    const member = await requireMember();
+    const workshop = await Workshops.findOneAsync(workshopId);
+    if (!workshop) {
+      throw new Meteor.Error("not-found", "Workshop not found");
+    }
+    if (!(await isWorkshopResponsible(member, workshop))) {
+      throw new Meteor.Error("not-authorized", "You are not responsible for this workshop");
+    }
+    return setEntityImage(Workshops, workshop, {
+      imageBase64,
+      mimeType,
+      baseName: `workshop-${workshopId}-${Date.now()}`,
+    });
+  },
+
+  /** Remove the workshop's image (workshop group responsible only). */
+  "workshops.removeImageByResponsible": async (workshopId) => {
+    const member = await requireMember();
+    const workshop = await Workshops.findOneAsync(workshopId);
+    if (!workshop) {
+      throw new Meteor.Error("not-found", "Workshop not found");
+    }
+    if (!(await isWorkshopResponsible(member, workshop))) {
+      throw new Meteor.Error("not-authorized", "You are not responsible for this workshop");
+    }
+    return clearEntityImage(Workshops, workshop);
   },
 });

@@ -6,8 +6,15 @@ import { Workshops } from "/imports/common/collections/workshops";
 import { Members } from "/imports/common/collections/members";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { groupImageUrlFor } from "/imports/common/server/workshopImage";
+import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
 import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
-import { findMemberForUser, isActiveMember, spacesMapView } from "./utils";
+import {
+  findMemberForUser,
+  isActiveMember,
+  isGroupResponsible,
+  applyWhitelistedUpdate,
+  spacesMapView,
+} from "./utils";
 
 const requireMember = async () => {
   const member = await findMemberForUser();
@@ -321,5 +328,50 @@ Meteor.methods({
       throw new Meteor.Error("not-found", "No pending request for that member");
     }
     return true;
+  },
+
+  /**
+   * Edit descriptive fields of a group. Only the group responsible
+   * (gruppansvarig) may do this — no admin role required — and only the
+   * whitelisted fields (description, Slack channel) can change; name, type,
+   * spaces, join policy, responsible, parent and linked role are off limits.
+   */
+  "groups.updateByResponsible": async (groupId, patch) => {
+    const member = await requireMember();
+    const group = await getGroup(groupId);
+    if (!isGroupResponsible(member, group)) {
+      throw new Meteor.Error("not-authorized", "You are not responsible for this group");
+    }
+    const p = patch || {};
+    await applyWhitelistedUpdate(Groups, groupId, {
+      "description.sv": p.description?.sv,
+      "description.en": p.description?.en,
+      slackChannel: p.slackChannel,
+    });
+    return true;
+  },
+
+  /** Set/replace the group's image (group responsible only). */
+  "groups.uploadImageByResponsible": async (groupId, imageBase64, mimeType) => {
+    const member = await requireMember();
+    const group = await getGroup(groupId);
+    if (!isGroupResponsible(member, group)) {
+      throw new Meteor.Error("not-authorized", "You are not responsible for this group");
+    }
+    return setEntityImage(Groups, group, {
+      imageBase64,
+      mimeType,
+      baseName: `group-${groupId}-${Date.now()}`,
+    });
+  },
+
+  /** Remove the group's image (group responsible only). */
+  "groups.removeImageByResponsible": async (groupId) => {
+    const member = await requireMember();
+    const group = await getGroup(groupId);
+    if (!isGroupResponsible(member, group)) {
+      throw new Meteor.Error("not-authorized", "You are not responsible for this group");
+    }
+    return clearEntityImage(Groups, group);
   },
 });

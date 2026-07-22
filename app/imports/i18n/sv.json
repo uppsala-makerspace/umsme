@@ -467,5 +467,15 @@
   "pendingRequests": "Väntande ansökningar",
   "approve": "Godkänn",
   "reject": "Avslå",
-  "partOfGroup": "del av"
+  "partOfGroup": "del av",
+  "edit": "Redigera",
+  "save": "Spara",
+  "saving": "Sparar…",
+  "descriptionSv": "Beskrivning (svenska)",
+  "descriptionEn": "Beskrivning (engelska)",
+  "descriptionMarkdownHint": "Markdown stöds.",
+  "guidesUrl": "Guide-URL",
+  "image": "Bild",
+  "uploadImage": "Ladda upp bild",
+  "removeImage": "Ta bort bild"
 }

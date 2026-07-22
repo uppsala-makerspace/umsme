@@ -2,6 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { Roles } from "meteor/roles";
 import { Members } from "/imports/common/collections/members";
 import { Spaces } from "/imports/common/collections/spaces";
+import { Groups } from "/imports/common/collections/groups";
 import { memberStatus } from "/imports/common/lib/utils";
 import { memberForUser } from "/imports/common/server/memberForUser";
 import { spaceIconUrlFor } from "/imports/common/server/workshopImage";
@@ -176,6 +177,45 @@ export const findForUser = async () => {
 export const findMemberForUser = async () => {
   const { member } = await findForUser();
   return member;
+};
+
+/**
+ * Whether the member is the responsible (gruppansvarig) of a group. Basis for
+ * the group-responsible editing methods (a group's responsible may edit its
+ * descriptive fields, no admin role required).
+ */
+export const isGroupResponsible = (member, group) =>
+  !!member && !!group && group.responsibleMemberId === member._id;
+
+/**
+ * Whether the member may edit a workshop: only the responsible of the
+ * workshop's own group (workshop groups link to a workshop via groupId).
+ * Responsibility subgroups' responsibles do not edit the workshop.
+ */
+export const isWorkshopResponsible = async (member, workshop) => {
+  if (!member || !workshop?.groupId) return false;
+  const group = await Groups.findOneAsync(workshop.groupId);
+  return isGroupResponsible(member, group);
+};
+
+/**
+ * Apply a whitelisted update: $set non-empty values, $unset empty ones (so
+ * optional fields can be cleared), skipping undefined values entirely. Keys
+ * may be dotted (e.g. "description.sv"). The caller decides the whitelist —
+ * never pass a client-supplied object straight through.
+ */
+export const applyWhitelistedUpdate = async (collection, id, fields) => {
+  const $set = {};
+  const $unset = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === undefined) continue;
+    if (value === null || value === "") $unset[key] = "";
+    else $set[key] = value;
+  }
+  const modifier = {};
+  if (Object.keys($set).length) modifier.$set = $set;
+  if (Object.keys($unset).length) modifier.$unset = $unset;
+  if (Object.keys(modifier).length) await collection.updateAsync(id, modifier);
 };
 
 /**

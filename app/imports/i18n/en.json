@@ -468,5 +468,15 @@
   "pendingRequests": "Pending requests",
   "approve": "Approve",
   "reject": "Reject",
-  "partOfGroup": "part of"
+  "partOfGroup": "part of",
+  "edit": "Edit",
+  "save": "Save",
+  "saving": "Saving…",
+  "descriptionSv": "Description (Swedish)",
+  "descriptionEn": "Description (English)",
+  "descriptionMarkdownHint": "Markdown is supported.",
+  "guidesUrl": "Guides URL",
+  "image": "Image",
+  "uploadImage": "Upload image",
+  "removeImage": "Remove image"
 }

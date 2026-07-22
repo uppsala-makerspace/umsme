@@ -80,8 +80,16 @@ const GroupDetail = ({
         />
       )}
 
-      <div className="flex items-center gap-3 mb-1">
+      <div className="flex items-center justify-between gap-3 mb-1">
         <h2 className="text-2xl m-0">{localized(group.name, lang)}</h2>
+        {group.myIsResponsible && (
+          <Link
+            to={`/groups/${group._id}/edit`}
+            className="flex-shrink-0 text-sm font-semibold text-brand-green no-underline hover:underline"
+          >
+            {t("edit")}
+          </Link>
+        )}
       </div>
       <p className="text-sm text-gray-500 mt-0 mb-4">
         {t(typeLabelKeys[group.type] || group.type)}

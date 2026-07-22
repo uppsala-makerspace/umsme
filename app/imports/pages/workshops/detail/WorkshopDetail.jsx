@@ -87,6 +87,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     relatedGroups = [],
     certificates,
     mapView,
+    canEdit,
   } = data;
   const slackUrl = workshop.slackChannel
     ? getSlackChannelUrl(workshop.slackChannel, slackTeam, slackChannelIds)
@@ -105,6 +106,14 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
       <div className="flex items-center gap-3 mb-2">
         <h2 className="text-2xl m-0">{localized(workshop.name, lang)}</h2>
         <WorkshopStatusBadge status={workshop.status} />
+        {canEdit && (
+          <Link
+            to={`/workshops/${workshop._id}/edit`}
+            className="flex-shrink-0 ml-auto text-sm font-semibold text-brand-green no-underline hover:underline"
+          >
+            {t("edit")}
+          </Link>
+        )}
       </div>
 
       {localized(workshop.description, lang) && (
