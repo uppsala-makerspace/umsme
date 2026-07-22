@@ -128,6 +128,14 @@ Template.GroupView.helpers({
       { sort: { 'name.sv': 1 } }
     );
   },
+  isResponsibilityGroup() {
+    return Groups.findOne(groupId())?.type === 'responsibility';
+  },
+  // Only interest and function groups pick spaces directly; workshop and
+  // responsibility groups inherit them from their connected workshop.
+  canChooseSpaces() {
+    return ['interest', 'function'].includes(Groups.findOne(groupId())?.type);
+  },
   parentGroup() {
     const group = Groups.findOne(groupId());
     return group?.parentGroupId ? Groups.findOne(group.parentGroupId) : null;

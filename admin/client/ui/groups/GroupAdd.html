@@ -7,6 +7,7 @@
         {{> afQuickField name="description.sv"}}
         {{> afQuickField name="description.en"}}
         {{> afQuickField name="type"}}
+        {{#if isResponsibilityGroup}}
         <div class="form-group">
             <label class="control-label">Parent group (required for responsibility groups)</label>
             <select class="form-control parentGroupSelect">
@@ -16,6 +17,7 @@
                 {{/each}}
             </select>
         </div>
+        {{/if}}
         {{> afQuickField name="slackChannel"}}
         {{> afQuickField name="joinPolicy"}}
         {{> afQuickField name="linkedRole"}}

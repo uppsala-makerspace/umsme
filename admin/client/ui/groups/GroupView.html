@@ -63,6 +63,7 @@
     </div>
     {{/if}}
 
+    {{#if isResponsibilityGroup}}
     <hr>
 
     <h2>Parent group</h2>
@@ -79,10 +80,13 @@
             <a href="/group/{{parentGroup._id}}">Open {{parentGroup.name.sv}}</a>
         {{/if}}
     </form>
+    {{/if}}
 
+    {{#if canChooseSpaces}}
     <hr>
 
     {{> entitySpaces collection=Groups entityId=groupIdValue}}
+    {{/if}}
 
     <hr>
 
