@@ -158,6 +158,17 @@ Meteor.methods({
       workshop = await Workshops.findOneAsync({ groupId: group.parentGroupId });
     }
 
+    // Which spaces the map shows: interest and function groups pick their own
+    // (only shown when they set one explicitly); workshop and responsibility
+    // (activity) groups inherit them from their connected workshop. Null →
+    // no map card at all.
+    const mapView =
+      group.type === "interest" || group.type === "function"
+        ? await spacesMapView(group)
+        : workshop
+          ? await spacesMapView(workshop)
+          : null;
+
     const userCanApprove = await canApprove(group, member);
     let pendingRequests = [];
     if (userCanApprove) {
@@ -188,7 +199,7 @@ Meteor.methods({
       canJoin: activeCaller,
       canApprove: userCanApprove,
       pendingRequests,
-      mapView: await spacesMapView(group),
+      mapView,
     };
   },
 

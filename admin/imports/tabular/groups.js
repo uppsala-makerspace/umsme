@@ -6,11 +6,16 @@ import { Groups } from '/imports/common/collections/groups';
 import { models } from '/imports/common/lib/models';
 import { extractor } from '/imports/common/lib/fieldsUtils';
 
+// Keep only the Swedish name, type and join policy; filter out the rest.
 const groupDefaults = {
   filter: [
     'name', 'name.en',
     'description', 'description.sv', 'description.en',
-    'responsibleMemberId', 'parentGroupId', 'createdAt',
+    'slackChannel', 'responsibleMemberId', 'parentGroupId',
+    'relatedWorkshopIds', 'relatedWorkshopIds.$',
+    'imageFileId', 'imageMimeType',
+    'primarySpaceId', 'secondarySpaceIds', 'secondarySpaceIds.$',
+    'linkedRole', 'createdAt',
   ],
 };
 

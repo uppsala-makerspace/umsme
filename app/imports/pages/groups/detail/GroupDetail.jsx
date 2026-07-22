@@ -150,28 +150,39 @@ const GroupDetail = ({
         )}
       </section>
 
-      {/* Space icons + cards on the left, mini map on the right — the same
-          shared section as the workshop page. */}
-      {(workshop || group.slackChannel || mapView) && (
-        <SpaceMapSection mapView={mapView}>
-          {workshop && (
-            <InfoCard
-              to={`/workshops/${workshop._id}`}
-              Icon={WrenchScrewdriverIcon}
-              title={t("workshop")}
-              subtitle={localized(workshop.name, lang)}
-            />
-          )}
-          {group.slackChannel && (
-            <InfoCard
-              href={slackUrl}
-              Icon={HashtagIcon}
-              title={t("slackChannel")}
-              subtitle={`#${group.slackChannel}`}
-            />
-          )}
-        </SpaceMapSection>
-      )}
+      {/* The Workshop and Slack cards. With a map (interest/function groups
+          with an explicit space, or workshop/activity groups whose connected
+          workshop has spaces) they share the map-integrated section; without
+          one, they stand alone in a plain grid — no empty map card. */}
+      {(() => {
+        const cards = (
+          <>
+            {workshop && (
+              <InfoCard
+                to={`/workshops/${workshop._id}`}
+                Icon={WrenchScrewdriverIcon}
+                title={t("workshop")}
+                subtitle={localized(workshop.name, lang)}
+              />
+            )}
+            {group.slackChannel && (
+              <InfoCard
+                href={slackUrl}
+                Icon={HashtagIcon}
+                title={t("slackChannel")}
+                subtitle={`#${group.slackChannel}`}
+              />
+            )}
+          </>
+        );
+        if (mapView) {
+          return <SpaceMapSection mapView={mapView}>{cards}</SpaceMapSection>;
+        }
+        if (workshop || group.slackChannel) {
+          return <section className="mb-6 grid grid-cols-2 gap-3">{cards}</section>;
+        }
+        return null;
+      })()}
 
       {/* Pending requests (approvers only) */}
       {canApprove && pendingRequests.length > 0 && (

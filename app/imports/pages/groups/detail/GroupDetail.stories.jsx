@@ -70,6 +70,23 @@ export const NotActiveMember = {
   },
 };
 
+export const NoMap = {
+  args: {
+    loading: false,
+    // Interest group without an explicit space: the Slack card stands alone,
+    // no empty map card.
+    data: {
+      ...baseData,
+      group: { ...baseData.group, type: "interest" },
+      workshop: null,
+      childGroups: [],
+      mapView: null,
+    },
+    slackTeam: "T123",
+    slackChannelIds: { "träverkstaden": "C123" },
+  },
+};
+
 export const PendingRequest = {
   args: {
     loading: false,
