@@ -92,7 +92,9 @@ export default () => {
               descriptionSv: group.description?.sv || "",
               descriptionEn: group.description?.en || "",
               slackChannel: group.slackChannel || "",
+              guidesUrl: group.guidesUrl || "",
             }}
+            showGuidesUrl={group.type === "interest" || group.type === "function"}
             saving={saving}
             onSave={handleSave}
             onImageSelect={handleImageSelect}

@@ -71,6 +71,7 @@ const groupSummary = async (group, memberId) => {
     description: group.description,
     type: group.type,
     slackChannel: group.slackChannel,
+    guidesUrl: group.guidesUrl,
     joinPolicy: group.joinPolicy,
     parentGroupId: group.parentGroupId,
     imageUrl: groupImageUrlFor(group),
@@ -347,6 +348,7 @@ Meteor.methods({
       "description.sv": p.description?.sv,
       "description.en": p.description?.en,
       slackChannel: p.slackChannel,
+      guidesUrl: p.guidesUrl,
     });
     return true;
   },

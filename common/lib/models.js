@@ -975,6 +975,15 @@ export const models = {
       max: 80,
       optional: true,
     },
+    // Link to guides/tutorials. Shown as a card on interest and function group
+    // pages, like workshops. (Workshop and responsibility groups get guides via
+    // their connected workshop instead.)
+    guidesUrl: {
+      label: "Guides URL",
+      type: String,
+      max: 500,
+      optional: true,
+    },
     // The one person responsible for the group (gruppansvarig). Picked with a
     // member selector in admin, so omitted from AutoForm.
     responsibleMemberId: {

@@ -73,11 +73,15 @@ export const NotActiveMember = {
 export const NoMap = {
   args: {
     loading: false,
-    // Interest group without an explicit space: the Slack card stands alone,
-    // no empty map card.
+    // Interest group without an explicit space: the Slack and Guides cards
+    // stand alone, no empty map card.
     data: {
       ...baseData,
-      group: { ...baseData.group, type: "interest" },
+      group: {
+        ...baseData.group,
+        type: "interest",
+        guidesUrl: "https://tutorial.uppsalamakerspace.se/bike/",
+      },
       workshop: null,
       childGroups: [],
       mapView: null,

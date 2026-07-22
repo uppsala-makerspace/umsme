@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { HashtagIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
+import { HashtagIcon, WrenchScrewdriverIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
@@ -158,11 +158,15 @@ const GroupDetail = ({
         )}
       </section>
 
-      {/* The Workshop and Slack cards. With a map (interest/function groups
-          with an explicit space, or workshop/activity groups whose connected
-          workshop has spaces) they share the map-integrated section; without
-          one, they stand alone in a plain grid — no empty map card. */}
+      {/* The Workshop, Slack and Guides cards. With a map (interest/function
+          groups with an explicit space, or workshop/activity groups whose
+          connected workshop has spaces) they share the map-integrated section;
+          without one, they stand alone in a plain grid — no empty map card.
+          Guides are only for interest/function groups (others get them via
+          their workshop). */}
       {(() => {
+        const showGuides =
+          (group.type === "interest" || group.type === "function") && group.guidesUrl;
         const cards = (
           <>
             {workshop && (
@@ -181,12 +185,15 @@ const GroupDetail = ({
                 subtitle={`#${group.slackChannel}`}
               />
             )}
+            {showGuides && (
+              <InfoCard href={group.guidesUrl} Icon={BookOpenIcon} title={t("tutorials")} />
+            )}
           </>
         );
         if (mapView) {
           return <SpaceMapSection mapView={mapView}>{cards}</SpaceMapSection>;
         }
-        if (workshop || group.slackChannel) {
+        if (workshop || group.slackChannel || showGuides) {
           return <section className="mb-6 grid grid-cols-2 gap-3">{cards}</section>;
         }
         return null;
