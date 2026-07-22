@@ -6,11 +6,13 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { models } from '/imports/common/lib/models';
 import { extractor } from '/imports/common/lib/fieldsUtils';
 
+// Keep only the Swedish name and status; filter out the rest.
 const workshopDefaults = {
   filter: [
     'name', 'name.en',
     'description', 'description.sv', 'description.en',
-    'groupId', 'imageFileId', 'imageMimeType', 'guidesUrl', 'createdAt',
+    'slackChannel', 'groupId', 'imageFileId', 'imageMimeType', 'guidesUrl',
+    'primarySpaceId', 'secondarySpaceIds', 'secondarySpaceIds.$', 'createdAt',
   ],
 };
 
