@@ -33,7 +33,16 @@ const WorkshopCard = ({ workshop, compact = false }) => {
             <span className="font-semibold leading-snug">
               {localized(workshop.name, lang)}
             </span>
-            <WorkshopStatusBadge status={workshop.status} />
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <WorkshopStatusBadge status={workshop.status} />
+              {workshop.spaceIconUrl && (
+                <img
+                  src={workshop.spaceIconUrl}
+                  alt=""
+                  className="w-10 h-10 object-contain"
+                />
+              )}
+            </div>
           </div>
           {excerpt && (
             <p className="text-sm text-gray-500 mt-1 mb-0">{excerpt}</p>

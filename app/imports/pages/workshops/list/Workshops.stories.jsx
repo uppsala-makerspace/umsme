@@ -11,6 +11,7 @@ const sampleWorkshops = [
     status: "established",
     slackChannel: "träverkstaden",
     imageUrl: "https://placehold.co/600x300?text=Tr%C3%A4verkstad",
+    spaceIconUrl: "https://placehold.co/80x80?text=icon",
   },
   {
     _id: "ws2",
@@ -18,6 +19,7 @@ const sampleWorkshops = [
     description: { sv: "Dreja och bränn keramik i vår ugn.", en: "Throw and fire ceramics." },
     status: "trial",
     imageUrl: "https://placehold.co/600x300?text=Keramik",
+    spaceIconUrl: "https://placehold.co/80x80?text=icon",
   },
   {
     _id: "ws3",

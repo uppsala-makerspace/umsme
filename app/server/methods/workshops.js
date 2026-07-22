@@ -3,7 +3,8 @@ import { Workshops } from "/imports/common/collections/workshops";
 import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Certificates } from "/imports/common/collections/certificates";
-import { workshopImageUrlFor } from "/imports/common/server/workshopImage";
+import { Spaces } from "/imports/common/collections/spaces";
+import { workshopImageUrlFor, spaceIconUrlFor } from "/imports/common/server/workshopImage";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
 import {
   findMemberForUser,
@@ -54,7 +55,17 @@ Meteor.methods({
   "workshops.list": async () => {
     await requireMember();
     const workshops = await Workshops.find({}, { sort: { "name.sv": 1 } }).fetchAsync();
-    return workshops.map(publicWorkshopFields);
+    // Attach the primary space's icon (a workshop with a primary space has
+    // one) for the list cards.
+    const spaceIds = [...new Set(workshops.map((w) => w.primarySpaceId).filter(Boolean))];
+    const spaces = spaceIds.length
+      ? await Spaces.find({ _id: { $in: spaceIds } }).fetchAsync()
+      : [];
+    const iconById = new Map(spaces.map((s) => [s._id, spaceIconUrlFor(s)]));
+    return workshops.map((w) => ({
+      ...publicWorkshopFields(w),
+      spaceIconUrl: w.primarySpaceId ? iconById.get(w.primarySpaceId) || null : null,
+    }));
   },
 
   /**
