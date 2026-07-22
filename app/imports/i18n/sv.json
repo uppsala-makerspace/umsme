@@ -443,6 +443,8 @@
   "noGroups": "Inga grupper ännu.",
   "noGroupsFound": "Inga grupper matchar sökningen.",
   "searchGroups": "Sök grupper",
+  "noWorkshopsFound": "Ingen verkstad matchar sökningen.",
+  "searchWorkshops": "Sök verkstäder",
   "lessInfo": "Visa mindre information",
   "moreInfo": "Visa mer information",
   "groupsSectionResponsibility": "Ansvarsgrupper",

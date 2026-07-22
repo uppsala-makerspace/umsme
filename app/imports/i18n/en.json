@@ -444,6 +444,8 @@
   "noGroups": "No groups yet.",
   "noGroupsFound": "No groups match the search.",
   "searchGroups": "Search groups",
+  "noWorkshopsFound": "No workshops match the search.",
+  "searchWorkshops": "Search workshops",
   "lessInfo": "Show less information",
   "moreInfo": "Show more information",
   "groupsSectionResponsibility": "Responsibility groups",

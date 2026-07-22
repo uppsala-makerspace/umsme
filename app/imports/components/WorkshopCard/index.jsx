@@ -8,26 +8,27 @@ import WorkshopStatusBadge from "/imports/pages/workshops/components/WorkshopSta
 /**
  * Workshop preview card: image banner, localized name with status badge, and
  * a truncated description excerpt. Used by the workshop list and the map's
- * space popup.
+ * space popup. In `compact` mode the image and excerpt are hidden with
+ * tighter padding, matching GroupCard.
  */
-const WorkshopCard = ({ workshop }) => {
+const WorkshopCard = ({ workshop, compact = false }) => {
   const { i18n } = useTranslation();
   const lang = i18n.language || "sv";
-  const excerpt = markdownExcerpt(localized(workshop.description, lang));
+  const excerpt = compact ? "" : markdownExcerpt(localized(workshop.description, lang));
   return (
     <li className="mb-4 rounded-lg bg-white border border-gray-200 overflow-hidden list-none">
       <Link
         to={`/workshops/${workshop._id}`}
         className="block no-underline text-inherit transition-colors hover:bg-gray-50"
       >
-        {workshop.imageUrl && (
+        {!compact && workshop.imageUrl && (
           <img
             src={workshop.imageUrl}
             alt={localized(workshop.name, lang)}
             className="w-full h-40 object-cover"
           />
         )}
-        <div className="p-4">
+        <div className={compact ? "p-3" : "p-4"}>
           <div className="flex items-center justify-between gap-2">
             <span className="font-semibold leading-snug">
               {localized(workshop.name, lang)}
