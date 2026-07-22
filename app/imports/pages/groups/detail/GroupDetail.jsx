@@ -215,12 +215,6 @@ const GroupDetail = ({
               <span className="font-semibold">{responsibleName}</span>
             </li>
           )}
-          {group.responsibleSpace && (
-            <li>
-              <span className="text-gray-500">{t("responsibleSpace")}:</span>{" "}
-              {group.responsibleSpace}
-            </li>
-          )}
         </ul>
       </section>
 

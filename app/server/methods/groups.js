@@ -64,7 +64,6 @@ const groupSummary = async (group, memberId) => {
     description: group.description,
     type: group.type,
     slackChannel: group.slackChannel,
-    responsibleSpace: group.responsibleSpace,
     joinPolicy: group.joinPolicy,
     parentGroupId: group.parentGroupId,
     imageUrl: groupImageUrlFor(group),

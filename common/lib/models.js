@@ -975,12 +975,6 @@ export const models = {
       max: 80,
       optional: true,
     },
-    responsibleSpace: {
-      label: "Responsible space",
-      type: String,
-      max: 200,
-      optional: true,
-    },
     // The one person responsible for the group (gruppansvarig). Picked with a
     // member selector in admin, so omitted from AutoForm.
     responsibleMemberId: {

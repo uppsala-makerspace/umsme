@@ -468,6 +468,5 @@
   "pendingRequests": "Pending requests",
   "approve": "Approve",
   "reject": "Reject",
-  "partOfGroup": "part of",
-  "responsibleSpace": "Responsible space"
+  "partOfGroup": "part of"
 }

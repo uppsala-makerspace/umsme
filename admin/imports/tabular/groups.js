@@ -10,7 +10,7 @@ const groupDefaults = {
   filter: [
     'name', 'name.en',
     'description', 'description.sv', 'description.en',
-    'responsibleSpace', 'responsibleMemberId', 'parentGroupId', 'createdAt',
+    'responsibleMemberId', 'parentGroupId', 'createdAt',
   ],
 };
 
