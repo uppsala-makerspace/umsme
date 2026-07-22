@@ -8,3 +8,6 @@ storybook-static
 .claude
 tutorial/dist/
 tests-data-example/
+inbox
+certs/
+admin/dist/
