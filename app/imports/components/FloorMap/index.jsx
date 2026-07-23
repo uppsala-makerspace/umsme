@@ -94,14 +94,19 @@ const FloorMap = ({
   // else switches floors.
   const setupMiniFloor = (svgDoc, floorNumber) => {
     if (!svgDoc) return;
-    const spaces = miniRef.current?.spaces || [];
-    const bySpaceId = new Map(spaces.map((s) => [s.spaceId, s]));
+    const floorKey = floorNumber === 1 ? "floor1" : "floor2";
+    // Match on floor too: spaceId is only unique per floor (e.g. "kitchen"
+    // exists on both), so a space is only colored on its own floor's SVG.
+    const onThisFloor = (spaceId) =>
+      (miniRef.current?.spaces || []).find(
+        (s) => s.spaceId === spaceId && s.floor === floorKey
+      );
     svgDoc.querySelectorAll('[id$="-marker"]').forEach((marker) => {
       marker.style.display = "none";
     });
     svgDoc.querySelectorAll(`[id$="${FLOOR_SUFFIX}"]`).forEach((floorEl) => {
       const spaceId = floorEl.id.slice(0, -FLOOR_SUFFIX.length);
-      floorEl.style.fill = bySpaceId.get(spaceId)?.color || "#e5e7eb";
+      floorEl.style.fill = onThisFloor(spaceId)?.color || "#e5e7eb";
     });
     const svgRoot = svgDoc.documentElement;
     if (svgRoot.dataset.miniSetup) return;
@@ -111,10 +116,9 @@ const FloorMap = ({
       const floorEl = event.target.closest?.(`[id$="${FLOOR_SUFFIX}"]`);
       if (activeFloorRef.current === floorNumber && floorEl) {
         const spaceId = floorEl.id.slice(0, -FLOOR_SUFFIX.length);
-        const current = miniRef.current?.spaces || [];
-        // Gray spaces lead to the primary space (always first in the list).
-        const target =
-          current.find((s) => s.spaceId === spaceId) || current[0];
+        // A highlighted space on this floor deep-links to itself; a gray one
+        // falls back to the primary space (always first in the list).
+        const target = onThisFloor(spaceId) || miniRef.current?.spaces?.[0];
         if (target) {
           navigate(spaceMapUrl(target.spaceId, target.colorName, target.floor));
         }

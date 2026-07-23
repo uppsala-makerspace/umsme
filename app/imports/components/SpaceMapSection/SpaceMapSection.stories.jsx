@@ -60,6 +60,21 @@ export const FiveSpaces = {
   },
 };
 
+// "kitchen" exists on both floors — only the floor2 instance should light up.
+export const DuplicateSpaceIdAcrossFloors = {
+  args: {
+    mapView: {
+      floor: "floor1",
+      primarySpaceId: "woodworkshop",
+      spaces: [
+        space("woodworkshop", "primary"),
+        space("kitchen", "sec1", "floor2"),
+      ],
+    },
+    children: cards,
+  },
+};
+
 export const WithoutMapView = {
   args: {
     mapView: null,
