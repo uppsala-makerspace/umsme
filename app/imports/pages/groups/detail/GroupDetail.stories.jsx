@@ -24,6 +24,10 @@ const baseData = {
   responsibleName: "Anna Andersson",
   parentGroup: null,
   childGroups: [{ _id: "grp6", name: { sv: "Ugnsgruppen" } }],
+  relatedGroups: [
+    { _id: "grp7", name: { sv: "Cykelgruppen", en: "Bike kitchen" }, type: "interest" },
+    { _id: "grp8", name: { sv: "IT-gruppen" }, type: "function" },
+  ],
   workshop: { _id: "ws1", name: { sv: "Träverkstad" } },
   canSeeMembers: true,
   canJoin: true,

@@ -1011,6 +1011,16 @@ export const models = {
       autoform: { omit: true },
     },
     "relatedWorkshopIds.$": { type: String, autoform: { omit: true } },
+    // Other groups this group is related to. The relation is mutual: each side
+    // is shown on the other's page, so only one side needs to record it. Any
+    // group type may relate to any other (edited in admin).
+    relatedGroupIds: {
+      label: "Related groups",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "relatedGroupIds.$": { type: String, autoform: { omit: true } },
     joinPolicy: {
       label: "Join policy",
       type: String,

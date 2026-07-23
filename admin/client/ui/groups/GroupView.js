@@ -157,6 +157,21 @@ Template.GroupView.helpers({
     const ids = Groups.findOne(groupId())?.relatedWorkshopIds || [];
     return Workshops.find({ _id: { $nin: ids } }, { sort: { 'name.sv': 1 } });
   },
+  relatedGroups() {
+    const ids = Groups.findOne(groupId())?.relatedGroupIds || [];
+    return Groups.find({ _id: { $in: ids } }, { sort: { 'name.sv': 1 } });
+  },
+  hasRelatedGroups() {
+    return (Groups.findOne(groupId())?.relatedGroupIds || []).length > 0;
+  },
+  addableRelatedGroups() {
+    const ids = Groups.findOne(groupId())?.relatedGroupIds || [];
+    // Any other group (excluding self and already-related).
+    return Groups.find(
+      { _id: { $nin: [...ids, groupId()] } },
+      { sort: { 'name.sv': 1 } }
+    );
+  },
   activeMembers() {
     return membershipWithNames('active');
   },
@@ -273,6 +288,18 @@ Template.GroupView.events({
   },
   'click .removeRelatedWorkshop': function (event) {
     Groups.update(groupId(), { $pull: { relatedWorkshopIds: event.currentTarget.dataset.id } }, (err) => {
+      if (err) alert('Update failed: ' + err.message);
+    });
+  },
+  'click .addRelatedGroup': function (event, template) {
+    const value = template.find('.relatedGroupSelect').value;
+    if (!value) return;
+    Groups.update(groupId(), { $addToSet: { relatedGroupIds: value } }, (err) => {
+      if (err) alert('Update failed: ' + err.message);
+    });
+  },
+  'click .removeRelatedGroup': function (event) {
+    Groups.update(groupId(), { $pull: { relatedGroupIds: event.currentTarget.dataset.id } }, (err) => {
       if (err) alert('Update failed: ' + err.message);
     });
   },

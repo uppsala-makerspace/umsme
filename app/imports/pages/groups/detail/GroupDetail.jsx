@@ -7,6 +7,7 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import InfoCard from "../../../components/InfoCard";
+import GroupTypeTag from "../../../components/GroupTypeTag";
 import SpaceMapSection from "../../../components/SpaceMapSection";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
@@ -55,6 +56,7 @@ const GroupDetail = ({
     responsibleName,
     parentGroup,
     childGroups,
+    relatedGroups = [],
     workshop,
     canSeeMembers,
     canJoin,
@@ -285,6 +287,31 @@ const GroupDetail = ({
                   className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
                 >
                   <span className="font-semibold">{localized(child.name, lang)}</span>
+                  <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Related groups (mutual relation with other groups) */}
+      {relatedGroups.length > 0 && (
+        <section className="mb-6">
+          <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
+            {t("relatedGroups")}
+          </h3>
+          <ul className="list-none p-0 m-0">
+            {relatedGroups.map((related) => (
+              <li key={related._id} className="mb-2">
+                <Link
+                  to={`/groups/${related._id}`}
+                  className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
+                >
+                  <span className="flex items-center gap-2 font-semibold">
+                    {localized(related.name, lang)}
+                    <GroupTypeTag type={related.type} />
+                  </span>
                   <span className="text-gray-400 text-xl ml-2">&rarr;</span>
                 </Link>
               </li>

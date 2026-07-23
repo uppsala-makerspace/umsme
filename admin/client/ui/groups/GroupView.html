@@ -116,6 +116,32 @@
 
     <hr>
 
+    <h2>Related groups</h2>
+    <p class="text-muted">Other groups related to this one. The relation is mutual — each group is shown on the other's page in the app — so you only need to add it on one side.</p>
+    {{#if hasRelatedGroups}}
+    <ul class="list-group">
+        {{#each relatedGroups}}
+        <li class="list-group-item">
+            <a href="/group/{{_id}}">{{name.sv}}</a>
+            <a class="removeRelatedGroup pull-right text-danger" data-id="{{_id}}">Remove</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p><em>No related groups.</em></p>
+    {{/if}}
+    <form class="form-inline">
+        <select class="form-control relatedGroupSelect">
+            <option value="">(Select a group)</option>
+            {{#each addableRelatedGroups}}
+            <option value="{{_id}}">{{name.sv}}</option>
+            {{/each}}
+        </select>
+        <button type="button" class="btn btn-default addRelatedGroup">Add</button>
+    </form>
+
+    <hr>
+
     <h2>Members <small><a class="showMemberSelector">Add</a></small></h2>
 
     {{#if showMemberSelector}}

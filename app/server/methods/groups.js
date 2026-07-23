@@ -158,6 +158,23 @@ Meteor.methods({
       { sort: { "name.sv": 1 } }
     ).fetchAsync();
 
+    // Related groups (mutual): those this group lists, plus those that list
+    // this group. Only interest and function groups have relations.
+    const relatedGroups = [];
+    const relatedGroupDocs = await Groups.find(
+      {
+        _id: { $ne: groupId },
+        $or: [
+          { _id: { $in: group.relatedGroupIds || [] } },
+          { relatedGroupIds: groupId },
+        ],
+      },
+      { sort: { "name.sv": 1 } }
+    ).fetchAsync();
+    for (const relatedGroup of relatedGroupDocs) {
+      relatedGroups.push(await groupSummary(relatedGroup, member._id));
+    }
+
     // The group's workshop: directly for workshop groups, via the parent
     // workshop group for responsibility subgroups (e.g. Ugnsgruppen shows
     // Keramikverkstaden).
@@ -202,6 +219,7 @@ Meteor.methods({
         ? { _id: parentGroup._id, name: parentGroup.name }
         : null,
       childGroups: childGroups.map((g) => ({ _id: g._id, name: g.name })),
+      relatedGroups,
       workshop: workshop ? { _id: workshop._id, name: workshop.name } : null,
       canSeeMembers,
       canJoin: activeCaller,
