@@ -954,6 +954,28 @@ export const models = {
       optional: true,
       autoform: { type: "textarea", rows: 10 },
     },
+    // Rules text (bilingual markdown), shown on its own page linked from a
+    // card when present.
+    rules: {
+      label: "Rules",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "rules.sv": {
+      label: "Rules (Swedish, markdown)",
+      type: String,
+      max: 10000,
+      optional: true,
+      autoform: { type: "textarea", rows: 10 },
+    },
+    "rules.en": {
+      label: "Rules (English, markdown)",
+      type: String,
+      max: 10000,
+      optional: true,
+      autoform: { type: "textarea", rows: 10 },
+    },
     type: {
       label: "Type",
       type: String,
@@ -1125,6 +1147,28 @@ export const models = {
       label: "Description (English, markdown)",
       type: String,
       max: 5000,
+      optional: true,
+      autoform: { type: "textarea", rows: 10 },
+    },
+    // Rules text (bilingual markdown), shown on its own page linked from a
+    // card when present.
+    rules: {
+      label: "Rules",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "rules.sv": {
+      label: "Rules (Swedish, markdown)",
+      type: String,
+      max: 10000,
+      optional: true,
+      autoform: { type: "textarea", rows: 10 },
+    },
+    "rules.en": {
+      label: "Rules (English, markdown)",
+      type: String,
+      max: 10000,
       optional: true,
       autoform: { type: "textarea", rows: 10 },
     },

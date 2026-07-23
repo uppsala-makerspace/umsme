@@ -40,6 +40,7 @@ const publicWorkshopFields = (workshop) => ({
   _id: workshop._id,
   name: workshop.name,
   description: workshop.description,
+  rules: workshop.rules,
   status: workshop.status,
   slackChannel: workshop.slackChannel,
   guidesUrl: workshop.guidesUrl,
@@ -141,6 +142,8 @@ Meteor.methods({
     await applyWhitelistedUpdate(Workshops, workshopId, {
       "description.sv": p.description?.sv,
       "description.en": p.description?.en,
+      "rules.sv": p.rules?.sv,
+      "rules.en": p.rules?.en,
       slackChannel: p.slackChannel,
       guidesUrl: p.guidesUrl,
     });

@@ -2,7 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { HashtagIcon, WrenchScrewdriverIcon, BookOpenIcon } from "@heroicons/react/24/outline";
+import {
+  HashtagIcon,
+  WrenchScrewdriverIcon,
+  BookOpenIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
@@ -169,6 +174,7 @@ const GroupDetail = ({
       {(() => {
         const showGuides =
           (group.type === "interest" || group.type === "function") && group.guidesUrl;
+        const hasRules = !!localized(group.rules, lang);
         const cards = (
           <>
             {workshop && (
@@ -187,6 +193,13 @@ const GroupDetail = ({
                 subtitle={`#${group.slackChannel}`}
               />
             )}
+            {hasRules && (
+              <InfoCard
+                to={`/groups/${group._id}/rules`}
+                Icon={ClipboardDocumentListIcon}
+                title={t("rules")}
+              />
+            )}
             {showGuides && (
               <InfoCard href={group.guidesUrl} Icon={BookOpenIcon} title={t("tutorials")} />
             )}
@@ -195,7 +208,7 @@ const GroupDetail = ({
         if (mapView) {
           return <SpaceMapSection mapView={mapView}>{cards}</SpaceMapSection>;
         }
-        if (workshop || group.slackChannel || showGuides) {
+        if (workshop || group.slackChannel || showGuides || hasRules) {
           return <section className="mb-6 grid grid-cols-2 gap-3">{cards}</section>;
         }
         return null;

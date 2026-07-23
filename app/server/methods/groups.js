@@ -69,6 +69,7 @@ const groupSummary = async (group, memberId) => {
     _id: group._id,
     name: group.name,
     description: group.description,
+    rules: group.rules,
     type: group.type,
     slackChannel: group.slackChannel,
     guidesUrl: group.guidesUrl,
@@ -365,6 +366,8 @@ Meteor.methods({
     await applyWhitelistedUpdate(Groups, groupId, {
       "description.sv": p.description?.sv,
       "description.en": p.description?.en,
+      "rules.sv": p.rules?.sv,
+      "rules.en": p.rules?.en,
       slackChannel: p.slackChannel,
       guidesUrl: p.guidesUrl,
     });

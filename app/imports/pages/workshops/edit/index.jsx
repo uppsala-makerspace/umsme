@@ -91,6 +91,8 @@ export default () => {
             values={{
               descriptionSv: workshop.description?.sv || "",
               descriptionEn: workshop.description?.en || "",
+              rulesSv: workshop.rules?.sv || "",
+              rulesEn: workshop.rules?.en || "",
               slackChannel: workshop.slackChannel || "",
               guidesUrl: workshop.guidesUrl || "",
             }}

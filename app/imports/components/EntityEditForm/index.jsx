@@ -16,7 +16,7 @@ const textareaStyles =
  *
  * @param {string} name        Entity name, shown read-only as a heading
  * @param {string} imageUrl    Current image URL (null when none)
- * @param {object} values      { descriptionSv, descriptionEn, slackChannel, guidesUrl }
+ * @param {object} values      { descriptionSv, descriptionEn, rulesSv, rulesEn, slackChannel, guidesUrl }
  * @param {boolean} showGuidesUrl  Whether to show the guides URL field (workshops)
  * @param {boolean} saving
  * @param {function} onSave        (patch) => void
@@ -36,6 +36,8 @@ const EntityEditForm = ({
   const { t } = useTranslation();
   const [descriptionSv, setDescriptionSv] = useState(values?.descriptionSv || "");
   const [descriptionEn, setDescriptionEn] = useState(values?.descriptionEn || "");
+  const [rulesSv, setRulesSv] = useState(values?.rulesSv || "");
+  const [rulesEn, setRulesEn] = useState(values?.rulesEn || "");
   const [slackChannel, setSlackChannel] = useState(values?.slackChannel || "");
   const [guidesUrl, setGuidesUrl] = useState(values?.guidesUrl || "");
 
@@ -55,6 +57,7 @@ const EntityEditForm = ({
   const handleSave = () => {
     onSave({
       description: { sv: descriptionSv, en: descriptionEn },
+      rules: { sv: rulesSv, en: rulesEn },
       slackChannel,
       ...(showGuidesUrl ? { guidesUrl } : {}),
     });
@@ -124,6 +127,33 @@ const EntityEditForm = ({
         />
       </div>
 
+      <div className="mb-4">
+        <label htmlFor="rulesSv" className="block mb-1 font-bold">
+          {t("rulesSv")}
+        </label>
+        <textarea
+          id="rulesSv"
+          rows={8}
+          className={textareaStyles}
+          value={rulesSv}
+          onChange={(e) => setRulesSv(e.target.value)}
+        />
+        <p className="text-gray-500 mt-1 text-sm">{t("descriptionMarkdownHint")}</p>
+      </div>
+
+      <div className="mb-4">
+        <label htmlFor="rulesEn" className="block mb-1 font-bold">
+          {t("rulesEn")}
+        </label>
+        <textarea
+          id="rulesEn"
+          rows={8}
+          className={textareaStyles}
+          value={rulesEn}
+          onChange={(e) => setRulesEn(e.target.value)}
+        />
+      </div>
+
       <Input
         id="slackChannel"
         label={t("slackChannel")}
@@ -155,6 +185,8 @@ EntityEditForm.propTypes = {
   values: PropTypes.shape({
     descriptionSv: PropTypes.string,
     descriptionEn: PropTypes.string,
+    rulesSv: PropTypes.string,
+    rulesEn: PropTypes.string,
     slackChannel: PropTypes.string,
     guidesUrl: PropTypes.string,
   }),

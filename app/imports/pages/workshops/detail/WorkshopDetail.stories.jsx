@@ -10,6 +10,7 @@ const sampleData = {
     },
     status: "trial",
     slackChannel: "träverkstaden",
+    rules: { sv: "Bär skyddsglasögon. Städa efter dig.", en: "Wear safety glasses." },
     guidesUrl: "https://tutorial.uppsalamakerspace.se",
     imageUrl: "https://placehold.co/800x400?text=Tr%C3%A4verkstad",
   },

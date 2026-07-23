@@ -6,6 +6,7 @@ import {
   HashtagIcon,
   MagnifyingGlassIcon,
   BookOpenIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
@@ -131,6 +132,13 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
             Icon={HashtagIcon}
             title={t("slackChannel")}
             subtitle={`#${workshop.slackChannel}`}
+          />
+        )}
+        {localized(workshop.rules, lang) && (
+          <InfoCard
+            to={`/workshops/${workshop._id}/rules`}
+            Icon={ClipboardDocumentListIcon}
+            title={t("rules")}
           />
         )}
         <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />

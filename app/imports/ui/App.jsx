@@ -47,9 +47,11 @@ const ExpenseNew = lazyWithRetry(() => import('/imports/pages/expenses/new'));
 const Workshops = lazyWithRetry(() => import('/imports/pages/workshops'));
 const WorkshopDetail = lazyWithRetry(() => import('/imports/pages/workshops/detail'));
 const WorkshopEdit = lazyWithRetry(() => import('/imports/pages/workshops/edit'));
+const WorkshopRules = lazyWithRetry(() => import('/imports/pages/workshops/rules'));
 const Groups = lazyWithRetry(() => import('/imports/pages/groups'));
 const GroupDetail = lazyWithRetry(() => import('/imports/pages/groups/detail'));
 const GroupEdit = lazyWithRetry(() => import('/imports/pages/groups/edit'));
+const GroupRules = lazyWithRetry(() => import('/imports/pages/groups/rules'));
 
 export const App = () => {
   useAutoReconnect();
@@ -102,9 +104,11 @@ export const App = () => {
             <Route path="/workshops" element={<Workshops />} />
             <Route path="/workshops/:workshopId" element={<WorkshopDetail />} />
             <Route path="/workshops/:workshopId/edit" element={<WorkshopEdit />} />
+            <Route path="/workshops/:workshopId/rules" element={<WorkshopRules />} />
             <Route path="/groups" element={<Groups />} />
             <Route path="/groups/:groupId" element={<GroupDetail />} />
             <Route path="/groups/:groupId/edit" element={<GroupEdit />} />
+            <Route path="/groups/:groupId/rules" element={<GroupRules />} />
           </Routes>
         </Suspense>
         </ChunkErrorBoundary>
