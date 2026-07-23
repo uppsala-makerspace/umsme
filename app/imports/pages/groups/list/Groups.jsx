@@ -55,9 +55,16 @@ const Groups = ({ loading, groups }) => {
   const ToggleIcon = compact ? Squares2X2Icon : QueueListIcon;
 
   const needle = search.trim().toLowerCase();
-  const visibleGroups = TYPE_ORDER.flatMap((type) =>
+  const typeOrdered = TYPE_ORDER.flatMap((type) =>
     groups.filter((g) => g.type === type && matchesSearch(g, needle))
   );
+  // Groups the member has joined come first (keeping the type order within
+  // each partition); the member chip on the card already marks them.
+  const isMine = (g) => g.myState === "active";
+  const visibleGroups = [
+    ...typeOrdered.filter(isMine),
+    ...typeOrdered.filter((g) => !isMine(g)),
+  ];
 
   return (
     <MainContent>
