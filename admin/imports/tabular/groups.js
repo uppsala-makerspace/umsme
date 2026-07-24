@@ -11,8 +11,10 @@ const groupDefaults = {
   filter: [
     'name', 'name.en',
     'description', 'description.sv', 'description.en',
-    'slackChannel', 'responsibleMemberId', 'parentGroupId',
+    'rules', 'rules.sv', 'rules.en',
+    'slackChannel', 'guidesUrl', 'responsibleMemberId', 'parentGroupId',
     'relatedWorkshopIds', 'relatedWorkshopIds.$',
+    'relatedGroupIds', 'relatedGroupIds.$',
     'imageFileId', 'imageMimeType',
     'primarySpaceId', 'secondarySpaceIds', 'secondarySpaceIds.$',
     'linkedRole', 'createdAt',

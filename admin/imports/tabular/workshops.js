@@ -11,6 +11,7 @@ const workshopDefaults = {
   filter: [
     'name', 'name.en',
     'description', 'description.sv', 'description.en',
+    'rules', 'rules.sv', 'rules.en',
     'slackChannel', 'groupId', 'imageFileId', 'imageMimeType', 'guidesUrl',
     'primarySpaceId', 'secondarySpaceIds', 'secondarySpaceIds.$', 'createdAt',
   ],
