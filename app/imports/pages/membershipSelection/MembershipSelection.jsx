@@ -48,19 +48,22 @@ export default function MembershipSelection({
   // Helper to get localized text from option config
   const getLabel = (option) =>
     option.label?.[lang] || option.label?.en || option.paymentType;
-  const getPeriodLabel = (option) =>
-    option.period === "quarter"
-      ? lang === "sv"
-        ? "/kvartal"
-        : "/quarter"
-      : lang === "sv"
-        ? "/år"
-        : "/year";
+  // Upgrade options (e.g. topping up to family lab) carry no period — they
+  // modify the current period instead of buying a new one, so no suffix.
+  const getPeriodLabel = (option) => {
+    if (!option.period) return "";
+    if (option.period === "quarter") return lang === "sv" ? "/kvartal" : "/quarter";
+    return lang === "sv" ? "/år" : "/year";
+  };
 
   // Filter options based on discounted and family checkboxes
   const filteredOptions = options.filter((option) => {
     const optionIsDiscounted = option.discountedOnly || false;
     const optionIsFamily = option.familyOnly || false;
+
+    // Availability rules hide options that don't apply at all (e.g. the family
+    // lab upgrade products outside the situation they exist for).
+    if (option.hidden) return false;
 
     // If family is checked, only show family options
     if (isFamily) {

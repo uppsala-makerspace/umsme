@@ -93,5 +93,25 @@
       "sv": "Med ett labbmedlemskap för familjen får du tillgång till Makerspace 24/7 för upp till 5 personer som är skrivna på samma adress."
     },
     "familyOnly": true
+  },
+  {
+    "paymentType": "toFamilyLab",
+    "amount": 400,
+    "label": {
+      "en": "Yearly Family Lab Membership",
+      "sv": "Årligt Familjemedlemskap Labb"
+    },
+    "familyOnly": true,
+    "upgradePath": "regular"
+  },
+  {
+    "paymentType": "discountedToFamilyLab",
+    "amount": 800,
+    "label": {
+      "en": "Yearly Family Lab Membership",
+      "sv": "Årligt Familjemedlemskap Labb"
+    },
+    "familyOnly": true,
+    "upgradePath": "discounted"
   }
 ]

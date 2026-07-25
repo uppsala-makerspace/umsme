@@ -13,7 +13,7 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
   const renewalWindowEnd = new Date(now);
   renewalWindowEnd.setDate(renewalWindowEnd.getDate() + MEMBERSHIP_RENEWAL_WINDOW_DAYS);
 
-  const { type, memberEnd, labEnd, quarterly, family } = memberStatus || {};
+  const { type, memberEnd, labEnd, quarterly, family, discounted } = memberStatus || {};
 
   // Determine member category
   const isNewMember = type === "none";
@@ -23,6 +23,18 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
     isActiveMember && memberEnd <= renewalWindowEnd;
   const isWithinLabRenewalWindow =
     labEnd && labEnd > now && labEnd <= renewalWindowEnd;
+  const hasActiveLab = labEnd && labEnd > now;
+
+  // S3: switching to family before the renewal window is an *upgrade* rather
+  // than a renewal (see MEMBERSHIP_RULES.md). What may be bought depends on
+  // what the member holds today; inside the window it is a normal renewal and
+  // these rules don't apply.
+  const isFamilyUpgrade = isActiveMember && !isWithinMemberRenewalWindow && !family;
+  // S3d: a yearly lab member pays only the price difference, through the
+  // dedicated upgrade payment types. Quarterly lab is excluded — those members
+  // renew into a full family lab year instead (S3b).
+  const isLabToFamilyLab = isFamilyUpgrade && hasActiveLab && !quarterly;
+  const upgradePath = discounted ? "discounted" : "regular";
 
   // Check if labEnd equals memberEnd (Q4 scenario)
   const labEndEqualsMemberEnd =
@@ -35,6 +47,20 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
   return options.map((option) => {
     const result = { ...option, disabled: false, disabledReason: null };
     const isQuarterlyLab = option.paymentType === "memberQuarterlyLab";
+
+    // === Family upgrade products (S3d) ===
+    // These exist only to top up an active lab membership to family, and only
+    // at the price matching what the member paid last time. In every other
+    // situation they are hidden rather than disabled — they are not a choice
+    // the member could make, just a variant of the family lab option.
+    if (option.upgradePath) {
+      if (!isLabToFamilyLab || option.upgradePath !== upgradePath) {
+        result.hidden = true;
+      } else {
+        result.note = "upgradeToFamily";
+      }
+      return result;
+    }
 
     // === Quarterly Lab Rules ===
     if (isQuarterlyLab) {
@@ -77,6 +103,30 @@ export function calculateOptionAvailability(options, memberStatus, isFamily) {
 
     // New/expired members can pick any yearly option
     if (isNewMember || isExpiredMember) {
+      return result;
+    }
+
+    // === Family upgrade (S3a/S3b/S3c) ===
+    // Checked before the S1 rule below so a base member upgrading to familyLab
+    // gets the family note (and the family terms on the server).
+    if (isFamilyUpgrade && option.familyOnly) {
+      if (option.paymentType === "familyLab") {
+        // A yearly lab member buys the cheaper difference-only product instead.
+        if (isLabToFamilyLab) {
+          result.hidden = true;
+        } else {
+          result.note = "upgradeToFamily";
+        }
+        return result;
+      }
+      // S3c: familyBase would mean giving up an active lab early — only
+      // allowed as an ordinary renewal, inside the window.
+      if (hasActiveLab) {
+        result.disabled = true;
+        result.disabledReason = "disabledFamilyBaseWithLab";
+        return result;
+      }
+      result.note = "upgradeToFamily";
       return result;
     }
 
@@ -124,9 +174,12 @@ export function getInitialCheckboxState(memberStatus) {
   const isWithinRenewalWindow =
     isActiveMember && memberEnd <= renewalWindowEnd;
 
-  // Family checkbox can be changed for new/expired members or within renewal window
+  // Family can be checked *in* at any time — switching to family mid-period is
+  // an upgrade (S3). Unchecking it is a downgrade that loses paid-for value, so
+  // it stays locked outside the renewal window for members who already are
+  // family. New/expired members may always change it.
   const familyLocked =
-    isActiveMember && !isWithinRenewalWindow && !isNewMember && !isExpiredMember;
+    isActiveMember && !isWithinRenewalWindow && !isNewMember && !isExpiredMember && !!family;
 
   return {
     isFamily: !!family,

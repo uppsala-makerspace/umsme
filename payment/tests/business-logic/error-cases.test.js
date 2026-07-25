@@ -54,9 +54,15 @@ describe('Error Case Tests', function () {
   });
 
   it('ERROR-002: FAMILY_UPGRADE_TOO_EARLY - payment created, no membership, error set', async function () {
-    // Regular member with membership ending in 6 months
+    // S3c: a member with an active lab moving to familyBase mid-period. Base
+    // members may upgrade to family at any time (S3a/S3b); only giving up an
+    // active lab early is refused.
     const memberEnd = addMonths(new Date(), 6);
-    const memberId = await createTestMember({ member: memberEnd, family: false });
+    const memberId = await createTestMember({
+      member: memberEnd,
+      lab: memberEnd,
+      family: false,
+    });
 
     const membership = await processPayment(memberId, 'familyBase', 500);
 

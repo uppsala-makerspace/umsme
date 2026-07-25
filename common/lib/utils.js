@@ -3,6 +3,7 @@ import { Memberships } from '/imports/common/collections/memberships.js';
 import {
   MEMBERSHIP_RENEWAL_WINDOW_DAYS,
   FIRST_TIME_MEMBER_GRACE_DAYS,
+  UPGRADE_MONTHS,
   QUARTERLY_LAB_MAX_DAYS,
 } from '/imports/common/lib/timeConstants.js';
 
@@ -153,8 +154,14 @@ export function membershipFromPayment(paymentDate, paymentType, member, { quarte
   twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
   const memberendMoreThan2MonthsAway = member.member && member.member > twoMonthsFromNow;
 
-  // Determine payment characteristics
-  const isFamilyPayment = paymentType.startsWith('family');
+  // Determine payment characteristics. toFamilyLab/discountedToFamilyLab are
+  // the S3d upgrade products: they top up an existing lab membership to family
+  // for the price difference and leave the end dates alone. The two differ
+  // only in price (the previous membership's discount decides which one is
+  // offered), so the calculation treats them identically.
+  const isFamilyLabUpgradePayment =
+    paymentType === 'toFamilyLab' || paymentType === 'discountedToFamilyLab';
+  const isFamilyPayment = paymentType.startsWith('family') || isFamilyLabUpgradePayment;
   const isDiscountedPayment = paymentType.includes('Discounted');
   const isQuarterlyPayment = paymentType === 'memberQuarterlyLab';
   const isLabPayment = paymentType.includes('Lab');
@@ -173,9 +180,24 @@ export function membershipFromPayment(paymentDate, paymentType, member, { quarte
     return { error: 'QUARTERLY_WITHOUT_BASE_MEMBERSHIP' };
   }
 
-  // S3: Regular -> Family outside the renewal window
-  if (isSwitchingToFamily && hasActiveMembership && !isWithinRenewalWindow) {
+  // S3: Regular -> Family. Within the renewal window this is an ordinary
+  // renewal that happens to flip the family flag. Earlier than that it is an
+  // *upgrade* — allowed, but on upgrade terms (see the payment cases below).
+  // The one refused combination is S3c: giving up an active lab to move to
+  // familyBase early would mean paying for less than you already have.
+  const isFamilyUpgrade =
+    isSwitchingToFamily && hasActiveMembership && !isWithinRenewalWindow;
+  if (isFamilyUpgrade && hasActiveLab && !isLabPayment) {
     return { error: 'FAMILY_UPGRADE_TOO_EARLY' };
+  }
+
+  // The S3d upgrade products only mean anything for a member who has an
+  // active, non-family lab membership to top up.
+  if (
+    isFamilyLabUpgradePayment &&
+    (!hasActiveMembership || !hasActiveLab || isCurrentlyFamily)
+  ) {
+    return { error: 'FAMILY_LAB_UPGRADE_NOT_APPLICABLE' };
   }
 
   // S4: Family -> Regular outside the renewal window
@@ -218,6 +240,16 @@ export function membershipFromPayment(paymentDate, paymentType, member, { quarte
     case 'memberBase':
     case 'memberDiscountedBase':
     case 'familyBase':
+      // S3a: upgrading to familyBase mid-period, on the same terms as the S1
+      // lab upgrade — the full family price buys UPGRADE_MONTHS from today
+      // rather than extending the old end date. (An active lab never reaches
+      // this branch — that is S3c, refused above.)
+      if (isFamilyUpgrade) {
+        start = new Date(now);
+        memberend = new Date(now);
+        memberend.setMonth(memberend.getMonth() + UPGRADE_MONTHS);
+        break;
+      }
       // S2: If has active lab, labend unchanged (kept from initialization)
       // memberend extends from current or now + grace
       if (hasActiveMembership) {
@@ -238,16 +270,28 @@ export function membershipFromPayment(paymentDate, paymentType, member, { quarte
     case 'familyLab':
       type = 'labandmember';
 
+      // S3b: upgrading to familyLab mid-period, on the same terms as the S1 lab
+      // upgrade below. Kept as its own branch so the family upgrade always
+      // grants UPGRADE_MONTHS, rather than falling into S1's "memberend is less
+      // than 2 months away" sub-case.
+      if (isFamilyUpgrade) {
+        start = new Date(now);
+        memberend = new Date(now);
+        memberend.setMonth(memberend.getMonth() + UPGRADE_MONTHS);
+        labend = new Date(memberend);
+        break;
+      }
+
       // S1: Upgrading to lab — from a base membership with no active lab, or
       // from an active *quarterly* lab (the quarter is replaced by a full year).
       if (hasActiveMembership && (!hasActiveLab || quarterly)) {
         if (memberendMoreThan2MonthsAway) {
           // memberend > now + 2 months: starts today, labend = memberend =
-          // now + 14 months (the extra 2 months compensates for the membership
-          // value given up by upgrading mid-period).
+          // now + UPGRADE_MONTHS (the extra 2 months compensates for the
+          // membership value given up by upgrading mid-period).
           start = new Date(now);
           memberend = new Date(now);
-          memberend.setMonth(memberend.getMonth() + 14);
+          memberend.setMonth(memberend.getMonth() + UPGRADE_MONTHS);
           labend = new Date(memberend);
         } else {
           // memberend <= now + 2 months: starts today, labend = memberend =
@@ -281,6 +325,18 @@ export function membershipFromPayment(paymentDate, paymentType, member, { quarte
           labend.setFullYear(labend.getFullYear() + 1);
         }
       }
+      break;
+
+    // === FAMILY LAB UPGRADE (S3d) ===
+    case 'toFamilyLab':
+    case 'discountedToFamilyLab':
+      // Tops up an active lab membership to family for the price difference.
+      // The period is untouched — only the family flag changes — so the end
+      // dates are copied from what the member already has.
+      type = 'labandmember';
+      start = new Date(now);
+      memberend = new Date(member.member);
+      labend = new Date(member.lab);
       break;
 
     default:

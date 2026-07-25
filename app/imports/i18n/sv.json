@@ -323,6 +323,8 @@
 
   "disabledTooEarlyToRenew": "För tidigt att förnya",
   "upgradeToLab": "Uppgradera till labb",
+  "upgradeToFamily": "Uppgradera till familj",
+  "disabledFamilyBaseWithLab": "Kan bara väljas vid förnyelse",
   "disabledNoBaseMembership": "Kräver aktivt medlemskap",
   "disabledHasYearlyLab": "Du har redan ett årslabbmedlemskap",
   "disabledRenewYearlyFirst": "Förnya årsmedlemskapet först",

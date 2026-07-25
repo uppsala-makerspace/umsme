@@ -27,12 +27,14 @@ export default function PaymentSelectionPage() {
   const paymentOptions = contextPaymentOptions || [];
   const paymentOption = paymentOptions.find((o) => o.paymentType === paymentType) || null;
 
-  // Check if this payment type is unavailable given the current membership status
+  // Check if this payment type is unavailable given the current membership
+  // status — either disabled, or no longer applicable at all (`hidden`, e.g. an
+  // upgrade product whose precondition lapsed while the page was open).
   const statusChanged = useMemo(() => {
     if (!paymentOptions.length || !memberStatus) return false;
     const withAvailability = calculateOptionAvailability(paymentOptions, memberStatus, !!member?.family);
     const option = withAvailability.find((o) => o.paymentType === paymentType);
-    return option?.disabled === true;
+    return option?.disabled === true || option?.hidden === true;
   }, [paymentOptions, memberStatus, member?.family, paymentType]);
 
   // Get Swish disabled status from public settings and allowlist

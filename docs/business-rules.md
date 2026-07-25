@@ -22,11 +22,16 @@ Each payment option is identified by a `paymentType` key. The configuration live
 | `memberQuarterlyLab` | `lab` | false | false | 3 months lab | 450 | quarter |
 | `familyBase` | `member` | true | false | 1 year | 300 | year |
 | `familyLab` | `labandmember` | true | false | 1 year member + 1 year lab | 2000 | year |
+| `toFamilyLab` | `labandmember` | true | false | unchanged (S3d upgrade) | 400 | -- |
+| `discountedToFamilyLab` | `labandmember` | true | false | unchanged (S3d upgrade) | 800 | -- |
+
+`toFamilyLab` / `discountedToFamilyLab` are upgrade-only products for [S3d](#s3-regular---family-upgrade): they top up an active lab membership to family for the price difference and leave the end dates alone. They deliberately have no `period`, since they modify the current period instead of buying a new one -- the UI omits the `/year` suffix for options without one.
 
 **Visibility rules** in the payment selection UI:
 
 - Options with `discountedOnly: true` (`memberDiscountedBase`, `memberDiscountedLab`) are only shown when the discount checkbox is checked.
-- Options with `familyOnly: true` (`familyBase`, `familyLab`) are only shown when the family checkbox is checked.
+- Options with `familyOnly: true` (`familyBase`, `familyLab`, `toFamilyLab`, `discountedToFamilyLab`) are only shown when the family checkbox is checked.
+- Options with an `upgradePath` (`regular`/`discounted`) are additionally hidden unless the member is in the S3d situation and their current membership matches that path. `calculateOptionAvailability` marks non-applicable options `hidden`, which the UI filters out (as opposed to `disabled`, which renders greyed out with a reason).
 
 ---
 
@@ -125,7 +130,7 @@ The lab extension stacks from the current lab end date.
 
 **UI note**: The UI discourages this scenario. When `quarterly=true` and `labEnd === memberEnd`, the quarterly option is disabled with reason `disabledRenewYearlyFirst`. The goal is to allow at most one quarterly renewal before prompting for a yearly renewal.
 
-Additionally, if a member has an active quarterly lab and `labEnd` is more than 14 days away, the quarterly option is disabled with `disabledTooEarlyToRenew`.
+Additionally, if a member has an active quarterly lab whose `labEnd` is outside the renewal window (`MEMBERSHIP_RENEWAL_WINDOW_DAYS`), the quarterly option is disabled with `disabledTooEarlyToRenew`.
 
 ---
 
@@ -139,8 +144,8 @@ A member with active `memberBase` (or `familyBase`) pays for `memberLab` (or `fa
 
 | Condition | Start | Memberend | Labend |
 |-----------|-------|-----------|--------|
-| `memberend > now + 2 months` | now + 2 months | now + 14 months | now + 14 months |
-| `memberend <= now + 2 months` | current memberend | current memberend + 1 year | current memberend + 1 year |
+| `memberend > now + 2 months` | now | now + `UPGRADE_MONTHS` (14 months) | now + `UPGRADE_MONTHS` (14 months) |
+| `memberend <= now + 2 months` | now | current memberend + 1 year | current memberend + 1 year |
 
 **Rationale**: When upgrading mid-membership with significant time remaining (> 2 months), the 14-month duration compensates for the "wasted" base membership value. When close to expiry (<= 2 months), the standard renewal-from-current-end logic applies.
 
@@ -158,25 +163,31 @@ The lab end date field is set to `undefined` on the new Membership record (the e
 
 Switching from a non-family to a family payment type. The family flag takes effect immediately, giving additional value (family members gain access).
 
-**Restriction**: Only allowed within 14 days of `memberend` to prevent abuse.
+Inside the renewal window (`now >= memberend - MEMBERSHIP_RENEWAL_WINDOW_DAYS`, or the member is new/expired) this is an ordinary renewal that happens to flip the family flag. Earlier than that it is an **upgrade**, allowed on upgrade terms:
 
-- **Allowed**: `now >= memberend - 14 days` (or member is expired/new)
-- **ERROR** if `now < memberend - 14 days`: `FAMILY_UPGRADE_TOO_EARLY`
+| Case | From -> to | Payment type | Result |
+|------|-----------|--------------|--------|
+| S3a | `memberBase` -> `familyBase` | `familyBase` (full price, 300) | start = now, `memberend` = now + `UPGRADE_MONTHS` |
+| S3b | `memberBase` -> `familyLab` | `familyLab` (full price, 2000) | start = now, `memberend` = `labend` = now + `UPGRADE_MONTHS` |
+| S3c | `memberLab` -> `familyBase` | -- | **ERROR** `FAMILY_UPGRADE_TOO_EARLY` |
+| S3d | `memberLab` -> `familyLab` | `toFamilyLab` (400) / `discountedToFamilyLab` (800) | start = now, `memberend` and `labend` **unchanged** |
 
-Applies to all combinations:
-- S3a: `memberBase` -> `familyBase`
-- S3b: `memberBase` -> `familyLab`
-- S3c: `memberLab` -> `familyBase`
-- S3d: `memberLab` -> `familyLab`
+**S3a/S3b**: paying a full family price buys `UPGRADE_MONTHS` (14) from the payment date rather than extending the old end date -- the same shared constant as the S1 lab upgrade, so all full-price mid-period upgrades grant the same period. S3b is evaluated before the S1 rule, so a family upgrade always grants the full period instead of falling into S1's `memberend <= now + 2 months` sub-case.
+
+**S3c**: moving to `familyBase` while holding an active lab would mean paying for less than the member already has, so it is refused outside the renewal window. Inside the window it is a normal renewal and allowed. This is now the only situation that produces `FAMILY_UPGRADE_TOO_EARLY`.
+
+**S3d**: the member keeps their period and pays only the price difference, so no dates change -- only the family flag. The two payment types differ solely in price (2000 - 1600 = 400, 2000 - 1200 = 800); `upgradePath` (`regular`/`discounted`) tells the UI which one to offer based on whether the current membership was discounted, and the server treats them identically. Both produce a full-price family membership (`discount: false`). Quarterly lab members are not offered this -- they renew into a full family lab year (S3b) instead.
+
+Like other upgrades, S3d creates a new Membership record whose end date matches the one it effectively replaces, so a member can end up with two memberships covering the same end date. Known limitation affecting some statistics.
 
 ### S4: Family -> Regular (downgrade)
 
 Switching from a family to a non-family payment type. The family flag is removed immediately, losing value for family members.
 
-**Restriction**: Only allowed within 14 days of `memberend` to protect members.
+**Restriction**: Only allowed within the renewal window, to protect members. Unlike S3, a downgrade is never allowed mid-period -- the member would lose access they have already paid for.
 
-- **Allowed**: `now >= memberend - 14 days` (or member is expired/new)
-- **ERROR** if `now < memberend - 14 days`: `FAMILY_DOWNGRADE_TOO_EARLY`
+- **Allowed**: `now >= memberend - MEMBERSHIP_RENEWAL_WINDOW_DAYS` (or member is expired/new)
+- **ERROR** earlier than that: `FAMILY_DOWNGRADE_TOO_EARLY`
 
 Applies to all combinations:
 - S4a: `familyBase` -> `memberBase`
@@ -184,7 +195,7 @@ Applies to all combinations:
 - S4c: `familyLab` -> `memberBase`
 - S4d: `familyLab` -> `memberLab`
 
-**UI note**: The UI prevents switching family status outside the 14-day window by locking the family checkbox. The checkbox is only editable for new members, expired members, or members within the renewal window.
+**UI note**: The family checkbox can be checked *in* at any time (S3 is an upgrade), but only checked *out* within the renewal window (S4). `familyLocked` in `availabilityRules.js` therefore locks the checkbox only for members who already are family and are outside the window; new and expired members may always change it. Outside the window the family options are marked as upgrades (`upgradeToFamily`), with `familyBase` disabled for lab members (S3c) and the full-price `familyLab` replaced by the difference-only upgrade product (S3d).
 
 ---
 
@@ -195,8 +206,9 @@ These situations should be prevented in the UI but may occur via other payment m
 | Error Code | Description | Resolution |
 |------------|-------------|------------|
 | `QUARTERLY_WITHOUT_BASE_MEMBERSHIP` | First-time member attempted to purchase quarterly lab without having a basic membership | Admin must manually create a base membership or refund the payment |
-| `FAMILY_UPGRADE_TOO_EARLY` | Regular member attempted to switch to family membership more than 14 days before memberend | Admin must manually adjust dates or refund the payment |
-| `FAMILY_DOWNGRADE_TOO_EARLY` | Family member attempted to switch to regular membership more than 14 days before memberend | Admin must manually adjust dates or refund the payment |
+| `FAMILY_UPGRADE_TOO_EARLY` | S3c: member with an active lab attempted to switch to `familyBase` earlier than the renewal window | Admin must manually adjust dates or refund the payment |
+| `FAMILY_DOWNGRADE_TOO_EARLY` | Family member attempted to switch to regular membership earlier than the renewal window | Admin must manually adjust dates or refund the payment |
+| `FAMILY_LAB_UPGRADE_NOT_APPLICABLE` | `toFamilyLab`/`discountedToFamilyLab` paid by someone without an active, non-family lab membership to top up | Admin must manually create the right membership or refund the payment |
 
 ### Error handling flow
 
@@ -218,7 +230,7 @@ A family membership covers one paying member plus additional family members who 
 
 ### Family switching restrictions
 
-Switching between family and non-family is restricted to a 14-day window before `memberend` (see [S3](#s3-regular---family-upgrade) and [S4](#s4-family---regular-downgrade)). Outside this window, the family checkbox in the UI is locked.
+Switching *to* family is allowed at any time as an upgrade (see [S3](#s3-regular---family-upgrade)); switching *away* from family is restricted to the renewal window before `memberend` (see [S4](#s4-family---regular-downgrade)). The family checkbox in the UI is therefore locked only for members who already are family and are outside the window.
 
 ### Family members and reminders
 
@@ -341,8 +353,12 @@ The `availabilityRules.js` module in the app controls which payment options are 
 |---------------|--------------------------|
 | New member (`type = "none"`) | All enabled |
 | Expired member (`memberEnd < now`) | All enabled |
-| Active, within 14-day renewal window (`memberEnd <= now + 14 days`) | All enabled |
-| Active, outside renewal window (`memberEnd > now + 14 days`) | All disabled (`disabledTooEarlyToRenew`) |
+| Active, within the renewal window | All enabled |
+| Active, outside the window -- base only, upgrading to lab (S1) | Lab options enabled, noted `upgradeToLab` |
+| Active, outside the window -- not family, family checked (S3) | Family options enabled, noted `upgradeToFamily`; for lab members `familyBase` is disabled (`disabledFamilyBaseWithLab`, S3c) and the full-price `familyLab` is `hidden` in favour of the difference-only upgrade (S3d) |
+| Active, outside the window -- otherwise | Disabled (`disabledTooEarlyToRenew`) |
+
+The renewal window is `MEMBERSHIP_RENEWAL_WINDOW_DAYS` (see `common/lib/timeConstants.js`), shared by the app, admin and payment service.
 
 ### Quarterly lab option
 
@@ -351,7 +367,7 @@ The `availabilityRules.js` module in the app controls which payment options are 
 | New or expired member | No | `disabledNoBaseMembership` |
 | Has yearly lab (`type = "labandmember"`, `quarterly = false`) | No | `disabledHasYearlyLab` |
 | Has quarterly lab, `labEnd === memberEnd` | No | `disabledRenewYearlyFirst` |
-| Has quarterly lab, `labEnd > now + 14 days` | No | `disabledTooEarlyToRenew` |
+| Has quarterly lab, `labEnd` outside the renewal window | No | `disabledTooEarlyToRenew` |
 | Has base membership only (`type = "member"`) | Yes | -- |
 | Has quarterly lab, within renewal window | Yes | -- |
 

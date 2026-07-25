@@ -64,6 +64,22 @@ const allOptions = [
     description: { en: "24/7 access for up to 5 people.", sv: "24/7 tillgång för upp till 5 personer." },
     familyOnly: true,
   },
+  // S3d upgrade products: no period, since they modify the current period
+  // instead of buying a new one.
+  {
+    paymentType: "toFamilyLab",
+    amount: 400,
+    label: { en: "Family Lab Membership", sv: "Familjemedlemskap Labb" },
+    familyOnly: true,
+    upgradePath: "regular",
+  },
+  {
+    paymentType: "discountedToFamilyLab",
+    amount: 800,
+    label: { en: "Family Lab Membership", sv: "Familjemedlemskap Labb" },
+    familyOnly: true,
+    upgradePath: "discounted",
+  },
 ];
 
 const baseActions = {
@@ -291,6 +307,66 @@ export const FamilyMemberCanChangeStatus = {
     member: { name: "The Smiths", mid: 12350, family: true },
     memberStatus: familyMemberRenewalStatus,
     options: calculateOptionAvailability(allOptions, familyMemberRenewalStatus, true),
+    isDiscounted: false,
+    isFamily: true,
+    familyLocked: false,
+    ...baseActions,
+  },
+};
+
+// === FAMILY UPGRADE MID-PERIOD (S3) ===
+
+// S3a/S3b: active base member, well outside the renewal window, family checked.
+// Both family options are offered as upgrades (red note), and the family
+// checkbox is not locked — you may check family in at any time.
+const baseUpgradeStatus = {
+  type: "member",
+  memberEnd: daysFromNow(180),
+  family: false,
+};
+export const FamilyUpgradeFromBase = {
+  args: {
+    member: { name: "Base Upgrader", mid: 12360 },
+    memberStatus: baseUpgradeStatus,
+    options: calculateOptionAvailability(allOptions, baseUpgradeStatus, true),
+    isDiscounted: false,
+    isFamily: true,
+    familyLocked: false,
+    ...baseActions,
+  },
+};
+
+// S3c/S3d: active yearly lab member outside the window. familyBase is disabled
+// (giving up lab early), and familyLab is replaced by the 400 kr
+// difference-only upgrade with no period suffix.
+const labUpgradeStatus = {
+  type: "labandmember",
+  memberEnd: daysFromNow(180),
+  labEnd: daysFromNow(180),
+  family: false,
+  discounted: false,
+  quarterly: false,
+};
+export const FamilyUpgradeFromLab = {
+  args: {
+    member: { name: "Lab Upgrader", mid: 12361 },
+    memberStatus: labUpgradeStatus,
+    options: calculateOptionAvailability(allOptions, labUpgradeStatus, true),
+    isDiscounted: false,
+    isFamily: true,
+    familyLocked: false,
+    ...baseActions,
+  },
+};
+
+// Same as above but the current lab membership was discounted, so the 800 kr
+// upgrade path is the one offered.
+const discountedLabUpgradeStatus = { ...labUpgradeStatus, discounted: true };
+export const FamilyUpgradeFromDiscountedLab = {
+  args: {
+    member: { name: "Discounted Lab Upgrader", mid: 12362 },
+    memberStatus: discountedLabUpgradeStatus,
+    options: calculateOptionAvailability(allOptions, discountedLabUpgradeStatus, true),
     isDiscounted: false,
     isFamily: true,
     familyLocked: false,
