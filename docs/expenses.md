@@ -17,16 +17,68 @@ feed verification series `U` in the accounting export — see
 
 Expense features in the member app are visible only to members for whom
 `expenseAccessAllowed` returns true (`app/server/methods/utils.js`): the
-member's email is on `settings.private.expenses.allowList`, **or** the user
-has the `admin` or `board` role. The flag is exposed to the client as
-`expensesAllowed` in the member info payload and also gates the bank-details
-section of the profile (section 6).
+member's email is on `settings.private.expenses.allowList`, the user has the
+`admin` or `board` role, **or** the member is an active member of a group that
+has at least one expense account (section 3). The flag is exposed to the client
+as `expensesAllowed` in the member info payload and also gates the bank-details
+section of the profile (section 7).
 
-Admin actions are role-gated per method (section 5), and **no one can review
+Admin actions are role-gated per method (section 6), and **no one can review
 their own expense**: confirm, reject, and reimburse all refuse when the acting
 admin's member record is the submitter (`assertNotOwnExpense`).
 
-## 3. Lifecycle
+## 3. Expense Accounts and Groups
+
+An **expense account** is the category a member picks when submitting an
+expense. Per the workshops-and-groups guideline (`inbox/Riktlinjer.md`) every
+account belongs to one or more **groups**, which decides who may spend on it:
+
+- `expenseAccount.groupIds` — the groups the account belongs to. Their active
+  members may make expenses on it, and the account is listed on each of those
+  groups' pages (app and admin).
+- `expenseAccount.approverMemberIds` — the expense approvers (the guideline
+  requires at least two). They must be **active members of the account's
+  groups**; the admin picker only offers those, and a deny rule on the
+  collection enforces it server-side. Removing a group from an account drops
+  approvers who are no longer eligible.
+
+Helpers in `app/server/methods/utils.js` implement the access rules:
+`myActiveGroupIds`, `myGroupExpenseAccounts`, `seesAllExpenseAccounts`
+(allowlist/admin/board), and `expenseAccountsFor` — the last one is the single
+source for "which accounts may this member use" and is applied both by
+`expenses.getAccounts` (the picker) and when an expense's account is set or
+submitted.
+
+Approvers are **stored but not yet authoritative**: confirm/reject/reimburse
+remain role-based in admin (section 6). In-app approval by the account's
+approvers is a planned follow-up.
+
+### The group's account overview (app)
+
+A group's page lists its expense accounts at the bottom — for the group's
+active members only (same gate as the member list). Each card opens
+`/groups/:groupId/accounts/:accountId`, a read-only overview of everything
+booked on that account, served by `expenses.getAccountExpenses`:
+
+- A year filter (defaults to the current year, "all years" available), applied
+  to the **receipt date**.
+- Three totals of what is shown: reimbursed, confirmed, submitted.
+- One card per expense showing submitter, and the **status with the date that
+  status change refers to** (submitted → `submittedAt`, confirmed →
+  `confirmedAt`, rejected → `rejectedAt`, reimbursed → `reimbursedDate`) plus
+  the amount. The shared `statusDate` helper in
+  `app/imports/pages/expenses/utils.js` picks both, and is used by the member's
+  own expense list too.
+- Tapping a card expands the receipt date, place, a truncated note, the whole
+  status timeline, the bookkeeping account, and a **Show receipt** button that
+  opens the receipt image in a dialog (signed URL, minted after the same
+  authorization — see section 5).
+
+Drafts (`pending`) are excluded — they are not claims yet. The view
+deliberately shows *other members'* expenses and receipts: the receipts are the
+evidence for what the group has spent. Drive ids are never exposed.
+
+## 4. Lifecycle
 
 Statuses (`expenses.status`): `pending → submitted → confirmed → reimbursed`,
 with `rejected` as a side exit and two backward transitions.
@@ -48,7 +100,7 @@ are denied. Every step publishes a manager event (`expenseSubmitted`,
 `expenseRetracted`, `expenseConfirmed`, `expenseRejected`,
 `expenseReimbursed`, `expenseUnreimbursed`) that typically lands in Slack.
 
-## 4. Receipts
+## 5. Receipts
 
 ### Storage
 
@@ -71,12 +123,13 @@ with signed, unguessable URLs
 - The token is an HMAC over expense id + Drive file id + a day bucket,
   keyed by `settings.private.receiptTokenSecret`.
 - It is minted only by methods that already passed authorization (owner in
-  the app, role in admin) — the endpoint then trusts it like a signed S3 URL.
+  the app, an active member of the account's groups in the group overview, role
+  in admin) — the endpoint then trusts it like a signed S3 URL.
 - Scoping to the Drive file id means replacing the photo changes the URL;
   day-bucketing keeps URLs stable for browser caching while a leaked URL
   expires within ~48 hours.
 
-## 5. Admin Workflows
+## 6. Admin Workflows
 
 Menu group **Expenses** in the admin app:
 
@@ -99,7 +152,7 @@ name, an explanation, and dimension tags used by the accounting export —
 deliberately no fixed ledger account (the treasurer picks that per expense).
 An account used by any expense cannot be deleted.
 
-## 6. Member Bank Details
+## 7. Member Bank Details
 
 So the treasurer can actually pay, members with expense access get a bank
 section on their profile page (app): bank name, clearing number, account
@@ -114,7 +167,7 @@ Fields on `members`: `bankName`, `bankClearing`, `bankAccountNumber`,
 persisted from the profile when the bank section was shown (a regular
 profile save never clobbers them).
 
-## 7. Data Model Summary
+## 8. Data Model Summary
 
 `expenses` (see `common/lib/models.js`):
 
@@ -128,7 +181,13 @@ profile save never clobbers them).
 | `bookkeepingAccount`, `reimbursedDate` | accounting fields set at reimbursement ([accounting.md](accounting.md)) |
 
 `expenseAccounts`: `name`, `explanation`, `dimensions` (dimension nr →
-object code), `createdAt`.
+object code), `groupIds` (owning groups), `approverMemberIds` (expense
+approvers, from those groups), `createdAt`.
+
+Client writes to `expenseAccounts` are admin/board-only, and a deny rule
+rejects approvers who are not active members of the account's groups
+(`common/collections/expenseAccounts.js`). A group cannot be deleted while an
+account still references it.
 
 ## Related Documentation
 

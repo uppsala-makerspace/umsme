@@ -4,6 +4,31 @@ export const EDITABLE_STATUSES = ["pending", "rejected"];
 
 export const isEditable = (status) => EDITABLE_STATUSES.includes(status);
 
+/**
+ * The date a status actually refers to, with the i18n key that names it. The
+ * label keys are singular ("Inskickad", "Bekräftad"), so they double as the
+ * status label next to the date. Falls back to the receipt date when the
+ * status timestamp is missing (older expenses).
+ */
+export const statusDate = (expense) => {
+  switch (expense.status) {
+    case "submitted":
+      return { labelKey: "expenseDateLabelSubmitted", value: expense.submittedAt || expense.date };
+    case "confirmed":
+      return { labelKey: "expenseDateLabelConfirmed", value: expense.confirmedAt || expense.date };
+    case "rejected":
+      return { labelKey: "expenseDateLabelRejected", value: expense.rejectedAt || expense.date };
+    case "reimbursed":
+      // The actual payment date when known, else when it was marked paid.
+      return {
+        labelKey: "expenseDateLabelReimbursed",
+        value: expense.reimbursedDate || expense.reimbursedAt || expense.date,
+      };
+    default:
+      return { labelKey: "expenseDateLabelDate", value: expense.date };
+  }
+};
+
 export const formatDate = (date, lang) => {
   if (!date) return "";
   return new Date(date).toLocaleDateString(lang === "sv" ? "sv-SE" : "en-US");

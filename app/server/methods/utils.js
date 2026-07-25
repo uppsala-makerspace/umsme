@@ -3,20 +3,66 @@ import { Roles } from "meteor/roles";
 import { Members } from "/imports/common/collections/members";
 import { Spaces } from "/imports/common/collections/spaces";
 import { Groups } from "/imports/common/collections/groups";
+import { GroupMemberships } from "/imports/common/collections/groupMemberships";
+import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { memberStatus } from "/imports/common/lib/utils";
 import { memberForUser } from "/imports/common/server/memberForUser";
 import { spaceIconUrlFor } from "/imports/common/server/workshopImage";
 
+/** The groups the member is an active (approved) member of. */
+export const myActiveGroupIds = async (member) => {
+  if (!member?._id) return [];
+  const memberships = await GroupMemberships.find(
+    { memberId: member._id, state: "active" },
+    { fields: { groupId: 1 } }
+  ).fetchAsync();
+  return memberships.map((m) => m.groupId);
+};
+
 /**
- * Whether the current user may see/use the expenses feature: either their
- * member email is on the configured allowlist, or their account is in the
- * admin/board group (which always has access, regardless of the allowlist).
+ * Expense accounts the member may spend on: those belonging to any group the
+ * member is an active member of (the guideline: a group's members may make
+ * expenses on the group's accounts). Admin/board and allowlisted members are
+ * not restricted — see expenseAccountsFor.
  */
-export const expenseAccessAllowed = async (member) => {
+export const myGroupExpenseAccounts = async (member) => {
+  const groupIds = await myActiveGroupIds(member);
+  if (!groupIds.length) return [];
+  return ExpenseAccounts.find(
+    { groupIds: { $in: groupIds } },
+    { sort: { name: 1 } }
+  ).fetchAsync();
+};
+
+/** Whether the account list should be unrestricted for this user. */
+export const seesAllExpenseAccounts = async (member) => {
   const allowList = Meteor.settings?.private?.expenses?.allowList;
   if (member?.email && allowList?.length && allowList.includes(member.email)) return true;
   const userId = Meteor.userId();
   return !!userId && (await Roles.userIsInRoleAsync(userId, ["admin", "board"]));
+};
+
+/**
+ * The expense accounts this member may pick when submitting an expense.
+ * Allowlisted members and admin/board see every account; everyone else is
+ * limited to the accounts of their groups.
+ */
+export const expenseAccountsFor = async (member) => {
+  if (await seesAllExpenseAccounts(member)) {
+    return ExpenseAccounts.find({}, { sort: { name: 1 } }).fetchAsync();
+  }
+  return myGroupExpenseAccounts(member);
+};
+
+/**
+ * Whether the current user may see/use the expenses feature: their member
+ * email is on the configured allowlist, their account is in the admin/board
+ * group (always allowed), or they are an active member of a group that has at
+ * least one expense account.
+ */
+export const expenseAccessAllowed = async (member) => {
+  if (await seesAllExpenseAccounts(member)) return true;
+  return (await myGroupExpenseAccounts(member)).length > 0;
 };
 
 /**

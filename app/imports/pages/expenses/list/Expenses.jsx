@@ -6,18 +6,7 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Button from "../../../components/Button";
 import ExpenseItem from "../components/ExpenseItem";
-import { EXPENSE_STATUSES, formatDate } from "../utils";
-
-// Which timestamp to show (right-aligned, with a label) per status.
-const statusDate = (e) => {
-  switch (e.status) {
-    case "submitted": return { labelKey: "expenseDateLabelSubmitted", value: e.submittedAt || e.date };
-    case "confirmed": return { labelKey: "expenseDateLabelConfirmed", value: e.confirmedAt || e.date };
-    case "rejected": return { labelKey: "expenseDateLabelRejected", value: e.rejectedAt || e.date };
-    case "reimbursed": return { labelKey: "expenseDateLabelReimbursed", value: e.reimbursedAt || e.date };
-    default: return { labelKey: "expenseDateLabelDate", value: e.date };
-  }
-};
+import { EXPENSE_STATUSES, formatDate, statusDate } from "../utils";
 
 const Expenses = ({ loading, error, expenses }) => {
   const { t, i18n } = useTranslation();

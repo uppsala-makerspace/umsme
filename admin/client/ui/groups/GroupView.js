@@ -97,7 +97,7 @@ Template.GroupView.helpers({
     return !(
       Workshops.findOne({ groupId: id }) ||
       GroupMemberships.findOne({ groupId: id }) ||
-      ExpenseAccounts.findOne({ groupId: id }) ||
+      ExpenseAccounts.findOne({ groupIds: id }) ||
       Groups.findOne({ parentGroupId: id })
     );
   },
@@ -194,10 +194,10 @@ Template.GroupView.helpers({
     return Groups.find({ parentGroupId: groupId() }).count() > 0;
   },
   expenseAccounts() {
-    return ExpenseAccounts.find({ groupId: groupId() }, { sort: { name: 1 } });
+    return ExpenseAccounts.find({ groupIds: groupId() }, { sort: { name: 1 } });
   },
   hasExpenseAccounts() {
-    return ExpenseAccounts.find({ groupId: groupId() }).count() > 0;
+    return ExpenseAccounts.find({ groupIds: groupId() }).count() > 0;
   },
 });
 

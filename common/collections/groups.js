@@ -74,7 +74,7 @@ Groups.deny({
     const referenced =
       (await Workshops.findOneAsync({ groupId: doc._id })) ||
       (await GroupMemberships.findOneAsync({ groupId: doc._id })) ||
-      (await ExpenseAccounts.findOneAsync({ groupId: doc._id })) ||
+      (await ExpenseAccounts.findOneAsync({ groupIds: doc._id })) ||
       (await Groups.findOneAsync({ parentGroupId: doc._id }));
     return !!referenced;
   },

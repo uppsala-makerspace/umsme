@@ -34,6 +34,10 @@ const baseData = {
   canJoin: true,
   canApprove: false,
   pendingRequests: [],
+  expenseAccounts: [
+    { _id: "acc1", name: "Träverkstaden — förbrukning" },
+    { _id: "acc2", name: "Träverkstaden — verktyg" },
+  ],
   mapView: {
     floor: "floor1",
     primarySpaceId: "woodworkshop",

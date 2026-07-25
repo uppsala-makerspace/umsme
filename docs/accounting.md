@@ -73,6 +73,10 @@ picks when submitting an expense — e.g. "Tools" or "Consumables". It has
 account number**: the actual BAS account is chosen per expense by the
 treasurer (below).
 
+An account also carries `groupIds` and `approverMemberIds` — who may spend on
+it and who approves — but those affect access only, never the generated
+verifications; see [expenses.md](expenses.md) §3.
+
 The `dimensions` field maps dimension number → object code, e.g.
 `{ "1": "VERKSTAD" }`. The allowed dimensions come from
 `settings.accounting.dimensions` (typically `1` = cost center, `6` =

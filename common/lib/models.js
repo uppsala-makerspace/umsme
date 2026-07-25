@@ -830,15 +830,16 @@ export const models = {
       blackbox: true,
       autoform: { omit: true },
     },
-    // Group (grupp) this account belongs to. Optional until existing accounts
-    // are backfilled; the guideline ultimately requires exactly one group.
-    groupId: {
-      label: "Group",
-      type: String,
-      max: 50,
+    // Groups (grupper) this account belongs to. Members of any of these groups
+    // may make expenses on the account, and approvers are picked from their
+    // members. Optional in the schema, but the guideline requires at least one.
+    groupIds: {
+      label: "Groups",
+      type: Array,
       optional: true,
       autoform: { omit: true },
     },
+    "groupIds.$": { type: String, autoform: { omit: true } },
     // Members allowed to approve expenses on this account (guideline: at least
     // two). Stored now; the approval flow itself is still role-based.
     approverMemberIds: {

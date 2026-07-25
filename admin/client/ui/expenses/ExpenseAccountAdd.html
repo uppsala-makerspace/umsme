@@ -5,14 +5,14 @@
         {{> afQuickField name="name"}}
         {{> afQuickField name="explanation"}}
         <div class="form-group">
-            <label class="control-label">Group</label>
-            <select class="form-control expenseAccountGroupSelect">
-                <option value="">(No group)</option>
+            <label class="control-label">Groups</label>
+            <select class="form-control expenseAccountGroupSelect" multiple size="8">
                 {{#each allGroups}}
                 <option value="{{_id}}">{{name.sv}}</option>
                 {{/each}}
             </select>
-            <span class="help-block">The group this account belongs to. Approvers are managed from the account page after creation.</span>
+            <span class="help-block">The groups this account belongs to (ctrl/cmd-click for several); their members
+                may make expenses on it. Approvers are managed from the account page after creation.</span>
         </div>
         {{> expenseAccountDimensions}}
         <button type="submit" class="btn btn-primary">Add expense account</button>

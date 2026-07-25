@@ -67,6 +67,7 @@ const GroupDetail = ({
     canJoin,
     canApprove,
     pendingRequests,
+    expenseAccounts = [],
     mapView,
   } = data;
 
@@ -325,6 +326,29 @@ const GroupDetail = ({
                     {localized(related.name, lang)}
                     <GroupTypeTag type={related.type} />
                   </span>
+                  <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* The group's expense accounts (members only) — each links to an
+          overview of everything booked on that account. */}
+      {expenseAccounts.length > 0 && (
+        <section className="mb-6">
+          <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
+            {t("groupExpenseAccounts")}
+          </h3>
+          <ul className="list-none p-0 m-0">
+            {expenseAccounts.map((account) => (
+              <li key={account._id} className="mb-2">
+                <Link
+                  to={`/groups/${group._id}/accounts/${account._id}`}
+                  className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
+                >
+                  <span className="font-semibold">{account.name}</span>
                   <span className="text-gray-400 text-xl ml-2">&rarr;</span>
                 </Link>
               </li>

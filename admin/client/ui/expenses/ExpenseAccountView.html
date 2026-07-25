@@ -15,17 +15,20 @@
         {{> afQuickField name="name"}}
         {{> afQuickField name="explanation"}}
         <div class="form-group">
-            <label class="control-label">Group</label>
-            <select class="form-control expenseAccountGroupSelect">
-                <option value="" {{noGroupSelected}}>(No group)</option>
+            <label class="control-label">Groups</label>
+            <select class="form-control expenseAccountGroupSelect" multiple size="8">
                 {{#each allGroups}}
                 <option value="{{_id}}" {{groupSelected _id}}>{{name.sv}}</option>
                 {{/each}}
             </select>
-            <span class="help-block">The group this account belongs to.
-                {{#if accountGroup}}<a href="/group/{{accountGroup._id}}">Open {{accountGroup.name.sv}}</a>{{/if}}
+            <span class="help-block">The groups this account belongs to (ctrl/cmd-click for several).
+                Their members may make expenses on it, and approvers are picked from them.
+                {{#each accountGroups}}<a href="/group/{{_id}}">{{name.sv}}</a>&nbsp; {{/each}}
             </span>
         </div>
+        {{#unless hasGroups}}
+        <div class="alert alert-warning">No group selected — the guideline requires every account to belong to at least one group.</div>
+        {{/unless}}
         {{> expenseAccountDimensions account=account}}
         <button type="submit" class="btn btn-primary">Update</button>
     {{/autoForm}}
@@ -34,6 +37,7 @@
 
     <h2>Expense approvers <small><a class="showApproverSelector">Add</a></small></h2>
     <p class="text-muted">Members who may approve expenses on this account (the guideline requires at least two).
+        Only active members of the account's groups can be picked.
         Stored for the upcoming in-app approval flow; confirmation is still done here by admin/board for now.</p>
 
     {{#if showApproverSelector}}
@@ -42,7 +46,22 @@
             <h3 class="panel-title">Add approver <a class="hideApproverSelector pull-right">Cancel</a></h3>
         </div>
         <div class="panel-body">
-            {{> tabular table=TabularTables.Members class="table table-hover table-striped table-bordered table-condensed approverList"}}
+            {{#if hasGroups}}
+                {{#if candidates.length}}
+                <ul class="list-group">
+                    {{#each candidates}}
+                    <li class="list-group-item">
+                        <a class="addApprover" data-id="{{_id}}">{{name}}</a>
+                        <span class="text-muted pull-right">{{groupNames}}</span>
+                    </li>
+                    {{/each}}
+                </ul>
+                {{else}}
+                <p><em>All active members of the account's groups are already approvers.</em></p>
+                {{/if}}
+            {{else}}
+            <p><em>Select at least one group above (and save) before adding approvers.</em></p>
+            {{/if}}
         </div>
     </div>
     {{/if}}

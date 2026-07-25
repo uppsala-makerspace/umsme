@@ -25,8 +25,9 @@ AutoForm.hooks({
       doc.createdAt = new Date();
       const dims = readDimensionInputs();
       if (Object.keys(dims).length) doc.dimensions = dims;
-      const group = document.querySelector('.expenseAccountGroupSelect')?.value;
-      if (group) doc.groupId = group;
+      const select = document.querySelector('.expenseAccountGroupSelect');
+      const groupIds = select ? [...select.selectedOptions].map((o) => o.value).filter(Boolean) : [];
+      if (groupIds.length) doc.groupIds = groupIds;
       ExpenseAccounts.insert(doc);
       this.done();
       FlowRouter.go('/expenses/accounts');

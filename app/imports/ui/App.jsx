@@ -52,6 +52,7 @@ const Groups = lazyWithRetry(() => import('/imports/pages/groups'));
 const GroupDetail = lazyWithRetry(() => import('/imports/pages/groups/detail'));
 const GroupEdit = lazyWithRetry(() => import('/imports/pages/groups/edit'));
 const GroupRules = lazyWithRetry(() => import('/imports/pages/groups/rules'));
+const GroupAccountExpenses = lazyWithRetry(() => import('/imports/pages/groups/expenseAccount'));
 
 export const App = () => {
   useAutoReconnect();
@@ -109,6 +110,7 @@ export const App = () => {
             <Route path="/groups/:groupId" element={<GroupDetail />} />
             <Route path="/groups/:groupId/edit" element={<GroupEdit />} />
             <Route path="/groups/:groupId/rules" element={<GroupRules />} />
+            <Route path="/groups/:groupId/accounts/:accountId" element={<GroupAccountExpenses />} />
           </Routes>
         </Suspense>
         </ChunkErrorBoundary>

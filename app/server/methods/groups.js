@@ -4,6 +4,7 @@ import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Workshops } from "/imports/common/collections/workshops";
 import { Members } from "/imports/common/collections/members";
+import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { groupImageUrlFor } from "/imports/common/server/workshopImage";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
@@ -195,6 +196,17 @@ Meteor.methods({
           ? await spacesMapView(workshop)
           : null;
 
+    // The group's expense accounts, for members only: they show what the group
+    // spends on, and only its members may make expenses on them.
+    const expenseAccounts = canSeeMembers
+      ? (
+          await ExpenseAccounts.find(
+            { groupIds: groupId },
+            { sort: { name: 1 }, fields: { name: 1 } }
+          ).fetchAsync()
+        ).map((a) => ({ _id: a._id, name: a.name }))
+      : [];
+
     const userCanApprove = await canApprove(group, member);
     let pendingRequests = [];
     if (userCanApprove) {
@@ -226,6 +238,7 @@ Meteor.methods({
       canJoin: activeCaller,
       canApprove: userCanApprove,
       pendingRequests,
+      expenseAccounts,
       mapView,
     };
   },

@@ -5,7 +5,14 @@ import { uploadImage, deleteImage } from "/imports/common/server/googleDrive";
 import { publishManagerEvent, ManagerEventType, blockquote } from "/imports/common/server/managerEvents";
 import { adminLink } from "/imports/common/lib/links";
 import { receiptUrlFor } from "/imports/common/server/receiptToken";
-import { findMemberForUser, expenseAccessAllowed } from "./utils";
+import { Members } from "/imports/common/collections/members";
+import {
+  findMemberForUser,
+  expenseAccessAllowed,
+  expenseAccountsFor,
+  myActiveGroupIds,
+  seesAllExpenseAccounts,
+} from "./utils";
 
 const EDITABLE_STATES = ["pending", "rejected"];
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB safety ceiling (client downscales)
@@ -18,6 +25,16 @@ const requireMember = async () => {
     throw new Meteor.Error("not-authorized", "Expenses are not enabled for this account");
   }
   return member;
+};
+
+// The account must be one the member is allowed to spend on (their groups'
+// accounts, or any account for admin/board/allowlisted members).
+const requireAllowedAccount = async (expenseAccountId, member) => {
+  if (!expenseAccountId) return;
+  const allowed = await expenseAccountsFor(member);
+  if (!allowed.some((a) => a._id === expenseAccountId)) {
+    throw new Meteor.Error("not-authorized", "That expense account is not available to you");
+  }
 };
 
 const requireOwnExpense = async (expenseId, member) => {
@@ -92,6 +109,7 @@ Meteor.methods({
       } else {
         const account = await ExpenseAccounts.findOneAsync(expenseAccountId);
         if (!account) throw new Meteor.Error("not-found", "Expense account not found");
+        await requireAllowedAccount(expenseAccountId, member);
         $set.expenseAccountId = expenseAccountId;
       }
     }
@@ -147,6 +165,8 @@ Meteor.methods({
     if (!expense.expenseAccountId) {
       throw new Meteor.Error("missing-account", "Choose an expense account before submitting");
     }
+    // Group membership can change between drafting and submitting.
+    await requireAllowedAccount(expense.expenseAccountId, member);
     await Expenses.updateAsync(expenseId, {
       $set: { status: "submitted", submittedAt: new Date() },
       $unset: { rejectionReason: "" },
@@ -237,17 +257,88 @@ Meteor.methods({
   },
 
   /**
-   * Expense accounts for the submission picker.
+   * Expense accounts for the submission picker: the accounts of the member's
+   * groups (admin/board and allowlisted members see all).
    */
   "expenses.getAccounts": async () => {
-    await requireMember();
-    const accounts = await ExpenseAccounts.find({}, { sort: { name: 1 } }).fetchAsync();
+    const member = await requireMember();
+    const accounts = await expenseAccountsFor(member);
     return accounts.map((a) => ({
       _id: a._id,
       name: a.name,
       explanation: a.explanation,
-      accountNumber: a.accountNumber,
     }));
+  },
+
+  /**
+   * All expenses booked on one account, for the group's overview. Visible to
+   * active members of any of the account's groups (and admin/board): the group
+   * needs to see what it has spent, so this deliberately shows other members'
+   * expenses. Read-only — approval still happens in admin.
+   *
+   * Drafts (status 'pending') are excluded: they are not claims yet.
+   */
+  "expenses.getAccountExpenses": async (accountId, year) => {
+    const member = await requireMember();
+    const account = await ExpenseAccounts.findOneAsync(accountId);
+    if (!account) throw new Meteor.Error("not-found", "Expense account not found");
+
+    if (!(await seesAllExpenseAccounts(member))) {
+      const myGroups = await myActiveGroupIds(member);
+      const shares = (account.groupIds || []).some((g) => myGroups.includes(g));
+      if (!shares) throw new Meteor.Error("not-authorized", "Not a member of this account's groups");
+    }
+
+    const all = await Expenses.find(
+      { expenseAccountId: accountId, status: { $in: ["submitted", "confirmed", "rejected", "reimbursed"] } },
+      { sort: { date: -1 } }
+    ).fetchAsync();
+
+    const availableYears = [
+      ...new Set(all.map((e) => new Date(e.date).getFullYear())),
+    ].sort((a, b) => b - a);
+
+    const selectedYear = year ? Number(year) : null;
+    const shown = selectedYear
+      ? all.filter((e) => new Date(e.date).getFullYear() === selectedYear)
+      : all;
+
+    // Resolve member and confirmer names in one round trip.
+    const memberIds = [
+      ...new Set(shown.flatMap((e) => [e.memberId, e.confirmedBy]).filter(Boolean)),
+    ];
+    const nameById = {};
+    for (const m of await Members.find(
+      { _id: { $in: memberIds } },
+      { fields: { name: 1 } }
+    ).fetchAsync()) {
+      nameById[m._id] = m.name;
+    }
+
+    return {
+      account: { _id: account._id, name: account.name, explanation: account.explanation },
+      availableYears,
+      year: selectedYear,
+      expenses: shown.map((e) => ({
+        _id: e._id,
+        memberName: nameById[e.memberId] || e.memberId,
+        status: e.status,
+        date: e.date,
+        amount: e.amount || 0,
+        place: e.place || null,
+        note: e.note || null,
+        submittedAt: e.submittedAt || null,
+        confirmedByName: e.confirmedBy ? nameById[e.confirmedBy] || e.confirmedBy : null,
+        confirmedAt: e.confirmedAt || null,
+        rejectedAt: e.rejectedAt || null,
+        bookkeepingAccount: e.bookkeepingAccount || null,
+        reimbursedDate: e.reimbursedDate || null,
+        reimbursedAt: e.reimbursedAt || null,
+        // Signed capability URL — authorization happened above, so the group's
+        // members can view the receipts backing their account's spending.
+        receiptUrl: receiptUrlFor(e._id, e.driveFileId),
+      })),
+    };
   },
 
   /**
