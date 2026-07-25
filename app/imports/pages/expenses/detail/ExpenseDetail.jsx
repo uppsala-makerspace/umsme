@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PaperAirplaneIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
@@ -59,6 +60,13 @@ const ExpenseDetail = ({
 
   const editable = isEditable(expense.status);
   const canSubmit = !!amount && Number(amount) > 0 && !!expenseAccountId;
+
+  // The account currently in play: the picked one while editing, the saved one
+  // otherwise. Its overview page is not group-scoped, so the id is enough.
+  const shownAccount = accounts.find(
+    (a) => a._id === (editable ? expenseAccountId : expense.expenseAccountId)
+  );
+  const accountPath = shownAccount ? `/expense-accounts/${shownAccount._id}` : null;
 
   const run = async (fn, ...args) => {
     setActionLoading(true);
@@ -144,9 +152,12 @@ const ExpenseDetail = ({
               ))}
             </select>
             {expenseAccountId && (
-              <span className="text-xs text-gray-500">
-                {accounts.find((a) => a._id === expenseAccountId)?.explanation}
-              </span>
+              <span className="text-xs text-gray-500">{shownAccount?.explanation}</span>
+            )}
+            {accountPath && (
+              <Link to={accountPath} className="text-xs text-gray-600 hover:underline">
+                {t("expenseOpenAccount")} &rarr;
+              </Link>
             )}
           </label>
 
@@ -215,10 +226,50 @@ const ExpenseDetail = ({
       ) : (
         <div className="flex flex-col gap-2 text-sm text-gray-700">
           <div><span className="font-semibold">{t("expenseAmount")}:</span> {expense.amount} kr</div>
-          <div><span className="font-semibold">{t("expenseAccount")}:</span> {expense.accountName || "—"}</div>
+          <div>
+            <span className="font-semibold">{t("expenseAccount")}:</span>{" "}
+            {accountPath ? (
+              <Link to={accountPath} className="text-gray-700 hover:underline">
+                {expense.accountName} &rarr;
+              </Link>
+            ) : (
+              expense.accountName || "—"
+            )}
+          </div>
           {expense.place && <div><span className="font-semibold">{t("expensePlace")}:</span> {expense.place}</div>}
           <div><span className="font-semibold">{t("expenseDate")}:</span> {formatDate(expense.date, lang)}</div>
           {expense.note && <div><span className="font-semibold">{t("expenseNote")}:</span> {expense.note}</div>}
+
+          {/* The review trail: each entry appears once it has happened. */}
+          {expense.submittedAt && (
+            <div>
+              <span className="font-semibold">{t("expenseDateLabelSubmitted")}:</span>{" "}
+              {formatDate(expense.submittedAt, lang)}
+            </div>
+          )}
+          {expense.confirmedByName && (
+            <div>
+              <span className="font-semibold">{t("expenseConfirmedBy")}:</span> {expense.confirmedByName}
+            </div>
+          )}
+          {expense.confirmedAt && (
+            <div>
+              <span className="font-semibold">{t("expenseDateLabelConfirmed")}:</span>{" "}
+              {formatDate(expense.confirmedAt, lang)}
+            </div>
+          )}
+          {expense.bookkeepingAccount && (
+            <div>
+              <span className="font-semibold">{t("expenseBookkeepingAccount")}:</span>{" "}
+              {expense.bookkeepingAccount}
+            </div>
+          )}
+          {expense.reimbursedDate && (
+            <div>
+              <span className="font-semibold">{t("expenseReimbursedDate")}:</span>{" "}
+              {formatDate(expense.reimbursedDate, lang)}
+            </div>
+          )}
 
           {expense.status === "submitted" ? (
             <>

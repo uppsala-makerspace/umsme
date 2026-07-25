@@ -9,8 +9,8 @@ export default {
 };
 
 const accounts = [
-  { _id: "a1", name: "Material", explanation: "Förbrukningsmaterial", accountNumber: "4010" },
-  { _id: "a2", name: "Verktyg", explanation: "Verktyg och utrustning", accountNumber: "4020" },
+  { _id: "a1", name: "Material", explanation: "Förbrukningsmaterial" },
+  { _id: "a2", name: "Verktyg", explanation: "Verktyg och utrustning" },
 ];
 
 const baseActions = {
@@ -39,7 +39,10 @@ export const PendingDraft = {
 
 export const SubmittedRetractable = {
   args: {
-    expense: expense({ status: "submitted", amount: 249.5, expenseAccountId: "a1", accountName: "Material" }),
+    expense: expense({
+      status: "submitted", amount: 249.5, expenseAccountId: "a1", accountName: "Material",
+      submittedAt: new Date("2026-06-12"),
+    }),
     accounts,
     ...baseActions,
   },
@@ -55,7 +58,10 @@ export const Rejected = {
 
 export const ConfirmedLocked = {
   args: {
-    expense: expense({ status: "confirmed", amount: 99, expenseAccountId: "a1", accountName: "Material" }),
+    expense: expense({
+      status: "confirmed", amount: 99, expenseAccountId: "a1", accountName: "Material",
+      submittedAt: new Date("2026-06-02"), confirmedByName: "Bo Berg", confirmedAt: new Date("2026-06-03"),
+    }),
     accounts,
     ...baseActions,
   },
@@ -63,7 +69,11 @@ export const ConfirmedLocked = {
 
 export const ReimbursedLocked = {
   args: {
-    expense: expense({ status: "reimbursed", amount: 540, expenseAccountId: "a1", accountName: "Material" }),
+    expense: expense({
+      status: "reimbursed", amount: 540, expenseAccountId: "a1", accountName: "Material",
+      submittedAt: new Date("2026-05-15"), confirmedByName: "Bo Berg", confirmedAt: new Date("2026-05-16"),
+      bookkeepingAccount: "6110", reimbursedDate: new Date("2026-05-20"),
+    }),
     accounts,
     ...baseActions,
   },

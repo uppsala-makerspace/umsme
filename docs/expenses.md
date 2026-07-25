@@ -57,8 +57,9 @@ approvers is a planned follow-up.
 
 A group's page lists its expense accounts at the bottom — for the group's
 active members only (same gate as the member list). Each card opens
-`/groups/:groupId/accounts/:accountId`, a read-only overview of everything
-booked on that account, served by `expenses.getAccountExpenses`:
+`/expense-accounts/:accountId` — deliberately *not* group-scoped, since an
+account can belong to several groups — a read-only overview of everything booked
+on that account, served by `expenses.getAccountExpenses`:
 
 - A year filter (defaults to the current year, "all years" available), applied
   to the **receipt date**.
@@ -69,14 +70,34 @@ booked on that account, served by `expenses.getAccountExpenses`:
   the amount. The shared `statusDate` helper in
   `app/imports/pages/expenses/utils.js` picks both, and is used by the member's
   own expense list too.
-- Tapping a card expands the receipt date, place, a truncated note, the whole
-  status timeline, the bookkeeping account, and a **Show receipt** button that
-  opens the receipt image in a dialog (signed URL, minted after the same
-  authorization — see section 5).
+- Tapping a card expands the receipt date, place, a truncated note, the status
+  timeline (submitted, rejected, confirmed by/at, bookkeeping account,
+  reimbursement date — each row appears once that step has happened) and a
+  **Show receipt** button that opens the receipt image in a dialog (signed URL,
+  minted after the same authorization — see section 5).
 
 Drafts (`pending`) are excluded — they are not claims yet. The view
 deliberately shows *other members'* expenses and receipts: the receipts are the
 evidence for what the group has spent. Drive ids are never exposed.
+
+From the same page a member can **create** an expense on that account — the
+button opens `/expenses/new?account=<id>&returnTo=<the account page>`, so
+`expenses.create` preselects the account (validated like any other account
+choice) and finishing the expense returns to the account page. The `returnTo`
+parameter is honoured by the new/detail pages for save, submit and abort, and
+only when it is an in-app path (`safeReturnTo` in
+`app/imports/pages/expenses/utils.js`). The member's own expenses get a **Show**
+link in the expanded card that opens the expense page (where a submitted expense
+can be retracted and a rejected one edited), carrying the same `returnTo`; the
+DTO's `isMine` flag drives it without exposing member ids.
+
+The expense's own page shows the same review trail once the expense is locked:
+submitted date, who confirmed it and when, the bookkeeping account and the
+reimbursement date (`expenses.getOne` resolves `confirmedByName`; it stays null
+when the confirmer had no member record, since `confirmedBy` is then never set). The expense page links back to its account (the picked account
+while editing, the saved one otherwise). Back navigation everywhere is the
+standard top-bar arrow — the account page is registered in `DETAIL_PAGES`
+(`app/imports/components/TopBar/index.jsx`) with `/groups` as its fallback.
 
 ## 4. Lifecycle
 

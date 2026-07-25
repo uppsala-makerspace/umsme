@@ -14,6 +14,7 @@ const baseData = {
     {
       _id: "e1",
       memberName: "Anna Andersson",
+      isMine: true,
       status: "reimbursed",
       date: d("2026-05-14"),
       amount: 1249.5,
@@ -31,6 +32,7 @@ const baseData = {
     {
       _id: "e2",
       memberName: "Cecilia Carlsson",
+      isMine: false,
       status: "confirmed",
       date: d("2026-06-02"),
       amount: 430,
@@ -48,6 +50,7 @@ const baseData = {
     {
       _id: "e3",
       memberName: "David Dahl",
+      isMine: true,
       status: "submitted",
       date: d("2026-06-11"),
       amount: 89.9,
@@ -65,6 +68,7 @@ const baseData = {
     {
       _id: "e4",
       memberName: "Erik Ek",
+      isMine: false,
       status: "rejected",
       date: d("2026-04-28"),
       amount: 2500,
@@ -90,17 +94,18 @@ export default {
 };
 
 export const Default = {
-  args: { data: baseData, backTo: "/groups/grp1" },
+  args: { data: baseData, newExpenseTo: "/expenses/new?account=acc1", expenseTo: (id) => `/expenses/${id}` },
 };
 
 export const AllYears = {
-  args: { data: { ...baseData, year: null }, backTo: "/groups/grp1" },
+  args: { data: { ...baseData, year: null }, newExpenseTo: "/expenses/new?account=acc1", expenseTo: (id) => `/expenses/${id}` },
 };
 
 export const EmptyYear = {
   args: {
     data: { ...baseData, year: 2024, expenses: [] },
-    backTo: "/groups/grp1",
+    newExpenseTo: "/expenses/new?account=acc1",
+    expenseTo: (id) => `/expenses/${id}`,
   },
 };
 

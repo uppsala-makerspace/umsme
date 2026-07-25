@@ -62,9 +62,12 @@ Meteor.methods({
   /**
    * Create a draft (pending) expense from an uploaded receipt photo.
    * Uploads the image first so the schema-required driveFileId is present.
+   * `expenseAccountId` preselects the account (used when starting from a
+   * group's account page); it must be one the member may spend on.
    */
-  "expenses.create": async (imageBase64, mimeType) => {
+  "expenses.create": async (imageBase64, mimeType, expenseAccountId) => {
     const member = await requireMember();
+    await requireAllowedAccount(expenseAccountId, member);
     const buffer = decodeImage(imageBase64, mimeType);
     const now = new Date();
     const driveFileId = await uploadImage({
@@ -80,6 +83,7 @@ Meteor.methods({
       status: "pending",
       date: now,
       createdAt: now,
+      ...(expenseAccountId ? { expenseAccountId } : {}),
     });
   },
 
@@ -249,9 +253,15 @@ Meteor.methods({
       const account = await ExpenseAccounts.findOneAsync(expense.expenseAccountId);
       accountName = account?.name || null;
     }
+    // Who confirmed it, for the review trail on the expense's own page. Unset
+    // when the confirmer had no member record (see withActor in admin).
+    const confirmer = expense.confirmedBy
+      ? await Members.findOneAsync(expense.confirmedBy, { fields: { name: 1 } })
+      : null;
     return {
       ...expense,
       accountName,
+      confirmedByName: confirmer?.name || null,
       receiptUrl: receiptUrlFor(expense._id, expense.driveFileId),
     };
   },
@@ -322,6 +332,9 @@ Meteor.methods({
       expenses: shown.map((e) => ({
         _id: e._id,
         memberName: nameById[e.memberId] || e.memberId,
+        // Lets the client offer an edit shortcut for the caller's own
+        // expenses without exposing member ids.
+        isMine: e.memberId === member._id,
         status: e.status,
         date: e.date,
         amount: e.amount || 0,

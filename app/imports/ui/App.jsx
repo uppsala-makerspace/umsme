@@ -110,7 +110,7 @@ export const App = () => {
             <Route path="/groups/:groupId" element={<GroupDetail />} />
             <Route path="/groups/:groupId/edit" element={<GroupEdit />} />
             <Route path="/groups/:groupId/rules" element={<GroupRules />} />
-            <Route path="/groups/:groupId/accounts/:accountId" element={<GroupAccountExpenses />} />
+            <Route path="/expense-accounts/:accountId" element={<GroupAccountExpenses />} />
           </Routes>
         </Suspense>
         </ChunkErrorBoundary>

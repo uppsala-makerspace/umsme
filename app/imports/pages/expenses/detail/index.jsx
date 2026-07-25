@@ -1,13 +1,19 @@
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback } from "react";
-import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Navigate, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import ExpenseDetail from "./ExpenseDetail.jsx";
+import { safeReturnTo } from "../utils";
 
 export default () => {
   const { expenseId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Where to go when done. Set when the expense was started from (or opened
+  // from) a group's expense account page; otherwise the member's own list.
+  const returnTo = safeReturnTo(searchParams.get("returnTo"));
+  const doneTo = returnTo || "/expenses";
   const user = useTracker(() => Meteor.user());
   const [loading, setLoading] = useState(true);
   const [expense, setExpense] = useState(null);
@@ -40,11 +46,17 @@ export default () => {
 
   const onSave = async (fields) => {
     await Meteor.callAsync("expenses.update", expenseId, fields);
-    navigate("/expenses");
+    navigate(doneTo);
   };
   const onSubmit = async (fields) => {
     await Meteor.callAsync("expenses.update", expenseId, fields);
     await Meteor.callAsync("expenses.submit", expenseId);
+    // Came from an account page: the member is done, take them back there.
+    // On the standalone page, stay and show the submitted state as before.
+    if (returnTo) {
+      navigate(returnTo);
+      return;
+    }
     await fetchData();
   };
   const onRetract = async () => {
@@ -57,7 +69,7 @@ export default () => {
   };
   const onAbort = async () => {
     await Meteor.callAsync("expenses.abort", expenseId);
-    navigate("/expenses");
+    navigate(doneTo);
   };
 
   if (!Meteor.userId()) {

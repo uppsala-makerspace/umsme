@@ -166,6 +166,9 @@ const DETAIL_PAGES = [
   { pattern: "/certifier-requests/:attestationId", fallback: "/certificates", state: { tab: "requests" } },
   { pattern: "/expenses/new", fallback: "/expenses" },
   { pattern: "/expenses/:expenseId", fallback: "/expenses" },
+  // An expense account belongs to one or more groups, so it has no single
+  // parent page; the group list is the closest fallback.
+  { pattern: "/expense-accounts/:accountId", fallback: "/groups" },
   { pattern: "/messages/:kind/:id", fallback: "/messages" },
   { pattern: "/notification-settings", fallback: "/settings" },
 ];

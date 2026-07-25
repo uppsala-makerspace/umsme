@@ -6,12 +6,13 @@ import Layout from "/imports/components/Layout/Layout";
 import AccountExpenses from "./AccountExpenses";
 
 /**
- * Overview of everything booked on one of a group's expense accounts. Open to
- * the group's active members (the server enforces that); read-only — approval
- * still happens in admin.
+ * Overview of everything booked on one expense account. Open to active members
+ * of any of the account's groups (the server enforces that) — the page is not
+ * scoped to a group, since an account can belong to several. Read-only;
+ * approval still happens in admin.
  */
 export default () => {
-  const { groupId, accountId } = useParams();
+  const { accountId } = useParams();
   const user = useTracker(() => Meteor.user());
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
@@ -42,13 +43,18 @@ export default () => {
     return <Navigate to="/login" />;
   }
 
+  // Creating and editing happen on the expense pages; they return here when
+  // done, so the member stays in the account's context.
+  const returnTo = `returnTo=${encodeURIComponent(`/expense-accounts/${accountId}`)}`;
+
   return (
     <Layout>
       <AccountExpenses
         loading={loading}
         error={error}
         data={data}
-        backTo={`/groups/${groupId}`}
+        newExpenseTo={`/expenses/new?account=${encodeURIComponent(accountId)}&${returnTo}`}
+        expenseTo={(expenseId) => `/expenses/${expenseId}?${returnTo}`}
         onYearChange={setYear}
       />
     </Layout>

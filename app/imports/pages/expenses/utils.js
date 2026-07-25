@@ -5,6 +5,14 @@ export const EDITABLE_STATUSES = ["pending", "rejected"];
 export const isEditable = (status) => EDITABLE_STATUSES.includes(status);
 
 /**
+ * A `returnTo` query parameter is only honoured when it is an in-app path, so
+ * a crafted link can't bounce the member off to another site. Returns null for
+ * anything else (missing, absolute URL, protocol-relative `//host`).
+ */
+export const safeReturnTo = (value) =>
+  typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : null;
+
+/**
  * The date a status actually refers to, with the i18n key that names it. The
  * label keys are singular ("Inskickad", "Bekräftad"), so they double as the
  * status label next to the date. Falls back to the receipt date when the

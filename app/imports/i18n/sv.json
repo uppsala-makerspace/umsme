@@ -415,6 +415,8 @@
   "expenseBookkeepingAccount": "Bokföringskonto",
   "expenseReimbursedDate": "Återbetalningsdatum",
   "expenseShowReceipt": "Visa kvitto",
+  "expenseOpenAccount": "Till utläggskontot",
+  "show": "Visa",
   "expenseChooseAccount": "Välj konto…",
   "expensePlace": "Inköpsställe",
   "expensePlacePlaceholder": "T.ex. Clas Ohlson, Uppsala",

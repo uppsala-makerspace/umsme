@@ -416,6 +416,8 @@
   "expenseBookkeepingAccount": "Bookkeeping account",
   "expenseReimbursedDate": "Reimbursement date",
   "expenseShowReceipt": "Show receipt",
+  "expenseOpenAccount": "Open expense account",
+  "show": "Show",
   "expenseChooseAccount": "Choose account…",
   "expensePlace": "Place of purchase",
   "expensePlacePlaceholder": "E.g. Clas Ohlson, Uppsala",

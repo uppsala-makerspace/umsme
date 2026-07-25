@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ChevronDownIcon, ChevronUpIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
@@ -23,10 +23,13 @@ const NOTE_MAX = 140;
 const truncate = (text) =>
   text && text.length > NOTE_MAX ? `${text.slice(0, NOTE_MAX).trimEnd()}…` : text;
 
+const dash = (value) => (value === null || value === undefined || value === "" ? "—" : value);
+
 const kr = (amount) => `${Math.round((amount || 0) * 100) / 100} kr`;
 
-const AccountExpenses = ({ loading, error, data, backTo, onYearChange }) => {
+const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYearChange }) => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const lang = i18n.language || "sv";
   const [expanded, setExpanded] = useState({});
   // The expense whose receipt is shown in the dialog, if any.
@@ -63,14 +66,16 @@ const AccountExpenses = ({ loading, error, data, backTo, onYearChange }) => {
 
   return (
     <MainContent>
-      {backTo && (
-        <Link to={backTo} className="inline-block mb-3 text-sm text-gray-500 no-underline hover:underline">
-          &larr; {t("back")}
-        </Link>
-      )}
-
       <h2 className="text-2xl m-0 mb-1">{account.name}</h2>
       <p className="text-sm text-gray-500 mt-0 mb-4">{t("expenseAccount")}</p>
+
+      {newExpenseTo && (
+        <div className="mb-6">
+          <Button fullWidth onClick={() => navigate(newExpenseTo)}>
+            {t("expenseNew")}
+          </Button>
+        </div>
+      )}
 
       <div className="mb-4">
         <label htmlFor="expenseYear" className="block text-sm text-gray-600 mb-1">
@@ -109,6 +114,7 @@ const AccountExpenses = ({ loading, error, data, backTo, onYearChange }) => {
             // The label is the singular status name and the date is the one
             // that status change refers to.
             const dated = statusDate(e);
+            const canOpen = !!expenseTo && e.isMine;
             return (
               <li
                 key={e._id}
@@ -141,14 +147,20 @@ const AccountExpenses = ({ loading, error, data, backTo, onYearChange }) => {
                     <dt className="text-gray-500">{t("expenseDate")}</dt>
                     <dd className="m-0">{formatDate(e.date, lang)}</dd>
                     <dt className="text-gray-500">{t("expensePlace")}</dt>
-                    <dd className="m-0">{e.place || "—"}</dd>
+                    <dd className="m-0">{dash(e.place)}</dd>
                     <dt className="text-gray-500">{t("expenseNote")}</dt>
-                    <dd className="m-0 break-words">{truncate(e.note) || "—"}</dd>
-                    {/* The status timeline — each date only once it exists. */}
+                    <dd className="m-0 break-words">{dash(truncate(e.note))}</dd>
+                    {/* Status timeline — a row only once it has happened. */}
                     {e.submittedAt && (
                       <>
                         <dt className="text-gray-500">{t("expenseDateLabelSubmitted")}</dt>
                         <dd className="m-0">{formatDate(e.submittedAt, lang)}</dd>
+                      </>
+                    )}
+                    {e.rejectedAt && (
+                      <>
+                        <dt className="text-gray-500">{t("expenseDateLabelRejected")}</dt>
+                        <dd className="m-0">{formatDate(e.rejectedAt, lang)}</dd>
                       </>
                     )}
                     {e.confirmedByName && (
@@ -161,12 +173,6 @@ const AccountExpenses = ({ loading, error, data, backTo, onYearChange }) => {
                       <>
                         <dt className="text-gray-500">{t("expenseDateLabelConfirmed")}</dt>
                         <dd className="m-0">{formatDate(e.confirmedAt, lang)}</dd>
-                      </>
-                    )}
-                    {e.rejectedAt && (
-                      <>
-                        <dt className="text-gray-500">{t("expenseDateLabelRejected")}</dt>
-                        <dd className="m-0">{formatDate(e.rejectedAt, lang)}</dd>
                       </>
                     )}
                     {e.bookkeepingAccount && (
@@ -184,16 +190,28 @@ const AccountExpenses = ({ loading, error, data, backTo, onYearChange }) => {
                   </dl>
                 )}
 
-                {isOpen && e.receiptUrl && (
-                  <div className="px-4 pb-4">
-                    <button
-                      type="button"
-                      onClick={() => setReceipt(e)}
-                      className="flex items-center gap-2 p-0 bg-transparent border-none text-sm text-gray-600 underline cursor-pointer hover:text-black"
-                    >
-                      <PhotoIcon className="w-5 h-5" aria-hidden="true" />
-                      {t("expenseShowReceipt")}
-                    </button>
+                {isOpen && (e.receiptUrl || canOpen) && (
+                  <div className="flex items-center justify-between gap-3 px-4 pb-4">
+                    {e.receiptUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => setReceipt(e)}
+                        className="flex items-center gap-2 p-0 bg-transparent border-none text-sm text-gray-600 underline cursor-pointer hover:text-black"
+                      >
+                        <PhotoIcon className="w-5 h-5" aria-hidden="true" />
+                        {t("expenseShowReceipt")}
+                      </button>
+                    ) : (
+                      <span />
+                    )}
+                    {canOpen && (
+                      <Link
+                        to={expenseTo(e._id)}
+                        className="flex items-center gap-1 text-sm text-gray-600 underline hover:text-black"
+                      >
+                        {t("show")} &rarr;
+                      </Link>
+                    )}
                   </div>
                 )}
               </li>
@@ -251,7 +269,8 @@ AccountExpenses.propTypes = {
   loading: PropTypes.bool,
   error: PropTypes.string,
   data: PropTypes.object,
-  backTo: PropTypes.string,
+  newExpenseTo: PropTypes.string,
+  expenseTo: PropTypes.func,
   onYearChange: PropTypes.func,
 };
 
@@ -259,7 +278,8 @@ AccountExpenses.defaultProps = {
   loading: false,
   error: null,
   data: null,
-  backTo: null,
+  newExpenseTo: null,
+  expenseTo: null,
   onYearChange: () => {},
 };
 

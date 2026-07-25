@@ -345,7 +345,7 @@ const GroupDetail = ({
             {expenseAccounts.map((account) => (
               <li key={account._id} className="mb-2">
                 <Link
-                  to={`/groups/${group._id}/accounts/${account._id}`}
+                  to={`/expense-accounts/${account._id}`}
                   className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
                 >
                   <span className="font-semibold">{account.name}</span>
