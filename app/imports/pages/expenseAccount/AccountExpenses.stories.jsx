@@ -87,7 +87,7 @@ const baseData = {
 };
 
 export default {
-  title: "UMSAPP/Groups/AccountExpenses",
+  title: "UMSAPP/AccountExpenses",
   component: AccountExpenses,
   parameters: {},
   tags: ["autodocs"],

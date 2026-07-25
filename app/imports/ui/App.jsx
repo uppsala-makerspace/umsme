@@ -44,6 +44,7 @@ const Settings = lazyWithRetry(() => import('/imports/pages/settings'));
 const Expenses = lazyWithRetry(() => import('/imports/pages/expenses/list'));
 const ExpenseDetail = lazyWithRetry(() => import('/imports/pages/expenses/detail'));
 const ExpenseNew = lazyWithRetry(() => import('/imports/pages/expenses/new'));
+const ExpenseAccount = lazyWithRetry(() => import('/imports/pages/expenseAccount'));
 const Workshops = lazyWithRetry(() => import('/imports/pages/workshops'));
 const WorkshopDetail = lazyWithRetry(() => import('/imports/pages/workshops/detail'));
 const WorkshopEdit = lazyWithRetry(() => import('/imports/pages/workshops/edit'));
@@ -52,7 +53,6 @@ const Groups = lazyWithRetry(() => import('/imports/pages/groups'));
 const GroupDetail = lazyWithRetry(() => import('/imports/pages/groups/detail'));
 const GroupEdit = lazyWithRetry(() => import('/imports/pages/groups/edit'));
 const GroupRules = lazyWithRetry(() => import('/imports/pages/groups/rules'));
-const GroupAccountExpenses = lazyWithRetry(() => import('/imports/pages/groups/expenseAccount'));
 
 export const App = () => {
   useAutoReconnect();
@@ -102,6 +102,7 @@ export const App = () => {
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/expenses/new" element={<ExpenseNew />} />
             <Route path="/expenses/:expenseId" element={<ExpenseDetail />} />
+            <Route path="/expense-accounts/:accountId" element={<ExpenseAccount />} />
             <Route path="/workshops" element={<Workshops />} />
             <Route path="/workshops/:workshopId" element={<WorkshopDetail />} />
             <Route path="/workshops/:workshopId/edit" element={<WorkshopEdit />} />
@@ -110,7 +111,6 @@ export const App = () => {
             <Route path="/groups/:groupId" element={<GroupDetail />} />
             <Route path="/groups/:groupId/edit" element={<GroupEdit />} />
             <Route path="/groups/:groupId/rules" element={<GroupRules />} />
-            <Route path="/expense-accounts/:accountId" element={<GroupAccountExpenses />} />
           </Routes>
         </Suspense>
         </ChunkErrorBoundary>

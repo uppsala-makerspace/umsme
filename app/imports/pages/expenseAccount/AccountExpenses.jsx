@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ChevronDownIcon, ChevronUpIcon, PhotoIcon } from "@heroicons/react/24/outline";
-import MainContent from "../../../components/MainContent";
-import Loader from "../../../components/Loader";
-import Button from "../../../components/Button";
-import { formatDate, statusDate } from "../../expenses/utils";
+import MainContent from "../../components/MainContent";
+import Loader from "../../components/Loader";
+import Button from "../../components/Button";
+import { formatDate, statusDate } from "../expenses/utils";
 
 // Same status accents as the member's own expense list (ExpenseItem).
 const statusAccent = {
