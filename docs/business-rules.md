@@ -178,7 +178,7 @@ Inside the renewal window (`now >= memberend - MEMBERSHIP_RENEWAL_WINDOW_DAYS`, 
 
 **S3d**: the member keeps their period and pays only the price difference, so no dates change -- only the family flag. The two payment types differ solely in price (2000 - 1600 = 400, 2000 - 1200 = 800); `upgradePath` (`regular`/`discounted`) tells the UI which one to offer based on whether the current membership was discounted, and the server treats them identically. Both produce a full-price family membership (`discount: false`). Quarterly lab members are not offered this -- they renew into a full family lab year (S3b) instead.
 
-Like other upgrades, S3d creates a new Membership record whose end date matches the one it effectively replaces, so a member can end up with two memberships covering the same end date. Known limitation affecting some statistics.
+Like other upgrades, S3d creates a new Membership record whose end date matches the one it effectively replaces, so a member can end up with two memberships covering the same period. The statistics handle this correctly -- see [section 14](#14-membership-counting-in-statistics) -- but the duplicate records themselves remain; how to model replacement properly is a separate discussion.
 
 ### S4: Family -> Regular (downgrade)
 
@@ -370,6 +370,40 @@ The renewal window is `MEMBERSHIP_RENEWAL_WINDOW_DAYS` (see `common/lib/timeCons
 | Has quarterly lab, `labEnd` outside the renewal window | No | `disabledTooEarlyToRenew` |
 | Has base membership only (`type = "member"`) | Yes | -- |
 | Has quarterly lab, within renewal window | Yes | -- |
+
+---
+
+## 14. Membership Counting in Statistics
+
+The `/stats` graphs accumulate +1/-1 events derived from Membership records, while
+`/history` counts one row per `Members` document with `member > now`. The two must
+agree on today's numbers, so `admin/imports/stats/membershipSeries.js` (pure and
+unit tested in `admin/tests/stats.tests.js`) builds the events from a per-member
+timeline rather than straight from each record:
+
+- **Presence** -- the union of all `member`/`labandmember` intervals covering the
+  moment. Counting each record separately would count a member twice for as long
+  as two of their memberships overlap, which happens on every mid-period upgrade
+  (the new membership starts today while the one it replaces runs on for months).
+- **Lab** -- any membership whose lab span covers the moment, including a
+  standalone quarterly lab record, mirroring the history page's `member.lab > now`.
+- **Family** -- the flag on the *latest started* membership covering the moment,
+  since an upgrade supersedes what it replaces.
+
+The four categories are therefore mutually exclusive and sum to the total, matching
+the history page's `paying = member + lab + family + labfamily`.
+
+### Known discrepancy: own membership plus `infamily`
+
+A member who joined someone's family while an own, still-running membership record
+remains is counted by `/stats` but not by `/history`, which treats `infamily` as
+"not paying". The statistics deliberately do **not** filter on `infamily`: it is a
+present-day flag with no history, so filtering would erase that person's genuinely
+individual membership from earlier years in the graphs.
+
+The effect is a current total a hair above the history page, one per such record.
+This is a data situation rather than a calculation error -- the cleanest resolution
+is to end a member's own membership when they become a family dependent.
 
 ---
 

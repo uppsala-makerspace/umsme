@@ -1,26 +1,8 @@
+import { groupByMember } from '/imports/stats/membershipSeries';
+
 // Time before considering a member has *left*, before this time the member is considered *disappeared*
 // Currently set to half a year.
 const renewingLimit = 1000*3600*24*30*6;
-
-/**
- * Builds an index mapping users to object with ordered memberships.
- * @param Memberships
- * @return {{memberships: []}}
- */
-const groupAndOrder = (Memberships) => {
-  const index = {};
-  Memberships.find().forEach((ms) => {
-    let obj = index[ms.mid];
-    if (!obj) {
-      obj = { memberships: [] };
-      index[ms.mid] = obj;
-    }
-    obj.memberships.push(ms);
-  });
-  Object.values(index).forEach(obj =>
-    obj.memberships.sort((a, b) => a.start < b.start ? -1 : 1));
-  return index;
-};
 
 /**
  * Enrich the object (per member) containing:
@@ -84,14 +66,15 @@ const detectJoiningInfo = (index) => {
 /**
  * Statistics within a specific period
  *
- * @param Memberships
+ * @param {Array<object>} memberships  All Membership documents (a plain array,
+ *   so this stays testable without a database)
  * @param members
  * @param from
  * @param to
  * @return {{memberAgeLeft: *[], memberAge: *[], joined: *[], renewLabels: *[], churn: *[], index: {memberships: []}, memberAgeLabels: *[], labels: *[], renewed: *[], renewTime: *[], left: *[], rejoined: *[], disappeared: *[]}}
  */
-export const statsPerMonth = (Memberships, members, from, to) => {
-  const index = groupAndOrder(Memberships);
+export const statsPerMonth = (memberships, members, from, to) => {
+  const index = groupByMember(memberships);
   detectJoiningInfo(index);
   const joined = {};
   const left = {};
@@ -204,35 +187,5 @@ export const statsPerMonth = (Memberships, members, from, to) => {
 };
 
 
-const datesAreOnSameDay = (first, second) =>
-  first && second &&
-  first.getFullYear() === second.getFullYear() &&
-  first.getMonth() === second.getMonth() &&
-  first.getDate() === second.getDate();
-
-export const sortAndaccumulate = (arr, from, to) => {
-  arr.sort((a, b) => {
-    return a.when < b.when ? -1 : 1;
-  });
-  const now = new Date();
-  let last;
-  arr = arr.filter((m) => {
-    if (m.when > now) {
-      return false;
-    }
-    if (last) {
-      if (datesAreOnSameDay(last.when, m.when)) {
-        last.value += m.value;
-        return false;
-      }
-    }
-    last = m;
-    return true;
-  });
-
-  let accumulate = 0;
-  return arr.map((ev) => {
-    accumulate += ev.value;
-    return {x: ev.when, y: accumulate};
-  }).filter(pair => ((from == null && pair.x < to) || (pair.x > from && pair.x < to)));
-};
+// sortAndAccumulate lives in /imports/stats/membershipSeries so it can be unit
+// tested together with the series building it consumes.

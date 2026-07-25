@@ -3,80 +3,36 @@ import Chart from 'chart.js/auto';
 import 'chartjs-adapter-moment';
 import { Memberships } from '/imports/common/collections/memberships.js';
 import './Statistics.html';
-import { statsPerMonth, sortAndaccumulate } from './utils';
+import { statsPerMonth } from './utils';
+import { buildSeries, sortAndAccumulate } from '/imports/stats/membershipSeries';
 
 const getDataSets = (from, to) => {
-  let members = [];
-  let individual = [];
-  let indiviudalLab = [];
-  let family = [];
-  let familyLab = [];
-  const member2Join = {};
-  Memberships.find().forEach((ms) => {
-    const oldMs = member2Join[ms.mid];
-    if (!oldMs || ms.start < oldMs.start) {
-      member2Join[ms.mid] = ms;
-    }
-  });
-  Memberships.find().forEach((ms) => {
-    // All memberships, including both individuals and family, independent if they are lab or not.
-    // Members part of a family are not counted as they don't have connected membership objects (as they do not pay).
-    if (ms.type === 'member' || ms.type === 'labandmember') {
-      const joined = member2Join[ms.mid]._id === ms._id;
-      members.push({ value: 1, when: ms.start, joined, member: ms.mid });
-      members.push({ value: -1, when: ms.memberend, member: ms.mid });
-    }
+  // One fetch, then everything is derived from a plain array. buildSeries walks
+  // each member's timeline so overlapping memberships (upgrades) count once and
+  // land in exactly one category.
+  const memberships = Memberships.find().fetch();
+  const {
+    memberEvents,
+    individualEvents,
+    individualLabEvents,
+    familyEvents,
+    familyLabEvents,
+  } = buildSeries(memberships);
 
-    // Individual membership payment
-    if (!ms.family && ms.type === 'member') {
-      individual.push({ value: 1, when: ms.start });
-      individual.push({ value: -1, when: ms.memberend });
-    }
-    // Individual membership AND lab payment
-    if (!ms.family && ms.type === 'labandmember') {
-      indiviudalLab.push({ value: 1, when: ms.start });
-      indiviudalLab.push({ value: -1, when: ms.memberend || ms.labend });
-    }
-    // Individual lab "upgrade" payment
-    if (!ms.family && ms.type === 'lab') {
-      indiviudalLab.push({ value: 1, when: ms.start });
-      indiviudalLab.push({ value: -1, when: ms.memberend || ms.labend });
-      // Below is because when someone "upgrades" to lab, we need to subtract them from the individual membership graph.
-      individual.push({ value: -1, when: ms.start });
-      individual.push({ value: 1, when: ms.labend });
-    }
+  const members = sortAndAccumulate(memberEvents, from, to);
+  const individual = sortAndAccumulate(individualEvents, from, to);
+  const individualLab = sortAndAccumulate(individualLabEvents, from, to);
+  const family = sortAndAccumulate(familyEvents, from, to);
+  const familyLab = sortAndAccumulate(familyLabEvents, from, to);
 
-    // Family membership payment
-    if (ms.family && ms.type === 'member') {
-      family.push({ value: 1, when: ms.start });
-      family.push({ value: -1, when: ms.memberend });
-    }
-    // Family membership AND lab payment
-    if (ms.family && ms.type === 'labandmember') {
-      familyLab.push({ value: 1, when: ms.start });
-      familyLab.push({ value: -1, when: ms.memberend || ms.labend });
-    }
-    // Family lab "upgrade" payment
-    if (ms.family && ms.type === 'lab') {
-      familyLab.push({ value: 1, when: ms.start });
-      familyLab.push({ value: -1, when: ms.memberend || ms.labend });
-      // Below is because when a family "upgrades" to lab, we need to subtract them from the family membership graph.
-      family.push({ value: -1, when: ms.start });
-      family.push({ value: 1, when: ms.labend });
-    }
-  });
-  members = sortAndaccumulate(members, from, to);
-  individual = sortAndaccumulate(individual, from, to);
-  indiviudalLab = sortAndaccumulate(indiviudalLab, from, to);
-  family = sortAndaccumulate(family, from, to);
-  familyLab = sortAndaccumulate(familyLab, from, to);
-  document.getElementById('totalmembers').innerText = members.length > 0 ? members[members.length-1].y : '-';
-  document.getElementById('nolab').innerText = individual.length > 0 ? individual[individual.length-1].y : '-';
-  document.getElementById('lab').innerText = indiviudalLab.length > 0 ? indiviudalLab[indiviudalLab.length-1].y : '-';
-  document.getElementById('nolabfamily').innerText = family.length > 0 ? family[family.length-1].y : '-';
-  document.getElementById('labfamily').innerText = familyLab.length > 0 ? familyLab[familyLab.length-1].y : '-';
+  const currentValue = (series) => (series.length > 0 ? series[series.length - 1].y : '-');
+  document.getElementById('totalmembers').innerText = currentValue(members);
+  document.getElementById('nolab').innerText = currentValue(individual);
+  document.getElementById('lab').innerText = currentValue(individualLab);
+  document.getElementById('nolabfamily').innerText = currentValue(family);
+  document.getElementById('labfamily').innerText = currentValue(familyLab);
 
-  const { labels, joined, left, churn, renewed, rejoined, disappeared, renewTime, renewLabels, memberAge, memberAgeLeft, memberAgeLabels, index } = statsPerMonth(Memberships, members, from, to);
+  const { labels, joined, left, churn, renewed, rejoined, disappeared, renewTime, renewLabels, memberAge, memberAgeLeft, memberAgeLabels, index } = statsPerMonth(memberships, members, from, to);
 
   return {
     graph1: {
@@ -102,7 +58,7 @@ const getDataSets = (from, to) => {
           label: 'Lab',
           borderWidth: 2,
           cubicInterpolationMode: 'monotone',
-          data: indiviudalLab,
+          data: individualLab,
           borderColor: 'rgba(54, 162, 235)',
           fill: false,
           steppedLine: 'before',

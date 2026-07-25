@@ -3,32 +3,16 @@ import { ReactiveDict } from 'meteor/reactive-dict';
 import { Memberships } from '/imports/common/collections/memberships.js';
 import { Members } from '/imports/common/collections/members.js';
 import './History.html';
-import { statsPerMonth, sortAndaccumulate } from '../stats/utils';
+import { statsPerMonth } from '../stats/utils';
+import { buildSeries, sortAndAccumulate } from '/imports/stats/membershipSeries';
 
 const load = (state, memberfilter = 'active') => {
-  let members = [];
-  const member2Join = {};
-  Memberships.find().forEach((ms) => {
-    const oldMs = member2Join[ms.mid];
-    if (!oldMs || ms.start < oldMs.start) {
-      member2Join[ms.mid] = ms;
-    }
-  });
   const from = null;
   const to = new Date();
 
-  Memberships.find().forEach((ms) => {
-    // All memberships, including both individuals and family, independent if they are lab or not.
-    // Members part of a family are not counted as they don't have connected membership objects (as they do not pay).
-    if (ms.type === 'member' || ms.type === 'labandmember') {
-      const joined = member2Join[ms.mid]._id === ms._id;
-      members.push({ value: 1, when: ms.start, joined, member: ms.mid });
-      members.push({ value: -1, when: ms.memberend, member: ms.mid });
-    }
-  });
-
-  members = sortAndaccumulate(members, from, to);
-  const { index } = statsPerMonth(Memberships, members, from, to);
+  const memberships = Memberships.find().fetch();
+  const members = sortAndAccumulate(buildSeries(memberships).memberEvents, from, to);
+  const { index } = statsPerMonth(memberships, members, from, to);
 
   const id2member = {};
   let stats = {

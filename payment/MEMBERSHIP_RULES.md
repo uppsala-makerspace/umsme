@@ -101,7 +101,7 @@ Within the renewal window (`MEMBERSHIP_RENEWAL_WINDOW_DAYS` before memberend) th
 
 **S3d**: the member keeps their period and pays only the difference, so no dates change — only the family flag. Quarterly lab members are not offered this; they renew into a full family lab year (S3b) instead.
 
-Note: like other upgrades, S3d creates a new Membership document whose end date matches the one it effectively replaces, so a member can end up with two memberships covering the same end date. Known limitation affecting some statistics; how to model this properly is a separate discussion.
+Note: like other upgrades, S3d creates a new Membership document whose end date matches the one it effectively replaces, so a member can end up with two memberships covering the same period. The statistics count such a member once (see section 14 of docs/business-rules.md); the duplicate records themselves remain, and how to model replacement properly is a separate discussion.
 
 ### S4: Family → Regular
 
