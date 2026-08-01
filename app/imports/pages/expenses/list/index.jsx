@@ -12,6 +12,7 @@ export default () => {
   const [toApprove, setToApprove] = useState([]);
   const [recentlyReviewed, setRecentlyReviewed] = useState([]);
   const [isApprover, setIsApprover] = useState(false);
+  const [accounts, setAccounts] = useState([]);
   const [error, setError] = useState(null);
 
   const fetchData = useCallback(async () => {
@@ -23,6 +24,8 @@ export default () => {
       setToApprove(review.pending);
       setRecentlyReviewed(review.recentlyReviewed);
       setIsApprover(review.isApprover);
+      const myAccounts = await Meteor.callAsync("expenses.getMyAccounts");
+      setAccounts(myAccounts);
       setError(null);
     } catch (err) {
       console.error("Error fetching expenses:", err);
@@ -50,6 +53,7 @@ export default () => {
         isApprover={isApprover}
         toApprove={toApprove}
         recentlyReviewed={recentlyReviewed}
+        accounts={accounts}
       />
     </Layout>
   );

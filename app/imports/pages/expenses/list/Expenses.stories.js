@@ -18,7 +18,7 @@ const sample = [
 ];
 
 export const AllStatuses = {
-  args: { loading: false, expenses: sample },
+  args: { loading: false, expenses: sample, accounts: [] },
 };
 
 const toApprove = [
@@ -31,12 +31,49 @@ const recentlyReviewed = [
   { _id: "r4", status: "rejected", date: daysAgo(11), rejectedAt: daysAgo(1), amount: 4200, accountName: "Verktyg", note: "Pelarborrmaskin", submitterName: "Fredrik Ask" },
 ];
 
+const accounts = [
+  {
+    _id: "a1",
+    name: "Förbrukning",
+    explanation: "Sandpapper, borrar, skruv och annat som tar slut.",
+    canSpend: true,
+    groupNames: [{ sv: "Träverkstaden", en: "The wood workshop" }],
+  },
+  {
+    _id: "a2",
+    name: "Verktyg",
+    explanation: null,
+    canSpend: true,
+    groupNames: [
+      { sv: "Träverkstaden", en: "The wood workshop" },
+      { sv: "Metallverkstaden", en: "The metal workshop" },
+    ],
+  },
+  // A treasurer sees accounts they may review but not spend on.
+  {
+    _id: "a3",
+    name: "Fika",
+    explanation: "Kaffe, te och tilltugg till öppna kvällar.",
+    canSpend: false,
+    groupNames: [{ sv: "Värdgruppen", en: "The host group" }],
+  },
+];
+
 export const Approver = {
-  args: { loading: false, expenses: sample, isApprover: true, toApprove, recentlyReviewed },
+  args: { loading: false, expenses: sample, isApprover: true, toApprove, recentlyReviewed, accounts },
 };
 
 export const ApproverNothingToDo = {
-  args: { loading: false, expenses: sample, isApprover: true, toApprove: [], recentlyReviewed: [] },
+  args: { loading: false, expenses: sample, isApprover: true, toApprove: [], recentlyReviewed: [], accounts },
+};
+
+// The common case: no approval rights, so two tabs.
+export const TwoTabs = {
+  args: { loading: false, expenses: sample, accounts: accounts.slice(0, 2) },
+};
+
+export const NoAccounts = {
+  args: { loading: false, expenses: sample, accounts: [] },
 };
 
 export const Empty = {

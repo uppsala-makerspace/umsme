@@ -6,13 +6,14 @@ import { publishManagerEvent, ManagerEventType, blockquote } from "/imports/comm
 import { adminLink } from "/imports/common/lib/links";
 import { receiptUrlFor } from "/imports/common/server/receiptToken";
 import { Members } from "/imports/common/collections/members";
+import { Groups } from "/imports/common/collections/groups";
 import {
   findMemberForUser,
   expenseAccessAllowed,
   expenseAccountsFor,
   approvableAccountIdsFor,
-  myActiveGroupIds,
-  seesAllExpenseAccounts,
+  visibleExpenseAccountsFor,
+  canViewExpenseAccount,
 } from "./utils";
 import { canReviewExpense, canViewExpense } from "/imports/common/lib/expenseApproval";
 
@@ -450,6 +451,35 @@ Meteor.methods({
   },
 
   /**
+   * The accounts the member may open, for the accounts tab: the ones they may
+   * spend on plus the ones they may review. Each is annotated with the groups
+   * behind it, so a name like "Förbrukning" says whose it is, and with whether
+   * the member may charge an expense to it — a treasurer sees every account
+   * here but may not spend on all of them.
+   */
+  "expenses.getMyAccounts": async () => {
+    const member = await requireMember();
+    const { accounts, spendableIds } = await visibleExpenseAccountsFor(member);
+
+    const groupIds = [...new Set(accounts.flatMap((a) => a.groupIds || []))];
+    const groups = await Groups.find(
+      { _id: { $in: groupIds } },
+      { fields: { name: 1 } }
+    ).fetchAsync();
+    const groupById = Object.fromEntries(groups.map((g) => [g._id, g]));
+
+    return accounts.map((a) => ({
+      _id: a._id,
+      name: a.name,
+      explanation: a.explanation || null,
+      canSpend: spendableIds.has(a._id),
+      groupNames: (a.groupIds || [])
+        .map((id) => groupById[id]?.name)
+        .filter(Boolean),
+    }));
+  },
+
+  /**
    * All expenses booked on one account, for the group's overview. Visible to
    * active members of any of the account's groups (and admin/board): the group
    * needs to see what it has spent, so this deliberately shows other members'
@@ -462,10 +492,9 @@ Meteor.methods({
     const account = await ExpenseAccounts.findOneAsync(accountId);
     if (!account) throw new Meteor.Error("not-found", "Expense account not found");
 
-    if (!(await seesAllExpenseAccounts(member))) {
-      const myGroups = await myActiveGroupIds(member);
-      const shares = (account.groupIds || []).some((g) => myGroups.includes(g));
-      if (!shares) throw new Meteor.Error("not-authorized", "Not a member of this account's groups");
+    // Same rule as the accounts tab lists, so everything it links to opens.
+    if (!(await canViewExpenseAccount(member, account))) {
+      throw new Meteor.Error("not-authorized", "Not a member of this account's groups");
     }
 
     const all = await Expenses.find(

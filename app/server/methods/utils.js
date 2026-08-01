@@ -80,6 +80,38 @@ export const canApproveExpenses = async (member) =>
   (await approvableAccountIdsFor(member)).length > 0;
 
 /**
+ * The expense accounts this member may look at: the ones they may spend on
+ * plus the ones they may review. Reviewing is the wider of the two for
+ * admin/board/treasurer, who get every account that way — deliberately without
+ * widening seesAllExpenseAccounts, which decides *spending* and must stay put.
+ *
+ * Returns the spendable ids alongside, since the caller needs to tell the two
+ * apart and recomputing them would mean running the same queries twice.
+ *
+ * @return {Promise<{accounts: Array<object>, spendableIds: Set<string>}>}
+ */
+export const visibleExpenseAccountsFor = async (member) => {
+  const spendable = await expenseAccountsFor(member);
+  const spendableIds = new Set(spendable.map((a) => a._id));
+  const missing = (await approvableAccountIdsFor(member)).filter((id) => !spendableIds.has(id));
+  if (!missing.length) return { accounts: spendable, spendableIds };
+  const extra = await ExpenseAccounts.find({ _id: { $in: missing } }).fetchAsync();
+  const accounts = [...spendable, ...extra].sort((a, b) =>
+    (a.name || "").localeCompare(b.name || "", "sv")
+  );
+  return { accounts, spendableIds };
+};
+
+/** Whether this member may open one particular account's overview. */
+export const canViewExpenseAccount = async (member, account) => {
+  if (!account) return false;
+  if (await seesAllExpenseAccounts(member)) return true;
+  const myGroups = await myActiveGroupIds(member);
+  if ((account.groupIds || []).some((g) => myGroups.includes(g))) return true;
+  return (await approvableAccountIdsFor(member)).includes(account._id);
+};
+
+/**
  * Whether the current user may see/use the expenses feature: their member
  * email is on the configured allowlist, their account is in the admin/board
  * group (always allowed), they are an active member of a group that has at

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
@@ -8,13 +8,24 @@ import Button from "../../../components/Button";
 import Tabs from "../../../components/Tabs";
 import ExpenseItem from "../components/ExpenseItem";
 import { EXPENSE_STATUSES, formatDate, statusDate } from "../utils";
+import { localized } from "/imports/common/lib/groupRules";
 
-const Expenses = ({ loading, error, expenses, isApprover, toApprove, recentlyReviewed }) => {
+const Expenses = ({
+  loading,
+  error,
+  expenses,
+  isApprover,
+  toApprove,
+  recentlyReviewed,
+  accounts,
+}) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
   const lang = i18n.language || "sv";
-  const [activeTab, setActiveTab] = useState(location.state?.tab || "mine");
+  // The tab lives in the URL rather than in state, so coming back from an
+  // account or an expense lands on the tab you left from — the back arrow does
+  // navigate(-1), which restores the query string with it.
+  const [searchParams, setSearchParams] = useSearchParams();
 
   if (loading) {
     return (
@@ -58,24 +69,37 @@ const Expenses = ({ loading, error, expenses, isApprover, toApprove, recentlyRev
     </ExpenseItem>
   );
 
+  // Two tabs for most members, three for approvers. The labels are kept short
+  // deliberately: at three tabs each gets a third of a phone's width, and the
+  // page is already titled Utlägg, so repeating the word in every tab buys
+  // nothing.
+  const tabs = [
+    { key: "mine", label: t("myExpensesTab") },
+    isApprover && {
+      key: "approve",
+      label: t("expensesToApproveTab"),
+      badge: toApprove.length > 0 ? toApprove.length : undefined,
+    },
+    { key: "accounts", label: t("expenseAccountsTab") },
+  ].filter(Boolean);
+
+  // Unknown or not-available (?tab=approve without approval rights) falls back
+  // to the default rather than showing nothing.
+  const requested = searchParams.get("tab");
+  const activeTab = tabs.some((tab) => tab.key === requested) ? requested : "mine";
+  // replace, not push: switching tabs should not make the back arrow walk back
+  // through them. The default tab drops the parameter so the URL stays clean,
+  // and any other parameter is carried over untouched.
+  const setActiveTab = (key) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === "mine") next.delete("tab");
+    else next.set("tab", key);
+    setSearchParams(next, { replace: true });
+  };
+
   return (
-    <MainContent topPadding={!isApprover}>
-      {/* The tab strip only appears for approvers; everyone else just sees
-          their own expenses as before. */}
-      {isApprover && (
-        <Tabs
-          tabs={[
-            { key: "mine", label: t("myExpensesTab") },
-            {
-              key: "approve",
-              label: t("expensesToApproveTab"),
-              badge: toApprove.length > 0 ? toApprove.length : undefined,
-            },
-          ]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-      )}
+    <MainContent topPadding={false}>
+      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === "mine" && (
         <div>
@@ -148,6 +172,50 @@ const Expenses = ({ loading, error, expenses, isApprover, toApprove, recentlyRev
           )}
         </div>
       )}
+
+      {activeTab === "accounts" && (
+        <section className="mb-8">
+          <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">
+            {t("expenseAccountsHeading")}
+          </h3>
+          {accounts.length === 0 ? (
+            <p className="text-center text-gray-500 p-8 italic">{t("expenseNoAccounts")}</p>
+          ) : (
+            <ul className="list-none p-0 m-0">
+              {accounts.map((a) => (
+                <li key={a._id} className="mb-3">
+                  <Link
+                    to={`/expense-accounts/${a._id}`}
+                    className="flex justify-between items-center gap-3 p-4 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
+                  >
+                    <span className="flex-1 min-w-0">
+                      <span className="block font-semibold leading-snug">{a.name}</span>
+                      {/* Account names repeat across groups ("Förbrukning"),
+                          so say whose the account is. */}
+                      {a.groupNames.length > 0 && (
+                        <span className="block text-xs text-gray-500 mt-0.5">
+                          {a.groupNames.map((n) => localized(n, lang)).join(", ")}
+                        </span>
+                      )}
+                      {a.explanation && (
+                        <span className="block text-sm text-gray-500 mt-1">{a.explanation}</span>
+                      )}
+                      {/* A treasurer sees every account but may only charge
+                          expenses to their own groups'. */}
+                      {!a.canSpend && (
+                        <span className="inline-block rounded-full bg-gray-100 text-gray-600 text-xs px-2 py-1 mt-2">
+                          {t("expenseAccountViewOnly")}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-gray-400 text-xl">&rarr;</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </MainContent>
   );
 };
@@ -159,6 +227,7 @@ Expenses.propTypes = {
   isApprover: PropTypes.bool,
   toApprove: PropTypes.array,
   recentlyReviewed: PropTypes.array,
+  accounts: PropTypes.array,
 };
 
 Expenses.defaultProps = {
@@ -168,6 +237,7 @@ Expenses.defaultProps = {
   isApprover: false,
   toApprove: [],
   recentlyReviewed: [],
+  accounts: [],
 };
 
 export default Expenses;
