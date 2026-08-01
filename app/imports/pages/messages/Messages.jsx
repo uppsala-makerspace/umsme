@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
@@ -26,10 +26,20 @@ const getTagClass = (item) => {
 
 const Messages = ({ loading, items, lastSeen }) => {
   const { t, i18n } = useTranslation();
-  const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState(
-    searchParams.get("tab") === "messages" ? "messages" : "announcements"
-  );
+  // The tab lives in the URL rather than in state, so coming back from a
+  // message lands on the tab you left from — the back arrow does navigate(-1),
+  // which restores the query string with it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") === "messages" ? "messages" : "announcements";
+  // replace, not push: switching tabs should not make the back arrow walk back
+  // through them. The default tab drops the parameter so the URL stays clean,
+  // and any other parameter is carried over untouched.
+  const setActiveTab = (key) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === "announcements") next.delete("tab");
+    else next.set("tab", key);
+    setSearchParams(next, { replace: true });
+  };
 
   const announcementCount = useMemo(
     () => items.filter((i) => i.kind === "announcement").length,
