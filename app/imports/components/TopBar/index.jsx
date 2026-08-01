@@ -150,8 +150,8 @@ const PAGE_TITLES = {
 
 // Drill-down pages get a back arrow in the top bar (top-level pages never
 // do). The arrow goes back in the app's history — a detail page can be
-// reached from several places — and falls back to the listed route (with
-// optional state) when the page was opened directly. The payment flow
+// reached from several places — and falls back to the listed route when the
+// page was opened directly; the route may carry a query string. The payment flow
 // (/membership, /paymentSelection, /initiatedPayment) deliberately has no
 // arrow: mid-flow back navigation is handled by the flow itself.
 const DETAIL_PAGES = [
@@ -163,7 +163,9 @@ const DETAIL_PAGES = [
   { pattern: "/groups/:groupId", fallback: "/groups" },
   { pattern: "/certificates/:certificateId", fallback: "/certificates" },
   { pattern: "/certificates/:certificateId/test", fallback: "/certificates" },
-  { pattern: "/certifier-requests/:attestationId", fallback: "/certificates", state: { tab: "requests" } },
+  // Deep-linked (e.g. from a notification), so there is nothing to go back to:
+  // name the tab in the fallback, since the request came from that one.
+  { pattern: "/certifier-requests/:attestationId", fallback: "/certificates?tab=requests" },
   { pattern: "/expenses/new", fallback: "/expenses" },
   { pattern: "/expenses/:expenseId", fallback: "/expenses" },
   // An expense account belongs to one or more groups, so it has no single
@@ -173,7 +175,7 @@ const DETAIL_PAGES = [
   { pattern: "/notification-settings", fallback: "/settings" },
 ];
 
-const BackButton = ({ fallback, state }) => {
+const BackButton = ({ fallback }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const handleClick = () => {
@@ -183,7 +185,7 @@ const BackButton = ({ fallback, state }) => {
     if (window.history.state?.idx > 0) {
       navigate(-1);
     } else {
-      navigate(fallback, { state });
+      navigate(fallback);
     }
   };
   return (
@@ -208,7 +210,7 @@ export const TopBar = ({ showNotifications = true }) => {
   return (
     <header className="flex justify-between items-center pl-4 pr-2 sm:pr-4 py-2 bg-white border-b border-gray-200 min-h-[44px]">
       <div className="flex items-center gap-2 min-w-0">
-        {detailPage && <BackButton fallback={detailPage.fallback} state={detailPage.state} />}
+        {detailPage && <BackButton fallback={detailPage.fallback} />}
         <HamburgerMenu />
         {titleKey && <span className="text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">{t(titleKey)}</span>}
       </div>

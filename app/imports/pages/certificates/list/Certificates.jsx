@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Tabs from "../../../components/Tabs";
@@ -19,8 +19,21 @@ const Certificates = ({
   recentlyConfirmed,
 }) => {
   const { t, i18n } = useTranslation();
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState(location.state?.tab || "my");
+  // The tab lives in the URL rather than in state, so coming back from a
+  // request lands on the tab you left from — the back arrow does navigate(-1),
+  // which restores the query string with it. The requests tab only exists for
+  // certifiers, so a hand-typed ?tab=requests falls back to the default.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") === "requests" && isCertifier ? "requests" : "my";
+  // replace, not push: switching tabs should not make the back arrow walk back
+  // through them. The default tab drops the parameter so the URL stays clean,
+  // and any other parameter is carried over untouched.
+  const setActiveTab = (key) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === "my") next.delete("tab");
+    else next.set("tab", key);
+    setSearchParams(next, { replace: true });
+  };
 
   const lang = i18n.language || "sv";
 

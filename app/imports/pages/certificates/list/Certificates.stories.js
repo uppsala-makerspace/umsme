@@ -169,6 +169,9 @@ export const WithPendingRequestAndComment = {
 export const CertifierView = {
   args: {
     loading: false,
+    // Without this the tab strip is hidden and the requests below are
+    // unreachable — the whole point of this story.
+    isCertifier: true,
     certificates: sampleCertificates,
     myAttestations: [myValidAttestation],
     pendingToConfirm: pendingToConfirm,

@@ -40,7 +40,7 @@ export default () => {
         comment || undefined,
         privateComment || undefined
       );
-      navigate("/certificates", { state: { tab: "requests" } });
+      navigate("/certificates?tab=requests");
     } catch (err) {
       console.error("Error confirming:", err);
       throw err;
@@ -53,7 +53,7 @@ export default () => {
         await Meteor.callAsync("certificates.addComment", attestationId, comment, privateComment);
       }
       await Meteor.callAsync("certificates.remove", attestationId);
-      navigate("/certificates", { state: { tab: "requests" } });
+      navigate("/certificates?tab=requests");
     } catch (err) {
       console.error("Error denying:", err);
       throw err;
