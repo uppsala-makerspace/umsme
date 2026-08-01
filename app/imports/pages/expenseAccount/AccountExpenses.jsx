@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -19,6 +19,13 @@ const statusAccent = {
 // The three totals shown above the list, in workflow order.
 const SUMMED_STATUSES = ["reimbursed", "confirmed", "submitted"];
 
+// The statuses an account's expenses can have (a pending draft never reaches
+// this page), in workflow order. Confirmed and reimbursed are on by default:
+// what the account has actually committed to, without the noise of expenses
+// still under review or turned down.
+const FILTER_STATUSES = ["submitted", "rejected", "confirmed", "reimbursed"];
+const DEFAULT_STATUSES = ["confirmed", "reimbursed"];
+
 const NOTE_MAX = 140;
 const truncate = (text) =>
   text && text.length > NOTE_MAX ? `${text.slice(0, NOTE_MAX).trimEnd()}…` : text;
@@ -27,6 +34,66 @@ const dash = (value) => (value === null || value === undefined || value === "" ?
 
 const kr = (amount) => `${Math.round((amount || 0) * 100) / 100} kr`;
 
+/**
+ * Multi-select status filter, sized like the year picker beside it. A native
+ * <select multiple> can't be made to look or behave like one on a phone, so
+ * this is a button plus a checkbox popover — the same outside-click pattern as
+ * PlaceAutocomplete.
+ */
+const StatusFilter = ({ statuses, onToggle, summary }) => {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocClick = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between gap-2 p-2 border border-gray-300 rounded-lg bg-white text-left cursor-pointer"
+      >
+        <span className="truncate">{summary}</span>
+        <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 w-full min-w-max z-20 bg-white border border-gray-300 rounded-lg shadow-lg p-1">
+          {FILTER_STATUSES.map((status) => (
+            <label
+              key={status}
+              className="flex items-center gap-2 px-2 py-2 rounded cursor-pointer hover:bg-gray-50"
+            >
+              <input
+                type="checkbox"
+                checked={statuses.includes(status)}
+                onChange={() => onToggle(status)}
+                className="w-4 h-4 accent-[#5fc86f]"
+              />
+              <span>{t(`expenseStatus_${status}`)}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYearChange }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -34,6 +101,9 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
   const [expanded, setExpanded] = useState({});
   // The expense whose receipt is shown in the dialog, if any.
   const [receipt, setReceipt] = useState(null);
+  // Which statuses to list. Purely client-side: the year filter decides what
+  // the server sends, this decides what is shown of it.
+  const [statuses, setStatuses] = useState(DEFAULT_STATUSES);
 
   if (loading) {
     return (
@@ -53,6 +123,8 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
 
   const { account, expenses = [], availableYears = [], year } = data;
 
+  // The totals stay a summary of the whole year, whatever the status filter
+  // hides — they are what the account stands at, not what is on screen.
   const totals = Object.fromEntries(
     SUMMED_STATUSES.map((status) => [
       status,
@@ -62,7 +134,27 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
     ])
   );
 
+  const shown = expenses.filter((e) => statuses.includes(e.status));
+
   const toggle = (id) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const toggleStatus = (status) =>
+    setStatuses((prev) =>
+      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
+    );
+
+  // Naming the single choice beats "1 vald"; beyond that the labels are too
+  // long to list, so fall back to a count.
+  const statusSummary =
+    statuses.length === FILTER_STATUSES.length
+      ? t("expenseAllStatuses")
+      : statuses.length === 0
+        ? t("expenseNoStatuses")
+        : statuses.length === 1
+          ? t(`expenseStatus_${statuses[0]}`)
+          // `n`, not `count`: the latter would pull in i18next's plural
+          // machinery, and this string never needs it.
+          : t("expenseStatusesSelected", { n: statuses.length });
 
   return (
     <MainContent>
@@ -77,23 +169,44 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
         </div>
       )}
 
-      <div className="mb-4">
-        <label htmlFor="expenseYear" className="block text-sm text-gray-600 mb-1">
-          {t("expenseYear")}
-        </label>
-        <select
-          id="expenseYear"
-          value={year || ""}
-          onChange={(e) => onYearChange(e.target.value ? Number(e.target.value) : null)}
-          className="w-full p-2 border border-gray-300 rounded-lg bg-white"
-        >
-          <option value="">{t("expenseAllYears")}</option>
-          {availableYears.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
+      {/* Year and status side by side: the year picker keeps its natural
+          width, the status filter takes the rest. */}
+      <div className="flex flex-wrap items-start gap-3 mb-4">
+        <div className="flex-none">
+          <label htmlFor="expenseYear" className="block text-sm text-gray-600 mb-1">
+            {t("expenseYear")}
+          </label>
+          {/* The native arrow is dropped for our own, so the two controls
+              match — the browser's differs per platform. */}
+          <div className="relative">
+            <select
+              id="expenseYear"
+              value={year || ""}
+              onChange={(e) => onYearChange(e.target.value ? Number(e.target.value) : null)}
+              className="appearance-none p-2 pr-9 border border-gray-300 rounded-lg bg-white"
+            >
+              <option value="">{t("expenseAllYears")}</option>
+              {availableYears.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+            <ChevronDownIcon
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <span className="block text-sm text-gray-600 mb-1">{t("expenseStatusFilter")}</span>
+          <StatusFilter
+            statuses={statuses}
+            onToggle={toggleStatus}
+            summary={statusSummary}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2 mb-6">
@@ -105,11 +218,15 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
         ))}
       </div>
 
-      {expenses.length === 0 ? (
-        <p className="text-center text-gray-500 p-8 italic">{t("expenseNoneForYear")}</p>
+      {shown.length === 0 ? (
+        <p className="text-center text-gray-500 p-8 italic">
+          {/* Distinguish "the year is empty" from "the filter hides it all" —
+              otherwise deselecting every status looks like missing data. */}
+          {expenses.length === 0 ? t("expenseNoneForYear") : t("expenseNoneForFilter")}
+        </p>
       ) : (
         <ul className="list-none p-0 m-0">
-          {expenses.map((e) => {
+          {shown.map((e) => {
             const isOpen = !!expanded[e._id];
             // The label is the singular status name and the date is the one
             // that status change refers to.
