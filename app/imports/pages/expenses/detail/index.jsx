@@ -71,6 +71,24 @@ export default () => {
     await Meteor.callAsync("expenses.abort", expenseId);
     navigate(doneTo);
   };
+  // Reviewing someone else's expense: stay on the page and refetch, so the
+  // reviewer sees the resulting state (and the buttons disappear).
+  const onApprove = async () => {
+    try {
+      await Meteor.callAsync("expenses.approve", expenseId);
+      await fetchData();
+    } catch (err) {
+      alert(err.reason || err.message);
+    }
+  };
+  const onReject = async (reason) => {
+    try {
+      await Meteor.callAsync("expenses.reject", expenseId, reason);
+      await fetchData();
+    } catch (err) {
+      alert(err.reason || err.message);
+    }
+  };
 
   if (!Meteor.userId()) {
     return <Navigate to="/login" />;
@@ -90,6 +108,8 @@ export default () => {
         onRetract={onRetract}
         onAbort={onAbort}
         onReplacePhoto={onReplacePhoto}
+        onApprove={onApprove}
+        onReject={onReject}
       />
     </Layout>
   );

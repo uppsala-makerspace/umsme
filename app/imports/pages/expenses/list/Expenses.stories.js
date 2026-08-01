@@ -21,6 +21,24 @@ export const AllStatuses = {
   args: { loading: false, expenses: sample },
 };
 
+const toApprove = [
+  { _id: "r1", status: "submitted", date: daysAgo(4), submittedAt: daysAgo(2), amount: 1450, accountName: "Verktyg", note: "Sticksåg till träverkstaden", submitterName: "Cecilia Ek" },
+  { _id: "r2", status: "submitted", date: daysAgo(6), submittedAt: daysAgo(5), amount: 320, accountName: "Material", note: "Plywood", submitterName: "Dan Nilsson" },
+];
+
+const recentlyReviewed = [
+  { _id: "r3", status: "confirmed", date: daysAgo(9), confirmedAt: daysAgo(1), amount: 78, accountName: "Fika", note: "Kaffe", submitterName: "Eva Lind" },
+  { _id: "r4", status: "rejected", date: daysAgo(11), rejectedAt: daysAgo(1), amount: 4200, accountName: "Verktyg", note: "Pelarborrmaskin", submitterName: "Fredrik Ask" },
+];
+
+export const Approver = {
+  args: { loading: false, expenses: sample, isApprover: true, toApprove, recentlyReviewed },
+};
+
+export const ApproverNothingToDo = {
+  args: { loading: false, expenses: sample, isApprover: true, toApprove: [], recentlyReviewed: [] },
+};
+
 export const Empty = {
   args: { loading: false, expenses: [] },
 };

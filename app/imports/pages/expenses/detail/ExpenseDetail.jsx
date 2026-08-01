@@ -22,6 +22,8 @@ const ExpenseDetail = ({
   onRetract,
   onAbort,
   onReplacePhoto,
+  onApprove,
+  onReject,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
@@ -31,6 +33,8 @@ const ExpenseDetail = ({
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [showRejectReason, setShowRejectReason] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
     if (expense) {
@@ -58,7 +62,10 @@ const ExpenseDetail = ({
     );
   }
 
-  const editable = isEditable(expense.status);
+  // A rejected expense is editable — but only by the one who submitted it. A
+  // reviewer opening the same expense gets the read-only view.
+  const isReviewer = expense.isOwn === false;
+  const editable = !isReviewer && isEditable(expense.status);
   const canSubmit = !!amount && Number(amount) > 0 && !!expenseAccountId;
 
   // The account currently in play: the picked one while editing, the saved one
@@ -225,6 +232,13 @@ const ExpenseDetail = ({
         </div>
       ) : (
         <div className="flex flex-col gap-2 text-sm text-gray-700">
+          {/* Only set when someone else is looking at it, i.e. a reviewer. */}
+          {expense.submitterName && (
+            <div>
+              <span className="font-semibold">{t("expenseSubmittedBy")}:</span>{" "}
+              {expense.submitterName}
+            </div>
+          )}
           <div><span className="font-semibold">{t("expenseAmount")}:</span> {expense.amount} kr</div>
           <div>
             <span className="font-semibold">{t("expenseAccount")}:</span>{" "}
@@ -245,6 +259,17 @@ const ExpenseDetail = ({
             <div>
               <span className="font-semibold">{t("expenseDateLabelSubmitted")}:</span>{" "}
               {formatDate(expense.submittedAt, lang)}
+            </div>
+          )}
+          {expense.rejectedByName && (
+            <div>
+              <span className="font-semibold">{t("expenseRejectedBy")}:</span> {expense.rejectedByName}
+            </div>
+          )}
+          {expense.rejectedAt && (
+            <div>
+              <span className="font-semibold">{t("expenseDateLabelRejected")}:</span>{" "}
+              {formatDate(expense.rejectedAt, lang)}
             </div>
           )}
           {expense.confirmedByName && (
@@ -271,7 +296,73 @@ const ExpenseDetail = ({
             </div>
           )}
 
-          {expense.status === "submitted" ? (
+          {/* Reviewing someone else's submitted expense. The owner never gets
+              here — reviewing your own is refused server-side too. */}
+          {expense.canApprove ? (
+            <>
+              <div className="flex items-start gap-2 p-3 mt-2 bg-blue-50 border border-blue-300 rounded-lg text-blue-800">
+                <InformationCircleIcon className="w-5 h-5 flex-shrink-0" />
+                <span>{t("expenseApproveHint")}</span>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1"
+                  disabled={actionLoading}
+                  onClick={() => run(onApprove)}
+                >
+                  {t("expenseApprove")}
+                </Button>
+                <Button
+                  variant="danger"
+                  className="flex-1"
+                  disabled={actionLoading}
+                  onClick={() => setShowRejectReason(true)}
+                >
+                  {t("expenseReject")}
+                </Button>
+              </div>
+              {showRejectReason && (
+                <div className="flex flex-col gap-2 p-3 border border-red-300 rounded-lg bg-red-50">
+                  <label htmlFor="rejectReason" className="font-semibold">
+                    {t("expenseRejectionReason")}
+                  </label>
+                  <textarea
+                    id="rejectReason"
+                    rows={3}
+                    className="bg-surface border border-black rounded py-2.5 px-3 text-base font-mono w-full box-border focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                  />
+                  <p className="text-sm text-gray-600">{t("expenseRejectReasonHint")}</p>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="danger"
+                      className="flex-1"
+                      disabled={actionLoading || !rejectReason.trim()}
+                      onClick={() => run(() => onReject(rejectReason.trim()))}
+                    >
+                      {t("expenseRejectConfirm")}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      disabled={actionLoading}
+                      onClick={() => {
+                        setShowRejectReason(false);
+                        setRejectReason("");
+                      }}
+                    >
+                      {t("cancel")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : isReviewer ? (
+            /* Already reviewed, or not this reviewer's to act on: nothing to
+               offer — the status and the reason above say it all. */
+            null
+          ) : expense.status === "submitted" ? (
             <>
               <div className="flex items-start gap-2 p-3 mt-2 bg-yellow-50 border border-yellow-300 rounded-lg text-yellow-800">
                 <InformationCircleIcon className="w-5 h-5 flex-shrink-0" />
@@ -307,6 +398,8 @@ ExpenseDetail.propTypes = {
   onRetract: PropTypes.func,
   onAbort: PropTypes.func,
   onReplacePhoto: PropTypes.func,
+  onApprove: PropTypes.func,
+  onReject: PropTypes.func,
 };
 
 ExpenseDetail.defaultProps = {
@@ -321,6 +414,8 @@ ExpenseDetail.defaultProps = {
   onRetract: () => {},
   onAbort: () => {},
   onReplacePhoto: () => {},
+  onApprove: () => {},
+  onReject: () => {},
 };
 
 export default ExpenseDetail;

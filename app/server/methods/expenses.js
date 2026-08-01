@@ -10,9 +10,11 @@ import {
   findMemberForUser,
   expenseAccessAllowed,
   expenseAccountsFor,
+  approvableAccountIdsFor,
   myActiveGroupIds,
   seesAllExpenseAccounts,
 } from "./utils";
+import { canReviewExpense, canViewExpense } from "/imports/common/lib/expenseApproval";
 
 const EDITABLE_STATES = ["pending", "rejected"];
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB safety ceiling (client downscales)
@@ -44,6 +46,39 @@ const requireOwnExpense = async (expenseId, member) => {
     throw new Meteor.Error("not-authorized", "Not your expense");
   }
   return expense;
+};
+
+/**
+ * Load an expense the member is allowed to review, enforcing the approval rules
+ * (submitted, not their own, on an account they approve for).
+ */
+const requireReviewableExpense = async (expenseId, member) => {
+  const expense = await Expenses.findOneAsync(expenseId);
+  if (!expense) throw new Meteor.Error("not-found", "Expense not found");
+  const accountIds = await approvableAccountIdsFor(member);
+  if (!canReviewExpense(expense, { memberId: member._id, accountIds })) {
+    if (expense.memberId === member._id) {
+      throw new Meteor.Error("self-review", "You cannot review your own expense");
+    }
+    throw new Meteor.Error("not-authorized", "You may not review this expense");
+  }
+  return expense;
+};
+
+/**
+ * Slack-mrkdwn line describing a reviewed expense, mirroring the admin app's
+ * expenseLine so the two produce comparable manager events.
+ */
+const reviewedLine = async (expense, verb, { by, note } = {}) => {
+  const submitter = await Members.findOneAsync(expense.memberId, { fields: { name: 1 } });
+  const account = expense.expenseAccountId
+    ? await ExpenseAccounts.findOneAsync(expense.expenseAccountId)
+    : null;
+  const url = adminLink(`expense/${expense._id}`);
+  const link = url ? `\n<${url}|Open in admin>` : "";
+  const noteText = note ? `\n${blockquote(note)}` : "";
+  return `*${submitter?.name || expense.memberId}*'s expense of ${expense.amount} kr — ` +
+    `\`${account?.name || "?"}\` was ${verb} by ${by}.${noteText}${link}`;
 };
 
 const decodeImage = (imageBase64, mimeType) => {
@@ -243,11 +278,26 @@ Meteor.methods({
   },
 
   /**
-   * Fetch a single own expense, enriched with the account name.
+   * Fetch a single expense, enriched with the account name.
+   *
+   * Owners see their own. A reviewer may open anything that has been submitted
+   * on an account they approve for, including what they have already approved
+   * or rejected — reading it is wider than acting on it, which stays limited to
+   * `submitted`. `isOwn`/`canApprove` tell the UI which view to render.
    */
   "expenses.getOne": async (expenseId) => {
     const member = await requireMember();
-    const expense = await requireOwnExpense(expenseId, member);
+    const found = await Expenses.findOneAsync(expenseId);
+    if (!found) throw new Meteor.Error("not-found", "Expense not found");
+    const isOwn = found.memberId === member._id;
+    const reviewer = isOwn
+      ? null
+      : { memberId: member._id, accountIds: await approvableAccountIdsFor(member) };
+    const canApprove = !isOwn && canReviewExpense(found, reviewer);
+    if (!isOwn && !canViewExpense(found, reviewer)) {
+      throw new Meteor.Error("not-authorized", "Not your expense");
+    }
+    const expense = found;
     let accountName = null;
     if (expense.expenseAccountId) {
       const account = await ExpenseAccounts.findOneAsync(expense.expenseAccountId);
@@ -258,12 +308,131 @@ Meteor.methods({
     const confirmer = expense.confirmedBy
       ? await Members.findOneAsync(expense.confirmedBy, { fields: { name: 1 } })
       : null;
+    const rejecter = expense.rejectedBy
+      ? await Members.findOneAsync(expense.rejectedBy, { fields: { name: 1 } })
+      : null;
+    // A reviewer needs to know whose expense they are looking at.
+    const submitter = isOwn
+      ? null
+      : await Members.findOneAsync(expense.memberId, { fields: { name: 1 } });
     return {
       ...expense,
       accountName,
       confirmedByName: confirmer?.name || null,
+      rejectedByName: rejecter?.name || null,
       receiptUrl: receiptUrlFor(expense._id, expense.driveFileId),
+      isOwn,
+      canApprove,
+      submitterName: submitter?.name || null,
     };
+  },
+
+  /**
+   * Expenses waiting for this member's review: submitted expenses on the
+   * accounts they approve for, never their own. Also returns the ones they
+   * reviewed in the last 24 hours, so the outcome of an action stays visible —
+   * the same courtesy the certifier list gives.
+   */
+  "expenses.getToApprove": async () => {
+    const member = await requireMember();
+    const accountIds = await approvableAccountIdsFor(member);
+    // No reviewable accounts at all: not an approver, so the tab stays hidden.
+    if (accountIds.length === 0) {
+      return { isApprover: false, pending: [], recentlyReviewed: [] };
+    }
+
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const pending = await Expenses.find(
+      {
+        status: "submitted",
+        expenseAccountId: { $in: accountIds },
+        memberId: { $ne: member._id },
+      },
+      { sort: { submittedAt: 1 } }
+    ).fetchAsync();
+    const recentlyReviewed = await Expenses.find(
+      {
+        expenseAccountId: { $in: accountIds },
+        memberId: { $ne: member._id },
+        $or: [
+          { confirmedBy: member._id, confirmedAt: { $gte: dayAgo } },
+          { rejectedBy: member._id, rejectedAt: { $gte: dayAgo } },
+        ],
+      },
+      { sort: { submittedAt: -1 } }
+    ).fetchAsync();
+
+    const accounts = await ExpenseAccounts.find({ _id: { $in: accountIds } }).fetchAsync();
+    const accountById = Object.fromEntries(accounts.map((a) => [a._id, a]));
+    const memberIds = [...new Set([...pending, ...recentlyReviewed].map((e) => e.memberId))];
+    const submitters = await Members.find(
+      { _id: { $in: memberIds } },
+      { fields: { name: 1 } }
+    ).fetchAsync();
+    const nameById = Object.fromEntries(submitters.map((m) => [m._id, m.name]));
+
+    const enrich = (e) => ({
+      _id: e._id,
+      amount: e.amount,
+      date: e.date,
+      place: e.place,
+      note: e.note,
+      status: e.status,
+      submittedAt: e.submittedAt,
+      accountName: accountById[e.expenseAccountId]?.name || null,
+      submitterName: nameById[e.memberId] || null,
+    });
+    return {
+      isApprover: true,
+      pending: pending.map(enrich),
+      recentlyReviewed: recentlyReviewed.map(enrich),
+    };
+  },
+
+  /**
+   * Approve a submitted expense (appointed approver or admin/board/treasurer,
+   * never the submitter). Produces the same document state as the admin app's
+   * expenses.confirm so the bookkeeping export stays consistent.
+   */
+  "expenses.approve": async (expenseId) => {
+    const member = await requireMember();
+    const expense = await requireReviewableExpense(expenseId, member);
+    await Expenses.updateAsync(expenseId, {
+      $set: { status: "confirmed", confirmedAt: new Date(), confirmedBy: member._id },
+    });
+    await publishManagerEvent(ManagerEventType.EXPENSE_CONFIRMED, {
+      subject: "Expense confirmed",
+      body: await reviewedLine(expense, "confirmed", { by: member.name }),
+    });
+    return true;
+  },
+
+  /**
+   * Reject a submitted expense with a reason the submitter will see. Clears any
+   * prior confirmation, as the admin app does, so a rejected expense never
+   * still reads as confirmed.
+   */
+  "expenses.reject": async (expenseId, reason) => {
+    const member = await requireMember();
+    const expense = await requireReviewableExpense(expenseId, member);
+    const trimmedReason = String(reason || "").trim();
+    if (!trimmedReason) {
+      throw new Meteor.Error("missing-reason", "A reason is required when rejecting");
+    }
+    await Expenses.updateAsync(expenseId, {
+      $set: {
+        status: "rejected",
+        rejectionReason: trimmedReason,
+        rejectedAt: new Date(),
+        rejectedBy: member._id,
+      },
+      $unset: { confirmedAt: "", confirmedBy: "" },
+    });
+    await publishManagerEvent(ManagerEventType.EXPENSE_REJECTED, {
+      subject: "Expense rejected",
+      body: await reviewedLine(expense, "rejected", { by: member.name, note: trimmedReason }),
+    });
+    return true;
   },
 
   /**

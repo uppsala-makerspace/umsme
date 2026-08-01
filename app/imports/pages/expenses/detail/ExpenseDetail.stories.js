@@ -20,6 +20,8 @@ const baseActions = {
   onRetract: fn(),
   onAbort: fn(),
   onReplacePhoto: fn(),
+  onApprove: fn(),
+  onReject: fn(),
 };
 
 const expense = (overrides) => ({
@@ -42,6 +44,38 @@ export const SubmittedRetractable = {
     expense: expense({
       status: "submitted", amount: 249.5, expenseAccountId: "a1", accountName: "Material",
       submittedAt: new Date("2026-06-12"),
+    }),
+    accounts,
+    ...baseActions,
+  },
+};
+
+// Someone else's submitted expense, seen by an approver: Godkänn/Avslå
+// instead of Återkalla.
+export const ToApprove = {
+  args: {
+    expense: expense({
+      status: "submitted", amount: 1450, expenseAccountId: "a2", accountName: "Verktyg",
+      note: "Sticksåg till träverkstaden", place: "Bauhaus",
+      submittedAt: new Date("2026-07-20"), submitterName: "Cecilia Ek",
+      isOwn: false, canApprove: true,
+    }),
+    accounts,
+    ...baseActions,
+  },
+};
+
+// The same expense after the reviewer rejected it: read-only, with the reason
+// they gave. A rejected expense is editable — but only by its submitter.
+export const ReviewedRejected = {
+  args: {
+    expense: expense({
+      status: "rejected", amount: 1450, expenseAccountId: "a2", accountName: "Verktyg",
+      note: "Sticksåg till träverkstaden", place: "Bauhaus",
+      submittedAt: new Date("2026-07-20"), submitterName: "Cecilia Ek",
+      rejectionReason: "Köp den billigare modellen och skicka in på nytt.",
+      rejectedByName: "Bo Berg", rejectedAt: new Date("2026-07-21"),
+      isOwn: false, canApprove: false,
     }),
     accounts,
     ...baseActions,

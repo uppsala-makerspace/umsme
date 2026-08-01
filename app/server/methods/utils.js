@@ -6,6 +6,7 @@ import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { memberStatus } from "/imports/common/lib/utils";
+import { REVIEWER_ROLES, approvableAccountIds } from "/imports/common/lib/expenseApproval";
 import { memberForUser } from "/imports/common/server/memberForUser";
 import { spaceIconUrlFor } from "/imports/common/server/workshopImage";
 
@@ -54,15 +55,41 @@ export const expenseAccountsFor = async (member) => {
   return myGroupExpenseAccounts(member);
 };
 
+/** Whether the user holds a role that may review every expense. */
+const hasReviewerRole = async () => {
+  const userId = Meteor.userId();
+  return !!userId && (await Roles.userIsInRoleAsync(userId, REVIEWER_ROLES));
+};
+
+/**
+ * The expense accounts whose expenses this member may review, i.e. approve or
+ * reject. Distinct from expenseAccountsFor, which is about *spending*: being in
+ * an account's owning group grants no review rights, only `approverMemberIds`
+ * (or one of the reviewer roles) does.
+ *
+ * @return {Promise<Array<string>>} account ids
+ */
+export const approvableAccountIdsFor = async (member) => {
+  if (!member?._id) return [];
+  const accounts = await ExpenseAccounts.find({}, { fields: { approverMemberIds: 1 } }).fetchAsync();
+  return approvableAccountIds(accounts, member._id, await hasReviewerRole());
+};
+
+/** Whether this member may review anyone's expenses at all. */
+export const canApproveExpenses = async (member) =>
+  (await approvableAccountIdsFor(member)).length > 0;
+
 /**
  * Whether the current user may see/use the expenses feature: their member
  * email is on the configured allowlist, their account is in the admin/board
- * group (always allowed), or they are an active member of a group that has at
- * least one expense account.
+ * group (always allowed), they are an active member of a group that has at
+ * least one expense account, or they are an appointed approver — an approver
+ * with no group accounts of their own still needs to reach their review list.
  */
 export const expenseAccessAllowed = async (member) => {
   if (await seesAllExpenseAccounts(member)) return true;
-  return (await myGroupExpenseAccounts(member)).length > 0;
+  if ((await myGroupExpenseAccounts(member)).length > 0) return true;
+  return canApproveExpenses(member);
 };
 
 /**
