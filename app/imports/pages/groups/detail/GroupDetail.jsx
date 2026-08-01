@@ -17,13 +17,6 @@ import SpaceMapSection from "../../../components/SpaceMapSection";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 
-const typeLabelKeys = {
-  steering: "groupTypeSteering",
-  function: "groupTypeFunction",
-  interest: "groupTypeInterest",
-  responsibility: "groupTypeResponsibility",
-};
-
 const GroupDetail = ({
   loading,
   error,
@@ -99,12 +92,16 @@ const GroupDetail = ({
           </Link>
         )}
       </div>
-      <p className="text-sm text-gray-500 mt-0 mb-4">
-        {t(typeLabelKeys[group.type] || group.type)}
+      {/* The same tag the groups list uses, so a type keeps its colour when
+          you click into it. */}
+      <p className="flex flex-wrap items-center gap-x-1 text-sm text-gray-500 mt-0 mb-4">
+        <GroupTypeTag type={group.type} />
+        {/* No manual spaces here: in a flex row whitespace-only children are
+            dropped, so gap-x-1 does the spacing. */}
         {parentGroup && (
           <>
-            {" · "}
-            {t("partOfGroup")}{" "}
+            <span>·</span>
+            <span>{t("partOfGroup")}</span>
             <Link to={`/groups/${parentGroup._id}`} className="text-brand-green no-underline hover:underline">
               {localized(parentGroup.name, lang)}
             </Link>
