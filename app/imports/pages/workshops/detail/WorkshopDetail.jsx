@@ -19,7 +19,7 @@ import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
 
 // One group row in the "get involved" / "related groups" lists, in the same
-// style as the groups list page. The responsible workshop group is rendered
+// style as the groups list page. The responsible steering group is rendered
 // highlighted with a green accent since it is the central one. All rows show
 // the shared group-type tag.
 const GroupRow = ({ group, highlighted }) => {

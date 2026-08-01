@@ -59,9 +59,9 @@ Meteor.methods({
       addLink("workshops", workshop.primarySpaceId, entry);
       for (const id of workshop.secondarySpaceIds || []) addLink("workshops", id, entry);
     }
-    // Workshop groups are represented by their workshop; the popup previews
+    // Steering groups are represented by their workshop; the popup previews
     // interest/function/responsibility groups.
-    for (const group of await Groups.find({ ...linkSelector, type: { $ne: "workshop" } }).fetchAsync()) {
+    for (const group of await Groups.find({ ...linkSelector, type: { $ne: "steering" } }).fetchAsync()) {
       const entry = {
         _id: group._id,
         name: group.name,

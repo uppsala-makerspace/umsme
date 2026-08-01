@@ -9,7 +9,7 @@
  * rather than stored, so it can never drift.
  */
 
-export const GROUP_TYPES = ["workshop", "function", "interest", "responsibility"];
+export const GROUP_TYPES = ["steering", "function", "interest", "responsibility"];
 export const WORKSHOP_STATUSES = ["established", "trial", "forming", "decommissioned"];
 export const JOIN_POLICIES = ["open", "request-any", "request-responsible"];
 
@@ -20,7 +20,7 @@ export const localized = (field, lang) =>
 /**
  * Guideline requirements on every group: short name, thorough description,
  * Slack channel, and a group responsible (gruppansvarig). Responsibility
- * groups additionally need their parent workshop group.
+ * groups additionally need their parent steering group.
  *
  * @returns {{complete: boolean, missing: string[]}} missing holds field keys.
  */
@@ -40,7 +40,7 @@ export const groupCompleteness = (group) => {
 /**
  * Guideline requirements on a workshop: a name ending in "verkstad" or
  * "verkstaden" (definite form), a description, a representative image, a
- * Slack channel, and a responsible workshop group with at least two active
+ * Slack channel, and a responsible steering group with at least two active
  * members.
  *
  * @param {object} workshop
@@ -74,7 +74,7 @@ export const isWorkshopPublic = (workshop, group, activeMemberCount = 0) =>
   workshopCompleteness(workshop, group, activeMemberCount).complete;
 
 // Website visibility: only interest groups are presented on the website —
-// workshop groups are represented through their workshop, and function and
+// steering groups are represented through their workshop, and function and
 // responsibility groups are app-internal.
 export const isGroupPublic = (group) =>
   group?.type === "interest" && groupCompleteness(group).complete;

@@ -124,7 +124,7 @@ Template.GroupView.helpers({
   },
   workshopGroups() {
     return Groups.find(
-      { type: 'workshop', _id: { $ne: groupId() } },
+      { type: 'steering', _id: { $ne: groupId() } },
       { sort: { 'name.sv': 1 } }
     );
   },

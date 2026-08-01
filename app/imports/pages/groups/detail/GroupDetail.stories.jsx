@@ -8,7 +8,7 @@ const baseData = {
       sv: "Vi ansvarar för träverkstaden:\n\n- underhåll av maskiner\n- påfyllning av material\n- **utbildning** och certifiering",
       en: "We care for the wood workshop.",
     },
-    type: "workshop",
+    type: "steering",
     slackChannel: "träverkstaden",
     rules: { sv: "Följ verkstadens ordningsregler och boka tid för maskiner.", en: "Follow the shop rules." },
     joinPolicy: "request-responsible",

@@ -8,9 +8,9 @@ import Input from "../../../components/Input";
 import GroupCard from "../../../components/GroupCard";
 
 // One flat list: interest groups first, then function groups, and last the
-// workshop-bound groups (workshop groups and their responsibility subgroups).
+// workshop-bound groups (steering groups and their responsibility subgroups).
 // Each row carries a type tag instead of section headings.
-const TYPE_ORDER = ["interest", "function", "workshop", "responsibility"];
+const TYPE_ORDER = ["interest", "function", "steering", "responsibility"];
 
 // Remembered detailed/compact choice (see the toggle next to the search box).
 const COMPACT_KEY = "groupsListCompact";

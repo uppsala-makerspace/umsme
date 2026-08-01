@@ -38,7 +38,7 @@ const violatesGroupRules = async ({ linkedRole, joinPolicy, type, parentGroupId 
   if (parentGroupId) {
     if (selfId && parentGroupId === selfId) return true;
     const parent = await Groups.findOneAsync(parentGroupId);
-    if (!parent || parent.type !== 'workshop') return true;
+    if (!parent || parent.type !== 'steering') return true;
   }
   return false;
 };

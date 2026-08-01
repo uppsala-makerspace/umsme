@@ -7,7 +7,7 @@ import MainContent from "/imports/components/MainContent";
 import Loader from "/imports/components/Loader";
 import EntityEditForm from "/imports/components/EntityEditForm";
 
-/** Limited workshop editing for the workshop group's responsible. */
+/** Limited workshop editing for the steering group's responsible. */
 export default () => {
   const { workshopId } = useParams();
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ export default () => {
   }
 
   const workshop = data?.workshop;
-  // Only the workshop group's responsible may edit; others go back to the
+  // Only the steering group's responsible may edit; others go back to the
   // workshop page (the server enforces this too).
   if (!loading && (!workshop || !data?.canEdit)) {
     return <Navigate to={detailPath} replace />;

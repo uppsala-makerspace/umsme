@@ -235,7 +235,7 @@ export const isGroupResponsible = (member, group) =>
 
 /**
  * Whether the member may edit a workshop: only the responsible of the
- * workshop's own group (workshop groups link to a workshop via groupId).
+ * workshop's own group (steering groups link to a workshop via groupId).
  * Responsibility subgroups' responsibles do not edit the workshop.
  */
 export const isWorkshopResponsible = async (member, workshop) => {

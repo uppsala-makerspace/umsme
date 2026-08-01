@@ -18,7 +18,7 @@ import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 
 const typeLabelKeys = {
-  workshop: "groupTypeWorkshop",
+  steering: "groupTypeSteering",
   function: "groupTypeFunction",
   interest: "groupTypeInterest",
   responsibility: "groupTypeResponsibility",

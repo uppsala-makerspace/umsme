@@ -916,8 +916,8 @@ export const models = {
     reimbursedDate: { label: "Reimbursed date", type: Date, optional: true, autoform: { omit: true } },
   },
   // A group (grupp) per the workshops-and-groups guideline: an organised set
-  // of members with a shared responsibility or interest. Workshop groups own
-  // a workshop; responsibility groups are subgroups of a workshop group.
+  // of members with a shared responsibility or interest. Steering groups own
+  // a workshop; responsibility groups are subgroups of a steering group.
   group: {
     name: {
       label: "Name",
@@ -980,12 +980,12 @@ export const models = {
     type: {
       label: "Type",
       type: String,
-      allowedValues: ["workshop", "function", "interest", "responsibility"],
+      allowedValues: ["steering", "function", "interest", "responsibility"],
       autoform: {
         type: "select",
         firstOption: "(Select a type)",
         options: [
-          { label: "Workshop group (verkstadsgrupp)", value: "workshop" },
+          { label: "Steering group (styrgrupp)", value: "steering" },
           { label: "Function group (funktionsgrupp)", value: "function" },
           { label: "Interest group (intressegrupp)", value: "interest" },
           { label: "Responsibility group (ansvarsgrupp)", value: "responsibility" },
@@ -1016,7 +1016,7 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
-    // Required for responsibility groups; must reference a workshop group.
+    // Required for responsibility groups; must reference a steering group.
     // Enforced by deny rules on the collection (schema can't do async checks).
     parentGroupId: {
       label: "Parent group",
@@ -1113,7 +1113,7 @@ export const models = {
     },
   },
   // A workshop (verkstad): a space with tools and machines for a certain kind
-  // of making. Always cared for by exactly one workshop group.
+  // of making. Always cared for by exactly one steering group.
   workshop: {
     name: {
       label: "Name",
@@ -1194,7 +1194,7 @@ export const models = {
       max: 80,
       optional: true,
     },
-    // The responsible workshop group (1:1). Optional in the schema so a
+    // The responsible steering group (1:1). Optional in the schema so a
     // workshop can be drafted first; required for completeness (groupRules).
     groupId: {
       label: "Responsible group",

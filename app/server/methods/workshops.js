@@ -79,7 +79,7 @@ Meteor.methods({
       throw new Meteor.Error("not-found", "Workshop not found");
     }
 
-    // The responsible workshop group and its responsibility subgroups, for
+    // The responsible steering group and its responsibility subgroups, for
     // the "get involved" list.
     let group = null;
     const responsibilityGroups = [];
@@ -150,7 +150,7 @@ Meteor.methods({
     return true;
   },
 
-  /** Set/replace the workshop's image (workshop group responsible only). */
+  /** Set/replace the workshop's image (steering group responsible only). */
   "workshops.uploadImageByResponsible": async (workshopId, imageBase64, mimeType) => {
     const member = await requireMember();
     const workshop = await Workshops.findOneAsync(workshopId);
@@ -167,7 +167,7 @@ Meteor.methods({
     });
   },
 
-  /** Remove the workshop's image (workshop group responsible only). */
+  /** Remove the workshop's image (steering group responsible only). */
   "workshops.removeImageByResponsible": async (workshopId) => {
     const member = await requireMember();
     const workshop = await Workshops.findOneAsync(workshopId);

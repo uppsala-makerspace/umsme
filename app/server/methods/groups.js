@@ -177,8 +177,8 @@ Meteor.methods({
       relatedGroups.push(await groupSummary(relatedGroup, member._id));
     }
 
-    // The group's workshop: directly for workshop groups, via the parent
-    // workshop group for responsibility subgroups (e.g. Ugnsgruppen shows
+    // The group's workshop: directly for steering groups, via the parent
+    // steering group for responsibility subgroups (e.g. Ugnsgruppen shows
     // Keramikverkstaden).
     let workshop = await Workshops.findOneAsync({ groupId });
     if (!workshop && group.parentGroupId) {
