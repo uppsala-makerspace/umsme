@@ -9,7 +9,7 @@
   "dependencies": {
     "@babel/runtime": "^7.17.9",
     "axios": "^1.8.4",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "bootstrap": "3.4.1",
     "chart.js": "^4.4.8",
     "chartjs-adapter-moment": "^1.0.1",
