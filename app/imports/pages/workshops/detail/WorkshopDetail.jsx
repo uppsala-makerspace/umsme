@@ -106,7 +106,6 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
 
       <div className="flex items-center gap-3 mb-2">
         <h2 className="text-2xl m-0">{localized(workshop.name, lang)}</h2>
-        <WorkshopStatusBadge status={workshop.status} />
         {canEdit && (
           <Link
             to={`/workshops/${workshop._id}/edit`}
@@ -115,6 +114,17 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
             {t("edit")}
           </Link>
         )}
+      </div>
+
+      {/* The status sits under the title, like the type tag on a group's page.
+          The negative top margin pulls it up against the title without
+          touching the title row's own mb-2, which is what spaces the title
+          from whatever follows when there is no badge.
+          empty:hidden rather than repeating the badge's own rule about which
+          statuses render — an established workshop shows nothing, and the
+          wrapper must not leave a gap behind. */}
+      <div className="-mt-2 mb-2 empty:hidden">
+        <WorkshopStatusBadge status={workshop.status} />
       </div>
 
       {localized(workshop.description, lang) && (

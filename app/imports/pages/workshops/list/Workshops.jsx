@@ -52,6 +52,13 @@ const Workshops = ({ loading, workshops }) => {
   const needle = search.trim().toLowerCase();
   const visibleWorkshops = workshops.filter((w) => matchesSearch(w, needle));
 
+  // Trial workshops go last, in both views: the established ones are what a
+  // member is usually looking for. sort is stable, so the two groups keep
+  // their incoming order.
+  const ordered = [...visibleWorkshops].sort(
+    (a, b) => (a.status === "trial" ? 1 : 0) - (b.status === "trial" ? 1 : 0)
+  );
+
   return (
     <MainContent>
       <div className="flex items-center gap-2 mb-4">
@@ -78,8 +85,8 @@ const Workshops = ({ loading, workshops }) => {
       ) : visibleWorkshops.length === 0 ? (
         <p className="text-center text-gray-500 p-8 italic">{t("noWorkshopsFound")}</p>
       ) : (
-        <ul className="list-none p-0 m-0">
-          {visibleWorkshops.map((workshop) => (
+        <ul className={`list-none p-0 m-0 ${compact ? "grid grid-cols-2 gap-3" : ""}`}>
+          {ordered.map((workshop) => (
             <WorkshopCard key={workshop._id} workshop={workshop} compact={compact} />
           ))}
         </ul>
