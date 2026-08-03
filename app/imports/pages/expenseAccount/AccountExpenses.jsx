@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -6,6 +6,7 @@ import { ChevronDownIcon, ChevronUpIcon, PhotoIcon } from "@heroicons/react/24/o
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Button from "../../components/Button";
+import CheckboxDropdown from "../../components/CheckboxDropdown";
 import { formatDate, statusDate } from "../expenses/utils";
 
 // Same status accents as the member's own expense list (ExpenseItem).
@@ -35,64 +36,21 @@ const dash = (value) => (value === null || value === undefined || value === "" ?
 const kr = (amount) => `${Math.round((amount || 0) * 100) / 100} kr`;
 
 /**
- * Multi-select status filter, sized like the year picker beside it. A native
- * <select multiple> can't be made to look or behave like one on a phone, so
- * this is a button plus a checkbox popover — the same outside-click pattern as
- * PlaceAutocomplete.
+ * The status filter's trigger: a button sized and styled like the year picker
+ * beside it, showing a summary of the selection. The popover itself comes from
+ * CheckboxDropdown, shared with the group list.
  */
-const StatusFilter = ({ statuses, onToggle, summary }) => {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDocClick = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
-    };
-    const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  return (
-    <div ref={wrapRef} className="relative">
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen((prev) => !prev)}
-        className="w-full flex items-center justify-between gap-2 p-2 border border-gray-300 rounded-lg bg-white text-left cursor-pointer"
-      >
-        <span className="truncate">{summary}</span>
-        <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
-      </button>
-      {open && (
-        <div className="absolute top-full left-0 mt-1 w-full min-w-max z-20 bg-white border border-gray-300 rounded-lg shadow-lg p-1">
-          {FILTER_STATUSES.map((status) => (
-            <label
-              key={status}
-              className="flex items-center gap-2 px-2 py-2 rounded cursor-pointer hover:bg-gray-50"
-            >
-              <input
-                type="checkbox"
-                checked={statuses.includes(status)}
-                onChange={() => onToggle(status)}
-                className="w-4 h-4 accent-[#5fc86f]"
-              />
-              <span>{t(`expenseStatus_${status}`)}</span>
-            </label>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+const StatusFilterTrigger = ({ open, toggle, summary }) => (
+  <button
+    type="button"
+    aria-expanded={open}
+    onClick={toggle}
+    className="w-full flex items-center justify-between gap-2 p-2 border border-gray-300 rounded-lg bg-white text-left cursor-pointer"
+  >
+    <span className="truncate">{summary}</span>
+    <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
+  </button>
+);
 
 const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYearChange }) => {
   const { t, i18n } = useTranslation();
@@ -201,10 +159,17 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
 
         <div className="flex-1 min-w-0">
           <span className="block text-sm text-gray-600 mb-1">{t("expenseStatusFilter")}</span>
-          <StatusFilter
-            statuses={statuses}
+          <CheckboxDropdown
+            options={FILTER_STATUSES.map((status) => ({
+              key: status,
+              label: t(`expenseStatus_${status}`),
+            }))}
+            selected={statuses}
             onToggle={toggleStatus}
-            summary={statusSummary}
+            panelClassName="w-full min-w-max"
+            renderTrigger={({ open, toggle }) => (
+              <StatusFilterTrigger open={open} toggle={toggle} summary={statusSummary} />
+            )}
           />
         </div>
       </div>
