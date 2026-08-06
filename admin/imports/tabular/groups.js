@@ -10,6 +10,7 @@ import { extractor } from '/imports/common/lib/fieldsUtils';
 const groupDefaults = {
   filter: [
     'name', 'name.en',
+    'tag', 'tag.sv', 'tag.en',
     'description', 'description.sv', 'description.en',
     'rules', 'rules.sv', 'rules.en',
     'slackChannel', 'guidesUrl', 'responsibleMemberId', 'parentGroupId',

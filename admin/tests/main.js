@@ -2,6 +2,8 @@ import assert from "assert";
 import "./accounting.tests";
 import "./stats.tests";
 import "./expenseApproval.tests";
+import "./slug.tests";
+import "./publicDirectory.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

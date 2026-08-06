@@ -935,6 +935,26 @@ export const models = {
       max: 100,
       optional: true,
     },
+    // Short label for the public website's listing (see the /api/public
+    // export). Not the same as the name: "Textilverkstad" vs "Textil".
+    tag: {
+      label: "Tag (public website)",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "tag.sv": {
+      label: "Tag (Swedish)",
+      type: String,
+      max: 40,
+      optional: true,
+    },
+    "tag.en": {
+      label: "Tag (English)",
+      type: String,
+      max: 40,
+      optional: true,
+    },
     description: {
       label: "Description",
       type: Object,
@@ -1129,6 +1149,26 @@ export const models = {
       label: "Name (English)",
       type: String,
       max: 100,
+      optional: true,
+    },
+    // Short label for the public website's listing (see the /api/public
+    // export). Not the same as the name: "Textilverkstad" vs "Textil".
+    tag: {
+      label: "Tag (public website)",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "tag.sv": {
+      label: "Tag (Swedish)",
+      type: String,
+      max: 40,
+      optional: true,
+    },
+    "tag.en": {
+      label: "Tag (English)",
+      type: String,
+      max: 40,
       optional: true,
     },
     description: {
