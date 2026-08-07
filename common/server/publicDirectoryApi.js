@@ -6,12 +6,16 @@ import { buildDirectory } from "/imports/common/lib/publicDirectory";
 import { workshopImageUrlFor, groupImageUrlFor, spaceIconUrlFor } from "./workshopImage";
 
 /**
- * WebApp.handlers callback serving the workshops-and-groups listing the public
- * website builds from. Mounted at /api/public (see the mounting app's
- * server/api/).
+ * WebApp.handlers callback serving what the public website builds from: the
+ * workshops and open groups, the map's spaces, and the link between them.
+ * Mounted at /api/public (see the mounting app's server/api/).
  *
  * URL shape:
- *   /api/public/entries
+ *   /api/public/entries   -> { entries, spaces, palette }
+ *
+ * The floor plan SVGs are NOT part of this: they are static assets of the member
+ * app (/images/floor1.svg, /images/floor2.svg), reachable without login, and the
+ * website hardcodes that base.
  *
  * DELIBERATELY WORLD-READABLE — do not put this behind the nginx allow/deny
  * block that guards /api/certificates. It exists to be fetched by an external
@@ -60,15 +64,16 @@ export const makePublicDirectoryHandler = () => async (req, res) => {
   const spaces = await Spaces.find({}).fetchAsync();
   const spaceById = new Map(spaces.map((s) => [s._id, s]));
 
-  const entries = buildDirectory({
+  const directory = buildDirectory({
     workshops,
     groups,
-    iconUrlFor: (spaceId) => absolute(spaceIconUrlFor(spaceById.get(spaceId))),
+    spaces,
+    iconUrlFor: (spaceDocId) => absolute(spaceIconUrlFor(spaceById.get(spaceDocId))),
     imageUrlFor: ({ doc, kind }) =>
       absolute(kind === "workshop" ? workshopImageUrlFor(doc) : groupImageUrlFor(doc)),
   });
 
-  const payload = JSON.stringify({ entries });
+  const payload = JSON.stringify(directory);
   const etag = etagFor(payload);
   // Matches the website's hourly poll; the image URLs carry ?v=<fileId> and so
   // invalidate themselves when an image is replaced.
