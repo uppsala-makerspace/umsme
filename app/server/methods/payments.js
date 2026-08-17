@@ -1,5 +1,4 @@
 import { Meteor } from "meteor/meteor";
-import { fetch } from "meteor/fetch";
 import { v4 as uuidv4 } from "uuid";
 import { getSwishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
@@ -8,52 +7,12 @@ import { initiatedPayments } from "/imports/common/collections/initiatedPayments
 import { findMemberForUser, sanitizeForSwish } from "/server/methods/utils";
 import { loadJson } from "/imports/common/server/configLoader";
 import { memberStatus } from "/imports/common/lib/utils";
-
-const PAYMENT_SERVICE_TIMEOUT_MS = 3000;
-
-/**
- * Probe the payment service's /status endpoint, derived from the same host
- * Swish would call back into. Throws Meteor.Error('payment-service-unavailable')
- * if the service is unreachable, slow, or returns a non-2xx response. Called
- * at the top of payment.initiate so the user gets a clean "try later" message
- * instead of paying through Swish and having the callback land on a dead host.
- */
-const checkPaymentServiceAlive = async () => {
-  const config = getSwishConfig();
-  if (!config.callbackUrl) {
-    throw new Meteor.Error(
-      "payment-service-unavailable",
-      "No callback URL configured"
-    );
-  }
-  let statusUrl;
-  try {
-    statusUrl = new URL("/status", new URL(config.callbackUrl).origin).toString();
-  } catch (err) {
-    throw new Meteor.Error(
-      "payment-service-unavailable",
-      `Invalid callback URL: ${err.message}`
-    );
-  }
-  try {
-    const res = await fetch(statusUrl, {
-      method: "GET",
-      signal: AbortSignal.timeout(PAYMENT_SERVICE_TIMEOUT_MS),
-    });
-    if (!res.ok) {
-      throw new Meteor.Error(
-        "payment-service-unavailable",
-        `Status ${res.status}`
-      );
-    }
-  } catch (err) {
-    if (err instanceof Meteor.Error) throw err;
-    throw new Meteor.Error(
-      "payment-service-unavailable",
-      err?.message || "Unreachable"
-    );
-  }
-};
+import {
+  getSwishConfig,
+  isSwishDisabled,
+  checkPaymentServiceAlive,
+  requestSwishPayment,
+} from "./swishRequest";
 
 const getPaymentOptions = () => loadJson("paymentOptionsPath", "paymentOptions.json");
 
@@ -71,35 +30,6 @@ const getPaymentTypes = async () => {
   }
   return _paymentTypes;
 };
-
-/**
- * Get Swish configuration from settings
- * @throws {Meteor.Error} if Swish is not configured
- */
-const getSwishConfig = () => {
-  const config = Meteor.settings?.private?.swish;
-  if (!config) {
-    throw new Meteor.Error("config-error", "Swish is not configured");
-  }
-  return config;
-};
-
-/**
- * Check if Swish payments are disabled via public settings.
- * @returns {boolean}
- */
-const isSwishDisabled = () => {
-  return Meteor.settings?.public?.swish?.disabled === true;
-};
-
-const formatError = (status, errArr) => {
-  const swishErrs = errArr.map(errObj => {
-    const additional = errObj.additionalInformation == '' ? '' : `; ${errObj.additionalInformation}`;
-    return `${errObj.errorMessage} (${errObj.errorCode})${additional}`;
-  });
-
-  return `HTTP status: ${status}, Swish: ${swishErrs.join(', ')}`;
-}
 
 Meteor.methods({
   /**
@@ -169,71 +99,24 @@ Meteor.methods({
       }
     }
 
-    const config = getSwishConfig();
     const { amount } = paymentTypes[paymentType];
     const externalId = uuidv4().replace(/-/g, "").toUpperCase();
 
-    // Create initiated payment record
     await initiatedPayments.insertAsync({
       externalId,
       member: member._id,
       status: "INITIATED",
       amount,
       createdAt: new Date(),
-      paymentType
+      kind: "membership",
+      paymentType,
     });
 
-    const data = {
-      callbackUrl: config.callbackUrl,
-      payeeAlias: config.payeeAlias,
-      currency: "SEK",
-      amount: amount.toString(),
+    return requestSwishPayment({
+      externalId,
+      amount,
       message: sanitizeForSwish(`pt:${paymentType} mid:${member.mid} ${member.name}`),
-      //callbackIdentifier
-    };
-
-    try {
-      const swishClient = await getSwishClient();
-      const response = await swishClient.put(
-        `${config.api.paymentRequest}/${externalId}`,
-        data
-      );
-
-      if (response.status === 201) {
-        const { paymentrequesttoken } = response.headers;
-
-        return {
-          paymentrequesttoken,
-          externalId,
-          amount
-        };
-      } else {
-        // Update payment status on failure
-        await initiatedPayments.updateAsync(
-          { externalId },
-          { $set: { status: "ERROR", error: "Unexpected response status" } }
-        );
-        throw new Meteor.Error("payment-failed", "Failed to create payment request");
-      }
-    } catch (error) {
-      if(!error.response) {
-        console.log(error);
-      } else {
-        const errorMessage = `Swish payment initiation error: ${formatError(error.status, error.response.data)}`;
-      }
-      console.error(errorMessage);
-
-      // Update payment status on error
-      await initiatedPayments.updateAsync(
-        { externalId },
-        { $set: { status: "ERROR", error: errorMessage} }
-      );
-
-      if (error instanceof Meteor.Error) {
-        throw error;
-      }
-      throw new Meteor.Error("payment-error", "Failed to initiate payment");
-    }
+    });
   },
 
   /**
