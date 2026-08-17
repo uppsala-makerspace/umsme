@@ -40,7 +40,7 @@ const driveLink = (fileId) => `https://drive.google.com/file/d/${fileId}/view`;
 export const toVerifications = (matches, ctx) => {
   const { config, expenseAccountsById, memberNameById } = ctx;
   const bank = config.bankAccount;
-  return matches.map(({ row, kind, expense, payment, code }) => {
+  return matches.map(({ row, kind, expense, payment, code, item }) => {
     if (kind === 'U') {
       const account = expenseAccountsById[expense.expenseAccountId];
       const memberName = memberNameById[expense.memberId] || expense.memberId;
@@ -62,6 +62,21 @@ export const toVerifications = (matches, ctx) => {
         trans: [
           { account: bank, dimension: null, amount: row.belopp },
           { account: code.account, dimension: code.dimension || null, amount: -row.belopp },
+        ],
+      };
+    }
+    if (kind === 'W') {
+      // A webshop purchase. The account comes off the store item, so the
+      // treasurer sets it once per item rather than once per purchase.
+      const buyer = memberNameById[payment.member] || payment.name || '';
+      const itemName = item.name?.sv || item.name?.en || item.code;
+      return {
+        series: config.standardIncome?.series || 'S',
+        date: row.transdag,
+        text: `${itemName} ${buyer}`.trim(),
+        trans: [
+          { account: bank, dimension: null, amount: row.belopp },
+          { account: item.bookkeepingAccount, dimension: item.dimension || null, amount: -row.belopp },
         ],
       };
     }

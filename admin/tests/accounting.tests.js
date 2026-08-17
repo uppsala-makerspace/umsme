@@ -257,4 +257,100 @@ if (Meteor.isServer) {
       ));
     });
   });
+
+  describe('accounting/webshop purchases', function () {
+    // A store item carries its own bookkeeping account, which is what keeps a
+    // purchase out of the treasurer's manual pile.
+    const CLAY = { _id: 'si1', code: 'lera', name: { sv: 'Lera, 5 kg' }, bookkeepingAccount: '3020', dimension: { 6: 'KERAMIK' } };
+    const TSHIRT = { _id: 'si2', code: 'tshirt', name: { sv: 'T-shirt' }, bookkeepingAccount: '3030' };
+    const NO_ACCOUNT = { _id: 'si3', code: 'trasig', name: { sv: 'Utan konto' } };
+
+    // Row 1 of the fixture: Swish +46700000001, 350 kr, 2026-06-21.
+    const purchase = (over = {}) => ({
+      _id: 'p1', mobile: '46700000001', amount: 350, date: new Date(2026, 5, 21, 14, 30),
+      member: 'm2', initiatedBy: 'i1', storeItem: 'si1', itemCode: 'lera',
+      message: 'ws:lera mid:7 Alice', ...over,
+    });
+
+    const runMatch = (payments, storeItems) =>
+      matchRows(parseBankFile(fixtureBuffer()).rows, { expenses: [], payments, storeItems, config: CONFIG });
+
+    it('classifies a purchase from its linked item, as kind W', function () {
+      const { matches } = runMatch([purchase()], [CLAY]);
+      const w = matches.find((m) => m.kind === 'W');
+      assert.ok(w, 'expected a W match');
+      assert.strictEqual(w.item._id, 'si1');
+    });
+
+    it('prefers the linked item over an income code the message happens to contain', function () {
+      // The message says "lera" and LERA is a configured income code, but the
+      // item link is the more specific fact and must win.
+      const { matches } = runMatch([purchase({ message: 'LERA ws:lera mid:7' })], [CLAY]);
+      assert.deepStrictEqual(matches.map((m) => m.kind), ['W']);
+    });
+
+    it('does not read a purchase as a member payment', function () {
+      // isMemberPayment would fire on initiatedBy + member if the message said
+      // pt:, so a ws: purchase must not be mistaken for one.
+      const { matches } = runMatch([purchase()], [CLAY]);
+      assert.ok(!matches.some((m) => m.kind === 'M'));
+    });
+
+    it('flags an item with no bookkeeping account rather than posting it nowhere', function () {
+      const { matches, flags, diagnostics } = runMatch(
+        [purchase({ storeItem: 'si3', itemCode: 'trasig' })], [NO_ACCOUNT]
+      );
+      assert.ok(!matches.some((m) => m.kind === 'W'));
+      assert.ok(flags.some((f) => f.reason === 'unclassified-payment'), JSON.stringify(flags));
+      assert.ok(
+        diagnostics.some((d) => /no bookkeeping account/.test(d.why)),
+        JSON.stringify(diagnostics)
+      );
+    });
+
+    it('treats two purchases of the same item as interchangeable', function () {
+      const two = [purchase(), purchase({ _id: 'p1b', date: new Date(2026, 5, 20) })];
+      const { matches, flags } = runMatch(two, [CLAY]);
+      assert.deepStrictEqual(matches.map((m) => m.kind), ['W']);
+      assert.strictEqual(flags.length, 0);
+    });
+
+    it('refuses to guess between purchases of different items', function () {
+      const two = [
+        purchase(),
+        purchase({ _id: 'p1b', storeItem: 'si2', itemCode: 'tshirt', date: new Date(2026, 5, 20) }),
+      ];
+      const { matches, flags } = runMatch(two, [CLAY, TSHIRT]);
+      assert.ok(!matches.some((m) => m.kind === 'W'));
+      assert.ok(flags.some((f) => f.reason === 'ambiguous-payment'), JSON.stringify(flags));
+    });
+
+    it('books the purchase against the item’s account and dimension', function () {
+      const { matches } = runMatch([purchase()], [CLAY]);
+      const vers = toVerifications(matches, {
+        config: ACCOUNTING,
+        expenseAccountsById: {},
+        memberNameById: { m2: 'Alice Andersson' },
+      });
+      const w = vers[0];
+      assert.strictEqual(w.series, 'S');
+      assert.strictEqual(w.text, 'Lera, 5 kg Alice Andersson');
+      assert.deepStrictEqual(w.trans, [
+        { account: '1930', dimension: null, amount: 350 },
+        { account: '3020', dimension: { 6: 'KERAMIK' }, amount: -350 },
+      ]);
+      // Balanced, like every other verification.
+      assert.strictEqual(w.trans.reduce((s, t) => s + t.amount, 0), 0);
+    });
+
+    it('books an item without a dimension too', function () {
+      const { matches } = runMatch(
+        [purchase({ storeItem: 'si2', itemCode: 'tshirt' })], [TSHIRT]
+      );
+      const [w] = toVerifications(matches, {
+        config: ACCOUNTING, expenseAccountsById: {}, memberNameById: {},
+      });
+      assert.deepStrictEqual(w.trans[1], { account: '3030', dimension: null, amount: -350 });
+    });
+  });
 }

@@ -60,6 +60,12 @@ const isMemberPayment = (payment) =>
   !!(payment.initiatedBy && payment.member && /\bpt:/.test(payment.message || '')) ||
   !!(payment.member && payment.membership);
 
+// A webshop purchase, recognised by the item it is linked to — never by the `ws:`
+// prefix in the message, which can be truncated by Swish's 50-character limit and
+// which a buyer paying by hand could write anything into. The bookkeeping account
+// comes off the item, so a purchase needs no treasurer intervention.
+const isStorePayment = (payment) => !!payment.storeItem;
+
 /**
  * @param rows       parsed bank rows (from parseBankFile)
  * @param expenses   Expense docs with status 'reimbursed' (with or without
@@ -70,17 +76,20 @@ const isMemberPayment = (payment) =>
  *                   bank-synced payments (hash set, the manual Swish number).
  *                   The two sources cover disjoint transactions, so there are
  *                   no twins; classification decides what a match means.
+ * @param storeItems StoreItem docs, for classifying webshop purchases and
+ *                   finding the bookkeeping account each one posts to
  * @param config     { matchWindowDays, standardIncomeCodes }
  * @returns { matches, remaining, flags, diagnostics }
- *   matches: [{ row, kind: 'U'|'M'|'S', expense?, payment?, code? }]
+ *   matches: [{ row, kind: 'U'|'M'|'S'|'W', expense?, payment?, code?, item? }]
  *   remaining: [row…] (file order)
  *   flags: [{ rowNr, reason, detail }]
  *   diagnostics: [{ rowNr, text, belopp, why }] — near-miss explanation per
  *   unmatched row that plausibly should have matched
  */
-export const matchRows = (rows, { expenses, payments, config }) => {
+export const matchRows = (rows, { expenses, payments, storeItems, config }) => {
   const window = config.matchWindowDays ?? 5;
   const codes = config.standardIncomeCodes || [];
+  const storeItemsById = Object.fromEntries((storeItems || []).map((i) => [i._id, i]));
   const consumedExpenses = new Set();
   const consumedPayments = new Set();
   const matches = [];
@@ -149,6 +158,15 @@ export const matchRows = (rows, { expenses, payments, config }) => {
         p.date && dayDiff(row.transdag, p.date) <= window;
       const candidates = payments.filter((p) => !consumedPayments.has(p._id) && fits(p));
       const classify = (p) => {
+        // A linked store item is the most specific signal there is, so it wins
+        // over a message that happens to contain a configured income code.
+        if (isStorePayment(p)) {
+          const item = storeItemsById[p.storeItem];
+          // An item without an account cannot be booked; fall through so the
+          // row is reported rather than silently posted to nowhere.
+          if (item?.bookkeepingAccount) return { kind: 'W', item };
+          return null;
+        }
         const code = findIncomeCode(p.message, codes);
         if (code) return { kind: 'S', code };
         if (isMemberPayment(p)) return { kind: 'M' };
@@ -165,25 +183,36 @@ export const matchRows = (rows, { expenses, payments, config }) => {
         const interchangeable = !!first && classified.every((c, i) =>
           c && c.kind === first.kind &&
           (first.kind !== 'S' || c.code.code === first.code.code) &&
+          (first.kind !== 'W' || c.item._id === first.item._id) &&
           (first.kind !== 'M' || candidates[i].member === candidates[0].member)
         );
         if (interchangeable) {
           const best = [...candidates]
             .sort((a, b) => dayDiff(row.transdag, a.date) - dayDiff(row.transdag, b.date))[0];
           consumedPayments.add(best._id);
-          matches.push({ row, kind: first.kind, payment: best, ...(first.code ? { code: first.code } : {}) });
+          matches.push({
+            row, kind: first.kind, payment: best,
+            ...(first.code ? { code: first.code } : {}),
+            ...(first.item ? { item: first.item } : {}),
+          });
           continue;
         }
         if (candidates.length === 1) {
           const payment = candidates[0];
-          flag(row, 'unclassified-payment', `payment ${payment._id} found but is neither a member payment nor a configured income code`);
-          diagnose(row, `payment ${payment._id} fits but is unclassifiable — link it to a member/membership in the Payments view, ` +
-            `or add its code to accounting.standardIncome.codes. ` +
-            `member: ${payment.member ? 'yes' : 'no'}, membership: ${payment.membership ? 'yes' : 'no'}, ` +
-            `message: "${payment.message || ''}"`);
+          flag(row, 'unclassified-payment', `payment ${payment._id} found but is neither a member payment, a webshop purchase, nor a configured income code`);
+          diagnose(row, payment.storeItem
+            ? `payment ${payment._id} is a purchase of store item ${payment.storeItem} but that item has no bookkeeping account — set one on the item`
+            : `payment ${payment._id} fits but is unclassifiable — link it to a member/membership in the Payments view, ` +
+              `or add its code to accounting.standardIncome.codes. ` +
+              `member: ${payment.member ? 'yes' : 'no'}, membership: ${payment.membership ? 'yes' : 'no'}, ` +
+              `message: "${payment.message || ''}"`);
         } else {
-          const kinds = [...new Set(classified.map((c) =>
-            c ? (c.kind === 'S' ? `S:${c.code.code}` : 'M') : 'unclassified'))];
+          const kinds = [...new Set(classified.map((c) => {
+            if (!c) return 'unclassified';
+            if (c.kind === 'S') return `S:${c.code.code}`;
+            if (c.kind === 'W') return `W:${c.item.code}`;
+            return 'M';
+          }))];
           flag(row, 'ambiguous-payment',
             `${candidates.length} payments fit ${row.belopp} kr from ...${phone} with conflicting classifications (${kinds.join(', ')})`);
         }

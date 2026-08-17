@@ -3,6 +3,7 @@ import { Roles } from 'meteor/roles';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Payments } from '/imports/common/collections/payments';
+import { StoreItems } from '/imports/common/collections/storeItems';
 import { Members } from '/imports/common/collections/members';
 import { parseBankFile, buildRemainingCsv } from '/imports/accounting/bankFile';
 import { matchRows, invalidIncomeCode } from '/imports/accounting/match';
@@ -90,9 +91,14 @@ Meteor.methods({
       date: { $gte: from, $lte: to },
     }).fetchAsync();
 
+    // Every item, not just available ones: a hidden item's past purchases still
+    // have to book, and the account lives on the item.
+    const storeItems = await StoreItems.find({}).fetchAsync();
+
     const { matches, remaining, flags, diagnostics } = matchRows(parsed.rows, {
       expenses,
       payments,
+      storeItems,
       config: {
         matchWindowDays: window,
         standardIncomeCodes: config.standardIncome?.codes || [],
