@@ -85,7 +85,10 @@ export const messageData = async (memberId, templateId, membershipId) => {
   if (!member || !messageTemplate) {
     return {};
   }
-  const status = memberStatus(member);
+  // memberStatus is async — without the await, status is a Promise and
+  // status.memberStart/labStart come out undefined, which silently emptied the
+  // memberStartDate and labStartDate variables in every template.
+  const status = await memberStatus(member);
   const data = {
     id: member._id,
     mid: member.mid,
