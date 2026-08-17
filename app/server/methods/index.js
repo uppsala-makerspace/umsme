@@ -16,3 +16,4 @@ import './membershipDetail';
 import './messages';
 import './groups';
 import './workshops';
+import './store';

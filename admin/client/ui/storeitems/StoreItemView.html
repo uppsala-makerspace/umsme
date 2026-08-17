@@ -1,0 +1,55 @@
+<template name="StoreItemView">
+    <a href="/storeitems" style="float: right">Back to store items</a>
+    <h1>Store item: {{item.name.sv}}{{#if item.name.en}} / {{item.name.en}}{{/if}}
+        {{#if isHidden}}<span class="label label-default">Hidden</span>{{/if}}
+    </h1>
+
+    {{#unless item.bookkeepingAccount}}
+    <div class="alert alert-warning">
+        No bookkeeping account. Purchases of this item will turn up as
+        <em>unclassified-payment</em> in every bank reconciliation until one is set.
+    </div>
+    {{/unless}}
+
+    {{#if buyerSetsPrice}}
+    <div class="alert alert-info">
+        No fixed price, so the buyer enters the amount. Set a minimum and maximum
+        below unless any amount really is acceptable.
+    </div>
+    {{/if}}
+
+    {{#if isDeletable}}
+    <p><button class="btn btn-danger deleteStoreItem">Delete store item</button></p>
+    {{else}}
+    <div class="alert alert-info">
+        {{deleteBlockedReason}}
+    </div>
+    {{/if}}
+
+    <h2>Image</h2>
+    {{#if item.imageFileId}}
+        <p><img src="{{imageUrl}}" alt="{{item.name.sv}}" style="max-width: 400px; max-height: 300px;"></p>
+        <p><button class="btn btn-default removeImage">Remove image</button></p>
+    {{else}}
+        <p><em>No image uploaded.</em></p>
+    {{/if}}
+    <form class="form-inline imageUploadForm">
+        <input type="file" class="imageFileInput" accept="image/jpeg,image/png,image/webp,image/heic">
+        <button type="button" class="btn btn-primary uploadImage" {{uploadingAttr}}>
+            {{#if uploading}}Uploading…{{else}}Upload image{{/if}}
+        </button>
+    </form>
+
+    <h2>Edit</h2>
+    {{> quickForm collection=StoreItems doc=item id="storeItemViewForm" omitFields="_id" type="update" buttonContent="Update"}}
+
+    <hr>
+
+    <h2>Purchases</h2>
+    {{#if hasPurchases}}
+    <p>{{purchaseCount}} purchase(s), {{purchaseTotal}} kr in total.
+        See them under <a href="/payments">Payments</a>.</p>
+    {{else}}
+    <p><em>Not bought yet.</em></p>
+    {{/if}}
+</template>

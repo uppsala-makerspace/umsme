@@ -6,6 +6,7 @@ import { Payments } from '/imports/common/collections/payments';
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
 import { Memberships } from '/imports/common/collections/memberships';
 import { Members } from '/imports/common/collections/members';
+import { StoreItems } from '/imports/common/collections/storeItems';
 
 /**
  * Generate a unique member ID (required by schema)
@@ -24,6 +25,7 @@ export async function clearTestData() {
   await initiatedPayments.removeAsync({});
   await Memberships.removeAsync({});
   await Members.removeAsync({});
+  await StoreItems.removeAsync({});
 }
 
 /**

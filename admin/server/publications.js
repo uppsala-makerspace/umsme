@@ -20,6 +20,7 @@ import { Groups } from '/imports/common/collections/groups';
 import { Workshops } from '/imports/common/collections/workshops';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Spaces } from '/imports/common/collections/spaces';
+import { StoreItems } from '/imports/common/collections/storeItems';
 
 const createAuthFuncForRoles = (col, roles) => async function () {
   if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
@@ -56,6 +57,7 @@ export default () => {
   Meteor.publish('workshops', createAuthFuncFor(Workshops));
   Meteor.publish('groupMemberships', createAuthFuncFor(GroupMemberships));
   Meteor.publish('spaces', createAuthFuncFor(Spaces));
+  Meteor.publish('storeItems', createAuthFuncFor(StoreItems));
 
   Meteor.publish(null, async function () {
     if (this.userId) {

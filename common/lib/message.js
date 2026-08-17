@@ -1,6 +1,8 @@
 import { template } from 'underscore';
 import { Members } from '/imports/common/collections/members';
 import { Memberships } from "/imports/common/collections/memberships";
+import { Payments } from "/imports/common/collections/payments";
+import { StoreItems } from "/imports/common/collections/storeItems";
 import { MessageTemplates } from '/imports/common/collections/templates';
 import { memberStatus } from '/imports/common/lib/utils';
 import moment from 'moment';
@@ -76,7 +78,21 @@ export const findBestTemplate = async (params) => {
   );
 };
 
-export const messageData = async (memberId, templateId, membershipId) => {
+/**
+ * Build the substitution data for a template, and render its subject and text.
+ *
+ * The third parameter used to be a bare membershipId. It is an options object now
+ * that a purchase receipt needs a payment instead — a fourth positional argument
+ * would have been worse. A bare string is still accepted so nothing breaks if a
+ * caller is missed.
+ *
+ * @param {string} memberId
+ * @param {string} templateId
+ * @param {{membershipId?: string, paymentId?: string}|string} [context]
+ */
+export const messageData = async (memberId, templateId, context) => {
+  const { membershipId, paymentId } =
+    typeof context === "string" ? { membershipId: context } : (context || {});
   let familyMembers = [];
   await Members.find({infamily: memberId}).forEachAsync((m) => familyMembers.push(m.name));
   familyMembers = familyMembers.join(', ');
@@ -112,6 +128,21 @@ export const messageData = async (memberId, templateId, membershipId) => {
     data.startPeriod = niceDate(membership.start);
     data.endMemberPeriod = niceDate(membership.memberend);
     data.endLabPeriod = niceDate(membership.labend);
+  }
+  // A webshop purchase receipt. `amount` means the same thing as for a
+  // membership, so it is reused rather than given a second name.
+  if (paymentId) {
+    const payment = await Payments.findOneAsync(paymentId);
+    if (payment) {
+      const item = payment.storeItem
+        ? await StoreItems.findOneAsync(payment.storeItem)
+        : null;
+      data.amount = payment.amount;
+      data.itemName = item?.name?.sv || item?.name?.en || payment.itemCode || '';
+      data.itemCode = payment.itemCode || '';
+      data.comment = payment.comment || '';
+      data.purchaseDate = niceDate(payment.date);
+    }
   }
   const subjectTemplate = template(messageTemplate.subject);
   const messageTextTemplate = template(messageTemplate.messagetext);

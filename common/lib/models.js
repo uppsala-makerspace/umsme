@@ -37,7 +37,22 @@ export const models = {
     amount: { label: "amount", type: String },
     createdAt: { label: "createdAt", type: Date, autoform: { type: "datetime-local" } },
     resolvedAt: { label: "resolvedAt", type: Date, optional: true, autoform: { type: "datetime-local" } },
-    paymentType: { label: "Payment type", type: String },
+    // What the payment is for. Defaults to membership so documents written
+    // before the webshop existed keep validating.
+    kind: {
+      label: "Kind",
+      type: String,
+      allowedValues: ["membership", "storeItem"],
+      defaultValue: "membership",
+    },
+    // Optional because a webshop purchase has no payment type. Required in
+    // practice for kind "membership" — enforced by the caller, not the schema,
+    // since SimpleSchema cannot express "required when a sibling equals X"
+    // without a custom function.
+    paymentType: { label: "Payment type", type: String, optional: true },
+    storeItem: { label: "Store item", type: String, max: 20, optional: true },
+    itemCode: { label: "Item code", type: String, max: 12, optional: true },
+    comment: { label: "Comment", type: String, max: 200, optional: true },
     errorCode: { label: "Error code", type: String, max: 20, optional: true },
     errorMessage: { label: "Error message", type: String, max: 200, optional: true },
   },
@@ -256,6 +271,15 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // A purchase receipt traces to its payment the way a membership mail traces
+    // to its membership.
+    payment: {
+      label: "Payment",
+      type: String,
+      max: 20,
+      optional: true,
+      autoform: { omit: true },
+    },
     type: {
       label: "Message type",
       type: String,
@@ -266,6 +290,7 @@ export const models = {
         options: {
           welcome: "Welcome",
           confirmation: "Confirmation",
+          purchase: "Purchase receipt",
           reminder: "Reminder",
           status: "Status",
           invite: "Invite",
@@ -351,6 +376,7 @@ export const models = {
         options: {
           welcome: "Welcome",
           confirmation: "Confirmation",
+          purchase: "Purchase receipt",
           reminder: "Reminder",
           status: "Status",
           invite: "Invite",
@@ -441,6 +467,12 @@ export const models = {
     membership: { label: "Membership", type: String, max: 20, optional: true },
     externalId: { label: "External ID", type: String, max: 40, optional: true, autoform: { readonly: true } },
     initiatedBy: { label: "Initiated by", type: String, max: 20, optional: true, autoform: { readonly: true } },
+    // Set for a webshop purchase. This — not the `ws:` prefix in the message —
+    // is what makes a payment a purchase: the message can be truncated, and a
+    // buyer paying by hand can write anything in theirs.
+    storeItem: { label: "Store item", type: String, max: 20, optional: true, autoform: { readonly: true } },
+    itemCode: { label: "Item code", type: String, max: 12, optional: true, autoform: { readonly: true } },
+    comment: { label: "Buyer comment", type: String, max: 200, optional: true },
   },
   lockusers: {
     name: { label: "Member", type: String, max: 40 },
@@ -1280,6 +1312,145 @@ export const models = {
       autoform: { omit: true },
     },
     "secondarySpaceIds.$": { type: String, autoform: { omit: true } },
+    createdAt: {
+      label: "Created",
+      type: Date,
+      optional: true,
+      autoform: { omit: true },
+    },
+  },
+  // Something buyable in the app's webshop: clay, a t-shirt, a Saturday course,
+  // a donation. Managed in admin, bought in the app, paid through Swish like a
+  // membership — see plan/webshop.md.
+  storeItem: {
+    // The item's public identity: it goes in the Swish message as `ws:<code>`
+    // and is how the app looks an item up. Short on purpose — Swish truncates
+    // the message at 50 characters (sanitizeForSwish), and the code has to
+    // survive that even when the buyer's name does not.
+    code: {
+      label: "Code",
+      type: String,
+      max: 12,
+      regEx: /^[a-z0-9-]+$/,
+    },
+    name: {
+      label: "Name",
+      type: Object,
+      blackbox: true,
+    },
+    "name.sv": { label: "Name (Swedish)", type: String, max: 100 },
+    "name.en": { label: "Name (English)", type: String, max: 100, optional: true },
+    description: {
+      label: "Description",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "description.sv": {
+      label: "Description (Swedish, markdown)",
+      type: String,
+      max: 5000,
+      optional: true,
+      autoform: { type: "textarea", rows: 6 },
+    },
+    "description.en": {
+      label: "Description (English, markdown)",
+      type: String,
+      max: 5000,
+      optional: true,
+      autoform: { type: "textarea", rows: 6 },
+    },
+    // Absent price means the buyer sets the amount: clay weighed by the member,
+    // a donation. Expressed as the absence of a price rather than a separate
+    // flag, so the two can never contradict each other.
+    price: {
+      label: "Price (kr) — leave empty to let the buyer set it",
+      type: Number,
+      min: 1,
+      optional: true,
+    },
+    minPrice: {
+      label: "Minimum (kr) — only for a buyer-set price",
+      type: Number,
+      min: 1,
+      optional: true,
+    },
+    maxPrice: {
+      label: "Maximum (kr) — only for a buyer-set price",
+      type: Number,
+      min: 1,
+      optional: true,
+    },
+    requiresMembership: {
+      label: "Requires membership",
+      type: Boolean,
+      defaultValue: false,
+    },
+    commentRequired: {
+      label: "Comment required",
+      type: Boolean,
+      defaultValue: false,
+    },
+    // Tells the buyer what the comment is for: "Namn på kursdeltagaren".
+    commentPlaceholder: {
+      label: "Comment placeholder",
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+    "commentPlaceholder.sv": { label: "Placeholder (Swedish)", type: String, max: 100, optional: true },
+    "commentPlaceholder.en": { label: "Placeholder (English)", type: String, max: 100, optional: true },
+    // Where the income lands in the SIE export. Required: without it a purchase
+    // becomes an unclassified payment in every month's bank reconciliation.
+    bookkeepingAccount: {
+      label: "Bookkeeping account",
+      type: String,
+      max: 10,
+    },
+    // Same shape as settings.accounting.standardIncome.codes[].dimension:
+    // { "6": "KERAMIK" }.
+    dimension: {
+      label: "Dimension",
+      type: Object,
+      blackbox: true,
+      optional: true,
+      autoform: { omit: true },
+    },
+    // Representative image, stored via common/server/workshopImageStore.js.
+    imageFileId: {
+      label: "Image file id",
+      type: String,
+      max: 200,
+      optional: true,
+      autoform: { omit: true },
+    },
+    imageMimeType: {
+      label: "Image mime type",
+      type: String,
+      max: 100,
+      optional: true,
+      autoform: { omit: true },
+    },
+    // Hidden rather than removed: a payment pointing at a missing item breaks
+    // the purchase history and the bookkeeping export.
+    status: {
+      label: "Status",
+      type: String,
+      allowedValues: ["available", "hidden"],
+      defaultValue: "available",
+      autoform: {
+        type: "select",
+        options: [
+          { label: "Available", value: "available" },
+          { label: "Hidden", value: "hidden" },
+        ],
+      },
+    },
+    sortOrder: {
+      label: "Sort order",
+      type: Number,
+      optional: true,
+    },
     createdAt: {
       label: "Created",
       type: Date,

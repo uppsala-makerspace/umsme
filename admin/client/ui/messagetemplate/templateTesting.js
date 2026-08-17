@@ -24,6 +24,12 @@ export const SAMPLE_DATA = {
   startPeriod: '2026-05-11',
   endMemberPeriod: '2027-05-11',
   endLabPeriod: '2027-05-11',
+  // Webshop purchase receipts (template type "purchase"). `amount` above is
+  // reused — it means the same thing for a purchase as for a membership.
+  itemName: 'Lera, 5 kg',
+  itemCode: 'lera',
+  comment: 'Anna Andersson',
+  purchaseDate: '2026-05-11',
 };
 
 const TEMPLATE_FIELDS = ['subject', 'messagetext', 'sms'];

@@ -1,6 +1,7 @@
 import { Workshops } from "/imports/common/collections/workshops";
 import { Groups } from "/imports/common/collections/groups";
 import { Spaces } from "/imports/common/collections/spaces";
+import { StoreItems } from "/imports/common/collections/storeItems";
 import { workshopImageStore } from "./workshopImageStore";
 import { mapIconStore } from "./mapIconStore";
 
@@ -16,6 +17,7 @@ import { mapIconStore } from "./mapIconStore";
  *   /api/workshops/<workshopId>/image[?v=<fileId>]
  *   /api/groups/<groupId>/image[?v=<fileId>]
  *   /api/spaces/<spaceId>/icon[?v=<fileId>]
+ *   /api/store-items/<itemId>/image[?v=<fileId>]
  */
 const makeImageHandler = (segment, resolve) => async (req, res) => {
   const [path] = req.url.split("?");
@@ -82,6 +84,12 @@ export const makeSpaceIconHandler = () =>
     return { fileId: doc?.iconFileId, mimeType: doc?.iconMimeType, store: mapIconStore };
   });
 
+export const makeStoreItemImageHandler = () =>
+  makeImageHandler("image", async (id) => {
+    const doc = await StoreItems.findOneAsync(id);
+    return { fileId: doc?.imageFileId, mimeType: doc?.imageMimeType, store: workshopImageStore };
+  });
+
 // Relative (same-origin) URLs, or null when the entity has no image/icon.
 const urlFor = (basePath, segment, id, fileId) =>
   fileId
@@ -94,3 +102,5 @@ export const groupImageUrlFor = (group) =>
   urlFor("/api/groups", "image", group?._id, group?.imageFileId);
 export const spaceIconUrlFor = (space) =>
   urlFor("/api/spaces", "icon", space?._id, space?.iconFileId);
+export const storeItemImageUrlFor = (item) =>
+  urlFor("/api/store-items", "image", item?._id, item?.imageFileId);

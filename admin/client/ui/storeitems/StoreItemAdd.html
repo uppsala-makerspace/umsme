@@ -1,0 +1,22 @@
+<template name="StoreItemAdd">
+    <a href="/storeitems" style="float: right">Back to store items</a>
+    <h1>Add store item</h1>
+    <p class="text-muted">
+        The code goes into the Swish message as <code>ws:&lt;code&gt;</code>, so keep it
+        short — Swish truncates the message at 50 characters and the code has to
+        survive that. Lower case, digits and hyphens only. The image, the price
+        bounds and the comment placeholder are set on the item's own page after
+        creation.
+    </p>
+    {{#autoForm collection=StoreItems id="insertStoreItemForm" type="normal" validation="keyup"}}
+        {{> afQuickField name="code"}}
+        {{> afQuickField name="name.sv"}}
+        {{> afQuickField name="name.en"}}
+        {{> afQuickField name="price"}}
+        {{> afQuickField name="bookkeepingAccount"}}
+        {{> afQuickField name="requiresMembership"}}
+        {{> afQuickField name="commentRequired"}}
+        {{> afQuickField name="status"}}
+        <button type="submit" class="btn btn-primary">Add store item</button>
+    {{/autoForm}}
+</template>

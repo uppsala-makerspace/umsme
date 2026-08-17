@@ -1,5 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import "/imports/common/server/familyCascade";
+import "/imports/common/collections/storeItemsDeny";
 import "./methods";
 import "./accounts";
 import "./tests/init";

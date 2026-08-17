@@ -22,6 +22,7 @@ export const ManagerEventType = {
   NEW_MEMBER_PAYMENT: "newMemberPayment",
   MEMBERSHIP_RENEWED: "membershipRenewed",
   QUARTERLY_LAB_PAYMENT: "quarterlyLabPayment",
+  STORE_PURCHASE: "storePurchase",
   BOX_REQUEST: "boxRequest",
   EXPENSE_SUBMITTED: "expenseSubmitted",
   EXPENSE_RETRACTED: "expenseRetracted",

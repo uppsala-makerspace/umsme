@@ -35,7 +35,7 @@ Template.SendMessage.helpers({
     const memberId = FlowRouter.getQueryParam('member');
     const templateId = FlowRouter.getQueryParam('template');
     const membershipId = FlowRouter.getQueryParam('membership');
-    return messageData(memberId, templateId, membershipId);
+    return messageData(memberId, templateId, { membershipId });
   }
 });
 

@@ -140,6 +140,8 @@ const PAGE_TITLES = {
   "/certificates": "certificates",
   "/tool": "toolsTitle",
   "/expenses": "expenses",
+  "/store": "store",
+  "/store/purchases": "storeMyPurchases",
   "/settings": "settings",
   "/messages": "messages",
   "/unlock": "navDoors",
@@ -166,6 +168,9 @@ const DETAIL_PAGES = [
   // Deep-linked (e.g. from a notification), so there is nothing to go back to:
   // name the tab in the fallback, since the request came from that one.
   { pattern: "/certifier-requests/:attestationId", fallback: "/certificates?tab=requests" },
+  { pattern: "/store/purchases", fallback: "/store" },
+  { pattern: "/store/:code", fallback: "/store" },
+  { pattern: "/payment/:paymentId", fallback: "/store/purchases" },
   { pattern: "/expenses/new", fallback: "/expenses" },
   { pattern: "/expenses/:expenseId", fallback: "/expenses" },
   // An expense account belongs to one or more groups, so it has no single

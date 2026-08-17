@@ -8,11 +8,12 @@ import { Payments } from "/imports/common/collections/payments";
 import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
 import { Messages } from "/imports/common/collections/messages";
+import { StoreItems } from "/imports/common/collections/storeItems";
 import { membershipFromPayment, memberStatus } from "/imports/common/lib/utils";
 import { findBestTemplate, messageData } from "/imports/common/lib/message";
 import { isEmailAllowed } from "/imports/common/server/emailGuard";
 import { pushMessage } from "/imports/common/server/push";
-import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
+import { publishManagerEvent, ManagerEventType, blockquote } from "/imports/common/server/managerEvents";
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -122,6 +123,79 @@ export async function processPayment(payment, member, paymentType) {
 }
 
 /**
+ * Record a settled webshop purchase: tell the managers, mail the buyer a receipt.
+ *
+ * There is no membership to create — the payment already carries `storeItem`,
+ * `itemCode` and the buyer's comment (set in swish.js), which is what makes it a
+ * purchase for admin, the member's history and the bookkeeping export.
+ *
+ * @param {Object} payment   the payment record (from addPayment)
+ * @param {Object} member
+ * @param {Object} initiated the initiatedPayment, for the item and comment
+ */
+export async function processStorePurchase(payment, member, initiated) {
+  const item = await StoreItems.findOneAsync(initiated.storeItem);
+  const itemName = item?.name?.sv || item?.name?.en || initiated.itemCode;
+
+  await publishManagerEvent(ManagerEventType.STORE_PURCHASE, {
+    subject: "Webshop purchase",
+    body:
+      `*${member.name}* (${member.email || "no email"}) bought ${itemName} ` +
+      `for ${payment.amount} kr — \`${initiated.itemCode}\`.` +
+      (initiated.comment ? `\n${blockquote(initiated.comment)}` : ""),
+  });
+
+  await sendPurchaseReceipt(member, payment, item);
+
+  return { pid: payment._id, storeItem: initiated.storeItem };
+}
+
+/**
+ * Mail the buyer a receipt, from a `purchase` template.
+ *
+ * Twin of sendConfirmationEmail: fails silently for the same reason — a broken
+ * mail must not fell payment processing, the money has already moved.
+ */
+async function sendPurchaseReceipt(member, payment, item) {
+  try {
+    const tpl = await findBestTemplate({ auto: true, type: 'purchase' });
+    if (!tpl) {
+      console.log('[Email] No auto purchase template found');
+      return;
+    }
+
+    const data = await messageData(member._id, tpl._id, { paymentId: payment._id });
+    if (!data.to) {
+      console.log(`[Email] No email address for member ${member._id}`);
+      return;
+    }
+    if (!isEmailAllowed(data.to)) {
+      console.log(`[Email] Receipt to ${data.to} blocked by whitelist`);
+      return;
+    }
+
+    const from = Meteor.settings?.noreply || "no-reply@uppsalamakerspace.se";
+    await Email.sendAsync({ to: data.to, from, subject: data.subject, text: data.messagetext });
+    console.log(`[Email] Purchase receipt sent to ${data.to}`);
+
+    const messageId = await Messages.insertAsync({
+      template: tpl._id,
+      member: member._id,
+      payment: payment._id,
+      type: 'purchase',
+      to: data.to,
+      subject: data.subject,
+      senddate: new Date(),
+      messagetext: data.messagetext,
+    });
+
+    await pushMessage(messageId);
+  } catch (err) {
+    console.error('[Email] Failed to send purchase receipt:', err);
+  }
+}
+
+/**
  * Update denormalized fields (member, lab, family) on the member object
  * and all family members who have infamily pointing to this member.
  *
@@ -180,7 +254,7 @@ async function sendConfirmationEmail(member, membershipId, membershipType) {
       return;
     }
 
-    const data = await messageData(member._id, tpl._id, membershipId);
+    const data = await messageData(member._id, tpl._id, { membershipId });
     if (!data.to) {
       console.log(`[Email] No email address for member ${member._id}`);
       return;

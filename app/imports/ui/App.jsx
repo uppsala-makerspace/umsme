@@ -32,6 +32,10 @@ const MembershipSelection = lazyWithRetry(() => import('/imports/pages/membershi
 const MembershipDetail = lazyWithRetry(() => import('/imports/pages/membershipDetail'));
 const PaymentSelection = lazyWithRetry(() => import('/imports/pages/paymentSelection'));
 const InitiatedPayment = lazyWithRetry(() => import('/imports/pages/initiatedPayment'));
+const Store = lazyWithRetry(() => import('/imports/pages/store/list'));
+const StoreItemPage = lazyWithRetry(() => import('/imports/pages/store/item'));
+const Purchases = lazyWithRetry(() => import('/imports/pages/store/purchases'));
+const PaymentDetail = lazyWithRetry(() => import('/imports/pages/paymentDetail'));
 const Install = lazyWithRetry(() => import('/imports/pages/install'));
 const CheckEmail = lazyWithRetry(() => import('/imports/pages/checkEmail'));
 const Notifications = lazyWithRetry(() => import('/imports/pages/notifications'));
@@ -91,6 +95,12 @@ export const App = () => {
             <Route path="/paymentSelection/:paymentType" element={<PaymentSelection />} />
             <Route path="/initiatedPayment/:externalId" element={<InitiatedPayment />} />
             <Route path="/payment" element={<Navigate to="/membership" replace />} />
+            {/* /store/purchases must come before /store/:code, or "purchases"
+                would be read as an item code. */}
+            <Route path="/store" element={<Store />} />
+            <Route path="/store/purchases" element={<Purchases />} />
+            <Route path="/store/:code" element={<StoreItemPage />} />
+            <Route path="/payment/:paymentId" element={<PaymentDetail />} />
             <Route path="/install" element={<Install />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:kind/:id" element={<MessageDetail />} />

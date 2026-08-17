@@ -3,6 +3,7 @@ import './swish/validation.test.js';
 import './swish/no-initiated-payment.test.js';
 import './swish/initiated-payment.test.js';
 import './swish/idempotency.test.js';
+import './swish/store-purchase.test.js';
 
 // Cron job tests
 import './cronjob/expiration.test.js';

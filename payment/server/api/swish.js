@@ -8,7 +8,7 @@ import { WebApp } from "meteor/webapp";
 import bodyParser from "body-parser";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments";
 import { Members } from "/imports/common/collections/members";
-import { addPayment, processPayment } from "./payments";
+import { addPayment, processPayment, processStorePurchase } from "./payments";
 
 WebApp.handlers.use(bodyParser.json());
 
@@ -125,7 +125,11 @@ async function handlePaidStatus(obj, initiated) {
     return;
   }
 
-  // Create payment record
+  const isPurchase = initiated.kind === "storeItem";
+
+  // Create payment record. A purchase carries the item it paid for; that link —
+  // not the ws: prefix in the message — is what makes it a purchase everywhere
+  // downstream (admin's list, the member's history, the bookkeeping export).
   const payment = await addPayment({
     type: "swish",
     amount: Number(amount),
@@ -135,9 +139,22 @@ async function handlePaidStatus(obj, initiated) {
     member: member._id,
     externalId: paymentReference,
     initiatedBy: initiated._id,
-    message
+    message,
+    ...(isPurchase
+      ? {
+          storeItem: initiated.storeItem,
+          itemCode: initiated.itemCode,
+          ...(initiated.comment ? { comment: initiated.comment } : {}),
+        }
+      : {}),
   });
   console.log(`[Swish] Created payment ${payment._id} for member ${member._id}`);
+
+  if (isPurchase) {
+    await processStorePurchase(payment, member, initiated);
+    console.log(`[Swish] Recorded purchase of ${initiated.itemCode} for member ${member._id}`);
+    return;
+  }
 
   // Process payment and create membership if paymentType is recognized
   const membershipResult = await processPayment(payment, member, initiated.paymentType);

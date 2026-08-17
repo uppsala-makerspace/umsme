@@ -16,5 +16,6 @@ import './expenseAccounts';
 import './groups';
 import './workshops';
 import './spaces';
+import './storeItems';
 
 

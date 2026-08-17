@@ -1,0 +1,11 @@
+<template name="StoreItemList">
+    <h1>Store items</h1>
+    <p class="text-muted">
+        What members can buy in the app's webshop. An item needs a bookkeeping
+        account, or its purchases turn up unclassified in the bank reconciliation.
+        Leave the price empty to let the buyer set the amount (clay by weight, a
+        donation).
+    </p>
+    <a href="/storeitems/add">Add store item</a>
+    {{> tabular table=TabularTables.StoreItems class="table table-hover table-striped table-bordered table-condensed storeItemList"}}
+</template>

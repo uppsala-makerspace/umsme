@@ -3,6 +3,7 @@
  */
 
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
+import { StoreItems } from '/imports/common/collections/storeItems';
 
 // Re-export shared helpers for convenience
 export { clearTestData, createTestMember } from '../test-helpers';
@@ -34,4 +35,39 @@ export async function createInitiatedPayment(memberId, externalId, paymentType, 
     status: 'CREATED',
     createdAt: new Date(),
   });
+}
+
+/**
+ * Create an initiated webshop purchase for testing. `kind: 'storeItem'` is what
+ * sends the callback down the purchase branch instead of the membership one.
+ */
+export async function createInitiatedPurchase(memberId, externalId, item, { amount = 150, comment } = {}) {
+  return await initiatedPayments.insertAsync({
+    externalId,
+    member: memberId,
+    amount: String(amount),
+    status: 'CREATED',
+    createdAt: new Date(),
+    kind: 'storeItem',
+    storeItem: item._id,
+    itemCode: item.code,
+    ...(comment ? { comment } : {}),
+  });
+}
+
+/** Insert a store item, returning the doc so its _id and code are to hand. */
+export async function createTestStoreItem(overrides = {}) {
+  const doc = {
+    code: overrides.code || 'test',
+    name: { sv: 'Testvara' },
+    price: 150,
+    requiresMembership: false,
+    commentRequired: false,
+    bookkeepingAccount: '3030',
+    status: 'available',
+    createdAt: new Date(),
+    ...overrides,
+  };
+  const _id = await StoreItems.insertAsync(doc);
+  return { _id, ...doc };
 }

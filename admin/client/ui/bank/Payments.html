@@ -8,6 +8,12 @@
         <li class="{{#if isTab 'automatic'}}active{{/if}}">
             <a href="#" class="tab-automatic">Automatic</a>
         </li>
+        <li class="{{#if isTab 'memberships'}}active{{/if}}">
+            <a href="#" class="tab-memberships">Memberships</a>
+        </li>
+        <li class="{{#if isTab 'store'}}active{{/if}}">
+            <a href="#" class="tab-store">Purchases</a>
+        </li>
     </ul>
     <div style="margin-top: 15px;">
         {{#if isTab 'manual'}}
@@ -43,6 +49,18 @@
         {{#if isTab 'automatic'}}
         <h2>Automatic payments</h2>
         {{> tabular table=TabularTables.AutomaticPayments class="table table-hover table-striped table-bordered table-condensed paymentList"}}
+        {{/if}}
+
+        {{#if isTab 'memberships'}}
+        <h2>Membership payments</h2>
+        <p class="text-muted">Every payment that is not a webshop purchase — manual and automatic alike.</p>
+        {{> tabular table=TabularTables.MembershipPayments class="table table-hover table-striped table-bordered table-condensed paymentList"}}
+        {{/if}}
+
+        {{#if isTab 'store'}}
+        <h2>Webshop purchases</h2>
+        <p class="text-muted">Payments linked to a store item. The bookkeeping account comes from the item itself.</p>
+        {{> tabular table=TabularTables.StorePayments class="table table-hover table-striped table-bordered table-condensed paymentList"}}
         {{/if}}
     </div>
     {{/if}}

@@ -29,6 +29,7 @@ export const schemas = {
   expense: new SimpleSchema(models.expense),
   group: new SimpleSchema(models.group),
   workshop: new SimpleSchema(models.workshop),
+  storeItem: new SimpleSchema(models.storeItem),
   groupMembership: new SimpleSchema(models.groupMembership),
   space: new SimpleSchema(models.space),
 };

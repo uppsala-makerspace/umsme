@@ -70,6 +70,14 @@ Template.Payments.events({
     event.preventDefault();
     instance.state.set('activeTab', 'automatic');
   },
+  'click .tab-memberships'(event, instance) {
+    event.preventDefault();
+    instance.state.set('activeTab', 'memberships');
+  },
+  'click .tab-store'(event, instance) {
+    event.preventDefault();
+    instance.state.set('activeTab', 'store');
+  },
   'click .checkBank': function (event, instance) {
     check(instance.state);
   },

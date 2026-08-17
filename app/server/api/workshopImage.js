@@ -3,6 +3,7 @@ import {
   makeWorkshopImageHandler,
   makeGroupImageHandler,
   makeSpaceIconHandler,
+  makeStoreItemImageHandler,
 } from "/imports/common/server/workshopImage";
 
 // Serves workshop and group images (public, tokenless — see common/server/
@@ -11,3 +12,4 @@ import {
 WebApp.handlers.use("/api/workshops", makeWorkshopImageHandler());
 WebApp.handlers.use("/api/groups", makeGroupImageHandler());
 WebApp.handlers.use("/api/spaces", makeSpaceIconHandler());
+WebApp.handlers.use("/api/store-items", makeStoreItemImageHandler());

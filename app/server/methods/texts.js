@@ -13,6 +13,8 @@ import {
 const TERMS_DEFAULT_ASSET = {
   termsOfPurchaseMembershipEn: "termsOfPurchaseMembership.en.md",
   termsOfPurchaseMembershipSv: "termsOfPurchaseMembership.sv.md",
+  termsOfPurchaseStoreEn: "termsOfPurchaseStore.en.md",
+  termsOfPurchaseStoreSv: "termsOfPurchaseStore.sv.md",
 };
 
 Meteor.methods({
@@ -23,6 +25,18 @@ Meteor.methods({
    */
   async "texts.termsOfPurchaseMembership"(lang = "en") {
     const settingKey = lang === "sv" ? "termsOfPurchaseMembershipSv" : "termsOfPurchaseMembershipEn";
+    return await loadText(settingKey, TERMS_DEFAULT_ASSET[settingKey]);
+  },
+
+  /**
+   * Terms of purchase for webshop items. Separate from the membership terms:
+   * these cover goods sold to non-members, where the consumer right of
+   * withdrawal applies.
+   * @param {string} lang - Language code ('en' or 'sv')
+   * @returns {string} Markdown content
+   */
+  async "texts.termsOfPurchaseStore"(lang = "en") {
+    const settingKey = lang === "sv" ? "termsOfPurchaseStoreSv" : "termsOfPurchaseStoreEn";
     return await loadText(settingKey, TERMS_DEFAULT_ASSET[settingKey]);
   },
 
