@@ -121,7 +121,7 @@ ingen vara och hanteras som i dag.
 
 ### 4. Appen: mina köp och landningssidan
 
-- `store/purchases/` — "Mina köp": **alla** `Payments` för medlemmen, både
+- `purchases/` — "Mina köp": **alla** `Payments` för medlemmen, både
   varuköp och medlemsbetalningar. Ny metod `store.getMyPayments`.
 - Klick på ett varuköp → `/payment/:paymentId` (ny landningssida, förlaga
   `app/imports/pages/membershipDetail/`, metod `payment.getDetail`).

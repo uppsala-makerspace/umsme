@@ -141,7 +141,7 @@ const PAGE_TITLES = {
   "/tool": "toolsTitle",
   "/expenses": "expenses",
   "/store": "store",
-  "/store/purchases": "storeMyPurchases",
+  "/purchases": "storeMyPurchases",
   "/settings": "settings",
   "/messages": "messages",
   "/unlock": "navDoors",
@@ -159,11 +159,6 @@ const PAGE_TITLES = {
 // /membership/:membershipId below is not part of that flow — it is the finished
 // membership's own page, and the required parameter keeps it from matching the
 // bare /membership selection page.
-// Top-level pages that sit underneath a parameterised sibling and would
-// otherwise be swept up by it: /store/:code matches /store/purchases, which is
-// reached from the menu and is nobody's drill-down. Listed by exact path.
-const NO_BACK_ARROW = ["/store/purchases"];
-
 const DETAIL_PAGES = [
   { pattern: "/workshops/:workshopId/edit", fallback: "/workshops" },
   { pattern: "/workshops/:workshopId/rules", fallback: "/workshops" },
@@ -178,7 +173,7 @@ const DETAIL_PAGES = [
   { pattern: "/certifier-requests/:attestationId", fallback: "/certificates?tab=requests" },
   { pattern: "/store/:code", fallback: "/store" },
   { pattern: "/membership/:membershipId", fallback: "/account" },
-  { pattern: "/payment/:paymentId", fallback: "/store/purchases" },
+  { pattern: "/payment/:paymentId", fallback: "/purchases" },
   { pattern: "/expenses/new", fallback: "/expenses" },
   { pattern: "/expenses/:expenseId", fallback: "/expenses" },
   // An expense account belongs to one or more groups, so it has no single
@@ -218,9 +213,7 @@ export const TopBar = ({ showNotifications = true }) => {
   const showInstall = ["/", "/home", "/login", "/register"].includes(location.pathname);
   const isInstalledPWA = isPWA();
   const titleKey = PAGE_TITLES[location.pathname];
-  const detailPage = NO_BACK_ARROW.includes(location.pathname)
-    ? undefined
-    : DETAIL_PAGES.find((p) => matchPath(p.pattern, location.pathname));
+  const detailPage = DETAIL_PAGES.find((p) => matchPath(p.pattern, location.pathname));
 
   return (
     <header className="flex justify-between items-center pl-4 pr-2 sm:pr-4 py-2 bg-white border-b border-gray-200 min-h-[44px]">

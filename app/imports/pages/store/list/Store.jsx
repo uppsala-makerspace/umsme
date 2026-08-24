@@ -68,7 +68,7 @@ const Store = ({ loading, error, items }) => {
   return (
     <MainContent>
       <div className="mb-6">
-        <Button variant="secondary" fullWidth onClick={() => navigate("/store/purchases")}>
+        <Button variant="secondary" fullWidth onClick={() => navigate("/purchases")}>
           {t("storeMyPurchases")}
         </Button>
       </div>
