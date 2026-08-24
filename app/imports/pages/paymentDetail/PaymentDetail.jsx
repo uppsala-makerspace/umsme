@@ -45,21 +45,23 @@ const PaymentDetail = ({ loading, error, payment, item, memberName }) => {
         />
       )}
 
-      {/* Linked only while the item is still on sale: store.getItem serves
-          available items only, so a hidden one would land on "item not found". */}
-      <h2 className="text-2xl mb-1">
-        {item?.available ? (
+      <div className="mb-4">
+        <h2 className="text-2xl mb-1">{title}</h2>
+        <p className="text-sm text-gray-500 m-0">{t("storePurchase")}</p>
+
+        {/* A named link rather than a linked title: a title that only reveals
+            itself on hover is invisible on a phone. Shown only while the item is
+            still on sale, since store.getItem serves available items only and a
+            hidden one would land on "item not found". */}
+        {item?.available && (
           <Link
             to={`/store/${encodeURIComponent(item.code)}`}
-            className="text-inherit no-underline hover:underline"
+            className="text-sm text-brand-green inline-block mt-1"
           >
-            {title}
+            {t("storeGoToItem")} &rarr;
           </Link>
-        ) : (
-          title
         )}
-      </h2>
-      <p className="text-sm text-gray-500 mt-0 mb-4">{t("storePurchase")}</p>
+      </div>
 
       <div className="flex flex-col gap-2 text-sm text-gray-700">
         <div>
