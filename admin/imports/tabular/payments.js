@@ -12,10 +12,23 @@ const appendColumns = [{
     // A webshop purchase is recognised by its linked item, never by the ws:
     // prefix in the message (Swish truncates at 50 characters, and a manual
     // payer writes their own message).
-    const label = doc.storeItem
-      ? `Purchase${doc.itemCode ? `: ${doc.itemCode}` : ''}`
-      : 'Membership';
-    const cls = doc.storeItem ? 'info' : 'default';
+    //
+    // The other two are told apart the same way the Memberships tab selects: a
+    // linked membership is what proves a payment was for membership. Without one
+    // it is either marked `other` (clay and the like, from before the webshop) or
+    // simply not treated yet — calling either "Membership" would be a guess.
+    let label = 'Unclassified';
+    let cls = 'default';
+    if (doc.storeItem) {
+      label = `Purchase${doc.itemCode ? `: ${doc.itemCode}` : ''}`;
+      cls = 'info';
+    } else if (doc.other) {
+      label = 'Other';
+      cls = 'warning';
+    } else if (doc.membership) {
+      label = 'Membership';
+      cls = 'primary';
+    }
     return new Spacebars.SafeString(`<span class="label label-${cls}">${label}</span>`);
   }
 }, {
@@ -101,6 +114,16 @@ new Tabular.Table({
   name: "MembershipPayments",
   columns: extractor(models.payment, { filter: filteredFields, append: appendColumns, enhance: enhanceColumns }),
   changeSelector(selector) {
-    return { ...selector, storeItem: { $exists: false } };
+    // A linked membership is the proof, and it subsumes the exclusions one might
+    // reach for: an `other` payment never gets a membership link, and a webshop
+    // purchase gets none either (processStorePurchase creates no membership). So
+    // no conditions on `other` or `storeItem` — adding them would only suggest
+    // they were needed.
+    //
+    // This deliberately leaves out payments that are certainly for membership but
+    // whose membership could not be created (processPayment returned an error, so
+    // `paymentError` is set on the member). Those need attention rather than
+    // filing, and they remain visible under Automatic, flagged Untreated.
+    return { ...selector, membership: { $exists: true } };
   }
 });
