@@ -6,6 +6,7 @@ import {
   DocumentTextIcon,
   BookOpenIcon,
   UserGroupIcon,
+  ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 import Button from "../../components/Button";
 import InfoCard from "../../components/InfoCard";
@@ -128,6 +129,7 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
           title={t("expenses")}
           disabled={!expensesAllowed}
         />
+        <InfoCard to="/store" Icon={ShoppingBagIcon} title={t("store")} />
         <InfoCard
           href="https://tutorial.uppsalamakerspace.se"
           Icon={BookOpenIcon}
