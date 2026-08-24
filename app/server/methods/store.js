@@ -202,8 +202,16 @@ Meteor.methods({
         comment: payment.comment || null,
         itemCode: payment.itemCode || null,
       },
+      // `available` decides whether the receipt links to the item's page:
+      // store.getItem only serves available items, so linking to a hidden one
+      // would land the buyer on "item not found".
       item: item
-        ? { code: item.code, name: item.name, imageUrl: storeItemImageUrlFor(item) }
+        ? {
+            code: item.code,
+            name: item.name,
+            imageUrl: storeItemImageUrlFor(item),
+            available: item.status === "available",
+          }
         : null,
       memberName: member.name,
     };

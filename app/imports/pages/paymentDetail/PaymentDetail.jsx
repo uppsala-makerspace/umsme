@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
@@ -44,7 +45,20 @@ const PaymentDetail = ({ loading, error, payment, item, memberName }) => {
         />
       )}
 
-      <h2 className="text-2xl mb-1">{title}</h2>
+      {/* Linked only while the item is still on sale: store.getItem serves
+          available items only, so a hidden one would land on "item not found". */}
+      <h2 className="text-2xl mb-1">
+        {item?.available ? (
+          <Link
+            to={`/store/${encodeURIComponent(item.code)}`}
+            className="text-inherit no-underline hover:underline"
+          >
+            {title}
+          </Link>
+        ) : (
+          title
+        )}
+      </h2>
       <p className="text-sm text-gray-500 mt-0 mb-4">{t("storePurchase")}</p>
 
       <div className="flex flex-col gap-2 text-sm text-gray-700">

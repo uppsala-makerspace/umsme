@@ -18,6 +18,7 @@ export const Course = {
       code: "kurs",
       name: { sv: "Lördagskurs: svarvning", en: "Saturday course: turning" },
       imageUrl: "https://placehold.co/600x300?text=Kurs",
+      available: true,
     },
     memberName: "Anna Andersson",
   },
@@ -28,12 +29,28 @@ export const Plain = {
   args: {
     loading: false,
     payment: { _id: "p2", amount: 85, date: new Date("2026-08-01"), type: "swish", comment: null, itemCode: "lera" },
-    item: { code: "lera", name: { sv: "Lera, per kilo" }, imageUrl: null },
+    item: { code: "lera", name: { sv: "Lera, per kilo" }, imageUrl: null, available: true },
     memberName: "Anna Andersson",
   },
 };
 
-// The item was hidden and later deleted: the payment still has to render.
+// Hidden since the purchase: the title stays but stops being a link, because
+// store.getItem serves available items only.
+export const ItemHidden = {
+  args: {
+    loading: false,
+    payment: { _id: "p4", amount: 300, date: new Date("2026-03-03"), type: "swish", comment: null, itemCode: "kurs" },
+    item: {
+      code: "kurs",
+      name: { sv: "Lördagskurs: svarvning" },
+      imageUrl: null,
+      available: false,
+    },
+    memberName: "Anna Andersson",
+  },
+};
+
+// The item was deleted outright: the payment still has to render.
 export const ItemGone = {
   args: {
     loading: false,
