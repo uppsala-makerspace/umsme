@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
@@ -69,12 +68,6 @@ const PaymentDetail = ({ loading, error, payment, item, memberName }) => {
           </div>
         )}
       </div>
-
-      <p className="mt-6">
-        <Link to="/store/purchases" className="text-brand-green no-underline hover:underline">
-          {t("storeMyPurchases")} &rarr;
-        </Link>
-      </p>
     </MainContent>
   );
 };

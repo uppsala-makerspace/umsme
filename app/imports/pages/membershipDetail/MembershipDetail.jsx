@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import MainContent from "/imports/components/MainContent";
 import PaymentInfo from "/imports/components/PaymentInfo/PaymentInfo";
 
@@ -41,10 +40,6 @@ const MembershipDetail = ({ membership, payment, initiatedPayment }) => {
   return (
     <MainContent>
       <div className="flex flex-col gap-4">
-        <Link to="/account" className="text-sm text-gray-600 no-underline hover:text-gray-800">
-          &larr; {t("back")}
-        </Link>
-
         <div className="flex flex-col gap-2">
           <div className="border-b-2 border-gray-600">
             <span className="text-gray-600">{t("membershipDetails")}</span>

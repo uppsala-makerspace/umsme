@@ -155,7 +155,15 @@ const PAGE_TITLES = {
 // reached from several places — and falls back to the listed route when the
 // page was opened directly; the route may carry a query string. The payment flow
 // (/membership, /paymentSelection, /initiatedPayment) deliberately has no
-// arrow: mid-flow back navigation is handled by the flow itself.
+// arrow: mid-flow back navigation is handled by the flow itself. Note that
+// /membership/:membershipId below is not part of that flow — it is the finished
+// membership's own page, and the required parameter keeps it from matching the
+// bare /membership selection page.
+// Top-level pages that sit underneath a parameterised sibling and would
+// otherwise be swept up by it: /store/:code matches /store/purchases, which is
+// reached from the menu and is nobody's drill-down. Listed by exact path.
+const NO_BACK_ARROW = ["/store/purchases"];
+
 const DETAIL_PAGES = [
   { pattern: "/workshops/:workshopId/edit", fallback: "/workshops" },
   { pattern: "/workshops/:workshopId/rules", fallback: "/workshops" },
@@ -168,8 +176,8 @@ const DETAIL_PAGES = [
   // Deep-linked (e.g. from a notification), so there is nothing to go back to:
   // name the tab in the fallback, since the request came from that one.
   { pattern: "/certifier-requests/:attestationId", fallback: "/certificates?tab=requests" },
-  { pattern: "/store/purchases", fallback: "/store" },
   { pattern: "/store/:code", fallback: "/store" },
+  { pattern: "/membership/:membershipId", fallback: "/account" },
   { pattern: "/payment/:paymentId", fallback: "/store/purchases" },
   { pattern: "/expenses/new", fallback: "/expenses" },
   { pattern: "/expenses/:expenseId", fallback: "/expenses" },
@@ -210,7 +218,9 @@ export const TopBar = ({ showNotifications = true }) => {
   const showInstall = ["/", "/home", "/login", "/register"].includes(location.pathname);
   const isInstalledPWA = isPWA();
   const titleKey = PAGE_TITLES[location.pathname];
-  const detailPage = DETAIL_PAGES.find((p) => matchPath(p.pattern, location.pathname));
+  const detailPage = NO_BACK_ARROW.includes(location.pathname)
+    ? undefined
+    : DETAIL_PAGES.find((p) => matchPath(p.pattern, location.pathname));
 
   return (
     <header className="flex justify-between items-center pl-4 pr-2 sm:pr-4 py-2 bg-white border-b border-gray-200 min-h-[44px]">
