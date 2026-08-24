@@ -3,6 +3,7 @@ import { Payments } from '/imports/common/collections/payments';
 import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
+import { StoreItems } from '/imports/common/collections/storeItems';
 import './PaymentView.html';
 import '../comment/CommentList';
 
@@ -11,6 +12,7 @@ Template.PaymentView.onCreated(function() {
   Meteor.subscribe('members');
   Meteor.subscribe('memberships');
   Meteor.subscribe('initiatedPayments');
+  Meteor.subscribe('storeItems');
 });
 
 Template.PaymentView.helpers({
@@ -29,7 +31,12 @@ Template.PaymentView.helpers({
     let label = 'Untreated';
     let cls = 'danger';
     if (payment) {
-      if (payment.membership) {
+      // Same order as the Kind column in imports/tabular/payments.js: a purchase
+      // needs no filing, so it must not sit red as "Untreated" for ever.
+      if (payment.storeItem) {
+        label = 'Purchase';
+        cls = 'success';
+      } else if (payment.membership) {
         label = 'Treated';
         cls = 'success';
       } else if (payment.other) {
@@ -48,6 +55,18 @@ Template.PaymentView.helpers({
     if (payment) {
       return Members.findOne(payment.member);
     }
+  },
+  // A webshop purchase, recognised by its linked item. Such a payment is already
+  // classified and already belongs to the buyer, so the controls for filing it
+  // by hand — connecting a membership, disconnecting the member, flagging it
+  // `other` — have nothing to do here.
+  isPurchase() {
+    const payment = Payments.findOne(FlowRouter.getParam('_id'));
+    return !!payment?.storeItem;
+  },
+  storeItem() {
+    const payment = Payments.findOne(FlowRouter.getParam('_id'));
+    return payment?.storeItem ? StoreItems.findOne(payment.storeItem) : undefined;
   },
   Memberships() {
     return Memberships;

@@ -8,17 +8,28 @@
     {{> quickForm collection=initiatedPayments doc=initiatedPayment id="initiatedPaymentForm" omitFields="_id,member" type="readonly"}}
     {{/if}}
 
-    {{#if payment.other}}
-    Not a membership payment <button class="btn btn-primary membershipPayment">switch</button>
+    {{#if isPurchase}}
+        <h2>Webshop purchase{{#if storeItem}}:
+            <strong><a href="/storeitem/{{storeItem._id}}">{{storeItem.name.sv}}</a></strong>{{/if}}</h2>
+        <p class="text-muted">Classified by the item it paid for, so there is nothing to file by
+            hand here — no membership to connect, and the buyer is already known.</p>
     {{/if}}
-    {{#unless payment.other}}
-        Membership payment <button class="btn btn-primary notAMembershipPayment">switch</button>
+
+    {{#unless isPurchase}}
+        {{#if payment.other}}
+        Not a membership payment <button class="btn btn-primary membershipPayment">switch</button>
+        {{/if}}
+        {{#unless payment.other}}
+            Membership payment <button class="btn btn-primary notAMembershipPayment">switch</button>
+        {{/unless}}
     {{/unless}}
 
     {{#if member}}
         <h2>Connected to member:
-        <strong><a href="/member/{{member._id}}">{{member.name}}</a></strong> <small><a class="removeMemberFromPayment">Disconnect member</a></small></h2>
+        <strong><a href="/member/{{member._id}}">{{member.name}}</a></strong>
+        {{#unless isPurchase}}<small><a class="removeMemberFromPayment">Disconnect member</a></small>{{/unless}}</h2>
 
+        {{#unless isPurchase}}
         {{#unless payment.other}}
             {{#if membership}}
                 <h2><strong><a href="/membership/{{membership._id}}">Connected membership</a></strong> <small><a class="removePaymentFromMembership">Disconnect</a></small></h2>
@@ -30,6 +41,7 @@
                     {{> tabular table=TabularTables.Memberships selector=membershipSelector class="table table-hover table-striped table-bordered table-condensed membershipList"}}
                 </div>
             {{/unless}}
+        {{/unless}}
         {{/unless}}
     {{/if}}
     {{#unless member}}
