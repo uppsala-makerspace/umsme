@@ -49,6 +49,7 @@ export const Default = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "granted",
     userPosition: userNearby,
     proximityRange: 100,
@@ -64,6 +65,7 @@ export const InRange = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "granted",
     userPosition: userNearby,
     proximityRange: 100,
@@ -79,6 +81,7 @@ export const OutOfRange = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "granted",
     userPosition: userFarAway,
     proximityRange: 100,
@@ -94,6 +97,7 @@ export const LocationDeniedBrowser = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "denied",
     userPosition: null,
     proximityRange: 100,
@@ -110,6 +114,7 @@ export const LocationDeniedPWA = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "denied",
     userPosition: null,
     proximityRange: 100,
@@ -126,6 +131,7 @@ export const AdminBypass = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "granted",
     userPosition: userFarAway,
     proximityRange: 100,
@@ -145,6 +151,7 @@ export const OuterDoorOpening = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "granted",
     userPosition: userNearby,
     proximityRange: 100,
@@ -162,6 +169,7 @@ export const SingleDoor = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "granted",
     userPosition: userNearby,
     proximityRange: 100,
@@ -177,6 +185,7 @@ export const NoDoors = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "granted",
     userPosition: userNearby,
     proximityRange: 100,
@@ -192,6 +201,7 @@ export const LiabilityNotApproved = {
 
     liabilityDate: null,
     liabilityOutdated: false,
+    registered: true,
     locationPermission: "granted",
     userPosition: userNearby,
     proximityRange: 100,
@@ -222,11 +232,54 @@ export const MemberIntroductionMissing = {
 
     liabilityDate,
     liabilityOutdated: false,
+    registered: true,
     mandatoryCertificate: { _id: "abc123", name: { en: "Member Introduction", sv: "Medlemsintroduktion" } },
     hasMandatoryCertificate: false,
     locationPermission: "granted",
     userPosition: userNearby,
     proximityRange: 100,
     isAdmin: false,
+  },
+};
+
+// === LOCATION PROBLEMS ===
+// The four states where the troubleshooting guide appears. Everything above
+// this point that blocks the door — liability, certificate, suspension, not
+// registered — returns before the door list and must stay guide-free.
+
+// Permission was never answered, or the fix timed out: watchPosition leaves the
+// state at "pending" with no position, which showed nothing at all before.
+export const LocationPending = {
+  args: {
+    doors: doorsWithLocation,
+    opening: defaultOpening,
+    onOpenDoor: () => {},
+    liabilityDate,
+    registered: true,
+    locationPermission: "pending",
+    userPosition: null,
+    proximityRange: 100,
+    isAdmin: false,
+  },
+};
+
+export const LocationTimedOut = {
+  args: {
+    ...LocationPending.args,
+    locationError: "timeout",
+  },
+};
+
+export const LocationRetrying = {
+  args: {
+    ...LocationPending.args,
+    locating: true,
+  },
+};
+
+export const LocationUnavailable = {
+  args: {
+    ...LocationPending.args,
+    locationPermission: "unavailable",
   },
 };

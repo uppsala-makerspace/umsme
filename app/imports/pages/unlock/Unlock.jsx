@@ -2,10 +2,16 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { getDistanceTo, formatDistance } from "/imports/utils/location";
+import {
+  getDistanceTo,
+  formatDistance,
+  isWithinRange,
+  locationProblemFor,
+} from "/imports/utils/location";
 import Button from "../../components/Button";
 import Loader from "../../components/Loader";
 import MainContent from "../../components/MainContent";
+import LocationHelp from "./LocationHelp";
 import "./unlockDoors.css";
 
 const Unlock = ({
@@ -24,6 +30,9 @@ const Unlock = ({
   proximityRange,
   isAdmin,
   isPWAOverride,
+  locationError,
+  locating,
+  onRetryLocation,
 }) => {
   const { t } = useTranslation();
 
@@ -100,9 +109,18 @@ const Unlock = ({
     if (!door.location) return true; // No location configured, allow
     if (!userPosition) return false; // No user position yet
 
-    const distance = getDistanceTo(userPosition, door.location);
-    return distance !== null && distance <= proximityRange;
+    return isWithinRange(userPosition, door.location, proximityRange);
   };
+
+  // Why a door stays grey, when the reason is the member's location rather than
+  // their membership. Null for everything else, and the guide below stays away.
+  const locationProblem = locationProblemFor({
+    doors,
+    userPosition,
+    locationPermission,
+    proximityRange,
+    isAdmin,
+  });
 
   // Helper to get distance to a door
   const getDistance = (door) => {
@@ -146,6 +164,16 @@ const Unlock = ({
           </React.Fragment>
         );
       })}
+
+      {locationProblem && (
+        <LocationHelp
+          reason={locationProblem.reason}
+          distance={locationProblem.distance}
+          locationError={locationError}
+          locating={locating}
+          onRetry={onRetryLocation}
+        />
+      )}
     </MainContent>
   );
 };
@@ -174,6 +202,9 @@ Unlock.propTypes = {
   isAdmin: PropTypes.bool,
   isPWAOverride: PropTypes.bool,
   loading: PropTypes.bool,
+  locationError: PropTypes.oneOf(["timeout", "unavailable"]),
+  locating: PropTypes.bool,
+  onRetryLocation: PropTypes.func,
 };
 
 Unlock.defaultProps = {
@@ -183,6 +214,9 @@ Unlock.defaultProps = {
   isAdmin: false,
   isPWAOverride: undefined,
   loading: false,
+  locationError: null,
+  locating: false,
+  onRetryLocation: () => {},
 };
 
 export default Unlock;

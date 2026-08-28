@@ -3,6 +3,9 @@ import React, { createContext, useState, useEffect, useRef } from "react";
 export const LocationContext = createContext({
   userPosition: null,
   locationPermission: "pending",
+  locationError: null,
+  locating: false,
+  retryLocation: () => {},
 });
 
 const WATCH_OPTIONS = {
@@ -11,9 +14,23 @@ const WATCH_OPTIONS = {
   maximumAge: 5000,
 };
 
+// A retry asks for a fresh fix rather than whatever the watch last managed:
+// maximumAge 0 rules out the cached position that keeps a stuck watch looking
+// alive, and the longer timeout gives a cold GPS a real chance.
+const RETRY_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout: 20000,
+  maximumAge: 0,
+};
+
 export const LocationProvider = ({ children }) => {
   const [userPosition, setUserPosition] = useState(null);
   const [locationPermission, setLocationPermission] = useState("pending");
+  // Why no position arrived, when the reason is not a denial: a timed-out or
+  // unavailable fix leaves locationPermission at "pending" forever, which on its
+  // own tells the door view nothing it can explain to the member.
+  const [locationError, setLocationError] = useState(null);
+  const [locating, setLocating] = useState(false);
   const watchIdRef = useRef(null);
 
   function startWatching() {
@@ -27,12 +44,20 @@ export const LocationProvider = ({ children }) => {
           long: position.coords.longitude,
         });
         setLocationPermission((prev) => prev !== "granted" ? "granted" : prev);
+        setLocationError(null);
+        setLocating(false);
       },
       (error) => {
         console.error("Geolocation error:", error);
+        setLocating(false);
         if (error.code === error.PERMISSION_DENIED) {
           setLocationPermission("denied");
+          setLocationError(null);
           stopWatching();
+        } else if (error.code === error.TIMEOUT) {
+          setLocationError("timeout");
+        } else {
+          setLocationError("unavailable");
         }
       },
       WATCH_OPTIONS
@@ -44,6 +69,40 @@ export const LocationProvider = ({ children }) => {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+  }
+
+  // Restart the watch and ask for one fresh fix. Offered from the door view's
+  // troubleshooting guide, since the watch is otherwise started once on mount
+  // and never again — a member whose first attempt timed out had no way back.
+  function retryLocation() {
+    if (!navigator.geolocation) {
+      setLocationPermission("unavailable");
+      return;
+    }
+    setLocating(true);
+    setLocationError(null);
+    stopWatching();
+    startWatching();
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserPosition({
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
+        setLocationPermission("granted");
+        setLocationError(null);
+        setLocating(false);
+      },
+      (error) => {
+        setLocating(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationPermission("denied");
+        } else {
+          setLocationError(error.code === error.TIMEOUT ? "timeout" : "unavailable");
+        }
+      },
+      RETRY_OPTIONS
+    );
   }
 
   useEffect(() => {
@@ -91,7 +150,9 @@ export const LocationProvider = ({ children }) => {
   }, []);
 
   return (
-    <LocationContext.Provider value={{ userPosition, locationPermission }}>
+    <LocationContext.Provider
+      value={{ userPosition, locationPermission, locationError, locating, retryLocation }}
+    >
       {children}
     </LocationContext.Provider>
   );

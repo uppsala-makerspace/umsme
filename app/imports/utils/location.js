@@ -75,3 +75,55 @@ export function getDistanceTo(userPosition, targetLocation) {
     targetLocation.long
   );
 }
+
+/**
+ * Why the door view cannot let a member unlock, when the reason is their
+ * location. Returns null when location is not what stands in the way — the view
+ * uses that to decide whether to offer its troubleshooting guide at all, so a
+ * member blocked by an unpaid membership or an unapproved liability keeps seeing
+ * exactly what they saw before.
+ *
+ * "outOfRange" carries the distance to the nearest door with a location, since
+ * an indoor GPS fix can be off by hundreds of metres and the number is the
+ * whole explanation.
+ *
+ * @param {object} args
+ * @param {Array<{location?: {lat: number, long: number}}>} args.doors
+ * @param {object|null} args.userPosition - { lat, long }
+ * @param {string} args.locationPermission - pending | granted | denied | unavailable
+ * @param {number} args.proximityRange - metres
+ * @param {boolean} args.isAdmin
+ * @returns {{reason: string, distance: number|null}|null}
+ */
+export function locationProblemFor({
+  doors = [],
+  userPosition = null,
+  locationPermission = "pending",
+  proximityRange = 100,
+  isAdmin = false,
+}) {
+  // Admins unlock regardless of where they are, so location is never their problem.
+  if (isAdmin) return null;
+  if (locationPermission === "denied") return { reason: "denied", distance: null };
+  if (locationPermission === "unavailable") return { reason: "unavailable", distance: null };
+
+  // Doors without a location are openable from anywhere; they cannot be the
+  // reason for a complaint about distance.
+  const placed = doors.filter((door) => door.location);
+  if (placed.length === 0) return null;
+
+  if (!userPosition) return { reason: "noPosition", distance: null };
+
+  const distances = placed
+    .map((door) => getDistanceTo(userPosition, door.location))
+    .filter((d) => d !== null);
+  const anyInRange = placed.some((door) =>
+    isWithinRange(userPosition, door.location, proximityRange),
+  );
+  if (anyInRange) return null;
+
+  return {
+    reason: "outOfRange",
+    distance: distances.length ? Math.min(...distances) : null,
+  };
+}

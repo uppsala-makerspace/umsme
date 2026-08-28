@@ -10,7 +10,8 @@ import { AppDataContext } from "/imports/context/AppDataContext";
 
 export default () => {
   const userId = useTracker(() => Meteor.userId());
-  const { userPosition, locationPermission } = useContext(LocationContext);
+  const { userPosition, locationPermission, locationError, locating, retryLocation } =
+    useContext(LocationContext);
   const { memberInfo, loading: memberInfoLoading } = useContext(MemberInfoContext);
   const { doors: doorsData, isAdmin, mandatoryCertStatus, loading: appDataLoading } = useContext(AppDataContext);
   const [opening, setOpening] = useState({});
@@ -70,6 +71,9 @@ export default () => {
         excluded={!!memberInfo?.member?.excluded}
         userPosition={userPosition}
         locationPermission={locationPermission}
+        locationError={locationError}
+        locating={locating}
+        onRetryLocation={retryLocation}
         proximityRange={proximityRange}
         isAdmin={isAdmin}
       />
