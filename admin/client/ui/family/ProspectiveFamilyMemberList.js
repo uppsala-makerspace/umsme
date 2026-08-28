@@ -10,7 +10,15 @@ Template.ProspectiveFamilyMemberList.onCreated(function() {
 
 Template.ProspectiveFamilyMemberList.helpers({
   selector() {
-    return {$and: [{infamily: {$exists: false}}, {family: {$eq: false}}]};
+    // The patron is excluded explicitly: with family:false they match the rest
+    // of this selector, so they would be offered as a candidate for their own
+    // family — and one click makes them their own family member, which hides
+    // their memberships in both apps.
+    return {$and: [
+      {_id: {$ne: FlowRouter.getParam('_id')}},
+      {infamily: {$exists: false}},
+      {family: {$eq: false}},
+    ]};
   },
   id() {
     return FlowRouter.getParam('_id');
@@ -28,6 +36,7 @@ Template.ProspectiveFamilyMemberList.events({
     var rowData = dataTable.row(event.currentTarget).data();
     if (!rowData) return; // Won't be data if a placeholder row is clicked
     const memberId = rowData._id;
+    if (memberId === patronId) return; // never join your own family
 
     // Update the member to add it to the patrons family
     Members.update(memberId, {$set: {infamily: patronId}});

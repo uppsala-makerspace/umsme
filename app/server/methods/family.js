@@ -25,6 +25,17 @@ Meteor.methods({
       );
     }
 
+    // Inviting yourself would make you a member of your own family: accepting
+    // sets infamily to your own _id, which hides your memberships everywhere
+    // and stops the family cascade from reaching your dependents. Compared
+    // case-insensitively — member emails are stored lowercased, invites are not.
+    if (String(email).toLowerCase() === String(member.email).toLowerCase()) {
+      throw new Meteor.Error(
+        "self-invite",
+        "You cannot invite yourself to your own family"
+      );
+    }
+
     const existing = await Invites.findOneAsync({ email });
     if (existing) {
       throw new Meteor.Error(
@@ -127,6 +138,13 @@ Meteor.methods({
       throw new Meteor.Error(
         "no-invite",
         "No invite exists for this member"
+      );
+    } else if (invite.infamily === member._id) {
+      // A self-invite from before inviteFamilyMember refused them. Left in
+      // place so the member can clear it with Decline, which removes it.
+      throw new Meteor.Error(
+        "self-invite",
+        "You cannot join your own family"
       );
     } else {
       await Members.updateAsync(member._id, {$set: {infamily: invite.infamily}});

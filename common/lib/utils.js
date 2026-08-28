@@ -1,5 +1,6 @@
 import { Members } from '/imports/common/collections/members.js';
 import { Memberships } from '/imports/common/collections/memberships.js';
+import { familyFromMemberships } from '/imports/common/lib/familyRules.js';
 import {
   MEMBERSHIP_RENEWAL_WINDOW_DAYS,
   FIRST_TIME_MEMBER_GRACE_DAYS,
@@ -33,14 +34,12 @@ export const memberStatus = async (mb) => {
   let memberStart;
   let lab;
   let labStart;
-  let family = false;
   const now = new Date();
   let discounted = false;
   const updateMemberDate = (ms) => {
     if (!member || ms.memberend > member) {
       member = ms.memberend;
       memberStart = ms.start;
-      family = ms.family;
       if (ms.memberend > now) {
         discounted = !!ms.discount;
       }
@@ -57,7 +56,11 @@ export const memberStatus = async (mb) => {
       }
     }
   };
+  // Collected rather than streamed: the family flag is decided across all of
+  // the member's memberships at once, not per document (see familyFromMemberships).
+  const own = [];
   await Memberships.find({mid}).forEachAsync((ms) => {
+    own.push(ms);
     switch (ms.type) {
       case 'member':
         updateMemberDate(ms);
@@ -75,6 +78,7 @@ export const memberStatus = async (mb) => {
         break;
     }
   });
+  const family = familyFromMemberships(own);
   let type = 'none';
   if (member > now && lab > now) {
     type = 'labandmember';
