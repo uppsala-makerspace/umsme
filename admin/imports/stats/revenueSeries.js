@@ -310,6 +310,10 @@ export const backtest = (monthly, year) => {
   return {
     year,
     madeAt: fit.lastMonth,
+    // The growth the line had at the time, so the table can show how the
+    // estimated growth rate has itself moved over the years.
+    slope: fit.slope,
+    level: fit.level,
     trend: projectWholeYear(fit, year, true),
     flat: projectWholeYear(fit, year, false),
   };

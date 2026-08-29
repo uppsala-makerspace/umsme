@@ -444,6 +444,14 @@ describe('Revenue statistics', function () {
       assert.ok(back.trend > back.flat, 'a rising series must forecast above its own level');
     });
 
+    it('reports the growth the line had at the time', function () {
+      // The run rate climbs by 120 kr a month (each month 10 kr above the last),
+      // which is what the table's own column shows.
+      const monthly = series(48, (i) => 1000 + 10 * i);
+      assert.ok(Math.abs(backtest(monthly, 2023).slope - 120) < 1e-6);
+      assert.ok(Math.abs(backtest(series(48, () => 1000), 2023).slope) < 1e-6);
+    });
+
     it('declines to forecast without a full twelve-point window', function () {
       // Rolling sums only start at the twelfth month, so a fit needs 23 months
       // of history before the year it predicts.

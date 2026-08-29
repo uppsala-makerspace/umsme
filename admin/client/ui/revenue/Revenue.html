@@ -108,6 +108,7 @@
             <th>Year</th>
             <th>Forecast from</th>
             <th class="revenue-number">Actual</th>
+            <th class="revenue-number">Trend per month</th>
             <th class="revenue-number">Trend continues</th>
             <th class="revenue-number">Level holds</th>
         </tr>
@@ -120,6 +121,9 @@
                 <td class="revenue-number">
                     {{#if hasActual}}{{kr actual}}{{#if partial}} <span class="revenue-partial">so far</span>{{/if}}{{else}}—{{/if}}
                 </td>
+                <td class="revenue-number">
+                    {{#if hasForecast}}{{signedKr slope}}{{else}}—{{/if}}
+                </td>
                 <td class="revenue-number revenue-total">
                     {{#if hasForecast}}{{kr trend}}{{#if trendMiss}} <span class="revenue-miss">{{trendMiss}}</span>{{/if}}{{else}}—{{/if}}
                 </td>
@@ -131,7 +135,9 @@
         </tbody>
     </table>
     <p class="revenue-caption">
-        A finished year is forecast from the end of the year before, so the model
+        <strong>Trend per month</strong> is the growth the fitted line had at the
+        time: how much the annual rate was climbing each month. A finished year is
+        forecast from the end of the year before, so the model
         never sees the year it is predicting. On this data both variants have come
         out consistently low — revenue has been compounding rather than climbing by
         a fixed amount, which a straight line cannot follow. Read the two forward
