@@ -8,6 +8,7 @@ import {
   yearOverYear,
   linearFit,
   forecast,
+  backtest,
   excludedSummary,
 } from '/imports/stats/revenueSeries';
 
@@ -409,6 +410,58 @@ describe('Revenue statistics', function () {
       const f = forecast({ monthly: flatHistory(5, 1000), today: d('2023-06-10') });
       assert.strictEqual(f.level, 0);
       assert.deepStrictEqual(f.years, []);
+    });
+  });
+
+  describe('backtest', function () {
+    /** `n` months from 2020-01, each worth `amount(i)`. */
+    const series = (n, amount) =>
+      Array.from({ length: n }, (_, i) => ({
+        month: `${2020 + Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, '0')}`,
+        total: amount(i),
+        byCategory: {},
+      }));
+
+    it('never sees the year it predicts', function () {
+      // Flat through 2022, then revenue doubles in 2023. A forecast made at the
+      // end of 2022 must not know about the jump.
+      const monthly = series(48, (i) => (i < 36 ? 1000 : 2000));
+      const back = backtest(monthly, 2023);
+      assert.strictEqual(back.madeAt, '2022-12');
+      assert.ok(Math.abs(back.flat - 12000) < 1e-6, `flat was ${back.flat}`);
+    });
+
+    it('projects a whole year, with no actuals mixed in', function () {
+      const monthly = series(48, () => 1000);
+      const back = backtest(monthly, 2023);
+      assert.ok(Math.abs(back.trend - 12000) < 1e-6);
+      assert.ok(Math.abs(back.flat - 12000) < 1e-6);
+    });
+
+    it('carries a rising run rate into the forecast year', function () {
+      const monthly = series(48, (i) => 1000 + 10 * i);
+      const back = backtest(monthly, 2023);
+      assert.ok(back.trend > back.flat, 'a rising series must forecast above its own level');
+    });
+
+    it('declines to forecast without a full twelve-point window', function () {
+      // Rolling sums only start at the twelfth month, so a fit needs 23 months
+      // of history before the year it predicts.
+      assert.strictEqual(backtest(series(22, () => 1000), 2022), null);
+      assert.ok(backtest(series(36, () => 1000), 2023) !== null);
+    });
+
+    it('uses the same arithmetic as the live forecast', function () {
+      // A backtest of different arithmetic would grade the wrong model. Fitting
+      // through the end of the series must match forecast()'s own numbers.
+      const monthly = series(36, (i) => 1000 + 10 * i);
+      const live = forecast({ monthly, today: new Date('2023-01-15') });
+      const back = backtest(monthly, 2023);
+      const liveNext = live.years.find((y) => y.year === 2024);
+      const backNext = backtest(monthly, 2024);
+      assert.ok(Math.abs(liveNext.trend.total - backNext.trend) < 1e-6);
+      assert.ok(Math.abs(liveNext.flat.total - backNext.flat) < 1e-6);
+      assert.ok(back.trend > 0);
     });
   });
 

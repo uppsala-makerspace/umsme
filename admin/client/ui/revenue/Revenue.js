@@ -8,6 +8,7 @@ import {
   CATEGORY_LABELS,
   monthlySeries,
   yearlyGrowth,
+  backtest,
   rollingTwelve,
   yearOverYear,
   forecast,
@@ -245,15 +246,64 @@ Template.Revenue.helpers({
       .map((r) => ({ ...r, hasPrevious: r.previousYear !== null, hasPercent: r.percent !== null }));
   },
 
+  /**
+   * Every year the records touch plus the next one, newest first: what was
+   * forecast, and what actually happened.
+   *
+   * A finished year is forecast from the end of the year before, so the model
+   * never sees the year it predicts — otherwise "how good has the forecast
+   * been" answers itself. The two years ahead use everything known today, which
+   * is the forecast that is actually of use going forward.
+   */
   forecastRows() {
     const model = Template.instance().model.get();
     if (!model) return [];
-    return model.forecast.years.map((y) => ({
-      year: y.year,
-      actual: y.trend.actual,
-      trend: y.trend.total,
-      flat: y.flat.total,
-    }));
+    const live = model.forecast;
+    const actuals = Object.fromEntries(model.yearly.map((y) => [y.year, y]));
+    const years = model.yearly.map((y) => y.year);
+    const all = [...new Set([...years, ...live.years.map((y) => y.year)])].sort((a, b) => b - a);
+
+    // How far the forecast sat from what happened, named in the direction that
+    // reads without effort: "25% low" rather than a bare signed number.
+    const miss = (forecast, actual) => {
+      if (!actual || !forecast) return '';
+      const off = Math.round(Math.abs((forecast - actual) / actual) * 100);
+      if (off === 0) return 'spot on';
+      return `${off}% ${forecast < actual ? 'low' : 'high'}`;
+    };
+
+    return all.map((year) => {
+      const row = actuals[year];
+      const liveRow = live.years.find((y) => y.year === year);
+      const partial = !!row && row.partial;
+      if (liveRow) {
+        return {
+          year,
+          madeAt: `today (${live.lastCompleteMonth})`,
+          actual: row ? row.total : null,
+          hasActual: !!row,
+          partial,
+          trend: liveRow.trend.total,
+          flat: liveRow.flat.total,
+          hasForecast: true,
+          trendMiss: '',
+          flatMiss: '',
+        };
+      }
+      const back = backtest(model.monthly, year);
+      return {
+        year,
+        madeAt: back ? back.madeAt : '',
+        actual: row ? row.total : null,
+        hasActual: !!row,
+        partial,
+        trend: back ? back.trend : null,
+        flat: back ? back.flat : null,
+        hasForecast: !!back,
+        trendMiss: back ? miss(back.trend, row && row.total) : '',
+        flatMiss: back ? miss(back.flat, row && row.total) : '',
+      };
+    });
   },
 
   excluded() {

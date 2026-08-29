@@ -263,6 +263,59 @@ const daysInMonth = (key) => {
 };
 
 /**
+ * Fit the trailing-twelve-month line using only the months up to and including
+ * `throughMonth`. Shared by the live forecast and by the backtest, so the two
+ * cannot drift apart — a backtest of arithmetic other than the real thing would
+ * be worthless.
+ *
+ * @returns {{lastMonth: string, level: number, slope: number, points: number}|null}
+ */
+const fitThrough = (monthly, throughMonth) => {
+  const rolling = rollingTwelve(monthly.filter((m) => m.month <= throughMonth));
+  if (rolling.length === 0) return null;
+  const window = rolling.slice(-12);
+  const lastMonth = rolling[rolling.length - 1].month;
+  const fit = linearFit(window.map((p) => ({ x: monthDiff(lastMonth, p.month), y: p.total })));
+  return { lastMonth, level: fit.at(0), slope: fit.slope, points: window.length };
+};
+
+/** Monthly revenue the line implies for `month`; never negative. */
+const rateFor = ({ level, slope, lastMonth }, month, useSlope) =>
+  Math.max(0, level + (useSlope ? slope * monthDiff(lastMonth, month) : 0)) / 12;
+
+/** A whole calendar year projected from one fit. */
+const projectWholeYear = (fit, year, useSlope) => {
+  let total = 0;
+  for (let m = 1; m <= 12; m++) {
+    total += rateFor(fit, `${year}-${String(m).padStart(2, '0')}`, useSlope);
+  }
+  return total;
+};
+
+/**
+ * What the model would have said about `year` knowing only what was on record at
+ * the end of the year before. The honest way to ask how good the forecast has
+ * been: it never sees the year it predicts.
+ *
+ * Null until there is a full twelve-point window to fit — a line through three
+ * points is not a forecast anybody should be graded on.
+ *
+ * @param {Array<object>} monthly
+ * @param {number} year
+ * @returns {{year: number, madeAt: string, trend: number, flat: number}|null}
+ */
+export const backtest = (monthly, year) => {
+  const fit = fitThrough(monthly, `${year - 1}-12`);
+  if (!fit || fit.points < 12) return null;
+  return {
+    year,
+    madeAt: fit.lastMonth,
+    trend: projectWholeYear(fit, year, true),
+    flat: projectWholeYear(fit, year, false),
+  };
+};
+
+/**
  * Everything the page needs to state where revenue stands and where it is going.
  *
  * The trend is fitted to the rolling twelve-month sum, not to the monthly
@@ -304,14 +357,11 @@ export const forecast = ({ monthly, today, payments = [], membershipsById = {} }
 
   // x in months, 0 at the last complete month, so `level` reads straight off the
   // intercept and `slope` is the change in annual run rate per month.
-  const window = rolling.slice(-12);
   const lastMonth = rolling[rolling.length - 1].month;
-  const fit = linearFit(window.map((p) => ({ x: monthDiff(lastMonth, p.month), y: p.total })));
-  const level = fit.at(0);
-  const slope = fit.slope;
+  const fit = fitThrough(complete, lastMonth);
+  const { level, slope } = fit;
 
-  const rateAt = (month, useSlope) =>
-    Math.max(0, level + (useSlope ? slope * monthDiff(lastMonth, month) : 0)) / 12;
+  const rateAt = (month, useSlope) => rateFor(fit, month, useSlope);
 
   const thisYear = today.getFullYear();
   const actualThisYear = monthly
@@ -330,10 +380,7 @@ export const forecast = ({ monthly, today, payments = [], membershipsById = {} }
       }
       return { actual: actualThisYear, projected: rest, total: actualThisYear + rest };
     }
-    let total = 0;
-    for (let m = 1; m <= 12; m++) {
-      total += rateAt(`${year}-${String(m).padStart(2, '0')}`, useSlope);
-    }
+    const total = projectWholeYear(fit, year, useSlope);
     return { actual: 0, projected: total, total };
   };
 
@@ -341,7 +388,7 @@ export const forecast = ({ monthly, today, payments = [], membershipsById = {} }
     trailingYear,
     level,
     slope,
-    fitMonths: window.length,
+    fitMonths: fit.points,
     lastCompleteMonth: lastMonth,
     years: [thisYear, thisYear + 1].map((year) => ({
       year,

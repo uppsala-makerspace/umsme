@@ -106,22 +106,37 @@
         <thead>
         <tr>
             <th>Year</th>
-            <th class="revenue-number">Received</th>
+            <th>Forecast from</th>
+            <th class="revenue-number">Actual</th>
             <th class="revenue-number">Trend continues</th>
             <th class="revenue-number">Level holds</th>
         </tr>
         </thead>
         <tbody>
         {{#each forecastRows}}
-            <tr>
+            <tr class="{{#if partial}}revenue-incomplete{{/if}}">
                 <td>{{year}}</td>
-                <td class="revenue-number">{{#if actual}}{{kr actual}}{{else}}—{{/if}}</td>
-                <td class="revenue-number revenue-total">{{kr trend}}</td>
-                <td class="revenue-number revenue-total">{{kr flat}}</td>
+                <td class="revenue-madeat">{{#if madeAt}}{{madeAt}}{{else}}—{{/if}}</td>
+                <td class="revenue-number">
+                    {{#if hasActual}}{{kr actual}}{{#if partial}} <span class="revenue-partial">so far</span>{{/if}}{{else}}—{{/if}}
+                </td>
+                <td class="revenue-number revenue-total">
+                    {{#if hasForecast}}{{kr trend}}{{#if trendMiss}} <span class="revenue-miss">{{trendMiss}}</span>{{/if}}{{else}}—{{/if}}
+                </td>
+                <td class="revenue-number revenue-total">
+                    {{#if hasForecast}}{{kr flat}}{{#if flatMiss}} <span class="revenue-miss">{{flatMiss}}</span>{{/if}}{{else}}—{{/if}}
+                </td>
             </tr>
         {{/each}}
         </tbody>
     </table>
+    <p class="revenue-caption">
+        A finished year is forecast from the end of the year before, so the model
+        never sees the year it is predicting. On this data both variants have come
+        out consistently low — revenue has been compounding rather than climbing by
+        a fixed amount, which a straight line cannot follow. Read the two forward
+        years as a floor rather than a best guess.
+    </p>
 
     <p class="revenue-excluded">
         Not in the figures above:
