@@ -105,3 +105,24 @@ canvas#revenueYearOverYear {
     color: #888;
     margin-left: 4px;
 }
+
+/* Column legend: short headers keep the table narrow, the meanings live here. */
+.revenue-legend {
+    max-width: 1100px;
+    margin: -18px 0 14px;
+    font-size: 13px;
+    color: #666;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 12px;
+    row-gap: 2px;
+}
+
+.revenue-legend dt {
+    font-weight: bold;
+    text-align: right;
+}
+
+.revenue-legend dd {
+    margin: 0;
+}

@@ -254,6 +254,41 @@ describe('Revenue statistics', function () {
       assert.strictEqual(rows.find((r) => r.year === 2024).baseIsPartial, false);
     });
 
+    it('reports what the monthly average actually gained', function () {
+      // 2023 averages 100/month over twelve months, 2024 averages 150.
+      const monthly = build(Object.fromEntries([
+        ...Array.from({ length: 12 }, (_, i) => [`2023-${String(i + 1).padStart(2, '0')}`, 100]),
+        ...Array.from({ length: 12 }, (_, i) => [`2024-${String(i + 1).padStart(2, '0')}`, 150]),
+      ]));
+      const rows = yearlyGrowth(monthly, d('2026-08-29'));
+      assert.strictEqual(rows.find((r) => r.year === 2024).perMonth, 150);
+      assert.strictEqual(rows.find((r) => r.year === 2024).growthPerMonth, 50);
+      assert.strictEqual(rows.find((r) => r.year === 2023).growthPerMonth, null);
+    });
+
+    it('measures the gain over the same months for a year in progress', function () {
+      // Last year's big autumn must not drag the current year's average down:
+      // both sides are cut at the same month.
+      const monthly = build({
+        '2025-01': 100, '2025-02': 100, '2025-09': 900,
+        '2026-01': 300, '2026-02': 300,
+      });
+      const rows = yearlyGrowth(monthly, d('2026-02-20'));
+      const current = rows.find((r) => r.year === 2026);
+      assert.strictEqual(current.growthPerMonth, 200); // (600 − 200) / 2 months
+    });
+
+    it('divides each side by the months it actually covers', function () {
+      // 2019 is three months at 300 a month; 2020 twelve months at 500.
+      const monthly = build(Object.fromEntries([
+        ['2019-10', 300], ['2019-11', 300], ['2019-12', 300],
+        ...Array.from({ length: 12 }, (_, i) => [`2020-${String(i + 1).padStart(2, '0')}`, 500]),
+      ]));
+      const rows = yearlyGrowth(monthly, d('2026-08-29'));
+      assert.strictEqual(rows.find((r) => r.year === 2019).perMonth, 300);
+      assert.strictEqual(rows.find((r) => r.year === 2020).growthPerMonth, 200);
+    });
+
     it('reports a fall as a negative number', function () {
       const monthly = build({ '2023-06': 200, '2024-06': 150 });
       assert.strictEqual(yearlyGrowth(monthly, d('2025-05-10')).find((r) => r.year === 2024).growth, -0.25);

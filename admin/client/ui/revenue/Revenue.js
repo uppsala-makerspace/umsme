@@ -277,7 +277,7 @@ Template.Revenue.helpers({
     const perMonthBefore = (year) => {
       const before = actuals[year - 1];
       if (!before || !before.months) return null;
-      return { value: before.total / before.months, months: before.months, year: year - 1 };
+      return { value: before.perMonth, months: before.months, year: year - 1 };
     };
 
     return all.map((year) => {
@@ -285,9 +285,17 @@ Template.Revenue.helpers({
       const liveRow = live.years.find((y) => y.year === year);
       const partial = !!row && row.partial;
       const before = perMonthBefore(year);
+      const grew = row && row.growthPerMonth !== null && row.growthPerMonth !== undefined;
       const beforeCell = {
         beforePerMonth: before ? before.value : null,
         hasBefore: !!before,
+        // What the monthly average actually gained, beside the fitted slope it
+        // is meant to be compared with.
+        actualGrowth: grew ? row.growthPerMonth : null,
+        hasActualGrowth: grew,
+        actualGrowthTitle: grew && partial
+          ? `${year} against the same months of ${year - 1}`
+          : '',
         // Named when it is not a whole year, so a small average is not read as
         // a bad year when it is simply a short one.
         beforeTitle: before && before.months !== 12

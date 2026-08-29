@@ -172,15 +172,29 @@ export const yearlyGrowth = (monthly, today) => {
   return yearly.map((row) => {
     const partial = row.year === currentYear;
     const startsMidYear = firstMonthOf(row.year) !== `${row.year}-01`;
-    const base = { ...row, partial, startsMidYear, coversFrom: firstMonthOf(row.year) };
+    const base = {
+      ...row,
+      partial,
+      startsMidYear,
+      coversFrom: firstMonthOf(row.year),
+      perMonth: row.months ? row.total / row.months : 0,
+    };
     const hasPrevious = row.year - 1 in totalsByYear;
     if (!hasPrevious) {
-      return { ...base, growth: null, comparedFrom: null, comparedTo: null };
+      return { ...base, growth: null, growthPerMonth: null, comparedFrom: null, comparedTo: null };
     }
     const to = partial ? sumThrough(row.year, throughMonth) : row.total;
     const from = partial ? sumThrough(row.year - 1, throughMonth) : totalsByYear[row.year - 1];
+    // What the monthly average actually gained on the year before — the realised
+    // counterpart to the fitted slope. Over the same months on both sides for a
+    // year in progress, so seasonality cannot fake a gain or a loss.
+    const previous = yearly.find((y) => y.year === row.year - 1);
+    const growthPerMonth = partial
+      ? (to - from) / row.months
+      : row.total / row.months - previous.total / previous.months;
     return {
       ...base,
+      growthPerMonth,
       // True when the year being compared against is itself a stub, which
       // inflates the percentage.
       baseIsPartial: !partial && firstMonthOf(row.year - 1) !== `${row.year - 1}-01`,
