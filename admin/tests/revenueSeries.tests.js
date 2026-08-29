@@ -148,6 +148,36 @@ describe('Revenue statistics', function () {
     });
   });
 
+  describe('yearlySeries months covered', function () {
+    const memberships = index([ms('m1', 'member')]);
+
+    it('counts twelve for a whole year', function () {
+      const monthly = monthlySeries(
+        Array.from({ length: 12 }, (_, i) =>
+          pay(`2025-${String(i + 1).padStart(2, '0')}-10`, 100, 'm1')),
+        memberships,
+      );
+      assert.strictEqual(yearlySeries(monthly)[0].months, 12);
+    });
+
+    it('counts only the months the records cover', function () {
+      // October to December, the way the real series begins.
+      const monthly = monthlySeries(
+        [pay('2019-10-10', 100, 'm1'), pay('2019-12-10', 100, 'm1')],
+        memberships,
+      );
+      assert.strictEqual(yearlySeries(monthly)[0].months, 3);
+    });
+
+    it('counts an empty month in between, since the year did run through it', function () {
+      const monthly = monthlySeries(
+        [pay('2025-01-10', 100, 'm1'), pay('2025-04-10', 100, 'm1')],
+        memberships,
+      );
+      assert.strictEqual(yearlySeries(monthly)[0].months, 4);
+    });
+  });
+
   describe('yearlyGrowth', function () {
     const memberships = index([ms('m1', 'member')]);
     /** One payment per listed month, so the yearly totals are easy to reason about. */

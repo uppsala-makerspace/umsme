@@ -272,10 +272,28 @@ Template.Revenue.helpers({
       return `${off}% ${forecast < actual ? 'low' : 'high'}`;
     };
 
+    // Last year's revenue spread over the months it actually covers, as a scale
+    // against which the trend per month next to it can be judged.
+    const perMonthBefore = (year) => {
+      const before = actuals[year - 1];
+      if (!before || !before.months) return null;
+      return { value: before.total / before.months, months: before.months, year: year - 1 };
+    };
+
     return all.map((year) => {
       const row = actuals[year];
       const liveRow = live.years.find((y) => y.year === year);
       const partial = !!row && row.partial;
+      const before = perMonthBefore(year);
+      const beforeCell = {
+        beforePerMonth: before ? before.value : null,
+        hasBefore: !!before,
+        // Named when it is not a whole year, so a small average is not read as
+        // a bad year when it is simply a short one.
+        beforeTitle: before && before.months !== 12
+          ? `${before.year} over the ${before.months} months on record`
+          : '',
+      };
       if (liveRow) {
         return {
           year,
@@ -283,6 +301,7 @@ Template.Revenue.helpers({
           actual: row ? row.total : null,
           hasActual: !!row,
           partial,
+          ...beforeCell,
           slope: live.slope,
           trend: liveRow.trend.total,
           flat: liveRow.flat.total,
@@ -298,6 +317,7 @@ Template.Revenue.helpers({
         actual: row ? row.total : null,
         hasActual: !!row,
         partial,
+        ...beforeCell,
         slope: back ? back.slope : null,
         trend: back ? back.trend : null,
         flat: back ? back.flat : null,

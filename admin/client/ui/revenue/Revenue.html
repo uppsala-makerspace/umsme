@@ -99,7 +99,8 @@
         since membership revenue is strongly seasonal and a fit to monthly values
         slopes whichever way the window happens to open. Where that line stands is
         the annual rate; how steeply it rises is the <strong>trend per month</strong>
-        column. <strong>Trend continues</strong> carries that row's own slope
+        column, shown next to what the year before actually averaged each month so
+        the growth has something to be measured against. <strong>Trend continues</strong> carries that row's own slope
         forward, <strong>level holds</strong> sets the slope to zero and keeps the
         rate where the line puts it, and a year still in progress counts the revenue
         already received and only models the rest.
@@ -116,6 +117,7 @@
             <th>Year</th>
             <th>Forecast from</th>
             <th class="revenue-number">Actual</th>
+            <th class="revenue-number">Year before, per month</th>
             <th class="revenue-number">Trend per month</th>
             <th class="revenue-number">Trend continues</th>
             <th class="revenue-number">Level holds</th>
@@ -128,6 +130,9 @@
                 <td class="revenue-madeat">{{#if madeAt}}{{madeAt}}{{else}}—{{/if}}</td>
                 <td class="revenue-number">
                     {{#if hasActual}}{{kr actual}}{{#if partial}} <span class="revenue-partial">so far</span>{{/if}}{{else}}—{{/if}}
+                </td>
+                <td class="revenue-number" title="{{beforeTitle}}">
+                    {{#if hasBefore}}{{kr beforePerMonth}}{{else}}—{{/if}}
                 </td>
                 <td class="revenue-number">
                     {{#if hasForecast}}{{signedKr slope}}{{else}}—{{/if}}

@@ -113,15 +113,21 @@ export const monthlySeries = (payments, membershipsById) => {
 /**
  * The same money per calendar year, for the coarser table.
  *
+ * `months` counts how many months of that year the records actually cover, so an
+ * average per month divides by what is there rather than always by twelve — the
+ * first year starts in October and the current one has not finished.
+ *
  * @param {Array<object>} monthly - from monthlySeries
- * @returns {Array<{year: number, total: number, byCategory: object}>}
+ * @returns {Array<{year: number, total: number, months: number, byCategory: object}>}
  */
 export const yearlySeries = (monthly) => {
   const byYear = {};
   monthly.forEach((m) => {
     const year = Number(m.month.split('-')[0]);
-    const row = (byYear[year] = byYear[year] || { year, total: 0, byCategory: emptyCategories() });
+    const row = (byYear[year] = byYear[year]
+      || { year, total: 0, months: 0, byCategory: emptyCategories() });
     row.total += m.total;
+    row.months += 1;
     CATEGORIES.forEach((c) => { row.byCategory[c] += m.byCategory[c]; });
   });
   return Object.values(byYear).sort((a, b) => a.year - b.year);
