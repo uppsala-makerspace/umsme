@@ -30,6 +30,7 @@ const GroupDetail = ({
   onReject,
   onLookupMember,
   onAddMember,
+  onRemoveMember,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
@@ -39,6 +40,8 @@ const GroupDetail = ({
   const [candidate, setCandidate] = useState(null);
   const [lookupError, setLookupError] = useState(null);
   const [busy, setBusy] = useState(false);
+  // The member the responsible is about to remove, held until they confirm.
+  const [removeCandidate, setRemoveCandidate] = useState(null);
 
   // The server speaks English error codes; the member reading the screen does
   // not. Falls back to the server's reason for anything unmapped.
@@ -78,6 +81,7 @@ const GroupDetail = ({
     relatedGroups = [],
     workshop,
     canSeeMembers,
+    canRemoveMembers = false,
     canJoin,
     canApprove,
     pendingRequests,
@@ -353,6 +357,53 @@ const GroupDetail = ({
         </div>
       )}
 
+      {/* Removing is destructive and irreversible from here, so the name is
+          confirmed the same way adding is. */}
+      {removeCandidate && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setRemoveCandidate(null)}
+        >
+          <div
+            className="bg-white rounded-lg max-w-sm w-full p-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold mt-0 mb-2">{t("removeFromGroupTitle")}</h2>
+            <p className="text-sm text-gray-700">
+              {t("removeFromGroupBody", {
+                name: removeCandidate.name,
+                group: localized(group.name, lang),
+              })}
+            </p>
+            <div className="flex gap-2 justify-end mt-4">
+              <button
+                type="button"
+                onClick={() => setRemoveCandidate(null)}
+                className="py-2 px-4 rounded-lg bg-white border border-gray-300 cursor-pointer"
+              >
+                {t("cancel")}
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    await onRemoveMember(removeCandidate.memberId);
+                    setRemoveCandidate(null);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+                className="py-2 px-4 rounded-lg bg-red-600 text-white border-none cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+              >
+                {t("removeFromGroup")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Pending requests (approvers only) */}
       {canApprove && pendingRequests.length > 0 && (
         <section className="mb-6">
@@ -418,6 +469,16 @@ const GroupDetail = ({
                   <span className="inline-block text-xs font-semibold rounded-full py-0.5 px-2 bg-green-100 text-green-800">
                     {t("groupResponsible")}
                   </span>
+                )}
+                {/* Not offered for the responsible, who must be reassigned
+                    first, nor for yourself — leaving is your own decision. */}
+                {canRemoveMembers && !member.isResponsible && !member.isSelf && (
+                  <button
+                    onClick={() => setRemoveCandidate(member)}
+                    className="ml-auto text-sm text-red-600 bg-transparent border-none cursor-pointer hover:underline"
+                  >
+                    {t("removeFromGroup")}
+                  </button>
                 )}
               </li>
             ))}
@@ -511,6 +572,7 @@ GroupDetail.propTypes = {
   onReject: PropTypes.func,
   onLookupMember: PropTypes.func,
   onAddMember: PropTypes.func,
+  onRemoveMember: PropTypes.func,
 };
 
 GroupDetail.defaultProps = {
@@ -526,6 +588,7 @@ GroupDetail.defaultProps = {
   onReject: () => {},
   onLookupMember: () => {},
   onAddMember: () => {},
+  onRemoveMember: () => {},
 };
 
 export default GroupDetail;

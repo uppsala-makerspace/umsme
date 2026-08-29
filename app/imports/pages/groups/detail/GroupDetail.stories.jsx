@@ -228,3 +228,46 @@ export const ApproverLookupNotActiveMember = {
     }),
   },
 };
+
+// === REMOVING MEMBERS ===
+// The responsible sees a Remove control on every row but the responsible's own
+// and their own; a plain member sees none.
+
+export const ResponsibleCanRemove = {
+  args: {
+    data: {
+      ...baseData,
+      group: {
+        ...baseData.group,
+        canRequestToJoin: false,
+        myState: "active",
+        myIsResponsible: true,
+      },
+      members: [
+        { memberId: "m1", name: "Anna Andersson", isResponsible: true, isSelf: true },
+        { memberId: "m2", name: "Bo Berg", isResponsible: false, isSelf: false },
+        { memberId: "m3", name: "Cecilia Carlsson", isResponsible: false, isSelf: false },
+      ],
+      canApprove: true,
+      canRemoveMembers: true,
+    },
+    onRemoveMember: async () => {},
+  },
+};
+
+// An admin who is also an ordinary member of the group: still no control on
+// their own row, and none on the responsible's.
+export const AdminMemberCanRemove = {
+  args: {
+    data: {
+      ...ResponsibleCanRemove.args.data,
+      group: { ...ResponsibleCanRemove.args.data.group, myIsResponsible: false },
+      members: [
+        { memberId: "m1", name: "Anna Andersson", isResponsible: true, isSelf: false },
+        { memberId: "m2", name: "Bo Berg", isResponsible: false, isSelf: true },
+        { memberId: "m3", name: "Cecilia Carlsson", isResponsible: false, isSelf: false },
+      ],
+    },
+    onRemoveMember: async () => {},
+  },
+};

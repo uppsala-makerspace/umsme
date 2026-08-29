@@ -66,6 +66,7 @@ export default () => {
         onLookupMember={(memberNumber) =>
           Meteor.callAsync("groups.lookupMemberNumber", groupId, memberNumber)
         }
+        onRemoveMember={(memberId) => runAction("groups.removeMember", groupId, memberId)}
         onAddMember={async (memberNumber) => {
           await Meteor.callAsync("groups.addMemberByNumber", groupId, memberNumber);
           await fetchData();

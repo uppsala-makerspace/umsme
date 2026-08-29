@@ -58,6 +58,17 @@ const canApprove = async (group, member) => {
   return !!membership;
 };
 
+/**
+ * Whether a member may remove other people from a group.
+ *
+ * Deliberately narrower than canApprove: adding follows the group's join policy,
+ * which under request-any is every member of the group, and letting each member
+ * throw the others out is not the same decision. Removal stays with the group
+ * responsible, plus admin/board.
+ */
+const canRemoveMembers = async (group, member) =>
+  isGroupResponsible(member, group) || (await isAdminish());
+
 const groupSummary = async (group, memberId) => {
   const memberCount = await GroupMemberships.find({
     groupId: group._id,
@@ -146,6 +157,9 @@ Meteor.methods({
           memberId: membership.memberId,
           name: m?.name || "Unknown",
           isResponsible: group.responsibleMemberId === membership.memberId,
+          // So the view can keep the remove control off your own row: leaving
+          // is your own decision, taken with the button further up the page.
+          isSelf: membership.memberId === member._id,
         });
       }
     }
@@ -239,6 +253,7 @@ Meteor.methods({
       canSeeMembers,
       canJoin: activeCaller,
       canApprove: userCanApprove,
+      canRemoveMembers: await canRemoveMembers(group, member),
       pendingRequests,
       expenseAccounts,
       mapView,
@@ -437,6 +452,40 @@ Meteor.methods({
       subject: "Group join approved",
       body: `*${joiner?.name || memberId}* was approved into *${group.name?.sv || groupId}* by ${member.name}.`,
     });
+    return true;
+  },
+
+  /**
+   * Remove someone else from the group. The group responsible does the removing;
+   * members leave under their own steam with groups.leave.
+   *
+   * Nobody removes themselves here — the responsible cannot leave at all until
+   * the role is reassigned, and for everyone else leaving is their own decision
+   * to take rather than an odd path through this method.
+   */
+  "groups.removeMember": async (groupId, memberId) => {
+    const member = await requireMember();
+    const group = await getGroup(groupId);
+    if (!(await canRemoveMembers(group, member))) {
+      throw new Meteor.Error("not-authorized", "You may not remove members from this group");
+    }
+    if (memberId === member._id) {
+      throw new Meteor.Error("cannot-remove-self", "Use leave to remove yourself from a group");
+    }
+    if (memberId === group.responsibleMemberId) {
+      throw new Meteor.Error(
+        "is-responsible",
+        "The group responsible must be reassigned before being removed"
+      );
+    }
+
+    const removed = await GroupMemberships.removeAsync({ groupId, memberId });
+    if (removed === 0) {
+      throw new Meteor.Error("not-member", "That member is not in this group");
+    }
+    await syncLinkedRole(group);
+    // No manager event: neither leaving nor rejecting publishes one, so
+    // departures are not a signal this system carries.
     return true;
   },
 
