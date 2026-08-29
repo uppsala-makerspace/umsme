@@ -7,6 +7,7 @@ import './ui/message';
 import './ui/family';
 import './ui/storage';
 import './ui/stats';
+import './ui/revenue';
 import './ui/messagetemplate';
 import './ui/mail';
 import './ui/lock';

@@ -1,0 +1,92 @@
+/* Named revenueStyle rather than revenue.css: Meteor's build mishandles a css
+   file with the same name as its folder. */
+
+.revenue-intro {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.revenue-caption {
+    color: #666;
+    max-width: 900px;
+    margin-bottom: 12px;
+}
+
+.revenue-keyfigures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.revenue-figure {
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+}
+
+.revenue-figure-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #888;
+}
+
+.revenue-figure-value {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.revenue-figure-note {
+    font-size: 13px;
+    color: #888;
+}
+
+.revenue-table {
+    max-width: 1100px;
+    margin-bottom: 30px;
+}
+
+.revenue-number {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.revenue-total {
+    font-weight: bold;
+}
+
+.revenue-up {
+    color: #096817;
+}
+
+.revenue-down {
+    color: #c0392b;
+}
+
+.revenue-incomplete td {
+    font-style: italic;
+}
+
+.revenue-partial {
+    font-style: normal;
+    font-size: 12px;
+    color: #888;
+}
+
+.revenue-excluded {
+    color: #666;
+    max-width: 900px;
+    margin-top: 30px;
+}
+
+.revenue-excluded-item {
+    display: inline-block;
+    margin-right: 14px;
+    white-space: nowrap;
+}
+
+canvas#revenuePerMonth,
+canvas#revenueYearOverYear {
+    margin-bottom: 30px;
+}

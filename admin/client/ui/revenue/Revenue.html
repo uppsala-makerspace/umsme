@@ -1,0 +1,122 @@
+<template name="Revenue">
+    <h1>Revenue</h1>
+    <p class="revenue-intro">
+        Membership payments only — every payment linked to a membership, counted
+        in the month the money arrived and at the amount actually paid.
+    </p>
+
+    <div class="revenue-keyfigures">
+        <div class="revenue-figure">
+            <span class="revenue-figure-label">Last twelve months</span>
+            <span class="revenue-figure-value">{{kr summary.trailingYear}}</span>
+            <span class="revenue-figure-note">exactly one year back from today</span>
+        </div>
+        <div class="revenue-figure">
+            <span class="revenue-figure-label">Current annual rate</span>
+            <span class="revenue-figure-value">{{kr summary.level}}</span>
+            <span class="revenue-figure-note">trend line at {{summary.lastCompleteMonth}}</span>
+        </div>
+        <div class="revenue-figure">
+            <span class="revenue-figure-label">Growth</span>
+            <span class="revenue-figure-value">{{kr summary.slopePerYear}}</span>
+            <span class="revenue-figure-note">per year, {{kr summary.slope}} per month</span>
+        </div>
+    </div>
+
+    <h2>All history</h2>
+    <p class="revenue-caption">
+        Revenue per month since {{summary.firstMonth}}, split by what was bought.
+        The line is the trailing twelve-month sum on the right-hand axis, which is
+        what the forecast below is fitted to.
+    </p>
+    <canvas id="revenuePerMonth"></canvas>
+
+    <h2>Last twelve months, against the year before</h2>
+    <p class="revenue-caption">
+        Each month next to the same month a year earlier, so growth is readable
+        month by month rather than through the trend line.
+    </p>
+    <canvas id="revenueYearOverYear"></canvas>
+
+    <table class="table table-striped table-condensed revenue-table">
+        <caption>Month by month against the year before</caption>
+        <thead>
+        <tr>
+            <th>Month</th>
+            <th class="revenue-number">Revenue</th>
+            <th class="revenue-number">Year before</th>
+            <th class="revenue-number">Change</th>
+            <th class="revenue-number">%</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each yearOverYear}}
+            <tr>
+                <td>{{month}}</td>
+                <td class="revenue-number">{{kr total}}</td>
+                <td class="revenue-number">{{#if hasPrevious}}{{kr previousYear}}{{else}}—{{/if}}</td>
+                <td class="revenue-number {{signClass diff}}">{{#if hasPrevious}}{{signedKr diff}}{{else}}—{{/if}}</td>
+                <td class="revenue-number {{signClass diff}}">{{#if hasPercent}}{{percentText percent}}{{else}}—{{/if}}</td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+
+    <h2>Per year</h2>
+    <table class="table table-striped table-condensed revenue-table">
+        <thead>
+        <tr>
+            <th>Year</th>
+            {{#each categories}}<th class="revenue-number">{{label}}</th>{{/each}}
+            <th class="revenue-number">Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each yearly}}
+            <tr class="{{#if incomplete}}revenue-incomplete{{/if}}">
+                <td>{{year}}{{#if incomplete}} <span class="revenue-partial">so far</span>{{/if}}</td>
+                {{#each amounts}}<td class="revenue-number">{{kr this}}</td>{{/each}}
+                <td class="revenue-number revenue-total">{{kr total}}</td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+
+    <h2>Forecast</h2>
+    <p class="revenue-caption">
+        Fitted to the trailing twelve-month sum over the last {{summary.fitMonths}}
+        months, not to the individual months: membership revenue is strongly
+        seasonal, and a fit to monthly values slopes whichever way the window
+        happens to open. <strong>Trend</strong> carries the fitted growth of
+        {{kr summary.slope}} per month forward; <strong>flat</strong> holds the
+        annual rate where it stands today. The current year counts revenue already
+        received and only models the rest.
+    </p>
+    <table class="table table-striped table-condensed revenue-table">
+        <thead>
+        <tr>
+            <th>Year</th>
+            <th class="revenue-number">Received</th>
+            <th class="revenue-number">Trend continues</th>
+            <th class="revenue-number">Level holds</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each forecastRows}}
+            <tr>
+                <td>{{year}}</td>
+                <td class="revenue-number">{{#if actual}}{{kr actual}}{{else}}—{{/if}}</td>
+                <td class="revenue-number revenue-total">{{kr trend}}</td>
+                <td class="revenue-number revenue-total">{{kr flat}}</td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+
+    <p class="revenue-excluded">
+        Not in the figures above:
+        {{#each excluded}}<span class="revenue-excluded-item">{{label}} {{count}} ({{kr sum}})</span>{{/each}}
+        Unclassified payments are the ones waiting for a treasurer to connect them
+        to a membership under Payments → Manual.
+    </p>
+</template>

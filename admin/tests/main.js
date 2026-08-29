@@ -6,6 +6,7 @@ import "./slug.tests";
 import "./publicDirectory.tests";
 import "./storeRules.tests";
 import "./familyRules.tests";
+import "./revenueSeries.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {
