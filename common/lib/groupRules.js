@@ -13,6 +13,18 @@ export const GROUP_TYPES = ["steering", "function", "interest", "responsibility"
 export const WORKSHOP_STATUSES = ["established", "trial", "forming", "decommissioned"];
 export const JOIN_POLICIES = ["open", "request-any", "request-responsible"];
 
+/**
+ * Whether members may ask to join this group on their own.
+ *
+ * A steering group is closed: its members are added by someone who already has
+ * the authority to approve, in person and by member number. Who that is remains
+ * the group's joinPolicy — this only removes the self-service route.
+ *
+ * Tested against `!== false` on purpose: groups created before the field existed
+ * have no value for it and must stay open to requests.
+ */
+export const canRequestToJoin = (group) => group?.allowJoinRequests !== false;
+
 // Localised field access with Swedish fallback: {sv, en} -> string.
 export const localized = (field, lang) =>
   (field && (field[lang] || field.sv)) || "";

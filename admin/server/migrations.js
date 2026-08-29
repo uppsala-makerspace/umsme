@@ -28,6 +28,23 @@ const renameWorkshopGroupType = async () => {
   }
 };
 
+/**
+ * 2026-08: steering groups no longer take join requests. Their members are added
+ * by an approver, in person and by membership number. Only groups that predate
+ * the field are touched, so an admin who deliberately reopens one keeps it open.
+ */
+const closeSteeringGroupsToRequests = async () => {
+  const collection = Groups.rawCollection();
+  const { modifiedCount } = await collection.updateMany(
+    { type: 'steering', allowJoinRequests: { $exists: false } },
+    { $set: { allowJoinRequests: false } }
+  );
+  if (modifiedCount) {
+    console.log(`[migration] steering groups closed to join requests: ${modifiedCount}`);
+  }
+};
+
 export default async () => {
   await renameWorkshopGroupType();
+  await closeSteeringGroupsToRequests();
 };

@@ -1096,6 +1096,14 @@ export const models = {
       autoform: { omit: true },
     },
     "relatedGroupIds.$": { type: String, autoform: { omit: true } },
+    // Whether members may ask to join at all. Separate from joinPolicy, which
+    // says who approves: a steering group is closed to requests but still needs
+    // a policy naming who may add people to it.
+    allowJoinRequests: {
+      label: "Members may ask to join",
+      type: Boolean,
+      defaultValue: true,
+    },
     joinPolicy: {
       label: "Join policy",
       type: String,

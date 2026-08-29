@@ -163,3 +163,68 @@ export const Loading = {
     loading: true,
   },
 };
+
+// === CLOSED TO JOIN REQUESTS ===
+// A steering group: members are added by an approver, in person and by
+// membership number, so the join button is replaced by an explanation.
+
+export const ClosedToRequests = {
+  args: {
+    data: {
+      ...baseData,
+      group: { ...baseData.group, canRequestToJoin: false },
+    },
+  },
+};
+
+export const ClosedSeenByApprover = {
+  args: {
+    data: {
+      ...baseData,
+      group: {
+        ...baseData.group,
+        canRequestToJoin: false,
+        myState: "active",
+        myIsResponsible: true,
+      },
+      canApprove: true,
+    },
+    // Enter a number and press Look up to see the confirmation dialog.
+    onLookupMember: async (memberNumber) => ({
+      memberId: "m9",
+      name: "Dagny Dahl",
+      state: null,
+      isActive: true,
+      memberNumber,
+    }),
+    onAddMember: async () => {},
+  },
+};
+
+// The three cases the dialog has to warn about rather than let through.
+export const ApproverLookupAlreadyMember = {
+  args: {
+    ...ClosedSeenByApprover.args,
+    onLookupMember: async () => ({
+      memberId: "m2", name: "Bo Berg", state: "active", isActive: true,
+    }),
+  },
+};
+
+export const ApproverLookupPending = {
+  args: {
+    ...ClosedSeenByApprover.args,
+    onLookupMember: async () => ({
+      memberId: "m9", name: "Dagny Dahl", state: "pending", isActive: true,
+    }),
+  },
+};
+
+export const ApproverLookupNotActiveMember = {
+  args: {
+    ...ClosedSeenByApprover.args,
+    onLookupMember: async () => ({
+      memberId: "m9", name: "Dagny Dahl", state: null, isActive: false,
+    }),
+  },
+};

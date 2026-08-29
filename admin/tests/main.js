@@ -7,6 +7,7 @@ import "./publicDirectory.tests";
 import "./storeRules.tests";
 import "./familyRules.tests";
 import "./revenueSeries.tests";
+import "./groupRules.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

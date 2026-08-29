@@ -7,6 +7,7 @@ import { Members } from "/imports/common/collections/members";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { groupImageUrlFor } from "/imports/common/server/workshopImage";
+import { canRequestToJoin } from "/imports/common/lib/groupRules";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
 import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
 import {
@@ -75,6 +76,7 @@ const groupSummary = async (group, memberId) => {
     slackChannel: group.slackChannel,
     guidesUrl: group.guidesUrl,
     joinPolicy: group.joinPolicy,
+    canRequestToJoin: canRequestToJoin(group),
     parentGroupId: group.parentGroupId,
     imageUrl: groupImageUrlFor(group),
     memberCount,
@@ -258,6 +260,12 @@ Meteor.methods({
       );
     }
     const group = await getGroup(groupId);
+    if (!canRequestToJoin(group)) {
+      throw new Meteor.Error(
+        "requests-closed",
+        "This group does not take join requests; its members are added by an approver"
+      );
+    }
 
     const existing = await GroupMemberships.findOneAsync({ groupId, memberId: member._id });
     if (existing) {
@@ -319,6 +327,91 @@ Meteor.methods({
     }
     await syncLinkedRole(group);
     return true;
+  },
+
+  /**
+   * Look up a member by their membership number, for the confirmation dialog
+   * that precedes adding them. Reads only; nothing is written until the adder
+   * has seen the name and confirmed.
+   *
+   * Authorized exactly like approving a request — the group's join policy
+   * decides — so this exposes no name to anyone who could not already see the
+   * group's member list.
+   */
+  "groups.lookupMemberNumber": async (groupId, memberNumber) => {
+    const member = await requireMember();
+    const group = await getGroup(groupId);
+    if (!(await canApprove(group, member))) {
+      throw new Meteor.Error("not-authorized", "You may not add members to this group");
+    }
+    const found = await Members.findOneAsync({ mid: String(memberNumber).trim() });
+    if (!found) {
+      throw new Meteor.Error("not-found", "No member has that number");
+    }
+    const existing = await GroupMemberships.findOneAsync({
+      groupId,
+      memberId: found._id,
+    });
+    return {
+      memberId: found._id,
+      name: found.name,
+      state: existing?.state || null,
+      isActive: await isActiveMember(found),
+    };
+  },
+
+  /**
+   * Add a member to the group by their membership number — the way a closed
+   * group grows: two people meeting in person, one of them an approver.
+   *
+   * Authorization is checked again here rather than trusted from the dialog,
+   * and the person being added must hold an active membership, the same rule
+   * groups.join enforces for joining.
+   */
+  "groups.addMemberByNumber": async (groupId, memberNumber) => {
+    const member = await requireMember();
+    const group = await getGroup(groupId);
+    if (!(await canApprove(group, member))) {
+      throw new Meteor.Error("not-authorized", "You may not add members to this group");
+    }
+    const found = await Members.findOneAsync({ mid: String(memberNumber).trim() });
+    if (!found) {
+      throw new Meteor.Error("not-found", "No member has that number");
+    }
+    if (!(await isActiveMember(found))) {
+      throw new Meteor.Error(
+        "not-active-member",
+        "That member does not have an active membership"
+      );
+    }
+
+    const existing = await GroupMemberships.findOneAsync({ groupId, memberId: found._id });
+    if (existing?.state === "active") {
+      throw new Meteor.Error("already-member", "That member is already in the group");
+    }
+    if (existing) {
+      // A pending request from before: approve it rather than collide with the
+      // unique {groupId, memberId} index.
+      await GroupMemberships.updateAsync(existing._id, {
+        $set: { state: "active", approvedAt: new Date(), approvedBy: member._id },
+      });
+    } else {
+      await GroupMemberships.insertAsync({
+        groupId,
+        memberId: found._id,
+        state: "active",
+        requestedAt: new Date(),
+        approvedAt: new Date(),
+        approvedBy: member._id,
+      });
+    }
+
+    await syncLinkedRole(group);
+    await publishManagerEvent(ManagerEventType.GROUP_JOIN_APPROVED, {
+      subject: "Group member added",
+      body: `*${found.name}* was added to *${group.name?.sv || groupId}* by ${member.name}.`,
+    });
+    return { memberId: found._id, name: found.name };
   },
 
   /**

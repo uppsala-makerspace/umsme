@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -28,9 +28,30 @@ const GroupDetail = ({
   onLeave,
   onApprove,
   onReject,
+  onLookupMember,
+  onAddMember,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
+  // The number being typed, and the member it resolved to — the dialog opens
+  // only once a lookup has produced a name to confirm.
+  const [memberNumber, setMemberNumber] = useState("");
+  const [candidate, setCandidate] = useState(null);
+  const [lookupError, setLookupError] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  // The server speaks English error codes; the member reading the screen does
+  // not. Falls back to the server's reason for anything unmapped.
+  const ADD_MEMBER_ERRORS = {
+    "not-found": "memberNumberNotFound",
+    "not-active-member": "memberNotActiveGeneric",
+    "already-member": "memberAlreadyInGroupGeneric",
+    "not-authorized": "notAuthorizedToAdd",
+  };
+  const addMemberError = (err) => {
+    const key = ADD_MEMBER_ERRORS[err?.error];
+    return key ? t(key) : err?.reason || err?.message;
+  };
 
   if (loading) {
     return (
@@ -124,7 +145,12 @@ const GroupDetail = ({
       {/* Own membership actions. The join button is disabled without an
           active makerspace membership (the server enforces the same rule). */}
       <section className="mb-6">
-        {group.myState === null && (
+        {group.myState === null && group.canRequestToJoin === false && (
+          <p className="p-3 rounded-lg bg-gray-50 border border-gray-200 text-gray-600 text-sm m-0">
+            {t("groupClosedToRequests")}
+          </p>
+        )}
+        {group.myState === null && group.canRequestToJoin !== false && (
           <button
             onClick={onJoin}
             disabled={!canJoin}
@@ -211,6 +237,121 @@ const GroupDetail = ({
         }
         return null;
       })()}
+
+      {/* Adding by membership number (approvers only). Same authority as
+          approving a request, so it sits with them. */}
+      {canApprove && (
+        <section className="mb-6">
+          <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
+            {t("addMemberToGroup")}
+          </h3>
+          <form
+            className="flex gap-2 items-start"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              if (!memberNumber.trim() || busy) return;
+              setBusy(true);
+              setLookupError(null);
+              try {
+                setCandidate(await onLookupMember(memberNumber.trim()));
+              } catch (err) {
+                setLookupError(addMemberError(err));
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <span className="flex-1">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={memberNumber}
+                onChange={(event) => setMemberNumber(event.target.value)}
+                placeholder={t("memberNumber")}
+                aria-label={t("memberNumber")}
+                className="w-full p-2 rounded-lg border border-gray-300"
+              />
+              <span className="block text-xs text-gray-500 mt-1">{t("memberNumberHelp")}</span>
+            </span>
+            <button
+              type="submit"
+              disabled={busy || !memberNumber.trim()}
+              className="py-2 px-4 rounded-lg bg-brand-green text-white border-none cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              {t("lookUpMember")}
+            </button>
+          </form>
+          {lookupError && (
+            <p className="mt-2 mb-0 text-sm text-red-600">{lookupError}</p>
+          )}
+        </section>
+      )}
+
+      {/* Confirmation: the name is shown before anything is written. */}
+      {candidate && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setCandidate(null)}
+        >
+          <div
+            className="bg-white rounded-lg max-w-sm w-full p-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold mt-0 mb-2">{t("addMemberConfirmTitle")}</h2>
+            <p className="text-sm text-gray-700">
+              {t("addMemberConfirmBody", {
+                name: candidate.name,
+                group: localized(group.name, lang),
+              })}
+            </p>
+            {candidate.state === "active" && (
+              <p className="text-sm text-red-600">
+                {t("memberAlreadyInGroup", { name: candidate.name })}
+              </p>
+            )}
+            {candidate.state === "pending" && (
+              <p className="text-sm text-gray-500">
+                {t("memberHasPendingRequest", { name: candidate.name })}
+              </p>
+            )}
+            {!candidate.isActive && (
+              <p className="text-sm text-red-600">
+                {t("memberNotActive", { name: candidate.name })}
+              </p>
+            )}
+            <div className="flex gap-2 justify-end mt-4">
+              <button
+                type="button"
+                onClick={() => setCandidate(null)}
+                className="py-2 px-4 rounded-lg bg-white border border-gray-300 cursor-pointer"
+              >
+                {t("cancel")}
+              </button>
+              <button
+                type="button"
+                disabled={busy || candidate.state === "active" || !candidate.isActive}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    await onAddMember(memberNumber.trim());
+                    setCandidate(null);
+                    setMemberNumber("");
+                    setLookupError(null);
+                  } catch (err) {
+                    setCandidate(null);
+                    setLookupError(addMemberError(err));
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+                className="py-2 px-4 rounded-lg bg-brand-green text-white border-none cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+              >
+                {t("addMemberConfirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pending requests (approvers only) */}
       {canApprove && pendingRequests.length > 0 && (
@@ -368,6 +509,8 @@ GroupDetail.propTypes = {
   onLeave: PropTypes.func,
   onApprove: PropTypes.func,
   onReject: PropTypes.func,
+  onLookupMember: PropTypes.func,
+  onAddMember: PropTypes.func,
 };
 
 GroupDetail.defaultProps = {
@@ -381,6 +524,8 @@ GroupDetail.defaultProps = {
   onLeave: () => {},
   onApprove: () => {},
   onReject: () => {},
+  onLookupMember: () => {},
+  onAddMember: () => {},
 };
 
 export default GroupDetail;

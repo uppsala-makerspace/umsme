@@ -63,6 +63,13 @@ export default () => {
         onLeave={() => runAction("groups.leave", groupId)}
         onApprove={(memberId) => runAction("groups.approve", groupId, memberId)}
         onReject={(memberId) => runAction("groups.reject", groupId, memberId)}
+        onLookupMember={(memberNumber) =>
+          Meteor.callAsync("groups.lookupMemberNumber", groupId, memberNumber)
+        }
+        onAddMember={async (memberNumber) => {
+          await Meteor.callAsync("groups.addMemberByNumber", groupId, memberNumber);
+          await fetchData();
+        }}
       />
     </Layout>
   );
