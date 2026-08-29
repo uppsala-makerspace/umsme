@@ -94,13 +94,21 @@
 
     <h2>Forecast</h2>
     <p class="revenue-caption">
-        Fitted to the trailing twelve-month sum over the last {{summary.fitMonths}}
-        months, not to the individual months: membership revenue is strongly
-        seasonal, and a fit to monthly values slopes whichever way the window
-        happens to open. <strong>Trend</strong> carries the fitted growth of
-        {{kr summary.slope}} per month forward; <strong>flat</strong> holds the
-        annual rate where it stands today. The current year counts revenue already
-        received and only models the rest.
+        Every row fits a straight line to the trailing twelve-month sum over the
+        twelve points before the year it forecasts — not to the individual months,
+        since membership revenue is strongly seasonal and a fit to monthly values
+        slopes whichever way the window happens to open. Where that line stands is
+        the annual rate; how steeply it rises is the <strong>trend per month</strong>
+        column. <strong>Trend continues</strong> carries that row's own slope
+        forward, <strong>level holds</strong> sets the slope to zero and keeps the
+        rate where the line puts it, and a year still in progress counts the revenue
+        already received and only models the rest.
+    </p>
+    <p class="revenue-caption">
+        The two rows ahead share the fit made today: {{summary.fitMonths}} points
+        ending {{summary.lastCompleteMonth}}, an annual rate of {{kr summary.level}}
+        rising {{kr summary.slope}} a month. Each earlier row has its own,
+        made at the time.
     </p>
     <table class="table table-striped table-condensed revenue-table">
         <thead>
@@ -135,13 +143,12 @@
         </tbody>
     </table>
     <p class="revenue-caption">
-        <strong>Trend per month</strong> is the growth the fitted line had at the
-        time: how much the annual rate was climbing each month. A finished year is
-        forecast from the end of the year before, so the model
+        A finished year is forecast from the end of the year before, so the model
         never sees the year it is predicting. On this data both variants have come
         out consistently low — revenue has been compounding rather than climbing by
-        a fixed amount, which a straight line cannot follow. Read the two forward
-        years as a floor rather than a best guess.
+        a fixed amount, which a straight line cannot follow, and the trend per month
+        has itself been climbing year on year. Read the two rows ahead as a floor
+        rather than a best guess.
     </p>
 
     <p class="revenue-excluded">
