@@ -7,13 +7,14 @@ import { Members } from "/imports/common/collections/members";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { groupImageUrlFor } from "/imports/common/server/workshopImage";
-import { canRequestToJoin } from "/imports/common/lib/groupRules";
+import { canRequestToJoin, mayEditGroup } from "/imports/common/lib/groupRules";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
 import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
 import {
   findMemberForUser,
   isActiveMember,
   isGroupResponsible,
+  canEditGroup,
   applyWhitelistedUpdate,
   spacesMapView,
 } from "./utils";
@@ -93,6 +94,11 @@ const groupSummary = async (group, memberId) => {
     memberCount,
     myState: myMembership?.state || null,
     myIsResponsible: group.responsibleMemberId === memberId,
+    myCanEdit: mayEditGroup({
+      isResponsible: group.responsibleMemberId === memberId,
+      groupType: group.type,
+      membershipState: myMembership?.state || null,
+    }),
   };
 };
 
@@ -506,16 +512,17 @@ Meteor.methods({
   },
 
   /**
-   * Edit descriptive fields of a group. Only the group responsible
-   * (gruppansvarig) may do this — no admin role required — and only the
-   * whitelisted fields (description, Slack channel) can change; name, type,
-   * spaces, join policy, responsible, parent and linked role are off limits.
+   * Edit descriptive fields of a group: the group responsible, or anyone in the
+   * group when it is a steering group — no admin role required. Only the
+   * whitelisted fields (description, rules, Slack channel, guides) can change;
+   * name, type, spaces, join policy, responsible, parent and linked role are off
+   * limits whoever is calling.
    */
   "groups.updateByResponsible": async (groupId, patch) => {
     const member = await requireMember();
     const group = await getGroup(groupId);
-    if (!isGroupResponsible(member, group)) {
-      throw new Meteor.Error("not-authorized", "You are not responsible for this group");
+    if (!(await canEditGroup(member, group))) {
+      throw new Meteor.Error("not-authorized", "You may not edit this group");
     }
     const p = patch || {};
     await applyWhitelistedUpdate(Groups, groupId, {
@@ -529,12 +536,12 @@ Meteor.methods({
     return true;
   },
 
-  /** Set/replace the group's image (group responsible only). */
+  /** Set/replace the group's image (see canEditGroup). */
   "groups.uploadImageByResponsible": async (groupId, imageBase64, mimeType) => {
     const member = await requireMember();
     const group = await getGroup(groupId);
-    if (!isGroupResponsible(member, group)) {
-      throw new Meteor.Error("not-authorized", "You are not responsible for this group");
+    if (!(await canEditGroup(member, group))) {
+      throw new Meteor.Error("not-authorized", "You may not edit this group");
     }
     return setEntityImage(Groups, group, {
       imageBase64,
@@ -543,12 +550,12 @@ Meteor.methods({
     });
   },
 
-  /** Remove the group's image (group responsible only). */
+  /** Remove the group's image (see canEditGroup). */
   "groups.removeImageByResponsible": async (groupId) => {
     const member = await requireMember();
     const group = await getGroup(groupId);
-    if (!isGroupResponsible(member, group)) {
-      throw new Meteor.Error("not-authorized", "You are not responsible for this group");
+    if (!(await canEditGroup(member, group))) {
+      throw new Meteor.Error("not-authorized", "You may not edit this group");
     }
     return clearEntityImage(Groups, group);
   },

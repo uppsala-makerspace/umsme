@@ -25,6 +25,22 @@ export const JOIN_POLICIES = ["open", "request-any", "request-responsible"];
  */
 export const canRequestToJoin = (group) => group?.allowJoinRequests !== false;
 
+/**
+ * Whether a member may edit a group's descriptive fields — and, for a steering
+ * group, its workshop's.
+ *
+ * A steering group is run collectively, so everyone in it maintains the
+ * information. Every other kind of group keeps this with its responsible. What
+ * may be changed is unaffected: description, rules, Slack channel, guides link
+ * and image, never name, status, spaces or who is responsible.
+ *
+ * A pending request is not membership.
+ *
+ * @param {{isResponsible: boolean, groupType: string, membershipState: string|null}} args
+ */
+export const mayEditGroup = ({ isResponsible, groupType, membershipState }) =>
+  !!isResponsible || (groupType === "steering" && membershipState === "active");
+
 // Localised field access with Swedish fallback: {sv, en} -> string.
 export const localized = (field, lang) =>
   (field && (field[lang] || field.sv)) || "";

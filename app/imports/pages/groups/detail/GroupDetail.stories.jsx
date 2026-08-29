@@ -271,3 +271,37 @@ export const AdminMemberCanRemove = {
     onRemoveMember: async () => {},
   },
 };
+
+// === EDITING ===
+// A steering group is run collectively, so every member gets the Edit link;
+// every other type keeps it with the responsible.
+
+export const SteeringMemberCanEdit = {
+  args: {
+    data: {
+      ...baseData,
+      group: {
+        ...baseData.group,
+        type: "steering",
+        myState: "active",
+        myIsResponsible: false,
+        myCanEdit: true,
+      },
+    },
+  },
+};
+
+export const InterestMemberCannotEdit = {
+  args: {
+    data: {
+      ...baseData,
+      group: {
+        ...baseData.group,
+        type: "interest",
+        myState: "active",
+        myIsResponsible: false,
+        myCanEdit: false,
+      },
+    },
+  },
+};

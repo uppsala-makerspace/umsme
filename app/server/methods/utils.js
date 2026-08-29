@@ -9,6 +9,7 @@ import { memberStatus } from "/imports/common/lib/utils";
 import { REVIEWER_ROLES, approvableAccountIds } from "/imports/common/lib/expenseApproval";
 import { memberForUser } from "/imports/common/server/memberForUser";
 import { spaceIconUrlFor } from "/imports/common/server/workshopImage";
+import { mayEditGroup } from "/imports/common/lib/groupRules";
 
 /** The groups the member is an active (approved) member of. */
 export const myActiveGroupIds = async (member) => {
@@ -293,14 +294,34 @@ export const isGroupResponsible = (member, group) =>
   !!member && !!group && group.responsibleMemberId === member._id;
 
 /**
- * Whether the member may edit a workshop: only the responsible of the
- * workshop's own group (steering groups link to a workshop via groupId).
- * Responsibility subgroups' responsibles do not edit the workshop.
+ * Whether the member may edit a group's descriptive fields: its responsible, or
+ * anyone in it when it is a steering group. See mayEditGroup for the rule; this
+ * only supplies it with the caller's membership.
  */
-export const isWorkshopResponsible = async (member, workshop) => {
+export const canEditGroup = async (member, group) => {
+  if (!member || !group) return false;
+  if (isGroupResponsible(member, group)) return true;
+  if (group.type !== 'steering') return false; // no lookup for the common case
+  const membership = await GroupMemberships.findOneAsync({
+    groupId: group._id,
+    memberId: member._id,
+  });
+  return mayEditGroup({
+    isResponsible: false,
+    groupType: group.type,
+    membershipState: membership?.state || null,
+  });
+};
+
+/**
+ * Whether the member may edit a workshop: decided by its own group, which a
+ * steering group links to via groupId. Responsibility subgroups' responsibles do
+ * not edit the workshop.
+ */
+export const canEditWorkshop = async (member, workshop) => {
   if (!member || !workshop?.groupId) return false;
   const group = await Groups.findOneAsync(workshop.groupId);
-  return isGroupResponsible(member, group);
+  return canEditGroup(member, group);
 };
 
 /**

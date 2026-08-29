@@ -73,7 +73,7 @@ export default () => {
   const group = data?.group;
   // Only the responsible may edit; anyone else is sent back to the group page
   // (the server enforces this too).
-  if (!loading && (!group || !group.myIsResponsible)) {
+  if (!loading && (!group || !group.myCanEdit)) {
     return <Navigate to={detailPath} replace />;
   }
 

@@ -1,7 +1,36 @@
 import assert from 'assert';
-import { canRequestToJoin } from '/imports/common/lib/groupRules';
+import { canRequestToJoin, mayEditGroup } from '/imports/common/lib/groupRules';
 
 describe('Group rules', function () {
+  describe('mayEditGroup', function () {
+    const may = (args) => mayEditGroup({ isResponsible: false, membershipState: null, ...args });
+
+    it('lets the responsible edit whatever the type', function () {
+      for (const groupType of ['steering', 'function', 'interest', 'responsibility']) {
+        assert.strictEqual(may({ isResponsible: true, groupType }), true, groupType);
+      }
+    });
+
+    it('lets any member of a steering group edit', function () {
+      assert.strictEqual(may({ groupType: 'steering', membershipState: 'active' }), true);
+    });
+
+    it('keeps every other type to its responsible', function () {
+      for (const groupType of ['function', 'interest', 'responsibility']) {
+        assert.strictEqual(may({ groupType, membershipState: 'active' }), false, groupType);
+      }
+    });
+
+    it('does not count a pending request as membership', function () {
+      assert.strictEqual(may({ groupType: 'steering', membershipState: 'pending' }), false);
+    });
+
+    it('says no to someone outside the group', function () {
+      assert.strictEqual(may({ groupType: 'steering' }), false);
+      assert.strictEqual(may({ groupType: 'interest' }), false);
+    });
+  });
+
   describe('canRequestToJoin', function () {
     it('lets members ask to join a group without the field', function () {
       // Every group predates the field; closing them all would be a silent
