@@ -7,7 +7,7 @@ import {
   CATEGORIES,
   CATEGORY_LABELS,
   monthlySeries,
-  yearlySeries,
+  yearlyGrowth,
   rollingTwelve,
   yearOverYear,
   forecast,
@@ -35,6 +35,12 @@ const CATEGORY_COLOURS = {
 
 const kr = (n) => `${Math.round(n || 0).toLocaleString('sv-SE')} kr`;
 
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
+/** "2019-10" as "October" — the year is already in the cell next to it. */
+const monthName = (key) => MONTH_NAMES[Number(key.split('-')[1]) - 1];
+
 let monthChart;
 let yoyChart;
 
@@ -57,7 +63,7 @@ const computeModel = () => {
     today,
     monthly,
     rolling: rollingTwelve(monthly),
-    yearly: yearlySeries(monthly),
+    yearly: yearlyGrowth(monthly, today),
     yoy: yearOverYear(monthly, today),
     forecast: forecast({ monthly, today, payments, membershipsById }),
     excluded: excludedSummary(payments, membershipsById),
@@ -186,6 +192,7 @@ Template.Revenue.helpers({
   signClass: (n) => (n > 0 ? 'revenue-up' : n < 0 ? 'revenue-down' : ''),
   percentText: (p) => `${p >= 0 ? '+' : '−'}${Math.round(Math.abs(p) * 100)}%`,
   categories: () => CATEGORIES.map((c) => ({ label: CATEGORY_LABELS[c] })),
+  currentYear: () => new Date().getFullYear(),
 
   summary() {
     const model = Template.instance().model.get();
@@ -205,15 +212,27 @@ Template.Revenue.helpers({
   yearly() {
     const model = Template.instance().model.get();
     if (!model) return [];
-    const thisYear = model.today.getFullYear();
     return model.yearly
       .slice()
       .reverse()
       .map((row) => ({
         year: row.year,
-        incomplete: row.year === thisYear,
+        incomplete: row.partial,
         amounts: CATEGORIES.map((c) => row.byCategory[c]),
         total: row.total,
+        // The stub first year of the series, labelled so the next year's
+        // percentage is not read as ordinary growth.
+        coversFrom: row.startsMidYear && !row.partial ? monthName(row.coversFrom) : '',
+        growth: row.growth,
+        hasGrowth: row.growth !== null,
+        // Spelled out where the plain reading of the two totals would mislead.
+        growthTitle: row.growth === null
+          ? ''
+          : row.partial
+          ? `${kr(row.comparedTo)} against ${kr(row.comparedFrom)} for the same months last year`
+          : row.baseIsPartial
+          ? `Against ${row.year - 1}, which the records only cover part of`
+          : '',
       }));
   },
 

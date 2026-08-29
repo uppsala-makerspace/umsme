@@ -3,6 +3,7 @@ import {
   classify,
   monthlySeries,
   yearlySeries,
+  yearlyGrowth,
   rollingTwelve,
   yearOverYear,
   linearFit,
@@ -143,6 +144,88 @@ describe('Revenue statistics', function () {
       assert.deepStrictEqual(yearly.map((y) => [y.year, y.total]), [[2025, 300], [2026, 400]]);
       assert.strictEqual(yearly[0].byCategory.family, 200);
       assert.strictEqual(yearly[1].byCategory.member, 400);
+    });
+  });
+
+  describe('yearlyGrowth', function () {
+    const memberships = index([ms('m1', 'member')]);
+    /** One payment per listed month, so the yearly totals are easy to reason about. */
+    const build = (spec) =>
+      monthlySeries(
+        Object.entries(spec).flatMap(([month, amount]) => [pay(`${month}-15`, amount, 'm1')]),
+        memberships,
+      );
+
+    it('compares two finished years as whole years', function () {
+      const monthly = build({ '2023-06': 100, '2024-06': 150 });
+      const rows = yearlyGrowth(monthly, d('2025-05-10'));
+      const y2024 = rows.find((r) => r.year === 2024);
+      assert.strictEqual(y2024.growth, 0.5);
+      assert.strictEqual(y2024.partial, false);
+    });
+
+    it('gives the first year no growth', function () {
+      const rows = yearlyGrowth(build({ '2023-06': 100, '2024-06': 150 }), d('2025-05-10'));
+      assert.strictEqual(rows.find((r) => r.year === 2023).growth, null);
+    });
+
+    it('compares the year in progress like for like', function () {
+      // Half of last year fell after June, so a whole-year comparison would read
+      // as a fall while the comparable months are up by half.
+      const monthly = build({
+        '2025-01': 100, '2025-02': 100, '2025-09': 500,
+        '2026-01': 150, '2026-02': 150,
+      });
+      const rows = yearlyGrowth(monthly, d('2026-02-20'));
+      const current = rows.find((r) => r.year === 2026);
+      assert.strictEqual(current.partial, true);
+      assert.strictEqual(current.comparedFrom, 200); // Jan+Feb 2025
+      assert.strictEqual(current.comparedTo, 300);   // Jan+Feb 2026
+      assert.strictEqual(current.growth, 0.5);
+      // The naive comparison, for contrast: 300 against a full year of 700.
+      assert.strictEqual(current.total, 300);
+    });
+
+    it('counts the whole current month in the comparison', function () {
+      // Both sides are cut at the same month, so a part-paid current month
+      // understates a little — but it never flips the sign.
+      const monthly = build({ '2025-03': 100, '2026-03': 200 });
+      const rows = yearlyGrowth(monthly, d('2026-03-02'));
+      assert.strictEqual(rows.find((r) => r.year === 2026).growth, 1);
+    });
+
+    it('gives no growth when the earlier period was zero', function () {
+      const monthly = build({ '2025-09': 100, '2026-03': 200 });
+      // Comparing through March: nothing was paid in Jan–Mar 2025.
+      const rows = yearlyGrowth(monthly, d('2026-03-20'));
+      assert.strictEqual(rows.find((r) => r.year === 2026).comparedFrom, 0);
+      assert.strictEqual(rows.find((r) => r.year === 2026).growth, null);
+    });
+
+    it('marks a first year the records only cover part of', function () {
+      // The real series starts in October 2019, which makes 2020 look like it
+      // grew sixfold. The rows say so rather than leaving the number bare.
+      const monthly = build({ '2019-10': 100, '2020-06': 500 });
+      const rows = yearlyGrowth(monthly, d('2026-08-29'));
+      const first = rows.find((r) => r.year === 2019);
+      const second = rows.find((r) => r.year === 2020);
+      assert.strictEqual(first.startsMidYear, true);
+      assert.strictEqual(first.coversFrom, '2019-10');
+      assert.strictEqual(second.startsMidYear, false);
+      assert.strictEqual(second.baseIsPartial, true);
+      assert.strictEqual(second.growth, 4);
+    });
+
+    it('does not flag a base year the records cover in full', function () {
+      const monthly = build({ '2023-01': 100, '2024-06': 150 });
+      const rows = yearlyGrowth(monthly, d('2026-08-29'));
+      assert.strictEqual(rows.find((r) => r.year === 2023).startsMidYear, false);
+      assert.strictEqual(rows.find((r) => r.year === 2024).baseIsPartial, false);
+    });
+
+    it('reports a fall as a negative number', function () {
+      const monthly = build({ '2023-06': 200, '2024-06': 150 });
+      assert.strictEqual(yearlyGrowth(monthly, d('2025-05-10')).find((r) => r.year === 2024).growth, -0.25);
     });
   });
 

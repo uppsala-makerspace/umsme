@@ -69,18 +69,28 @@
             <th>Year</th>
             {{#each categories}}<th class="revenue-number">{{label}}</th>{{/each}}
             <th class="revenue-number">Total</th>
+            <th class="revenue-number">Growth</th>
         </tr>
         </thead>
         <tbody>
         {{#each yearly}}
             <tr class="{{#if incomplete}}revenue-incomplete{{/if}}">
-                <td>{{year}}{{#if incomplete}} <span class="revenue-partial">so far</span>{{/if}}</td>
+                <td>{{year}}{{#if incomplete}} <span class="revenue-partial">so far</span>{{/if}}{{#if coversFrom}} <span class="revenue-partial">from {{coversFrom}}</span>{{/if}}</td>
                 {{#each amounts}}<td class="revenue-number">{{kr this}}</td>{{/each}}
                 <td class="revenue-number revenue-total">{{kr total}}</td>
+                <td class="revenue-number {{signClass growth}}" title="{{growthTitle}}">
+                    {{#if hasGrowth}}{{percentText growth}}{{else}}—{{/if}}
+                </td>
             </tr>
         {{/each}}
         </tbody>
     </table>
+    <p class="revenue-caption">
+        Growth compares each year with the one before. {{currentYear}} is still
+        running, so its figure compares the months elapsed this year with the
+        same months last year — a part year against a whole one would read as a
+        fall in the middle of a rise.
+    </p>
 
     <h2>Forecast</h2>
     <p class="revenue-caption">

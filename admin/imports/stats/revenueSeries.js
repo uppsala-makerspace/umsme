@@ -128,6 +128,64 @@ export const yearlySeries = (monthly) => {
 };
 
 /**
+ * The yearly rows with growth against the year before.
+ *
+ * For a finished year that is simply one annual total against the previous one.
+ * For the year in progress it is like-for-like — the months elapsed this year
+ * against the same months last year — because measuring a part year against a
+ * whole one shows a fall in the middle of a rise: eight months of 2026 against
+ * all of 2025 reads as −26% while the association is in fact growing by a
+ * quarter.
+ *
+ * `growth` is null where there is nothing to compare against: the first year of
+ * the series, or a previous period of zero.
+ *
+ * @param {Array<object>} monthly - from monthlySeries
+ * @param {Date} today
+ * @returns {Array<{year, total, byCategory, partial: boolean, growth: number|null,
+ *                  comparedFrom: number|null, comparedTo: number|null}>}
+ */
+export const yearlyGrowth = (monthly, today) => {
+  const yearly = yearlySeries(monthly);
+  const currentYear = today.getFullYear();
+  const throughMonth = today.getMonth() + 1;
+
+  const sumThrough = (year, lastMonth) =>
+    monthly.reduce((sum, m) => {
+      const [y, mo] = m.month.split('-').map(Number);
+      return y === year && mo <= lastMonth ? sum + m.total : sum;
+    }, 0);
+
+  const totalsByYear = Object.fromEntries(yearly.map((y) => [y.year, y.total]));
+  // The series starts whenever the first payment was made, so its first year can
+  // cover only part of a year. Reported per row, because it makes the next
+  // year's growth look spectacular against a stub base.
+  const firstMonthOf = (year) =>
+    (monthly.find((m) => Number(m.month.split('-')[0]) === year) || {}).month;
+
+  return yearly.map((row) => {
+    const partial = row.year === currentYear;
+    const startsMidYear = firstMonthOf(row.year) !== `${row.year}-01`;
+    const base = { ...row, partial, startsMidYear, coversFrom: firstMonthOf(row.year) };
+    const hasPrevious = row.year - 1 in totalsByYear;
+    if (!hasPrevious) {
+      return { ...base, growth: null, comparedFrom: null, comparedTo: null };
+    }
+    const to = partial ? sumThrough(row.year, throughMonth) : row.total;
+    const from = partial ? sumThrough(row.year - 1, throughMonth) : totalsByYear[row.year - 1];
+    return {
+      ...base,
+      // True when the year being compared against is itself a stub, which
+      // inflates the percentage.
+      baseIsPartial: !partial && firstMonthOf(row.year - 1) !== `${row.year - 1}-01`,
+      growth: from ? (to - from) / from : null,
+      comparedFrom: from,
+      comparedTo: to,
+    };
+  });
+};
+
+/**
  * Trailing twelve-month sum at each month, from the twelfth month onwards.
  * Seasonally neutral by construction: every point covers one whole year, so it
  * cannot be tilted by which month the window happens to start in.
