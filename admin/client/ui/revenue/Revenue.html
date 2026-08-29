@@ -113,7 +113,7 @@
             <th>Year</th>
             <th>From</th>
             <th class="revenue-number">Actual</th>
-            <th class="revenue-number">Prev/mo</th>
+            <th class="revenue-number">Actual/mo</th>
             <th class="revenue-number">Growth/mo</th>
             <th class="revenue-number">Trend/mo</th>
             <th class="revenue-number">Trend</th>
@@ -128,8 +128,8 @@
                 <td class="revenue-number">
                     {{#if hasActual}}{{kr actual}}{{#if partial}} <span class="revenue-partial">so far</span>{{/if}}{{else}}—{{/if}}
                 </td>
-                <td class="revenue-number" title="{{beforeTitle}}">
-                    {{#if hasBefore}}{{kr beforePerMonth}}{{else}}—{{/if}}
+                <td class="revenue-number" title="{{perMonthTitle}}">
+                    {{#if hasPerMonth}}{{kr perMonth}}{{else}}—{{/if}}
                 </td>
                 <td class="revenue-number {{signClass actualGrowth}}" title="{{actualGrowthTitle}}">
                     {{#if hasActualGrowth}}{{signedKr actualGrowth}}{{else}}—{{/if}}
@@ -150,7 +150,7 @@
     <dl class="revenue-legend">
         <dt>From</dt><dd>where the forecast was made</dd>
         <dt>Actual</dt><dd>revenue actually received that year</dd>
-        <dt>Prev/mo</dt><dd>the year before, averaged over the months on record</dd>
+        <dt>Actual/mo</dt><dd>that revenue averaged over the months on record</dd>
         <dt>Growth/mo</dt><dd>what that monthly average really gained on the year before</dd>
         <dt>Trend/mo</dt><dd>what the fitted line expected it to gain, at the time</dd>
         <dt>Trend</dt><dd>the year with that growth carried forward</dd>
