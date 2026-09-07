@@ -40,6 +40,12 @@ Vi vill kunna:
   medlemmar. Board/admin kan sätta vem som helst.
 - **Ingen förifyllning av Slack-kanal eller kontaktmail** från gruppen. Vanliga
   fält, tomma tills någon fyller i dem.
+- **Certifikat kan vara krav eller mål, och de två är skilda fält.** Ett krav
+  (`requiredCertificateId`) måste man ha för att få anmäla sig — teoriprovet för
+  träverkstaden innan den praktiska introduktionen. Ett mål
+  (`targetCertificateId`) är det aktiviteten syftar till, och delas ut på ett av
+  två sätt: automatiskt vid närvaro, eller av hosten i det befintliga
+  intygsflödet efter att deltagaren visat att hen kan momenten.
 - **Betalning ingår inte i grundmodellen.** `cost` är ett fält; kopplingen till
   webbshoppen (en aktivitet med kostnad är i praktiken en `StoreItem`) kommer när
   behovet är verkligt.
@@ -71,7 +77,9 @@ testade i `admin/tests/` som `storeRules` och `groupRules`.
 | `checkInEnabled` | Boolean | bara när `registration !== none` |
 | `checkInOpensHoursBefore` | Number | fönstrets början; slutet sitter på tillfället |
 | `published` | Boolean | visas på hemsidan |
-| `certificateId` | String, optional | intro → attestering, se nedan |
+| `requiredCertificateId` | String, optional | **krav**: giltigt intyg för att få anmäla sig. Sätts explicit — inte härlett från målets förkunskaper, av samma skäl som visningskopplingen |
+| `targetCertificateId` | String, optional | **mål**: det intyg aktiviteten syftar till |
+| `certificateGrant` | `onAttendance \| manual` | hur målet delas ut; bara när `targetCertificateId` är satt. Se *Certifikat* |
 | `createdBy`, `createdAt`, `updatedAt` | | |
 
 ### `activityOccasions` — en gång det händer
@@ -130,7 +138,8 @@ Alla kontroller på serversidan; att knappar döljs är artighet.
 | Redigera aktivitet | `mayEditGroup` mot `activity.groupId`; tom tillhörighet → board/admin | |
 | Skapa/ändra/ställa in tillfälle | **alla aktiva medlemmar** i `activity.groupId`, oavsett grupptyp; tom tillhörighet → board/admin | aktiv gruppmedlem, som i `canApprove`:s request-any-gren |
 | Sätta host | skaparen: sig själv eller en medlem i samma grupp (listan finns redan via `canSeeMembers`); board/admin: vilken medlem som helst, via medlemsnummer (`groups.lookupMemberNumber`-mönstret) | |
-| Anmäla sig, intresseanmäla | aktiv medlem | `isActiveMember` |
+| Anmäla sig | aktiv medlem, med giltigt intyg för `requiredCertificateId` när det är satt | `isActiveMember` + befintlig attestering som inte gått ut |
+| Intresseanmäla | aktiv medlem — kravet gäller inte här, intresse får man ha innan man tagit provet | `isActiveMember` |
 | Acceptera erbjuden plats | den köande själv | |
 | Checka in | den anmälde själv, inom fönstret | |
 | Registrera närvaro, se deltagarlista | hosten, board/admin | |
@@ -143,8 +152,11 @@ Aktiviteten är produkten, tillfället är driften.
 
 ### Anmälan och kö
 
-1. Medlem anmäler sig. Finns plats → `approved`; annars, om `queueAllowed`,
-   → `queued`. Bekräftelse via push + mail (nya malltyper).
+1. Medlem anmäler sig. Har aktiviteten ett `requiredCertificateId` kontrolleras
+   först att medlemmen har ett giltigt intyg — servern avvisar annars, och appen
+   säger varför med en länk till certifikatsidan, där teoriprovet redan finns.
+   Finns plats → `approved`; annars, om `queueAllowed`, → `queued`. Bekräftelse
+   via push + mail (nya malltyper).
 2. När antalet `approved` når `minSeats` går tillfället från `awaiting` till
    `confirmed`; hosten och gruppens Slack-kanal får besked via `publishManagerEvent`.
 3. Medlem meddelar förhinder → `withdrawn`, platsen släpps.
@@ -226,11 +238,48 @@ pollar redan varje timme.
 
 ## Certifikat
 
-Pekar en aktivitet på ett certifikat ("Träverkstadsintro") kan hostens
-närvaroregistrering `attended` skapa attesteringen, med hosten som certifierare —
-förutsatt att
-hosten är certifierare för det certifikatet. Valfritt; kräver ingenting av
-grundmodellen och kan komma sist.
+Två relationer, som en aktivitet kan ha båda, en eller ingen av.
+
+### Krav — `requiredCertificateId`
+
+Man måste ha ett giltigt intyg för att få anmäla sig. Exemplet: teoriprovet för
+träverkstaden är kravet för att anmäla sig till den praktiska introduktionen.
+Kontrollen är serversidans, vid anmälan, mot en attestering som inte gått ut.
+Appen visar kravet på aktivitetssidan med länk till certifikatet, så den som
+saknar det hittar direkt till provet.
+
+Kravet sätts explicit på aktiviteten, även om det oftast är samma sak som målets
+förkunskap i `certificate.prerequisites`. Två skäl: en aktivitet kan kräva ett
+intyg utan att syfta till något (en fortsättningskurs), och att härleda krav ur
+en annan post gör det omöjligt att se på aktiviteten vad som gäller — samma
+resonemang som för visningskopplingen. Admin kan varna när de två inte stämmer
+överens, men systemet väljer inte åt någon.
+
+Kravet gäller anmälan, inte intresseanmälan: intresse får man ha innan man tagit
+provet — det är ju ofta därför man tar det.
+
+### Mål — `targetCertificateId` och `certificateGrant`
+
+Aktiviteten syftar till ett intyg. Hur det delas ut är ett val per aktivitet:
+
+**`onAttendance` — närvaro ger intyget.** När hosten registrerar `attended`
+skapas attesteringen direkt, med hosten som certifierare. Det förutsätter att
+hosten *får* certifiera det intyget enligt den befintliga regeln (`canCertify`:
+certifikatets `certifiers`-lista eller `certifierRole`). Därför kontrolleras det
+**när hosten sätts** på ett tillfälle av en sådan aktivitet — inte först vid
+närvaroregistreringen, då det är för sent. Passar det som är en ren genomgång:
+den som var med har fått informationen.
+
+**`manual` — intyget visas, hosten delar ut.** Certifikatet listas på
+aktivitetens och tillfällets sidor så det är lätt att hitta, men delas ut i det
+flöde som redan finns: deltagaren begär (`certificates.request`), hosten som
+certifierare godkänner (`certificates.confirm`) efter att deltagaren visat att hen
+kan de nödvändiga momenten. Passar det som kräver bedömning. Tillfällets sida kan
+visa hosten vilka av dagens deltagare som har en väntande begäran, så det inte
+blir ett letande i den allmänna listan.
+
+Ingen av relationerna kräver något av grundmodellen; de är fält och en kontroll
+till.
 
 ## Etapper
 
@@ -238,11 +287,12 @@ grundmodellen och kan komma sist.
    under `/activities`, hemsidans `kind: "activity"`. Ger det aktuella
    aktivitetsregistret på hemsidan direkt — ett av de mest konkreta problemen.
 2. **Anmälan, kö och erbjudanden.** Registreringar, intresseanmälan, malltyper,
-   push, den atomära accepteringen.
+   push, den atomära accepteringen, och kravet på intyg vid anmälan.
 3. **Incheckning, närvaro och påminnelser.** Fönster, deadline-jobb,
    `missedCheckIn`; hostens närvaroregistrering och `noShow`.
 4. **Kalendersynk.** Servicekonto, `googleEventId`, återförsök.
-5. *(valfritt)* **Certifikat.**
+5. **Mål-certifikat.** Visning på aktivitets- och tillfällessidor, hostens
+   väntande begäranden, och `onAttendance` med kontrollen vid host-tilldelning.
 
 ## Risker att bevaka
 
@@ -256,6 +306,12 @@ grundmodellen och kan komma sist.
   populär aktivitet där folk droppar av i följd. Deadline-fallet är löst genom
   att jobbet räknas som en händelse; det som återstår är förhinder ett och ett.
   Mät innan någon tröskel införs.
+- **Host som inte får certifiera** på en `onAttendance`-aktivitet skulle ge
+  närvaro utan intyg. Därför avvisas host-tilldelningen redan när tillfället
+  skapas, med ett tydligt fel — inte tyst nedgradering till `manual`.
+- **Intyg som går ut mellan anmälan och tillfälle.** Kravet kontrolleras vid
+  anmälan; att kontrollera det igen vid incheckning är billigt och rimligt, men
+  avgörs i etapp 3.
 - **Tidszon.** Alla tider i Europe/Stockholm; Google Calendar-händelser måste
   skapas med explicit tidszon, annars driver sommartiden dem en timme.
 - **Servicekontots nyckel** är en hemlighet på samma nivå som Swish-certifikaten.
