@@ -188,6 +188,7 @@ Template.Storage.helpers({
       warnings: StorageWarnings.find().fetch(),
       exemptions: StorageExemptions.find().fetch(),
       moves: StorageMoves.find().fetch(),
+      users: Meteor.users.find().fetch(),
     }).filter((row) => (!filters.member_id || row.ownerIds.includes(filters.member_id))
       && (!filters.unit_id || row.unitIds.includes(filters.unit_id)))
       .slice(0, 500)
@@ -240,10 +241,14 @@ Template.Storage.events({
   'change .storage-owner-filter'(e, i) { i.state.set('filters', { ...(i.state.get('filters') || {}), owner: e.currentTarget.checked }); },
   'change .storage-overdue-filter'(e, i) { i.state.set('filters', { ...(i.state.get('filters') || {}), overdue: e.currentTarget.checked }); },
   'input .storage-queue-search'(e, i) { i.state.set('queueQuery', e.currentTarget.value); },
-  'change .storage-event-filter'(e, i) {
+  'input .storage-event-filter'(e, i) {
+    const input = e.currentTarget;
+    const match = [...(input.list?.options || [])].find((option) => option.value === input.value);
+    input.setCustomValidity(input.value && !match ? 'Choose a value from the suggestions.' : '');
+    if (input.value && !match) return;
     i.state.set('eventFilters', {
       ...(i.state.get('eventFilters') || {}),
-      [e.currentTarget.dataset.filter]: e.currentTarget.value,
+      [input.dataset.filter]: match?.dataset.id || '',
     });
   },
   'click .clear-storage-event-filters'(e, i) {

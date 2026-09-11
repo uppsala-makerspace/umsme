@@ -63,7 +63,7 @@
 .storage-history { max-height: 22rem; overflow-y: auto; }
 .storage-event-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .8rem; margin: 1rem 0; }
 .storage-event-filters label { display: flex; flex-direction: column; font-weight: 600; }
-.storage-event-filters select { width: 100%; font-weight: normal; }
+.storage-event-filters input { width: 100%; font-weight: normal; }
 .storage-event-table-wrap { max-height: 38rem; overflow: auto; border: 1px solid #ddd; }
 .storage-event-table { margin-bottom: 0; }
 .storage-event-table th { position: sticky; z-index: 1; top: 0; background: #f4f6f7; }

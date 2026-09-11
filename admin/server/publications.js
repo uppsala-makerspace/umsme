@@ -88,6 +88,7 @@ export default () => {
       StorageMoves.find(),
       StorageNotificationDeliveries.find(),
       Members.find({}, { fields: { name: 1, mid: 1, email: 1, mobile: 1, lab: 1, infamily: 1 } }),
+      Meteor.users.find({}, { fields: { 'emails.address': 1, profile: 1 } }),
     ];
   });
 

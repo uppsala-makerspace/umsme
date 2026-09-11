@@ -190,10 +190,17 @@ describe('storage admin presentation', function () {
   it('presents event rows with related member and storage-unit names', function () {
     const rows = storageEventRows({
       events: [
-        { _id: 'older', entity_type: 'storageAssignment', entity_id: 'a1', event_type: 'assignment_created', actor_type: 'administrator', actor: 'admin-1', occurred_at: new Date('2026-09-10') },
-        { _id: 'newer', entity_type: 'storageMove', entity_id: 'mv1', event_type: 'move_reserved', actor_type: 'member', actor: 'user-1', occurred_at: new Date('2026-09-11'), details: { to_unit: 'u2' } },
+        { _id: 'older', entity_type: 'storageAssignment', entity_id: 'a1', event_type: 'assignment_created', actor_type: 'administrator', actor: 'admin-user', occurred_at: new Date('2026-09-10') },
+        { _id: 'newer', entity_type: 'storageMove', entity_id: 'mv1', event_type: 'move_reserved', actor_type: 'member', actor: 'member-user', occurred_at: new Date('2026-09-11'), details: { to_unit: 'u2' } },
       ],
-      members: [{ _id: 'm1', name: 'Ada Lovelace' }],
+      members: [
+        { _id: 'm1', name: 'Ada Lovelace', email: 'ada@example.com' },
+        { _id: 'admin-member', name: 'Admin User', email: 'admin@example.com' },
+      ],
+      users: [
+        { _id: 'member-user', emails: [{ address: 'Ada@example.com' }] },
+        { _id: 'admin-user', emails: [{ address: 'admin@example.com' }] },
+      ],
       units: [{ _id: 'u1', name: '1001' }, { _id: 'u2', name: '2001' }],
       assignments: [{ _id: 'a1', owner: 'm1', unit: 'u1' }],
       moves: [{ _id: 'mv1', owner: 'm1', from_unit: 'u1', to_unit: 'u2', from_assignment: 'a1' }],
@@ -202,6 +209,22 @@ describe('storage admin presentation', function () {
     assert.strictEqual(rows[0].memberLabel, 'Ada Lovelace');
     assert.strictEqual(rows[0].unitLabel, '1001, 2001');
     assert.strictEqual(rows[0].eventLabel, 'Move reserved');
-    assert.strictEqual(rows[1].actorLabel, 'Administrator · admin-1');
+    assert.strictEqual(rows[0].actorLabel, 'Member · Ada Lovelace');
+    assert.strictEqual(rows[1].actorLabel, 'Administrator · Admin User');
+  });
+
+  it('uses readable system actor labels and never exposes an unknown actor id', function () {
+    const [seed] = storageEventRows({ events: [{
+      _id: 'seed', entity_type: 'storageMigration', entity_id: 'migration',
+      event_type: 'legacy_storage_migration_applied', actor_type: 'system',
+      actor: '__e2e_seed__', occurred_at: new Date('2026-09-11'),
+    }] });
+    assert.strictEqual(seed.actorLabel, 'System · Test data setup');
+    const [unknown] = storageEventRows({ events: [{
+      _id: 'unknown', entity_type: 'storageUnit', entity_id: 'u1',
+      event_type: 'unit_updated', actor_type: 'administrator',
+      actor: 'opaque-database-id', occurred_at: new Date('2026-09-11'),
+    }] });
+    assert.strictEqual(unknown.actorLabel, 'Administrator');
   });
 });

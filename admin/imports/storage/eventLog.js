@@ -67,12 +67,30 @@ const eventLabel = (value) => String(value || 'unknown event')
 
 export const storageEventRows = ({
   events = [], members = [], units = [], assignments = [], requests = [],
-  warnings = [], exemptions = [], moves = [],
+  warnings = [], exemptions = [], moves = [], users = [],
 }) => {
   const records = { assignments, requests, warnings, exemptions, moves };
   const relationsFor = createRelationsResolver(records);
   const memberById = indexById(members);
   const unitById = indexById(units);
+  const memberByEmail = new Map(members
+    .filter(({ email }) => email)
+    .map((member) => [member.email.toLowerCase(), member]));
+  const userById = indexById(users);
+  const actorLabel = (event) => {
+    const actorType = eventLabel(event.actor_type);
+    if (event.actor_type === 'system') {
+      return `${actorType} · ${event.actor === '__e2e_seed__' ? 'Test data setup' : 'Automatic reconciliation'}`;
+    }
+    const directMember = memberById.get(event.actor);
+    const user = userById.get(event.actor);
+    const accountMember = (user?.emails || [])
+      .map(({ address }) => memberByEmail.get(String(address || '').toLowerCase()))
+      .find(Boolean);
+    const readableActor = directMember?.name || accountMember?.name
+      || user?.profile?.name || user?.emails?.[0]?.address;
+    return [actorType, readableActor].filter(Boolean).join(' · ') || '—';
+  };
   return [...events]
     .sort((left, right) => new Date(right.occurred_at) - new Date(left.occurred_at)
       || String(right._id).localeCompare(String(left._id)))
@@ -86,7 +104,7 @@ export const storageEventRows = ({
         entityLabel: eventLabel(event.entity_type),
         memberLabel: related.owners.map((id) => memberById.get(id)?.name || id).join(', ') || '—',
         unitLabel: related.units.map((id) => unitById.get(id)?.name || id).join(', ') || '—',
-        actorLabel: [event.actor_type && eventLabel(event.actor_type), event.actor].filter(Boolean).join(' · ') || '—',
+        actorLabel: actorLabel(event),
         detailsLabel: event.details && Object.keys(event.details).length
           ? JSON.stringify(event.details, null, 2)
           : '',
