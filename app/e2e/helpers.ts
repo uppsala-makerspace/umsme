@@ -35,6 +35,31 @@ export const testUsers = {
     password: 'password123',
     name: 'Family Payer',
   },
+  storageDependent: {
+    email: 'storage-dependent@test.com',
+    password: 'password123',
+    name: 'Storage Family Member',
+  },
+  storageWarning: {
+    email: 'storage-warning@test.com',
+    password: 'password123',
+    name: 'Storage Warning Member',
+  },
+  storageClearance: {
+    email: 'storage-clearance@test.com',
+    password: 'password123',
+    name: 'Storage Clearance Member',
+  },
+  storageMove: {
+    email: 'storage-move@test.com',
+    password: 'password123',
+    name: 'Storage Move Member',
+  },
+  storageRetry: {
+    email: 'storage-retry@test.com',
+    password: 'password123',
+    name: 'Storage Retry Member',
+  },
   invited: {
     email: 'invited@test.com',
     password: 'password123',

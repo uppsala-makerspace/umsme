@@ -1,7 +1,6 @@
 {
   "public": {
     "checkPath": "http://example.com#",
-    "vapidPublicKey": "test-vapid-public-key",
     "googleCalendar": {
       "apiKey": "test-calendar-api-key",
       "calendarId": "test@group.calendar.google.com"
@@ -16,7 +15,6 @@
     }
   },
   "private": {
-    "vapidPrivateKey": "test-vapid-private-key",
     "homeAssistant": {
       "url": "http://localhost:8123",
       "token": "test-token",
