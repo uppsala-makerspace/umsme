@@ -532,6 +532,10 @@ Storage email is sent as `Uppsala Makerspace Hyllplats
 <hyllplats@uppsalamakerspace.se>`. SMTP credentials are deployment secrets and
 must not be stored in this repository.
 
+Generated subjects, email bodies, and SMS messages contain Swedish first and
+English second. The two language blocks are separated by dashes; dates are
+formatted in the language of their block.
+
 Automatic communication applies to confirmed suggested actions for:
 
 - assignment;

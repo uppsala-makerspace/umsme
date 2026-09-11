@@ -85,8 +85,21 @@ describe('storage notification delivery', function () {
       assert.strictEqual(rendered.sender_from, STORAGE_NOTIFICATION_FROM);
       assert.strictEqual(rendered.reply_to, STORAGE_NOTIFICATION_REPLY_TO);
       assert(rendered.subject && rendered.email && rendered.sms);
+      assert.match(rendered.subject, / — /);
+      assert.match(rendered.email, /\n\n---\n\n/);
+      assert.match(rendered.sms, / — /);
     }
     assert.strictEqual(renderStorageNotification('unknown').status, 'missing_template');
+  });
+
+  it('renders deadlines in Swedish and English in the corresponding message blocks', function () {
+    const rendered = renderStorageNotification('move', {
+      owner_name: 'Anna', unit_name: '1001', deadline_at: new Date('2026-10-01T00:00:00Z'),
+    });
+    assert.match(rendered.email, /1 oktober 2026/);
+    assert.match(rendered.email, /1 October 2026/);
+    assert.match(rendered.email, /You are in the queue to change storage units/);
+    assert.match(rendered.sms, /New storage unit \(1001\) is reserved/);
   });
 
   it('normalizes only valid Swedish mobile numbers to E.164', function () {
