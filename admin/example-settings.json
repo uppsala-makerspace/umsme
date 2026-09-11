@@ -49,6 +49,11 @@
     ]
   },
   "private": {
+    "mailUrl": "smtps://GMAIL_USERNAME:GMAIL_APP_PASSWORD@smtp.gmail.com:465",
+    "storageNotifications": {
+      "worker": { "enabled": false, "intervalMs": 30000 },
+      "sms": { "provider": "disabled" }
+    },
     "vapidPrivateKey": "F7hcqyRl7P27b3dALstLwz__2lK-NHNZRgxqzCL9HUo",
     "notificationsPath": "private/notifications.json",
     "notifyExpiringTime": "at 09:00 am",

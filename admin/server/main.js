@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import '/imports/common/collections/users';
 import '/imports/common/collections/storeItemsDeny';
 import '/imports/common/server/familyCascade';
+import '/imports/common/server/storage/membershipSync';
 import './cronjob';
 import './methods';
 import './api/certificatesRfid';
@@ -14,6 +15,11 @@ import publications from './publications';
 import setupAccounts from './accounts';
 import runMigrations from './migrations';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
+import { startStorageNotificationWorker } from '/imports/common/server/storageNotifications/worker';
+
+if (Meteor.settings?.private?.mailUrl) {
+  process.env.MAIL_URL = Meteor.settings.private.mailUrl;
+}
 
 Meteor.startup(async () => {
   await adminAvailable();
@@ -21,4 +27,5 @@ Meteor.startup(async () => {
   await ensureStorageIndexes();
   await runMigrations();
   publications();
+  startStorageNotificationWorker();
 });
