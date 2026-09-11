@@ -70,8 +70,18 @@ describe('storage server suggestions', function () {
     const before = new Date('2026-09-03T12:00:00.000Z');
     assert.strictEqual(buildStorageSuggestions('remind', state, before).rows.length, 1);
     assert.strictEqual(buildStorageSuggestions('remind', state, now).rows.length, 0);
-    assert.strictEqual(buildStorageSuggestions('reclaim', state, now).rows.length, 1);
-    state.deliveries = [{ decision_type: 'reminder', decision_id: 'warning' }];
+    const manualContact = buildStorageSuggestions('reclaim', state, now).rows[0];
+    assert.strictEqual(manualContact.manual_contact_required, true);
+    assert.strictEqual(manualContact.warning_delivered, false);
+    state.deliveries.push({
+      _id: 'warning-delivery', decision_type: 'warning', decision_id: 'warning',
+      email: { status: 'sent' }, sms: { status: 'failed' }, updatedAt: timestamp,
+    });
+    const delivered = buildStorageSuggestions('reclaim', state, now).rows[0];
+    assert.strictEqual(delivered.manual_contact_required, false);
+    assert.strictEqual(delivered.warning_delivered, true);
+    assert.notStrictEqual(delivered.suggestion_id, manualContact.suggestion_id);
+    state.deliveries.push({ decision_type: 'reminder', decision_id: 'warning' });
     assert.strictEqual(buildStorageSuggestions('remind', state, before).rows.length, 0);
   });
 

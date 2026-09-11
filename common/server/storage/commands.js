@@ -9,6 +9,7 @@ import {
   StorageWarnings,
   StorageExemptions,
   StorageMoves,
+  StorageNotificationDeliveries,
   StorageActionExecutions,
 } from '/imports/common/collections/storage';
 import {
@@ -219,11 +220,35 @@ const applyReminder = async (records, actor, now, session, journal, ids = {}) =>
   return { decision_id: warning._id, delivery_id: deliveryId };
 };
 
-const endForClearance = async ({ records, actor, now, reason, request, warning, session, journal, ids = {} }) => {
+const endForClearance = async ({
+  records, actor, now, reason, request, warning, contactConfirmation, session, journal, ids = {},
+}) => {
   const { owner, unit, assignment } = records;
   ensure(owner && unit && assignment && !assignment.ended_at, 'Assignment state is missing');
   const exemption = await StorageExemptions.findOneAsync({ assignment: assignment._id, active: true });
   if (reason === 'reclaimed') ensure(!isStorageExemptionActive(exemption, now), 'Assignment is exempt');
+  let warningContact;
+  let manualContactReason;
+  if (reason === 'reclaimed') {
+    ensure(warning?.warning_status === 'open' && warning.assignment === assignment._id,
+      'Open warning state is missing');
+    const successfulDelivery = await StorageNotificationDeliveries.findOneAsync({
+      decision_type: 'warning',
+      decision_id: warning?._id,
+      $or: [{ 'email.status': 'sent' }, { 'sms.status': 'sent' }],
+    });
+    if (successfulDelivery) {
+      warningContact = 'notification_delivered';
+    } else {
+      manualContactReason = typeof contactConfirmation?.reason === 'string'
+        ? contactConfirmation.reason.trim()
+        : '';
+      ensure(manualContactReason.length <= 5000, 'Manual contact reason is too long');
+      ensure(contactConfirmation?.confirmed === true && manualContactReason.length > 0,
+        'Reclamation requires a delivered warning or confirmed manual contact with a reason');
+      warningContact = 'manual_contact_confirmed';
+    }
+  }
   await runStep(journal, 'assignment_ended', () => ensureStorageUpdate(StorageAssignments, assignment._id,
     { ended_at: { $exists: false }, updatedAt: assignment.updatedAt },
     { $set: { ended_at: now, ended_by: actor, ended_reason: reason, updatedAt: now } },
@@ -247,7 +272,10 @@ const endForClearance = async ({ records, actor, now, reason, request, warning, 
       { session }));
   }
   await runStep(journal, 'event_inserted', () => event('storageAssignment', assignment._id, 'assignment_ended', actor, now,
-    { unit: unit._id, owner: owner._id, reason }, session, undefined, ids.event));
+    {
+      unit: unit._id, owner: owner._id, reason,
+      ...(warningContact ? { warning_contact: warningContact } : {}),
+    }, session, manualContactReason || undefined, ids.event));
   const decisionType = reason === 'reclaimed' ? 'reclamation' : 'voluntary_release';
   let deliveryId = ids.delivery;
   await runStep(journal, 'outbox_inserted', async () => {
@@ -394,7 +422,14 @@ const applySuggestedAction = async (action, row, selection, actor, now, session,
   if (action === 'warn') return applyWarning(records, actor, now, session, journal, ids);
   if (action === 'remind') return applyReminder(records, actor, now, session, journal, ids);
   if (action === 'reclaim') {
-    return endForClearance({ records, actor, now, reason: 'reclaimed', warning: records.warning, session, journal, ids });
+    return endForClearance({
+      records, actor, now, reason: 'reclaimed', warning: records.warning,
+      contactConfirmation: {
+        confirmed: selection.manual_contact_confirmed === true,
+        reason: selection.manual_contact_reason,
+      },
+      session, journal, ids,
+    });
   }
   if (action === 'release') {
     return endForClearance({ records, actor, now, reason: 'voluntary_release', request: records.request, session, journal, ids });

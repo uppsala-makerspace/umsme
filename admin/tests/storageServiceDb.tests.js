@@ -190,6 +190,112 @@ describe('storage server database workflow', function () {
     assert.strictEqual(await StorageNotificationDeliveries.find({ decision_type: 'warning' }).countAsync(), 1);
   });
 
+  it('requires delivered warning evidence or an audited manual-contact reason before reclamation', async function () {
+    const created = new Date(Date.now() - 40 * 86400000);
+    const ownerId = `${prefix}reclaim-owner`;
+    const unitId = `${prefix}reclaim-unit`;
+    const assignmentId = `${prefix}reclaim-assignment`;
+    const warningId = `${prefix}reclaim-warning`;
+    await Members.insertAsync({
+      _id: ownerId, mid: 'ssrc', name: 'Reclamation Contact',
+      email: 'reclaim@example.com', lab: created,
+    });
+    await StorageUnits.insertAsync({
+      _id: unitId, name: unitId, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`,
+      column: 92, row: 1, availability_status: 'occupied', owner: ownerId,
+      createdAt: created, updatedAt: created,
+    });
+    await StorageAssignments.insertAsync({
+      _id: assignmentId, unit: unitId, owner: ownerId, assigned_at: created,
+      assigned_by: `${prefix}admin`, createdAt: created, updatedAt: created,
+    });
+    await StorageWarnings.insertAsync({
+      _id: warningId, assignment: assignmentId, owner: ownerId, warned_at: created,
+      warned_by: `${prefix}admin`, deadline_at: new Date(created.getTime() + 28 * 86400000),
+      warning_status: 'open', createdAt: created, updatedAt: created,
+    });
+    await StorageNotificationDeliveries.insertAsync({
+      _id: `${prefix}failed-warning-delivery`, owner: ownerId,
+      decision_type: 'warning', decision_id: warningId,
+      render_status: 'render_failed', render_error: 'Test delivery failure',
+      email: { status: 'failed', attempts: 1 }, sms: { status: 'unavailable', attempts: 0 },
+      created_at: created, created_by: `${prefix}admin`, updatedAt: created,
+    });
+
+    const preview = await previewStorageSuggestions('reclaim');
+    assert.strictEqual(preview.rows[0].manual_contact_required, true);
+    const withoutEvidence = await confirmStorageSuggestions({
+      action: 'reclaim', commandId: `${prefix}reclaim-without-evidence`, actor: `${prefix}admin`,
+      selections: [{ suggestion_id: preview.rows[0].suggestion_id }],
+    });
+    assert.strictEqual(withoutEvidence.results[0].status, 'conflict');
+    assert.match(withoutEvidence.results[0].reason, /delivered warning or confirmed manual contact/);
+    assert.strictEqual((await StorageAssignments.findOneAsync(assignmentId)).ended_at, undefined);
+
+    const manualReason = 'Spoke with the member by telephone on 2026-09-10.';
+    const confirmed = await confirmStorageSuggestions({
+      action: 'reclaim', commandId: `${prefix}reclaim-manual-contact`, actor: `${prefix}admin`,
+      selections: [{
+        suggestion_id: preview.rows[0].suggestion_id,
+        manual_contact_confirmed: true,
+        manual_contact_reason: manualReason,
+      }],
+    });
+    assert.strictEqual(confirmed.results[0].status, 'applied');
+    const audit = await StorageEvents.findOneAsync({ event_type: 'assignment_ended', entity_id: assignmentId });
+    assert.strictEqual(audit.reason, manualReason);
+    assert.strictEqual(audit.details.warning_contact, 'manual_contact_confirmed');
+
+    const deliveredOwnerId = `${prefix}delivered-reclaim-owner`;
+    const deliveredUnitId = `${prefix}delivered-reclaim-unit`;
+    const deliveredAssignmentId = `${prefix}delivered-reclaim-assignment`;
+    const deliveredWarningId = `${prefix}delivered-reclaim-warning`;
+    await Members.insertAsync({
+      _id: deliveredOwnerId, mid: 'ssrd', name: 'Delivered Reclamation',
+      email: 'delivered@example.com', lab: created,
+    });
+    await StorageUnits.insertAsync({
+      _id: deliveredUnitId, name: deliveredUnitId, floor: 'floor1', height: 'low',
+      wall_id: `${prefix}wall`, column: 93, row: 1, availability_status: 'occupied',
+      owner: deliveredOwnerId, createdAt: created, updatedAt: created,
+    });
+    await StorageAssignments.insertAsync({
+      _id: deliveredAssignmentId, unit: deliveredUnitId, owner: deliveredOwnerId,
+      assigned_at: created, assigned_by: `${prefix}admin`, createdAt: created, updatedAt: created,
+    });
+    await StorageWarnings.insertAsync({
+      _id: deliveredWarningId, assignment: deliveredAssignmentId, owner: deliveredOwnerId,
+      warned_at: created, warned_by: `${prefix}admin`,
+      deadline_at: new Date(created.getTime() + 28 * 86400000),
+      warning_status: 'open', createdAt: created, updatedAt: created,
+    });
+    await StorageNotificationDeliveries.insertAsync({
+      _id: `${prefix}sent-warning-delivery`, owner: deliveredOwnerId,
+      decision_type: 'warning', decision_id: deliveredWarningId,
+      render_status: 'rendered', recipient_email: 'delivered@example.com',
+      sender_from: 'Uppsala Makerspace Hyllplats <hyllplats@uppsalamakerspace.se>',
+      reply_to: 'hyllplats@uppsalamakerspace.se', template_id: 'storage.warning.v1',
+      message_id: `${prefix}sent-warning-message`, rendered_subject: 'Test warning',
+      rendered_email: 'Test warning body', rendered_sms: 'Test warning SMS',
+      email: { status: 'sent', attempts: 1, sent_at: created },
+      sms: { status: 'unavailable', attempts: 0 },
+      created_at: created, created_by: `${prefix}admin`, updatedAt: created,
+    });
+    const deliveredPreview = await previewStorageSuggestions('reclaim');
+    const deliveredRow = deliveredPreview.rows.find(({ owner }) => owner === deliveredOwnerId);
+    assert.strictEqual(deliveredRow.manual_contact_required, false);
+    const deliveredResult = await confirmStorageSuggestions({
+      action: 'reclaim', commandId: `${prefix}reclaim-delivered`, actor: `${prefix}admin`,
+      selections: [{ suggestion_id: deliveredRow.suggestion_id }],
+    });
+    assert.strictEqual(deliveredResult.results[0].status, 'applied');
+    const deliveredAudit = await StorageEvents.findOneAsync({
+      event_type: 'assignment_ended', entity_id: deliveredAssignmentId,
+    });
+    assert.strictEqual(deliveredAudit.reason, undefined);
+    assert.strictEqual(deliveredAudit.details.warning_contact, 'notification_delivered');
+  });
+
   it('resumes member and manual audit writes without duplicating domain records', async function () {
     const created = now();
     const owner = { _id: `${prefix}member-journal`, mid: 'ssjm', name: 'Member Journal', lab: future() };

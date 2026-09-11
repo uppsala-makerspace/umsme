@@ -49,6 +49,8 @@ export const storageSuggestionId = (action, state) => {
 const version = (record) => record
   ? `${record._id}:${iso(record.updatedAt)}:${iso(record.lab)}`
   : null;
+export const warningDeliverySucceeded = (delivery) =>
+  delivery?.email?.status === 'sent' || delivery?.sms?.status === 'sent';
 const expectedChannels = (owner) => {
   const smsProvider = Meteor.settings?.private?.storageNotifications?.sms?.provider;
   return {
@@ -57,13 +59,14 @@ const expectedChannels = (owner) => {
   };
 };
 
-const row = ({ action, owner, unit, request, assignment, warning, move, reason, phase }) => {
+const row = ({ action, owner, unit, request, assignment, warning, warningDelivery, move, reason, phase }) => {
   const state = {
     owner: version(owner),
     unit: version(unit),
     request: version(request),
     assignment: version(assignment),
     warning: version(warning),
+    warningDelivery: version(warningDelivery),
     move: version(move),
   };
   return {
@@ -79,6 +82,10 @@ const row = ({ action, owner, unit, request, assignment, warning, move, reason, 
     request: request?._id,
     assignment: assignment?._id,
     warning: warning?._id,
+    ...(action === 'reclaim' ? {
+      warning_delivered: warningDeliverySucceeded(warningDelivery),
+      manual_contact_required: !warningDeliverySucceeded(warningDelivery),
+    } : {}),
     move: move?._id,
     reason_code: reason,
     ...(phase ? { phase } : {}),
@@ -130,6 +137,10 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
   const reminderDecisionIds = new Set(
     state.deliveries.filter((delivery) => delivery.decision_type === 'reminder')
       .map((delivery) => delivery.decision_id),
+  );
+  const warningDeliveryByDecision = new Map(
+    state.deliveries.filter((delivery) => delivery.decision_type === 'warning')
+      .map((delivery) => [delivery.decision_id, delivery]),
   );
   const rows = [];
   const skipped = [];
@@ -197,6 +208,7 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
         unit,
         assignment,
         warning,
+        warningDelivery: warningDeliveryByDecision.get(warning._id),
         reason: action === 'remind' ? 'warning_age_21_days' : 'warning_deadline_passed',
       }));
     }

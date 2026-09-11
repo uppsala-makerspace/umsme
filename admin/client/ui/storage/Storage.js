@@ -50,6 +50,8 @@ const viewRow = (row, selected, options) => ({
   channels: [row.expected_channels?.email === 'available' ? 'Email' : null, row.expected_channels?.sms === 'available' ? 'SMS' : null].filter(Boolean).join(' + ') || 'No valid channel',
   allocationMove: row.action === 'allocate' && row.decision_type === 'move',
   expiredMove: row.action === 'review_expired_moves',
+  reclamation: row.action === 'reclaim',
+  warningContactLabel: row.warning_delivered ? 'Warning delivered' : 'No delivered warning',
 });
 
 const requestEditorView = (editor) => {
@@ -135,7 +137,15 @@ Template.Storage.helpers({
   previewRows() { const state = Template.instance().state; const selected = state.get('selected') || {}; const options = state.get('rowOptions') || {}; return (state.get('preview')?.rows || []).map((row) => viewRow(row, selected[row.suggestion_id] !== false, options[row.suggestion_id] || {})); },
   retryRows() { const state = Template.instance().state; const selected = state.get('selected') || {}; return (state.get('preview')?.rows || []).map((row) => { const delivery = StorageNotificationDeliveries.findOne(row.delivery); return { ...row, ...delivery, renderStatus: delivery?.render_status || '—', selectionId: row.suggestion_id, selected: selected[row.suggestion_id] !== false, ownerName: row.member_name, failure: [delivery?.render_error, delivery?.email?.last_error, delivery?.sms?.last_error].filter(Boolean).join(' · ') }; }); },
   selectedCount() { const state = Template.instance().state; const selected = state.get('selected') || {}; return (state.get('preview')?.rows || []).filter(({ suggestion_id }) => selected[suggestion_id] !== false).length; },
-  confirmDisabled() { const state = Template.instance().state; const selected = state.get('selected') || {}; return state.get('busy') || !(state.get('preview')?.rows || []).some(({ suggestion_id }) => selected[suggestion_id] !== false); },
+  confirmDisabled() {
+    const state = Template.instance().state;
+    const selected = state.get('selected') || {};
+    const options = state.get('rowOptions') || {};
+    const rows = (state.get('preview')?.rows || []).filter(({ suggestion_id }) => selected[suggestion_id] !== false);
+    return state.get('busy') || !rows.length || rows.some((row) => row.manual_contact_required &&
+      (options[row.suggestion_id]?.manual_contact_confirmed !== true ||
+       !options[row.suggestion_id]?.manual_contact_reason?.trim()));
+  },
   batchResults: () => Template.instance().state.get('results'), createUnitOpen: () => Template.instance().state.get('createUnitOpen'),
   storageQueue() {
     return filterStorageQueue(storageQueueRows({
@@ -215,6 +225,8 @@ Template.Storage.events({
   'click .close-preview'(e, i) { e.preventDefault(); i.state.set('previewAction', ''); },
   'change .select-suggestion, change .select-retry'(e, i) { i.state.set('selected', { ...(i.state.get('selected') || {}), [e.currentTarget.dataset.id]: e.currentTarget.checked }); },
   'change .requires-inspection'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), requires_inspection: e.currentTarget.checked } }); },
+  'change .manual-contact-confirmed'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), manual_contact_confirmed: e.currentTarget.checked } }); },
+  'input .manual-contact-reason'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), manual_contact_reason: e.currentTarget.value } }); },
   'change .move-resolution'(e, i) { const id = e.currentTarget.dataset.id, resolution = e.currentTarget.value; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { resolution, ...(resolution === 'extend' ? { extend_to: new Date(Date.now() + 14 * 86400000) } : {}) } }); },
   async 'click .confirm-preview'(e, i) {
     e.preventDefault(); const action = i.state.get('previewAction'), selected = i.state.get('selected') || {}, original = i.state.get('preview')?.rows || [];

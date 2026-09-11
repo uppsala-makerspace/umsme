@@ -189,6 +189,8 @@ after lab expiry.
 - Families consistently resolve to the payer.
 - Renewal resolves warnings and resumes requests without communication.
 - External delivery never starts before the decision commits.
+- Reclamation requires a successfully delivered warning or an explicit,
+  reasoned administrator confirmation of manual contact.
 
 ## 5. Phase 4 — Email and SMS delivery
 

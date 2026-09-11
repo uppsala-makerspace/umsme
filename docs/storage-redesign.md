@@ -510,6 +510,7 @@ open warning (deadline in 28 days)
     -> after 21 days: reminder suggested
     -> administrator confirms reminder batch
     -> after 28 days: reclamation suggested
+    -> delivered warning, or administrator records manual contact and a reason
     -> administrator confirms reclamation
 assignment ended; unit awaiting_clearance
     -> administrator confirms physical clearance
@@ -522,6 +523,13 @@ deliveries remain.
 
 An active exemption keeps the assignment visible but removes it from warning
 and reclamation suggestions.
+
+The warning clock starts when the warning batch is confirmed, but a passed
+deadline is not sufficient evidence for reclamation. At least one warning
+channel must have status `sent`. If no channel succeeded, the reclamation row
+requires an explicit manual-contact confirmation and a reason. The server
+rechecks this evidence when the batch is confirmed and records the evidence in
+the assignment-ended event.
 
 ### 7.4 Voluntary release
 
@@ -592,7 +600,7 @@ The existing admin `/storage` page gains a panel with live counts:
 | Make assignments | Proposals from the three-phase allocator |
 | Send warnings | Ineligible occupied assignments without a warning or exemption |
 | Send reminders | Open warnings at least 21 days old without the suggested reminder |
-| Reclaim assignments | Still-ineligible open warnings whose 28-day deadline passed |
+| Reclaim assignments | Still-ineligible open warnings whose 28-day deadline passed; confirmation requires delivered-warning or manual-contact evidence |
 | Process voluntary releases | Active release requests |
 | Review expired moves | Pending moves beyond their 14-day deadline |
 | Confirm physical clearances | Units in `awaiting_clearance` |

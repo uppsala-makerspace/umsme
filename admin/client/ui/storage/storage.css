@@ -27,6 +27,9 @@
 .storage-advanced-request summary { cursor: pointer; font-weight: 700; }
 .storage-advanced-request .storage-form { margin-bottom: 0; }
 .storage-confirm-bar { position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem; background: #eef4f7; }
+.storage-contact-evidence { display: grid; gap: .35rem; min-width: 230px; margin-top: .45rem; padding: .5rem; background: #fff4dd; border-left: 3px solid #d98200; }
+.storage-contact-evidence label { margin: 0; font-weight: normal; }
+.storage-contact-evidence input[type="text"] { width: 100%; }
 .storage-filters, .storage-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: .8rem; margin: 1rem 0; }
 .storage-filters label, .storage-form label { display: flex; flex-direction: column; font-weight: 600; }
 .storage-filters .storage-filter-checkbox { align-self: end; flex-direction: row; align-items: center; gap: .45rem; min-height: 34px; margin: 0; }
