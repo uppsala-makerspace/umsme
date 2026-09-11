@@ -377,6 +377,11 @@ Domain collections remain the source of current state. Events provide a single
 chronology for request changes, renewals, warnings, exemptions, assignments,
 moves, clearances, overrides, and delivery retries.
 
+The administrator dashboard exposes the newest 500 events as a read-only log.
+Administrators and board members can filter it by member, storage unit, or both;
+historical assignment and move records preserve those relationships after a
+unit changes owner.
+
 ### 5.9 `storageActionExecutions`
 
 Durable per-row receipts make batch confirmation safe to retry after a network

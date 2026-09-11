@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import { check } from 'meteor/check';
+import { check, Match } from 'meteor/check';
 import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
 import { MessageTemplates } from '/imports/common/collections/templates';
@@ -32,6 +32,7 @@ import {
   StorageNotificationDeliveries,
   StorageEvents,
 } from '/imports/common/collections/storage';
+import { storageEventEntityIds } from '/imports/storage/eventLog';
 
 const createAuthFuncForRoles = (col, roles) => async function () {
   if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
@@ -98,6 +99,36 @@ export default () => {
     }
     if (entityIds.length > 20) throw new Meteor.Error('bad-request', 'Too many storage history entities');
     return StorageEvents.find({ entity_id: { $in: entityIds } }, { sort: { occurred_at: -1 }, limit: 500 });
+  });
+
+  Meteor.publish('storageAdminEventLog', async function (filters = {}) {
+    check(filters, {
+      member_id: Match.Maybe(String),
+      unit_id: Match.Maybe(String),
+    });
+    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))) {
+      this.ready();
+      return undefined;
+    }
+    const memberId = filters.member_id || undefined;
+    const unitId = filters.unit_id || undefined;
+    if (!memberId && !unitId) {
+      return StorageEvents.find({}, { sort: { occurred_at: -1 }, limit: 500 });
+    }
+    const [assignments, requests, warnings, exemptions, moves] = await Promise.all([
+      StorageAssignments.find().fetchAsync(),
+      StorageRequests.find().fetchAsync(),
+      StorageWarnings.find().fetchAsync(),
+      StorageExemptions.find().fetchAsync(),
+      StorageMoves.find().fetchAsync(),
+    ]);
+    const entityIds = storageEventEntityIds({
+      memberId, unitId, assignments, requests, warnings, exemptions, moves,
+    });
+    return StorageEvents.find(
+      entityIds.length ? { entity_id: { $in: entityIds } } : { _id: '__no_storage_events__' },
+      { sort: { occurred_at: -1 }, limit: 500 },
+    );
   });
 
   Meteor.publish(null, async function () {

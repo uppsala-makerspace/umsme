@@ -61,6 +61,17 @@
 .storage-inline-form, .storage-subpanel { margin-top: 1rem; padding: 1rem; border: 1px solid #ddd; background: #fafafa; }
 .storage-inline-form { display: flex; flex-wrap: wrap; align-items: end; gap: .7rem; }
 .storage-history { max-height: 22rem; overflow-y: auto; }
+.storage-event-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .8rem; margin: 1rem 0; }
+.storage-event-filters label { display: flex; flex-direction: column; font-weight: 600; }
+.storage-event-filters select { width: 100%; font-weight: normal; }
+.storage-event-table-wrap { max-height: 38rem; overflow: auto; border: 1px solid #ddd; }
+.storage-event-table { margin-bottom: 0; }
+.storage-event-table th { position: sticky; z-index: 1; top: 0; background: #f4f6f7; }
+.storage-event-table td:first-child { min-width: 165px; white-space: nowrap; }
+.storage-event-table td:nth-child(2) { min-width: 190px; }
+.storage-event-table details { margin-top: .35rem; }
+.storage-event-table summary { cursor: pointer; }
+.storage-event-table pre { max-width: 42rem; margin: .35rem 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
 .storage-result-applied, .storage-result-already_applied { color: #2e7d32; }
 .storage-result-stale, .storage-result-conflict { color: #9a6700; }
 .storage-result-failed { color: #b71c1c; }

@@ -12,6 +12,7 @@ import {
   joinStorageResults, sameSuggestionSet, storageReadinessPresentation,
   storageMemberLabel, storageQueueRows, storageStatusClass, storageStatusLabel,
 } from '/imports/storage/presentation';
+import { storageEventRows } from '/imports/storage/eventLog';
 
 const date = (value) => value instanceof Date ? value.toLocaleString() : (value || '—');
 const newCommandId = () => globalThis.crypto?.randomUUID?.() || Random.id(32);
@@ -78,8 +79,16 @@ const requestEditorView = (editor) => {
 
 Template.Storage.onCreated(function () {
   this.state = new ReactiveDict();
-  this.state.setDefault({ busy: false, error: '', previews: {}, previewAction: '', selected: {}, rowOptions: {}, filters: {}, queueQuery: '', bulk: {}, bulkPending: null, bulkAcknowledged: false, results: null, createUnitOpen: false, requestEditor: null });
+  this.state.setDefault({ busy: false, error: '', previews: {}, previewAction: '', selected: {}, rowOptions: {}, filters: {}, eventFilters: {}, queueQuery: '', bulk: {}, bulkPending: null, bulkAcknowledged: false, results: null, createUnitOpen: false, requestEditor: null });
   this.subscribe('storageAdminDashboard');
+  this.autorun(() => {
+    if (!operator()) return;
+    const filters = this.state.get('eventFilters') || {};
+    this.subscribe('storageAdminEventLog', {
+      ...(filters.member_id ? { member_id: filters.member_id } : {}),
+      ...(filters.unit_id ? { unit_id: filters.unit_id } : {}),
+    });
+  });
   this.autorun(() => {
     const unit = StorageUnits.findOne(this.state.get('selectedUnitId'));
     if (!unit) return;
@@ -164,6 +173,30 @@ Template.Storage.helpers({
   },
   memberOptions: () => Members.find({}, { sort: { name: 1 } }).fetch()
     .map((member) => ({ ...member, pickerLabel: storageMemberLabel(member) })),
+  eventMemberOptions: () => Members.find({}, { sort: { name: 1 } }).fetch()
+    .map((member) => ({ ...member, pickerLabel: storageMemberLabel(member) })),
+  eventUnitOptions: () => StorageUnits.find({}, { sort: { name: 1 } }).fetch(),
+  eventLogRows() {
+    const state = Template.instance().state;
+    const filters = state.get('eventFilters') || {};
+    return storageEventRows({
+      events: StorageEvents.find().fetch(),
+      members: Members.find().fetch(),
+      units: StorageUnits.find().fetch(),
+      assignments: StorageAssignments.find().fetch(),
+      requests: StorageRequests.find().fetch(),
+      warnings: StorageWarnings.find().fetch(),
+      exemptions: StorageExemptions.find().fetch(),
+      moves: StorageMoves.find().fetch(),
+    }).filter((row) => (!filters.member_id || row.ownerIds.includes(filters.member_id))
+      && (!filters.unit_id || row.unitIds.includes(filters.unit_id)))
+      .slice(0, 500)
+      .map((row) => ({
+        ...row,
+        date: date(row.occurred_at),
+        memberId: row.ownerIds.length === 1 ? row.ownerIds[0] : null,
+      }));
+  },
 });
 
 Template.Storage.events({
@@ -207,6 +240,18 @@ Template.Storage.events({
   'change .storage-owner-filter'(e, i) { i.state.set('filters', { ...(i.state.get('filters') || {}), owner: e.currentTarget.checked }); },
   'change .storage-overdue-filter'(e, i) { i.state.set('filters', { ...(i.state.get('filters') || {}), overdue: e.currentTarget.checked }); },
   'input .storage-queue-search'(e, i) { i.state.set('queueQuery', e.currentTarget.value); },
+  'change .storage-event-filter'(e, i) {
+    i.state.set('eventFilters', {
+      ...(i.state.get('eventFilters') || {}),
+      [e.currentTarget.dataset.filter]: e.currentTarget.value,
+    });
+  },
+  'click .clear-storage-event-filters'(e, i) {
+    e.preventDefault();
+    i.state.set('eventFilters', {});
+    e.currentTarget.closest('.storage-event-log').querySelectorAll('.storage-event-filter')
+      .forEach((field) => { field.value = ''; });
+  },
   'click .open-request-flow'(e, i) { e.preventDefault(); i.state.set('requestEditor', { mode: e.currentTarget.dataset.mode }); },
   'click .close-request-editor'(e, i) { e.preventDefault(); i.state.set('requestEditor', null); },
   'click .edit-queue-preference, click .correct-queue-date'(e, i) {
