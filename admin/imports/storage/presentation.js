@@ -16,6 +16,22 @@ export const storageStatusLabel = (status) => ({
 
 export const storageStatusClass = (status) => `storage-status-${status || 'unknown'}`;
 
+const actionReasonLabels = {
+  oldest_compatible_without_storage: 'Oldest compatible request without storage',
+  oldest_without_storage_soft_fallback: 'Oldest request without storage; preference unavailable',
+  oldest_compatible_move: 'Oldest compatible move request',
+  lab_membership_inactive_unwarned: 'Lab membership expired; no warning sent',
+  warning_age_21_days: 'Warning is at least 21 days old',
+  warning_deadline_passed: 'The 28-day warning deadline passed',
+  voluntary_release_requested: 'Member requested release',
+  move_deadline_passed: 'The 14-day move deadline passed',
+  awaiting_physical_clearance: 'Unit is awaiting clearance',
+  notification_delivery_failed: 'Notification delivery failed',
+};
+
+export const storageActionReasonLabel = (reason) =>
+  actionReasonLabels[reason] || String(reason || '—').replaceAll('_', ' ');
+
 export const storageMemberLabel = (member = {}) => [
   member.name || 'Unnamed member',
   member.mid ? `(${member.mid})` : '',
@@ -124,23 +140,38 @@ export const failedChannels = (delivery) => [
   ...['email', 'sms'].filter((channel) => delivery?.[channel]?.status === 'failed'),
 ];
 
+const readinessReasonLabels = {
+  migration_not_applied: 'The storage migration has not been applied.',
+  migration_manifest_invalid: 'The storage migration manifest is invalid.',
+  migration_manifest_incomplete: 'One or more migrated storage records are missing.',
+  cutover_finalization_invalid: 'The storage migration cutover record is invalid.',
+  legacy_source_changed_after_migration: 'Legacy storage data changed after migration.',
+  unclassified_units: 'One or more available units need an upper or lower classification.',
+  storage_invariant_errors: 'Stored assignments or unit states are inconsistent.',
+  storage_layout_errors: 'Storage wall references or coordinates are inconsistent.',
+};
+
+export const storageReadinessReasonLabel = (reason) =>
+  readinessReasonLabels[reason] || String(reason || 'Unknown readiness problem').replaceAll('_', ' ');
+
 export const storageReadinessPresentation = (readiness) => {
   if (!readiness) return { state: 'loading', label: 'Checking migration readiness…', detail: '', reasons: [] };
-  const reasons = Array.isArray(readiness.allocation_blocked_reasons)
+  const reasonCodes = Array.isArray(readiness.allocation_blocked_reasons)
     ? readiness.allocation_blocked_reasons
     : [];
+  const reasons = reasonCodes.map(storageReadinessReasonLabel);
   if (readiness.allocation_ready === true) {
     return { state: 'ready', label: 'Ready.', detail: 'Migration and invariant checks passed.', reasons };
   }
-  if (reasons.length === 1 && reasons[0] === 'unclassified_units') {
+  if (reasonCodes.length === 1 && reasonCodes[0] === 'unclassified_units') {
     return {
       state: 'metadata', label: 'Metadata incomplete.',
       detail: `${readiness.unclassified_unit_ids?.length || 0} unit(s) need a height.`, reasons,
     };
   }
   return {
-    state: reasons.includes('migration_not_applied') ? 'missing' : 'blocked',
-    label: reasons.includes('migration_not_applied') ? 'Migration missing.' : 'Allocation blocked.',
+    state: reasonCodes.includes('migration_not_applied') ? 'missing' : 'blocked',
+    label: reasonCodes.includes('migration_not_applied') ? 'Migration missing.' : 'Allocation blocked.',
     detail: 'Automatic allocation remains disabled until every authoritative blocker is resolved.',
     reasons,
   };
@@ -164,8 +195,42 @@ export const joinStorageResults = (results = [], confirmedRows = []) => {
     const row = rows.get(result.suggestion_id) || {};
     const member = row.member_name || row.owner || 'Unknown member';
     const unit = row.unit_name || row.unit || 'No unit';
-    return { ...result, label: `${member} · ${unit}` };
+    return {
+      ...result,
+      label: `${member} · ${unit}`,
+      statusLabel: ({
+        applied: 'Applied',
+        already_applied: 'Already applied',
+        stale: 'Needs review',
+        conflict: 'Needs review',
+        failed: 'Failed',
+      })[result.status] || result.status,
+    };
   });
+};
+
+export const storageResultSummary = (results = []) => {
+  const counts = { applied: 0, review: 0, failed: 0 };
+  for (const result of results) {
+    if (['applied', 'already_applied', 'updated'].includes(result.status)) counts.applied += 1;
+    else if (['stale', 'conflict'].includes(result.status)) counts.review += 1;
+    else counts.failed += 1;
+  }
+  return [
+    counts.applied ? `${counts.applied} applied` : null,
+    counts.review ? `${counts.review} need review` : null,
+    counts.failed ? `${counts.failed} failed` : null,
+  ].filter(Boolean).join(' · ') || 'No results';
+};
+
+export const joinBulkHeightResults = (results = [], units = []) => {
+  const unitNames = new Map(units.map((unit) => [unit._id, unit.name]));
+  return results.map((result) => ({
+    ...result,
+    label: unitNames.get(result.unitId) || 'Unknown unit',
+    statusClass: result.status === 'updated' ? 'applied' : 'failed',
+    statusLabel: result.status === 'updated' ? 'Updated' : 'Failed',
+  }));
 };
 
 export const sameSuggestionSet = (left = [], right = []) => {

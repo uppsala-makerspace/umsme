@@ -2,6 +2,7 @@
 .storage-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .storage-heading h1, .storage-heading h2 { margin-top: 0; }
 .storage-panel, .storage-readiness { margin: 1.5rem 0; padding: 1.25rem; border: 1px solid #ccd4da; border-radius: 6px; background: #fff; }
+.storage-inline-error { margin: .8rem 0; }
 .storage-readiness { border-left-width: 6px; }
 .storage-readiness-ready { border-left-color: #2e7d32; }
 .storage-readiness-loading, .storage-readiness-metadata { border-left-color: #ef9a00; }
@@ -44,6 +45,8 @@
 .storage-bulk { margin: 1rem 0; padding: .7rem; background: #f4f4f4; }
 .storage-bulk-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; }
 .storage-bulk-confirm label { margin: 0; }
+.storage-bulk-results { margin: .8rem 0; padding: .75rem; border: 1px solid #ccd4da; background: #f7fafc; }
+.storage-bulk-results ul { margin-bottom: 0; }
 .storage-visual-legend { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
 .storage-visual-legend span { padding: .35rem .65rem; border: 2px solid #9e9e9e; border-radius: 4px; }
 .storage-wall-editors { display: grid; gap: .6rem; margin-top: 1rem; }
@@ -82,4 +85,5 @@
 .storage-result-applied, .storage-result-already_applied { color: #2e7d32; }
 .storage-result-stale, .storage-result-conflict { color: #9a6700; }
 .storage-result-failed { color: #b71c1c; }
+.storage-result-summary { font-weight: 700; }
 @media (max-width: 700px) { .storage-heading, .storage-confirm-bar { flex-direction: column; } .storage-table { min-width: 650px; } }

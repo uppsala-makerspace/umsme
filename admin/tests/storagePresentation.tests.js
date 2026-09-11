@@ -5,12 +5,15 @@ import {
   filterStorageQueue,
   filterStorageUnits,
   groupStorageWalls,
+  joinBulkHeightResults,
   joinStorageResults,
   sameSuggestionSet,
+  storageActionReasonLabel,
   storageMemberLabel,
   storagePreferenceLabel,
   storageQueueRows,
   storageReadinessPresentation,
+  storageResultSummary,
 } from '/imports/storage/presentation';
 import { storageEventEntityIds, storageEventRows } from '/imports/storage/eventLog';
 
@@ -117,17 +120,22 @@ describe('storage admin presentation', function () {
     assert.deepStrictEqual(failedChannels({ render_status: 'rendered', email: { status: 'sent' }, sms: { status: 'sent' } }), []);
   });
 
-  it('uses authoritative readiness and preserves every blocker verbatim', function () {
-    for (const reason of [
-      'legacy_source_changed_after_migration',
-      'migration_manifest_incomplete',
-      'cutover_finalization_invalid',
-    ]) {
-      const source = { allocation_ready: false, allocation_blocked_reasons: [reason] };
-      const view = storageReadinessPresentation(source);
-      assert.strictEqual(view.state, 'blocked');
-      assert.strictEqual(view.reasons, source.allocation_blocked_reasons);
-    }
+  it('uses authoritative readiness and presents every blocker in plain language', function () {
+    const source = {
+      allocation_ready: false,
+      allocation_blocked_reasons: [
+        'legacy_source_changed_after_migration',
+        'migration_manifest_incomplete',
+        'cutover_finalization_invalid',
+      ],
+    };
+    const view = storageReadinessPresentation(source);
+    assert.strictEqual(view.state, 'blocked');
+    assert.deepStrictEqual(view.reasons, [
+      'Legacy storage data changed after migration.',
+      'One or more migrated storage records are missing.',
+      'The storage migration cutover record is invalid.',
+    ]);
     const metadata = storageReadinessPresentation({
       allocation_ready: false,
       allocation_blocked_reasons: ['unclassified_units'],
@@ -150,12 +158,32 @@ describe('storage admin presentation', function () {
 
   it('joins every result status to the exact confirmed row', function () {
     const rows = [{ suggestion_id: 'one', member_name: 'Ada', unit_name: 'A-1' }];
+    const labels = {
+      applied: 'Applied', already_applied: 'Already applied', stale: 'Needs review',
+      conflict: 'Needs review', failed: 'Failed',
+    };
     for (const status of ['applied', 'already_applied', 'stale', 'conflict', 'failed']) {
       assert.deepStrictEqual(
         joinStorageResults([{ suggestion_id: 'one', status }], rows)[0],
-        { suggestion_id: 'one', status, label: 'Ada · A-1' },
+        { suggestion_id: 'one', status, label: 'Ada · A-1', statusLabel: labels[status] },
       );
     }
+  });
+
+  it('summarizes batches and labels every bulk result by unit', function () {
+    assert.strictEqual(storageResultSummary([
+      { status: 'applied' }, { status: 'already_applied' },
+      { status: 'conflict' }, { status: 'failed' },
+    ]), '2 applied · 1 need review · 1 failed');
+    assert.deepStrictEqual(joinBulkHeightResults([
+      { unitId: 'a', status: 'updated' },
+      { unitId: 'missing', status: 'failed', reason: 'Gone' },
+    ], units), [
+      { unitId: 'a', status: 'updated', label: '1', statusClass: 'applied', statusLabel: 'Updated' },
+      { unitId: 'missing', status: 'failed', reason: 'Gone', label: 'Unknown unit', statusClass: 'failed', statusLabel: 'Failed' },
+    ]);
+    assert.strictEqual(storageActionReasonLabel('warning_deadline_passed'), 'The 28-day warning deadline passed');
+    assert.strictEqual(storageActionReasonLabel('unexpected_reason'), 'unexpected reason');
   });
 
   it('resolves member and unit event filters through historical storage records', function () {
