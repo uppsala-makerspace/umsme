@@ -11,12 +11,14 @@ import {
   completeStorageMoveManual,
   confirmStorageClearanceManual,
   createStorageExemptionManual,
+  createStorageWallManual,
   createStorageUnitManual,
   endStorageAssignmentManual,
   extendStorageMoveManual,
   revokeStorageExemptionManual,
   setStorageRequestPausedManual,
   updateStorageUnitManual,
+  updateStorageWallManual,
   upsertStorageRequestManual,
 } from '/imports/common/server/storage/manual';
 import { retryStorageNotification } from '/imports/common/server/storageNotifications/service';
@@ -27,6 +29,19 @@ const operator = async (context) => {
 };
 
 Meteor.methods({
+  async 'adminStorage.walls.create'({ fields, command_id }) {
+    check(fields, Object);
+    check(command_id, String);
+    return createStorageWallManual({ fields, commandId: command_id, actor: await operator(this) });
+  },
+
+  async 'adminStorage.walls.update'({ wall_id, fields, command_id }) {
+    check(wall_id, String);
+    check(fields, Object);
+    check(command_id, String);
+    return updateStorageWallManual({ wallId: wall_id, fields, commandId: command_id, actor: await operator(this) });
+  },
+
   async 'adminStorage.preview'({ action }) {
     check(action, String);
     await operator(this);

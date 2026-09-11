@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { Members } from '/imports/common/collections/members';
 import {
+  StorageWalls,
   StorageUnits,
   StorageRequests,
   StorageAssignments,
@@ -11,7 +12,7 @@ import {
 } from '/imports/common/collections/storage';
 import { hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
 import { runStorageAtomic } from './atomic';
-import { STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument } from './db';
+import { STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument, validateStorageDocument } from './db';
 import { appendStorageEvent } from './events';
 import { completeStorageMove } from './commands';
 import { reconcileStorageState } from './reconciliation';
@@ -26,7 +27,8 @@ const requiredReason = (reason) => {
   return value;
 };
 
-const allowedUnitFields = ['name', 'floor', 'height', 'wall', 'position', 'availability_status', 'note'];
+const allowedWallFields = ['name', 'floor', 'display_order', 'column_count', 'row_count', 'note', 'active'];
+const allowedUnitFields = ['name', 'height', 'wall_id', 'column', 'row', 'availability_status', 'note'];
 const sameDate = (a, b) => a instanceof Date && b instanceof Date && a.getTime() === b.getTime();
 
 const manualOperationId = (kind, actor, commandId) => commandId
@@ -52,15 +54,102 @@ const runManualOperation = async ({ kind, targetType, targetId, actor, commandId
   return runStorageAtomic({ transactional: run, fallback: () => run() });
 };
 
+const storageWallLocation = async ({ wallId, column, row, requireActive = false }) => {
+  const wall = await StorageWalls.findOneAsync(wallId);
+  if (!wall) throw new Meteor.Error('not-found', 'Storage wall not found');
+  if (requireActive && !wall.active) throw new Meteor.Error('bad-state', 'New units require an active wall');
+  if (!Number.isInteger(column) || !Number.isInteger(row) ||
+      column < 1 || row < 1 || column > wall.column_count || row > wall.row_count) {
+    throw new Meteor.Error('bad-location', 'Storage unit coordinates are outside the wall layout');
+  }
+  return wall;
+};
+
+export const createStorageWallManual = async ({ fields, actor, commandId, now = new Date() }) => {
+  const wallId = commandId ? `${manualOperationId('wall.create', actor, commandId)}:wall` : Random.id();
+  const doc = {
+    _id: wallId,
+    ...Object.fromEntries(allowedWallFields.filter((key) => fields[key] !== undefined)
+      .map((key) => [key, fields[key]])),
+    active: fields.active === undefined ? true : fields.active,
+    createdAt: now,
+    updatedAt: now,
+  };
+  return runManualOperation({
+    kind: 'wall.create', targetType: 'storageWall', targetId: wallId,
+    actor, commandId, payload: { doc }, intent: { fields }, now,
+  }, async (journal, payload, session) => {
+    await journal.step('wall_inserted', () => ensureStorageDocument(
+      StorageWalls, STORAGE_SCHEMAS.wall, payload.doc,
+      { session, matches: (current) => current.name === payload.doc.name },
+    ));
+    await journal.step('event_inserted', () => appendStorageEvent({
+      id: `${payload.operation_id}:event`, entityType: 'storageWall', entityId: payload.doc._id,
+      eventType: 'wall_created', actorType: 'administrator', actor: payload.operation_actor,
+      occurredAt: payload.operation_now,
+    }, { session }));
+    return payload.doc._id;
+  });
+};
+
+export const updateStorageWallManual = async ({ wallId, fields, actor, commandId, now = new Date() }) => {
+  const wall = await StorageWalls.findOneAsync(wallId);
+  if (!wall) throw new Meteor.Error('not-found', 'Storage wall not found');
+  const changes = Object.fromEntries(allowedWallFields.filter((key) => fields[key] !== undefined)
+    .map((key) => [key, fields[key]]));
+  const candidate = { ...wall, ...changes, updatedAt: now };
+  if (candidate.note === null || candidate.note === '') delete candidate.note;
+  validateStorageDocument(STORAGE_SCHEMAS.wall, candidate);
+  const unitSelector = { wall_id: wallId };
+  if (fields.floor !== undefined && fields.floor !== wall.floor && await StorageUnits.findOneAsync(unitSelector)) {
+    throw new Meteor.Error('wall-not-empty', 'Move all units before changing the wall floor');
+  }
+  const columnCount = fields.column_count ?? wall.column_count;
+  const rowCount = fields.row_count ?? wall.row_count;
+  if (await StorageUnits.findOneAsync({
+    ...unitSelector,
+    $or: [{ column: { $gt: columnCount } }, { row: { $gt: rowCount } }],
+  })) {
+    throw new Meteor.Error('wall-layout-in-use', 'The smaller wall layout would exclude existing units');
+  }
+  const $set = { updatedAt: now };
+  const $unset = {};
+  for (const key of allowedWallFields) {
+    if (fields[key] === undefined) continue;
+    if (key === 'note' && (fields[key] === null || fields[key] === '')) $unset[key] = '';
+    else $set[key] = fields[key];
+  }
+  const modifier = { $set, ...(Object.keys($unset).length ? { $unset } : {}) };
+  return runManualOperation({
+    kind: 'wall.update', targetType: 'storageWall', targetId: wallId,
+    actor, commandId, payload: { wall, modifier, fields: changes }, intent: { fields: changes }, now,
+  }, async (journal, payload, session) => {
+    await journal.step('wall_updated', () => ensureStorageUpdate(
+      StorageWalls, wallId, { updatedAt: payload.wall.updatedAt }, payload.modifier,
+      (current) => sameDate(current.updatedAt, payload.operation_now), { session },
+    ));
+    await journal.step('event_inserted', () => appendStorageEvent({
+      id: `${payload.operation_id}:event`, entityType: 'storageWall', entityId: wallId,
+      eventType: 'wall_updated', actorType: 'administrator', actor: payload.operation_actor,
+      occurredAt: payload.operation_now, details: { changed_fields: Object.keys(payload.fields) },
+    }, { session }));
+    return true;
+  });
+};
+
 export const createStorageUnitManual = async ({ fields, actor, commandId, now = new Date() }) => {
   if (fields.owner !== undefined) throw new Meteor.Error('bad-field', 'New storage units cannot have an owner');
   if (fields.availability_status !== undefined && !['available', 'unavailable'].includes(fields.availability_status)) {
     throw new Meteor.Error('bad-state', 'New storage units must be available or unavailable');
   }
+  const wall = await storageWallLocation({
+    wallId: fields.wall_id, column: fields.column, row: fields.row, requireActive: true,
+  });
   const unitId = commandId ? `${manualOperationId('unit.create', actor, commandId)}:unit` : Random.id();
   const doc = {
     _id: unitId,
     ...Object.fromEntries(allowedUnitFields.filter((key) => fields[key] !== undefined).map((key) => [key, fields[key]])),
+    floor: wall.floor,
     createdAt: now,
     updatedAt: now,
   };
@@ -85,7 +174,9 @@ export const createStorageUnitManual = async ({ fields, actor, commandId, now = 
 export const updateStorageUnitManual = async ({ unitId, fields, actor, commandId, acknowledged = false, now = new Date() }) => {
   const unit = await StorageUnits.findOneAsync(unitId);
   if (!unit) throw new Meteor.Error('not-found', 'Storage unit not found');
-  const metadataChanged = ['name', 'floor', 'height', 'wall', 'position']
+  const changes = Object.fromEntries(allowedUnitFields.filter((key) => fields[key] !== undefined)
+    .map((key) => [key, fields[key]]));
+  const metadataChanged = ['name', 'height', 'wall_id', 'column', 'row']
     .some((key) => fields[key] !== undefined && fields[key] !== unit[key]);
   if (metadataChanged && ['occupied', 'reserved'].includes(unit.availability_status) && !acknowledged) {
     throw new Meteor.Error('acknowledgement-required', 'Confirm metadata changes to an occupied or reserved unit');
@@ -96,6 +187,16 @@ export const updateStorageUnitManual = async ({ unitId, fields, actor, commandId
       throw new Meteor.Error('bad-state', 'Lifecycle availability changes require their dedicated operation');
     }
   }
+  const wallId = fields.wall_id ?? unit.wall_id;
+  const column = fields.column ?? unit.column;
+  const row = fields.row ?? unit.row;
+  const wall = await storageWallLocation({
+    wallId, column, row, requireActive: wallId !== unit.wall_id,
+  });
+  const candidate = { ...unit, ...changes, floor: wall.floor, updatedAt: now };
+  if (candidate.height === null || candidate.height === '') delete candidate.height;
+  if (candidate.note === null || candidate.note === '') delete candidate.note;
+  validateStorageDocument(STORAGE_SCHEMAS.unit, candidate);
   const $set = { updatedAt: now };
   const $unset = {};
   for (const key of allowedUnitFields) {
@@ -103,10 +204,11 @@ export const updateStorageUnitManual = async ({ unitId, fields, actor, commandId
     if ((key === 'height' || key === 'note') && (fields[key] === null || fields[key] === '')) $unset[key] = '';
     else $set[key] = fields[key];
   }
+  $set.floor = wall.floor;
   const modifier = { $set, ...(Object.keys($unset).length ? { $unset } : {}) };
   return runManualOperation({
     kind: 'unit.update', targetType: 'storageUnit', targetId: unitId,
-    actor, commandId, payload: { unit, modifier, fields }, intent: { fields, acknowledged }, now,
+    actor, commandId, payload: { unit, modifier, fields: changes }, intent: { fields: changes, acknowledged }, now,
   }, async (journal, payload, session) => {
     await journal.step('unit_updated', () => ensureStorageUpdate(
       StorageUnits, unitId, { updatedAt: payload.unit.updatedAt }, payload.modifier,

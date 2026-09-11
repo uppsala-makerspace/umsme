@@ -11,7 +11,7 @@ const member = (id, lab = '2027-01-01T00:00:00.000Z') => ({
   ...(lab ? { lab: new Date(lab) } : {}),
 });
 const unit = (id, status = 'available', owner) => ({
-  _id: id, name: id, floor: 'floor1', height: 'low', wall: 'wall', position: 1,
+  _id: id, name: id, floor: 'floor1', height: 'low', wall_id: 'wall', column: 1, row: 1,
   availability_status: status, ...(owner ? { owner } : {}), updatedAt: timestamp,
 });
 const emptyState = () => ({
@@ -32,8 +32,8 @@ describe('storage server suggestions', function () {
     state.members = [member('new'), member('moving')];
     state.units = [
       unit('free'),
-      { ...unit('old', 'occupied', 'moving'), height: 'high', position: 2 },
-      { ...unit('destination'), _id: 'destination', name: 'destination', position: 3 },
+      { ...unit('old', 'occupied', 'moving'), height: 'high', column: 2 },
+      { ...unit('destination'), _id: 'destination', name: 'destination', column: 3 },
     ];
     state.requests = [
       { _id: 'r1', owner: 'new', request_type: 'allocation', request_status: 'waiting', requested_at: new Date('2026-01-01'), updatedAt: timestamp },

@@ -14,6 +14,7 @@ import {
 } from '/server/storageMigration';
 import { requireStorageMigrationOperator } from '/server/methods/storageMigration';
 import {
+  StorageWalls,
   StorageAssignments,
   StorageEvents,
   StorageRequests,
@@ -53,6 +54,11 @@ describe('legacy storage migration', function () {
   it('maps inventory, canonical ownership, assignments, notes, and requests', function () {
     const plan = buildLegacyStorageMigrationPlan(source());
     assert.strictEqual(plan.report.blocker_count, 0);
+    assert.strictEqual(plan.documents.storageWalls.length, 1);
+    assert.deepStrictEqual(
+      Object.fromEntries(['column_count', 'row_count'].map((key) => [key, plan.documents.storageWalls[0][key]])),
+      { column_count: 4, row_count: 1 },
+    );
     assert.strictEqual(plan.documents.storageUnits.length, 4);
     const byName = Object.fromEntries(plan.documents.storageUnits.map((unit) => [unit.name, unit]));
     assert.strictEqual(byName['1'].owner, 'payer');
@@ -61,6 +67,10 @@ describe('legacy storage migration', function () {
     assert.strictEqual(byName['3'].availability_status, 'unavailable');
     assert.strictEqual(byName['3'].note, 'Blocked');
     assert.strictEqual(byName['4'].availability_status, 'available');
+    assert.deepStrictEqual(
+      [byName['1'].column, byName['1'].row, byName['2'].column, byName['2'].row],
+      [1, 1, 2, 1],
+    );
     assert.ok(!('height' in byName['4']));
     assert.strictEqual(plan.documents.storageAssignments.length, 2);
     assert.ok(plan.documents.storageAssignments.every((assignment) =>
@@ -220,10 +230,12 @@ describe('legacy storage migration database gate', function () {
     await StorageRequests.removeAsync({ _id: { $regex: '^legacy-storage-v1:' } });
     await StorageUnits.removeAsync({ _id: { $regex: '^legacy-storage-v1:' } });
     await StorageUnits.removeAsync({ _id: { $regex: '^migration-review-' } });
+    await StorageWalls.removeAsync({ _id: { $regex: '^legacy-storage-v1:' } });
     await StorageEvents.removeAsync({ _id: { $regex: '^legacy-storage-v1:' } });
   };
 
   const insertPlan = async (plan, { includeSummary = true } = {}) => {
+    for (const wall of plan.documents.storageWalls) await StorageWalls.insertAsync(wall);
     for (const unit of plan.documents.storageUnits) {
       await StorageUnits.insertAsync({ ...unit, height: 'low' });
     }
@@ -347,10 +359,11 @@ describe('legacy storage migration database gate', function () {
     await StorageUnits.insertAsync({
       _id: 'migration-review-later-v2-unit',
       name: 'Later v2 unit',
-      floor: 'floor2',
+      floor: 'floor1',
       height: 'high',
-      wall: 'Later v2 wall',
-      position: 1,
+      wall_id: plan.documents.storageWalls[0]._id,
+      column: 1,
+      row: 3,
       availability_status: 'available',
       createdAt: cutoff,
       updatedAt: cutoff,

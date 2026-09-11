@@ -120,6 +120,31 @@ export const storageUnitStateErrors = (unit) => {
   return errors;
 };
 
+/** Referential and coordinate invariants for the physical storage layout. */
+export const storageLayoutErrors = ({ walls = [], units = [] } = {}) => {
+  const errors = [];
+  const wallsById = new Map(walls.map((wall) => [wall._id, wall]));
+  const occupiedCoordinates = new Set();
+  for (const unit of units) {
+    const wall = wallsById.get(unit.wall_id);
+    if (!wall) {
+      errors.push({ code: 'unit_wall_missing', id: unit._id });
+      continue;
+    }
+    if (unit.floor !== wall.floor) errors.push({ code: 'unit_wall_floor_mismatch', id: unit._id });
+    if (!Number.isInteger(unit.column) || !Number.isInteger(unit.row) ||
+        unit.column < 1 || unit.row < 1 ||
+        unit.column > wall.column_count || unit.row > wall.row_count) {
+      errors.push({ code: 'unit_outside_wall_layout', id: unit._id });
+      continue;
+    }
+    const coordinate = `${unit.wall_id}:${unit.column}:${unit.row}`;
+    if (occupiedCoordinates.has(coordinate)) errors.push({ code: 'duplicate_unit_coordinate', id: unit._id });
+    occupiedCoordinates.add(coordinate);
+  }
+  return errors;
+};
+
 const hasText = (value) => typeof value === 'string' && value.trim().length > 0;
 
 /** Conditional delivery invariants that SimpleSchema cannot express. */

@@ -1,4 +1,5 @@
 import {
+  StorageWalls,
   StorageUnits,
   StorageRequests,
   StorageAssignments,
@@ -17,6 +18,7 @@ export const STORAGE_ACTION_EXECUTION_SCOPED_UNIQUE_INDEX =
   'storage_action_execution_actor_kind_row_unique';
 export const STORAGE_ACTION_EXECUTION_OBSOLETE_UNIQUE_INDEX =
   'storage_action_execution_row_unique';
+export const STORAGE_UNIT_OBSOLETE_POSITION_INDEX = 'storage_unit_wall_position_unique';
 const scopedExecutionKeys = {
   created_by: 1, operation_kind: 1, command_id: 1, suggestion_id: 1,
 };
@@ -55,17 +57,34 @@ export const ensureStorageActionExecutionIdentityIndex = async (rawCollection) =
   return { created: STORAGE_ACTION_EXECUTION_SCOPED_UNIQUE_INDEX, dropped_obsolete: false };
 };
 
+export const retireStorageUnitPositionIndex = async (rawCollection) => {
+  const indexes = await rawCollection.listIndexes().toArray();
+  const obsolete = indexes.find(({ name }) => name === STORAGE_UNIT_OBSOLETE_POSITION_INDEX);
+  if (!obsolete) return;
+  if (obsolete.unique === true && exactIndexKeys(obsolete.key, { wall: 1, position: 1 })) {
+    await rawCollection.dropIndex(STORAGE_UNIT_OBSOLETE_POSITION_INDEX);
+    return;
+  }
+  throw new Error(
+    `Refusing to drop unexpected index ${STORAGE_UNIT_OBSOLETE_POSITION_INDEX}; ` +
+    'expected unique {wall: 1, position: 1}. Inspect and resolve it manually.',
+  );
+};
+
 /**
  * Create the constraints the storage service relies on before it accepts work.
  * Kept explicit and awaited so an index failure cannot leave the service
  * silently running without its concurrency guarantees.
  */
 export const ensureStorageIndexes = async () => {
+  await create(StorageWalls, { name: 1 }, { unique: true, name: 'storage_wall_name_unique' });
+  await create(StorageWalls, { display_order: 1, name: 1 }, { name: 'storage_wall_display_order' });
   await create(StorageUnits, { name: 1 }, { unique: true, name: 'storage_unit_name_unique' });
+  await retireStorageUnitPositionIndex(StorageUnits.rawCollection());
   await create(
     StorageUnits,
-    { wall: 1, position: 1 },
-    { unique: true, name: 'storage_unit_wall_position_unique' },
+    { wall_id: 1, column: 1, row: 1 },
+    { unique: true, name: 'storage_unit_wall_coordinate_unique' },
   );
   await create(
     StorageUnits,

@@ -46,7 +46,7 @@ const insertAssignmentDelivery = async () => {
   const delivery = `${prefix}delivery`;
   await Members.insertAsync({ _id: owner, mid: 'snt1', name: 'Anna Andersson', email: 'anna@example.com', mobile: '070-123 45 67' });
   await StorageUnits.insertAsync({
-    _id: unit, name: 'F1-L42', floor: 'floor1', height: 'low', wall: 'snt-wall', position: 42,
+    _id: unit, name: 'F1-L42', floor: 'floor1', height: 'low', wall_id: 'snt-wall', column: 42, row: 1,
     availability_status: 'occupied', owner, createdAt: created, updatedAt: created,
   });
   await StorageAssignments.insertAsync({

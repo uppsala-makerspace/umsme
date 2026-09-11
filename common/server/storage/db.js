@@ -34,6 +34,7 @@ export const casStorageUpdate = async (collection, selector, modifier, { session
 };
 
 export const STORAGE_SCHEMAS = {
+  wall: schemas.storageWall,
   unit: schemas.storageUnit,
   request: schemas.storageRequest,
   assignment: schemas.storageAssignment,

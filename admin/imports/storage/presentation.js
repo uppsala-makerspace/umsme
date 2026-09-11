@@ -79,41 +79,44 @@ export const filterStorageUnits = (units, filters = {}) => units.filter((unit) =
   if (filters.floor && unit.floor !== filters.floor) return false;
   if (filters.height === 'unclassified' && unit.height) return false;
   if (filters.height && filters.height !== 'unclassified' && unit.height !== filters.height) return false;
-  if (filters.wall && unit.wall !== filters.wall) return false;
+  if (filters.wall && unit.wall_id !== filters.wall) return false;
   if (filters.owner && !unit.owner) return false;
   if (filters.overdue && !unit._overdue) return false;
   if (filters.warning && unit._warningState !== filters.warning) return false;
   const query = String(filters.query || '').trim().toLowerCase();
-  return !query || [unit.name, unit.wall, unit.note].some((value) =>
+  return !query || [unit.name, unit.wall_name, unit.note].some((value) =>
     String(value || '').toLowerCase().includes(query));
 });
 
-export const groupStorageWalls = (units, definitions = []) => {
-  const definitionsByName = new Map(definitions.map((definition) => [definition.name, definition]));
-  const byWall = new Map();
+export const groupStorageWalls = (units, walls = []) => {
+  const unitsByWall = new Map();
   for (const unit of units) {
-    const key = unit.wall || 'Unclassified wall';
-    if (!byWall.has(key)) byWall.set(key, []);
-    byWall.get(key).push(unit);
+    const rows = unitsByWall.get(unit.wall_id) || [];
+    rows.push(unit);
+    unitsByWall.set(unit.wall_id, rows);
   }
-  return [...byWall.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([name, rows]) => {
-    const unitsForWall = rows.sort((a, b) =>
-      (a.position || 0) - (b.position || 0) || a.name.localeCompare(b.name));
-    const configuredSize = Number(definitionsByName.get(name)?.shelfSize);
-    const shelfSize = Number.isInteger(configuredSize) && configuredSize > 0 ? configuredSize : 12;
-    const shelves = [];
-    for (let offset = 0; offset < unitsForWall.length; offset += shelfSize) {
-      const shelfUnits = unitsForWall.slice(offset, offset + shelfSize);
-      shelves.push({
-        number: shelves.length + 1,
-        columns: [
-          { units: shelfUnits.filter((_, index) => index % 2 === 0) },
-          { units: shelfUnits.filter((_, index) => index % 2 === 1) },
-        ],
-      });
-    }
-    return { name, units: unitsForWall, shelves };
-  });
+  return [...walls]
+    .sort((a, b) => a.display_order - b.display_order || a.name.localeCompare(b.name))
+    .filter((wall) => unitsByWall.has(wall._id))
+    .map((wall) => {
+      const unitsForWall = unitsByWall.get(wall._id).sort((a, b) =>
+        a.column - b.column || a.row - b.row || a.name.localeCompare(b.name));
+      const byCoordinate = new Map(unitsForWall.map((unit) => [`${unit.column}:${unit.row}`, unit]));
+      const columns = Array.from({ length: wall.column_count }, (_, columnIndex) => ({
+        number: columnIndex + 1,
+        units: Array.from({ length: wall.row_count }, (_, rowIndex) => {
+          const column = columnIndex + 1;
+          const row = rowIndex + 1;
+          return byCoordinate.get(`${column}:${row}`) || {
+            empty: true,
+            key: `${wall._id}:${column}:${row}`,
+            column,
+            row,
+          };
+        }),
+      }));
+      return { ...wall, units: unitsForWall, columns };
+    });
 };
 
 export const failedChannels = (delivery) => [

@@ -32,6 +32,7 @@ export const schemas = {
   storeItem: new SimpleSchema(models.storeItem),
   groupMembership: new SimpleSchema(models.groupMembership),
   space: new SimpleSchema(models.space),
+  storageWall: new SimpleSchema(models.storageWall),
   storageUnit: new SimpleSchema(models.storageUnit),
   storageRequest: new SimpleSchema(models.storageRequest),
   storageAssignment: new SimpleSchema(models.storageAssignment),

@@ -107,7 +107,30 @@ The field names below define the intended domain vocabulary. Timestamps are
 stored as UTC dates. Collection names follow the repository's lower-camel-case
 MongoDB convention.
 
-### 5.1 `storageUnits`
+### 5.1 `storageWalls`
+
+One document per named physical wall. Shelf groups are not domain objects.
+
+```js
+{
+  _id,
+  name,
+  floor,          // floor1 | floor2
+  display_order,
+  column_count,
+  row_count,
+  note,
+  active,
+  createdAt,
+  updatedAt
+}
+```
+
+Columns on one wall have a uniform row count. A coordinate without a unit is
+an empty physical position. Wall dimensions cannot be reduced past an existing
+unit, and a populated wall cannot change floor.
+
+### 5.2 `storageUnits`
 
 One document per physical storage unit.
 
@@ -118,8 +141,9 @@ One document per physical storage unit.
   owner,                // paying Member._id; optional
   floor,                // floor1 | floor2
   height,               // low | high; temporarily null during migration
-  wall,                 // display/layout group
-  position,             // numeric order within the wall
+  wall_id,              // StorageWall._id
+  column,               // one-based horizontal coordinate
+  row,                  // one-based vertical coordinate
   availability_status, // see states below
   note,                 // internal administrative note
   createdAt,
@@ -138,7 +162,8 @@ Allowed `availability_status` values:
 Invariants:
 
 - `name` is unique.
-- `(wall, position)` is unique.
+- `(wall_id, column, row)` is unique.
+- Every unit coordinate is inside its wall and its floor matches the wall.
 - `available` and `unavailable` units have no owner.
 - `occupied`, `reserved`, and `awaiting_clearance` units have an owner.
 - Only classified `available` units with both `floor` and `height` participate
@@ -150,7 +175,7 @@ The owner remains present during `awaiting_clearance` so administrators can see
 whose belongings may remain. Physical-clearance confirmation removes the owner
 and changes the status to `available`.
 
-### 5.2 `storageRequests`
+### 5.3 `storageRequests`
 
 One record for an allocation, move, or voluntary-release request.
 
@@ -185,7 +210,7 @@ Rules:
 - `none` in the legacy model becomes a `release` request, not an allocation
   preference.
 
-### 5.3 `storageAssignments`
+### 5.4 `storageAssignments`
 
 Immutable ownership periods.
 
@@ -213,7 +238,7 @@ yet a second active assignment.
 Assignment records are never deleted. Corrections end or supersede them with a
 recorded reason.
 
-### 5.4 `storageWarnings`
+### 5.5 `storageWarnings`
 
 One record per overdue warning cycle. A later lapse creates a new cycle rather
 than reopening an old one.
@@ -237,7 +262,7 @@ than reopening an old one.
 Reminder deliveries refer to the warning. They do not alter `deadline_at`.
 Only one open warning may exist for an assignment.
 
-### 5.5 `storageExemptions`
+### 5.6 `storageExemptions`
 
 Internal protection from warning and reclamation.
 
@@ -265,7 +290,7 @@ unique index follows this materialized field; time-based eligibility still
 treats an exemption as expired immediately at `exempt_until` even if that
 housekeeping write has not yet run.
 
-### 5.6 `storageMoves`
+### 5.7 `storageMoves`
 
 A pending physical transfer between two units.
 
@@ -297,7 +322,7 @@ Deadline expiry is advisory: it creates a suggested action but never changes
 the move automatically. Administrators may complete, extend, or cancel an
 expired move.
 
-### 5.7 `storageNotificationDeliveries`
+### 5.8 `storageNotificationDeliveries`
 
 Tracks communication caused by suggested actions. Recipient values are
 snapshots so history remains accurate after profile changes.
@@ -355,7 +380,7 @@ content. Delivery records add per-channel status and retry behavior. A failed
 email or SMS does not roll back the administrative decision. Retrying delivery
 cannot repeat that decision.
 
-### 5.8 `storageEvents`
+### 5.9 `storageEvents`
 
 Immutable, cross-entity audit feed.
 
@@ -382,7 +407,7 @@ Administrators and board members can filter it by member, storage unit, or both;
 historical assignment and move records preserve those relationships after a
 unit changes owner.
 
-### 5.9 `storageActionExecutions`
+### 5.10 `storageActionExecutions`
 
 Durable per-row receipts make batch confirmation safe to retry after a network
 or process failure.
@@ -587,6 +612,7 @@ or conceal successful rows.
 
 Below the panel, retain and extend the current wall/grid and unit list with:
 
+- first-class wall metadata and uniform grid dimensions;
 - filters for every availability status and incomplete metadata;
 - inline unit metadata and note editing;
 - bulk low/high classification;
@@ -613,8 +639,8 @@ confirmation. Cancelling another person's request or changing its queue date
 also requires a reason. All manual operations are audited. They do not send
 automatic email or SMS.
 
-Referenced units cannot be deleted. Editing the name, floor, height, wall, or
-position of an occupied or reserved unit requires an explicit warning
+Referenced units cannot be deleted. Editing the name, height, wall, column, or
+row of an occupied or reserved unit requires an explicit warning
 confirmation and creates an audit event.
 
 ## 11. Migration
@@ -641,17 +667,19 @@ The migration is never run automatically at process startup. Its deterministic
 document IDs make an interrupted application resumable. A matching existing
 document is accepted, while a differing document or natural-key collision is
 reported and never overwritten. The summary commit event contains a digest and
-the sorted IDs of every migration-owned unit, assignment, request, and
+the sorted IDs of every migration-owned wall, unit, assignment, request, and
 provenance event. Readiness requires the complete manifest, so an interrupted
 write or later deletion cannot look applied; additional legitimate v2 records
 remain allowed.
 
 ### 11.1 Unit inventory
 
-1. Generate unit records from the current `storageWalls` ranges.
+1. Generate wall and unit records from the current `storageWalls` ranges.
 2. Add an explicit `floor` value to every legacy wall setting before migration;
-   do not parse the English wall name. Derive `name`, `floor`, `wall`, and
-   `position` from that definition.
+   do not parse the English wall name. Derive each wall's uniform dimensions
+   and every unit's `name`, `floor`, `wall_id`, `column`, and `row` from that
+   definition. The legacy `shelfSize` supplies the row count but shelf groups
+   are not retained.
 3. Leave `height` unset; it cannot be inferred from current data.
 4. Convert `_box_<number>` comments into unit notes.
 5. Mark an unowned unit with a legacy comment as `unavailable`.
@@ -759,7 +787,7 @@ Likely locations:
 - Change `/storage` to subscribe to database-backed inventory and lifecycle
   records.
 - Add the suggested-actions panel and preview/confirmation dialogs.
-- Preserve the wall/grid view using `wall` and `position`.
+- Preserve the wall/grid view using first-class walls and unit coordinates.
 - Add unit editing, filters, bulk height classification, exemptions, histories,
   manual operations, and failed-delivery retry.
 - Make notification behavior explicit in both suggested and manual flows.

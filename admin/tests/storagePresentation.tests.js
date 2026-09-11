@@ -16,9 +16,9 @@ import { storageEventEntityIds, storageEventRows } from '/imports/storage/eventL
 
 describe('storage admin presentation', function () {
   const units = [
-    { _id: 'b', name: '2', wall: 'B', position: 2, floor: 'floor2', availability_status: 'occupied', owner: 'm' },
-    { _id: 'a', name: '1', wall: 'A', position: 1, floor: 'floor1', availability_status: 'available' },
-    { _id: 'c', name: '3', wall: 'B', position: 1, floor: 'floor2', height: 'high', availability_status: 'available', note: 'repair' },
+    { _id: 'b', name: '2', wall_id: 'B', wall_name: 'Wall B', column: 2, row: 1, floor: 'floor2', availability_status: 'occupied', owner: 'm' },
+    { _id: 'a', name: '1', wall_id: 'A', wall_name: 'Wall A', column: 1, row: 1, floor: 'floor1', availability_status: 'available' },
+    { _id: 'c', name: '3', wall_id: 'B', wall_name: 'Wall B', column: 1, row: 1, floor: 'floor2', height: 'high', availability_status: 'available', note: 'repair' },
   ];
 
   it('filters inventory without changing source order', function () {
@@ -27,13 +27,16 @@ describe('storage admin presentation', function () {
     assert.strictEqual(units[0]._id, 'b');
   });
 
-  it('groups walls and sorts physical positions', function () {
-    const walls = groupStorageWalls(units, [{ name: 'B', shelfSize: 2 }]);
-    assert.deepStrictEqual(walls.map((wall) => wall.name), ['A', 'B']);
+  it('renders each wall as its configured uniform grid', function () {
+    const walls = groupStorageWalls(units, [
+      { _id: 'B', name: 'Wall B', display_order: 2, column_count: 2, row_count: 2 },
+      { _id: 'A', name: 'Wall A', display_order: 1, column_count: 1, row_count: 1 },
+    ]);
+    assert.deepStrictEqual(walls.map((wall) => wall.name), ['Wall A', 'Wall B']);
     assert.deepStrictEqual(walls[1].units.map((unit) => unit._id), ['c', 'b']);
-    assert.deepStrictEqual(walls[1].shelves[0].columns.map((column) =>
-      column.units.map((unit) => unit._id)), [['c'], ['b']]);
-    assert.strictEqual(walls[0].shelves.length, 1);
+    assert.deepStrictEqual(walls[1].columns.map((column) =>
+      column.units.map((unit) => unit._id || null)), [['c', null], ['b', null]]);
+    assert.strictEqual(walls[1].columns[0].units[1].empty, true);
   });
 
   it('labels searchable member choices without exposing only an internal id', function () {

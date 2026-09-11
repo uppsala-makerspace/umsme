@@ -1,8 +1,10 @@
 import assert from 'assert';
 import {
   ensureStorageActionExecutionIdentityIndex,
+  retireStorageUnitPositionIndex,
   STORAGE_ACTION_EXECUTION_OBSOLETE_UNIQUE_INDEX,
   STORAGE_ACTION_EXECUTION_SCOPED_UNIQUE_INDEX,
+  STORAGE_UNIT_OBSOLETE_POSITION_INDEX,
 } from '/imports/common/server/storageIndexes';
 
 const sameSpec = (left, right) => JSON.stringify(left) === JSON.stringify(right);
@@ -83,5 +85,31 @@ describe('storage action execution index rollout', function () {
     );
     assert.deepStrictEqual(raw.dropped, []);
     assert(raw.indexes.some((index) => index.name === STORAGE_ACTION_EXECUTION_OBSOLETE_UNIQUE_INDEX));
+  });
+});
+
+describe('storage unit coordinate index rollout', function () {
+  it('drops only the exact obsolete wall-position index', async function () {
+    const raw = new FakeRawCollection([{
+      name: STORAGE_UNIT_OBSOLETE_POSITION_INDEX,
+      key: { wall: 1, position: 1 },
+      unique: true,
+    }]);
+    await retireStorageUnitPositionIndex(raw);
+    await retireStorageUnitPositionIndex(raw);
+    assert.deepStrictEqual(raw.dropped, [STORAGE_UNIT_OBSOLETE_POSITION_INDEX]);
+  });
+
+  it('preserves and rejects an unexpected same-named index', async function () {
+    const raw = new FakeRawCollection([{
+      name: STORAGE_UNIT_OBSOLETE_POSITION_INDEX,
+      key: { wall: 1 },
+      unique: true,
+    }]);
+    await assert.rejects(
+      retireStorageUnitPositionIndex(raw),
+      /Refusing to drop unexpected index storage_unit_wall_position_unique/,
+    );
+    assert.deepStrictEqual(raw.dropped, []);
   });
 });

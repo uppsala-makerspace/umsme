@@ -1578,6 +1578,21 @@ export const models = {
     // memberId of the approver, or '__system__' for open joins / admin edits.
     approvedBy: { label: "Approved by", type: String, max: 50, optional: true },
   },
+  storageWall: {
+    name: { label: "Storage wall name", type: String, max: 200 },
+    floor: {
+      label: "Floor",
+      type: String,
+      allowedValues: ["floor1", "floor2"],
+    },
+    display_order: { label: "Display order", type: Number, min: 1 },
+    column_count: { label: "Columns", type: Number, min: 1 },
+    row_count: { label: "Rows", type: Number, min: 1 },
+    note: { label: "Internal note", type: String, max: 5000, optional: true },
+    active: { label: "Active", type: Boolean },
+    createdAt: { label: "Created", type: Date },
+    updatedAt: { label: "Updated", type: Date },
+  },
   storageUnit: {
     name: { label: "Storage unit name", type: String, max: 100 },
     owner: { label: "Owner", type: String, max: 50, optional: true },
@@ -1594,8 +1609,9 @@ export const models = {
       allowedValues: ["low", "high"],
       optional: true,
     },
-    wall: { label: "Wall", type: String, max: 200 },
-    position: { label: "Position", type: Number, min: 1 },
+    wall_id: { label: "Wall", type: String, max: 200 },
+    column: { label: "Column", type: Number, min: 1 },
+    row: { label: "Row", type: Number, min: 1 },
     availability_status: {
       label: "Availability",
       type: String,

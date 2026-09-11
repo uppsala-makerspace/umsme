@@ -45,7 +45,8 @@ Owner: domain and migration workstream.
 
 ### Required indexes
 
-- Unique unit `name` and unique `(wall, position)`.
+- Unique wall `name`, unique unit `name`, and unique
+  `(wall_id, column, row)`.
 - Partial unique active request per owner.
 - Partial unique active assignment per unit and per owner.
 - Partial unique open warning per assignment.
@@ -274,7 +275,8 @@ stable; notification status integration follows Phase 4.
 - Eight suggested-action cards from the design.
 - Fresh preview before confirmation, row exclusion, double-submit prevention,
   and per-row results.
-- Database-backed wall/grid ordered by `wall` and `position`.
+- Database-backed wall grids ordered by `display_order`, with units placed at
+  exact column and row coordinates.
 - Filters for availability, metadata, floor, height, wall, owner, overdue, and
   warning state.
 - Bulk classification, manual operations, exemptions, history, and channel

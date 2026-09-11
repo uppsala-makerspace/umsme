@@ -24,6 +24,7 @@ import {
   StorageMoves,
   StorageNotificationDeliveries,
   StorageRequests,
+  StorageWalls,
   StorageUnits,
   StorageWarnings,
 } from '/imports/common/collections/storage';
@@ -57,6 +58,7 @@ if (process.env.SEED_TEST_DATA === 'true') {
       StorageMoves.removeAsync({}),
       StorageNotificationDeliveries.removeAsync({}),
       StorageRequests.removeAsync({}),
+      StorageWalls.removeAsync({}),
       StorageUnits.removeAsync({}),
       StorageWarnings.removeAsync({}),
     ]);
@@ -346,13 +348,30 @@ if (process.env.SEED_TEST_DATA === 'true') {
 
     // Isolated v2 storage fixtures. The ordinary and retry members start
     // empty; each other lifecycle owns distinct units and records.
+    const wallDefinitions = [
+      { _id: 'storage-fixture-wall-1', name: 'Floor 1, Wall 1', floor: 'floor1', display_order: 1, column_count: 8, row_count: 6, start: 1, end: 48 },
+      { _id: 'storage-fixture-wall-2', name: 'Floor 1, Wall 2', floor: 'floor1', display_order: 2, column_count: 4, row_count: 5, start: 49, end: 68 },
+      { _id: 'storage-fixture-wall-3', name: 'Floor 2, Wall 1', floor: 'floor2', display_order: 3, column_count: 4, row_count: 6, start: 69, end: 92 },
+    ];
+    for (const { start, end, ...wall } of wallDefinitions) {
+      await StorageWalls.insertAsync({ ...wall, active: true, createdAt: now, updatedAt: now });
+    }
+    const unitLocation = (position) => {
+      const wall = wallDefinitions.find(({ start, end }) => position >= start && position <= end);
+      const offset = position - wall.start;
+      const sectionSize = wall.row_count * 2;
+      return {
+        wall_id: wall._id,
+        floor: wall.floor,
+        column: Math.floor(offset / sectionSize) * 2 + (offset % 2) + 1,
+        row: Math.floor((offset % sectionSize) / 2) + 1,
+      };
+    };
     const insertUnit = (name, position, availabilityStatus, owner) => StorageUnits.insertAsync({
       name,
       ...(owner ? { owner } : {}),
-      floor: 'floor1',
+      ...unitLocation(position),
       height: position <= 24 ? 'low' : 'high',
-      wall: 'Floor 1, Wall 1',
-      position,
       availability_status: availabilityStatus,
       createdAt: now,
       updatedAt: now,
@@ -428,9 +447,9 @@ if (process.env.SEED_TEST_DATA === 'true') {
       updatedAt: now,
     });
 
-    // Fill four complete 12-position shelf sections. A few unavailable units
+    // Fill three walls, including one five-row wall. A few unavailable units
     // make the status visualization realistic; the remainder are assignable.
-    for (let position = 7; position <= 48; position += 1) {
+    for (let position = 7; position <= 92; position += 1) {
       const status = position % 13 === 0 ? 'unavailable' : 'available';
       await insertUnit(String(1000 + position), position, status);
     }
@@ -441,6 +460,7 @@ if (process.env.SEED_TEST_DATA === 'true') {
     // Production can only create these commit markers through the guarded
     // preview/apply/finalize workflow.
     const migrationDocuments = {
+      storageWalls: [],
       storageUnits: [],
       storageAssignments: [],
       storageRequests: [],

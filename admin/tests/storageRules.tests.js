@@ -15,6 +15,7 @@ import {
   storageReminderAt,
   storageDeliveryStateErrors,
   storageExemptionDeactivationReason,
+  storageLayoutErrors,
   storageStateErrors,
   storageUnitStateErrors,
   storageWarningDeadline,
@@ -237,6 +238,21 @@ describe('storageRules', function () {
       assert.deepStrictEqual(storageUnitStateErrors({ availability_status: 'occupied' }), ['owner_required']);
       assert.deepStrictEqual(storageUnitStateErrors({ availability_status: 'available', owner: 'm' }), ['owner_forbidden']);
       assert.deepStrictEqual(storageUnitStateErrors({ availability_status: 'reserved', owner: 'm' }), []);
+    });
+
+    it('validates wall references, coordinates, and floor consistency', function () {
+      const walls = [{ _id: 'wall', floor: 'floor1', column_count: 2, row_count: 5 }];
+      const errors = storageLayoutErrors({ walls, units: [
+        { _id: 'valid', wall_id: 'wall', floor: 'floor1', column: 1, row: 5 },
+        { _id: 'duplicate', wall_id: 'wall', floor: 'floor1', column: 1, row: 5 },
+        { _id: 'outside', wall_id: 'wall', floor: 'floor1', column: 3, row: 1 },
+        { _id: 'wrong-floor', wall_id: 'wall', floor: 'floor2', column: 2, row: 1 },
+        { _id: 'orphan', wall_id: 'missing', floor: 'floor1', column: 1, row: 1 },
+      ] });
+      assert.deepStrictEqual(errors.map(({ code }) => code), [
+        'duplicate_unit_coordinate', 'unit_outside_wall_layout',
+        'unit_wall_floor_mismatch', 'unit_wall_missing',
+      ]);
     });
 
     it('reports duplicate and cross-document state violations', function () {

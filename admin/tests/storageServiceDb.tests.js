@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { Members } from '/imports/common/collections/members';
 import {
+  StorageWalls,
   StorageUnits,
   StorageRequests,
   StorageAssignments,
@@ -16,7 +17,9 @@ import { confirmStorageSuggestions } from '/imports/common/server/storage/comman
 import { reconcileStorageState } from '/imports/common/server/storage/reconciliation';
 import {
   assignStorageUnitManual,
+  createStorageWallManual,
   createStorageUnitManual,
+  updateStorageWallManual,
   upsertStorageRequestManual,
 } from '/imports/common/server/storage/manual';
 import { upsertMemberStorageRequest } from '/imports/common/server/storage/memberCommands';
@@ -32,7 +35,7 @@ const now = () => new Date();
 const future = () => new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 
 const collections = [
-  StorageUnits, StorageRequests, StorageAssignments, StorageWarnings,
+  StorageWalls, StorageUnits, StorageRequests, StorageAssignments, StorageWarnings,
   StorageExemptions, StorageMoves, StorageNotificationDeliveries,
   StorageEvents, StorageActionExecutions,
 ];
@@ -45,8 +48,13 @@ const cleanup = async () => {
   await Members.removeAsync({ _id: { $regex: `^${prefix}` } });
 };
 
+const insertTestWall = (created) => StorageWalls.insertAsync({
+  _id: `${prefix}wall`, name: 'Test wall', floor: 'floor1', display_order: 1,
+  column_count: 200, row_count: 2, active: true, createdAt: created, updatedAt: created,
+});
+
 const installReadyMigration = async (created, documents = {
-  storageUnits: [], storageAssignments: [], storageRequests: [], storageEvents: [],
+  storageWalls: [], storageUnits: [], storageAssignments: [], storageRequests: [], storageEvents: [],
 }) => {
   const payload = { version: 1, documents };
   const manifest = { ...payload, digest: storageMigrationFingerprint(payload) };
@@ -67,7 +75,10 @@ const installReadyMigration = async (created, documents = {
 };
 
 describe('storage server database workflow', function () {
-  beforeEach(cleanup);
+  beforeEach(async () => {
+    await cleanup();
+    await insertTestWall(now());
+  });
   afterEach(async () => {
     setStorageJournalFailureInjectorForTests(undefined);
     await cleanup();
@@ -80,8 +91,8 @@ describe('storage server database workflow', function () {
     const requestId = `${prefix}request`;
     await Members.insertAsync({ _id: ownerId, mid: 'sst1', name: 'Storage Test', email: 'storage@example.com', lab: future() });
     await StorageUnits.insertAsync({
-      _id: unitId, name: `${prefix}1`, floor: 'floor1', height: 'low', wall: `${prefix}wall`,
-      position: 1, availability_status: 'available', createdAt: created, updatedAt: created,
+      _id: unitId, name: `${prefix}1`, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`,
+      column: 1, row: 1, availability_status: 'available', createdAt: created, updatedAt: created,
     });
     await StorageRequests.insertAsync({
       _id: requestId, owner: ownerId, request_type: 'allocation', requested_at: created,
@@ -113,12 +124,13 @@ describe('storage server database workflow', function () {
     ].entries()) {
       await cleanup();
       const created = new Date(Date.now() + index * 1000);
+      await insertTestWall(created);
       const ownerId = `${prefix}journal-owner-${index}`;
       const unitId = `${prefix}journal-unit-${index}`;
       await Members.insertAsync({ _id: ownerId, mid: `ssj${index}`, name: 'Journal Test', email: 'storage@example.com', lab: future() });
       await StorageUnits.insertAsync({
-        _id: unitId, name: unitId, floor: 'floor1', height: 'low', wall: `${prefix}journal-wall`,
-        position: index + 1, availability_status: 'available', createdAt: created, updatedAt: created,
+        _id: unitId, name: unitId, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`,
+        column: index + 1, row: 1, availability_status: 'available', createdAt: created, updatedAt: created,
       });
       await StorageRequests.insertAsync({
         _id: `${prefix}journal-request-${index}`, owner: ownerId, request_type: 'allocation',
@@ -155,7 +167,7 @@ describe('storage server database workflow', function () {
     const assignmentId = `${prefix}warning-assignment`;
     await Members.insertAsync({ _id: ownerId, mid: 'ssjw', name: 'Warning Journal', email: 'warn@example.com', lab: created });
     await StorageUnits.insertAsync({
-      _id: unitId, name: unitId, floor: 'floor1', height: 'low', wall: `${prefix}wall`, position: 91,
+      _id: unitId, name: unitId, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`, column: 91, row: 1,
       availability_status: 'occupied', owner: ownerId, createdAt: created, updatedAt: created,
     });
     await StorageAssignments.insertAsync({
@@ -204,7 +216,7 @@ describe('storage server database workflow', function () {
       if (step === 'unit_inserted' && point === 'after_effect') throw new Error('injected unit/audit gap');
     });
     const unitArgs = {
-      fields: { name: `${prefix}manual-unit`, floor: 'floor1', height: 'high', wall: `${prefix}wall`, position: 92 },
+      fields: { name: `${prefix}manual-unit`, height: 'high', wall_id: `${prefix}wall`, column: 92, row: 1 },
       actor: `${prefix}admin`, commandId: `${prefix}unit-command`, now: created,
     };
     await assert.rejects(createStorageUnitManual(unitArgs), /injected unit\/audit gap/);
@@ -217,6 +229,36 @@ describe('storage server database workflow', function () {
     assert.strictEqual(await StorageUnits.find({ _id: unitId }).countAsync(), 1);
     assert.strictEqual(await StorageEvents.find({ entity_id: unitId }).countAsync(), 1);
     assert.strictEqual(failures, 1);
+  });
+
+  it('creates walls, derives unit floors, and protects used layout bounds', async function () {
+    const created = now();
+    const wallId = await createStorageWallManual({
+      fields: {
+        name: `${prefix}second-wall`, floor: 'floor2', display_order: 2,
+        column_count: 2, row_count: 5, active: true,
+      },
+      actor: `${prefix}admin`, commandId: `${prefix}wall-command`, now: created,
+    });
+    const unitId = await createStorageUnitManual({
+      fields: { name: `${prefix}wall-unit`, wall_id: wallId, column: 2, row: 5 },
+      actor: `${prefix}admin`, commandId: `${prefix}wall-unit-command`, now: created,
+    });
+    assert.strictEqual((await StorageUnits.findOneAsync(unitId)).floor, 'floor2');
+    await assert.rejects(
+      updateStorageWallManual({
+        wallId, fields: { column_count: 1 }, actor: `${prefix}admin`,
+        commandId: `${prefix}shrink-wall-command`, now: new Date(created.getTime() + 1),
+      }),
+      (error) => error.error === 'wall-layout-in-use',
+    );
+    await assert.rejects(
+      updateStorageWallManual({
+        wallId, fields: { floor: 'floor1' }, actor: `${prefix}admin`,
+        commandId: `${prefix}floor-wall-command`, now: new Date(created.getTime() + 2),
+      }),
+      (error) => error.error === 'wall-not-empty',
+    );
   });
 
   it('scopes member command keys and rejects changed manual intent', async function () {
@@ -247,7 +289,7 @@ describe('storage server database workflow', function () {
 
     const unitCommand = `${prefix}intent-unit-command`;
     const common = { actor: `${prefix}admin`, commandId: unitCommand, now: created };
-    const unitMetadata = { floor: 'floor1', wall: `${prefix}wall`, position: 120 };
+    const unitMetadata = { wall_id: `${prefix}wall`, column: 120, row: 1 };
     await createStorageUnitManual({
       ...common, fields: { ...unitMetadata, name: `${prefix}intent-unit`, availability_status: 'available' },
     });
@@ -276,6 +318,7 @@ describe('storage server database workflow', function () {
   it('blocks allocation when a manifest record is missing', async function () {
     const created = now();
     await installReadyMigration(created, {
+      storageWalls: [],
       storageUnits: [`${prefix}missing-unit`],
       storageAssignments: [], storageRequests: [], storageEvents: [],
     });
@@ -291,8 +334,8 @@ describe('storage server database workflow', function () {
     const unitId = `${prefix}unit`;
     await Members.insertAsync({ _id: ownerId, mid: 'sst3', name: 'Storage Test', lab: future() });
     await StorageUnits.insertAsync({
-      _id: unitId, name: `${prefix}2`, floor: 'floor1', height: 'low', wall: `${prefix}wall`,
-      position: 2, availability_status: 'available', createdAt: created, updatedAt: created,
+      _id: unitId, name: `${prefix}2`, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`,
+      column: 2, row: 1, availability_status: 'available', createdAt: created, updatedAt: created,
     });
     await StorageRequests.insertAsync({
       _id: `${prefix}request`, owner: ownerId, request_type: 'allocation', requested_at: created,
@@ -318,8 +361,8 @@ describe('storage server database workflow', function () {
     const unitId = `${prefix}unit`;
     await Members.insertAsync({ _id: ownerId, mid: 'sst4', name: 'Storage Test', lab: future() });
     await StorageUnits.insertAsync({
-      _id: unitId, name: `${prefix}3`, floor: 'floor1', height: 'low', wall: `${prefix}wall`,
-      position: 3, availability_status: 'available', createdAt: created, updatedAt: created,
+      _id: unitId, name: `${prefix}3`, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`,
+      column: 3, row: 1, availability_status: 'available', createdAt: created, updatedAt: created,
     });
     await assert.rejects(
       assignStorageUnitManual({ unitId, ownerId, actor: `${prefix}admin`, now: created }),
@@ -381,12 +424,12 @@ describe('storage server database workflow', function () {
     const requestId = `${prefix}request`;
     await Members.insertAsync({ _id: ownerId, mid: 'sst5', name: 'Storage Test', lab: future() });
     await StorageUnits.insertAsync({
-      _id: sourceId, name: `${prefix}source`, floor: 'floor1', height: 'high', wall: `${prefix}wall`,
-      position: 4, availability_status: 'occupied', owner: ownerId, createdAt: created, updatedAt: created,
+      _id: sourceId, name: `${prefix}source`, floor: 'floor1', height: 'high', wall_id: `${prefix}wall`,
+      column: 4, row: 1, availability_status: 'occupied', owner: ownerId, createdAt: created, updatedAt: created,
     });
     await StorageUnits.insertAsync({
-      _id: destinationId, name: `${prefix}destination`, floor: 'floor1', height: 'low', wall: `${prefix}wall`,
-      position: 5, availability_status: 'available', createdAt: created, updatedAt: created,
+      _id: destinationId, name: `${prefix}destination`, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`,
+      column: 5, row: 1, availability_status: 'available', createdAt: created, updatedAt: created,
     });
     await StorageAssignments.insertAsync({
       _id: assignmentId, unit: sourceId, owner: ownerId, assigned_at: created,

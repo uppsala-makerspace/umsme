@@ -1,3 +1,4 @@
+export { StorageWalls } from './storageWalls';
 export { StorageUnits } from './storageUnits';
 export { StorageRequests } from './storageRequests';
 export { StorageAssignments } from './storageAssignments';

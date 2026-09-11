@@ -4,7 +4,7 @@ import { Random } from 'meteor/random';
 import { Roles } from 'meteor/roles';
 import { Members } from '/imports/common/collections/members';
 import {
-  StorageUnits, StorageRequests, StorageAssignments, StorageWarnings, StorageExemptions,
+  StorageWalls, StorageUnits, StorageRequests, StorageAssignments, StorageWarnings, StorageExemptions,
   StorageMoves, StorageNotificationDeliveries, StorageEvents,
 } from '/imports/common/collections/storage';
 import {
@@ -79,7 +79,7 @@ const requestEditorView = (editor) => {
 
 Template.Storage.onCreated(function () {
   this.state = new ReactiveDict();
-  this.state.setDefault({ busy: false, error: '', previews: {}, previewAction: '', selected: {}, rowOptions: {}, filters: {}, eventFilters: {}, queueQuery: '', bulk: {}, bulkPending: null, bulkAcknowledged: false, results: null, createUnitOpen: false, requestEditor: null });
+  this.state.setDefault({ busy: false, error: '', previews: {}, previewAction: '', selected: {}, rowOptions: {}, filters: {}, eventFilters: {}, queueQuery: '', bulk: {}, bulkPending: null, bulkAcknowledged: false, results: null, createWallOpen: false, createUnitOpen: false, requestEditor: null });
   this.subscribe('storageAdminDashboard');
   this.autorun(() => {
     if (!operator()) return;
@@ -145,20 +145,29 @@ Template.Storage.helpers({
   },
   requestEditor: () => requestEditorView(Template.instance().state.get('requestEditor')),
   bulkPending() { const state = Template.instance().state; const pending = state.get('bulkPending'); return pending && { ...pending, confirmDisabled: state.get('busy') || (pending.requiresAcknowledgement && !state.get('bulkAcknowledged')) }; },
-  wallOptions: () => [...new Set(StorageUnits.find().fetch().map(({ wall }) => wall).filter(Boolean))].sort(),
+  wallOptions: () => StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch(),
+  activeWallOptions: () => StorageWalls.find({ active: true }, { sort: { display_order: 1, name: 1 } }).fetch(),
+  createWallOpen: () => Template.instance().state.get('createWallOpen'),
+  storageWalls: () => StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch().map((wall) => ({
+    ...wall,
+    floor1: wall.floor === 'floor1',
+    floor2: wall.floor === 'floor2',
+    unitCount: StorageUnits.find({ wall_id: wall._id }).count(),
+  })),
   walls() {
     const state = Template.instance().state, bulk = state.get('bulk') || {}, selectedId = state.get('selectedUnitId');
     const now = new Date();
+    const wallById = new Map(StorageWalls.find().fetch().map((wall) => [wall._id, wall]));
     const units = StorageUnits.find().fetch().map((unit) => {
       const member = Members.findOne(unit.owner);
       const assignment = StorageAssignments.findOne({ unit: unit._id, ended_at: { $exists: false } });
       const warning = assignment && StorageWarnings.findOne({ assignment: assignment._id, warning_status: 'open' });
       const exemption = assignment && StorageExemptions.findOne({ assignment: assignment._id, active: true });
       const overdue = !!assignment && !!member && (!(member.lab instanceof Date) || member.lab <= now);
-      return { ...unit, _overdue: overdue, _warningState: overdue ? (exemption ? 'exempt' : (warning ? 'warned' : 'unwarned')) : '' };
+      return { ...unit, wall_name: wallById.get(unit.wall_id)?.name || 'Unknown wall', _overdue: overdue, _warningState: overdue ? (exemption ? 'exempt' : (warning ? 'warned' : 'unwarned')) : '' };
     });
     const visible = filterStorageUnits(units, state.get('filters') || {}).map((unit) => ({ ...unit, statusLabel: storageStatusLabel(unit.availability_status), statusClass: storageStatusClass(unit.availability_status), overdueClass: unit._overdue ? 'storage-unit-overdue' : '', selectedClass: unit._id === selectedId ? 'storage-unit-selected' : '', bulkSelected: !!bulk[unit._id], ownerName: Members.findOne(unit.owner)?.name || '', tooltip: [unit.name, unit._overdue ? 'Overdue' : storageStatusLabel(unit.availability_status), Members.findOne(unit.owner)?.name, unit.note].filter(Boolean).join(' · ') }));
-    return groupStorageWalls(visible, Meteor.settings.public.storageWalls || []);
+    return groupStorageWalls(visible, StorageWalls.find().fetch());
   },
   unitDetail() {
     const unit = StorageUnits.findOne(Template.instance().state.get('selectedUnitId')); if (!unit) return null;
@@ -169,7 +178,7 @@ Template.Storage.helpers({
     const ownerEligible = !!unit.owner && !!Members.findOne(unit.owner)?.lab
       && new Date(Members.findOne(unit.owner).lab) > new Date();
     const entityIds = [unit._id, assignment?._id, request?._id, move?._id].filter(Boolean);
-    return { ...unit, statusLabel: storageStatusLabel(unit.availability_status), ownerName: Members.findOne(unit.owner)?.name || 'No owner', floor1: unit.floor === 'floor1', floor2: unit.floor === 'floor2', heightNone: !unit.height, heightLow: unit.height === 'low', heightHigh: unit.height === 'high', statusAvailable: unit.availability_status === 'available', statusUnavailable: unit.availability_status === 'unavailable', statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status), metadataProtected: ['occupied', 'reserved'].includes(unit.availability_status), clearance: unit.availability_status === 'awaiting_clearance', assignable: unit.availability_status === 'available', canRequestRelease: !!assignment && !request && !move, activeAssignment: assignment && { ...assignment, assignedDate: date(assignment.assigned_at), exemption }, activeRequest: request && { ...request, requestedDate: date(request.requested_at), pauseTarget: request.request_status === 'waiting', pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume', canTogglePause: request.request_status === 'waiting' ? !ownerEligible : (request.request_status === 'paused_ineligible' && ownerEligible) }, pendingMove: move && { ...move, deadlineDate: date(move.deadline_at) }, deliveries: unit.owner ? StorageNotificationDeliveries.find({ owner: unit.owner }, { sort: { created_at: -1 }, limit: 20 }).fetch() : [], history: StorageEvents.find({ entity_id: { $in: entityIds } }, { sort: { occurred_at: -1 }, limit: 50 }).fetch().map((event) => ({ ...event, date: date(event.occurred_at) })) };
+    return { ...unit, statusLabel: storageStatusLabel(unit.availability_status), ownerName: Members.findOne(unit.owner)?.name || 'No owner', wallChoices: StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch().map((wall) => ({ ...wall, selected: wall._id === unit.wall_id, disabled: !wall.active && wall._id !== unit.wall_id, choiceLabel: `${wall.name}${wall.active ? '' : ' (inactive)'}` })), heightNone: !unit.height, heightLow: unit.height === 'low', heightHigh: unit.height === 'high', statusAvailable: unit.availability_status === 'available', statusUnavailable: unit.availability_status === 'unavailable', statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status), metadataProtected: ['occupied', 'reserved'].includes(unit.availability_status), clearance: unit.availability_status === 'awaiting_clearance', assignable: unit.availability_status === 'available', canRequestRelease: !!assignment && !request && !move, activeAssignment: assignment && { ...assignment, assignedDate: date(assignment.assigned_at), exemption }, activeRequest: request && { ...request, requestedDate: date(request.requested_at), pauseTarget: request.request_status === 'waiting', pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume', canTogglePause: request.request_status === 'waiting' ? !ownerEligible : (request.request_status === 'paused_ineligible' && ownerEligible) }, pendingMove: move && { ...move, deadlineDate: date(move.deadline_at) }, deliveries: unit.owner ? StorageNotificationDeliveries.find({ owner: unit.owner }, { sort: { created_at: -1 }, limit: 20 }).fetch() : [], history: StorageEvents.find({ entity_id: { $in: entityIds } }, { sort: { occurred_at: -1 }, limit: 50 }).fetch().map((event) => ({ ...event, date: date(event.occurred_at) })) };
   },
   memberOptions: () => Members.find({}, { sort: { name: 1 } }).fetch()
     .map((member) => ({ ...member, pickerLabel: storageMemberLabel(member) })),
@@ -235,8 +244,25 @@ Template.Storage.events({
       await i.refresh();
     } catch (error) { i.state.set('error', errorMessage(error)); } finally { i.state.set('busy', false); }
   },
+  'click .toggle-create-wall'(e, i) { e.preventDefault(); i.state.set('createWallOpen', !i.state.get('createWallOpen')); },
+  async 'submit .create-wall-form'(e, i) {
+    e.preventDefault();
+    const fields = formObject(e.currentTarget);
+    fields.display_order = Number(fields.display_order);
+    fields.column_count = Number(fields.column_count);
+    fields.row_count = Number(fields.row_count);
+    fields.active = true;
+    if (!fields.note) delete fields.note;
+    try { await mutate(i, 'adminStorage.walls.create', { fields }, `wall.create:${JSON.stringify(fields)}`); e.currentTarget.reset(); i.state.set('createWallOpen', false); } catch (_) {}
+  },
+  async 'submit .edit-wall-form'(e, i) {
+    e.preventDefault();
+    const v = formObject(e.currentTarget), wall_id = e.currentTarget.dataset.id;
+    const fields = { name: v.name, floor: v.floor, display_order: Number(v.display_order), column_count: Number(v.column_count), row_count: Number(v.row_count), active: v.active === 'on', note: v.note || null };
+    try { await mutate(i, 'adminStorage.walls.update', { wall_id, fields }, `wall.update:${wall_id}:${JSON.stringify(fields)}`); } catch (_) {}
+  },
   'click .toggle-create-unit'(e, i) { e.preventDefault(); i.state.set('createUnitOpen', !i.state.get('createUnitOpen')); },
-  async 'submit .create-unit-form'(e, i) { e.preventDefault(); const fields = formObject(e.currentTarget); fields.position = Number(fields.position); if (!fields.height) delete fields.height; if (!fields.note) delete fields.note; try { await mutate(i, 'adminStorage.units.create', { fields }, `unit.create:${JSON.stringify(fields)}`); e.currentTarget.reset(); i.state.set('createUnitOpen', false); } catch (_) {} },
+  async 'submit .create-unit-form'(e, i) { e.preventDefault(); const fields = formObject(e.currentTarget); fields.column = Number(fields.column); fields.row = Number(fields.row); if (!fields.height) delete fields.height; if (!fields.note) delete fields.note; try { await mutate(i, 'adminStorage.units.create', { fields }, `unit.create:${JSON.stringify(fields)}`); e.currentTarget.reset(); i.state.set('createUnitOpen', false); } catch (_) {} },
   'input .storage-filter, change .storage-filter'(e, i) { i.state.set('filters', { ...(i.state.get('filters') || {}), [e.currentTarget.dataset.filter]: e.currentTarget.value }); },
   'change .storage-owner-filter'(e, i) { i.state.set('filters', { ...(i.state.get('filters') || {}), owner: e.currentTarget.checked }); },
   'change .storage-overdue-filter'(e, i) { i.state.set('filters', { ...(i.state.get('filters') || {}), overdue: e.currentTarget.checked }); },
@@ -289,7 +315,7 @@ Template.Storage.events({
     const acknowledged = pending.requiresAcknowledgement && i.state.get('bulkAcknowledged') === true;
     try { await mutate(i, 'adminStorage.units.bulkSetHeight', { unit_ids: pending.unit_ids, height: pending.height, acknowledged }, `bulk.height:${pending.height}:${pending.unit_ids.join(',')}`); i.state.set('bulk', {}); i.state.set('bulkPending', null); i.state.set('bulkAcknowledged', false); } catch (_) {}
   },
-  async 'submit .edit-unit-form'(e, i) { e.preventDefault(); const v = formObject(e.currentTarget), unit_id = e.currentTarget.dataset.id; const fields = { name: v.name, floor: v.floor, height: v.height || null, wall: v.wall, position: Number(v.position), availability_status: v.availability_status, note: v.note || null }; try { await mutate(i, 'adminStorage.units.update', { unit_id, fields, acknowledged: v.acknowledged === 'on' }, `unit.update:${unit_id}:${JSON.stringify(fields)}`); } catch (_) {} },
+  async 'submit .edit-unit-form'(e, i) { e.preventDefault(); const v = formObject(e.currentTarget), unit_id = e.currentTarget.dataset.id; const fields = { name: v.name, height: v.height || null, wall_id: v.wall_id, column: Number(v.column), row: Number(v.row), availability_status: v.availability_status, note: v.note || null }; try { await mutate(i, 'adminStorage.units.update', { unit_id, fields, acknowledged: v.acknowledged === 'on' }, `unit.update:${unit_id}:${JSON.stringify(fields)}`); } catch (_) {} },
   async 'submit .manual-assign-form'(e, i) { e.preventDefault(); const v = formObject(e.currentTarget), payload = { unit_id: e.currentTarget.dataset.id, owner_id: v.owner_id, override: v.override === 'on', reason: v.reason || undefined }; try { await mutate(i, 'adminStorage.assignments.assignManual', payload, `assign:${JSON.stringify(payload)}`); } catch (_) {} },
   async 'click .confirm-clearance'(e, i) { const unit_id = e.currentTarget.dataset.id; try { await mutate(i, 'adminStorage.clearances.confirm', { unit_id }, `clear:${unit_id}`); } catch (_) {} },
   async 'click .end-assignment'(e, i) { const assignment_id = e.currentTarget.dataset.id, reason = prompt('Reason for ending/correcting this assignment:'); if (reason) try { await mutate(i, 'adminStorage.assignments.endManual', { assignment_id, reason }, `end:${assignment_id}:${reason}`); } catch (_) {} },

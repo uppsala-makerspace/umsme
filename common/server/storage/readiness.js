@@ -4,6 +4,7 @@ import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
 import { Comments } from '/imports/common/collections/comments';
 import {
+  StorageWalls,
   StorageUnits,
   StorageRequests,
   StorageAssignments,
@@ -17,12 +18,13 @@ import {
   stableStorageMigrationString,
   storageMigrationFingerprintForSource,
 } from '/imports/common/lib/legacyStorageMigrationFingerprint';
-import { storageStateErrors } from '/imports/common/lib/storageRules';
+import { storageLayoutErrors, storageStateErrors } from '/imports/common/lib/storageRules';
 
 export const STORAGE_MIGRATION_SUMMARY_ID = `${LEGACY_STORAGE_MIGRATION_VERSION}:event:summary`;
 export const STORAGE_CUTOVER_FINALIZED_ID = `${LEGACY_STORAGE_MIGRATION_VERSION}:event:cutover-finalized`;
 
 const manifestCollections = {
+  storageWalls: StorageWalls,
   storageUnits: StorageUnits,
   storageAssignments: StorageAssignments,
   storageRequests: StorageRequests,
@@ -63,9 +65,10 @@ const inspectManifest = async (manifest) => {
 };
 
 export const storageAllocationReadiness = async ({ legacySource } = {}) => {
-  const [summary, finalized, units, requests, assignments, warnings, exemptions, moves] = await Promise.all([
+  const [summary, finalized, walls, units, requests, assignments, warnings, exemptions, moves] = await Promise.all([
     StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_ID),
     StorageEvents.findOneAsync(STORAGE_CUTOVER_FINALIZED_ID),
+    StorageWalls.find({}).fetchAsync(),
     StorageUnits.find({}).fetchAsync(),
     StorageRequests.find({}).fetchAsync(),
     StorageAssignments.find({}).fetchAsync(),
@@ -95,9 +98,10 @@ export const storageAllocationReadiness = async ({ legacySource } = {}) => {
     );
     legacySourceChanged = currentFingerprint !== summary.details?.fingerprint;
   }
-  const invariantErrors = storageStateErrors({
-    units, requests, assignments, warnings, exemptions, moves,
-  });
+  const invariantErrors = [
+    ...storageStateErrors({ units, requests, assignments, warnings, exemptions, moves }),
+    ...storageLayoutErrors({ walls, units }),
+  ];
   const unclassifiedUnits = units.filter((unit) => !unit.floor || !unit.height);
   const blockedReasons = [
     ...(!summary ? ['migration_not_applied'] : []),

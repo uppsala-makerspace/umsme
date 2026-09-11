@@ -23,6 +23,7 @@ import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Spaces } from '/imports/common/collections/spaces';
 import { StoreItems } from '/imports/common/collections/storeItems';
 import {
+  StorageWalls,
   StorageUnits,
   StorageRequests,
   StorageAssignments,
@@ -80,6 +81,7 @@ export default () => {
       return undefined;
     }
     return [
+      StorageWalls.find(),
       StorageUnits.find(),
       StorageRequests.find(),
       StorageAssignments.find(),
