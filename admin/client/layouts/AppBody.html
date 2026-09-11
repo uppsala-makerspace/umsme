@@ -25,7 +25,7 @@
                     <li><a href="/spaces">Spaces</a></li>
                     <li><a href="/certificates">Certificates</a></li>
                     <li><a href="/liability">Liability</a></li>
-                    <li><a href="/storage">Storage</a></li>
+                    {{#if isInRole "admin,board"}}<li><a href="/storage">Storage</a></li>{{/if}}
                 </ul>
             </li>
             <li class="menu-section" data-section="economy">
