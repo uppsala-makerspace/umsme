@@ -8,6 +8,10 @@ import "./storeRules.tests";
 import "./familyRules.tests";
 import "./revenueSeries.tests";
 import "./groupRules.tests";
+import "./storageRules.tests";
+import "./storageSchemas.tests";
+import "./storageMigration.tests";
+import "./storageIndexes.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

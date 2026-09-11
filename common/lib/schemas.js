@@ -32,4 +32,13 @@ export const schemas = {
   storeItem: new SimpleSchema(models.storeItem),
   groupMembership: new SimpleSchema(models.groupMembership),
   space: new SimpleSchema(models.space),
+  storageUnit: new SimpleSchema(models.storageUnit),
+  storageRequest: new SimpleSchema(models.storageRequest),
+  storageAssignment: new SimpleSchema(models.storageAssignment),
+  storageWarning: new SimpleSchema(models.storageWarning),
+  storageExemption: new SimpleSchema(models.storageExemption),
+  storageMove: new SimpleSchema(models.storageMove),
+  storageNotificationDelivery: new SimpleSchema(models.storageNotificationDelivery),
+  storageEvent: new SimpleSchema(models.storageEvent),
+  storageActionExecution: new SimpleSchema(models.storageActionExecution),
 };

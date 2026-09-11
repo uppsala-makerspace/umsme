@@ -17,3 +17,4 @@ import './groups';
 import './workshops';
 import './spaces';
 import './storeItems';
+import './storageMigration';
