@@ -16,6 +16,7 @@ import {
   storageMigrationFingerprintForSource,
 } from '/imports/common/lib/legacyStorageMigrationFingerprint';
 import { storageLayoutErrors, storageStateErrors } from '/imports/common/lib/storageRules';
+import { detectStorageTransactionSupport } from './atomic';
 
 export const STORAGE_MIGRATION_SUMMARY_ID = `${LEGACY_STORAGE_MIGRATION_VERSION}:event:summary`;
 export const STORAGE_CUTOVER_FINALIZED_ID = `${LEGACY_STORAGE_MIGRATION_VERSION}:event:cutover-finalized`;
@@ -62,13 +63,14 @@ const inspectManifest = async (manifest) => {
 };
 
 export const storageAllocationReadiness = async ({ legacySource } = {}) => {
-  const [summary, finalized, walls, units, requests, offers] = await Promise.all([
+  const [summary, finalized, walls, units, requests, offers, transactionsSupported] = await Promise.all([
     StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_ID),
     StorageEvents.findOneAsync(STORAGE_CUTOVER_FINALIZED_ID),
     StorageWalls.find({}).fetchAsync(),
     StorageUnits.find({}).fetchAsync(),
     StorageRequests.find({}).fetchAsync(),
     StorageOffers.find({}).fetchAsync(),
+    detectStorageTransactionSupport(),
   ]);
 
   const manifest = summary?.details?.manifest;
@@ -101,8 +103,10 @@ export const storageAllocationReadiness = async ({ legacySource } = {}) => {
     ...(!summary ? ['migration_not_applied'] : []),
     ...(summary && !manifestState.valid ? ['migration_manifest_invalid'] : []),
     ...(missingCount ? ['migration_manifest_incomplete'] : []),
-    ...(!finalizedValid ? ['cutover_finalization_invalid'] : []),
+    ...(!finalized ? ['cutover_not_finalized'] : []),
+    ...(finalized && !finalizedValid ? ['cutover_finalization_invalid'] : []),
     ...(legacySourceChanged ? ['legacy_source_changed_after_migration'] : []),
+    ...(!transactionsSupported ? ['transactions_unavailable'] : []),
     ...(invariantErrors.length ? ['storage_invariant_errors'] : []),
     ...(unclassifiedUnits.length ? ['unclassified_units'] : []),
   ];
@@ -112,6 +116,7 @@ export const storageAllocationReadiness = async ({ legacySource } = {}) => {
     allocation_blocked_reasons: blockedReasons,
     migration_applied: !!summary,
     cutover_finalized: !!finalized && finalizedValid,
+    transactions_supported: transactionsSupported,
     legacy_source_changed: legacySourceChanged,
     manifest_valid: manifestState.valid,
     missing_migrated_documents: manifestState.missing_migrated_documents,

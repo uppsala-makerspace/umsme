@@ -122,6 +122,8 @@ describe('storage admin presentation', function () {
         'legacy_source_changed_after_migration',
         'migration_manifest_incomplete',
         'cutover_finalization_invalid',
+        'cutover_not_finalized',
+        'transactions_unavailable',
       ],
     };
     const view = storageReadinessPresentation(source);
@@ -130,6 +132,8 @@ describe('storage admin presentation', function () {
       'Legacy storage data changed after migration.',
       'One or more migrated storage records are missing.',
       'The storage migration cutover record is invalid.',
+      'The storage migration cutover has not been finalized.',
+      'MongoDB transaction support is required for storage changes.',
     ]);
     const metadata = storageReadinessPresentation({
       allocation_ready: false,

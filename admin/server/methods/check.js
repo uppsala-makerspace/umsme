@@ -1,5 +1,7 @@
 import { Members } from '/imports/common/collections/members.js';
 import { Meteor } from "meteor/meteor";
+import { StorageUnits } from '/imports/common/collections/storage';
+import { storageOwnerForMember } from '/imports/common/server/storage/access';
 
 Meteor.methods({
   'findMemberId': async (mail, mid) => {
@@ -14,12 +16,12 @@ Meteor.methods({
   },
   'storageCheck': async (id) => {
     const member = await Members.findOneAsync(id);
-    let storage = member.storage;
-    if (member.infamily) {
-      const payingFamilyMember = await Members.findOneAsync(member.infamily);
-      storage = payingFamilyMember.storage;
-    }
     if (member) {
+      const owner = await storageOwnerForMember(member);
+      const unit = await StorageUnits.findOneAsync({
+        owner: owner._id,
+        availability_status: 'occupied',
+      });
       return {
         member: member != null,
         info: {
@@ -29,9 +31,7 @@ Meteor.methods({
           family: member.family,
           infamily: !!member.infamily,
           id: member.mid,
-          storage,
-          storagequeue: member.storagequeue ? true : undefined,
-          storagerequest: member.storagerequest
+          storage: unit?.name,
         },
       };
     } else {
@@ -40,26 +40,5 @@ Meteor.methods({
         info: {}
       }
     }
-  },
-  'storageQueue': async (id, queue) => {
-    console.log("Queue called "+ typeof queue);
-    const member = await Members.findOneAsync(id);
-    console.log("For member "+ member._id);
-    if (typeof queue !== 'boolean') {
-      return false;
-    }
-    await Members.updateAsync(id, {"$set": { storagequeue: queue} });
-    return true;
-  },
-  'storageRequest': async (id, request) => {
-    console.log("Request called "+ typeof request);
-    const member = await Members.findOneAsync(id);
-    console.log("For member "+ member._id);
-    if (request) {
-      await Members.updateAsync(id, {"$set": { storagerequest: request} });
-    } else {
-      await Members.updateAsync(id, {"$unset": "storagerequest" });
-    }
-    return true;
   }
 });

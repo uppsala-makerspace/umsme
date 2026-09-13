@@ -388,8 +388,9 @@ storage.member.confirmOffer(...)
 ```
 
 Confirmation reloads the authoritative state and uses conditional database
-updates. MongoDB transactions are used when available. Stable command and event
-identifiers prevent a retry from applying the same decision twice.
+updates inside a MongoDB transaction. Storage changes require a replica set;
+readiness blocks them when transaction support is unavailable. Stable command
+and event identifiers prevent a retry from applying the same decision twice.
 
 ### 3.8 Existing communication system
 
@@ -581,13 +582,14 @@ The deployment sequence is:
 
 1. Restore recent production data in a safe test environment.
 2. Run the preview and resolve every blocker.
-3. Classify unit heights and verify wall layouts.
-4. Deploy the shared schema, server methods, admin UI, and member UI together.
-5. Disable all legacy storage write paths in the same maintenance window.
-6. Apply the reviewed migration and verify counts and sample records.
-7. Exercise every preview with delivery disabled or restricted.
-8. Finalize the cutover after operational review.
-9. Remove legacy member fields and settings-backed inventory in a later cleanup.
+3. Verify that production MongoDB is a replica set with transaction support.
+4. Classify unit heights and verify wall layouts.
+5. Deploy the shared schema, server methods, admin UI, and member UI together.
+6. Disable all legacy storage write paths in the same maintenance window.
+7. Apply the reviewed migration and verify counts and sample records.
+8. Exercise every preview with delivery disabled or restricted.
+9. Finalize the cutover after operational review.
+10. Remove legacy member fields and settings-backed inventory in a later cleanup.
 
 ## 7. Safety and verification
 
@@ -617,9 +619,6 @@ The storage policy and application flow are settled. Deployment still needs:
 
 - Gmail SMTP submission or Google Workspace SMTP relay configuration for
   `hyllplats@uppsalamakerspace.se`;
-- confirmation that the production MongoDB setup supports multi-document
-  transactions;
-- an operational batch-size limit; and
 - a retention policy for member messages and storage events.
 
 These choices do not change the allocation order or lifecycle described above.

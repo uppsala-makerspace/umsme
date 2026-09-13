@@ -246,7 +246,9 @@ export const finalizeLegacyStorageCutover = async ({
     error.code = 'fingerprint_mismatch';
     throw error;
   }
-  const blocking = validation.allocation_blocked_reasons.filter((code) => code !== 'unclassified_units');
+  const blocking = validation.allocation_blocked_reasons.filter(
+    (code) => !['unclassified_units', 'cutover_not_finalized'].includes(code),
+  );
   if (blocking.length) {
     const error = new Error('Migration must be complete, coherent, and unchanged before finalization');
     error.code = 'finalization_blocked';

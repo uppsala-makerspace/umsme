@@ -6,7 +6,7 @@
             {{#if payment}}
                 <h2>New member information</h2>
             {{/if}}
-            {{> quickForm collection=Members doc=draftMember  id="insertMemberForm" type="normal" validation="keyup" omitFields="family,storage,lock"}}
+            {{> quickForm collection=Members doc=draftMember  id="insertMemberForm" type="normal" validation="keyup" omitFields="family,storage,storagequeue,storagerequest,lock"}}
         </div>
         {{#if payment}}
             <div style="flex-grow: 1; margin-left:10px;padding-left: 10px;border-left: 1px solid lightgray">

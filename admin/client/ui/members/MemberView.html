@@ -25,7 +25,7 @@
         &nbsp;|&nbsp;<a href="/user/{{_id}}">User account: {{username}}</a>
         {{/with}}
     </div>
-    {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id,registered" type="update" buttonContent="Update"}}
+    {{> quickForm collection=Members doc=member id="updateMemberForm" omitFields="_id,registered,storage,storagequeue,storagerequest" type="update" buttonContent="Update"}}
     {{#if member.infamily}}
     <h2>Part of family, paying family member is <strong><a href="/member/{{member.infamily}}">{{payingMember.name}}</a></strong> <small><a class="removeFromFamily">Remove from family</a></small></h2>
     {{/if}}

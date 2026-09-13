@@ -370,7 +370,8 @@ describe('legacy storage migration database gate', function () {
     });
     const complete = await validateStorageMigrationState({ legacySource: source });
     assert.strictEqual(complete.migration_manifest.complete, true);
-    assert.strictEqual(complete.allocation_ready, true);
+    assert.strictEqual(complete.allocation_ready, false);
+    assert.ok(complete.allocation_blocked_reasons.includes('cutover_not_finalized'));
 
     const provenance = plan.documents.storageEvents.find(({ _id }) => _id !== STORAGE_MIGRATION_SUMMARY_EVENT_ID);
     await StorageEvents.removeAsync(provenance._id);

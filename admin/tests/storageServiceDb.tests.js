@@ -10,7 +10,8 @@ import { reconcileStorageState } from '/imports/common/server/storage/reconcilia
 import {
   assignStorageUnitManual, createStorageExemptionManual, revokeStorageExemptionManual,
 } from '/imports/common/server/storage/manual';
-import { upsertMemberStorageRequest } from '/imports/common/server/storage/memberCommands';
+import { confirmMemberStorageOffer, upsertMemberStorageRequest } from '/imports/common/server/storage/memberCommands';
+import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
 import { storageMigrationFingerprint } from '/imports/common/lib/legacyStorageMigrationFingerprint';
 import { STORAGE_CUTOVER_FINALIZED_ID, STORAGE_MIGRATION_SUMMARY_ID } from '/imports/common/server/storage/readiness';
 import { setStorageNotificationTransportsForTests } from '/imports/common/server/storageMessages/service';
@@ -57,6 +58,10 @@ const installReadyMigration = async (created = new Date()) => {
 };
 
 describe('five-collection storage database workflow', function () {
+  before(async function () {
+    await ensureStorageIndexes();
+  });
+
   beforeEach(async () => {
     setStorageNotificationTransportsForTests({ sendEmail: async () => {}, sendPush: async () => {} });
     await cleanup();
@@ -145,6 +150,63 @@ describe('five-collection storage database workflow', function () {
     assert.strictEqual((await StorageUnits.findOneAsync(destinationId)).availability_status, 'occupied');
     assert.strictEqual((await StorageUnits.findOneAsync(sourceId)).availability_status, 'available');
     assert(await StorageEvents.findOneAsync({ entity_id: offerId, event_type: 'offer_completed' }));
+  });
+
+  it('rejects member completion after eligibility or the offer deadline has ended', async function () {
+    const now = new Date();
+    const insertOffer = (id, owner, deadline) => StorageOffers.insertAsync({
+      _id: id, owner: owner._id, request: `${id}:request`, from_unit: `${id}:from`, to_unit: `${id}:to`,
+      offered_at: new Date(now.getTime() - 86400000), offered_by: `${prefix}admin`,
+      deadline_at: deadline, requires_inspection: false, createdAt: now, updatedAt: now,
+    });
+    const expiredOwner = { _id: `${prefix}expired`, lab: future() };
+    const expiredOfferId = `${prefix}expired-offer`;
+    await insertOffer(expiredOfferId, expiredOwner, new Date(now.getTime() - 1));
+    await assert.rejects(
+      confirmMemberStorageOffer({ owner: expiredOwner, offerId: expiredOfferId, actor: expiredOwner._id, now }),
+      (error) => error.error === 'offer-expired',
+    );
+
+    const ineligibleOwner = { _id: `${prefix}ineligible`, lab: past() };
+    const ineligibleOfferId = `${prefix}ineligible-offer`;
+    await insertOffer(ineligibleOfferId, ineligibleOwner, new Date(now.getTime() + 86400000));
+    await assert.rejects(
+      confirmMemberStorageOffer({ owner: ineligibleOwner, offerId: ineligibleOfferId, actor: ineligibleOwner._id, now }),
+      (error) => error.error === 'not-eligible',
+    );
+  });
+
+  it('preserves an overdue warning when an administrator completes the offer', async function () {
+    const now = new Date();
+    const ownerId = `${prefix}overdue`;
+    const sourceId = `${prefix}old`;
+    const destinationId = `${prefix}new`;
+    const requestId = `${prefix}request`;
+    const offerId = `${prefix}offer`;
+    const warning = {
+      id: `${prefix}warning`, warned_at: new Date(now.getTime() - 29 * 86400000),
+      warned_by: `${prefix}admin`, deadline_at: new Date(now.getTime() - 86400000),
+    };
+    await Members.insertAsync({ _id: ownerId, mid: 'five6', name: 'Overdue Owner', lab: past() });
+    await unit(sourceId, 7, 'occupied', ownerId);
+    await StorageUnits.updateAsync(sourceId, { $set: { warning } });
+    await unit(destinationId, 8, 'reserved', ownerId);
+    await StorageRequests.insertAsync({
+      _id: requestId, owner: ownerId, request_type: 'move', source_unit: sourceId,
+      preference: { height: 'low' }, requested_at: now, request_status: 'in_progress',
+      createdAt: now, updatedAt: now,
+    });
+    await StorageOffers.insertAsync({
+      _id: offerId, owner: ownerId, request: requestId, from_unit: sourceId, to_unit: destinationId,
+      offered_at: new Date(now.getTime() - 15 * 86400000), offered_by: `${prefix}admin`,
+      deadline_at: new Date(now.getTime() - 86400000), requires_inspection: false,
+      createdAt: now, updatedAt: now,
+    });
+
+    await completeStorageOffer({ offerId, actor: `${prefix}admin`, actorType: 'administrator' });
+
+    assert.deepStrictEqual((await StorageUnits.findOneAsync(destinationId)).warning, warning);
+    assert.strictEqual((await StorageUnits.findOneAsync(sourceId)).availability_status, 'available');
   });
 
   it('stores and removes an administrative exemption on the occupied unit', async function () {

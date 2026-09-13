@@ -210,12 +210,6 @@ const finishMove = async (offer, actor, actorType, now, session, eventId) => {
   ensure(owner && source && destination && request, 'Move references are missing');
   ensure(source.availability_status === 'occupied' && source.owner === owner._id, 'Move source changed');
   ensure(destination.availability_status === 'reserved' && destination.owner === owner._id, 'Move destination changed');
-  await casStorageUpdate(StorageUnits,
-    { _id: destination._id, availability_status: 'reserved', owner: owner._id, updatedAt: destination.updatedAt },
-    { $set: {
-      availability_status: 'occupied', assigned_at: now, assigned_by: actor,
-      source_request: request._id, updatedAt: now,
-    } }, { session });
   const sourceModifier = offer.requires_inspection
     ? { $set: { availability_status: 'awaiting_clearance', updatedAt: now }, $unset: { warning: '', exemption: '' } }
     : { $set: { availability_status: 'available', updatedAt: now }, $unset: {
@@ -224,6 +218,15 @@ const finishMove = async (offer, actor, actorType, now, session, eventId) => {
   await casStorageUpdate(StorageUnits,
     { _id: source._id, availability_status: 'occupied', owner: owner._id, updatedAt: source.updatedAt },
     sourceModifier, { session });
+  await casStorageUpdate(StorageUnits,
+    { _id: destination._id, availability_status: 'reserved', owner: owner._id, updatedAt: destination.updatedAt },
+    { $set: {
+      availability_status: 'occupied', assigned_at: now, assigned_by: actor,
+      source_request: request._id,
+      ...(source.warning ? { warning: source.warning } : {}),
+      ...(source.exemption ? { exemption: source.exemption } : {}),
+      updatedAt: now,
+    } }, { session });
   await casStorageUpdate(StorageRequests,
     { _id: request._id, request_status: 'in_progress', updatedAt: request.updatedAt },
     { $set: { request_status: 'fulfilled', fulfilled_at: now, updatedAt: now } }, { session });
@@ -302,7 +305,6 @@ const executeRow = async ({ action, commandId, selection, row, actor }) => {
   try {
     const result = await runStorageAtomic({
       transactional: (session) => applySuggestedAction(action, records, selection, actor, now, session, eventId, row),
-      fallback: () => applySuggestedAction(action, records, selection, actor, now, undefined, eventId, row),
     });
     return { suggestion_id: row.suggestion_id, status: 'applied', ...result };
   } catch (error) {
@@ -344,8 +346,8 @@ export const completeStorageOffer = async ({ offerId, actor, actorType }) => {
   const offer = await StorageOffers.findOneAsync(offerId);
   if (!offer) throw new Meteor.Error('not-found', 'Offer not found');
   const now = new Date();
+  await reconcileStorageState({ ownerIds: [offer.owner], now });
   return runStorageAtomic({
     transactional: (session) => finishMove(offer, actor, actorType, now, session, eventId),
-    fallback: () => finishMove(offer, actor, actorType, now, undefined, eventId),
   });
 };

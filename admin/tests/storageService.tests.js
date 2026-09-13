@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { Meteor } from 'meteor/meteor';
 import {
   buildStorageSuggestions,
   storageSuggestionId,
@@ -44,6 +45,31 @@ describe('storage server suggestions', function () {
     assert.strictEqual(result.rows[0].decision_type, 'assignment');
     assert.strictEqual(result.rows[1].decision_type, 'move');
     assert.strictEqual(JSON.stringify(state), snapshot);
+  });
+
+  it('reports email as unavailable when mail delivery is disabled', function () {
+    const originalDeliverMails = Meteor.settings.deliverMails;
+    const state = emptyState();
+    state.members = [member('new')];
+    state.units = [unit('free')];
+    state.requests = [{
+      _id: 'r1', owner: 'new', request_type: 'allocation', request_status: 'waiting',
+      requested_at: new Date('2026-01-01'), updatedAt: timestamp,
+    }];
+    try {
+      Meteor.settings.deliverMails = false;
+      assert.strictEqual(
+        buildStorageSuggestions('allocate', state, now).rows[0].expected_channels.email,
+        'unavailable',
+      );
+      Meteor.settings.deliverMails = true;
+      assert.strictEqual(
+        buildStorageSuggestions('allocate', state, now).rows[0].expected_channels.email,
+        'available',
+      );
+    } finally {
+      Meteor.settings.deliverMails = originalDeliverMails;
+    }
   });
 
   it('excludes an exempt overdue assignment from warnings', function () {

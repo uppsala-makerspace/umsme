@@ -1,4 +1,5 @@
 import { Email } from 'meteor/email';
+import { Meteor } from 'meteor/meteor';
 import { Messages } from '/imports/common/collections/messages';
 import { schemas } from '/imports/common/lib/schemas';
 import { isEmailAllowed } from '/imports/common/server/emailGuard';
@@ -59,7 +60,8 @@ export const sendStorageNotification = async ({
 }) => {
   const rendered = renderStorageNotification(decisionType, context);
   if (rendered.status !== 'rendered') throw new Error(rendered.error);
-  if (owner?.email && !isEmailAllowed(owner.email)) {
+  const deliverEmail = Boolean(owner?.email && Meteor.settings.deliverMails);
+  if (deliverEmail && !isEmailAllowed(owner.email)) {
     throw new Error('Email address is blocked by the configured whitelist');
   }
 
@@ -84,7 +86,7 @@ export const sendStorageNotification = async ({
   } catch (error) {
     console.error(`Storage push failed for ${document._id}: ${error.message}`);
   }
-  if (owner.email) {
+  if (deliverEmail) {
     try {
       await transports().sendEmail({
         to: owner.email,

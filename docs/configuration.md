@@ -401,7 +401,7 @@ The "Open in admin" links in the expense manager events are built from `public.a
 
 - Node.js (version matching the Meteor requirement)
 - Meteor 3.1+
-- MongoDB (local instance)
+- MongoDB (local replica set)
 
 ### Running the Apps
 
@@ -421,7 +421,17 @@ cd payment/
 npm run dev            # Runs with settings.json on port 3003
 ```
 
-All three apps must point to the same MongoDB instance. In development, Meteor's built-in MongoDB (port 3001) is used by default; for multi-app development, configure `MONGO_URL` to point all apps to the same database.
+All three apps must point to the same MongoDB instance. Storage lifecycle changes require MongoDB transaction support. Configure local and production MongoDB as a replica set and include its name in `MONGO_URL`.
+
+For local development, configure MongoDB with `replication.replSetName: rs0`,
+start MongoDB, and initialize the replica set once:
+
+```bash
+mongosh --eval 'rs.initiate()'
+```
+
+The development scripts connect with
+`mongodb://localhost:27017/umsme?replicaSet=rs0`.
 
 ### Testing
 

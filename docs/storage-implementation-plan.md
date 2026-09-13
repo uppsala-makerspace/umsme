@@ -164,11 +164,11 @@ after lab expiry.
 
 - Reconcile lazily before reads, previews, confirmations, and relevant manual
   actions; hooks improve promptness but are not the only correctness path.
-- Commit each domain effect and message through the existing idempotent command
-  boundary.
+- Commit each storage state change and audit event through the existing
+  idempotent command boundary. Notifications use the existing message system.
 - Process batch rows independently.
-- Prefer MongoDB transactions when supported; otherwise use compare-and-set,
-  action receipts, safe unavailable states, and narrow compensation.
+- Require MongoDB transactions for storage lifecycle changes. Readiness blocks
+  automatic actions when transaction support is unavailable.
 - Unique indexes remain the final conflict barrier.
 
 ### Acceptance gate

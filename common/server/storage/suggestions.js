@@ -58,7 +58,10 @@ const row = ({ action, owner, unit, sourceUnit, request, offer, reason, phase, w
       warned_at: warning?.warned_at,
       deadline_at: warning?.deadline_at || offer?.deadline_at,
     },
-    expected_channels: { email: owner?.email ? 'available' : 'unavailable', app: 'best_effort' },
+    expected_channels: {
+      email: owner?.email && Meteor.settings.deliverMails ? 'available' : 'unavailable',
+      app: 'best_effort',
+    },
   };
 };
 

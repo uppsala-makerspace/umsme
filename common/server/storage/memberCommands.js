@@ -3,6 +3,8 @@ import { Random } from 'meteor/random';
 import { StorageUnits, StorageRequests, StorageOffers, StorageEvents } from '/imports/common/collections/storage';
 import { hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
 import { appendStorageEvent } from './events';
+import { casStorageUpdate, insertStorageDocument, STORAGE_SCHEMAS } from './db';
+import { runStorageAtomic } from './atomic';
 import { completeStorageOffer } from './commands';
 import { reconcileStorageState } from './reconciliation';
 import { storageOperationId } from './ids';
@@ -51,33 +53,35 @@ export const upsertMemberStorageRequest = async ({ owner, requestType, preferenc
   if (existing?.request_status === 'in_progress') throw new Meteor.Error('bad-state', 'A pending move cannot be edited');
 
   const requestId = existing?._id || Random.id();
-  if (existing) {
-    const $set = {
-      request_type: requestType, request_status: 'waiting', updatedAt: now,
-      ...(unit ? { source_unit: unit._id } : {}),
-      ...(normalizedPreference ? { preference: normalizedPreference } : {}),
-    };
-    const $unset = {};
-    if (!unit) $unset.source_unit = '';
-    if (!normalizedPreference) $unset.preference = '';
-    const changed = await StorageRequests.updateAsync(
-      { _id: requestId, request_status: existing.request_status, updatedAt: existing.updatedAt },
-      { $set, ...(Object.keys($unset).length ? { $unset } : {}) },
-    );
-    if (!changed) throw new Meteor.Error('storage-conflict', 'The request changed. Reload and try again.');
-  } else {
-    await StorageRequests.insertAsync({
-      _id: requestId, owner: owner._id, request_type: requestType, requested_at: now,
-      ...(normalizedPreference ? { preference: normalizedPreference } : {}),
-      ...(unit ? { source_unit: unit._id } : {}),
-      request_status: 'waiting', createdAt: now, updatedAt: now,
-    });
-  }
-  await appendStorageEvent({
-    id: eventId, entityType: 'storageRequest', entityId: requestId,
-    eventType: existing ? 'request_updated' : 'request_created', actorType: 'member', actor,
-    member: owner._id, unit: unit?._id, occurredAt: now,
-    details: { request_type: requestType, preference: normalizedPreference },
+  await runStorageAtomic({
+    transactional: async (session) => {
+      if (existing) {
+        const $set = {
+          request_type: requestType, request_status: 'waiting', updatedAt: now,
+          ...(unit ? { source_unit: unit._id } : {}),
+          ...(normalizedPreference ? { preference: normalizedPreference } : {}),
+        };
+        const $unset = {};
+        if (!unit) $unset.source_unit = '';
+        if (!normalizedPreference) $unset.preference = '';
+        await casStorageUpdate(StorageRequests,
+          { _id: requestId, request_status: existing.request_status, updatedAt: existing.updatedAt },
+          { $set, ...(Object.keys($unset).length ? { $unset } : {}) }, { session });
+      } else {
+        await insertStorageDocument(StorageRequests, STORAGE_SCHEMAS.request, {
+          _id: requestId, owner: owner._id, request_type: requestType, requested_at: now,
+          ...(normalizedPreference ? { preference: normalizedPreference } : {}),
+          ...(unit ? { source_unit: unit._id } : {}),
+          request_status: 'waiting', createdAt: now, updatedAt: now,
+        }, { session });
+      }
+      await appendStorageEvent({
+        id: eventId, entityType: 'storageRequest', entityId: requestId,
+        eventType: existing ? 'request_updated' : 'request_created', actorType: 'member', actor,
+        member: owner._id, unit: unit?._id, occurredAt: now,
+        details: { request_type: requestType, preference: normalizedPreference },
+      }, { session });
+    },
   });
   return requestId;
 };
@@ -90,20 +94,28 @@ export const cancelMemberStorageRequest = async ({ owner, requestId, actor, comm
   if (!['waiting', 'paused_ineligible'].includes(request.request_status)) {
     throw new Meteor.Error('bad-state', 'This request cannot be cancelled');
   }
-  const changed = await StorageRequests.updateAsync(
-    { _id: requestId, request_status: request.request_status, updatedAt: request.updatedAt },
-    { $set: { request_status: 'cancelled', cancelled_at: now, updatedAt: now } },
-  );
-  if (!changed) throw new Meteor.Error('storage-conflict', 'The request changed. Reload and try again.');
-  await appendStorageEvent({
-    id: eventId, entityType: 'storageRequest', entityId: requestId,
-    eventType: 'request_cancelled', actorType: 'member', actor, member: owner._id, occurredAt: now,
+  await runStorageAtomic({
+    transactional: async (session) => {
+      await casStorageUpdate(StorageRequests,
+        { _id: requestId, request_status: request.request_status, updatedAt: request.updatedAt },
+        { $set: { request_status: 'cancelled', cancelled_at: now, updatedAt: now } }, { session });
+      await appendStorageEvent({
+        id: eventId, entityType: 'storageRequest', entityId: requestId,
+        eventType: 'request_cancelled', actorType: 'member', actor, member: owner._id, occurredAt: now,
+      }, { session });
+    },
   });
   return true;
 };
 
-export const confirmMemberStorageOffer = async ({ owner, offerId, actor }) => {
+export const confirmMemberStorageOffer = async ({ owner, offerId, actor, now = new Date() }) => {
   const offer = await StorageOffers.findOneAsync(offerId);
   if (!offer || offer.owner !== owner._id) throw new Meteor.Error('not-found', 'Offer not found');
+  if (!hasActiveLabMembershipAt(owner, now)) {
+    throw new Meteor.Error('not-eligible', 'Active lab membership required');
+  }
+  if (!(offer.deadline_at instanceof Date) || offer.deadline_at <= now) {
+    throw new Meteor.Error('offer-expired', 'This storage offer has expired. Contact an administrator.');
+  }
   return completeStorageOffer({ offerId, actor, actorType: 'member' });
 };
