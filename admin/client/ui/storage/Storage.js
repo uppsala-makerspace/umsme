@@ -5,8 +5,7 @@ import { Roles } from 'meteor/roles';
 import { Members } from '/imports/common/collections/members';
 import { Messages } from '/imports/common/collections/messages';
 import {
-  StorageWalls, StorageUnits, StorageRequests, StorageAssignments, StorageWarnings, StorageExemptions,
-  StorageMoves, StorageEvents,
+  StorageWalls, StorageUnits, StorageRequests, StorageOffers, StorageEvents,
 } from '/imports/common/collections/storage';
 import {
   STORAGE_ACTIONS, bulkHeightImpact, filterStorageQueue, filterStorageUnits, groupStorageWalls,
@@ -107,10 +106,9 @@ Template.Storage.onCreated(function () {
   this.autorun(() => {
     const unit = StorageUnits.findOne(this.state.get('selectedUnitId'));
     if (!unit) return;
-    const assignment = StorageAssignments.findOne({ unit: unit._id, ended_at: { $exists: false } });
     const request = unit.owner && StorageRequests.findOne({ owner: unit.owner, request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] } });
-    const move = unit.owner && StorageMoves.findOne({ owner: unit.owner, move_status: 'pending' });
-    this.subscribe('storageAdminHistory', [unit._id, assignment?._id, request?._id, move?._id].filter(Boolean));
+    const move = unit.owner && StorageOffers.findOne({ owner: unit.owner });
+    this.subscribe('storageAdminHistory', [unit._id, request?._id, move?._id].filter(Boolean));
   });
   this.refresh = async () => {
     if (!operator()) return;
@@ -168,7 +166,7 @@ Template.Storage.helpers({
   storageQueue() {
     return filterStorageQueue(storageQueueRows({
       requests: StorageRequests.find().fetch(), members: Members.find().fetch(),
-      assignments: StorageAssignments.find().fetch(), units: StorageUnits.find().fetch(),
+      units: StorageUnits.find().fetch(),
     }), Template.instance().state.get('queueQuery')).map((row) => ({ ...row, waitingSince: date(row.requested_at) }));
   },
   requestEditor: () => requestEditorView(Template.instance().state.get('requestEditor')),
@@ -188,10 +186,9 @@ Template.Storage.helpers({
     const wallById = new Map(StorageWalls.find().fetch().map((wall) => [wall._id, wall]));
     const units = StorageUnits.find().fetch().map((unit) => {
       const member = Members.findOne(unit.owner);
-      const assignment = StorageAssignments.findOne({ unit: unit._id, ended_at: { $exists: false } });
-      const warning = assignment && StorageWarnings.findOne({ assignment: assignment._id, warning_status: 'open' });
-      const exemption = assignment && StorageExemptions.findOne({ assignment: assignment._id, active: true });
-      const overdue = !!assignment && !!member && (!(member.lab instanceof Date) || member.lab <= now);
+      const warning = unit.warning;
+      const exemption = unit.exemption;
+      const overdue = unit.availability_status === 'occupied' && !!member && (!(member.lab instanceof Date) || member.lab <= now);
       return { ...unit, wall_name: wallById.get(unit.wall_id)?.name || 'Unknown wall', _overdue: overdue, _warningState: overdue ? (exemption ? 'exempt' : (warning ? 'warned' : 'unwarned')) : '' };
     });
     const visible = filterStorageUnits(units, state.get('filters') || {}).map((unit) => ({ ...unit, statusLabel: storageStatusLabel(unit.availability_status), statusClass: storageStatusClass(unit.availability_status), overdueClass: unit._overdue ? 'storage-unit-overdue' : '', selectedClass: unit._id === selectedId ? 'storage-unit-selected' : '', bulkSelected: !!bulk[unit._id], ownerName: Members.findOne(unit.owner)?.name || '', tooltip: [unit.name, unit._overdue ? 'Overdue' : storageStatusLabel(unit.availability_status), Members.findOne(unit.owner)?.name, unit.note].filter(Boolean).join(' · ') }));
@@ -199,14 +196,16 @@ Template.Storage.helpers({
   },
   unitDetail() {
     const unit = StorageUnits.findOne(Template.instance().state.get('selectedUnitId')); if (!unit) return null;
-    const assignment = StorageAssignments.findOne({ unit: unit._id, ended_at: { $exists: false } });
+    const assignment = unit.availability_status === 'occupied' ? {
+      _id: unit._id, owner: unit.owner, unit: unit._id, assigned_at: unit.assigned_at,
+    } : null;
     const request = unit.owner && StorageRequests.findOne({ owner: unit.owner, request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] } });
-    const move = unit.owner && StorageMoves.findOne({ owner: unit.owner, move_status: 'pending' });
-    const exemption = assignment && StorageExemptions.findOne({ assignment: assignment._id, active: true });
+    const move = unit.owner && StorageOffers.findOne({ owner: unit.owner });
+    const exemption = assignment && unit.exemption;
     const ownerEligible = !!unit.owner && !!Members.findOne(unit.owner)?.lab
       && new Date(Members.findOne(unit.owner).lab) > new Date();
-    const entityIds = [unit._id, assignment?._id, request?._id, move?._id].filter(Boolean);
-    return { ...unit, statusLabel: storageStatusLabel(unit.availability_status), ownerName: Members.findOne(unit.owner)?.name || 'No owner', wallChoices: StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch().map((wall) => ({ ...wall, selected: wall._id === unit.wall_id, disabled: !wall.active && wall._id !== unit.wall_id, choiceLabel: `${wall.name}${wall.active ? '' : ' (inactive)'}` })), heightNone: !unit.height, heightLow: unit.height === 'low', heightHigh: unit.height === 'high', statusAvailable: unit.availability_status === 'available', statusUnavailable: unit.availability_status === 'unavailable', statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status), metadataProtected: ['occupied', 'reserved'].includes(unit.availability_status), clearance: unit.availability_status === 'awaiting_clearance', assignable: unit.availability_status === 'available', canRequestRelease: !!assignment && !request && !move, activeAssignment: assignment && { ...assignment, assignedDate: date(assignment.assigned_at), exemption }, activeRequest: request && { ...request, requestedDate: date(request.requested_at), pauseTarget: request.request_status === 'waiting', pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume', canTogglePause: request.request_status === 'waiting' ? !ownerEligible : (request.request_status === 'paused_ineligible' && ownerEligible) }, pendingMove: move && { ...move, deadlineDate: date(move.deadline_at) }, messages: unit.owner ? Messages.find({ member: unit.owner, type: 'storage' }, { sort: { senddate: -1 }, limit: 20 }).fetch().map((message) => ({ ...message, sentDate: date(message.senddate) })) : [], history: StorageEvents.find({ entity_id: { $in: entityIds } }, { sort: { occurred_at: -1 }, limit: 50 }).fetch().map((event) => ({ ...event, date: date(event.occurred_at) })) };
+    const entityIds = [unit._id, request?._id, move?._id].filter(Boolean);
+    return { ...unit, statusLabel: storageStatusLabel(unit.availability_status), ownerName: Members.findOne(unit.owner)?.name || 'No owner', wallChoices: StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch().map((wall) => ({ ...wall, selected: wall._id === unit.wall_id, disabled: !wall.active && wall._id !== unit.wall_id, choiceLabel: `${wall.name}${wall.active ? '' : ' (inactive)'}` })), heightNone: !unit.height, heightLow: unit.height === 'low', heightHigh: unit.height === 'high', statusAvailable: unit.availability_status === 'available', statusUnavailable: unit.availability_status === 'unavailable', statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status), metadataProtected: ['occupied', 'reserved'].includes(unit.availability_status), clearance: unit.availability_status === 'awaiting_clearance', assignable: unit.availability_status === 'available', canRequestRelease: !!assignment && !request && !move, activeAssignment: assignment && { ...assignment, assignedDate: date(assignment.assigned_at), exemption }, activeRequest: request && { ...request, requestedDate: date(request.requested_at), pauseTarget: request.request_status === 'waiting', pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume', canTogglePause: request.request_status === 'waiting' ? !ownerEligible : (request.request_status === 'paused_ineligible' && ownerEligible) }, pendingMove: move && { ...move, deadlineDate: date(move.deadline_at) }, messages: unit.owner ? Messages.find({ member: unit.owner, type: 'storage' }, { sort: { senddate: -1 }, limit: 20 }).fetch().map((message) => ({ ...message, sentDate: date(message.senddate) })) : [], history: StorageEvents.find({ $or: [{ entity_id: { $in: entityIds } }, { unit: unit._id }, { related_unit: unit._id }] }, { sort: { occurred_at: -1 }, limit: 50 }).fetch().map((event) => ({ ...event, date: date(event.occurred_at) })) };
   },
   memberOptions: () => Members.find({}, { sort: { name: 1 } }).fetch()
     .map((member) => ({ ...member, pickerLabel: storageMemberLabel(member) })),
@@ -220,11 +219,6 @@ Template.Storage.helpers({
       events: StorageEvents.find().fetch(),
       members: Members.find().fetch(),
       units: StorageUnits.find().fetch(),
-      assignments: StorageAssignments.find().fetch(),
-      requests: StorageRequests.find().fetch(),
-      warnings: StorageWarnings.find().fetch(),
-      exemptions: StorageExemptions.find().fetch(),
-      moves: StorageMoves.find().fetch(),
       users: Meteor.users.find().fetch(),
     }).filter((row) => (!filters.member_id || row.ownerIds.includes(filters.member_id))
       && (!filters.unit_id || row.unitIds.includes(filters.unit_id)))
@@ -365,7 +359,7 @@ Template.Storage.events({
     }
     const storageOwnerId = storageOwnerIdForMember(v.owner_id);
     const activeRequest = !v.request_id && StorageRequests.findOne({ owner: storageOwnerId, request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] } });
-    const assignment = StorageAssignments.findOne({ owner: storageOwnerId, ended_at: { $exists: false } });
+    const assignment = StorageUnits.findOne({ owner: storageOwnerId, availability_status: 'occupied' });
     if (activeRequest) { setError(i, 'This storage owner already has an active request. Use its queue row instead.', 'queue'); return; }
     if (v.request_type === 'allocation' && assignment) { setError(i, 'This member already has storage. Use “Request different unit”.', 'queue'); return; }
     if (v.request_type === 'move' && !assignment) { setError(i, 'This member has no current storage. Use “Add to queue”.', 'queue'); return; }

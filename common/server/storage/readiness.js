@@ -7,10 +7,7 @@ import {
   StorageWalls,
   StorageUnits,
   StorageRequests,
-  StorageAssignments,
-  StorageWarnings,
-  StorageExemptions,
-  StorageMoves,
+  StorageOffers,
   StorageEvents,
 } from '/imports/common/collections/storage';
 import {
@@ -26,8 +23,8 @@ export const STORAGE_CUTOVER_FINALIZED_ID = `${LEGACY_STORAGE_MIGRATION_VERSION}
 const manifestCollections = {
   storageWalls: StorageWalls,
   storageUnits: StorageUnits,
-  storageAssignments: StorageAssignments,
   storageRequests: StorageRequests,
+  storageOffers: StorageOffers,
   storageEvents: StorageEvents,
 };
 
@@ -65,16 +62,13 @@ const inspectManifest = async (manifest) => {
 };
 
 export const storageAllocationReadiness = async ({ legacySource } = {}) => {
-  const [summary, finalized, walls, units, requests, assignments, warnings, exemptions, moves] = await Promise.all([
+  const [summary, finalized, walls, units, requests, offers] = await Promise.all([
     StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_ID),
     StorageEvents.findOneAsync(STORAGE_CUTOVER_FINALIZED_ID),
     StorageWalls.find({}).fetchAsync(),
     StorageUnits.find({}).fetchAsync(),
     StorageRequests.find({}).fetchAsync(),
-    StorageAssignments.find({}).fetchAsync(),
-    StorageWarnings.find({}).fetchAsync(),
-    StorageExemptions.find({}).fetchAsync(),
-    StorageMoves.find({}).fetchAsync(),
+    StorageOffers.find({}).fetchAsync(),
   ]);
 
   const manifest = summary?.details?.manifest;
@@ -99,7 +93,7 @@ export const storageAllocationReadiness = async ({ legacySource } = {}) => {
     legacySourceChanged = currentFingerprint !== summary.details?.fingerprint;
   }
   const invariantErrors = [
-    ...storageStateErrors({ units, requests, assignments, warnings, exemptions, moves }),
+    ...storageStateErrors({ units, requests, offers }),
     ...storageLayoutErrors({ walls, units }),
   ];
   const unclassifiedUnits = units.filter((unit) => !unit.floor || !unit.height);

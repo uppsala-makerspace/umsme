@@ -41,13 +41,15 @@ const latestComment = (comments) => [...comments].sort((a, b) => {
   return bDate - aDate || compareId(b, a);
 })[0];
 
-const event = ({ id, entityType, entityId, eventType, cutoff, details }) => ({
+const event = ({ id, entityType, entityId, eventType, cutoff, member, unit, details }) => ({
   _id: `${LEGACY_STORAGE_MIGRATION_VERSION}:event:${id}`,
   entity_type: entityType,
   entity_id: entityId,
   event_type: eventType,
   actor_type: 'system',
   actor: SYSTEM_ACTOR,
+  ...(member ? { member } : {}),
+  ...(unit ? { unit } : {}),
   occurred_at: new Date(cutoff),
   details,
 });
@@ -55,7 +57,7 @@ const event = ({ id, entityType, entityId, eventType, cutoff, details }) => ({
 /** Manifest only records migration-owned IDs; later v2 records are allowed. */
 export const buildLegacyStorageMigrationManifest = (documents) => {
   const manifestDocuments = Object.fromEntries(
-    ['storageWalls', 'storageUnits', 'storageAssignments', 'storageRequests', 'storageEvents'].map((name) => [
+    ['storageWalls', 'storageUnits', 'storageRequests', 'storageOffers', 'storageEvents'].map((name) => [
       name,
       [...(documents[name] || [])].map((document) => document._id).sort(),
     ]),
@@ -213,29 +215,26 @@ export const buildLegacyStorageMigrationPlan = ({
     }
   }
 
-  const assignmentByOwner = new Map();
-  const assignments = [];
+  const unitByOwner = new Map();
   const events = [];
   for (const [number, claims] of [...claimsByUnit].sort((a, b) => a[0] - b[0])) {
     const owners = [...new Set(claims.map((claim) => claim.owner))];
     if (owners.length !== 1 || claimedUnitsByOwner.get(owners[0])?.size !== 1) continue;
     const owner = owners[0];
-    const assignment = {
-      _id: `${LEGACY_STORAGE_MIGRATION_VERSION}:assignment:${owner}`,
+    const occupancy = {
       unit: definitions.get(number)._id,
       owner,
       assigned_at: at,
       assigned_by: SYSTEM_ACTOR,
-      createdAt: at,
-      updatedAt: at,
     };
-    assignments.push(assignment);
-    assignmentByOwner.set(owner, assignment);
+    unitByOwner.set(owner, occupancy);
     events.push(event({
       id: `assignment:${owner}`,
-      entityType: 'storageAssignment',
-      entityId: assignment._id,
+      entityType: 'storageUnit',
+      entityId: occupancy.unit,
       eventType: 'legacy_assignment_migrated',
+      member: owner,
+      unit: occupancy.unit,
       cutoff: at,
       details: {
         source_member_ids: claims.map((claim) => claim.member_id).sort(),
@@ -255,7 +254,11 @@ export const buildLegacyStorageMigrationPlan = ({
     const note = typeof selectedComment?.text === 'string' ? selectedComment.text.trim() : '';
     return {
       ...base,
-      ...(validOwner ? { owner: validOwner } : {}),
+      ...(validOwner ? {
+        owner: validOwner,
+        assigned_at: at,
+        assigned_by: SYSTEM_ACTOR,
+      } : {}),
       availability_status: validOwner ? 'occupied' : note ? 'unavailable' : 'available',
       ...(note ? { note } : {}),
       createdAt: at,
@@ -301,9 +304,9 @@ export const buildLegacyStorageMigrationPlan = ({
       });
     }
     const meaning = parsed[0].parsed;
-    const assignment = assignmentByOwner.get(owner);
+    const currentUnit = unitByOwner.get(owner);
     let requestType;
-    if (!assignment) {
+    if (!currentUnit) {
       if (meaning.release) {
         addIssue('blocker', 'release_without_assignment', 'member', owner);
         continue;
@@ -343,7 +346,7 @@ export const buildLegacyStorageMigrationPlan = ({
       request_type: requestType,
       requested_at: requestedAt,
       ...(meaning.preference ? { preference: meaning.preference } : {}),
-      ...(assignment ? { source_assignment: assignment._id } : {}),
+      ...(currentUnit ? { source_unit: currentUnit.unit } : {}),
       request_status: desiredStorageRequestStatus(requestType, activeLab),
       createdAt: at,
       updatedAt: at,
@@ -354,6 +357,8 @@ export const buildLegacyStorageMigrationPlan = ({
       entityType: 'storageRequest',
       entityId: request._id,
       eventType: 'legacy_request_migrated',
+      member: owner,
+      unit: currentUnit?.unit,
       cutoff: at,
       details: {
         source_member_ids: signals.map((signal) => signal.member_id).sort(),
@@ -363,7 +368,7 @@ export const buildLegacyStorageMigrationPlan = ({
     }));
   }
 
-  for (const invariant of storageStateErrors({ units, assignments, requests, now: at })) {
+  for (const invariant of storageStateErrors({ units, requests, offers: [], now: at })) {
     addIssue('blocker', `planned_${invariant.code}`, 'migrationPlan', invariant.id, invariant);
   }
   for (const invariant of storageLayoutErrors({ walls: storageWalls, units })) {
@@ -375,8 +380,8 @@ export const buildLegacyStorageMigrationPlan = ({
   const documents = {
     storageWalls,
     storageUnits: units,
-    storageAssignments: assignments,
     storageRequests: requests,
+    storageOffers: [],
     storageEvents: events,
   };
   const counts = {

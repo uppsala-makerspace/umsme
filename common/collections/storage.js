@@ -1,9 +1,5 @@
 export { StorageWalls } from './storageWalls';
 export { StorageUnits } from './storageUnits';
 export { StorageRequests } from './storageRequests';
-export { StorageAssignments } from './storageAssignments';
-export { StorageWarnings } from './storageWarnings';
-export { StorageExemptions } from './storageExemptions';
-export { StorageMoves } from './storageMoves';
+export { StorageOffers } from './storageOffers';
 export { StorageEvents } from './storageEvents';
-export { StorageActionExecutions } from './storageActionExecutions';

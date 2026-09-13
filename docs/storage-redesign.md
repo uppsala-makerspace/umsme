@@ -145,6 +145,23 @@ One document per physical storage unit.
   column,               // one-based horizontal coordinate
   row,                  // one-based vertical coordinate
   availability_status, // see states below
+  assigned_at,
+  assigned_by,
+  assignment_request,
+  warning: {            // optional current warning cycle
+    id,
+    warned_at,
+    warned_by,
+    deadline_at,
+    reminded_at,
+    message_id
+  },
+  exemption: {          // optional current administrative exemption
+    reason,
+    exempt_until,
+    created_at,
+    created_by
+  },
   note,                 // internal administrative note
   createdAt,
   updatedAt
@@ -189,7 +206,7 @@ One record for an allocation, move, or voluntary-release request.
     floor,           // optional: floor1 | floor2
     height           // optional: low | high
   },
-  source_assignment, // present for a move or release
+  source_unit,       // present for a move or release
   request_status,    // waiting | paused_ineligible | in_progress |
                      // fulfilled | cancelled
   fulfilled_at,
@@ -210,119 +227,32 @@ Rules:
 - `none` in the legacy model becomes a `release` request, not an allocation
   preference.
 
-### 5.4 `storageAssignments`
+### 5.4 `storageOffers`
 
-Immutable ownership periods.
-
-```js
-{
-  _id,
-  unit,
-  owner,
-  request,
-  assigned_at,
-  assigned_by,
-  ended_at,
-  ended_by,
-  ended_reason, // moved | voluntary_release | reclaimed | correction
-  createdAt,
-  updatedAt
-}
-```
-
-An assignment without `ended_at` is active. A partial unique index prevents
-more than one active assignment for a unit. A paying member normally has only
-one active assignment; the destination of a pending move is a reservation, not
-yet a second active assignment.
-
-Assignment records are never deleted. Corrections end or supersede them with a
-recorded reason.
-
-### 5.5 `storageWarnings`
-
-One record per overdue warning cycle. A later lapse creates a new cycle rather
-than reopening an old one.
-
-```js
-{
-  _id,
-  assignment,
-  owner,
-  warned_at,
-  warned_by,
-  deadline_at,    // warned_at + 28 days
-  warning_status, // open | resolved_renewal | resolved_reclamation | voided
-  resolved_at,
-  resolved_by,
-  createdAt,
-  updatedAt
-}
-```
-
-Reminder deliveries refer to the warning. They do not alter `deadline_at`.
-Only one open warning may exist for an assignment.
-
-### 5.6 `storageExemptions`
-
-Internal protection from warning and reclamation.
-
-```js
-{
-  _id,
-  assignment,
-  reason,
-  exempt_until, // optional; absent means indefinite
-  active,       // materialized; used by the uniqueness constraint
-  created_at,
-  created_by,
-  revoked_at,
-  revoked_by,
-  updatedAt
-}
-```
-
-Only one active exemption may exist for an assignment. An exempt assignment
-remains visible as overdue but is excluded from warning and reclamation
-suggestions. Creating, expiring, or revoking an exemption sends no member
-notification. Before previews and before an exemption is replaced, expiry and
-revocation reconciliation atomically changes `active` to false. The partial
-unique index follows this materialized field; time-based eligibility still
-treats an exemption as expired immediately at `exempt_until` even if that
-housekeeping write has not yet run.
-
-### 5.7 `storageMoves`
-
-A pending physical transfer between two units.
+A pending offer to move between two units.
 
 ```js
 {
   _id,
   owner,
   request,
-  from_assignment,
   from_unit,
   to_unit,
-  reserved_at,
-  reserved_by,
-  deadline_at,       // initially reserved_at + 14 days
+  offered_at,
+  offered_by,
+  deadline_at,       // initially offered_at + 14 days
   requires_inspection,
-  move_status,       // pending | completed | cancelled
-  completed_at,
-  completed_by,
-  completed_by_type, // member | administrator
-  cancelled_at,
-  cancelled_by,
-  cancellation_reason,
   createdAt,
   updatedAt
 }
 ```
 
 Deadline expiry is advisory: it creates a suggested action but never changes
-the move automatically. Administrators may complete, extend, or cancel an
-expired move.
+the offer automatically. Administrators may complete, extend, or cancel an
+expired offer. Completion and cancellation append events and remove the offer,
+so this collection contains pending offers only.
 
-### 5.8 `storageEvents`
+### 5.5 `storageEvents`
 
 Immutable, cross-entity audit feed.
 
@@ -334,6 +264,9 @@ Immutable, cross-entity audit feed.
   event_type,
   actor_type, // member | administrator | system
   actor,
+  member,
+  unit,
+  related_unit,
   occurred_at,
   reason,
   details
@@ -342,37 +275,16 @@ Immutable, cross-entity audit feed.
 
 Domain collections remain the source of current state. Events provide a single
 chronology for request changes, renewals, warnings, exemptions, assignments,
-moves, clearances, overrides, and delivery retries.
+offers, clearances, and overrides. Member and unit fields make history directly
+filterable after current ownership changes.
 
 The administrator dashboard exposes the newest 500 events as a read-only log.
 Administrators and board members can filter it by member, storage unit, or both;
-historical assignment and move records preserve those relationships after a
-unit changes owner.
+the event fields preserve those relationships after a unit changes owner.
 
-### 5.9 `storageActionExecutions`
-
-Durable per-row receipts make batch confirmation safe to retry after a network
-or process failure.
-
-```js
-{
-  _id,
-  command_id,
-  suggestion_id,
-  action,
-  execution_status, // running | applied | failed_repairable
-  decision_id,
-  delivery_id,
-  started_at,
-  completed_at,
-  last_error
-}
-```
-
-`(command_id, suggestion_id)` is unique. A repeated confirmation returns the
-recorded result rather than repeating its decision. This collection also
-anchors safe compensating behavior when the MongoDB deployment does not support
-multi-document transactions.
+The event ID is also the idempotency receipt for a confirmed command. Commands
+use compare-and-set updates and MongoDB transactions where available. There is
+no separate action-execution or delivery-retry collection.
 
 ## 6. Allocation policy
 
@@ -653,7 +565,7 @@ For every effective queued paying member:
 - set `requested_at` to the start of their earliest membership;
 - preserve and structure the current preference;
 - create an `allocation` request when they have no unit;
-- create a `move` request linked to the current unit/assignment when they have
+- create a `move` request linked to the current unit when they have
   a location preference and a unit; and
 - create a `release` request when the legacy value is `none`.
 
@@ -677,7 +589,7 @@ during migration review.
 
 ### Phase 1: Domain foundation
 
-- Add shared schemas and collections for all storage entities.
+- Add the five shared storage collections and their schemas.
 - Add unique and query-supporting indexes.
 - Implement canonical paying-family-owner resolution.
 - Implement pure compatibility, eligibility, allocation, and lifecycle rules.
@@ -686,19 +598,17 @@ during migration review.
 Likely locations:
 
 - `common/lib/storageRules.js`
+- `common/collections/storageWalls.js`
 - `common/collections/storageUnits.js`
 - `common/collections/storageRequests.js`
-- `common/collections/storageAssignments.js`
-- `common/collections/storageWarnings.js`
-- `common/collections/storageExemptions.js`
-- `common/collections/storageMoves.js`
+- `common/collections/storageOffers.js`
 - `common/collections/storageEvents.js`
 
 ### Phase 2: Migration and validation
 
 - Build a dry-run scanner that reports every legacy anomaly without writing.
 - Add the idempotent migration under the admin-owned migration mechanism.
-- Create units, assignments, requests, and migration audit events.
+- Create walls, units with current ownership, requests, and migration audit events.
 - Add an admin migration report and block automatic allocation until required
   metadata and conflicts are resolved.
 - Verify counts and sample records against a restored database backup before

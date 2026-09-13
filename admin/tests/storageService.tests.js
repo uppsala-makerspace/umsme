@@ -15,7 +15,7 @@ const unit = (id, status = 'available', owner) => ({
   availability_status: status, ...(owner ? { owner } : {}), updatedAt: timestamp,
 });
 const emptyState = () => ({
-  units: [], requests: [], assignments: [], warnings: [], exemptions: [], moves: [], messages: [], members: [],
+  units: [], requests: [], offers: [], messages: [], members: [],
 });
 
 describe('storage server suggestions', function () {
@@ -39,7 +39,6 @@ describe('storage server suggestions', function () {
       { _id: 'r1', owner: 'new', request_type: 'allocation', request_status: 'waiting', requested_at: new Date('2026-01-01'), updatedAt: timestamp },
       { _id: 'r2', owner: 'moving', request_type: 'move', request_status: 'waiting', requested_at: new Date('2026-01-02'), preference: { height: 'low' }, updatedAt: timestamp },
     ];
-    state.assignments = [{ _id: 'a', owner: 'moving', unit: 'old', assigned_at: timestamp, updatedAt: timestamp }];
     const snapshot = JSON.stringify(state);
     const result = buildStorageSuggestions('allocate', state, now);
     assert.strictEqual(result.rows[0].decision_type, 'assignment');
@@ -50,9 +49,9 @@ describe('storage server suggestions', function () {
   it('excludes an exempt overdue assignment from warnings', function () {
     const state = emptyState();
     state.members = [member('owner', null)];
-    state.units = [unit('box', 'occupied', 'owner')];
-    state.assignments = [{ _id: 'assignment', owner: 'owner', unit: 'box', assigned_at: timestamp, updatedAt: timestamp }];
-    state.exemptions = [{ _id: 'exemption', assignment: 'assignment', active: true, updatedAt: timestamp }];
+    state.units = [{ ...unit('box', 'occupied', 'owner'), exemption: {
+      reason: 'Internal reason', created_at: timestamp, created_by: 'admin',
+    } }];
     const result = buildStorageSuggestions('warn', state, now);
     assert.strictEqual(result.rows.length, 0);
     assert.strictEqual(result.skipped[0].reason_code, 'active_exemption');
@@ -61,12 +60,10 @@ describe('storage server suggestions', function () {
   it('suggests one reminder and then reclamation, not both at the deadline', function () {
     const state = emptyState();
     state.members = [member('owner', null)];
-    state.units = [unit('box', 'occupied', 'owner')];
-    state.assignments = [{ _id: 'assignment', owner: 'owner', unit: 'box', assigned_at: timestamp, updatedAt: timestamp }];
-    state.warnings = [{
-      _id: 'warning', assignment: 'assignment', owner: 'owner', warning_status: 'open',
+    state.units = [{ ...unit('box', 'occupied', 'owner'), warning: {
+      id: 'warning',
       warned_at: new Date('2026-08-13T12:00:00.000Z'), deadline_at: now, updatedAt: timestamp,
-    }];
+    } }];
     const before = new Date('2026-09-03T12:00:00.000Z');
     assert.strictEqual(buildStorageSuggestions('remind', state, before).rows.length, 1);
     assert.strictEqual(buildStorageSuggestions('remind', state, now).rows.length, 0);
@@ -80,7 +77,7 @@ describe('storage server suggestions', function () {
     assert.strictEqual(delivered.manual_contact_required, false);
     assert.strictEqual(delivered.warning_delivered, true);
     assert.notStrictEqual(delivered.suggestion_id, manualContact.suggestion_id);
-    state.messages.push({ _id: 'storage-notification:reminder:warning', type: 'storage', senddate: timestamp });
+    state.units[0].warning.reminded_at = timestamp;
     assert.strictEqual(buildStorageSuggestions('remind', state, before).rows.length, 0);
   });
 
@@ -88,14 +85,13 @@ describe('storage server suggestions', function () {
     const state = emptyState();
     state.members = [member('owner')];
     state.units = [unit('source', 'occupied', 'owner'), unit('destination', 'reserved', 'owner'), unit('clear', 'awaiting_clearance', 'owner')];
-    state.assignments = [{ _id: 'assignment', owner: 'owner', unit: 'source', assigned_at: timestamp, updatedAt: timestamp }];
     state.requests = [{
       _id: 'release', owner: 'owner', request_type: 'release', request_status: 'waiting',
-      source_assignment: 'assignment', requested_at: timestamp, updatedAt: timestamp,
+      source_unit: 'source', requested_at: timestamp, updatedAt: timestamp,
     }];
-    state.moves = [{
-      _id: 'move', owner: 'owner', request: 'release', from_assignment: 'assignment',
-      from_unit: 'source', to_unit: 'destination', move_status: 'pending', deadline_at: now, updatedAt: timestamp,
+    state.offers = [{
+      _id: 'move', owner: 'owner', request: 'release',
+      from_unit: 'source', to_unit: 'destination', deadline_at: now, updatedAt: timestamp,
     }];
     assert.strictEqual(buildStorageSuggestions('release', state, now).rows.length, 1);
     assert.strictEqual(buildStorageSuggestions('review_expired_moves', state, now).rows.length, 1);

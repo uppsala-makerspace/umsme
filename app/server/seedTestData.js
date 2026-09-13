@@ -17,15 +17,7 @@ import {
   storageMigrationFingerprint,
 } from '/imports/common/lib/legacyStorageMigrationFingerprint';
 import {
-  StorageActionExecutions,
-  StorageAssignments,
-  StorageEvents,
-  StorageExemptions,
-  StorageMoves,
-  StorageRequests,
-  StorageWalls,
-  StorageUnits,
-  StorageWarnings,
+  StorageEvents, StorageOffers, StorageRequests, StorageWalls, StorageUnits,
 } from '/imports/common/collections/storage';
 
 // Only run in test environment
@@ -50,15 +42,11 @@ if (process.env.SEED_TEST_DATA === 'true') {
     await LiabilityDocuments.removeAsync({});
     await Invites.removeAsync({});
     await Promise.all([
-      StorageActionExecutions.removeAsync({}),
-      StorageAssignments.removeAsync({}),
       StorageEvents.removeAsync({}),
-      StorageExemptions.removeAsync({}),
-      StorageMoves.removeAsync({}),
+      StorageOffers.removeAsync({}),
       StorageRequests.removeAsync({}),
       StorageWalls.removeAsync({}),
       StorageUnits.removeAsync({}),
-      StorageWarnings.removeAsync({}),
     ]);
 
     // Create admin role if it doesn't exist
@@ -368,38 +356,24 @@ if (process.env.SEED_TEST_DATA === 'true') {
     const insertUnit = (name, position, availabilityStatus, owner) => StorageUnits.insertAsync({
       name,
       ...(owner ? { owner } : {}),
+      ...(owner && availabilityStatus === 'occupied' ? {
+        assigned_at: oneMonthAgo, assigned_by: '__e2e_seed__',
+      } : {}),
       ...unitLocation(position),
       height: position <= 24 ? 'low' : 'high',
       availability_status: availabilityStatus,
       createdAt: now,
       updatedAt: now,
     });
-    const insertAssignment = (unit, owner, request) => StorageAssignments.insertAsync({
-      unit,
-      owner,
-      ...(request ? { request } : {}),
-      assigned_at: oneMonthAgo,
-      assigned_by: '__e2e_seed__',
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    const familyUnitId = await insertUnit('1001', 1, 'occupied', familyPayerId);
-    await insertAssignment(familyUnitId, familyPayerId);
+    await insertUnit('1001', 1, 'occupied', familyPayerId);
 
     const warningOwnerId = memberIdMap['storage-warning@test.com'];
     const warningUnitId = await insertUnit('1002', 2, 'occupied', warningOwnerId);
-    const warningAssignmentId = await insertAssignment(warningUnitId, warningOwnerId);
-    await StorageWarnings.insertAsync({
-      assignment: warningAssignmentId,
-      owner: warningOwnerId,
+    await StorageUnits.updateAsync(warningUnitId, { $set: { warning: {
+      id: 'storage-fixture-warning',
       warned_at: new Date(now.getTime() - 23 * 24 * 60 * 60 * 1000),
-      warned_by: '__e2e_seed__',
-      deadline_at: fiveDaysFromNow,
-      warning_status: 'open',
-      createdAt: now,
-      updatedAt: now,
-    });
+      warned_by: '__e2e_seed__', deadline_at: fiveDaysFromNow,
+    } } });
 
     const clearanceOwnerId = memberIdMap['storage-clearance@test.com'];
     await insertUnit('1003', 3, 'awaiting_clearance', clearanceOwnerId);
@@ -416,19 +390,17 @@ if (process.env.SEED_TEST_DATA === 'true') {
       createdAt: now,
       updatedAt: now,
     });
-    const moveAssignmentId = await insertAssignment(moveSourceId, moveOwnerId, moveRequestId);
-    await StorageRequests.updateAsync(moveRequestId, { $set: { source_assignment: moveAssignmentId } });
-    await StorageMoves.insertAsync({
+    await StorageUnits.updateAsync(moveSourceId, { $set: { assignment_request: moveRequestId } });
+    await StorageRequests.updateAsync(moveRequestId, { $set: { source_unit: moveSourceId } });
+    await StorageOffers.insertAsync({
       owner: moveOwnerId,
       request: moveRequestId,
-      from_assignment: moveAssignmentId,
       from_unit: moveSourceId,
       to_unit: moveDestinationId,
-      reserved_at: now,
-      reserved_by: '__e2e_seed__',
+      offered_at: now,
+      offered_by: '__e2e_seed__',
       deadline_at: twoWeeksFromNow,
       requires_inspection: false,
-      move_status: 'pending',
       createdAt: now,
       updatedAt: now,
     });
@@ -460,8 +432,8 @@ if (process.env.SEED_TEST_DATA === 'true') {
     const migrationDocuments = {
       storageWalls: [],
       storageUnits: [],
-      storageAssignments: [],
       storageRequests: [],
+      storageOffers: [],
       storageEvents: [],
     };
     const manifestPayload = { version: 1, documents: migrationDocuments };

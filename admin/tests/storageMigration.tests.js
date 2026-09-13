@@ -15,8 +15,8 @@ import {
 import { requireStorageMigrationOperator } from '/server/methods/storageMigration';
 import {
   StorageWalls,
-  StorageAssignments,
   StorageEvents,
+  StorageOffers,
   StorageRequests,
   StorageUnits,
 } from '/imports/common/collections/storage';
@@ -72,9 +72,9 @@ describe('legacy storage migration', function () {
       [1, 1, 2, 1],
     );
     assert.ok(!('height' in byName['4']));
-    assert.strictEqual(plan.documents.storageAssignments.length, 2);
-    assert.ok(plan.documents.storageAssignments.every((assignment) =>
-      assignment.assigned_at.getTime() === cutoff.getTime()));
+    const occupied = plan.documents.storageUnits.filter((unit) => unit.availability_status === 'occupied');
+    assert.strictEqual(occupied.length, 2);
+    assert.ok(occupied.every((unit) => unit.assigned_at.getTime() === cutoff.getTime()));
 
     const requests = Object.fromEntries(plan.documents.storageRequests.map((request) => [request.owner, request]));
     assert.strictEqual(requests.payer.request_type, 'move');
@@ -133,8 +133,8 @@ describe('legacy storage migration', function () {
       comments: [],
     });
     assert.strictEqual(plan.report.blocker_count, 0);
-    assert.strictEqual(plan.documents.storageAssignments.length, 1);
-    assert.strictEqual(plan.documents.storageAssignments[0].owner, 'payer');
+    assert.strictEqual(plan.documents.storageUnits.filter((unit) => unit.owner).length, 1);
+    assert.strictEqual(plan.documents.storageUnits.find((unit) => unit.owner).owner, 'payer');
     assert.ok(plan.report.issues.some((issue) => issue.code === 'duplicate_family_claim_collapsed'));
   });
 
@@ -226,7 +226,7 @@ describe('legacy storage migration database gate', function () {
   });
 
   const cleanup = async () => {
-    await StorageAssignments.removeAsync({ _id: { $regex: '^legacy-storage-v1:' } });
+    await StorageOffers.removeAsync({ _id: { $regex: '^legacy-storage-v1:' } });
     await StorageRequests.removeAsync({ _id: { $regex: '^legacy-storage-v1:' } });
     await StorageUnits.removeAsync({ _id: { $regex: '^legacy-storage-v1:' } });
     await StorageUnits.removeAsync({ _id: { $regex: '^migration-review-' } });
@@ -239,8 +239,8 @@ describe('legacy storage migration database gate', function () {
     for (const unit of plan.documents.storageUnits) {
       await StorageUnits.insertAsync({ ...unit, height: 'low' });
     }
-    for (const assignment of plan.documents.storageAssignments) await StorageAssignments.insertAsync(assignment);
     for (const request of plan.documents.storageRequests) await StorageRequests.insertAsync(request);
+    for (const offer of plan.documents.storageOffers) await StorageOffers.insertAsync(offer);
     for (const migrationEvent of plan.documents.storageEvents) {
       if (includeSummary || migrationEvent._id !== STORAGE_MIGRATION_SUMMARY_EVENT_ID) {
         await StorageEvents.insertAsync(migrationEvent);

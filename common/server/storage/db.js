@@ -37,9 +37,5 @@ export const STORAGE_SCHEMAS = {
   wall: schemas.storageWall,
   unit: schemas.storageUnit,
   request: schemas.storageRequest,
-  assignment: schemas.storageAssignment,
-  warning: schemas.storageWarning,
-  exemption: schemas.storageExemption,
-  move: schemas.storageMove,
-  actionExecution: schemas.storageActionExecution,
+  offer: schemas.storageOffer,
 };

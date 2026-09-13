@@ -51,20 +51,19 @@ export const filterStorageQueue = (rows, query) => {
     .some((value) => String(value || '').toLowerCase().includes(needle)));
 };
 
-export const storageQueueRows = ({ requests = [], members = [], assignments = [], units = [], now = new Date() }) => {
+export const storageQueueRows = ({ requests = [], members = [], units = [], now = new Date() }) => {
   const memberById = new Map(members.map((member) => [member._id, member]));
   const unitById = new Map(units.map((unit) => [unit._id, unit]));
-  const assignmentByOwner = new Map(assignments
-    .filter((assignment) => !assignment.ended_at)
-    .map((assignment) => [assignment.owner, assignment]));
+  const unitByOwner = new Map(units
+    .filter((unit) => unit.availability_status === 'occupied' && unit.owner)
+    .map((unit) => [unit.owner, unit]));
   return requests
     .filter((request) => activeRequestStatuses.has(request.request_status) && request.request_type !== 'release')
     .sort((left, right) => new Date(left.requested_at) - new Date(right.requested_at)
       || String(left._id).localeCompare(String(right._id)))
     .map((request) => {
       const member = memberById.get(request.owner);
-      const assignment = assignmentByOwner.get(request.owner);
-      const unit = assignment && unitById.get(assignment.unit);
+      const unit = unitByOwner.get(request.owner) || unitById.get(request.source_unit);
       const editable = ['waiting', 'paused_ineligible'].includes(request.request_status);
       const eligible = !!member?.lab && new Date(member.lab).getTime() > new Date(now).getTime();
       return {

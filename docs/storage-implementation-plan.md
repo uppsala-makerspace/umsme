@@ -8,14 +8,14 @@ Date: 2026-09-10
 
 Phases 1–6 have been implemented and independently reviewed across the domain
 and migration, server and delivery, and UI workstreams. The admin test suite
-passes with 268 tests, and the admin production build, member production build,
+passes, and the admin production build, member production build,
 and Storybook build pass. Seven member Playwright scenarios compile; executing
 them locally still requires a running MongoDB instance and the Playwright
 Chromium runtime.
 
 Phase 7 has intentionally not been executed. It is an operational maintenance
 window involving a production-like migration preview, manual unit-height
-classification, deployment secrets, worker enablement, the coordinated legacy
+classification, deployment secrets, the coordinated legacy
 write cutover, and post-cutover observation before legacy cleanup.
 
 ## 1. Workstreams and dependency gates
@@ -36,8 +36,8 @@ Owner: domain and migration workstream.
 
 ### Deliverables
 
-- Add models, schemas, collection modules, and a barrel export for all storage
-  entities in the parent design, including `storageActionExecutions`.
+- Add models, schemas, and a barrel export for the five storage collections:
+  walls, units, requests, pending offers, and events.
 - Deny all client inserts, updates, and removals. Events are immutable.
 - Add awaited, idempotent index setup in `common/server/storageIndexes.js`.
 - Add pure, time-injectable rules in `common/lib/storageRules.js`.
@@ -48,17 +48,9 @@ Owner: domain and migration workstream.
 - Unique wall `name`, unique unit `name`, and unique
   `(wall_id, column, row)`.
 - Partial unique active request per owner.
-- Partial unique active assignment per unit and per owner.
-- Partial unique open warning per assignment.
-- Partial unique active exemption per assignment.
-- Partial unique pending move per owner, request, and destination unit.
-- Unique action execution per `(created_by, operation_kind, command_id,
-  suggestion_id)`. Startup creates
-  this scoped index under a new name first, then drops the exact obsolete
-  `{command_id, suggestion_id}` unique index if present. A same-named index
-  with any unexpected shape is preserved and fails startup with an explicit
-  diagnostic so it can be investigated manually.
-- Query indexes for allocation inventory, queue age, deadlines, and histories.
+- Unique pending offer per owner, request, and destination unit.
+- Unit indexes for current owner, warning deadline, and exemption expiry.
+- Event indexes for direct member and storage-unit history filters.
 
 ### Pure rules
 

@@ -6,7 +6,7 @@ import {
   StorageWalls,
   StorageUnits,
   StorageRequests,
-  StorageAssignments,
+  StorageOffers,
   StorageEvents,
 } from '/imports/common/collections/storage';
 import {
@@ -23,8 +23,8 @@ import {
 const collections = {
   storageWalls: StorageWalls,
   storageUnits: StorageUnits,
-  storageAssignments: StorageAssignments,
   storageRequests: StorageRequests,
+  storageOffers: StorageOffers,
   storageEvents: StorageEvents,
 };
 
@@ -85,13 +85,6 @@ const naturalKeyConflicts = async (documents) => {
     });
     if (found) conflicts.push({ collection: 'storageUnits', id: unit._id, code: 'unit_natural_key_conflict', existing_id: found._id });
   }
-  for (const assignment of documents.storageAssignments) {
-    const found = await StorageAssignments.findOneAsync({
-      _id: { $ne: assignment._id }, ended_at: { $exists: false },
-      $or: [{ unit: assignment.unit }, { owner: assignment.owner }],
-    });
-    if (found) conflicts.push({ collection: 'storageAssignments', id: assignment._id, code: 'active_assignment_conflict', existing_id: found._id });
-  }
   for (const request of documents.storageRequests) {
     const found = await StorageRequests.findOneAsync({
       _id: { $ne: request._id }, owner: request.owner,
@@ -121,12 +114,12 @@ export const preflightLegacyStorageMigration = async (plan) => {
 };
 
 export const validateStorageMigrationState = async ({ legacySource } = {}) => {
-  const [readiness, walls, units, requests, assignments, applied] = await Promise.all([
+  const [readiness, walls, units, requests, offers, applied] = await Promise.all([
     storageAllocationReadiness({ legacySource }),
     StorageWalls.find({}).fetchAsync(),
     StorageUnits.find({}).fetchAsync(),
     StorageRequests.find({}).fetchAsync(),
-    StorageAssignments.find({}).fetchAsync(),
+    StorageOffers.find({}).fetchAsync(),
     StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_EVENT_ID),
   ]);
   const missing = readiness.missing_migrated_documents;
@@ -152,7 +145,7 @@ export const validateStorageMigrationState = async ({ legacySource } = {}) => {
       walls: walls.length,
       units: units.length,
       requests: requests.length,
-      assignments: assignments.length,
+      offers: offers.length,
       occupied_units: units.filter((unit) => unit.availability_status === 'occupied').length,
       unclassified_units: readiness.unclassified_unit_ids.length,
     },
@@ -189,7 +182,7 @@ export const applyLegacyStorageMigration = async ({ fingerprint, cutoff, legacyS
   }
 
   const inserted = {};
-  for (const name of ['storageWalls', 'storageUnits', 'storageAssignments', 'storageRequests', 'storageEvents']) {
+  for (const name of ['storageWalls', 'storageUnits', 'storageRequests', 'storageOffers', 'storageEvents']) {
     inserted[name] = 0;
     for (const document of difference.inserts[name]) {
       try {

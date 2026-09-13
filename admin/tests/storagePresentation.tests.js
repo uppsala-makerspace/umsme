@@ -60,8 +60,7 @@ describe('storage admin presentation', function () {
         { _id: 'active', name: 'Ada', mid: 'M1', lab: new Date('2027-01-01') },
         { _id: 'expired', name: 'Grace', mid: 'M2', lab: new Date('2026-01-01') },
       ],
-      assignments: [{ _id: 'assignment', owner: 'active', unit: 'unit' }],
-      units: [{ _id: 'unit', name: 'A-42' }],
+      units: [{ _id: 'unit', name: 'A-42', owner: 'active', availability_status: 'occupied' }],
     });
     assert.deepStrictEqual(rows.map(({ _id }) => _id), ['first', 'later']);
     assert.strictEqual(rows[0].eligibilityLabel, 'Not eligible');
@@ -183,32 +182,22 @@ describe('storage admin presentation', function () {
   });
 
   it('resolves member and unit event filters through historical storage records', function () {
-    const records = {
-      assignments: [
-        { _id: 'a1', owner: 'm1', unit: 'u1', request: 'r1' },
-        { _id: 'a2', owner: 'm2', unit: 'u1', request: 'r2' },
-      ],
-      requests: [
-        { _id: 'r1', owner: 'm1' }, { _id: 'r2', owner: 'm2' }, { _id: 'r3', owner: 'm1' },
-      ],
-      warnings: [
-        { _id: 'w1', owner: 'm1', assignment: 'a1' },
-        { _id: 'w2', owner: 'm2', assignment: 'a2' },
-      ],
-      exemptions: [{ _id: 'e1', assignment: 'a1' }],
-      moves: [{ _id: 'mv1', owner: 'm1', from_unit: 'u1', to_unit: 'u2', from_assignment: 'a1', request: 'r3' }],
-    };
+    const records = { events: [
+      { entity_id: 'a1', member: 'm1', unit: 'u1' },
+      { entity_id: 'a2', member: 'm2', unit: 'u1' },
+      { entity_id: 'mv1', member: 'm1', unit: 'u2', related_unit: 'u1' },
+    ] };
     assert.deepStrictEqual(
       storageEventEntityIds({ memberId: 'm1', ...records }),
-      ['a1', 'e1', 'mv1', 'r1', 'r3', 'w1'],
+      ['a1', 'mv1'],
     );
     assert.deepStrictEqual(
       storageEventEntityIds({ unitId: 'u1', ...records }),
-      ['a1', 'a2', 'e1', 'mv1', 'r1', 'r2', 'r3', 'u1', 'w1', 'w2'],
+      ['a1', 'a2', 'mv1'],
     );
     assert.deepStrictEqual(
       storageEventEntityIds({ memberId: 'm1', unitId: 'u1', ...records }),
-      ['a1', 'e1', 'mv1', 'r1', 'r3', 'w1'],
+      ['a1', 'mv1'],
     );
     assert.deepStrictEqual(storageEventEntityIds({ memberId: 'm2', unitId: 'u2', ...records }), []);
     assert.strictEqual(storageEventEntityIds(records), null);
@@ -217,8 +206,8 @@ describe('storage admin presentation', function () {
   it('presents event rows with related member and storage-unit names', function () {
     const rows = storageEventRows({
       events: [
-        { _id: 'older', entity_type: 'storageAssignment', entity_id: 'a1', event_type: 'assignment_created', actor_type: 'administrator', actor: 'admin-user', occurred_at: new Date('2026-09-10') },
-        { _id: 'newer', entity_type: 'storageMove', entity_id: 'mv1', event_type: 'move_reserved', actor_type: 'member', actor: 'member-user', occurred_at: new Date('2026-09-11'), details: { to_unit: 'u2' } },
+        { _id: 'older', entity_type: 'storageUnit', entity_id: 'u1', event_type: 'assignment_created', actor_type: 'administrator', actor: 'admin-user', member: 'm1', unit: 'u1', occurred_at: new Date('2026-09-10') },
+        { _id: 'newer', entity_type: 'storageOffer', entity_id: 'mv1', event_type: 'move_reserved', actor_type: 'member', actor: 'member-user', member: 'm1', unit: 'u2', related_unit: 'u1', occurred_at: new Date('2026-09-11') },
       ],
       members: [
         { _id: 'm1', name: 'Ada Lovelace', email: 'ada@example.com' },
@@ -229,8 +218,6 @@ describe('storage admin presentation', function () {
         { _id: 'admin-user', emails: [{ address: 'admin@example.com' }] },
       ],
       units: [{ _id: 'u1', name: '1001' }, { _id: 'u2', name: '2001' }],
-      assignments: [{ _id: 'a1', owner: 'm1', unit: 'u1' }],
-      moves: [{ _id: 'mv1', owner: 'm1', from_unit: 'u1', to_unit: 'u2', from_assignment: 'a1' }],
     });
     assert.deepStrictEqual(rows.map(({ _id }) => _id), ['newer', 'older']);
     assert.strictEqual(rows[0].memberLabel, 'Ada Lovelace');

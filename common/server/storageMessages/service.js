@@ -71,16 +71,6 @@ export const sendStorageNotification = async ({
     return existing._id;
   }
 
-  if (owner.email) {
-    await transports().sendEmail({
-      to: owner.email,
-      from: rendered.sender_from,
-      replyTo: rendered.reply_to,
-      subject: rendered.subject,
-      text: rendered.email,
-    });
-  }
-
   try {
     await Messages.insertAsync(document);
   } catch (error) {
@@ -89,7 +79,24 @@ export const sendStorageNotification = async ({
     if (!raced) throw error;
     assertMessageMatches(raced, document);
   }
-  await transports().sendPush(document._id);
+  try {
+    await transports().sendPush(document._id);
+  } catch (error) {
+    console.error(`Storage push failed for ${document._id}: ${error.message}`);
+  }
+  if (owner.email) {
+    try {
+      await transports().sendEmail({
+        to: owner.email,
+        from: rendered.sender_from,
+        replyTo: rendered.reply_to,
+        subject: rendered.subject,
+        text: rendered.email,
+      });
+    } catch (error) {
+      console.error(`Storage email failed for ${document._id}: ${error.message}`);
+    }
+  }
   return document._id;
 };
 

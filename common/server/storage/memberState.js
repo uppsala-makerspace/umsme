@@ -1,9 +1,7 @@
 import {
   StorageUnits,
   StorageRequests,
-  StorageAssignments,
-  StorageWarnings,
-  StorageMoves,
+  StorageOffers,
 } from '/imports/common/collections/storage';
 import { hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
 import { reconcileStorageState } from './reconciliation';
@@ -22,16 +20,11 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
     owner: owner._id,
     request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] },
   }));
-  const assignment = await StorageAssignments.findOneAsync({ owner: owner._id, ended_at: { $exists: false } });
-  const move = await StorageMoves.findOneAsync({ owner: owner._id, move_status: 'pending' });
-  const warning = assignment
-    ? await StorageWarnings.findOneAsync({ assignment: assignment._id, warning_status: 'open' })
-    : null;
-  const [unit, moveDestination] = await Promise.all([
-    assignment ? StorageUnits.findOneAsync(assignment.unit) : null,
-    move ? StorageUnits.findOneAsync(move.to_unit) : null,
-  ]);
-  const awaitingClearanceUnit = assignment ? null : await StorageUnits.findOneAsync({
+  const unit = await StorageUnits.findOneAsync({ owner: owner._id, availability_status: 'occupied' });
+  const move = await StorageOffers.findOneAsync({ owner: owner._id });
+  const moveDestination = move ? await StorageUnits.findOneAsync(move.to_unit) : null;
+  const warning = unit?.warning;
+  const awaitingClearanceUnit = unit ? null : await StorageUnits.findOneAsync({
     owner: owner._id, availability_status: 'awaiting_clearance',
   });
   return {
@@ -40,9 +33,9 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
     family_read_only: familyDependent,
     has_active_lab_membership: hasActiveLabMembershipAt(owner, now),
     request,
-    assignment: assignment ? {
-      _id: assignment._id,
-      assigned_at: assignment.assigned_at,
+    assignment: unit ? {
+      _id: unit._id,
+      assigned_at: unit.assigned_at,
       unit: publicUnit(unit),
     } : null,
     awaiting_clearance: publicUnit(awaitingClearanceUnit),
@@ -53,7 +46,7 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
       destination: publicUnit(moveDestination),
     } : null,
     warning: warning ? {
-      _id: warning._id,
+      _id: warning.id,
       warned_at: warning.warned_at,
       deadline_at: warning.deadline_at,
     } : null,
