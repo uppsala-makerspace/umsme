@@ -41,6 +41,5 @@ export const STORAGE_SCHEMAS = {
   warning: schemas.storageWarning,
   exemption: schemas.storageExemption,
   move: schemas.storageMove,
-  delivery: schemas.storageNotificationDelivery,
   actionExecution: schemas.storageActionExecution,
 };

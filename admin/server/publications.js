@@ -30,7 +30,6 @@ import {
   StorageWarnings,
   StorageExemptions,
   StorageMoves,
-  StorageNotificationDeliveries,
   StorageEvents,
 } from '/imports/common/collections/storage';
 import { storageEventEntityIds } from '/imports/storage/eventLog';
@@ -88,7 +87,7 @@ export default () => {
       StorageWarnings.find(),
       StorageExemptions.find(),
       StorageMoves.find(),
-      StorageNotificationDeliveries.find(),
+      Messages.find({ type: 'storage' }),
       Members.find({}, { fields: { name: 1, mid: 1, email: 1, mobile: 1, lab: 1, infamily: 1 } }),
       Meteor.users.find({}, { fields: { 'emails.address': 1, profile: 1 } }),
     ];

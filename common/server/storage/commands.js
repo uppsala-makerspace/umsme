@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { Members } from '/imports/common/collections/members';
+import { Messages } from '/imports/common/collections/messages';
 import {
   StorageUnits,
   StorageRequests,
@@ -9,7 +10,6 @@ import {
   StorageWarnings,
   StorageExemptions,
   StorageMoves,
-  StorageNotificationDeliveries,
   StorageActionExecutions,
 } from '/imports/common/collections/storage';
 import {
@@ -22,7 +22,7 @@ import { runStorageAtomic } from './atomic';
 import { STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument } from './db';
 import { appendStorageEvent } from './events';
 import { isDuplicateKeyError, StorageConflictError } from './errors';
-import { createStorageNotificationOutbox } from './outbox';
+import { sendStorageNotification, storageMessageRecordId } from '../storageMessages/service';
 import { previewStorageSuggestions } from './suggestions';
 import { reconcileStorageState } from './reconciliation';
 import { storageAllocationReadiness } from './readiness';
@@ -95,15 +95,14 @@ const applyAssignment = async (records, actor, now, session, journal, ids = {}) 
   }, { session, matches: (current) => current.unit === unit._id && current.owner === owner._id }));
   await runStep(journal, 'event_inserted', () => event('storageAssignment', assignmentId, 'assignment_created', actor, now,
     { unit: unit._id, owner: owner._id, request: request._id }, session, undefined, ids.event));
-  let deliveryId = ids.delivery;
-  await runStep(journal, 'outbox_inserted', async () => {
-    deliveryId = await createStorageNotificationOutbox({
-      owner, decisionType: 'assignment', decisionId: assignmentId, createdBy: actor, now,
-      deliveryId: ids.delivery,
-      renderContext: { owner_name: owner.name, unit_name: unit.name },
-    }, { session });
+  let messageId = storageMessageRecordId('assignment', assignmentId);
+  await runStep(journal, 'message_sent', async () => {
+    messageId = await sendStorageNotification({
+      owner, decisionType: 'assignment', decisionId: assignmentId, now,
+      context: { owner_name: owner.name, unit_name: unit.name },
+    });
   });
-  return { decision_id: assignmentId, delivery_id: deliveryId };
+  return { decision_id: assignmentId, message_id: messageId };
 };
 
 const reserveMove = async (records, actor, now, session, { requiresInspection = false } = {}, journal, ids = {}) => {
@@ -146,17 +145,17 @@ const reserveMove = async (records, actor, now, session, { requiresInspection = 
       owner: owner._id,
       requires_inspection: requiresInspection,
     }, session, undefined, ids.event));
-  let deliveryId = ids.delivery;
-  await runStep(journal, 'outbox_inserted', async () => {
-    deliveryId = await createStorageNotificationOutbox({
-      owner, decisionType: 'move', decisionId: moveId, createdBy: actor, now, deliveryId: ids.delivery,
-      renderContext: {
+  let messageId = storageMessageRecordId('move', moveId);
+  await runStep(journal, 'message_sent', async () => {
+    messageId = await sendStorageNotification({
+      owner, decisionType: 'move', decisionId: moveId, now,
+      context: {
         owner_name: owner.name, unit_name: unit.name,
         from_unit: assignment.unit, deadline_at: storageMoveDeadline(now),
       },
-    }, { session });
+    });
   });
-  return { decision_id: moveId, delivery_id: deliveryId };
+  return { decision_id: moveId, message_id: messageId };
 };
 
 const applyWarning = async (records, actor, now, session, journal, ids = {}) => {
@@ -183,15 +182,14 @@ const applyWarning = async (records, actor, now, session, journal, ids = {}) => 
   }, { session, matches: (current) => current.assignment === assignment._id && current.owner === owner._id }));
   await runStep(journal, 'event_inserted', () => event('storageWarning', warningId, 'warning_created', actor, now,
     { assignment: assignment._id, deadline_at: storageWarningDeadline(now) }, session, undefined, ids.event));
-  let deliveryId = ids.delivery;
-  await runStep(journal, 'outbox_inserted', async () => {
-    deliveryId = await createStorageNotificationOutbox({
-      owner, decisionType: 'warning', decisionId: warningId, createdBy: actor, now,
-      deliveryId: ids.delivery,
-      renderContext: { owner_name: owner.name, deadline_at: storageWarningDeadline(now) },
-    }, { session });
+  let messageId = storageMessageRecordId('warning', warningId);
+  await runStep(journal, 'message_sent', async () => {
+    messageId = await sendStorageNotification({
+      owner, decisionType: 'warning', decisionId: warningId, now,
+      context: { owner_name: owner.name, deadline_at: storageWarningDeadline(now) },
+    });
   });
-  return { decision_id: warningId, delivery_id: deliveryId };
+  return { decision_id: warningId, message_id: messageId };
 };
 
 const applyReminder = async (records, actor, now, session, journal, ids = {}) => {
@@ -210,14 +208,14 @@ const applyReminder = async (records, actor, now, session, journal, ids = {}) =>
     (current) => !current.ended_at && sameDate(current.updatedAt, now), { session }));
   await runStep(journal, 'event_inserted', () => event('storageWarning', warning._id, 'reminder_confirmed', actor, now,
     { assignment: warning.assignment }, session, undefined, ids.event));
-  let deliveryId = ids.delivery;
-  await runStep(journal, 'outbox_inserted', async () => {
-    deliveryId = await createStorageNotificationOutbox({
-      owner, decisionType: 'reminder', decisionId: warning._id, createdBy: actor, now, deliveryId: ids.delivery,
-      renderContext: { owner_name: owner.name, deadline_at: warning.deadline_at },
-    }, { session });
+  let messageId = storageMessageRecordId('reminder', warning._id);
+  await runStep(journal, 'message_sent', async () => {
+    messageId = await sendStorageNotification({
+      owner, decisionType: 'reminder', decisionId: warning._id, now,
+      context: { owner_name: owner.name, deadline_at: warning.deadline_at },
+    });
   });
-  return { decision_id: warning._id, delivery_id: deliveryId };
+  return { decision_id: warning._id, message_id: messageId };
 };
 
 const endForClearance = async ({
@@ -232,12 +230,8 @@ const endForClearance = async ({
   if (reason === 'reclaimed') {
     ensure(warning?.warning_status === 'open' && warning.assignment === assignment._id,
       'Open warning state is missing');
-    const successfulDelivery = await StorageNotificationDeliveries.findOneAsync({
-      decision_type: 'warning',
-      decision_id: warning?._id,
-      $or: [{ 'email.status': 'sent' }, { 'sms.status': 'sent' }],
-    });
-    if (successfulDelivery) {
+    const warningMessage = await Messages.findOneAsync(storageMessageRecordId('warning', warning?._id));
+    if (warningMessage) {
       warningContact = 'notification_delivered';
     } else {
       manualContactReason = typeof contactConfirmation?.reason === 'string'
@@ -277,15 +271,14 @@ const endForClearance = async ({
       ...(warningContact ? { warning_contact: warningContact } : {}),
     }, session, manualContactReason || undefined, ids.event));
   const decisionType = reason === 'reclaimed' ? 'reclamation' : 'voluntary_release';
-  let deliveryId = ids.delivery;
-  await runStep(journal, 'outbox_inserted', async () => {
-    deliveryId = await createStorageNotificationOutbox({
-      owner, decisionType, decisionId: assignment._id, createdBy: actor, now,
-      deliveryId: ids.delivery,
-      renderContext: { owner_name: owner.name, unit_name: unit.name },
-    }, { session });
+  let messageId = storageMessageRecordId(decisionType, assignment._id);
+  await runStep(journal, 'message_sent', async () => {
+    messageId = await sendStorageNotification({
+      owner, decisionType, decisionId: assignment._id, now,
+      context: { owner_name: owner.name, unit_name: unit.name },
+    });
   });
-  return { decision_id: assignment._id, delivery_id: deliveryId };
+  return { decision_id: assignment._id, message_id: messageId };
 };
 
 const completeMove = async (records, actor, actorType, now, session, journal, ids = {}) => {
@@ -462,7 +455,7 @@ const executeRow = async ({ action, commandId, selection, row, actor }) => {
   const now = existing?.operation_payload?.now || new Date();
   const ids = existing?.operation_payload?.ids || {
     decision: `${id}:decision`, assignment: `${id}:assignment`,
-    event: `${id}:event`, delivery: `${id}:delivery`,
+    event: `${id}:event`,
   };
   const payload = existing?.operation_payload || { action, row, selection, actor, now, ids, records };
   const spec = {

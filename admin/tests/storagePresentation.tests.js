@@ -1,6 +1,5 @@
 import assert from 'assert';
 import {
-  failedChannels,
   bulkHeightImpact,
   filterStorageQueue,
   filterStorageUnits,
@@ -112,12 +111,9 @@ describe('storage admin presentation', function () {
     assert.strictEqual(byId['expired-paused'].canTogglePause, false);
   });
 
-  it('compares preview identities and finds failed channels', function () {
+  it('compares preview identities', function () {
     assert(sameSuggestionSet([{ suggestion_id: 'b' }, { suggestion_id: 'a' }], [{ suggestion_id: 'a' }, { suggestion_id: 'b' }]));
     assert(!sameSuggestionSet([{ suggestion_id: 'a' }], []));
-    assert.deepStrictEqual(failedChannels({ render_status: 'missing_template', email: { status: 'sent' }, sms: { status: 'failed' } }), ['render', 'sms']);
-    assert.deepStrictEqual(failedChannels({ render_status: 'render_failed', email: { status: 'failed' }, sms: { status: 'sent' } }), ['render', 'email']);
-    assert.deepStrictEqual(failedChannels({ render_status: 'rendered', email: { status: 'sent' }, sms: { status: 'sent' } }), []);
   });
 
   it('uses authoritative readiness and presents every blocker in plain language', function () {

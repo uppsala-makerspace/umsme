@@ -15,7 +15,6 @@ import publications from './publications';
 import setupAccounts from './accounts';
 import runMigrations from './migrations';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
-import { startStorageNotificationWorker } from '/imports/common/server/storageNotifications/worker';
 
 if (Meteor.settings?.private?.mailUrl) {
   process.env.MAIL_URL = Meteor.settings.private.mailUrl;
@@ -27,5 +26,4 @@ Meteor.startup(async () => {
   await ensureStorageIndexes();
   await runMigrations();
   publications();
-  startStorageNotificationWorker();
 });

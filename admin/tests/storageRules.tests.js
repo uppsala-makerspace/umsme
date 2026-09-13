@@ -13,7 +13,6 @@ import {
   storageMoveDeadline,
   storagePreferenceMatches,
   storageReminderAt,
-  storageDeliveryStateErrors,
   storageExemptionDeactivationReason,
   storageLayoutErrors,
   storageStateErrors,
@@ -314,25 +313,5 @@ describe('storageRules', function () {
       ]) assert.ok(codes.includes(code), code);
     });
 
-    it('allows a durable render failure but rejects deliverable channels without snapshots', function () {
-      const failedRender = {
-        render_status: 'missing_template',
-        render_error: 'No storage warning template is configured',
-        email: { status: 'unavailable' },
-        sms: { status: 'unavailable' },
-      };
-      assert.deepStrictEqual(storageDeliveryStateErrors(failedRender), []);
-      const pending = {
-        render_status: 'render_failed',
-        render_error: 'Template expression failed',
-        email: { status: 'pending' },
-        sms: { status: 'unavailable' },
-      };
-      const errors = storageDeliveryStateErrors(pending);
-      assert.ok(errors.includes('email_render_required'));
-      assert.ok(errors.includes('email_sender_required'));
-      assert.ok(errors.includes('email_subject_required'));
-      assert.ok(errors.includes('email_content_required'));
-    });
   });
 });

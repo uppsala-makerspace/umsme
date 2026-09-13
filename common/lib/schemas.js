@@ -39,7 +39,6 @@ export const schemas = {
   storageWarning: new SimpleSchema(models.storageWarning),
   storageExemption: new SimpleSchema(models.storageExemption),
   storageMove: new SimpleSchema(models.storageMove),
-  storageNotificationDelivery: new SimpleSchema(models.storageNotificationDelivery),
   storageEvent: new SimpleSchema(models.storageEvent),
   storageActionExecution: new SimpleSchema(models.storageActionExecution),
 };

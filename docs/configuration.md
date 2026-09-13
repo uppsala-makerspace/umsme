@@ -59,7 +59,6 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `private.vapidPrivateKey`         | VAPID private key for push                 |
 | `private.paymentOptionsPath`      | Path to payment options JSON               |
 | `private.mailUrl`                 | SMTP connection URL (deployment secret)    |
-| `private.storageNotifications`    | Storage email/SMS worker and provider      |
 | `private.homeAssistant`           | Home Assistant URL, token, lock configs (see below) |
 | `private.swish`                   | Swish API config (see below)               |
 | `private.roomsPath`               | Path to rooms config JSON                  |
@@ -220,44 +219,10 @@ environment variable or `private.mailUrl`. For Gmail/Google Workspace SMTP the
 shape is `smtps://GMAIL_USERNAME:GMAIL_APP_PASSWORD@smtp.gmail.com:465`; keep
 the real username and app password in deployment secrets, not this repository.
 
-The delivery worker is an explicit opt-in:
-
-```json
-{
-  "private": {
-    "storageNotifications": {
-      "worker": { "enabled": true, "intervalMs": 30000 },
-      "sms": { "provider": "disabled" }
-    }
-  }
-}
-```
-
-SMS can instead use `provider: "webhook"` with deployment-secret `url` and
-optional `token`. The worker posts `{to, text}` and supplies an
-`idempotency-key` header. With the default disabled provider, SMS is recorded
-as unavailable and email continues independently.
-
-Each channel has its own atomic lease and attempt state. Email and SMS run
-independently, provider calls are aborted before the lease expires, and a
-process-local mutex coalesces overlapping worker ticks. Failed channels are not
-automatically retried: an admin selects only the failed channel in the storage
-panel. A missing or broken template is similarly held until an admin explicitly
-retries `render` after the deployment is fixed.
-
-Storage email uses a deterministic SMTP `Message-ID`, while the delivery row's
-claim token and `sent` state remain authoritative. The member-visible
-`Messages` row is inserted only after the SMTP call returns and before the
-channel is marked sent. This guarantees that every database-confirmed send has
-exactly one linked history row. SMTP cannot participate in the MongoDB
-transaction, so a process crash after the provider accepts a message but before
-MongoDB records it can still result in an at-least-once retry. Providers should
-deduplicate the stable `Message-ID`/idempotency metadata where supported.
-
-The outbox stores recipient details and all template inputs at decision time.
-Rendering never reloads current member, unit, warning, or move data. Old Phase
-3 placeholder rows without that immutable context fail recoverably instead of
-inventing content from newer state.
+Storage decisions use the existing `Messages` collection and app-push
+implementation. There is no storage-specific worker, delivery collection, SMS
+provider, or retry configuration. A member without an email address still gets
+the persistent in-app message.
 
 ### Membership reminder cron
 

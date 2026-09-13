@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { Meteor } from 'meteor/meteor';
 import { Members } from '/imports/common/collections/members';
+import { Messages } from '/imports/common/collections/messages';
 import {
   StorageUnits,
   StorageRequests,
@@ -8,7 +9,6 @@ import {
   StorageWarnings,
   StorageExemptions,
   StorageMoves,
-  StorageNotificationDeliveries,
 } from '/imports/common/collections/storage';
 import {
   hasActiveLabMembershipAt,
@@ -20,6 +20,7 @@ import {
 } from '/imports/common/lib/storageRules';
 import { reconcileStorageState } from './reconciliation';
 import { storageAllocationReadiness } from './readiness';
+import { storageMessageRecordId } from '../storageMessages/service';
 
 export const STORAGE_SUGGESTION_ACTIONS = [
   'allocate',
@@ -29,7 +30,6 @@ export const STORAGE_SUGGESTION_ACTIONS = [
   'release',
   'review_expired_moves',
   'confirm_clearance',
-  'retry_notifications',
 ];
 
 const iso = (value) => value instanceof Date ? value.toISOString() : value;
@@ -47,15 +47,12 @@ export const storageSuggestionId = (action, state) => {
 };
 
 const version = (record) => record
-  ? `${record._id}:${iso(record.updatedAt)}:${iso(record.lab)}`
+  ? `${record._id}:${iso(record.updatedAt)}:${iso(record.lab)}:${iso(record.senddate)}`
   : null;
-export const warningDeliverySucceeded = (delivery) =>
-  delivery?.email?.status === 'sent' || delivery?.sms?.status === 'sent';
 const expectedChannels = (owner) => {
-  const smsProvider = Meteor.settings?.private?.storageNotifications?.sms?.provider;
   return {
     email: owner?.email ? 'available' : 'unavailable',
-    sms: owner?.mobile && smsProvider && smsProvider !== 'disabled' ? 'available' : 'unavailable',
+    app: 'best_effort',
   };
 };
 
@@ -83,8 +80,8 @@ const row = ({ action, owner, unit, request, assignment, warning, warningDeliver
     assignment: assignment?._id,
     warning: warning?._id,
     ...(action === 'reclaim' ? {
-      warning_delivered: warningDeliverySucceeded(warningDelivery),
-      manual_contact_required: !warningDeliverySucceeded(warningDelivery),
+      warning_delivered: Boolean(warningDelivery),
+      manual_contact_required: !warningDelivery,
     } : {}),
     move: move?._id,
     reason_code: reason,
@@ -99,24 +96,24 @@ const row = ({ action, owner, unit, request, assignment, warning, warningDeliver
 };
 
 export const loadStorageSuggestionState = async () => {
-  const [units, requests, assignments, warnings, exemptions, moves, deliveries] = await Promise.all([
+  const [units, requests, assignments, warnings, exemptions, moves, messages] = await Promise.all([
     StorageUnits.find({}).fetchAsync(),
     StorageRequests.find({}).fetchAsync(),
     StorageAssignments.find({}).fetchAsync(),
     StorageWarnings.find({}).fetchAsync(),
     StorageExemptions.find({ active: true }).fetchAsync(),
     StorageMoves.find({ move_status: 'pending' }).fetchAsync(),
-    StorageNotificationDeliveries.find({}).fetchAsync(),
+    Messages.find({ type: 'storage' }).fetchAsync(),
   ]);
   const ownerIds = [...new Set([
     ...requests.map((item) => item.owner),
     ...assignments.map((item) => item.owner),
     ...warnings.map((item) => item.owner),
     ...moves.map((item) => item.owner),
-    ...deliveries.map((item) => item.owner),
+    ...messages.map((item) => item.member),
   ])];
   const members = await Members.find({ _id: { $in: ownerIds } }).fetchAsync();
-  return { units, requests, assignments, warnings, exemptions, moves, deliveries, members };
+  return { units, requests, assignments, warnings, exemptions, moves, messages, members };
 };
 
 export const buildStorageSuggestions = (action, state, now = new Date()) => {
@@ -134,14 +131,7 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
     state.exemptions.filter((exemption) => isStorageExemptionActive(exemption, now))
       .map((exemption) => [exemption.assignment, exemption]),
   );
-  const reminderDecisionIds = new Set(
-    state.deliveries.filter((delivery) => delivery.decision_type === 'reminder')
-      .map((delivery) => delivery.decision_id),
-  );
-  const warningDeliveryByDecision = new Map(
-    state.deliveries.filter((delivery) => delivery.decision_type === 'warning')
-      .map((delivery) => [delivery.decision_id, delivery]),
-  );
+  const messageById = new Map((state.messages || []).map((message) => [message._id, message]));
   const rows = [];
   const skipped = [];
 
@@ -192,7 +182,7 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
       const eligible = action === 'remind'
         ? isStorageReminderEligible(warning, {
           now,
-          reminderAlreadySent: reminderDecisionIds.has(warning._id),
+          reminderAlreadySent: messageById.has(storageMessageRecordId('reminder', warning._id)),
           labIsActive: hasActiveLabMembershipAt(owner, now),
           exemption,
         })
@@ -208,7 +198,7 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
         unit,
         assignment,
         warning,
-        warningDelivery: warningDeliveryByDecision.get(warning._id),
+        warningDelivery: messageById.get(storageMessageRecordId('warning', warning._id)),
         reason: action === 'remind' ? 'warning_age_21_days' : 'warning_deadline_passed',
       }));
     }
@@ -247,23 +237,6 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
         unit,
         reason: 'awaiting_physical_clearance',
       }));
-    }
-  } else if (action === 'retry_notifications') {
-    for (const delivery of state.deliveries) {
-      const failed_channels = ['email', 'sms'].filter((channel) => delivery[channel]?.status === 'failed');
-      if (['missing_template', 'render_failed'].includes(delivery.render_status)) failed_channels.unshift('render');
-      if (!failed_channels.length) continue;
-      const owner = memberById.get(delivery.owner);
-      rows.push({
-        suggestion_id: storageSuggestionId(action, { delivery: version(delivery), failed_channels }),
-        action, decision_type: 'notification_retry', delivery: delivery._id,
-        owner: delivery.owner, member_name: owner?.name,
-        failed_channels, reason_code: 'notification_delivery_failed',
-        expected_channels: {
-          email: delivery.email?.status,
-          sms: delivery.sms?.status,
-        },
-      });
     }
   }
   return { rows, skipped };

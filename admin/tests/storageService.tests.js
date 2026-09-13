@@ -15,7 +15,7 @@ const unit = (id, status = 'available', owner) => ({
   availability_status: status, ...(owner ? { owner } : {}), updatedAt: timestamp,
 });
 const emptyState = () => ({
-  units: [], requests: [], assignments: [], warnings: [], exemptions: [], moves: [], deliveries: [], members: [],
+  units: [], requests: [], assignments: [], warnings: [], exemptions: [], moves: [], messages: [], members: [],
 });
 
 describe('storage server suggestions', function () {
@@ -73,15 +73,14 @@ describe('storage server suggestions', function () {
     const manualContact = buildStorageSuggestions('reclaim', state, now).rows[0];
     assert.strictEqual(manualContact.manual_contact_required, true);
     assert.strictEqual(manualContact.warning_delivered, false);
-    state.deliveries.push({
-      _id: 'warning-delivery', decision_type: 'warning', decision_id: 'warning',
-      email: { status: 'sent' }, sms: { status: 'failed' }, updatedAt: timestamp,
+    state.messages.push({
+      _id: 'storage-notification:warning:warning', type: 'storage', senddate: timestamp,
     });
     const delivered = buildStorageSuggestions('reclaim', state, now).rows[0];
     assert.strictEqual(delivered.manual_contact_required, false);
     assert.strictEqual(delivered.warning_delivered, true);
     assert.notStrictEqual(delivered.suggestion_id, manualContact.suggestion_id);
-    state.deliveries.push({ decision_type: 'reminder', decision_id: 'warning' });
+    state.messages.push({ _id: 'storage-notification:reminder:warning', type: 'storage', senddate: timestamp });
     assert.strictEqual(buildStorageSuggestions('remind', state, before).rows.length, 0);
   });
 
@@ -103,14 +102,4 @@ describe('storage server suggestions', function () {
     assert.strictEqual(buildStorageSuggestions('confirm_clearance', state, now).rows.length, 1);
   });
 
-  it('offers explicit render recovery alongside failed delivery channels', function () {
-    const state = emptyState();
-    state.members = [member('owner')];
-    state.deliveries = [{
-      _id: 'delivery', owner: 'owner', render_status: 'missing_template',
-      email: { status: 'unavailable' }, sms: { status: 'failed' }, updatedAt: timestamp,
-    }];
-    const result = buildStorageSuggestions('retry_notifications', state, now);
-    assert.deepStrictEqual(result.rows[0].failed_channels, ['render', 'sms']);
-  });
 });

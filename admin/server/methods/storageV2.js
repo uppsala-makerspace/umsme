@@ -21,7 +21,6 @@ import {
   updateStorageWallManual,
   upsertStorageRequestManual,
 } from '/imports/common/server/storage/manual';
-import { retryStorageNotification } from '/imports/common/server/storageNotifications/service';
 
 const operator = async (context) => {
   await requireStorageOperator(context.userId);
@@ -175,12 +174,4 @@ Meteor.methods({
     return confirmStorageClearanceManual({ unitId: unit_id, commandId: command_id, actor: await operator(this) });
   },
 
-  async 'adminStorage.notifications.retry'({ delivery_id, channels, command_id }) {
-    check(delivery_id, String);
-    check(channels, [String]);
-    check(command_id, String);
-    return retryStorageNotification({
-      deliveryId: delivery_id, channels, commandId: command_id, actor: await operator(this),
-    });
-  },
 });

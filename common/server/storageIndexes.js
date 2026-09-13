@@ -6,7 +6,6 @@ import {
   StorageWarnings,
   StorageExemptions,
   StorageMoves,
-  StorageNotificationDeliveries,
   StorageEvents,
   StorageActionExecutions,
 } from '/imports/common/collections/storage';
@@ -163,23 +162,6 @@ export const ensureStorageIndexes = async () => {
     );
   }
   await create(StorageMoves, { move_status: 1, deadline_at: 1 }, { name: 'storage_move_deadlines' });
-
-  await create(
-    StorageNotificationDeliveries,
-    { decision_type: 1, decision_id: 1 },
-    { unique: true, name: 'storage_delivery_one_per_decision' },
-  );
-  await create(
-    StorageNotificationDeliveries,
-    { 'email.status': 1, 'email.lease_expires_at': 1 },
-    { name: 'storage_delivery_email_work' },
-  );
-  await create(
-    StorageNotificationDeliveries,
-    { 'sms.status': 1, 'sms.lease_expires_at': 1 },
-    { name: 'storage_delivery_sms_work' },
-  );
-  await create(StorageNotificationDeliveries, { owner: 1, created_at: -1 }, { name: 'storage_delivery_owner_history' });
 
   await create(StorageEvents, { entity_type: 1, entity_id: 1, occurred_at: -1 }, { name: 'storage_event_entity_history' });
   await create(StorageEvents, { event_type: 1, occurred_at: -1 }, { name: 'storage_event_type_history' });

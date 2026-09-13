@@ -3,9 +3,10 @@ import { ReactiveDict } from 'meteor/reactive-dict';
 import { Random } from 'meteor/random';
 import { Roles } from 'meteor/roles';
 import { Members } from '/imports/common/collections/members';
+import { Messages } from '/imports/common/collections/messages';
 import {
   StorageWalls, StorageUnits, StorageRequests, StorageAssignments, StorageWarnings, StorageExemptions,
-  StorageMoves, StorageNotificationDeliveries, StorageEvents,
+  StorageMoves, StorageEvents,
 } from '/imports/common/collections/storage';
 import {
   STORAGE_ACTIONS, bulkHeightImpact, filterStorageQueue, filterStorageUnits, groupStorageWalls,
@@ -57,7 +58,9 @@ const viewRow = (row, selected, options) => ({
   ...row, ...options, selected,
   date: date(row.relevant_dates?.deadline_at || row.relevant_dates?.requested_at || row.relevant_dates?.warned_at),
   reasonLabel: storageActionReasonLabel(row.reason_code),
-  channels: [row.expected_channels?.email === 'available' ? 'Email' : null, row.expected_channels?.sms === 'available' ? 'SMS' : null].filter(Boolean).join(' + ') || 'No valid channel',
+  channels: ['allocate', 'warn', 'remind', 'reclaim', 'release'].includes(row.action)
+    ? (row.expected_channels?.email === 'available' ? 'Email + app message' : 'App message only')
+    : 'No automatic message',
   allocationMove: row.action === 'allocate' && row.decision_type === 'move',
   expiredMove: row.action === 'review_expired_moves',
   reclamation: row.action === 'reclaim',
@@ -146,9 +149,7 @@ Template.Storage.helpers({
   previewGenerated: () => date(Template.instance().state.get('preview')?.generated_at),
   previewBlocked: () => Template.instance().state.get('preview')?.blocked,
   previewEmpty: () => !(Template.instance().state.get('preview')?.rows?.length),
-  retryPreview: () => Template.instance().state.get('previewAction') === 'retry_notifications',
   previewRows() { const state = Template.instance().state; const selected = state.get('selected') || {}; const options = state.get('rowOptions') || {}; return (state.get('preview')?.rows || []).map((row) => viewRow(row, selected[row.suggestion_id] !== false, options[row.suggestion_id] || {})); },
-  retryRows() { const state = Template.instance().state; const selected = state.get('selected') || {}; return (state.get('preview')?.rows || []).map((row) => { const delivery = StorageNotificationDeliveries.findOne(row.delivery); return { ...row, ...delivery, renderStatus: delivery?.render_status || '—', selectionId: row.suggestion_id, selected: selected[row.suggestion_id] !== false, ownerName: row.member_name, failure: [delivery?.render_error, delivery?.email?.last_error, delivery?.sms?.last_error].filter(Boolean).join(' · ') }; }); },
   selectedCount() { const state = Template.instance().state; const selected = state.get('selected') || {}; return (state.get('preview')?.rows || []).filter(({ suggestion_id }) => selected[suggestion_id] !== false).length; },
   confirmDisabled() {
     const state = Template.instance().state;
@@ -205,7 +206,7 @@ Template.Storage.helpers({
     const ownerEligible = !!unit.owner && !!Members.findOne(unit.owner)?.lab
       && new Date(Members.findOne(unit.owner).lab) > new Date();
     const entityIds = [unit._id, assignment?._id, request?._id, move?._id].filter(Boolean);
-    return { ...unit, statusLabel: storageStatusLabel(unit.availability_status), ownerName: Members.findOne(unit.owner)?.name || 'No owner', wallChoices: StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch().map((wall) => ({ ...wall, selected: wall._id === unit.wall_id, disabled: !wall.active && wall._id !== unit.wall_id, choiceLabel: `${wall.name}${wall.active ? '' : ' (inactive)'}` })), heightNone: !unit.height, heightLow: unit.height === 'low', heightHigh: unit.height === 'high', statusAvailable: unit.availability_status === 'available', statusUnavailable: unit.availability_status === 'unavailable', statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status), metadataProtected: ['occupied', 'reserved'].includes(unit.availability_status), clearance: unit.availability_status === 'awaiting_clearance', assignable: unit.availability_status === 'available', canRequestRelease: !!assignment && !request && !move, activeAssignment: assignment && { ...assignment, assignedDate: date(assignment.assigned_at), exemption }, activeRequest: request && { ...request, requestedDate: date(request.requested_at), pauseTarget: request.request_status === 'waiting', pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume', canTogglePause: request.request_status === 'waiting' ? !ownerEligible : (request.request_status === 'paused_ineligible' && ownerEligible) }, pendingMove: move && { ...move, deadlineDate: date(move.deadline_at) }, deliveries: unit.owner ? StorageNotificationDeliveries.find({ owner: unit.owner }, { sort: { created_at: -1 }, limit: 20 }).fetch() : [], history: StorageEvents.find({ entity_id: { $in: entityIds } }, { sort: { occurred_at: -1 }, limit: 50 }).fetch().map((event) => ({ ...event, date: date(event.occurred_at) })) };
+    return { ...unit, statusLabel: storageStatusLabel(unit.availability_status), ownerName: Members.findOne(unit.owner)?.name || 'No owner', wallChoices: StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch().map((wall) => ({ ...wall, selected: wall._id === unit.wall_id, disabled: !wall.active && wall._id !== unit.wall_id, choiceLabel: `${wall.name}${wall.active ? '' : ' (inactive)'}` })), heightNone: !unit.height, heightLow: unit.height === 'low', heightHigh: unit.height === 'high', statusAvailable: unit.availability_status === 'available', statusUnavailable: unit.availability_status === 'unavailable', statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status), metadataProtected: ['occupied', 'reserved'].includes(unit.availability_status), clearance: unit.availability_status === 'awaiting_clearance', assignable: unit.availability_status === 'available', canRequestRelease: !!assignment && !request && !move, activeAssignment: assignment && { ...assignment, assignedDate: date(assignment.assigned_at), exemption }, activeRequest: request && { ...request, requestedDate: date(request.requested_at), pauseTarget: request.request_status === 'waiting', pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume', canTogglePause: request.request_status === 'waiting' ? !ownerEligible : (request.request_status === 'paused_ineligible' && ownerEligible) }, pendingMove: move && { ...move, deadlineDate: date(move.deadline_at) }, messages: unit.owner ? Messages.find({ member: unit.owner, type: 'storage' }, { sort: { senddate: -1 }, limit: 20 }).fetch().map((message) => ({ ...message, sentDate: date(message.senddate) })) : [], history: StorageEvents.find({ entity_id: { $in: entityIds } }, { sort: { occurred_at: -1 }, limit: 50 }).fetch().map((event) => ({ ...event, date: date(event.occurred_at) })) };
   },
   memberOptions: () => Members.find({}, { sort: { name: 1 } }).fetch()
     .map((member) => ({ ...member, pickerLabel: storageMemberLabel(member) })),
@@ -240,7 +241,7 @@ Template.Storage.events({
   'click .refresh-storage'(e, i) { e.preventDefault(); i.refresh(); },
   'click .open-preview'(e, i) { const action = e.currentTarget.dataset.action; setError(i, ''); i.state.set('previewAction', action); i.state.set('preview', i.state.get('previews')?.[action]); i.state.set('selected', {}); i.state.set('rowOptions', {}); i.state.set('results', null); },
   'click .close-preview'(e, i) { e.preventDefault(); i.state.set('previewAction', ''); },
-  'change .select-suggestion, change .select-retry'(e, i) { i.state.set('selected', { ...(i.state.get('selected') || {}), [e.currentTarget.dataset.id]: e.currentTarget.checked }); },
+  'change .select-suggestion'(e, i) { i.state.set('selected', { ...(i.state.get('selected') || {}), [e.currentTarget.dataset.id]: e.currentTarget.checked }); },
   'change .requires-inspection'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), requires_inspection: e.currentTarget.checked } }); },
   'change .manual-contact-confirmed'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), manual_contact_confirmed: e.currentTarget.checked } }); },
   'input .manual-contact-reason'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), manual_contact_reason: e.currentTarget.value } }); },
@@ -251,25 +252,16 @@ Template.Storage.events({
     try {
       const fresh = await Meteor.callAsync('adminStorage.preview', { action });
       if (!sameSuggestionSet(original, fresh.rows)) { i.state.set('preview', fresh); setError(i, 'Suggestions changed. Review the refreshed preview and confirm again.', 'preview'); return; }
-      if (action === 'retry_notifications') {
-        const results = [];
-        for (const row of fresh.rows.filter(({ suggestion_id }) => selected[suggestion_id] !== false)) {
-          const intent = `notification.retry:${row.delivery}:${row.failed_channels.join(',')}`;
-          try { const value = await Meteor.callAsync('adminStorage.notifications.retry', { delivery_id: row.delivery, channels: row.failed_channels, command_id: stateCommand(i, intent) }); clearCommand(i, intent); results.push({ ...value, status: 'applied', statusLabel: 'Applied', label: row.member_name }); } catch (error) { results.push({ status: 'failed', statusLabel: 'Failed', label: row.member_name, reason: errorMessage(error) }); }
-        }
-        i.state.set('results', results);
-      } else {
-        const options = i.state.get('rowOptions') || {};
-        if (action === 'review_expired_moves' && fresh.rows.some(({ suggestion_id }) => selected[suggestion_id] !== false && !options[suggestion_id]?.resolution)) {
-          setError(i, 'Choose complete, extend, or cancel for every selected expired move.', 'preview'); return;
-        }
-        const confirmedRows = fresh.rows.filter(({ suggestion_id }) => selected[suggestion_id] !== false);
-        const selections = confirmedRows.map(({ suggestion_id }) => ({ suggestion_id, ...(options[suggestion_id] || {}) }));
-        const intent = `batch:${action}:${JSON.stringify(selections)}`;
-        const result = await Meteor.callAsync('adminStorage.confirm', { action, selections, command_id: stateCommand(i, intent) });
-        clearCommand(i, intent);
-        i.state.set('results', joinStorageResults(result.results, confirmedRows));
+      const options = i.state.get('rowOptions') || {};
+      if (action === 'review_expired_moves' && fresh.rows.some(({ suggestion_id }) => selected[suggestion_id] !== false && !options[suggestion_id]?.resolution)) {
+        setError(i, 'Choose complete, extend, or cancel for every selected expired move.', 'preview'); return;
       }
+      const confirmedRows = fresh.rows.filter(({ suggestion_id }) => selected[suggestion_id] !== false);
+      const selections = confirmedRows.map(({ suggestion_id }) => ({ suggestion_id, ...(options[suggestion_id] || {}) }));
+      const intent = `batch:${action}:${JSON.stringify(selections)}`;
+      const result = await Meteor.callAsync('adminStorage.confirm', { action, selections, command_id: stateCommand(i, intent) });
+      clearCommand(i, intent);
+      i.state.set('results', joinStorageResults(result.results, confirmedRows));
       await i.refresh();
     } catch (error) { setError(i, errorMessage(error), 'preview'); } finally { i.state.set('busy', false); }
   },

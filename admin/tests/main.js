@@ -9,12 +9,11 @@ import "./familyRules.tests";
 import "./revenueSeries.tests";
 import "./groupRules.tests";
 import "./storageRules.tests";
-import "./storageSchemas.tests";
+import "./storageMessages.tests";
 import "./storageMigration.tests";
 import "./storageService.tests";
 import "./storageServiceDb.tests";
 import "./storageIndexes.tests";
-import "./storageNotifications.tests";
 import "./storagePresentation.tests";
 
 describe("umsme", function () {

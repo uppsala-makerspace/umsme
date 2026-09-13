@@ -43,8 +43,8 @@ Warnings and their deadlines are not represented at all.
   requirements.
 - Prefer members without storage over members requesting a move.
 - Prevent duplicate or concurrent assignment of a unit.
-- Automatically email the paying member and, where possible, send an SMS after
-  a suggested assignment or move is confirmed.
+- Add the decision to the paying member's existing message inbox, send email
+  when an address exists, and use the existing app-push function.
 - Explain every proposed assignment and every skipped request.
 
 ### 3.2 Overdue assignments
@@ -322,65 +322,7 @@ Deadline expiry is advisory: it creates a suggested action but never changes
 the move automatically. Administrators may complete, extend, or cancel an
 expired move.
 
-### 5.8 `storageNotificationDeliveries`
-
-Tracks communication caused by suggested actions. Recipient values are
-snapshots so history remains accurate after profile changes.
-
-```js
-{
-  _id,
-  owner,
-  decision_type,    // assignment | move | warning | reminder | reclamation |
-                    // voluntary_release
-  decision_id,
-  recipient_email,
-  recipient_mobile,
-  render_status,     // rendered | missing_template | render_failed
-  render_error,      // present for a missing template/render failure
-  template_id,
-  sender_from,
-  reply_to,
-  rendered_subject,
-  rendered_email,
-  rendered_sms,
-  message_id,        // linked Messages._id after successful email
-  email: {
-    status,          // pending | sending | sent | failed | unavailable
-    last_attempt_at,
-    sent_at,
-    attempts,
-    lease_expires_at,
-    last_error
-  },
-  sms: {
-    status,          // pending | sending | sent | failed | unavailable
-    last_attempt_at,
-    sent_at,
-    attempts,
-    lease_expires_at,
-    last_error,
-    provider_id
-  },
-  created_at,
-  created_by,
-  updatedAt
-}
-```
-
-Render snapshot fields are immutable after creation. A missing template or
-rendering error is itself stored durably without invented sender, subject, or
-body values; both channels are then unavailable. Any email in `pending`,
-`sending`, or `sent` state must have a recipient, sender, rendered subject, and
-rendered body. SMS in those states similarly requires a recipient and rendered
-SMS body.
-
-The existing `Messages` collection remains the member-visible record of email
-content. Delivery records add per-channel status and retry behavior. A failed
-email or SMS does not roll back the administrative decision. Retrying delivery
-cannot repeat that decision.
-
-### 5.9 `storageEvents`
+### 5.8 `storageEvents`
 
 Immutable, cross-entity audit feed.
 
@@ -407,7 +349,7 @@ Administrators and board members can filter it by member, storage unit, or both;
 historical assignment and move records preserve those relationships after a
 unit changes owner.
 
-### 5.10 `storageActionExecutions`
+### 5.9 `storageActionExecutions`
 
 Durable per-row receipts make batch confirmation safe to retry after a network
 or process failure.
@@ -484,7 +426,7 @@ the server.
 waiting request
     -> administrator confirms suggested assignment
     -> unit occupied, assignment created, request fulfilled
-    -> email and optional SMS attempted
+    -> existing Messages record, app push, and email when available
 ```
 
 There is no acceptance step for a normal new assignment.
@@ -525,8 +467,8 @@ An active exemption keeps the assignment visible but removes it from warning
 and reclamation suggestions.
 
 The warning clock starts when the warning batch is confirmed, but a passed
-deadline is not sufficient evidence for reclamation. At least one warning
-channel must have status `sent`. If no channel succeeded, the reclamation row
+deadline is not sufficient evidence for reclamation. The warning must have a
+persistent member message. If it does not, the reclamation row
 requires an explicit manual-contact confirmation and a reason. The server
 rechecks this evidence when the batch is confirmed and records the evidence in
 the assignment-ended event.
@@ -537,7 +479,7 @@ the assignment-ended event.
 release request
     -> administrator confirms suggested release
 assignment ended; unit awaiting_clearance
-    -> email and optional SMS attempted
+    -> existing Messages record, app push, and email when available
     -> administrator confirms physical clearance
 unit available
 ```
@@ -559,19 +501,19 @@ If the old unit requires inspection, move confirmation puts it in
 After the deadline, the move appears for administrator review. Nothing changes
 automatically. Cancellation frees the destination and returns the original
 request to the queue by default. An administrator may instead cancel the
-request. Extensions and cancellations notify the payer only when performed as
-part of a suggested-action workflow; direct manual actions do not notify.
+request. Extensions and cancellations are manual decisions and do not send a
+message.
 
 ## 8. Communication policy
 
-Suggested member-facing decisions create an email and attempt an SMS when the
-paying member has a valid mobile number and an SMS provider is configured.
+Suggested member-facing decisions use the existing `Messages` collection and
+app-push function. They also send email when the paying member has an address.
 Storage email is sent as `Uppsala Makerspace Hyllplats
 <hyllplats@uppsalamakerspace.se>`. SMTP credentials are deployment secrets and
 must not be stored in this repository.
 
-Generated subjects, email bodies, and SMS messages contain Swedish first and
-English second. The two language blocks are separated by dashes; dates are
+Generated subjects and message bodies contain Swedish first and English
+second. The two language blocks are separated by dashes; dates are
 formatted in the language of their block.
 
 Automatic communication applies to confirmed suggested actions for:
@@ -583,8 +525,8 @@ Automatic communication applies to confirmed suggested actions for:
 - reclamation; and
 - voluntary release acknowledgement.
 
-The preview indicates `Email + SMS`, `Email only`, or missing/invalid contact
-information. Email and SMS have independent delivery states and retries.
+The preview indicates `Email + app message` or `App message only`. Storage has
+no separate delivery collection, background worker, or retry interface.
 
 Direct manual actions do not send notifications because the administrator is
 expected to coordinate with the member. Their confirmation UI must state
@@ -604,12 +546,11 @@ The existing admin `/storage` page gains a panel with live counts:
 | Process voluntary releases | Active release requests |
 | Review expired moves | Pending moves beyond their 14-day deadline |
 | Confirm physical clearances | Units in `awaiting_clearance` |
-| Retry notifications | Failed email or SMS channels |
 
 Each action follows the same interaction:
 
 1. Calculate suggestions without changing state.
-2. Preview members, units, reasons, deadlines, and delivery channels.
+2. Preview members, units, reasons, deadlines, and message handling.
 3. Allow individual rows to be excluded.
 4. Require explicit confirmation.
 5. Revalidate each row server-side and execute it safely.
@@ -639,13 +580,12 @@ Administrators and board members may:
 - end or correct an assignment;
 - create or revoke an exemption;
 - confirm physical clearance;
-- edit inventory metadata and availability; and
-- retry a failed delivery.
+- edit inventory metadata and availability.
 
 Bypassing membership or queue eligibility requires a reason and stronger
 confirmation. Cancelling another person's request or changing its queue date
 also requires a reason. All manual operations are audited. They do not send
-automatic email or SMS.
+automatic messages.
 
 Referenced units cannot be deleted. Editing the name, height, wall, column, or
 row of an occupied or reserved unit requires an explicit warning
@@ -752,7 +692,6 @@ Likely locations:
 - `common/collections/storageWarnings.js`
 - `common/collections/storageExemptions.js`
 - `common/collections/storageMoves.js`
-- `common/collections/storageNotificationDeliveries.js`
 - `common/collections/storageEvents.js`
 
 ### Phase 2: Migration and validation
@@ -784,11 +723,8 @@ Likely locations:
 - Define email templates for assignment, move, warning, reminder, reclamation,
   and voluntary release.
 - Reuse `Messages` for member-visible email history.
-- Add delivery records, idempotency keys, per-channel retries, and error
-  reporting.
-- Add an SMS adapter interface and configuration. A missing provider degrades to
-  email-only without blocking decisions.
-- Ensure a failed delivery cannot roll back or repeat its decision.
+- Use the existing `Messages`, email, and app-push flow without a separate
+  storage delivery ledger.
 
 ### Phase 5: Administrator UI
 
@@ -797,7 +733,7 @@ Likely locations:
 - Add the suggested-actions panel and preview/confirmation dialogs.
 - Preserve the wall/grid view using first-class walls and unit coordinates.
 - Add unit editing, filters, bulk height classification, exemptions, histories,
-  manual operations, and failed-delivery retry.
+  and manual operations.
 - Make notification behavior explicit in both suggested and manual flows.
 
 ### Phase 6: Member UI
@@ -840,7 +776,7 @@ Automated tests must cover:
 - move reservation, member/admin completion, extension and cancellation without notification, and
   inspection exceptions;
 - suggested-action versus manual-action notification policy;
-- independent email/SMS failure and retry behavior;
+- existing message, email, and app-push integration;
 - authorization of every method; and
 - idempotent migration, legacy anomalies, and reruns.
 
@@ -851,13 +787,12 @@ of production data and exercise all admin previews without delivery enabled.
 
 The product policy is settled. These technical choices remain for the build:
 
-- SMS provider and credentials/configuration format
-- final email and SMS wording and localization
+- final email and app-message wording and localization
 - Gmail SMTP submission versus Google Workspace SMTP relay for
   `hyllplats@uppsalamakerspace.se`
 - whether the production MongoDB deployment supports multi-document
   transactions
-- exact batch size and delivery-rate limits
-- how long completed delivery and audit records are retained
+- exact batch size
+- how long member messages, action receipts, and audit records are retained
 
 None changes the lifecycle or allocation policy in this document.

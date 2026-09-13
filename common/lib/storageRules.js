@@ -145,34 +145,6 @@ export const storageLayoutErrors = ({ walls = [], units = [] } = {}) => {
   return errors;
 };
 
-const hasText = (value) => typeof value === 'string' && value.trim().length > 0;
-
-/** Conditional delivery invariants that SimpleSchema cannot express. */
-export const storageDeliveryStateErrors = (delivery) => {
-  const errors = [];
-  const emailNeedsContent = ['pending', 'sending', 'sent'].includes(delivery?.email?.status);
-  const smsNeedsContent = ['pending', 'sending', 'sent'].includes(delivery?.sms?.status);
-  if (delivery?.render_status === 'rendered') {
-    if (!hasText(delivery.sender_from)) errors.push('sender_required');
-    if (!hasText(delivery.rendered_subject)) errors.push('subject_required');
-    if (!hasText(delivery.rendered_email)) errors.push('email_body_required');
-  } else if (!hasText(delivery?.render_error)) {
-    errors.push('render_error_required');
-  }
-  if (emailNeedsContent) {
-    if (delivery.render_status !== 'rendered') errors.push('email_render_required');
-    if (!hasText(delivery.recipient_email)) errors.push('email_recipient_required');
-    if (!hasText(delivery.sender_from)) errors.push('email_sender_required');
-    if (!hasText(delivery.rendered_subject)) errors.push('email_subject_required');
-    if (!hasText(delivery.rendered_email)) errors.push('email_content_required');
-  }
-  if (smsNeedsContent) {
-    if (!hasText(delivery.recipient_mobile)) errors.push('sms_recipient_required');
-    if (!hasText(delivery.rendered_sms)) errors.push('sms_content_required');
-  }
-  return [...new Set(errors)];
-};
-
 const activeAssignment = (assignment) => !assignment.ended_at;
 
 /** Return cross-document invariant violations without mutating state. */

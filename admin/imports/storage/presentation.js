@@ -6,7 +6,6 @@ export const STORAGE_ACTIONS = [
   { id: 'release', label: 'Process releases', help: 'Handle release requests.' },
   { id: 'review_expired_moves', label: 'Review expired moves', help: 'Resolve expired moves.' },
   { id: 'confirm_clearance', label: 'Confirm clearances', help: 'Release cleared units.' },
-  { id: 'retry_notifications', label: 'Retry notifications', help: 'Retry failed messages.' },
 ];
 
 export const storageStatusLabel = (status) => ({
@@ -26,7 +25,6 @@ const actionReasonLabels = {
   voluntary_release_requested: 'Member requested release',
   move_deadline_passed: 'The 14-day move deadline passed',
   awaiting_physical_clearance: 'Unit is awaiting clearance',
-  notification_delivery_failed: 'Notification delivery failed',
 };
 
 export const storageActionReasonLabel = (reason) =>
@@ -134,11 +132,6 @@ export const groupStorageWalls = (units, walls = []) => {
       return { ...wall, units: unitsForWall, columns };
     });
 };
-
-export const failedChannels = (delivery) => [
-  ...(['missing_template', 'render_failed'].includes(delivery?.render_status) ? ['render'] : []),
-  ...['email', 'sms'].filter((channel) => delivery?.[channel]?.status === 'failed'),
-];
 
 const readinessReasonLabels = {
   migration_not_applied: 'The storage migration has not been applied.',
