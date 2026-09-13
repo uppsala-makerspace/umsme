@@ -109,8 +109,8 @@ export default function StoragePage() {
     { request_id: requestId },
     `cancel:${requestId}`,
   );
-  // Move completion is idempotent by move and actor on the server.
-  const confirmMove = (moveId) => mutate("storage.member.confirmMove", { move_id: moveId });
+  // Offer completion is idempotent by offer and actor on the server.
+  const confirmOffer = (offerId) => mutate("storage.member.confirmOffer", { offer_id: offerId });
 
   return (
     <Layout>
@@ -122,7 +122,7 @@ export default function StoragePage() {
         onRetry={() => fetchState({ showLoader: true }).catch(() => {})}
         onUpsertRequest={upsertRequest}
         onCancelRequest={cancelRequest}
-        onConfirmMove={confirmMove}
+        onConfirmOffer={confirmOffer}
       />
     </Layout>
   );

@@ -21,8 +21,8 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
     request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] },
   }));
   const unit = await StorageUnits.findOneAsync({ owner: owner._id, availability_status: 'occupied' });
-  const move = await StorageOffers.findOneAsync({ owner: owner._id });
-  const moveDestination = move ? await StorageUnits.findOneAsync(move.to_unit) : null;
+  const offer = await StorageOffers.findOneAsync({ owner: owner._id });
+  const offerDestination = offer ? await StorageUnits.findOneAsync(offer.to_unit) : null;
   const warning = unit?.warning;
   const awaitingClearanceUnit = unit ? null : await StorageUnits.findOneAsync({
     owner: owner._id, availability_status: 'awaiting_clearance',
@@ -33,17 +33,13 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
     family_read_only: familyDependent,
     has_active_lab_membership: hasActiveLabMembershipAt(owner, now),
     request,
-    assignment: unit ? {
-      _id: unit._id,
-      assigned_at: unit.assigned_at,
-      unit: publicUnit(unit),
-    } : null,
+    unit: unit ? { ...publicUnit(unit), assigned_at: unit.assigned_at } : null,
     awaiting_clearance: publicUnit(awaitingClearanceUnit),
-    move: move ? {
-      _id: move._id,
-      deadline_at: move.deadline_at,
-      requires_inspection: move.requires_inspection,
-      destination: publicUnit(moveDestination),
+    offer: offer ? {
+      _id: offer._id,
+      deadline_at: offer.deadline_at,
+      requires_inspection: offer.requires_inspection,
+      destination: publicUnit(offerDestination),
     } : null,
     warning: warning ? {
       _id: warning.id,

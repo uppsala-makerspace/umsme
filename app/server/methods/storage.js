@@ -10,7 +10,7 @@ import {
 import { storageMemberState } from "/imports/common/server/storage/memberState";
 import {
   cancelMemberStorageRequest,
-  confirmMemberStorageMove,
+  confirmMemberStorageOffer,
   upsertMemberStorageRequest,
 } from "/imports/common/server/storage/memberCommands";
 
@@ -43,9 +43,10 @@ Meteor.methods({
     return { success: true };
   },
 
-  async 'storage.member.confirmMove'({ move_id }) {
+  async 'storage.member.confirmOffer'({ offer_id }) {
+    check(offer_id, String);
     const { owner } = await requirePayingStorageMember(this.userId);
-    return confirmMemberStorageMove({ owner, moveId: move_id, actor: this.userId });
+    return confirmMemberStorageOffer({ owner, offerId: offer_id, actor: this.userId });
   },
 
   /**

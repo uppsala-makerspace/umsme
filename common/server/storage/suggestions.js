@@ -16,7 +16,7 @@ import { storageAllocationReadiness } from './readiness';
 import { storageMessageRecordId } from '../storageMessages/service';
 
 export const STORAGE_SUGGESTION_ACTIONS = [
-  'allocate', 'warn', 'remind', 'reclaim', 'release', 'review_expired_moves', 'confirm_clearance',
+  'allocate', 'warn', 'remind', 'reclaim', 'release', 'review_expired_offers', 'confirm_clearance',
 ];
 
 const iso = (value) => value instanceof Date ? value.toISOString() : value;
@@ -49,9 +49,6 @@ const row = ({ action, owner, unit, sourceUnit, request, offer, reason, phase, w
     unit: unit?._id, unit_name: unit?.name,
     source_unit: sourceUnit?._id, request: request?._id,
     warning: warning?.id, offer: offer?._id,
-    // Temporary aliases for the current admin client.
-    assignment: sourceUnit?._id || (unit?.availability_status === 'occupied' ? unit._id : undefined),
-    move: offer?._id,
     ...(action === 'reclaim' ? {
       warning_delivered: Boolean(warningDelivery), manual_contact_required: !warningDelivery,
     } : {}),
@@ -109,7 +106,7 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
       const owner = memberById.get(unit.owner);
       if (hasActiveLabMembershipAt(owner, now) || unit.warning) continue;
       if (isStorageExemptionActive(unit.exemption, now)) {
-        skipped.push({ assignment: unit._id, owner: unit.owner, reason_code: 'active_exemption' });
+        skipped.push({ unit: unit._id, owner: unit.owner, reason_code: 'active_exemption' });
         continue;
       }
       rows.push(row({ action, owner, unit, reason: 'lab_membership_inactive_unwarned' }));
@@ -140,7 +137,7 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
       if (!unit || (request.source_unit && request.source_unit !== unit._id)) continue;
       rows.push(row({ action, owner: memberById.get(request.owner), unit, request, reason: 'voluntary_release_requested' }));
     }
-  } else if (action === 'review_expired_moves') {
+  } else if (action === 'review_expired_offers') {
     for (const offer of state.offers) {
       if (!isStorageOfferReviewDue(offer, now)) continue;
       rows.push(row({

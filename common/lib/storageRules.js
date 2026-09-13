@@ -85,7 +85,7 @@ export const storageWarningDeadline = (warnedAt) =>
 export const storageReminderAt = (warnedAt) =>
   new Date(new Date(warnedAt).getTime() + STORAGE_REMINDER_DAYS * DAY_MS);
 
-export const storageMoveDeadline = (reservedAt) =>
+export const storageOfferDeadline = (reservedAt) =>
   new Date(new Date(reservedAt).getTime() + STORAGE_MOVE_DAYS * DAY_MS);
 
 export const isStorageReminderEligible = (

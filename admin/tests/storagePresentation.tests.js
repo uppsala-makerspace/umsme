@@ -206,8 +206,8 @@ describe('storage admin presentation', function () {
   it('presents event rows with related member and storage-unit names', function () {
     const rows = storageEventRows({
       events: [
-        { _id: 'older', entity_type: 'storageUnit', entity_id: 'u1', event_type: 'assignment_created', actor_type: 'administrator', actor: 'admin-user', member: 'm1', unit: 'u1', occurred_at: new Date('2026-09-10') },
-        { _id: 'newer', entity_type: 'storageOffer', entity_id: 'mv1', event_type: 'move_reserved', actor_type: 'member', actor: 'member-user', member: 'm1', unit: 'u2', related_unit: 'u1', occurred_at: new Date('2026-09-11') },
+        { _id: 'older', entity_type: 'storageUnit', entity_id: 'u1', event_type: 'unit_assigned', actor_type: 'administrator', actor: 'admin-user', member: 'm1', unit: 'u1', occurred_at: new Date('2026-09-10') },
+        { _id: 'newer', entity_type: 'storageOffer', entity_id: 'offer1', event_type: 'offer_created', actor_type: 'member', actor: 'member-user', member: 'm1', unit: 'u2', related_unit: 'u1', occurred_at: new Date('2026-09-11') },
       ],
       members: [
         { _id: 'm1', name: 'Ada Lovelace', email: 'ada@example.com' },
@@ -222,7 +222,7 @@ describe('storage admin presentation', function () {
     assert.deepStrictEqual(rows.map(({ _id }) => _id), ['newer', 'older']);
     assert.strictEqual(rows[0].memberLabel, 'Ada Lovelace');
     assert.strictEqual(rows[0].unitLabel, '1001, 2001');
-    assert.strictEqual(rows[0].eventLabel, 'Move reserved');
+    assert.strictEqual(rows[0].eventLabel, 'Offer created');
     assert.strictEqual(rows[0].actorLabel, 'Member · Ada Lovelace');
     assert.strictEqual(rows[1].actorLabel, 'Administrator · Admin User');
   });

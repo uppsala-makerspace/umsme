@@ -4,7 +4,7 @@ const eventLabel = (value) => String(value || 'unknown event')
 
 const readableDetails = (details, members, units) => {
   if (!details) return '';
-  const hidden = new Set(['owner', 'unit', 'from_unit', 'to_unit', 'assignment', 'new_assignment', 'request', 'warning', 'move', 'message_id']);
+  const hidden = new Set(['owner', 'unit', 'from_unit', 'to_unit', 'request', 'warning', 'offer', 'message_id']);
   const memberById = indexById(members);
   const unitById = indexById(units);
   return Object.entries(details)

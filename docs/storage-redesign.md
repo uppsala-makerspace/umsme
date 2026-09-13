@@ -147,7 +147,7 @@ One document per physical storage unit.
   availability_status, // see states below
   assigned_at,
   assigned_by,
-  assignment_request,
+  source_request,
   warning: {            // optional current warning cycle
     id,
     warned_at,

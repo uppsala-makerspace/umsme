@@ -1625,7 +1625,7 @@ export const models = {
     },
     assigned_at: { label: "Assigned", type: Date, optional: true },
     assigned_by: { label: "Assigned by", type: String, max: 100, optional: true },
-    assignment_request: { label: "Assignment request", type: String, max: 100, optional: true },
+    source_request: { label: "Source request", type: String, max: 100, optional: true },
     warning: { label: "Warning", type: Object, optional: true },
     "warning.id": { label: "Warning id", type: String, max: 100 },
     "warning.warned_at": { label: "Warned", type: Date },

@@ -5,7 +5,7 @@ import {
   StorageWalls, StorageUnits, StorageRequests, StorageOffers, StorageEvents,
 } from '/imports/common/collections/storage';
 import { previewStorageSuggestions } from '/imports/common/server/storage/suggestions';
-import { confirmStorageSuggestions, completeStorageMove } from '/imports/common/server/storage/commands';
+import { confirmStorageSuggestions, completeStorageOffer } from '/imports/common/server/storage/commands';
 import { reconcileStorageState } from '/imports/common/server/storage/reconciliation';
 import {
   assignStorageUnitManual, createStorageExemptionManual, revokeStorageExemptionManual,
@@ -94,7 +94,7 @@ describe('five-collection storage database workflow', function () {
     const stored = await StorageUnits.findOneAsync(unitId);
     assert.strictEqual(stored.owner, ownerId);
     assert.strictEqual(stored.availability_status, 'occupied');
-    assert.strictEqual(stored.assignment_request, requestId);
+    assert.strictEqual(stored.source_request, requestId);
     assert(stored.assigned_at instanceof Date);
     assert.strictEqual(await Messages.find({ member: ownerId, type: 'storage' }).countAsync(), 1);
   });
@@ -140,11 +140,11 @@ describe('five-collection storage database workflow', function () {
     });
     const offerId = reservation.results[0].decision_id;
     assert(await StorageOffers.findOneAsync(offerId));
-    await completeStorageMove({ moveId: offerId, actor: ownerId, actorType: 'member' });
+    await completeStorageOffer({ offerId, actor: ownerId, actorType: 'member' });
     assert.strictEqual(await StorageOffers.findOneAsync(offerId), undefined);
     assert.strictEqual((await StorageUnits.findOneAsync(destinationId)).availability_status, 'occupied');
     assert.strictEqual((await StorageUnits.findOneAsync(sourceId)).availability_status, 'available');
-    assert(await StorageEvents.findOneAsync({ entity_id: offerId, event_type: 'move_completed' }));
+    assert(await StorageEvents.findOneAsync({ entity_id: offerId, event_type: 'offer_completed' }));
   });
 
   it('stores and removes an administrative exemption on the occupied unit', async function () {
@@ -156,10 +156,10 @@ describe('five-collection storage database workflow', function () {
       unitId, ownerId, actor: `${prefix}admin`, commandId: 'assign', now: new Date(),
     });
     assert.strictEqual(await createStorageExemptionManual({
-      assignmentId: unitId, actor: `${prefix}admin`, commandId: 'exempt', reason: 'Board decision', now: new Date(),
+      unitId, actor: `${prefix}admin`, commandId: 'exempt', reason: 'Board decision', now: new Date(),
     }), unitId);
     assert.strictEqual((await StorageUnits.findOneAsync(unitId)).exemption.reason, 'Board decision');
-    await revokeStorageExemptionManual({ exemptionId: unitId, actor: `${prefix}admin`, commandId: 'revoke' });
+    await revokeStorageExemptionManual({ unitId, actor: `${prefix}admin`, commandId: 'revoke' });
     assert.strictEqual((await StorageUnits.findOneAsync(unitId)).exemption, undefined);
   });
 

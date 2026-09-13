@@ -390,7 +390,7 @@ if (process.env.SEED_TEST_DATA === 'true') {
       createdAt: now,
       updatedAt: now,
     });
-    await StorageUnits.updateAsync(moveSourceId, { $set: { assignment_request: moveRequestId } });
+    await StorageUnits.updateAsync(moveSourceId, { $set: { source_request: moveRequestId } });
     await StorageRequests.updateAsync(moveRequestId, { $set: { source_unit: moveSourceId } });
     await StorageOffers.insertAsync({
       owner: moveOwnerId,

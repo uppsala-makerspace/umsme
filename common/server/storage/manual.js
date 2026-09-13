@@ -6,7 +6,7 @@ import {
 import { hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
 import { STORAGE_SCHEMAS, validateStorageDocument } from './db';
 import { appendStorageEvent } from './events';
-import { completeStorageMove } from './commands';
+import { completeStorageOffer } from './commands';
 import { reconcileStorageState } from './reconciliation';
 import { storageOwnerForMember } from './access';
 import { storageOperationId } from './ids';
@@ -175,7 +175,7 @@ export const bulkSetStorageHeightManual = async ({ unitIds, height, actor, comma
 };
 
 export const assignStorageUnitManual = async ({ unitId, ownerId, actor, commandId, override = false, reason, now = new Date() }) => {
-  const id = operationId('assignment.create', actor, commandId, unitId);
+  const id = operationId('unit.assign', actor, commandId, unitId);
   if (await priorOperation(id)) return unitId;
   await reconcileStorageState({ now });
   const selectedOwner = await Members.findOneAsync(ownerId);
@@ -198,7 +198,7 @@ export const assignStorageUnitManual = async ({ unitId, ownerId, actor, commandI
     { _id: unitId, availability_status: 'available', owner: { $exists: false }, updatedAt: unit.updatedAt },
     { $set: {
       availability_status: 'occupied', owner: owner._id, assigned_at: now, assigned_by: actor,
-      ...(request ? { assignment_request: request._id } : {}), updatedAt: now,
+      ...(request ? { source_request: request._id } : {}), updatedAt: now,
     } },
   );
   if (!changed) throw new Meteor.Error('storage-conflict', 'The unit changed. Reload and try again.');
@@ -206,18 +206,18 @@ export const assignStorageUnitManual = async ({ unitId, ownerId, actor, commandI
     $set: { request_status: 'fulfilled', fulfilled_at: now, updatedAt: now },
   });
   await event(id, {
-    entityType: 'storageUnit', entityId: unitId, eventType: 'manual_assignment_created',
+    entityType: 'storageUnit', entityId: unitId, eventType: 'manual_unit_assigned',
     actor, member: owner._id, unit: unitId, occurredAt: now, reason: explanation,
     details: { request: request?._id, eligibility_override: override },
   });
   return unitId;
 };
 
-export const endStorageAssignmentManual = async ({ assignmentId, actor, reason, commandId, now = new Date() }) => {
+export const markStorageUnitReturnedManual = async ({ unitId, actor, reason, commandId, now = new Date() }) => {
   const explanation = requiredReason(reason);
-  const id = operationId('assignment.end', actor, commandId, assignmentId);
+  const id = operationId('unit.return', actor, commandId, unitId);
   if (await priorOperation(id)) return true;
-  const unit = await StorageUnits.findOneAsync(assignmentId);
+  const unit = await StorageUnits.findOneAsync(unitId);
   if (!unit || unit.availability_status !== 'occupied' || !unit.owner) {
     throw new Meteor.Error('bad-state', 'Active assignment not found');
   }
@@ -227,18 +227,18 @@ export const endStorageAssignmentManual = async ({ assignmentId, actor, reason, 
   );
   if (!changed) throw new Meteor.Error('storage-conflict', 'The unit changed. Reload and try again.');
   await event(id, {
-    entityType: 'storageUnit', entityId: unit._id, eventType: 'manual_assignment_ended',
+    entityType: 'storageUnit', entityId: unit._id, eventType: 'manual_unit_marked_returned',
     actor, member: unit.owner, unit: unit._id, occurredAt: now, reason: explanation,
   });
   return true;
 };
 
-export const createStorageExemptionManual = async ({ assignmentId, actor, reason, exemptUntil, commandId, now = new Date() }) => {
+export const createStorageExemptionManual = async ({ unitId, actor, reason, exemptUntil, commandId, now = new Date() }) => {
   const explanation = requiredReason(reason);
-  const id = operationId('exemption.create', actor, commandId, assignmentId);
-  if (await priorOperation(id)) return assignmentId;
+  const id = operationId('exemption.create', actor, commandId, unitId);
+  if (await priorOperation(id)) return unitId;
   await reconcileStorageState({ now });
-  const unit = await StorageUnits.findOneAsync(assignmentId);
+  const unit = await StorageUnits.findOneAsync(unitId);
   if (!unit || unit.availability_status !== 'occupied') throw new Meteor.Error('bad-state', 'Active assignment not found');
   if (unit.exemption) throw new Meteor.Error('bad-state', 'An active exemption already exists');
   const until = exemptUntil ? new Date(exemptUntil) : undefined;
@@ -259,10 +259,10 @@ export const createStorageExemptionManual = async ({ assignmentId, actor, reason
   return unit._id;
 };
 
-export const revokeStorageExemptionManual = async ({ exemptionId, actor, commandId, now = new Date() }) => {
-  const id = operationId('exemption.revoke', actor, commandId, exemptionId);
+export const revokeStorageExemptionManual = async ({ unitId, actor, commandId, now = new Date() }) => {
+  const id = operationId('exemption.revoke', actor, commandId, unitId);
   if (await priorOperation(id)) return true;
-  const unit = await StorageUnits.findOneAsync(exemptionId);
+  const unit = await StorageUnits.findOneAsync(unitId);
   if (!unit?.exemption) throw new Meteor.Error('bad-state', 'Active exemption not found');
   const changed = await StorageUnits.updateAsync(
     { _id: unit._id, 'exemption.created_at': unit.exemption.created_at, updatedAt: unit.updatedAt },
@@ -276,8 +276,8 @@ export const revokeStorageExemptionManual = async ({ exemptionId, actor, command
   return true;
 };
 
-export const completeStorageMoveManual = ({ moveId, actor }) =>
-  completeStorageMove({ moveId, actor, actorType: 'administrator' });
+export const completeStorageOfferManual = ({ offerId, actor }) =>
+  completeStorageOffer({ offerId, actor, actorType: 'administrator' });
 
 export const upsertStorageRequestManual = async ({
   ownerId, requestId, requestType, preference, requestedAt, actor, reason, commandId, now = new Date(),
@@ -379,30 +379,30 @@ export const setStorageRequestPausedManual = async ({ requestId, paused, actor, 
   return true;
 };
 
-export const extendStorageMoveManual = async ({ moveId, extendTo, actor, reason, commandId, now = new Date() }) => {
+export const extendStorageOfferManual = async ({ offerId, extendTo, actor, reason, commandId, now = new Date() }) => {
   const explanation = requiredReason(reason);
   const deadline = new Date(extendTo);
   if (Number.isNaN(deadline.getTime()) || deadline <= now) throw new Meteor.Error('bad-date', 'Deadline must be in the future');
-  const id = operationId('offer.extend', actor, commandId, moveId);
+  const id = operationId('offer.extend', actor, commandId, offerId);
   if (await priorOperation(id)) return true;
-  const offer = await StorageOffers.findOneAsync(moveId);
+  const offer = await StorageOffers.findOneAsync(offerId);
   if (!offer) throw new Meteor.Error('bad-state', 'Pending move not found');
-  const changed = await StorageOffers.updateAsync({ _id: moveId, updatedAt: offer.updatedAt },
+  const changed = await StorageOffers.updateAsync({ _id: offerId, updatedAt: offer.updatedAt },
     { $set: { deadline_at: deadline, updatedAt: now } });
   if (!changed) throw new Meteor.Error('storage-conflict', 'The offer changed. Reload and try again.');
   await event(id, {
-    entityType: 'storageOffer', entityId: moveId, eventType: 'manual_move_extended', actor,
+    entityType: 'storageOffer', entityId: offerId, eventType: 'manual_offer_extended', actor,
     member: offer.owner, unit: offer.to_unit, relatedUnit: offer.from_unit,
     occurredAt: now, reason: explanation, details: { deadline_at: deadline },
   });
   return true;
 };
 
-export const cancelStorageMoveManual = async ({ moveId, actor, reason, cancelRequest = false, commandId, now = new Date() }) => {
+export const cancelStorageOfferManual = async ({ offerId, actor, reason, cancelRequest = false, commandId, now = new Date() }) => {
   const explanation = requiredReason(reason);
-  const id = operationId('offer.cancel', actor, commandId, moveId);
+  const id = operationId('offer.cancel', actor, commandId, offerId);
   if (await priorOperation(id)) return true;
-  const offer = await StorageOffers.findOneAsync(moveId);
+  const offer = await StorageOffers.findOneAsync(offerId);
   if (!offer) throw new Meteor.Error('bad-state', 'Pending move not found');
   const [unit, request] = await Promise.all([
     StorageUnits.findOneAsync(offer.to_unit), StorageRequests.findOneAsync(offer.request),
@@ -418,7 +418,7 @@ export const cancelStorageMoveManual = async ({ moveId, actor, reason, cancelReq
     : { $set: { request_status: 'waiting', updatedAt: now }, $unset: { cancelled_at: '', fulfilled_at: '' } });
   await StorageOffers.removeAsync(offer._id);
   await event(id, {
-    entityType: 'storageOffer', entityId: moveId, eventType: 'manual_move_cancelled', actor,
+    entityType: 'storageOffer', entityId: offerId, eventType: 'manual_offer_cancelled', actor,
     member: offer.owner, unit: offer.to_unit, relatedUnit: offer.from_unit,
     occurredAt: now, reason: explanation, details: { request_returned_to_queue: !cancelRequest },
   });
@@ -434,7 +434,7 @@ export const confirmStorageClearanceManual = async ({ unitId, actor, commandId, 
   }
   const changed = await StorageUnits.updateAsync({ _id: unitId, availability_status: 'awaiting_clearance', updatedAt: unit.updatedAt }, {
     $set: { availability_status: 'available', updatedAt: now },
-    $unset: { owner: '', assigned_at: '', assigned_by: '', assignment_request: '', warning: '', exemption: '' },
+    $unset: { owner: '', assigned_at: '', assigned_by: '', source_request: '', warning: '', exemption: '' },
   });
   if (!changed) throw new Meteor.Error('storage-conflict', 'The unit changed. Reload and try again.');
   await event(id, {

@@ -232,7 +232,7 @@ export const buildLegacyStorageMigrationPlan = ({
       id: `assignment:${owner}`,
       entityType: 'storageUnit',
       entityId: occupancy.unit,
-      eventType: 'legacy_assignment_migrated',
+      eventType: 'legacy_occupancy_migrated',
       member: owner,
       unit: occupancy.unit,
       cutoff: at,

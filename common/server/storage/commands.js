@@ -6,7 +6,7 @@ import {
 } from '/imports/common/collections/storage';
 import {
   hasActiveLabMembershipAt, isStorageExemptionActive,
-  storageMoveDeadline, storageWarningDeadline,
+  storageOfferDeadline, storageWarningDeadline,
 } from '/imports/common/lib/storageRules';
 import { runStorageAtomic } from './atomic';
 import { STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument } from './db';
@@ -39,7 +39,7 @@ const recordsFor = async (row) => {
     row.unit ? StorageUnits.findOneAsync(row.unit) : null,
     row.source_unit ? StorageUnits.findOneAsync(row.source_unit) : null,
     row.request ? StorageRequests.findOneAsync(row.request) : null,
-    (row.offer || row.move) ? StorageOffers.findOneAsync(row.offer || row.move) : null,
+    row.offer ? StorageOffers.findOneAsync(row.offer) : null,
   ]);
   return { owner, unit, sourceUnit, request, offer };
 };
@@ -53,7 +53,7 @@ const applyAssignment = async ({ owner, unit, request }, actor, now, session, ev
     { _id: unit._id, availability_status: 'available', owner: { $exists: false }, updatedAt: unit.updatedAt },
     { $set: {
       availability_status: 'occupied', owner: owner._id, assigned_at: now,
-      assigned_by: actor, assignment_request: request._id, updatedAt: now,
+      assigned_by: actor, source_request: request._id, updatedAt: now,
     } }, { session });
   await casStorageUpdate(StorageRequests,
     { _id: request._id, request_status: 'waiting', updatedAt: request.updatedAt },
@@ -63,7 +63,7 @@ const applyAssignment = async ({ owner, unit, request }, actor, now, session, ev
     context: { owner_name: owner.name, unit_name: unit.name },
   });
   await storageEvent({
-    id: eventId, entityType: 'storageUnit', entityId: unit._id, eventType: 'assignment_created',
+    id: eventId, entityType: 'storageUnit', entityId: unit._id, eventType: 'unit_assigned',
     actorType: 'administrator', actor, member: owner._id, unit: unit._id, occurredAt: now,
     details: { request: request._id, message_id: messageId },
   }, session);
@@ -75,7 +75,7 @@ const reserveMove = async ({ owner, unit, sourceUnit, request }, selection, acto
   ensure(sourceUnit.availability_status === 'occupied' && sourceUnit.owner === owner._id, 'Move source changed');
   ensure(hasActiveLabMembershipAt(owner, now), 'Lab membership is no longer active');
   const offerId = `${eventId}:offer`;
-  const deadline = storageMoveDeadline(now);
+  const deadline = storageOfferDeadline(now);
   await casStorageUpdate(StorageUnits,
     { _id: unit._id, availability_status: 'available', owner: { $exists: false }, updatedAt: unit.updatedAt },
     { $set: { availability_status: 'reserved', owner: owner._id, updatedAt: now } }, { session });
@@ -93,7 +93,7 @@ const reserveMove = async ({ owner, unit, sourceUnit, request }, selection, acto
     context: { owner_name: owner.name, unit_name: unit.name, from_unit: sourceUnit._id, deadline_at: deadline },
   });
   await storageEvent({
-    id: eventId, entityType: 'storageOffer', entityId: offerId, eventType: 'move_reserved',
+    id: eventId, entityType: 'storageOffer', entityId: offerId, eventType: 'offer_created',
     actorType: 'administrator', actor, member: owner._id, unit: unit._id,
     relatedUnit: sourceUnit._id, occurredAt: now,
     details: { request: request._id, requires_inspection: selection.requires_inspection === true, message_id: messageId },
@@ -179,7 +179,7 @@ const endForClearance = async ({ owner, unit, request }, selection, actor, now, 
     context: { owner_name: owner.name, unit_name: unit.name },
   });
   await storageEvent({
-    id: eventId, entityType: 'storageUnit', entityId: unit._id, eventType: 'assignment_ended',
+    id: eventId, entityType: 'storageUnit', entityId: unit._id, eventType: 'unit_marked_returned',
     actorType: 'administrator', actor, member: owner._id, unit: unit._id,
     occurredAt: now, reason: manualReason || undefined,
     details: { reason, warning_contact: warningContact, message_id: messageId },
@@ -192,7 +192,7 @@ const clearUnit = async ({ unit }, actor, now, session, eventId) => {
   await casStorageUpdate(StorageUnits, { _id: unit._id, availability_status: 'awaiting_clearance', updatedAt: unit.updatedAt }, {
     $set: { availability_status: 'available', updatedAt: now },
     $unset: {
-      owner: '', assigned_at: '', assigned_by: '', assignment_request: '', warning: '', exemption: '',
+      owner: '', assigned_at: '', assigned_by: '', source_request: '', warning: '', exemption: '',
     },
   }, { session });
   await storageEvent({
@@ -214,12 +214,12 @@ const finishMove = async (offer, actor, actorType, now, session, eventId) => {
     { _id: destination._id, availability_status: 'reserved', owner: owner._id, updatedAt: destination.updatedAt },
     { $set: {
       availability_status: 'occupied', assigned_at: now, assigned_by: actor,
-      assignment_request: request._id, updatedAt: now,
+      source_request: request._id, updatedAt: now,
     } }, { session });
   const sourceModifier = offer.requires_inspection
     ? { $set: { availability_status: 'awaiting_clearance', updatedAt: now }, $unset: { warning: '', exemption: '' } }
     : { $set: { availability_status: 'available', updatedAt: now }, $unset: {
-      owner: '', assigned_at: '', assigned_by: '', assignment_request: '', warning: '', exemption: '',
+      owner: '', assigned_at: '', assigned_by: '', source_request: '', warning: '', exemption: '',
     } };
   await casStorageUpdate(StorageUnits,
     { _id: source._id, availability_status: 'occupied', owner: owner._id, updatedAt: source.updatedAt },
@@ -229,11 +229,11 @@ const finishMove = async (offer, actor, actorType, now, session, eventId) => {
     { $set: { request_status: 'fulfilled', fulfilled_at: now, updatedAt: now } }, { session });
   await removeOffer(offer, session);
   await storageEvent({
-    id: eventId, entityType: 'storageOffer', entityId: offer._id, eventType: 'move_completed',
+    id: eventId, entityType: 'storageOffer', entityId: offer._id, eventType: 'offer_completed',
     actorType, actor, member: owner._id, unit: destination._id, relatedUnit: source._id,
     occurredAt: now, details: { requires_inspection: offer.requires_inspection },
   }, session);
-  return { decision_id: offer._id, assignment_id: destination._id };
+  return { decision_id: offer._id, unit_id: destination._id };
 };
 
 const reviewOffer = async (records, selection, actor, now, session, eventId) => {
@@ -246,7 +246,7 @@ const reviewOffer = async (records, selection, actor, now, session, eventId) => 
     await casStorageUpdate(StorageOffers, { _id: offer._id, updatedAt: offer.updatedAt },
       { $set: { deadline_at: deadline, updatedAt: now } }, { session });
     await storageEvent({
-      id: eventId, entityType: 'storageOffer', entityId: offer._id, eventType: 'move_extended',
+      id: eventId, entityType: 'storageOffer', entityId: offer._id, eventType: 'offer_extended',
       actorType: 'administrator', actor, member: owner._id, unit: offer.to_unit,
       relatedUnit: offer.from_unit, occurredAt: now, details: { deadline_at: deadline },
     }, session);
@@ -265,7 +265,7 @@ const reviewOffer = async (records, selection, actor, now, session, eventId) => 
       { session });
     await removeOffer(offer, session);
     await storageEvent({
-      id: eventId, entityType: 'storageOffer', entityId: offer._id, eventType: 'move_cancelled',
+      id: eventId, entityType: 'storageOffer', entityId: offer._id, eventType: 'offer_cancelled',
       actorType: 'administrator', actor, member: owner._id, unit: offer.to_unit,
       relatedUnit: offer.from_unit, occurredAt: now, reason: selection.reason,
       details: { request_returned_to_queue: selection.cancel_request !== true },
@@ -285,7 +285,7 @@ const applySuggestedAction = async (action, records, selection, actor, now, sess
   if (action === 'remind') return applyReminder(records, actor, now, session, eventId);
   if (action === 'reclaim') return endForClearance(records, selection, actor, now, session, eventId, 'reclaimed');
   if (action === 'release') return endForClearance(records, selection, actor, now, session, eventId, 'voluntary_release');
-  if (action === 'review_expired_moves') return reviewOffer(records, selection, actor, now, session, eventId);
+  if (action === 'review_expired_offers') return reviewOffer(records, selection, actor, now, session, eventId);
   if (action === 'confirm_clearance') return clearUnit(records, actor, now, session, eventId);
   throw new Meteor.Error('bad-action', 'Unknown storage action');
 };
@@ -337,12 +337,12 @@ export const confirmStorageSuggestions = async ({ action, commandId, selections,
   return { command_id: commandId, results };
 };
 
-export const completeStorageMove = async ({ moveId, actor, actorType }) => {
-  const eventId = storageOperationId('move.complete', actorType, actor, moveId);
+export const completeStorageOffer = async ({ offerId, actor, actorType }) => {
+  const eventId = storageOperationId('offer.complete', actorType, actor, offerId);
   const prior = await StorageEvents.findOneAsync(eventId);
-  if (prior) return { decision_id: moveId, assignment_id: prior.unit };
-  const offer = await StorageOffers.findOneAsync(moveId);
-  if (!offer) throw new Meteor.Error('not-found', 'Move not found');
+  if (prior) return { decision_id: offerId, unit_id: prior.unit };
+  const offer = await StorageOffers.findOneAsync(offerId);
+  if (!offer) throw new Meteor.Error('not-found', 'Offer not found');
   const now = new Date();
   return runStorageAtomic({
     transactional: (session) => finishMove(offer, actor, actorType, now, session, eventId),

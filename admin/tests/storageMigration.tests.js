@@ -91,7 +91,7 @@ describe('legacy storage migration', function () {
   it('records that legacy assignment time is unknown and queue time approximate', function () {
     const plan = buildLegacyStorageMigrationPlan(source());
     const assignmentEvent = plan.documents.storageEvents.find((entry) =>
-      entry.event_type === 'legacy_assignment_migrated');
+      entry.event_type === 'legacy_occupancy_migrated');
     const requestEvent = plan.documents.storageEvents.find((entry) =>
       entry.event_type === 'legacy_request_migrated');
     assert.strictEqual(assignmentEvent.details.original_assigned_at_known, false);

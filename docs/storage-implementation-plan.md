@@ -143,7 +143,7 @@ adminStorage.confirm({ action, command_id, selections })
 storage.member.getState()
 storage.member.upsertRequest(...)
 storage.member.cancelRequest(...)
-storage.member.confirmMove(...)
+storage.member.confirmOffer(...)
 ```
 
 Preview returns opaque deterministic suggestion IDs, reason codes, dates,

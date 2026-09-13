@@ -94,7 +94,7 @@ describe('storage server suggestions', function () {
       from_unit: 'source', to_unit: 'destination', deadline_at: now, updatedAt: timestamp,
     }];
     assert.strictEqual(buildStorageSuggestions('release', state, now).rows.length, 1);
-    assert.strictEqual(buildStorageSuggestions('review_expired_moves', state, now).rows.length, 1);
+    assert.strictEqual(buildStorageSuggestions('review_expired_offers', state, now).rows.length, 1);
     assert.strictEqual(buildStorageSuggestions('confirm_clearance', state, now).rows.length, 1);
   });
 

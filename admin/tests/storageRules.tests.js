@@ -10,7 +10,7 @@ import {
   preferenceSpecificity,
   proposeStorageAllocations,
   resolveStorageOwner,
-  storageMoveDeadline,
+  storageOfferDeadline,
   storagePreferenceMatches,
   storageReminderAt,
   storageExemptionDeactivationReason,
@@ -206,7 +206,7 @@ describe('storageRules', function () {
     it('uses exact 21, 28, and 14 day elapsed durations', function () {
       assert.strictEqual(storageReminderAt(warning.warned_at).toISOString(), '2026-09-03T12:00:00.000Z');
       assert.strictEqual(storageWarningDeadline(warning.warned_at).toISOString(), NOW.toISOString());
-      assert.strictEqual(storageMoveDeadline(d('2026-08-27T12:00:00.000Z')).toISOString(), NOW.toISOString());
+      assert.strictEqual(storageOfferDeadline(d('2026-08-27T12:00:00.000Z')).toISOString(), NOW.toISOString());
       assert.strictEqual(isStorageOfferReviewDue({ deadline_at: NOW }, NOW), true);
     });
 

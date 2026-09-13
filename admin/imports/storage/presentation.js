@@ -4,7 +4,7 @@ export const STORAGE_ACTIONS = [
   { id: 'remind', label: 'Send reminders', help: 'Remind warned occupants.' },
   { id: 'reclaim', label: 'Reclaim assignments', help: 'Reclaim after 28 days.' },
   { id: 'release', label: 'Process releases', help: 'Handle release requests.' },
-  { id: 'review_expired_moves', label: 'Review expired moves', help: 'Resolve expired moves.' },
+  { id: 'review_expired_offers', label: 'Review expired offers', help: 'Resolve expired storage offers.' },
   { id: 'confirm_clearance', label: 'Confirm clearances', help: 'Release cleared units.' },
 ];
 

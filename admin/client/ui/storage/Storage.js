@@ -60,8 +60,8 @@ const viewRow = (row, selected, options) => ({
   channels: ['allocate', 'warn', 'remind', 'reclaim', 'release'].includes(row.action)
     ? (row.expected_channels?.email === 'available' ? 'Email + app message' : 'App message only')
     : 'No automatic message',
-  allocationMove: row.action === 'allocate' && row.decision_type === 'move',
-  expiredMove: row.action === 'review_expired_moves',
+  allocationOffer: row.action === 'allocate' && row.decision_type === 'move',
+  expiredOffer: row.action === 'review_expired_offers',
   reclamation: row.action === 'reclaim',
   warningContactLabel: row.warning_delivered ? 'Warning delivered' : 'No delivered warning',
 });
@@ -196,16 +196,16 @@ Template.Storage.helpers({
   },
   unitDetail() {
     const unit = StorageUnits.findOne(Template.instance().state.get('selectedUnitId')); if (!unit) return null;
-    const assignment = unit.availability_status === 'occupied' ? {
+    const occupancy = unit.availability_status === 'occupied' ? {
       _id: unit._id, owner: unit.owner, unit: unit._id, assigned_at: unit.assigned_at,
     } : null;
     const request = unit.owner && StorageRequests.findOne({ owner: unit.owner, request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] } });
-    const move = unit.owner && StorageOffers.findOne({ owner: unit.owner });
-    const exemption = assignment && unit.exemption;
+    const offer = unit.owner && StorageOffers.findOne({ owner: unit.owner });
+    const exemption = occupancy && unit.exemption;
     const ownerEligible = !!unit.owner && !!Members.findOne(unit.owner)?.lab
       && new Date(Members.findOne(unit.owner).lab) > new Date();
-    const entityIds = [unit._id, request?._id, move?._id].filter(Boolean);
-    return { ...unit, statusLabel: storageStatusLabel(unit.availability_status), ownerName: Members.findOne(unit.owner)?.name || 'No owner', wallChoices: StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch().map((wall) => ({ ...wall, selected: wall._id === unit.wall_id, disabled: !wall.active && wall._id !== unit.wall_id, choiceLabel: `${wall.name}${wall.active ? '' : ' (inactive)'}` })), heightNone: !unit.height, heightLow: unit.height === 'low', heightHigh: unit.height === 'high', statusAvailable: unit.availability_status === 'available', statusUnavailable: unit.availability_status === 'unavailable', statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status), metadataProtected: ['occupied', 'reserved'].includes(unit.availability_status), clearance: unit.availability_status === 'awaiting_clearance', assignable: unit.availability_status === 'available', canRequestRelease: !!assignment && !request && !move, activeAssignment: assignment && { ...assignment, assignedDate: date(assignment.assigned_at), exemption }, activeRequest: request && { ...request, requestedDate: date(request.requested_at), pauseTarget: request.request_status === 'waiting', pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume', canTogglePause: request.request_status === 'waiting' ? !ownerEligible : (request.request_status === 'paused_ineligible' && ownerEligible) }, pendingMove: move && { ...move, deadlineDate: date(move.deadline_at) }, messages: unit.owner ? Messages.find({ member: unit.owner, type: 'storage' }, { sort: { senddate: -1 }, limit: 20 }).fetch().map((message) => ({ ...message, sentDate: date(message.senddate) })) : [], history: StorageEvents.find({ $or: [{ entity_id: { $in: entityIds } }, { unit: unit._id }, { related_unit: unit._id }] }, { sort: { occurred_at: -1 }, limit: 50 }).fetch().map((event) => ({ ...event, date: date(event.occurred_at) })) };
+    const entityIds = [unit._id, request?._id, offer?._id].filter(Boolean);
+    return { ...unit, statusLabel: storageStatusLabel(unit.availability_status), ownerName: Members.findOne(unit.owner)?.name || 'No owner', wallChoices: StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch().map((wall) => ({ ...wall, selected: wall._id === unit.wall_id, disabled: !wall.active && wall._id !== unit.wall_id, choiceLabel: `${wall.name}${wall.active ? '' : ' (inactive)'}` })), heightNone: !unit.height, heightLow: unit.height === 'low', heightHigh: unit.height === 'high', statusAvailable: unit.availability_status === 'available', statusUnavailable: unit.availability_status === 'unavailable', statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status), metadataProtected: ['occupied', 'reserved'].includes(unit.availability_status), clearance: unit.availability_status === 'awaiting_clearance', assignable: unit.availability_status === 'available', canRequestRelease: !!occupancy && !request && !offer, currentOccupancy: occupancy && { ...occupancy, assignedDate: date(occupancy.assigned_at), exemption }, activeRequest: request && { ...request, requestedDate: date(request.requested_at), pauseTarget: request.request_status === 'waiting', pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume', canTogglePause: request.request_status === 'waiting' ? !ownerEligible : (request.request_status === 'paused_ineligible' && ownerEligible) }, pendingOffer: offer && { ...offer, deadlineDate: date(offer.deadline_at) }, messages: unit.owner ? Messages.find({ member: unit.owner, type: 'storage' }, { sort: { senddate: -1 }, limit: 20 }).fetch().map((message) => ({ ...message, sentDate: date(message.senddate) })) : [], history: StorageEvents.find({ $or: [{ entity_id: { $in: entityIds } }, { unit: unit._id }, { related_unit: unit._id }] }, { sort: { occurred_at: -1 }, limit: 50 }).fetch().map((event) => ({ ...event, date: date(event.occurred_at) })) };
   },
   memberOptions: () => Members.find({}, { sort: { name: 1 } }).fetch()
     .map((member) => ({ ...member, pickerLabel: storageMemberLabel(member) })),
@@ -239,7 +239,7 @@ Template.Storage.events({
   'change .requires-inspection'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), requires_inspection: e.currentTarget.checked } }); },
   'change .manual-contact-confirmed'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), manual_contact_confirmed: e.currentTarget.checked } }); },
   'input .manual-contact-reason'(e, i) { const id = e.currentTarget.dataset.id; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { ...(i.state.get('rowOptions')?.[id] || {}), manual_contact_reason: e.currentTarget.value } }); },
-  'change .move-resolution'(e, i) { const id = e.currentTarget.dataset.id, resolution = e.currentTarget.value; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { resolution, ...(resolution === 'extend' ? { extend_to: new Date(Date.now() + 14 * 86400000) } : {}) } }); },
+  'change .offer-resolution'(e, i) { const id = e.currentTarget.dataset.id, resolution = e.currentTarget.value; i.state.set('rowOptions', { ...(i.state.get('rowOptions') || {}), [id]: { resolution, ...(resolution === 'extend' ? { extend_to: new Date(Date.now() + 14 * 86400000) } : {}) } }); },
   async 'click .confirm-preview'(e, i) {
     e.preventDefault(); const action = i.state.get('previewAction'), selected = i.state.get('selected') || {}, original = i.state.get('preview')?.rows || [];
     i.state.set('busy', true); setError(i, '');
@@ -247,8 +247,8 @@ Template.Storage.events({
       const fresh = await Meteor.callAsync('adminStorage.preview', { action });
       if (!sameSuggestionSet(original, fresh.rows)) { i.state.set('preview', fresh); setError(i, 'Suggestions changed. Review the refreshed preview and confirm again.', 'preview'); return; }
       const options = i.state.get('rowOptions') || {};
-      if (action === 'review_expired_moves' && fresh.rows.some(({ suggestion_id }) => selected[suggestion_id] !== false && !options[suggestion_id]?.resolution)) {
-        setError(i, 'Choose complete, extend, or cancel for every selected expired move.', 'preview'); return;
+      if (action === 'review_expired_offers' && fresh.rows.some(({ suggestion_id }) => selected[suggestion_id] !== false && !options[suggestion_id]?.resolution)) {
+        setError(i, 'Choose complete, extend, or cancel for every selected expired offer.', 'preview'); return;
       }
       const confirmedRows = fresh.rows.filter(({ suggestion_id }) => selected[suggestion_id] !== false);
       const selections = confirmedRows.map(({ suggestion_id }) => ({ suggestion_id, ...(options[suggestion_id] || {}) }));
@@ -338,11 +338,11 @@ Template.Storage.events({
     } catch (_) {}
   },
   async 'submit .edit-unit-form'(e, i) { e.preventDefault(); const v = formObject(e.currentTarget), unit_id = e.currentTarget.dataset.id; const fields = { name: v.name, height: v.height || null, wall_id: v.wall_id, column: Number(v.column), row: Number(v.row), availability_status: v.availability_status, note: v.note || null }; try { await mutate(i, 'adminStorage.units.update', { unit_id, fields, acknowledged: v.acknowledged === 'on' }, `unit.update:${unit_id}:${JSON.stringify(fields)}`, 'inventory'); } catch (_) {} },
-  async 'submit .manual-assign-form'(e, i) { e.preventDefault(); const v = formObject(e.currentTarget), payload = { unit_id: e.currentTarget.dataset.id, owner_id: v.owner_id, override: v.override === 'on', reason: v.reason || undefined }; try { await mutate(i, 'adminStorage.assignments.assignManual', payload, `assign:${JSON.stringify(payload)}`, 'inventory'); } catch (_) {} },
+  async 'submit .manual-assign-form'(e, i) { e.preventDefault(); const v = formObject(e.currentTarget), payload = { unit_id: e.currentTarget.dataset.id, owner_id: v.owner_id, override: v.override === 'on', reason: v.reason || undefined }; try { await mutate(i, 'adminStorage.units.assignManual', payload, `assign:${JSON.stringify(payload)}`, 'inventory'); } catch (_) {} },
   async 'click .confirm-clearance'(e, i) { const unit_id = e.currentTarget.dataset.id; try { await mutate(i, 'adminStorage.clearances.confirm', { unit_id }, `clear:${unit_id}`, 'inventory'); } catch (_) {} },
-  async 'click .end-assignment'(e, i) { const assignment_id = e.currentTarget.dataset.id, reason = prompt('Reason for ending/correcting this assignment:'); if (reason) try { await mutate(i, 'adminStorage.assignments.endManual', { assignment_id, reason }, `end:${assignment_id}:${reason}`, 'inventory'); } catch (_) {} },
-  async 'click .create-exemption'(e, i) { const assignment_id = e.currentTarget.dataset.id, reason = prompt('Internal exemption reason:'); if (!reason) return; const until = prompt('Optional end date (YYYY-MM-DD), or blank:') || '', exempt_until = until ? new Date(`${until}T23:59:59`) : undefined; try { await mutate(i, 'adminStorage.exemptions.create', { assignment_id, reason, exempt_until }, `exempt:${assignment_id}:${reason}:${until}`, 'inventory'); } catch (_) {} },
-  async 'click .revoke-exemption'(e, i) { const exemption_id = e.currentTarget.dataset.id; try { await mutate(i, 'adminStorage.exemptions.revoke', { exemption_id }, `revoke:${exemption_id}`, 'inventory'); } catch (_) {} },
+  async 'click .mark-unit-returned'(e, i) { const unit_id = e.currentTarget.dataset.id, reason = prompt('Reason for marking this unit as returned:'); if (reason) try { await mutate(i, 'adminStorage.units.markReturnedManual', { unit_id, reason }, `return:${unit_id}:${reason}`, 'inventory'); } catch (_) {} },
+  async 'click .create-exemption'(e, i) { const unit_id = e.currentTarget.dataset.id, reason = prompt('Internal exemption reason:'); if (!reason) return; const until = prompt('Optional end date (YYYY-MM-DD), or blank:') || '', exempt_until = until ? new Date(`${until}T23:59:59`) : undefined; try { await mutate(i, 'adminStorage.units.createExemption', { unit_id, reason, exempt_until }, `exempt:${unit_id}:${reason}:${until}`, 'inventory'); } catch (_) {} },
+  async 'click .revoke-exemption'(e, i) { const unit_id = e.currentTarget.dataset.id; try { await mutate(i, 'adminStorage.units.revokeExemption', { unit_id }, `revoke:${unit_id}`, 'inventory'); } catch (_) {} },
   async 'click .cancel-request'(e, i) { const request_id = e.currentTarget.dataset.id, reason = prompt('Reason for cancelling this request:'); if (reason) try { await mutate(i, 'adminStorage.requests.cancel', { request_id, reason }, `request.cancel:${request_id}:${reason}`, 'queue'); } catch (_) {} },
   async 'click .toggle-request-pause'(e, i) { const request_id = e.currentTarget.dataset.id, paused = e.currentTarget.dataset.paused === 'true', reason = prompt(paused ? 'Reason for pausing:' : 'Reason for resuming:'); if (reason) try { await mutate(i, 'adminStorage.requests.setPaused', { request_id, paused, reason }, `request.pause:${request_id}:${paused}:${reason}`, 'queue'); } catch (_) {} },
   async 'submit .request-goal-form'(e, i) {
@@ -372,7 +372,7 @@ Template.Storage.events({
     const payload = { owner_id, request_type: 'release' };
     try { await mutate(i, 'adminStorage.requests.upsert', payload, `request.upsert:${JSON.stringify(payload)}`, 'queue'); } catch (_) {}
   },
-  async 'click .complete-move'(e, i) { const move_id = e.currentTarget.dataset.id; try { await mutate(i, 'adminStorage.moves.completeManual', { move_id }, `move.complete:${move_id}`, 'inventory'); } catch (_) {} },
-  async 'click .extend-move'(e, i) { const move_id = e.currentTarget.dataset.id, value = prompt('New deadline (YYYY-MM-DD):'), reason = value && prompt('Reason:'); if (value && reason) try { await mutate(i, 'adminStorage.moves.extendManual', { move_id, extend_to: new Date(`${value}T23:59:59`), reason }, `move.extend:${move_id}:${value}:${reason}`, 'inventory'); } catch (_) {} },
-  async 'click .cancel-move'(e, i) { const move_id = e.currentTarget.dataset.id, reason = prompt('Cancellation reason:'); if (!reason) return; const cancel_request = confirm('Also cancel the member request? OK cancels it; Cancel returns it to queue.'); try { await mutate(i, 'adminStorage.moves.cancelManual', { move_id, reason, cancel_request }, `move.cancel:${move_id}:${reason}:${cancel_request}`, 'inventory'); } catch (_) {} },
+  async 'click .complete-offer'(e, i) { const offer_id = e.currentTarget.dataset.id; try { await mutate(i, 'adminStorage.offers.completeManual', { offer_id }, `offer.complete:${offer_id}`, 'inventory'); } catch (_) {} },
+  async 'click .extend-offer'(e, i) { const offer_id = e.currentTarget.dataset.id, value = prompt('New deadline (YYYY-MM-DD):'), reason = value && prompt('Reason:'); if (value && reason) try { await mutate(i, 'adminStorage.offers.extendManual', { offer_id, extend_to: new Date(`${value}T23:59:59`), reason }, `offer.extend:${offer_id}:${value}:${reason}`, 'inventory'); } catch (_) {} },
+  async 'click .cancel-offer'(e, i) { const offer_id = e.currentTarget.dataset.id, reason = prompt('Cancellation reason:'); if (!reason) return; const cancel_request = confirm('Also cancel the member request? OK cancels it; Cancel returns it to queue.'); try { await mutate(i, 'adminStorage.offers.cancelManual', { offer_id, reason, cancel_request }, `offer.cancel:${offer_id}:${reason}:${cancel_request}`, 'inventory'); } catch (_) {} },
 });

@@ -9,7 +9,7 @@ const actions = {
   onRetry: async () => {},
   onUpsertRequest: async () => {},
   onCancelRequest: async () => {},
-  onConfirmMove: async () => {},
+  onConfirmOffer: async () => {},
 };
 const unit = (name, availability_status = "occupied") => ({
   _id: `unit-${name}`,
@@ -24,9 +24,9 @@ const baseState = {
   family_read_only: false,
   has_active_lab_membership: true,
   request: null,
-  assignment: null,
+  unit: null,
   awaiting_clearance: null,
-  move: null,
+  offer: null,
   warning: null,
 };
 
@@ -72,7 +72,7 @@ export const Occupied = {
   args: {
     ...actions,
     loading: false,
-    state: { ...baseState, assignment: { _id: "assignment-1", assigned_at: new Date("2025-03-01"), unit: unit("A-12") } },
+    state: { ...baseState, unit: { ...unit("A-12"), assigned_at: new Date("2025-03-01") } },
   },
 };
 export const MoveRequested = {
@@ -81,7 +81,7 @@ export const MoveRequested = {
     loading: false,
     state: {
       ...baseState,
-      assignment: { _id: "assignment-1", assigned_at: new Date("2025-03-01"), unit: unit("A-12") },
+      unit: { ...unit("A-12"), assigned_at: new Date("2025-03-01") },
       request: {
         _id: "request-move",
         request_type: "move",
@@ -98,7 +98,7 @@ export const ReleaseRequested = {
     loading: false,
     state: {
       ...baseState,
-      assignment: { _id: "assignment-1", assigned_at: new Date("2025-03-01"), unit: unit("A-12") },
+      unit: { ...unit("A-12"), assigned_at: new Date("2025-03-01") },
       request: { _id: "request-release", request_type: "release", request_status: "waiting", requested_at: new Date("2026-08-20") },
     },
   },
@@ -109,10 +109,10 @@ export const MovePendingConfirmation = {
     loading: false,
     state: {
       ...baseState,
-      assignment: { _id: "assignment-1", assigned_at: new Date("2025-03-01"), unit: unit("A-12") },
+      unit: { ...unit("A-12"), assigned_at: new Date("2025-03-01") },
       request: { _id: "request-move", request_type: "move", request_status: "in_progress", requested_at: new Date("2026-08-20") },
-      move: {
-        _id: "move-1",
+      offer: {
+        _id: "offer-1",
         deadline_at: new Date("2026-09-24"),
         requires_inspection: true,
         destination: unit("B-04", "reserved"),
@@ -127,7 +127,7 @@ export const OverdueWarning = {
     state: {
       ...baseState,
       has_active_lab_membership: false,
-      assignment: { _id: "assignment-1", assigned_at: new Date("2025-03-01"), unit: unit("A-12") },
+      unit: { ...unit("A-12"), assigned_at: new Date("2025-03-01") },
       warning: { _id: "warning-1", warned_at: new Date("2026-09-01"), deadline_at: new Date("2026-09-29") },
     },
   },
@@ -144,7 +144,7 @@ export const FamilyDependentReadOnly = {
       member: "dependent-1",
       owner: "member-1",
       family_read_only: true,
-      assignment: { _id: "assignment-1", assigned_at: new Date("2025-03-01"), unit: unit("A-12") },
+      unit: { ...unit("A-12"), assigned_at: new Date("2025-03-01") },
       request: { _id: "request-move", request_type: "move", request_status: "waiting", requested_at: new Date("2026-08-20") },
     },
   },

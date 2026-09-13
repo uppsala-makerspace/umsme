@@ -69,7 +69,7 @@ const PreferenceSummary = ({ preference }) => {
 };
 
 /** Member-facing view of the safe, authoritative storage.member.getState DTO. */
-const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequest, onConfirmMove }) => {
+const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequest, onConfirmOffer }) => {
   const { t, i18n } = useTranslation();
   const [preference, setPreference] = useState({ floor: "", height: "" });
   const [submitting, setSubmitting] = useState(null);
@@ -104,7 +104,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
     );
   }
 
-  const { assignment, awaiting_clearance: awaitingClearance, move, request, warning } = state;
+  const { unit, awaiting_clearance: awaitingClearance, offer, request, warning } = state;
   const readOnly = state.family_read_only;
   const activeLab = state.has_active_lab_membership;
   const requestCanBeEdited = request && ["waiting", "paused_ineligible"].includes(request.request_status);
@@ -119,11 +119,11 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
           <p className="mt-1 text-sm">{t("storageFamilyReadOnly")}</p>
         </StatusCard>
       )}
-      {assignment && (
+      {unit && (
         <StatusCard tone="green" testId="storage-occupied">
           <p className="text-sm text-gray-600">{t("myBoxNumber")}</p>
-          <p className="mt-1 text-3xl font-bold text-green-700">{assignment.unit?.name || "—"}</p>
-          {assignment.assigned_at && <p className="mt-2 text-xs text-gray-600">{t("storageAssignedAt", { date: formatDate(assignment.assigned_at, i18n.language) })}</p>}
+          <p className="mt-1 text-3xl font-bold text-green-700">{unit.name || "—"}</p>
+          {unit.assigned_at && <p className="mt-2 text-xs text-gray-600">{t("storageAssignedAt", { date: formatDate(unit.assigned_at, i18n.language) })}</p>}
         </StatusCard>
       )}
       {warning && (
@@ -133,15 +133,15 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
           <p className="mt-2 text-sm">{t("storageWarningRenewHelp")}</p>
         </StatusCard>
       )}
-      {move && (
+      {offer && (
         <StatusCard tone="blue" testId="storage-move-pending">
           <h2 className="font-semibold">{t("storageMovePendingTitle")}</h2>
-          <p className="mt-1 text-sm">{t("storageMoveDestination", { unit: move.destination?.name || "—" })}</p>
-          <p className="mt-1 text-sm">{t("storageMoveDeadline", { date: formatDate(move.deadline_at, i18n.language) })}</p>
-          {move.requires_inspection && <p className="mt-2 text-sm">{t("storageMoveInspection")}</p>}
+          <p className="mt-1 text-sm">{t("storageMoveDestination", { unit: offer.destination?.name || "—" })}</p>
+          <p className="mt-1 text-sm">{t("storageMoveDeadline", { date: formatDate(offer.deadline_at, i18n.language) })}</p>
+          {offer.requires_inspection && <p className="mt-2 text-sm">{t("storageMoveInspection")}</p>}
           {!readOnly && (
-            <Button className="mt-4" fullWidth disabled={!!submitting} onClick={() => run("confirm-move", () => onConfirmMove(move._id))}>
-              {submitting === "confirm-move" ? t("loading") : t("storageConfirmMove")}
+            <Button className="mt-4" fullWidth disabled={!!submitting} onClick={() => run("confirm-offer", () => onConfirmOffer(offer._id))}>
+              {submitting === "confirm-offer" ? t("loading") : t("storageConfirmMove")}
             </Button>
           )}
         </StatusCard>
@@ -152,7 +152,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
           <p className="mt-1 text-sm">{t("storageAwaitingClearanceBody", { unit: awaitingClearance.name })}</p>
         </StatusCard>
       )}
-      {request && !move && (
+      {request && !offer && (
         <StatusCard tone={request.request_status === "paused_ineligible" ? "yellow" : "blue"} testId={`storage-request-${request.request_type}`}>
           <h2 className="font-semibold">{t(`storageRequest_${request.request_type}`)}</h2>
           <p className="mt-1 text-sm">{t(`storageRequestStatus_${request.request_status}`)}</p>
@@ -160,11 +160,11 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
           {request.request_type !== "release" && <p className="mt-1 text-xs text-gray-600">{t("storagePreferenceSummary")}: <PreferenceSummary preference={request.preference} /></p>}
         </StatusCard>
       )}
-      {!assignment && !request && !awaitingClearance && (
+      {!unit && !request && !awaitingClearance && (
         <p className="text-center text-gray-600" data-testid="storage-none">{activeLab ? t("noBoxAssigned") : t("storageRequiresLab")}</p>
       )}
 
-      {!readOnly && !move && requestCanBeEdited && request.request_type !== "release" && activeLab && (
+      {!readOnly && !offer && requestCanBeEdited && request.request_type !== "release" && activeLab && (
         <section className="w-full">
           <h2 className="mb-2 text-lg font-medium">{t("boxPreference")}</h2>
           <p className="mb-3 text-sm text-gray-600">{t("boxPreferenceInfo")}</p>
@@ -174,7 +174,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
           </Button>
         </section>
       )}
-      {!readOnly && !assignment && !request && activeLab && !awaitingClearance && (
+      {!readOnly && !unit && !request && activeLab && !awaitingClearance && (
         <section className="w-full">
           <p className="mb-3 text-sm text-gray-600">{t("queueForBoxInfo")}</p>
           <PreferenceFields preference={preference} onChange={setPreference} disabled={!!submitting} />
@@ -183,7 +183,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
           </Button>
         </section>
       )}
-      {!readOnly && assignment && !request && !move && (
+      {!readOnly && unit && !request && !offer && (
         <section className="w-full space-y-3">
           {activeLab && (
             <>

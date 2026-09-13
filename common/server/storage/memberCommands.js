@@ -3,7 +3,7 @@ import { Random } from 'meteor/random';
 import { StorageUnits, StorageRequests, StorageOffers, StorageEvents } from '/imports/common/collections/storage';
 import { hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
 import { appendStorageEvent } from './events';
-import { completeStorageMove } from './commands';
+import { completeStorageOffer } from './commands';
 import { reconcileStorageState } from './reconciliation';
 import { storageOperationId } from './ids';
 
@@ -102,8 +102,8 @@ export const cancelMemberStorageRequest = async ({ owner, requestId, actor, comm
   return true;
 };
 
-export const confirmMemberStorageMove = async ({ owner, moveId, actor }) => {
-  const offer = await StorageOffers.findOneAsync(moveId);
-  if (!offer || offer.owner !== owner._id) throw new Meteor.Error('not-found', 'Move not found');
-  return completeStorageMove({ moveId, actor, actorType: 'member' });
+export const confirmMemberStorageOffer = async ({ owner, offerId, actor }) => {
+  const offer = await StorageOffers.findOneAsync(offerId);
+  if (!offer || offer.owner !== owner._id) throw new Meteor.Error('not-found', 'Offer not found');
+  return completeStorageOffer({ offerId, actor, actorType: 'member' });
 };
