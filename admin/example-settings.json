@@ -43,9 +43,9 @@
     "checkPath": "http://example.com#",
     "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc",
     "storageWalls": [
-      { "name": "Floor 1, Wall 1", "start": 1, "end": 108, "shelfSize": 12 },
-      { "name": "Floor 1, Wall 2", "start": 109, "end": 204, "shelfSize": 12 },
-      { "name": "Floor 2, Wall 1", "start": 2001, "end": 2108, "shelfSize": 12 }
+      { "name": "Floor 1, Wall 1", "floor": "floor1", "start": 1, "end": 108, "shelfSize": 12 },
+      { "name": "Floor 1, Wall 2", "floor": "floor1", "start": 109, "end": 204, "shelfSize": 12 },
+      { "name": "Floor 2, Wall 1", "floor": "floor2", "start": 2001, "end": 2108, "shelfSize": 12 }
     ]
   },
   "private": {

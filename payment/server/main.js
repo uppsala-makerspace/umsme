@@ -11,12 +11,14 @@ import '/imports/common/server/familyCascade';
 import './api/swish';
 import './api/status';
 import { initPush } from '/imports/common/server/push';
+import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
 
 if (Meteor.settings.private?.mailUrl) {
   process.env.MAIL_URL = Meteor.settings.private.mailUrl;
 }
 
-Meteor.startup(() => {
+Meteor.startup(async () => {
+  await ensureStorageIndexes();
   initPush();
 });
 
