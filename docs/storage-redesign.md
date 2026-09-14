@@ -528,8 +528,9 @@ members see the same storage information in read-only form.
 
 ## 6. Migration and deployment story
 
-Migration is a controlled deployment task. It starts with a dry run and does
-not run as an unreviewed application-startup side effect.
+Migration is a controlled deployment task, not an administrator-dashboard
+workflow. Deployment starts with a dry run and does not run it as an
+unreviewed application-startup side effect.
 
 The migration tools are restricted to administrators, board members, and
 storage-role users:

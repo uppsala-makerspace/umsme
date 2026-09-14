@@ -3,9 +3,6 @@
 .storage-heading h1, .storage-heading h2 { margin-top: 0; }
 .storage-panel, .storage-readiness { margin: 1.5rem 0; padding: 1.25rem; border: 1px solid #ccd4da; border-radius: 6px; background: #fff; }
 .storage-inline-error { margin: .8rem 0; }
-.storage-migration > summary { cursor: pointer; }
-.storage-migration-preview { margin-top: 1rem; }
-.storage-migration label { display: inline-flex; flex-direction: column; min-width: 320px; margin-top: 1rem; }
 .storage-readiness { border-left-width: 6px; }
 .storage-readiness-ready { border-left-color: #2e7d32; }
 .storage-readiness-loading, .storage-readiness-metadata { border-left-color: #ef9a00; }

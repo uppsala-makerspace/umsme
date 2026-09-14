@@ -216,8 +216,6 @@ Template.Storage.onCreated(function () {
     createWallOpen: false,
     createUnitOpen: false,
     requestEditor: null,
-    migrationPreview: null,
-    migrationReason: '',
   });
   this.subscribe('storageAdminDashboard');
   this.autorun(() => {
@@ -267,33 +265,11 @@ Template.Storage.helpers({
   pageError: () => scopedError('page'), previewError: () => scopedError('preview'),
   queueError: () => scopedError('queue'), wallsError: () => scopedError('walls'),
   inventoryError: () => scopedError('inventory'),
-  migrationError: () => scopedError('migration'),
   readiness() {
     const presentation = storageReadinessPresentation(Template.instance().state.get('readiness'));
     // Readiness is a safety gate, not a success notification. Keep the page
     // quiet when allocation is safe and only surface states that need action.
     return ['ready', 'loading'].includes(presentation.state) ? null : presentation;
-  },
-  migration() {
-    const state = Template.instance().state;
-    const preview = state.get('migrationPreview');
-    const readiness = state.get('readiness') || {};
-    const sourceBlockers = preview?.preview_report?.blocker_count || 0;
-    const targetBlockers = preview?.target_preflight?.blocker_count || 0;
-    return {
-      previewed: !!preview,
-      cutoff: preview ? date(preview.cutoff) : '',
-      fingerprint: preview?.fingerprint,
-      sourceBlockers,
-      targetBlockers,
-      cannotApply: !preview || !!readiness.migration_applied ||
-        sourceBlockers !== 0 || targetBlockers !== 0 || state.get('busy'),
-      migrationApplied: !!readiness.migration_applied,
-      cutoverFinalized: !!readiness.cutover_finalized,
-      cannotFinalize: !readiness.migration_applied || readiness.cutover_finalized ||
-        !state.get('migrationReason')?.trim() || state.get('busy'),
-      busy: state.get('busy'),
-    };
   },
   actionCards() {
     const state = Template.instance().state;
@@ -430,59 +406,6 @@ Template.Storage.events({
   'click .refresh-storage'(event, instance) {
     event.preventDefault();
     instance.refresh();
-  },
-  async 'click .preview-migration'(event, instance) {
-    event.preventDefault();
-    instance.state.set('busy', true);
-    setError(instance, '');
-    try {
-      instance.state.set('migrationPreview', await Meteor.callAsync('storageMigration.preview', {}));
-    } catch (error) {
-      setError(instance, errorMessage(error), 'migration');
-    } finally {
-      instance.state.set('busy', false);
-    }
-  },
-  async 'click .apply-migration'(event, instance) {
-    event.preventDefault();
-    const preview = instance.state.get('migrationPreview');
-    if (!preview || !window.confirm('Apply this exact migration preview?')) return;
-    instance.state.set('busy', true);
-    setError(instance, '');
-    try {
-      await Meteor.callAsync('storageMigration.apply', {
-        fingerprint: preview.fingerprint,
-        cutoff: preview.cutoff,
-      });
-      await instance.refresh();
-    } catch (error) {
-      setError(instance, errorMessage(error), 'migration');
-    } finally {
-      instance.state.set('busy', false);
-    }
-  },
-  'input .migration-reason'(event, instance) {
-    instance.state.set('migrationReason', event.currentTarget.value);
-  },
-  async 'click .finalize-migration'(event, instance) {
-    event.preventDefault();
-    const readiness = instance.state.get('readiness') || {};
-    const reason = instance.state.get('migrationReason')?.trim();
-    if (!reason || !readiness.migration_fingerprint ||
-        !window.confirm('Finalize cutover and retire the legacy storage fields?')) return;
-    instance.state.set('busy', true);
-    setError(instance, '');
-    try {
-      await Meteor.callAsync('storageMigration.finalizeCutover', {
-        fingerprint: readiness.migration_fingerprint,
-        reason,
-      });
-      await instance.refresh();
-    } catch (error) {
-      setError(instance, errorMessage(error), 'migration');
-    } finally {
-      instance.state.set('busy', false);
-    }
   },
   'click .open-preview'(event, instance) {
     const action = event.currentTarget.dataset.action;

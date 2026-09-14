@@ -6,16 +6,6 @@
       {{#if pageError}}<div class="alert alert-danger" role="alert">{{pageError}}</div>{{/if}}
       {{#with readiness}}<div class="storage-readiness storage-readiness-{{state}}" role="status"><strong>{{label}}</strong> {{detail}}{{#if reasons}}<ul>{{#each reason in reasons}}<li>{{reason}}</li>{{/each}}</ul>{{/if}}</div>{{/with}}
 
-      {{#with migration}}<details class="storage-panel storage-migration">
-        <summary><strong>Migration and cutover</strong></summary>
-        <p>Preview first. Apply uses that exact snapshot; finalization is a separate audited decision.</p>
-        {{#if migrationError}}<div class="alert alert-danger storage-inline-error" role="alert">{{migrationError}}</div>{{/if}}
-        <button class="btn btn-default preview-migration" disabled={{busy}}>Preview migration</button>
-        {{#if previewed}}<div class="storage-migration-preview"><p>Cutoff: {{cutoff}}</p><p>Source blockers: <strong>{{sourceBlockers}}</strong> · Existing-data conflicts: <strong>{{targetBlockers}}</strong></p><button class="btn btn-warning apply-migration" disabled={{cannotApply}}>Apply preview</button></div>{{/if}}
-        {{#if migrationApplied}}<p><strong>Migration applied.</strong></p>{{/if}}
-        {{#unless cutoverFinalized}}{{#if migrationApplied}}<label>Audit reason <input class="migration-reason" maxlength="5000" placeholder="Why is the legacy cutover ready?"></label> <button class="btn btn-danger finalize-migration" disabled={{cannotFinalize}}>Finalize cutover</button>{{/if}}{{else}}<p><strong>Legacy cutover finalized.</strong></p>{{/unless}}
-      </details>{{/with}}
-
       <h2>Suggested actions</h2><p>Nothing is changed or sent until you review and confirm a batch.</p>
       <div class="storage-action-grid">{{#each card in actionCards}}<button class="storage-action-card open-preview" data-action={{card.id}} disabled={{card.disabled}}><span class="storage-action-count">{{card.count}}</span><strong>{{card.label}}</strong><small>{{card.help}}</small></button>{{/each}}</div>
 
