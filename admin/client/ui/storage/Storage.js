@@ -2,14 +2,15 @@ import './Storage.html';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Random } from 'meteor/random';
 import { Roles } from 'meteor/roles';
+import { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
 import { Members } from '/imports/common/collections/members';
 import { Messages } from '/imports/common/collections/messages';
 import {
   StorageWalls, StorageUnits, StorageRequests, StorageOffers, StorageEvents,
 } from '/imports/common/collections/storage';
 import {
-  STORAGE_ACTIONS, bulkHeightImpact, filterStorageQueue, filterStorageUnits, groupStorageWalls,
-  joinBulkHeightResults, joinStorageResults, sameSuggestionSet, storageReadinessPresentation,
+  STORAGE_ACTIONS, filterStorageQueue, filterStorageUnits, groupStorageWalls,
+  joinStorageResults, sameSuggestionSet, storageReadinessPresentation,
   storageActionReasonLabel, storageResultSummary,
   storageMemberLabel, storageQueueRows, storageStatusClass, storageStatusLabel,
 } from '/imports/storage/presentation';
@@ -26,7 +27,8 @@ const scopedError = (section) => {
   const state = Template.instance().state;
   return state.get('errorSection') === section ? state.get('error') : '';
 };
-const operator = () => !!Meteor.userId() && Roles.userIsInRole(Meteor.userId(), ['admin', 'board']);
+const operator = () => !!Meteor.userId() &&
+  Roles.userIsInRole(Meteor.userId(), STORAGE_OPERATOR_ROLES);
 const formObject = (form) => Object.fromEntries(new FormData(form).entries());
 const storageOwnerIdForMember = (memberId) => {
   const seen = new Set();
@@ -178,9 +180,6 @@ const storageUnitView = (unit) => {
     statusLabel: storageStatusLabel(unit.availability_status),
     ownerName: owner?.name || 'No owner',
     wallChoices: unitWallChoices(unit),
-    heightNone: !unit.height,
-    heightLow: unit.height === 'low',
-    heightHigh: unit.height === 'high',
     statusAvailable: unit.availability_status === 'available',
     statusUnavailable: unit.availability_status === 'unavailable',
     statusLifecycle: !['available', 'unavailable'].includes(unit.availability_status),
@@ -213,14 +212,12 @@ Template.Storage.onCreated(function () {
     filters: {},
     eventFilters: {},
     queueQuery: '',
-    bulk: {},
-    bulkPending: null,
-    bulkAcknowledged: false,
-    bulkResults: null,
     results: null,
     createWallOpen: false,
     createUnitOpen: false,
     requestEditor: null,
+    migrationPreview: null,
+    migrationReason: '',
   });
   this.subscribe('storageAdminDashboard');
   this.autorun(() => {
@@ -270,11 +267,33 @@ Template.Storage.helpers({
   pageError: () => scopedError('page'), previewError: () => scopedError('preview'),
   queueError: () => scopedError('queue'), wallsError: () => scopedError('walls'),
   inventoryError: () => scopedError('inventory'),
+  migrationError: () => scopedError('migration'),
   readiness() {
     const presentation = storageReadinessPresentation(Template.instance().state.get('readiness'));
     // Readiness is a safety gate, not a success notification. Keep the page
     // quiet when allocation is safe and only surface states that need action.
     return ['ready', 'loading'].includes(presentation.state) ? null : presentation;
+  },
+  migration() {
+    const state = Template.instance().state;
+    const preview = state.get('migrationPreview');
+    const readiness = state.get('readiness') || {};
+    const sourceBlockers = preview?.preview_report?.blocker_count || 0;
+    const targetBlockers = preview?.target_preflight?.blocker_count || 0;
+    return {
+      previewed: !!preview,
+      cutoff: preview ? date(preview.cutoff) : '',
+      fingerprint: preview?.fingerprint,
+      sourceBlockers,
+      targetBlockers,
+      cannotApply: !preview || !!readiness.migration_applied ||
+        sourceBlockers !== 0 || targetBlockers !== 0 || state.get('busy'),
+      migrationApplied: !!readiness.migration_applied,
+      cutoverFinalized: !!readiness.cutover_finalized,
+      cannotFinalize: !readiness.migration_applied || readiness.cutover_finalized ||
+        !state.get('migrationReason')?.trim() || state.get('busy'),
+      busy: state.get('busy'),
+    };
   },
   actionCards() {
     const state = Template.instance().state;
@@ -318,8 +337,6 @@ Template.Storage.helpers({
   },
   batchResults: () => Template.instance().state.get('results'),
   batchResultSummary: () => storageResultSummary(Template.instance().state.get('results') || []),
-  bulkResults: () => Template.instance().state.get('bulkResults'),
-  bulkResultSummary: () => storageResultSummary(Template.instance().state.get('bulkResults') || []),
   createUnitOpen: () => Template.instance().state.get('createUnitOpen'),
   storageQueue() {
     const state = Template.instance().state;
@@ -331,16 +348,6 @@ Template.Storage.helpers({
       .map((row) => ({ ...row, waitingSince: date(row.requested_at) }));
   },
   requestEditor: () => requestEditorView(Template.instance().state.get('requestEditor')),
-  bulkPending() {
-    const state = Template.instance().state;
-    const pending = state.get('bulkPending');
-    return pending && {
-      ...pending,
-      confirmDisabled: state.get('busy') || (
-        pending.requiresAcknowledgement && !state.get('bulkAcknowledged')
-      ),
-    };
-  },
   wallOptions: () => StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch(),
   activeWallOptions: () => StorageWalls.find({ active: true }, { sort: { display_order: 1, name: 1 } }).fetch(),
   createWallOpen: () => Template.instance().state.get('createWallOpen'),
@@ -352,7 +359,6 @@ Template.Storage.helpers({
   })),
   walls() {
     const state = Template.instance().state;
-    const bulk = state.get('bulk') || {};
     const selectedId = state.get('selectedUnitId');
     const now = new Date();
     const walls = StorageWalls.find().fetch();
@@ -381,7 +387,6 @@ Template.Storage.helpers({
         statusClass: storageStatusClass(unit.availability_status),
         overdueClass: unit._overdue ? 'storage-unit-overdue' : '',
         selectedClass: unit._id === selectedId ? 'storage-unit-selected' : '',
-        bulkSelected: !!bulk[unit._id],
         ownerName,
         tooltip: [
           unit.name,
@@ -425,6 +430,59 @@ Template.Storage.events({
   'click .refresh-storage'(event, instance) {
     event.preventDefault();
     instance.refresh();
+  },
+  async 'click .preview-migration'(event, instance) {
+    event.preventDefault();
+    instance.state.set('busy', true);
+    setError(instance, '');
+    try {
+      instance.state.set('migrationPreview', await Meteor.callAsync('storageMigration.preview', {}));
+    } catch (error) {
+      setError(instance, errorMessage(error), 'migration');
+    } finally {
+      instance.state.set('busy', false);
+    }
+  },
+  async 'click .apply-migration'(event, instance) {
+    event.preventDefault();
+    const preview = instance.state.get('migrationPreview');
+    if (!preview || !window.confirm('Apply this exact migration preview?')) return;
+    instance.state.set('busy', true);
+    setError(instance, '');
+    try {
+      await Meteor.callAsync('storageMigration.apply', {
+        fingerprint: preview.fingerprint,
+        cutoff: preview.cutoff,
+      });
+      await instance.refresh();
+    } catch (error) {
+      setError(instance, errorMessage(error), 'migration');
+    } finally {
+      instance.state.set('busy', false);
+    }
+  },
+  'input .migration-reason'(event, instance) {
+    instance.state.set('migrationReason', event.currentTarget.value);
+  },
+  async 'click .finalize-migration'(event, instance) {
+    event.preventDefault();
+    const readiness = instance.state.get('readiness') || {};
+    const reason = instance.state.get('migrationReason')?.trim();
+    if (!reason || !readiness.migration_fingerprint ||
+        !window.confirm('Finalize cutover and retire the legacy storage fields?')) return;
+    instance.state.set('busy', true);
+    setError(instance, '');
+    try {
+      await Meteor.callAsync('storageMigration.finalizeCutover', {
+        fingerprint: readiness.migration_fingerprint,
+        reason,
+      });
+      await instance.refresh();
+    } catch (error) {
+      setError(instance, errorMessage(error), 'migration');
+    } finally {
+      instance.state.set('busy', false);
+    }
   },
   'click .open-preview'(event, instance) {
     const action = event.currentTarget.dataset.action;
@@ -585,7 +643,6 @@ Template.Storage.events({
     const fields = formObject(form);
     fields.column = Number(fields.column);
     fields.row = Number(fields.row);
-    if (!fields.height) delete fields.height;
     if (!fields.note) delete fields.note;
     try {
       await mutate(
@@ -664,65 +721,12 @@ Template.Storage.events({
   'click .select-unit'(event, instance) {
     instance.state.set('selectedUnitId', event.currentTarget.dataset.id);
   },
-  'change .bulk-unit'(event, instance) {
-    setStateMapValue(
-      instance,
-      'bulk',
-      event.currentTarget.dataset.id,
-      event.currentTarget.checked,
-    );
-    instance.state.set('bulkPending', null);
-    instance.state.set('bulkAcknowledged', false);
-  },
-  'click .bulk-height'(event, instance) {
-    const unit_ids = Object.entries(instance.state.get('bulk') || {})
-      .filter(([, selected]) => selected)
-      .map(([unitId]) => unitId)
-      .sort();
-    if (!unit_ids.length) {
-      setError(instance, 'Select at least one unit.', 'inventory');
-      return;
-    }
-    const height = event.currentTarget.dataset.height;
-    instance.state.set('bulkResults', null);
-    instance.state.set('bulkPending', {
-      unit_ids,
-      height,
-      ...bulkHeightImpact(StorageUnits.find().fetch(), unit_ids),
-    });
-    instance.state.set('bulkAcknowledged', false);
-  },
-  'change .bulk-acknowledgement'(event, instance) {
-    instance.state.set('bulkAcknowledged', event.currentTarget.checked);
-  },
-  async 'click .confirm-bulk-height'(event, instance) {
-    event.preventDefault();
-    const pending = instance.state.get('bulkPending');
-    if (!pending) return;
-    const acknowledged = pending.requiresAcknowledgement
-      && instance.state.get('bulkAcknowledged') === true;
-    try {
-      const results = await mutate(instance, 'adminStorage.units.bulkSetHeight', {
-        unit_ids: pending.unit_ids, height: pending.height, acknowledged,
-      }, `bulk.height:${pending.height}:${pending.unit_ids.join(',')}`, 'inventory');
-      instance.state.set('bulkResults', joinBulkHeightResults(
-        results,
-        StorageUnits.find().fetch(),
-      ));
-      instance.state.set('bulk', {});
-      instance.state.set('bulkPending', null);
-      instance.state.set('bulkAcknowledged', false);
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
-  },
   async 'submit .edit-unit-form'(event, instance) {
     event.preventDefault();
     const values = formObject(event.currentTarget);
     const unit_id = event.currentTarget.dataset.id;
     const fields = {
       name: values.name,
-      height: values.height || null,
       wall_id: values.wall_id,
       column: Number(values.column),
       row: Number(values.row),

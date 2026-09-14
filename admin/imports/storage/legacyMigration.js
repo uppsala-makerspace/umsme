@@ -2,6 +2,7 @@ import {
   desiredStorageRequestStatus,
   legacyStoragePreference,
   resolveStorageOwner,
+  storageHeightForRow,
   storageLayoutErrors,
   storageStateErrors,
 } from '/imports/common/lib/storageRules';
@@ -81,6 +82,7 @@ export const buildLegacyStorageMigrationPlan = ({
   const membersById = Object.fromEntries(members.map((member) => [member._id, member]));
 
   const definitions = new Map();
+  const configuredStorageNumbers = new Set();
   const wallPositions = new Set();
   const storageWalls = [];
   const wallNames = new Set();
@@ -90,6 +92,11 @@ export const buildLegacyStorageMigrationPlan = ({
   for (const [wallIndex, wall] of orderedWalls.entries()) {
     const wallId = String(wall.name || 'unnamed');
     const shelfSize = wall.shelfSize === undefined ? 12 : wall.shelfSize;
+    if (Number.isInteger(wall.start) && Number.isInteger(wall.end) && wall.end >= wall.start) {
+      for (let number = wall.start; number <= wall.end; number += 1) {
+        configuredStorageNumbers.add(number);
+      }
+    }
     if (!wall.name || !['floor1', 'floor2'].includes(wall.floor) ||
         !Number.isInteger(wall.start) || !Number.isInteger(wall.end) || wall.end < wall.start ||
         !Number.isInteger(shelfSize) || shelfSize < 2 || shelfSize % 2 !== 0) {
@@ -128,13 +135,15 @@ export const buildLegacyStorageMigrationPlan = ({
       }
       wallPositions.add(layoutKey);
       const shelfOffset = (position - 1) % shelfSize;
+      const row = Math.floor(shelfOffset / 2) + 1;
       definitions.set(number, {
         _id: `${LEGACY_STORAGE_MIGRATION_VERSION}:unit:${number}`,
         name: String(number),
         floor: wall.floor,
         wall_id: storageWallId,
         column: Math.floor((position - 1) / shelfSize) * 2 + (shelfOffset % 2) + 1,
-        row: Math.floor(shelfOffset / 2) + 1,
+        row,
+        height: storageHeightForRow(row, rowCount),
       });
     }
   }
@@ -148,10 +157,11 @@ export const buildLegacyStorageMigrationPlan = ({
       continue;
     }
     const number = Number(match[1]);
-    if (!definitions.has(number)) {
+    if (!definitions.has(number) && !configuredStorageNumbers.has(number)) {
       addIssue('warning', 'box_comment_outside_inventory', 'comment', comment._id, { number });
       continue;
     }
+    if (!definitions.has(number)) continue;
     const entries = commentsByNumber.get(number) || [];
     entries.push(comment);
     commentsByNumber.set(number, entries);
@@ -166,6 +176,7 @@ export const buildLegacyStorageMigrationPlan = ({
 
   const claimsByUnit = new Map();
   const claimedUnitsByOwner = new Map();
+  const ownersWithInvalidWallClaims = new Set();
   const ownerResolution = new Map();
   for (const member of members) {
     const resolved = resolveStorageOwner(member, membersById);
@@ -187,8 +198,14 @@ export const buildLegacyStorageMigrationPlan = ({
       addIssue('warning', 'numeric_string_storage_normalized', 'member', member._id, { value: member.storage });
     }
     const number = normalized.value;
-    if (!definitions.has(number)) {
+    if (!definitions.has(number) && !configuredStorageNumbers.has(number)) {
       addIssue('blocker', 'storage_outside_inventory', 'member', member._id, { number });
+      continue;
+    }
+    // The invalid wall is already an authoritative blocker. Avoid producing
+    // one derived error for every member whose box belongs to that wall.
+    if (!definitions.has(number)) {
+      if (resolved.owner) ownersWithInvalidWallClaims.add(resolved.owner._id);
       continue;
     }
     if (!resolved.owner || resolved.error) continue;
@@ -279,6 +296,7 @@ export const buildLegacyStorageMigrationPlan = ({
     if (member.storagequeue !== true && !requestPresent) continue;
     const resolved = ownerResolution.get(member._id);
     if (!resolved?.owner || resolved.error) continue;
+    if (ownersWithInvalidWallClaims.has(resolved.owner._id)) continue;
     const signals = requestSignalsByOwner.get(resolved.owner._id) || [];
     signals.push({ member_id: member._id, requestPresent, value: member.storagerequest });
     requestSignalsByOwner.set(resolved.owner._id, signals);

@@ -14,6 +14,7 @@ import {
   storagePreferenceMatches,
   storageReminderAt,
   storageExemptionDeactivationReason,
+  storageHeightForRow,
   storageLayoutErrors,
   storageStateErrors,
   storageUnitStateErrors,
@@ -79,6 +80,19 @@ describe('storageRules', function () {
   });
 
   describe('preferences', function () {
+    it('derives high and low positions from top-to-bottom wall rows', function () {
+      assert.deepStrictEqual(
+        [1, 2, 3, 4, 5, 6].map((row) => storageHeightForRow(row, 6)),
+        ['high', 'high', 'high', 'low', 'low', 'low'],
+      );
+      assert.deepStrictEqual(
+        [1, 2, 3, 4, 5].map((row) => storageHeightForRow(row, 5)),
+        ['high', 'high', 'low', 'low', 'low'],
+      );
+      assert.strictEqual(storageHeightForRow(1, 1), 'low');
+      assert.strictEqual(storageHeightForRow(0, 6), undefined);
+    });
+
     it('maps every legacy preference', function () {
       assert.deepStrictEqual(legacyStoragePreference('floor1'), { preference: { floor: 'floor1' } });
       assert.deepStrictEqual(legacyStoragePreference('floor1L'), { preference: { floor: 'floor1', height: 'low' } });
@@ -239,15 +253,16 @@ describe('storageRules', function () {
     it('validates wall references, coordinates, and floor consistency', function () {
       const walls = [{ _id: 'wall', floor: 'floor1', column_count: 2, row_count: 5 }];
       const errors = storageLayoutErrors({ walls, units: [
-        { _id: 'valid', wall_id: 'wall', floor: 'floor1', column: 1, row: 5 },
-        { _id: 'duplicate', wall_id: 'wall', floor: 'floor1', column: 1, row: 5 },
+        { _id: 'valid', wall_id: 'wall', floor: 'floor1', column: 1, row: 5, height: 'low' },
+        { _id: 'duplicate', wall_id: 'wall', floor: 'floor1', column: 1, row: 5, height: 'low' },
         { _id: 'outside', wall_id: 'wall', floor: 'floor1', column: 3, row: 1 },
-        { _id: 'wrong-floor', wall_id: 'wall', floor: 'floor2', column: 2, row: 1 },
+        { _id: 'wrong-floor', wall_id: 'wall', floor: 'floor2', column: 2, row: 1, height: 'high' },
+        { _id: 'wrong-height', wall_id: 'wall', floor: 'floor1', column: 2, row: 5, height: 'high' },
         { _id: 'orphan', wall_id: 'missing', floor: 'floor1', column: 1, row: 1 },
       ] });
       assert.deepStrictEqual(errors.map(({ code }) => code), [
         'duplicate_unit_coordinate', 'unit_outside_wall_layout',
-        'unit_wall_floor_mismatch', 'unit_wall_missing',
+        'unit_wall_floor_mismatch', 'unit_height_row_mismatch', 'unit_wall_missing',
       ]);
     });
 

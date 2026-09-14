@@ -77,9 +77,6 @@ const load = (state, memberfilter = 'active') => {
       statusClass: isActive ? 'memberCurrent' : 'memberLeft',
       left: obj.left ? obj.left.toISOString().substring(0,10) : ''
     };
-    if (memberfilter === 'queueing' && !member.storagequeue && !member.storagerequest) {
-      return;
-    }
     if (memberfilter === 'active' && !isActive) {
       return;
     }

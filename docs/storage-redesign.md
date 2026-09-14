@@ -21,7 +21,7 @@ which unit is free, and whether a family already has a shared unit.
 
 The redesign makes the system do that preparation. It keeps a structured
 inventory, calculates the next useful actions, and presents them as batches.
-An administrator or board member reviews the suggestions and confirms them.
+An administrator, board member, or storage operator reviews the suggestions and confirms them.
 The system then updates the records and sends the required member messages.
 
 The aim is not unattended storage management. The aim is to remove routine
@@ -101,7 +101,8 @@ physical clearance is confirmed.
 
 ### 1.6 Where automation stops
 
-Every suggested batch requires confirmation by an `admin` or `board` user.
+Every suggested batch requires confirmation by an `admin`, `board`, or
+storage-role user.
 The system never assigns, warns, reminds, reclaims, releases, or resolves an
 expired offer without that confirmation.
 
@@ -242,7 +243,7 @@ One record represents one physical storage unit.
   name,                 // unique member-facing number, such as 1001
   owner,                // paying Member._id; optional
   floor,                // floor1 | floor2
-  height,               // low | high; may be unset during migration
+  height,               // low | high; derived from wall row
   wall_id,
   column,
   row,
@@ -281,7 +282,8 @@ The availability states mean:
 
 Unit names and wall coordinates are unique. Available and unavailable units
 have no owner. Occupied, reserved, and awaiting-clearance units have an owner.
-Only available units with both floor and height can enter automatic allocation.
+Only available units with coherent floor, wall, row, and derived height can
+enter automatic allocation.
 
 Referenced units are not deleted. They are marked unavailable so their history
 continues to resolve.
@@ -369,7 +371,8 @@ separate action-execution collection.
 ### 3.7 Server-side command boundary
 
 All storage mutations run in server methods. Administrative methods require an
-`admin` or `board` role. Member methods resolve the signed-in person to the
+`admin`, `board`, or dedicated `storage` role. The storage role grants no
+unrelated board or administrator data access. Member methods resolve the signed-in person to the
 paying storage owner before reading or changing state.
 
 The main interfaces are:
@@ -391,6 +394,11 @@ Confirmation reloads the authoritative state and uses conditional database
 updates inside a MongoDB transaction. Storage changes require a replica set;
 readiness blocks them when transaction support is unavailable. Stable command
 and event identifiers prevent a retry from applying the same decision twice.
+
+Reads and previews also perform lazy reconciliation: they pause or resume queue
+requests as eligibility changes, clear warnings after renewal, and expire
+administrative exemptions. These housekeeping changes never communicate with a
+member. Each reconciliation update and its audit event commit in one transaction.
 
 ### 3.8 Existing communication system
 
@@ -457,10 +465,11 @@ number of columns and rows. Each unit is shown at its physical coordinate with
 a strong status color. The page supports status, floor, height, wall, owner,
 warning, overdue, and text filters.
 
-An administrator can edit wall and unit metadata, classify units as low or
-high in bulk, and set units available or unavailable when their lifecycle
-allows it. Metadata changes to occupied or reserved units require explicit
-acknowledgement.
+An administrator can edit wall and unit metadata and set units available or
+unavailable when their lifecycle allows it. Height follows the unit row: the
+top half is high and the bottom half is low; on an odd-row wall the middle row
+is low. Moving a unit or changing a wall's row count recalculates height.
+Metadata changes to occupied or reserved units require explicit acknowledgement.
 
 The selected-unit panel shows the current owner, request, pending offer,
 warning, exemption, messages, and event history. It also contains the manual
@@ -522,7 +531,8 @@ members see the same storage information in read-only form.
 Migration is a controlled deployment task. It starts with a dry run and does
 not run as an unreviewed application-startup side effect.
 
-The migration tools are restricted to administrators and board members:
+The migration tools are restricted to administrators, board members, and
+storage-role users:
 
 - `storageMigration.preview` scans the legacy source, reports anomalies and
   target conflicts, and creates a stable source fingerprint;
@@ -544,8 +554,9 @@ The migration creates walls and units from the current configured ranges. The
 wall definition supplies the floor and grid dimensions. Unit numbers and
 coordinates are derived from those ranges.
 
-Height cannot be inferred. It remains unset until an administrator classifies
-the unit as low or high. Unclassified units cannot enter automatic allocation.
+Height is derived from the generated row and the wall's row count. The top half
+is high and the remaining rows are low, including the middle row of an odd-row
+wall. A missing or inconsistent derived value blocks automatic allocation.
 
 Legacy `_box_<number>` comments become internal unit notes. A commented unit
 without an owner becomes unavailable so it is not assigned by mistake.
@@ -583,7 +594,7 @@ The deployment sequence is:
 1. Restore recent production data in a safe test environment.
 2. Run the preview and resolve every blocker.
 3. Verify that production MongoDB is a replica set with transaction support.
-4. Classify unit heights and verify wall layouts.
+4. Verify wall layouts and their derived unit heights.
 5. Deploy the shared schema, server methods, admin UI, and member UI together.
 6. Disable all legacy storage write paths in the same maintenance window.
 7. Apply the reviewed migration and verify counts and sample records.
@@ -597,7 +608,7 @@ The implemented test suite covers:
 
 - all allocation phases and stable tie-breaking;
 - soft-preference fallback;
-- exclusion of unavailable, reserved, uncleared, and unclassified units;
+- exclusion of unavailable, reserved, uncleared, and invalid-layout units;
 - family ownership and eligibility;
 - queue pause and renewal;
 - warning, reminder, reclamation, and exemption timing;

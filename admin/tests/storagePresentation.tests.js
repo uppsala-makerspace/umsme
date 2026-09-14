@@ -1,10 +1,8 @@
 import assert from 'assert';
 import {
-  bulkHeightImpact,
   filterStorageQueue,
   filterStorageUnits,
   groupStorageWalls,
-  joinBulkHeightResults,
   joinStorageResults,
   sameSuggestionSet,
   storageActionReasonLabel,
@@ -149,12 +147,6 @@ describe('storage admin presentation', function () {
     assert.strictEqual(storageReadinessPresentation({ allocation_ready: true, allocation_blocked_reasons: [] }).state, 'ready');
   });
 
-  it('requires acknowledgement when bulk height affects occupied or reserved units', function () {
-    const impact = bulkHeightImpact(units, ['a', 'b', 'missing']);
-    assert.deepStrictEqual(impact, { selectedCount: 2, protectedCount: 1, requiresAcknowledgement: true });
-    assert.strictEqual(bulkHeightImpact(units, ['a']).requiresAcknowledgement, false);
-  });
-
   it('joins every result status to the exact confirmed row', function () {
     const rows = [{ suggestion_id: 'one', member_name: 'Ada', unit_name: 'A-1' }];
     const labels = {
@@ -169,18 +161,11 @@ describe('storage admin presentation', function () {
     }
   });
 
-  it('summarizes batches and labels every bulk result by unit', function () {
+  it('summarizes batch results and labels action reasons', function () {
     assert.strictEqual(storageResultSummary([
       { status: 'applied' }, { status: 'already_applied' },
       { status: 'conflict' }, { status: 'failed' },
     ]), '2 applied · 1 need review · 1 failed');
-    assert.deepStrictEqual(joinBulkHeightResults([
-      { unitId: 'a', status: 'updated' },
-      { unitId: 'missing', status: 'failed', reason: 'Gone' },
-    ], units), [
-      { unitId: 'a', status: 'updated', label: '1', statusClass: 'applied', statusLabel: 'Updated' },
-      { unitId: 'missing', status: 'failed', reason: 'Gone', label: 'Unknown unit', statusClass: 'failed', statusLabel: 'Failed' },
-    ]);
     assert.strictEqual(storageActionReasonLabel('warning_deadline_passed'), 'The 28-day warning deadline passed');
     assert.strictEqual(storageActionReasonLabel('unexpected_reason'), 'unexpected reason');
   });

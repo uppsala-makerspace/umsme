@@ -171,18 +171,6 @@ export const storageReadinessPresentation = (readiness) => {
   };
 };
 
-export const bulkHeightImpact = (units, selectedIds) => {
-  const selected = new Set(selectedIds);
-  const affected = units.filter(({ _id }) => selected.has(_id));
-  const protectedCount = affected.filter(({ availability_status }) =>
-    ['occupied', 'reserved'].includes(availability_status)).length;
-  return {
-    selectedCount: affected.length,
-    protectedCount,
-    requiresAcknowledgement: protectedCount > 0,
-  };
-};
-
 export const joinStorageResults = (results = [], confirmedRows = []) => {
   const rows = new Map(confirmedRows.map((row) => [row.suggestion_id, row]));
   return results.map((result) => {
@@ -215,16 +203,6 @@ export const storageResultSummary = (results = []) => {
     counts.review ? `${counts.review} need review` : null,
     counts.failed ? `${counts.failed} failed` : null,
   ].filter(Boolean).join(' · ') || 'No results';
-};
-
-export const joinBulkHeightResults = (results = [], units = []) => {
-  const unitNames = new Map(units.map((unit) => [unit._id, unit.name]));
-  return results.map((result) => ({
-    ...result,
-    label: unitNames.get(result.unitId) || 'Unknown unit',
-    statusClass: result.status === 'updated' ? 'applied' : 'failed',
-    statusLabel: result.status === 'updated' ? 'Updated' : 'Failed',
-  }));
 };
 
 export const sameSuggestionSet = (left = [], right = []) => {

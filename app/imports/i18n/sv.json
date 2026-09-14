@@ -250,6 +250,7 @@
   "storageUpdateRequest": "Uppdatera begäran",
   "storageRequestMove": "Begär en annan låda",
   "storageRequestRelease": "Begär att lämna tillbaka lådan",
+  "storageReleaseConfirm": "Vill du lämna tillbaka din förvaringslåda? En administratör måste godkänna begäran innan lådan lämnas tillbaka.",
   "storageReleaseHelp": "Lådan är tilldelad till dig tills en administratör godkänner återlämningen och senare bekräftar att den är tömd.",
   "storageCancelRequest": "Avbryt begäran",
   "storageLoadFailed": "Det gick inte att hämta din förvaringsinformation. Försök igen.",

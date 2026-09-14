@@ -5,7 +5,6 @@ import { previewStorageSuggestions } from '/imports/common/server/storage/sugges
 import { confirmStorageSuggestions } from '/imports/common/server/storage/commands';
 import {
   assignStorageUnitManual,
-  bulkSetStorageHeightManual,
   cancelStorageOfferManual,
   cancelStorageRequestManual,
   completeStorageOfferManual,
@@ -67,14 +66,6 @@ Meteor.methods({
     check(acknowledged, Match.Maybe(Boolean));
     check(command_id, String);
     return updateStorageUnitManual({ unitId: unit_id, fields, acknowledged, commandId: command_id, actor: await operator(this) });
-  },
-
-  async 'adminStorage.units.bulkSetHeight'({ unit_ids, height, acknowledged, command_id }) {
-    check(unit_ids, [String]);
-    check(height, String);
-    check(acknowledged, Match.Maybe(Boolean));
-    check(command_id, String);
-    return bulkSetStorageHeightManual({ unitIds: unit_ids, height, acknowledged, commandId: command_id, actor: await operator(this) });
   },
 
   async 'adminStorage.units.assignManual'({ unit_id, owner_id, override, reason, command_id }) {

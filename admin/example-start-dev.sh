@@ -6,4 +6,5 @@ export METEOR_SETTINGS=$(cat settings.json )
 export MAIL_URL=smtp://umsme@uppsalamakerspace.se:PASSWORD@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false
 # Assumes mongod is started separately as the rs0 replica set.
 export MONGO_URL=mongodb://localhost:27017/umsme?replicaSet=rs0
+export MONGO_OPLOG_URL=mongodb://localhost:27017/local?replicaSet=rs0
 meteor --settings settings.json

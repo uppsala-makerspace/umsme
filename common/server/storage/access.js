@@ -2,13 +2,16 @@ import { Meteor } from 'meteor/meteor';
 import { Roles } from 'meteor/roles';
 import { Members } from '/imports/common/collections/members';
 import { memberForUser } from '/imports/common/server/memberForUser';
-import { resolveStorageOwner } from '/imports/common/lib/storageRules';
+import {
+  resolveStorageOwner,
+  STORAGE_OPERATOR_ROLES,
+} from '/imports/common/lib/storageRules';
 
-export const STORAGE_OPERATOR_ROLES = ['admin', 'board'];
+export { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
 
 export const requireStorageOperator = async (userId) => {
   if (!userId || !(await Roles.userIsInRoleAsync(userId, STORAGE_OPERATOR_ROLES))) {
-    throw new Meteor.Error('not-authorized', 'Admin or board role required');
+    throw new Meteor.Error('not-authorized', 'Storage, admin, or board role required');
   }
   return userId;
 };

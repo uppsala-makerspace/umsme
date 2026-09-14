@@ -1,6 +1,7 @@
 export const STORAGE_WARNING_DAYS = 28;
 export const STORAGE_REMINDER_DAYS = 21;
 export const STORAGE_MOVE_DAYS = 14;
+export const STORAGE_OPERATOR_ROLES = ['admin', 'board', 'storage'];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const ACTIVE_REQUEST_STATUSES = new Set(['waiting', 'paused_ineligible', 'in_progress']);
@@ -36,6 +37,13 @@ export const resolveStorageOwner = (member, members) => {
 
 export const hasActiveLabMembershipAt = (owner, now = new Date()) =>
   !!owner?.lab && new Date(owner.lab).getTime() > new Date(now).getTime();
+
+/** Rows count from the top. On odd walls, the middle row belongs to the low half. */
+export const storageHeightForRow = (row, rowCount) => {
+  if (!Number.isInteger(row) || !Number.isInteger(rowCount) ||
+      row < 1 || rowCount < 1 || row > rowCount) return undefined;
+  return row <= Math.floor(rowCount / 2) ? 'high' : 'low';
+};
 
 export const legacyStoragePreference = (value) => {
   if (value === undefined || value === null || value === '') return { preference: undefined };
@@ -139,6 +147,9 @@ export const storageLayoutErrors = ({ walls = [], units = [] } = {}) => {
         unit.column > wall.column_count || unit.row > wall.row_count) {
       errors.push({ code: 'unit_outside_wall_layout', id: unit._id });
       continue;
+    }
+    if (unit.height !== storageHeightForRow(unit.row, wall.row_count)) {
+      errors.push({ code: 'unit_height_row_mismatch', id: unit._id });
     }
     const coordinate = `${unit.wall_id}:${unit.column}:${unit.row}`;
     if (occupiedCoordinates.has(coordinate)) errors.push({ code: 'duplicate_unit_coordinate', id: unit._id });

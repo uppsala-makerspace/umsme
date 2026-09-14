@@ -6,25 +6,35 @@ import {
   storageExemptionDeactivationReason,
 } from '/imports/common/lib/storageRules';
 import { appendStorageEvent } from './events';
+import { runStorageAtomic } from './atomic';
 
 const systemActor = '__system__';
 
-const updateOne = async (collection, selector, modifier) => collection.updateAsync(selector, modifier);
+const updateWithEvent = async ({ collection, selector, modifier, event }) => runStorageAtomic({
+  transactional: async (session) => {
+    const result = await collection.rawCollection().updateOne(selector, modifier, { session });
+    if (result.matchedCount !== 1) return false;
+    await appendStorageEvent(event, { session });
+    return true;
+  },
+});
 
 const reconcileRequest = async (request, owner, now) => {
   if (!['waiting', 'paused_ineligible'].includes(request.request_status)) return false;
   const wanted = desiredStorageRequestStatus(request.request_type, hasActiveLabMembershipAt(owner, now));
   if (wanted === request.request_status) return false;
-  const changed = await updateOne(StorageRequests,
-    { _id: request._id, request_status: request.request_status, updatedAt: request.updatedAt },
-    { $set: { request_status: wanted, updatedAt: now } });
-  if (!changed) return false;
-  await appendStorageEvent({
-    entityType: 'storageRequest', entityId: request._id,
-    eventType: wanted === 'waiting' ? 'request_eligibility_resumed' : 'request_eligibility_paused',
-    actorType: 'system', actor: systemActor, member: request.owner, occurredAt: now,
-    details: { previous_status: request.request_status },
+  const changed = await updateWithEvent({
+    collection: StorageRequests,
+    selector: { _id: request._id, request_status: request.request_status, updatedAt: request.updatedAt },
+    modifier: { $set: { request_status: wanted, updatedAt: now } },
+    event: {
+      entityType: 'storageRequest', entityId: request._id,
+      eventType: wanted === 'waiting' ? 'request_eligibility_resumed' : 'request_eligibility_paused',
+      actorType: 'system', actor: systemActor, member: request.owner, occurredAt: now,
+      details: { previous_status: request.request_status },
+    },
   });
+  if (!changed) return false;
   return true;
 };
 
@@ -33,32 +43,40 @@ const reconcileUnit = async (unit, owner, now) => {
   let exemptionsChanged = 0;
   if (unit.warning && hasActiveLabMembershipAt(owner, now)) {
     const warning = unit.warning;
-    const changed = await updateOne(StorageUnits,
-      { _id: unit._id, 'warning.id': warning.id, updatedAt: unit.updatedAt },
-      { $unset: { warning: '' }, $set: { updatedAt: now } });
-    if (changed) {
-      warningsChanged = 1;
-      await appendStorageEvent({
+    const changed = await updateWithEvent({
+      collection: StorageUnits,
+      selector: { _id: unit._id, 'warning.id': warning.id, updatedAt: unit.updatedAt },
+      modifier: { $unset: { warning: '' }, $set: { updatedAt: now } },
+      event: {
         entityType: 'storageUnit', entityId: unit._id, eventType: 'warning_resolved_renewal',
         actorType: 'system', actor: systemActor, member: unit.owner, unit: unit._id,
         occurredAt: now, details: { warning_id: warning.id },
-      });
+      },
+    });
+    if (changed) {
+      warningsChanged = 1;
       unit = { ...unit, updatedAt: now };
       delete unit.warning;
     }
   }
   const reason = storageExemptionDeactivationReason(unit.exemption, now);
   if (reason) {
-    const changed = await updateOne(StorageUnits,
-      { _id: unit._id, 'exemption.created_at': unit.exemption.created_at, updatedAt: unit.updatedAt },
-      { $unset: { exemption: '' }, $set: { updatedAt: now } });
-    if (changed) {
-      exemptionsChanged = 1;
-      await appendStorageEvent({
+    const changed = await updateWithEvent({
+      collection: StorageUnits,
+      selector: {
+        _id: unit._id,
+        'exemption.created_at': unit.exemption.created_at,
+        updatedAt: unit.updatedAt,
+      },
+      modifier: { $unset: { exemption: '' }, $set: { updatedAt: now } },
+      event: {
         entityType: 'storageUnit', entityId: unit._id, eventType: `exemption_${reason}`,
         actorType: 'system', actor: systemActor, member: unit.owner, unit: unit._id,
         occurredAt: now,
-      });
+      },
+    });
+    if (changed) {
+      exemptionsChanged = 1;
     }
   }
   return { warningsChanged, exemptionsChanged };

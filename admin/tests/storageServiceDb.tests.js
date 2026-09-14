@@ -8,7 +8,8 @@ import { previewStorageSuggestions } from '/imports/common/server/storage/sugges
 import { confirmStorageSuggestions, completeStorageOffer } from '/imports/common/server/storage/commands';
 import { reconcileStorageState } from '/imports/common/server/storage/reconciliation';
 import {
-  assignStorageUnitManual, createStorageExemptionManual, revokeStorageExemptionManual,
+  assignStorageUnitManual, createStorageExemptionManual, createStorageUnitManual,
+  revokeStorageExemptionManual, updateStorageUnitManual, updateStorageWallManual,
 } from '/imports/common/server/storage/manual';
 import { confirmMemberStorageOffer, upsertMemberStorageRequest } from '/imports/common/server/storage/memberCommands';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
@@ -27,10 +28,11 @@ const cleanup = async () => {
   await Messages.removeAsync({ member: { $regex: `^${prefix}` }, type: 'storage' });
 };
 
-const unit = (id, column, status = 'available', owner) => {
+const unit = (id, column, status = 'available', owner, row = 2) => {
   const created = new Date();
   return StorageUnits.insertAsync({
-    _id: id, name: id, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`, column, row: 1,
+    _id: id, name: id, floor: 'floor1', height: row === 1 ? 'high' : 'low',
+    wall_id: `${prefix}wall`, column, row,
     availability_status: status, ...(owner ? { owner } : {}),
     ...(owner && status === 'occupied' ? { assigned_at: created, assigned_by: `${prefix}admin` } : {}),
     createdAt: created, updatedAt: created,
@@ -104,6 +106,33 @@ describe('five-collection storage database workflow', function () {
     assert.strictEqual(await Messages.find({ member: ownerId, type: 'storage' }).countAsync(), 1);
   });
 
+  it('derives height when units and wall layouts change', async function () {
+    const wallId = `${prefix}wall`;
+    const actor = `${prefix}admin`;
+    await updateStorageWallManual({
+      wallId, fields: { row_count: 4 }, actor, commandId: 'wall-four-rows',
+    });
+    const unitId = await createStorageUnitManual({
+      fields: {
+        name: `${prefix}derived-unit`, wall_id: wallId, column: 1, row: 2,
+        availability_status: 'available',
+      },
+      actor,
+      commandId: 'create-derived-unit',
+    });
+    assert.strictEqual((await StorageUnits.findOneAsync(unitId)).height, 'high');
+
+    await updateStorageWallManual({
+      wallId, fields: { row_count: 3 }, actor, commandId: 'wall-three-rows',
+    });
+    assert.strictEqual((await StorageUnits.findOneAsync(unitId)).height, 'low');
+
+    await updateStorageUnitManual({
+      unitId, fields: { row: 1 }, actor, commandId: 'move-to-top-row',
+    });
+    assert.strictEqual((await StorageUnits.findOneAsync(unitId)).height, 'high');
+  });
+
   it('embeds warnings and clears them when lab membership is renewed', async function () {
     const ownerId = `${prefix}warning-owner`;
     const unitId = `${prefix}warning-unit`;
@@ -129,8 +158,7 @@ describe('five-collection storage database workflow', function () {
     const requestId = `${prefix}move-request`;
     const created = new Date();
     await Members.insertAsync({ _id: ownerId, mid: 'five3', name: 'Move Owner', email: 'move@example.com', lab: future() });
-    await unit(sourceId, 3, 'occupied', ownerId);
-    await StorageUnits.updateAsync(sourceId, { $set: { height: 'high' } });
+    await unit(sourceId, 3, 'occupied', ownerId, 1);
     await unit(destinationId, 4);
     await StorageRequests.insertAsync({
       _id: requestId, owner: ownerId, request_type: 'move', source_unit: sourceId,

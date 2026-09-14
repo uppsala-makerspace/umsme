@@ -14,8 +14,8 @@ them locally still requires a running MongoDB instance and the Playwright
 Chromium runtime.
 
 Phase 7 has intentionally not been executed. It is an operational maintenance
-window involving a production-like migration preview, manual unit-height
-classification, deployment secrets, the coordinated legacy
+window involving a production-like migration preview, wall-layout verification,
+deployment secrets, the coordinated legacy
 write cutover, and post-cutover observation before legacy cleanup.
 
 ## 1. Workstreams and dependency gates
@@ -78,7 +78,7 @@ Owner: domain and migration workstream. Starts after Phase 1.
 
 - `admin/imports/storage/legacyMigration.js`: pure scanner/plan builder.
 - `admin/server/storageMigration.js`: database adapter and idempotent apply.
-- `admin/server/methods/storageMigration.js`: admin/board-only
+- `admin/server/methods/storageMigration.js`: storage-operator-only
   preview, apply, status, and explicit cutover-finalization methods.
 - `admin/tests/storageMigration.tests.js`: mapping, anomaly, fingerprint, and
   rerun coverage.
@@ -90,6 +90,7 @@ an administrator-confirmed preview fingerprint with zero blockers.
 ### Migration rules
 
 - Expand wall ranges into deterministic unit records.
+- Derive unit height from the wall row; the middle row of an odd-row wall is low.
 - Migrate box comments to `note`; a noted unowned box becomes `unavailable`.
 - Migrate member box ownership to units and active assignments under the
   canonical payer.
@@ -173,7 +174,8 @@ after lab expiry.
 
 ### Acceptance gate
 
-- Every method rejects unauthorized users; `admin` and `board` both work.
+- Every method rejects unauthorized users; `admin`, `board`, and the dedicated
+  `storage` role work without granting the storage role unrelated access.
 - Preview is deterministic and side-effect free.
 - Confirmation is per-row idempotent and concurrency-safe.
 - Every mutation has an authoritative actor and audit event.
@@ -222,11 +224,11 @@ stable; notification status integration follows Phase 4.
 ### Deliverables
 
 - Rework `admin/client/ui/storage/Storage.{js,html}` as the dashboard shell.
-- Add suggested-action, batch-preview, inventory, unit-details, and bulk-edit
+- Add suggested-action, batch-preview, inventory, and unit-details
   Blaze templates under the same directory.
 - Add pure presentation helpers under `admin/imports/storage/` and test them in
   admin Mocha.
-- Add compact admin/board-only dashboard publications and on-demand history.
+- Add compact storage-operator-only dashboard publications and on-demand history.
 - Hide storage navigation from treasurer-only users.
 
 ### Required states and interactions
@@ -240,8 +242,7 @@ stable; notification status integration follows Phase 4.
   exact column and row coordinates.
 - Filters for availability, metadata, floor, height, wall, owner, overdue, and
   warning state.
-- Bulk classification, manual operations, exemptions, history, and channel
-  retries.
+- Derived row height, manual operations, exemptions, and history.
 - Accessible status labels/icons in addition to color.
 
 ### Acceptance gate
@@ -249,7 +250,7 @@ stable; notification status integration follows Phase 4.
 - `/storage` derives entirely from storage collections and server DTOs.
 - No client code mutates `Members`, `Comments`, or storage collections.
 - Units with incomplete metadata cannot be allocated.
-- Both operator roles have equivalent access; treasurer does not.
+- All three operator roles have equivalent storage access; treasurer does not.
 - Two simultaneous admin previews cannot produce two successful assignments.
 
 ## 7. Phase 6 — Member UI

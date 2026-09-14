@@ -251,6 +251,7 @@
   "storageUpdateRequest": "Update request",
   "storageRequestMove": "Request a different box",
   "storageRequestRelease": "Request release of this box",
+  "storageReleaseConfirm": "Do you want to return your storage box? An administrator must approve the request before the box is released.",
   "storageReleaseHelp": "The box remains assigned to you until an administrator approves the release and later confirms physical clearance.",
   "storageCancelRequest": "Cancel request",
   "storageLoadFailed": "We could not load your storage information. Please try again.",

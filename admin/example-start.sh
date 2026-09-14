@@ -9,6 +9,8 @@ export PORT=3000
 export MAIL_URL=smtp://umsme@uppsalamakerspace.se:PASSWORD@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false
 # Storage lifecycle changes require a MongoDB replica set for transactions.
 export MONGO_URL=mongodb://localhost:27017/umsme?replicaSet=rs0
+# Required for reactive ordered event-log publications.
+export MONGO_OPLOG_URL=mongodb://localhost:27017/local?replicaSet=rs0
 export ROOT_URL=https://umsme.uppsalamakerspace.se
 
 cd bundle

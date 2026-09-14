@@ -1601,13 +1601,11 @@ export const models = {
       type: String,
       allowedValues: ["floor1", "floor2"],
     },
-    // Optional during the legacy migration. Unclassified units are never
-    // candidates for automatic allocation.
+    // Derived from row and the wall's row count by storage server methods.
     height: {
       label: "Height",
       type: String,
       allowedValues: ["low", "high"],
-      optional: true,
     },
     wall_id: { label: "Wall", type: String, max: 200 },
     column: { label: "Column", type: Number, min: 1 },

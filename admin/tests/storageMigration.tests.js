@@ -71,7 +71,7 @@ describe('legacy storage migration', function () {
       [byName['1'].column, byName['1'].row, byName['2'].column, byName['2'].row],
       [1, 1, 2, 1],
     );
-    assert.ok(!('height' in byName['4']));
+    assert.ok(plan.documents.storageUnits.every((unit) => unit.height === 'low'));
     const occupied = plan.documents.storageUnits.filter((unit) => unit.availability_status === 'occupied');
     assert.strictEqual(occupied.length, 2);
     assert.ok(occupied.every((unit) => unit.assigned_at.getTime() === cutoff.getTime()));
@@ -84,8 +84,20 @@ describe('legacy storage migration', function () {
     assert.strictEqual(requests.waiting.request_status, 'paused_ineligible');
     assert.strictEqual(requests.release.request_type, 'release');
     assert.strictEqual(requests.release.request_status, 'waiting');
-    assert.strictEqual(plan.report.counts.unclassified_units, 4);
-    assert.deepStrictEqual(plan.report.allocation_blocked_reasons, ['unclassified_units', 'migration_not_applied']);
+    assert.strictEqual(plan.report.counts.unclassified_units, 0);
+    assert.deepStrictEqual(plan.report.allocation_blocked_reasons, ['migration_not_applied']);
+  });
+
+  it('derives unit height from the upper and lower wall rows', function () {
+    const plan = buildLegacyStorageMigrationPlan({
+      walls: [{ name: 'Six rows', floor: 'floor1', start: 1, end: 12, shelfSize: 12 }],
+      cutoff, members: [], memberships: [], comments: [],
+    });
+    const byRow = new Map(plan.documents.storageUnits.map((unit) => [unit.row, unit.height]));
+    assert.deepStrictEqual([...byRow.entries()], [
+      [1, 'high'], [2, 'high'], [3, 'high'],
+      [4, 'low'], [5, 'low'], [6, 'low'],
+    ]);
   });
 
   it('records that legacy assignment time is unknown and queue time approximate', function () {
@@ -174,6 +186,24 @@ describe('legacy storage migration', function () {
     ]) assert.ok(codes.has(code), code);
   });
 
+  it('does not repeat an invalid-wall blocker for every configured box claim', function () {
+    const plan = buildLegacyStorageMigrationPlan({
+      walls: [{ name: 'Missing floor', start: 1, end: 2 }],
+      cutoff,
+      members: [{ _id: 'inside', storage: 1 }, { _id: 'outside', storage: 99 }],
+      memberships: [],
+      comments: [{ _id: 'inside-note', about: '_box_2', text: 'note' }],
+    });
+    const issues = plan.report.issues;
+    assert.strictEqual(issues.filter(({ code }) => code === 'invalid_wall_definition').length, 1);
+    assert.strictEqual(issues.filter(({ code }) => code === 'storage_outside_inventory').length, 1);
+    assert.strictEqual(
+      issues.some(({ code, entity_id }) => code === 'storage_outside_inventory' && entity_id === 'inside'),
+      false,
+    );
+    assert.strictEqual(issues.some(({ code }) => code === 'box_comment_outside_inventory'), false);
+  });
+
   it('has a stable order-independent fingerprint that changes with source or cutoff', function () {
     const first = source();
     const reordered = {
@@ -236,9 +266,7 @@ describe('legacy storage migration database gate', function () {
 
   const insertPlan = async (plan, { includeSummary = true } = {}) => {
     for (const wall of plan.documents.storageWalls) await StorageWalls.insertAsync(wall);
-    for (const unit of plan.documents.storageUnits) {
-      await StorageUnits.insertAsync({ ...unit, height: 'low' });
-    }
+    for (const unit of plan.documents.storageUnits) await StorageUnits.insertAsync(unit);
     for (const request of plan.documents.storageRequests) await StorageRequests.insertAsync(request);
     for (const offer of plan.documents.storageOffers) await StorageOffers.insertAsync(offer);
     for (const migrationEvent of plan.documents.storageEvents) {
@@ -251,10 +279,11 @@ describe('legacy storage migration database gate', function () {
   beforeEach(cleanup);
   afterEach(cleanup);
 
-  it('authorizes both admin and board operators but rejects everyone else', async function () {
+  it('authorizes admin, board, and storage operators but rejects everyone else', async function () {
     const rolesByUser = {
       administrator: ['admin'],
       boardMember: ['board'],
+      storageOperator: ['storage'],
       ordinaryMember: ['member'],
     };
     const roleService = {
@@ -264,6 +293,7 @@ describe('legacy storage migration database gate', function () {
     };
     await requireStorageMigrationOperator('administrator', roleService);
     await requireStorageMigrationOperator('boardMember', roleService);
+    await requireStorageMigrationOperator('storageOperator', roleService);
     await assert.rejects(
       requireStorageMigrationOperator('ordinaryMember', roleService),
       (error) => error.error === 'not-authorized',

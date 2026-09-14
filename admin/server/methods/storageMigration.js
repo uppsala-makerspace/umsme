@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Roles } from 'meteor/roles';
+import { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
 import {
   applyLegacyStorageMigration,
   finalizeLegacyStorageCutover,
@@ -8,8 +9,8 @@ import {
 } from '../storageMigration';
 
 export const requireStorageMigrationOperator = async (userId, roleService = Roles) => {
-  if (!userId || !(await roleService.userIsInRoleAsync(userId, ['admin', 'board']))) {
-    throw new Meteor.Error('not-authorized', 'Admin or board role required');
+  if (!userId || !(await roleService.userIsInRoleAsync(userId, STORAGE_OPERATOR_ROLES))) {
+    throw new Meteor.Error('not-authorized', 'Storage, admin, or board role required');
   }
 };
 
@@ -23,9 +24,16 @@ const asMeteorError = (error) => {
 };
 
 Meteor.methods({
-  async 'storageMigration.preview'() {
+  async 'storageMigration.preview'({ cutoff } = {}) {
     await requireStorageMigrationOperator(this.userId);
-    return previewLegacyStorageMigration();
+    if (cutoff !== undefined && !(cutoff instanceof Date) && typeof cutoff !== 'string') {
+      throw new Meteor.Error('invalid-arguments', 'Cutoff must be a date');
+    }
+    const parsedCutoff = cutoff === undefined ? new Date() : new Date(cutoff);
+    if (Number.isNaN(parsedCutoff.getTime())) {
+      throw new Meteor.Error('invalid-arguments', 'Cutoff must be a valid date');
+    }
+    return previewLegacyStorageMigration({ cutoff: parsedCutoff });
   },
 
   async 'storageMigration.status'() {

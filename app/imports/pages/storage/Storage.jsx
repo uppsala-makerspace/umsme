@@ -195,7 +195,11 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
               </Button>
             </>
           )}
-          <Button variant="secondary" fullWidth disabled={!!submitting} onClick={() => run("release", () => onUpsertRequest("release", {}))}>
+          <Button variant="secondary" fullWidth disabled={!!submitting} onClick={() => {
+            if (window.confirm(t("storageReleaseConfirm"))) {
+              run("release", () => onUpsertRequest("release", {}));
+            }
+          }}>
             {submitting === "release" ? t("loading") : t("storageRequestRelease")}
           </Button>
           <p className="text-xs text-gray-600">{t("storageReleaseHelp")}</p>

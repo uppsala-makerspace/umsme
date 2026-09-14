@@ -44,6 +44,18 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `private.googleDrive` | Receipt storage for expenses; same block as the app (see section 12). Admin uses it to download receipts for review. |
 | `private.receiptTokenSecret` | Secret for signing receipt-image URLs (see section 12). If unset, a random per-process secret is used. |
 
+Storage walls are configured in `public.storageWalls`. Every wall requires a
+unique `name`, `floor` (`floor1` or `floor2`), inclusive integer `start` and
+`end` box numbers, and an even `shelfSize`. `shelfSize` defaults to 12. A wall
+with missing or invalid metadata blocks migration; errors for individual boxes
+within that wall are suppressed because they are consequences of the wall error.
+
+The admin process also needs `MONGO_OPLOG_URL`, for example
+`mongodb://localhost:27017/local?replicaSet=rs0`. Start the applications only
+after the replica set has been initialized with `rs.initiate()` and has elected
+a primary. Transactions use `MONGO_URL`; the oplog connection keeps sorted
+storage event publications reactive without polling-driver limitations.
+
 ---
 
 ## 3. App Settings

@@ -29,6 +29,7 @@ import {
   StorageOffers,
   StorageEvents,
 } from '/imports/common/collections/storage';
+import { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
 
 const createAuthFuncForRoles = (col, roles) => async function () {
   if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
@@ -71,7 +72,7 @@ export default () => {
   // publication: treasurer-only users may see members for reimbursements, but
   // must not receive operational storage state or internal unit notes.
   Meteor.publish('storageAdminDashboard', async function () {
-    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))) {
+    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, STORAGE_OPERATOR_ROLES))) {
       this.ready();
       return undefined;
     }
@@ -88,7 +89,7 @@ export default () => {
 
   Meteor.publish('storageAdminHistory', async function (entityIds) {
     check(entityIds, [String]);
-    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))) {
+    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, STORAGE_OPERATOR_ROLES))) {
       this.ready();
       return undefined;
     }
@@ -99,7 +100,7 @@ export default () => {
         { unit: { $in: entityIds } },
         { related_unit: { $in: entityIds } },
       ],
-    }, { sort: { occurred_at: -1 }, limit: 500 });
+    }, { sort: { occurred_at: -1 } });
   });
 
   Meteor.publish('storageAdminEventLog', async function (filters = {}) {
@@ -107,20 +108,20 @@ export default () => {
       member_id: Match.Maybe(String),
       unit_id: Match.Maybe(String),
     });
-    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))) {
+    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, STORAGE_OPERATOR_ROLES))) {
       this.ready();
       return undefined;
     }
     const memberId = filters.member_id || undefined;
     const unitId = filters.unit_id || undefined;
     if (!memberId && !unitId) {
-      return StorageEvents.find({}, { sort: { occurred_at: -1 }, limit: 500 });
+      return StorageEvents.find({}, { sort: { occurred_at: -1 } });
     }
     const clauses = [];
     if (memberId) clauses.push({ member: memberId });
     if (unitId) clauses.push({ $or: [{ unit: unitId }, { related_unit: unitId }, { entity_id: unitId }] });
     return StorageEvents.find(clauses.length === 1 ? clauses[0] : { $and: clauses }, {
-      sort: { occurred_at: -1 }, limit: 500,
+      sort: { occurred_at: -1 },
     });
   });
 
