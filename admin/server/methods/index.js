@@ -18,3 +18,4 @@ import './workshops';
 import './spaces';
 import './storeItems';
 import './storageMigration';
+import './storageV2';

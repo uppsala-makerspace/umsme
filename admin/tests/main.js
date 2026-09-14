@@ -11,7 +11,10 @@ import "./groupRules.tests";
 import "./storageRules.tests";
 import "./storageSchemas.tests";
 import "./storageMigration.tests";
+import "./storageService.tests";
+import "./storageServiceDb.tests";
 import "./storageIndexes.tests";
+import "./storageNotifications.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {
