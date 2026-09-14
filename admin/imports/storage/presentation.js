@@ -1,0 +1,171 @@
+export const STORAGE_ACTIONS = [
+  { id: 'allocate', label: 'Make assignments', help: 'Assign suggested units.' },
+  { id: 'warn', label: 'Send warnings', help: 'Warn overdue occupants.' },
+  { id: 'remind', label: 'Send reminders', help: 'Remind warned occupants.' },
+  { id: 'reclaim', label: 'Reclaim assignments', help: 'Reclaim after 28 days.' },
+  { id: 'release', label: 'Process releases', help: 'Handle release requests.' },
+  { id: 'review_expired_moves', label: 'Review expired moves', help: 'Resolve expired moves.' },
+  { id: 'confirm_clearance', label: 'Confirm clearances', help: 'Release cleared units.' },
+  { id: 'retry_notifications', label: 'Retry notifications', help: 'Retry failed messages.' },
+];
+
+export const storageStatusLabel = (status) => ({
+  available: 'Available', occupied: 'Occupied', reserved: 'Reserved',
+  awaiting_clearance: 'Awaiting clearance', unavailable: 'Unavailable',
+}[status] || status || 'Unknown');
+
+export const storageStatusClass = (status) => `storage-status-${status || 'unknown'}`;
+
+export const storageMemberLabel = (member = {}) => [
+  member.name || 'Unnamed member',
+  member.mid ? `(${member.mid})` : '',
+  member.email ? `— ${member.email}` : '',
+].filter(Boolean).join(' ');
+
+const activeRequestStatuses = new Set(['waiting', 'paused_ineligible', 'in_progress']);
+
+export const storagePreferenceLabel = (preference = {}) => {
+  const floor = { floor1: 'Floor 1', floor2: 'Floor 2' }[preference.floor];
+  const height = { low: 'Low', high: 'High' }[preference.height];
+  return [floor, height].filter(Boolean).join(' · ') || 'Any available unit';
+};
+
+export const filterStorageQueue = (rows, query) => {
+  const needle = String(query || '').trim().toLowerCase();
+  if (!needle) return rows;
+  return rows.filter((row) => [row.memberName, row.memberNumber, row.memberEmail]
+    .some((value) => String(value || '').toLowerCase().includes(needle)));
+};
+
+export const storageQueueRows = ({ requests = [], members = [], assignments = [], units = [], now = new Date() }) => {
+  const memberById = new Map(members.map((member) => [member._id, member]));
+  const unitById = new Map(units.map((unit) => [unit._id, unit]));
+  const assignmentByOwner = new Map(assignments
+    .filter((assignment) => !assignment.ended_at)
+    .map((assignment) => [assignment.owner, assignment]));
+  return requests
+    .filter((request) => activeRequestStatuses.has(request.request_status) && request.request_type !== 'release')
+    .sort((left, right) => new Date(left.requested_at) - new Date(right.requested_at)
+      || String(left._id).localeCompare(String(right._id)))
+    .map((request) => {
+      const member = memberById.get(request.owner);
+      const assignment = assignmentByOwner.get(request.owner);
+      const unit = assignment && unitById.get(assignment.unit);
+      const editable = ['waiting', 'paused_ineligible'].includes(request.request_status);
+      const eligible = !!member?.lab && new Date(member.lab).getTime() > new Date(now).getTime();
+      return {
+        ...request,
+        memberName: member?.name || 'Unknown member',
+        memberNumber: member?.mid || '',
+        memberEmail: member?.email || '',
+        currentUnit: unit?.name || '—',
+        preferenceLabel: storagePreferenceLabel(request.preference),
+        requestLabel: request.request_type === 'move' ? 'Different unit' : 'Storage unit',
+        eligibilityLabel: eligible ? 'Eligible' : 'Not eligible',
+        eligibilityClass: eligible ? 'storage-eligible' : 'storage-ineligible',
+        pauseLabel: request.request_status === 'paused_ineligible'
+          ? 'Paused' : (request.request_status === 'in_progress' ? 'Assignment in progress' : 'Active'),
+        pauseTarget: request.request_status === 'waiting',
+        pauseActionLabel: request.request_status === 'paused_ineligible' ? 'Resume' : 'Pause',
+        canTogglePause: request.request_status === 'waiting' ? !eligible
+          : (request.request_status === 'paused_ineligible' && eligible),
+        editable,
+      };
+    });
+};
+
+export const filterStorageUnits = (units, filters = {}) => units.filter((unit) => {
+  if (filters.status && unit.availability_status !== filters.status) return false;
+  if (filters.floor && unit.floor !== filters.floor) return false;
+  if (filters.height === 'unclassified' && unit.height) return false;
+  if (filters.height && filters.height !== 'unclassified' && unit.height !== filters.height) return false;
+  if (filters.wall && unit.wall !== filters.wall) return false;
+  if (filters.owner && !unit.owner) return false;
+  if (filters.overdue && !unit._overdue) return false;
+  if (filters.warning && unit._warningState !== filters.warning) return false;
+  const query = String(filters.query || '').trim().toLowerCase();
+  return !query || [unit.name, unit.wall, unit.note].some((value) =>
+    String(value || '').toLowerCase().includes(query));
+});
+
+export const groupStorageWalls = (units, definitions = []) => {
+  const definitionsByName = new Map(definitions.map((definition) => [definition.name, definition]));
+  const byWall = new Map();
+  for (const unit of units) {
+    const key = unit.wall || 'Unclassified wall';
+    if (!byWall.has(key)) byWall.set(key, []);
+    byWall.get(key).push(unit);
+  }
+  return [...byWall.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([name, rows]) => {
+    const unitsForWall = rows.sort((a, b) =>
+      (a.position || 0) - (b.position || 0) || a.name.localeCompare(b.name));
+    const configuredSize = Number(definitionsByName.get(name)?.shelfSize);
+    const shelfSize = Number.isInteger(configuredSize) && configuredSize > 0 ? configuredSize : 12;
+    const shelves = [];
+    for (let offset = 0; offset < unitsForWall.length; offset += shelfSize) {
+      const shelfUnits = unitsForWall.slice(offset, offset + shelfSize);
+      shelves.push({
+        number: shelves.length + 1,
+        columns: [
+          { units: shelfUnits.filter((_, index) => index % 2 === 0) },
+          { units: shelfUnits.filter((_, index) => index % 2 === 1) },
+        ],
+      });
+    }
+    return { name, units: unitsForWall, shelves };
+  });
+};
+
+export const failedChannels = (delivery) => [
+  ...(['missing_template', 'render_failed'].includes(delivery?.render_status) ? ['render'] : []),
+  ...['email', 'sms'].filter((channel) => delivery?.[channel]?.status === 'failed'),
+];
+
+export const storageReadinessPresentation = (readiness) => {
+  if (!readiness) return { state: 'loading', label: 'Checking migration readiness…', detail: '', reasons: [] };
+  const reasons = Array.isArray(readiness.allocation_blocked_reasons)
+    ? readiness.allocation_blocked_reasons
+    : [];
+  if (readiness.allocation_ready === true) {
+    return { state: 'ready', label: 'Ready.', detail: 'Migration and invariant checks passed.', reasons };
+  }
+  if (reasons.length === 1 && reasons[0] === 'unclassified_units') {
+    return {
+      state: 'metadata', label: 'Metadata incomplete.',
+      detail: `${readiness.unclassified_unit_ids?.length || 0} unit(s) need a height.`, reasons,
+    };
+  }
+  return {
+    state: reasons.includes('migration_not_applied') ? 'missing' : 'blocked',
+    label: reasons.includes('migration_not_applied') ? 'Migration missing.' : 'Allocation blocked.',
+    detail: 'Automatic allocation remains disabled until every authoritative blocker is resolved.',
+    reasons,
+  };
+};
+
+export const bulkHeightImpact = (units, selectedIds) => {
+  const selected = new Set(selectedIds);
+  const affected = units.filter(({ _id }) => selected.has(_id));
+  const protectedCount = affected.filter(({ availability_status }) =>
+    ['occupied', 'reserved'].includes(availability_status)).length;
+  return {
+    selectedCount: affected.length,
+    protectedCount,
+    requiresAcknowledgement: protectedCount > 0,
+  };
+};
+
+export const joinStorageResults = (results = [], confirmedRows = []) => {
+  const rows = new Map(confirmedRows.map((row) => [row.suggestion_id, row]));
+  return results.map((result) => {
+    const row = rows.get(result.suggestion_id) || {};
+    const member = row.member_name || row.owner || 'Unknown member';
+    const unit = row.unit_name || row.unit || 'No unit';
+    return { ...result, label: `${member} · ${unit}` };
+  });
+};
+
+export const sameSuggestionSet = (left = [], right = []) => {
+  const ids = (rows) => rows.map(({ suggestion_id }) => suggestion_id).sort();
+  return JSON.stringify(ids(left)) === JSON.stringify(ids(right));
+};
