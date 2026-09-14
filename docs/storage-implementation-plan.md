@@ -8,14 +8,14 @@ Date: 2026-09-10
 
 Phases 1–6 have been implemented and independently reviewed across the domain
 and migration, server and delivery, and UI workstreams. The admin test suite
-passes with 268 tests, and the admin production build, member production build,
+passes, and the admin production build, member production build,
 and Storybook build pass. Seven member Playwright scenarios compile; executing
 them locally still requires a running MongoDB instance and the Playwright
 Chromium runtime.
 
 Phase 7 has intentionally not been executed. It is an operational maintenance
 window involving a production-like migration preview, manual unit-height
-classification, deployment secrets, worker enablement, the coordinated legacy
+classification, deployment secrets, the coordinated legacy
 write cutover, and post-cutover observation before legacy cleanup.
 
 ## 1. Workstreams and dependency gates
@@ -23,7 +23,7 @@ write cutover, and post-cutover observation before legacy cleanup.
 | Workstream | Phases | Scope | Starts when |
 | --- | --- | --- | --- |
 | Domain and migration | 1–2 | Schemas, indexes, rules, dry-run migration | Immediately |
-| Server and delivery | 3–4 | Commands, previews, concurrency, email/SMS outbox | Phase 1 contracts pass |
+| Server and messages | 3–4 | Commands, previews, concurrency, existing message flow | Phase 1 contracts pass |
 | UI and cutover | 5–7 | Admin UI, member UI, rollout, cleanup | Phase 3 APIs stabilize |
 
 The workstreams have separate file ownership, but their phases are gated. UI
@@ -36,8 +36,8 @@ Owner: domain and migration workstream.
 
 ### Deliverables
 
-- Add models, schemas, collection modules, and a barrel export for all storage
-  entities in the parent design, including `storageActionExecutions`.
+- Add models, schemas, and a barrel export for the five storage collections:
+  walls, units, requests, pending offers, and events.
 - Deny all client inserts, updates, and removals. Events are immutable.
 - Add awaited, idempotent index setup in `common/server/storageIndexes.js`.
 - Add pure, time-injectable rules in `common/lib/storageRules.js`.
@@ -45,20 +45,12 @@ Owner: domain and migration workstream.
 
 ### Required indexes
 
-- Unique unit `name` and unique `(wall, position)`.
+- Unique wall `name`, unique unit `name`, and unique
+  `(wall_id, column, row)`.
 - Partial unique active request per owner.
-- Partial unique active assignment per unit and per owner.
-- Partial unique open warning per assignment.
-- Partial unique active exemption per assignment.
-- Partial unique pending move per owner, request, and destination unit.
-- Unique delivery per decision and action execution per
-  `(created_by, operation_kind, command_id, suggestion_id)`. Startup creates
-  this scoped index under a new name first, then drops the exact obsolete
-  `{command_id, suggestion_id}` unique index if present. A same-named index
-  with any unexpected shape is preserved and fails startup with an explicit
-  diagnostic so it can be investigated manually.
-- Query indexes for allocation inventory, queue age, deadlines, histories, and
-  failed delivery channels.
+- Unique pending offer per owner, request, and destination unit.
+- Unit indexes for current owner, warning deadline, and exemption expiry.
+- Event indexes for direct member and storage-unit history filters.
 
 ### Pure rules
 
@@ -151,7 +143,7 @@ adminStorage.confirm({ action, command_id, selections })
 storage.member.getState()
 storage.member.upsertRequest(...)
 storage.member.cancelRequest(...)
-storage.member.confirmMove(...)
+storage.member.confirmOffer(...)
 ```
 
 Preview returns opaque deterministic suggestion IDs, reason codes, dates,
@@ -172,11 +164,11 @@ after lab expiry.
 
 - Reconcile lazily before reads, previews, confirmations, and relevant manual
   actions; hooks improve promptness but are not the only correctness path.
-- Commit domain state, audit event, action receipt, and notification outbox row
-  before external I/O.
+- Commit each storage state change and audit event through the existing
+  idempotent command boundary. Notifications use the existing message system.
 - Process batch rows independently.
-- Prefer MongoDB transactions when supported; otherwise use compare-and-set,
-  action receipts, safe unavailable states, and narrow compensation.
+- Require MongoDB transactions for storage lifecycle changes. Readiness blocks
+  automatic actions when transaction support is unavailable.
 - Unique indexes remain the final conflict barrier.
 
 ### Acceptance gate
@@ -187,24 +179,20 @@ after lab expiry.
 - Every mutation has an authoritative actor and audit event.
 - Families consistently resolve to the payer.
 - Renewal resolves warnings and resumes requests without communication.
-- External delivery never starts before the decision commits.
+- Automatic decisions create one existing member message and use existing push.
+- Reclamation requires a successfully delivered warning or an explicit,
+  reasoned administrator confirmation of manual contact.
 
-## 5. Phase 4 — Email and SMS delivery
+## 5. Phase 4 — Existing message integration
 
-Owner: server and delivery workstream. Starts after Phase 3 command boundaries
+Owner: server and message workstream. Starts after Phase 3 command boundaries
 are stable.
 
-### Delivery architecture
+### Message architecture
 
-Implement an outbox under `common/server/storageNotifications/` with:
-
-- template resolution and immutable rendering;
-- Meteor email adapter;
-- Swedish phone normalization to E.164;
-- configurable SMS adapter plus explicit disabled adapter;
-- per-channel `sending` leases, attempt history, failure normalization, and
-  retry; and
-- deterministic `Message-ID`/idempotency metadata where supported.
+Use the existing `Messages` collection, Meteor email transport, and
+`pushMessage()` function. Do not add a storage-specific outbox, delivery
+collection, background worker, channel state, or retry API.
 
 Add six storage template types: assignment, move, warning, reminder,
 reclamation, and voluntary release. Storage mail uses:
@@ -214,42 +202,16 @@ From: Uppsala Makerspace Hyllplats <hyllplats@uppsalamakerspace.se>
 Reply-To: hyllplats@uppsalamakerspace.se
 ```
 
-Credentials remain deployment secrets. A missing SMS provider yields
-`unavailable` for SMS and does not block email or the decision.
-
-### Retry API
-
-```text
-adminStorage.notifications.retry({ delivery_id, channels, command_id })
-```
-
-Retry preserves the original recipient and rendered content. It never resends
-an already successful channel or repeats the storage decision.
-`channels` accepts `email`, `sms`, and `render`; the latter is an explicit
-operator recovery after a missing/broken template is fixed and still uses only
-the immutable decision-time context stored in the outbox.
-
-The email/SMS leases are separate and provider calls have a deadline shorter
-than the lease. A process-local mutex coalesces worker ticks, while Mongo claim
-tokens protect against other processes and expired-lease takeover. Channel
-state—not the existence of a `Messages` row—is proof of completion. Storage
-history rows use server-owned deterministic IDs and must exactly match the
-outbox snapshot if already present.
-
-Operational limitation: SMTP and MongoDB do not share a transaction. The
-service writes member history after SMTP accepts the message and before it
-marks the channel sent, and reuses a deterministic SMTP `Message-ID`. A crash
-inside that narrow interval can cause an at-least-once resend unless the SMTP
-provider deduplicates that identifier; it can never cause the storage decision
-itself to roll back.
+Credentials remain deployment secrets. A member without an email address still
+gets the persistent in-app message. Push is best effort, as it is for existing
+membership reminders.
 
 ### Acceptance gate
 
-- Each suggested member-facing decision creates one durable delivery.
+- Each suggested member-facing decision creates one `Messages` record.
 - Manual/internal actions create none.
-- Email and SMS succeed/fail independently.
-- Failed channels can be retried without repeating successful work.
-- Successful email creates one linked member-visible `Messages` record.
+- Email is sent when an address exists.
+- The existing app-push function is called after the message is stored.
 - Gmail credentials are absent from source control.
 
 ## 6. Phase 5 — Administrator UI
@@ -274,7 +236,8 @@ stable; notification status integration follows Phase 4.
 - Eight suggested-action cards from the design.
 - Fresh preview before confirmation, row exclusion, double-submit prevention,
   and per-row results.
-- Database-backed wall/grid ordered by `wall` and `position`.
+- Database-backed wall grids ordered by `display_order`, with units placed at
+  exact column and row coordinates.
 - Filters for availability, metadata, floor, height, wall, owner, overdue, and
   warning state.
 - Bulk classification, manual operations, exemptions, history, and channel
@@ -372,7 +335,7 @@ writes.
 | Allocation, compatibility, timing, invariants | Pure admin Mocha tests |
 | Migration mapping/idempotence | Pure and database-backed admin tests |
 | Authorization, commands, concurrency | Server integration tests |
-| Delivery failure/retry/idempotency | Fake-adapter server tests |
+| Existing message, email, push, and idempotency | Stubbed-transport server tests |
 | Admin grouping and presentation | Pure admin Mocha plus browser matrix |
 | Member lifecycle and family behavior | Storybook plus Playwright |
 | Production readiness | Dry-run, invariant report, restored-data rehearsal |

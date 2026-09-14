@@ -1,9 +1,7 @@
 import {
   StorageUnits,
   StorageRequests,
-  StorageAssignments,
-  StorageWarnings,
-  StorageMoves,
+  StorageOffers,
 } from '/imports/common/collections/storage';
 import { hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
 import { reconcileStorageState } from './reconciliation';
@@ -22,16 +20,11 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
     owner: owner._id,
     request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] },
   }));
-  const assignment = await StorageAssignments.findOneAsync({ owner: owner._id, ended_at: { $exists: false } });
-  const move = await StorageMoves.findOneAsync({ owner: owner._id, move_status: 'pending' });
-  const warning = assignment
-    ? await StorageWarnings.findOneAsync({ assignment: assignment._id, warning_status: 'open' })
-    : null;
-  const [unit, moveDestination] = await Promise.all([
-    assignment ? StorageUnits.findOneAsync(assignment.unit) : null,
-    move ? StorageUnits.findOneAsync(move.to_unit) : null,
-  ]);
-  const awaitingClearanceUnit = assignment ? null : await StorageUnits.findOneAsync({
+  const unit = await StorageUnits.findOneAsync({ owner: owner._id, availability_status: 'occupied' });
+  const offer = await StorageOffers.findOneAsync({ owner: owner._id });
+  const offerDestination = offer ? await StorageUnits.findOneAsync(offer.to_unit) : null;
+  const warning = unit?.warning;
+  const awaitingClearanceUnit = unit ? null : await StorageUnits.findOneAsync({
     owner: owner._id, availability_status: 'awaiting_clearance',
   });
   return {
@@ -40,20 +33,16 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
     family_read_only: familyDependent,
     has_active_lab_membership: hasActiveLabMembershipAt(owner, now),
     request,
-    assignment: assignment ? {
-      _id: assignment._id,
-      assigned_at: assignment.assigned_at,
-      unit: publicUnit(unit),
-    } : null,
+    unit: unit ? { ...publicUnit(unit), assigned_at: unit.assigned_at } : null,
     awaiting_clearance: publicUnit(awaitingClearanceUnit),
-    move: move ? {
-      _id: move._id,
-      deadline_at: move.deadline_at,
-      requires_inspection: move.requires_inspection,
-      destination: publicUnit(moveDestination),
+    offer: offer ? {
+      _id: offer._id,
+      deadline_at: offer.deadline_at,
+      requires_inspection: offer.requires_inspection,
+      destination: publicUnit(offerDestination),
     } : null,
     warning: warning ? {
-      _id: warning._id,
+      _id: warning.id,
       warned_at: warning.warned_at,
       deadline_at: warning.deadline_at,
     } : null,

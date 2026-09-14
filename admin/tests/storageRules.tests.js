@@ -3,18 +3,18 @@ import {
   desiredStorageRequestStatus,
   hasActiveLabMembershipAt,
   isStorageExemptionActive,
-  isStorageMoveReviewDue,
+  isStorageOfferReviewDue,
   isStorageReclamationEligible,
   isStorageReminderEligible,
   legacyStoragePreference,
   preferenceSpecificity,
   proposeStorageAllocations,
   resolveStorageOwner,
-  storageMoveDeadline,
+  storageOfferDeadline,
   storagePreferenceMatches,
   storageReminderAt,
-  storageDeliveryStateErrors,
   storageExemptionDeactivationReason,
+  storageLayoutErrors,
   storageStateErrors,
   storageUnitStateErrors,
   storageWarningDeadline,
@@ -112,13 +112,12 @@ describe('storageRules', function () {
         request('fallback', 'fallback', '2026-01-02', { floor: 'floor9' }),
         request('move', 'moving', '2026-01-03', { floor: 'floor2', height: 'low' }, 'move'),
       ];
-      const assignments = [{ _id: 'assignment', unit: 'old', owner: 'moving' }];
       const members = {
         compatible: member('compatible'),
         fallback: member('fallback'),
         moving: member('moving'),
       };
-      const result = proposeStorageAllocations({ units, requests, assignments, members, now: NOW });
+      const result = proposeStorageAllocations({ units, requests, members, now: NOW });
       assert.deepStrictEqual(result.proposals.map((p) => [p.request._id, p.unit._id, p.phase]), [
         ['compatible', '1-low', 1],
         ['fallback', '1-high', 2],
@@ -147,7 +146,6 @@ describe('storageRules', function () {
       const result = proposeStorageAllocations({
         units: [unit('free', 'floor1', 'low'), unit('current', 'floor1', 'low', { availability_status: 'occupied', owner: 'm' })],
         requests: [request('move', 'm', '2025-01-01', { floor: 'floor1', height: 'low' }, 'move')],
-        assignments: [{ _id: 'a', unit: 'current', owner: 'm' }],
         members: { m: member('m') },
         now: NOW,
       });
@@ -188,7 +186,6 @@ describe('storageRules', function () {
       const result = proposeStorageAllocations({
         units: [...units, current],
         requests,
-        assignments: [{ _id: 'assignment', unit: 'current', owner: 'moving' }],
         members,
         now: NOW,
       });
@@ -209,8 +206,8 @@ describe('storageRules', function () {
     it('uses exact 21, 28, and 14 day elapsed durations', function () {
       assert.strictEqual(storageReminderAt(warning.warned_at).toISOString(), '2026-09-03T12:00:00.000Z');
       assert.strictEqual(storageWarningDeadline(warning.warned_at).toISOString(), NOW.toISOString());
-      assert.strictEqual(storageMoveDeadline(d('2026-08-27T12:00:00.000Z')).toISOString(), NOW.toISOString());
-      assert.strictEqual(isStorageMoveReviewDue({ move_status: 'pending', deadline_at: NOW }, NOW), true);
+      assert.strictEqual(storageOfferDeadline(d('2026-08-27T12:00:00.000Z')).toISOString(), NOW.toISOString());
+      assert.strictEqual(isStorageOfferReviewDue({ deadline_at: NOW }, NOW), true);
     });
 
     it('suggests one reminder before the deadline and reclamation at the deadline', function () {
@@ -228,95 +225,74 @@ describe('storageRules', function () {
       assert.strictEqual(isStorageExemptionActive(expired, NOW), false);
       assert.strictEqual(isStorageReclamationEligible(warning, { now: NOW, exemption: active }), false);
       assert.strictEqual(isStorageReclamationEligible(warning, { now: NOW, exemption: expired }), true);
-      assert.strictEqual(isStorageExemptionActive({ ...active, active: false }, NOW), false);
       assert.strictEqual(storageExemptionDeactivationReason(expired, NOW), 'expired');
-      assert.strictEqual(storageExemptionDeactivationReason({ ...active, revoked_at: NOW }, NOW), 'revoked');
     });
 
     it('validates ownership implied by availability status', function () {
-      assert.deepStrictEqual(storageUnitStateErrors({ availability_status: 'occupied' }), ['owner_required']);
+      assert.deepStrictEqual(storageUnitStateErrors({ availability_status: 'occupied' }), [
+        'owner_required', 'assignment_metadata_required',
+      ]);
       assert.deepStrictEqual(storageUnitStateErrors({ availability_status: 'available', owner: 'm' }), ['owner_forbidden']);
       assert.deepStrictEqual(storageUnitStateErrors({ availability_status: 'reserved', owner: 'm' }), []);
+    });
+
+    it('validates wall references, coordinates, and floor consistency', function () {
+      const walls = [{ _id: 'wall', floor: 'floor1', column_count: 2, row_count: 5 }];
+      const errors = storageLayoutErrors({ walls, units: [
+        { _id: 'valid', wall_id: 'wall', floor: 'floor1', column: 1, row: 5 },
+        { _id: 'duplicate', wall_id: 'wall', floor: 'floor1', column: 1, row: 5 },
+        { _id: 'outside', wall_id: 'wall', floor: 'floor1', column: 3, row: 1 },
+        { _id: 'wrong-floor', wall_id: 'wall', floor: 'floor2', column: 2, row: 1 },
+        { _id: 'orphan', wall_id: 'missing', floor: 'floor1', column: 1, row: 1 },
+      ] });
+      assert.deepStrictEqual(errors.map(({ code }) => code), [
+        'duplicate_unit_coordinate', 'unit_outside_wall_layout',
+        'unit_wall_floor_mismatch', 'unit_wall_missing',
+      ]);
     });
 
     it('reports duplicate and cross-document state violations', function () {
       const errors = storageStateErrors({
         units: [
-          unit('occupied', 'floor1', 'low', { availability_status: 'occupied', owner: 'right' }),
+          unit('occupied', 'floor1', 'low', { availability_status: 'occupied', owner: 'right', assigned_at: NOW, assigned_by: 'admin' }),
+          unit('also-occupied', 'floor1', 'high', { availability_status: 'occupied', owner: 'right', assigned_at: NOW, assigned_by: 'admin' }),
           unit('reserved', 'floor1', 'high', { availability_status: 'reserved', owner: 'right' }),
         ],
-        assignments: [
-          { _id: 'a1', unit: 'occupied', owner: 'wrong' },
-          { _id: 'a2', unit: 'other', owner: 'wrong' },
-        ],
-        moves: [],
+        offers: [],
       });
       const codes = errors.map((error) => error.code);
-      assert.ok(codes.includes('duplicate_active_assignment_owner'));
-      assert.ok(codes.includes('assignment_owner_mismatch'));
-      assert.ok(codes.includes('reserved_without_move'));
+      assert.ok(codes.includes('duplicate_occupied_owner'));
+      assert.ok(codes.includes('reserved_without_offer'));
     });
 
     it('checks pending move, warning, and exemption references in both directions', function () {
       const errors = storageStateErrors({
         units: [
           unit('source', 'floor1', 'low', { availability_status: 'available' }),
-          unit('destination', 'floor2', 'high', { availability_status: 'occupied', owner: 'other' }),
+          unit('destination', 'floor2', 'high', { availability_status: 'occupied', owner: 'other', assigned_at: NOW, assigned_by: 'admin' }),
         ],
         requests: [{
           ...request('request', 'other', '2026-01-01', { floor: 'floor2' }, 'allocation'),
           request_status: 'waiting',
         }],
-        assignments: [{ _id: 'ended', unit: 'source', owner: 'owner', ended_at: d('2026-01-02') }],
-        moves: [{
-          _id: 'move', owner: 'owner', request: 'request', from_assignment: 'ended',
-          from_unit: 'source', to_unit: 'destination', move_status: 'pending',
+        offers: [{
+          _id: 'offer', owner: 'owner', request: 'request',
+          from_unit: 'source', to_unit: 'destination',
         }],
-        warnings: [
-          { _id: 'warning-missing', assignment: 'missing', warning_status: 'open' },
-          { _id: 'warning-ended', assignment: 'ended', warning_status: 'open' },
-        ],
-        exemptions: [
-          { _id: 'exemption-missing', assignment: 'missing', active: true },
-          { _id: 'exemption-expired', assignment: 'ended', active: true, exempt_until: NOW },
-        ],
         now: NOW,
       });
       const codes = errors.map((error) => error.code);
       for (const code of [
-        'move_source_assignment_ended',
-        'move_source_unit_not_occupied',
-        'move_destination_not_reserved',
-        'move_request_type_mismatch',
-        'move_request_not_in_progress',
-        'move_request_owner_mismatch',
-        'warning_assignment_missing',
-        'open_warning_assignment_ended',
-        'exemption_assignment_missing',
-        'expired_exemption_still_active',
-        'active_exemption_assignment_ended',
+        'offer_source_unit_not_occupied',
+        'offer_source_unit_owner_mismatch',
+        'offer_destination_not_reserved',
+        'offer_destination_owner_mismatch',
+        'offer_request_type_mismatch',
+        'offer_request_not_in_progress',
+        'offer_request_owner_mismatch',
+        'offer_request_source_mismatch',
       ]) assert.ok(codes.includes(code), code);
     });
 
-    it('allows a durable render failure but rejects deliverable channels without snapshots', function () {
-      const failedRender = {
-        render_status: 'missing_template',
-        render_error: 'No storage warning template is configured',
-        email: { status: 'unavailable' },
-        sms: { status: 'unavailable' },
-      };
-      assert.deepStrictEqual(storageDeliveryStateErrors(failedRender), []);
-      const pending = {
-        render_status: 'render_failed',
-        render_error: 'Template expression failed',
-        email: { status: 'pending' },
-        sms: { status: 'unavailable' },
-      };
-      const errors = storageDeliveryStateErrors(pending);
-      assert.ok(errors.includes('email_render_required'));
-      assert.ok(errors.includes('email_sender_required'));
-      assert.ok(errors.includes('email_subject_required'));
-      assert.ok(errors.includes('email_content_required'));
-    });
   });
 });

@@ -1,4 +1,5 @@
 import { MongoInternals } from 'meteor/mongo';
+import { Meteor } from 'meteor/meteor';
 
 let transactionSupport;
 
@@ -6,15 +7,40 @@ const transactionUnavailable = (error) =>
   error?.code === 20 || error?.codeName === 'IllegalOperation' ||
   /transaction numbers are only allowed|does not support transactions/i.test(error?.message || '');
 
-const mongoClient = () => MongoInternals.defaultRemoteCollectionDriver()?.mongo?.client;
+const mongoDriver = () => MongoInternals.defaultRemoteCollectionDriver()?.mongo;
+
+export const detectStorageTransactionSupport = async () => {
+  if (transactionSupport !== undefined) return transactionSupport;
+  const driver = mongoDriver();
+  if (!driver?.client?.startSession || !driver?.db) {
+    transactionSupport = false;
+    return false;
+  }
+  const session = driver.client.startSession();
+  try {
+    await session.withTransaction(() => driver.db.collection('storageEvents').findOne({}, { session }));
+    transactionSupport = true;
+  } catch (error) {
+    if (!transactionUnavailable(error)) throw error;
+    transactionSupport = false;
+  } finally {
+    await session.endSession();
+  }
+  return transactionSupport;
+};
 
 /**
- * Run one storage row atomically where Mongo transactions are available.
- * Standalone Mongo deployments use the command's compare-and-set fallback.
+ * Run one storage row atomically. Storage lifecycle commands are disabled on
+ * MongoDB deployments that cannot provide transactions.
  */
-export const runStorageAtomic = async ({ transactional, fallback }) => {
-  if (transactionSupport === false || !mongoClient()?.startSession) return fallback();
-  const session = mongoClient().startSession();
+export const runStorageAtomic = async ({ transactional }) => {
+  if (!(await detectStorageTransactionSupport())) {
+    throw new Meteor.Error(
+      'storage-transactions-required',
+      'Storage changes require MongoDB transaction support. Configure a replica set.',
+    );
+  }
+  const session = mongoDriver().client.startSession();
   try {
     let value;
     await session.withTransaction(async () => {
@@ -22,12 +48,6 @@ export const runStorageAtomic = async ({ transactional, fallback }) => {
     });
     transactionSupport = true;
     return value;
-  } catch (error) {
-    if (transactionSupport === undefined && transactionUnavailable(error)) {
-      transactionSupport = false;
-      return fallback();
-    }
-    throw error;
   } finally {
     await session.endSession();
   }

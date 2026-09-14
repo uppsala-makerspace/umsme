@@ -11,7 +11,7 @@ export const isStorageGeneratedMessage = (document) =>
   typeof document?._id === 'string' && document._id.startsWith('storage-notification:');
 
 // Ordinary message composition keeps its historical allow rules. Only the
-// deterministic rows proving a storage email send are server-owned.
+// deterministic storage messages created by the server are server-owned.
 Messages.deny({
   insert(userId, document) { return isStorageGeneratedMessage(document); },
   update(userId, document) { return isStorageGeneratedMessage(document); },

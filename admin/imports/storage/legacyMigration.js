@@ -2,6 +2,7 @@ import {
   desiredStorageRequestStatus,
   legacyStoragePreference,
   resolveStorageOwner,
+  storageLayoutErrors,
   storageStateErrors,
 } from '/imports/common/lib/storageRules';
 import {
@@ -40,13 +41,15 @@ const latestComment = (comments) => [...comments].sort((a, b) => {
   return bDate - aDate || compareId(b, a);
 })[0];
 
-const event = ({ id, entityType, entityId, eventType, cutoff, details }) => ({
+const event = ({ id, entityType, entityId, eventType, cutoff, member, unit, details }) => ({
   _id: `${LEGACY_STORAGE_MIGRATION_VERSION}:event:${id}`,
   entity_type: entityType,
   entity_id: entityId,
   event_type: eventType,
   actor_type: 'system',
   actor: SYSTEM_ACTOR,
+  ...(member ? { member } : {}),
+  ...(unit ? { unit } : {}),
   occurred_at: new Date(cutoff),
   details,
 });
@@ -54,7 +57,7 @@ const event = ({ id, entityType, entityId, eventType, cutoff, details }) => ({
 /** Manifest only records migration-owned IDs; later v2 records are allowed. */
 export const buildLegacyStorageMigrationManifest = (documents) => {
   const manifestDocuments = Object.fromEntries(
-    ['storageUnits', 'storageAssignments', 'storageRequests', 'storageEvents'].map((name) => [
+    ['storageWalls', 'storageUnits', 'storageRequests', 'storageOffers', 'storageEvents'].map((name) => [
       name,
       [...(documents[name] || [])].map((document) => document._id).sort(),
     ]),
@@ -79,15 +82,39 @@ export const buildLegacyStorageMigrationPlan = ({
 
   const definitions = new Map();
   const wallPositions = new Set();
+  const storageWalls = [];
+  const wallNames = new Set();
   if (!walls.length) addIssue('blocker', 'missing_storage_walls', 'migration', LEGACY_STORAGE_MIGRATION_VERSION);
-  for (const wall of [...walls].sort((a, b) =>
-    stableStorageMigrationString(a).localeCompare(stableStorageMigrationString(b)))) {
+  const orderedWalls = [...walls].sort((a, b) =>
+    stableStorageMigrationString(a).localeCompare(stableStorageMigrationString(b)));
+  for (const [wallIndex, wall] of orderedWalls.entries()) {
     const wallId = String(wall.name || 'unnamed');
+    const shelfSize = wall.shelfSize === undefined ? 12 : wall.shelfSize;
     if (!wall.name || !['floor1', 'floor2'].includes(wall.floor) ||
-        !Number.isInteger(wall.start) || !Number.isInteger(wall.end) || wall.end < wall.start) {
+        !Number.isInteger(wall.start) || !Number.isInteger(wall.end) || wall.end < wall.start ||
+        !Number.isInteger(shelfSize) || shelfSize < 2 || shelfSize % 2 !== 0) {
       addIssue('blocker', 'invalid_wall_definition', 'wall', wallId);
       continue;
     }
+    if (wallNames.has(wall.name)) {
+      addIssue('blocker', 'duplicate_wall_name', 'wall', wallId);
+      continue;
+    }
+    wallNames.add(wall.name);
+    const storageWallId = `${LEGACY_STORAGE_MIGRATION_VERSION}:wall:${storageMigrationFingerprint(wall.name).slice(0, 24)}`;
+    const rowCount = shelfSize / 2;
+    const unitCount = wall.end - wall.start + 1;
+    storageWalls.push({
+      _id: storageWallId,
+      name: wall.name,
+      floor: wall.floor,
+      display_order: wallIndex + 1,
+      column_count: Math.ceil(unitCount / shelfSize) * 2,
+      row_count: rowCount,
+      active: true,
+      createdAt: at,
+      updatedAt: at,
+    });
     for (let number = wall.start; number <= wall.end; number += 1) {
       const position = number - wall.start + 1;
       const layoutKey = `${wall.name}:${position}`;
@@ -100,12 +127,14 @@ export const buildLegacyStorageMigrationPlan = ({
         continue;
       }
       wallPositions.add(layoutKey);
+      const shelfOffset = (position - 1) % shelfSize;
       definitions.set(number, {
         _id: `${LEGACY_STORAGE_MIGRATION_VERSION}:unit:${number}`,
         name: String(number),
         floor: wall.floor,
-        wall: wall.name,
-        position,
+        wall_id: storageWallId,
+        column: Math.floor((position - 1) / shelfSize) * 2 + (shelfOffset % 2) + 1,
+        row: Math.floor(shelfOffset / 2) + 1,
       });
     }
   }
@@ -186,29 +215,26 @@ export const buildLegacyStorageMigrationPlan = ({
     }
   }
 
-  const assignmentByOwner = new Map();
-  const assignments = [];
+  const unitByOwner = new Map();
   const events = [];
   for (const [number, claims] of [...claimsByUnit].sort((a, b) => a[0] - b[0])) {
     const owners = [...new Set(claims.map((claim) => claim.owner))];
     if (owners.length !== 1 || claimedUnitsByOwner.get(owners[0])?.size !== 1) continue;
     const owner = owners[0];
-    const assignment = {
-      _id: `${LEGACY_STORAGE_MIGRATION_VERSION}:assignment:${owner}`,
+    const occupancy = {
       unit: definitions.get(number)._id,
       owner,
       assigned_at: at,
       assigned_by: SYSTEM_ACTOR,
-      createdAt: at,
-      updatedAt: at,
     };
-    assignments.push(assignment);
-    assignmentByOwner.set(owner, assignment);
+    unitByOwner.set(owner, occupancy);
     events.push(event({
       id: `assignment:${owner}`,
-      entityType: 'storageAssignment',
-      entityId: assignment._id,
-      eventType: 'legacy_assignment_migrated',
+      entityType: 'storageUnit',
+      entityId: occupancy.unit,
+      eventType: 'legacy_occupancy_migrated',
+      member: owner,
+      unit: occupancy.unit,
       cutoff: at,
       details: {
         source_member_ids: claims.map((claim) => claim.member_id).sort(),
@@ -228,7 +254,11 @@ export const buildLegacyStorageMigrationPlan = ({
     const note = typeof selectedComment?.text === 'string' ? selectedComment.text.trim() : '';
     return {
       ...base,
-      ...(validOwner ? { owner: validOwner } : {}),
+      ...(validOwner ? {
+        owner: validOwner,
+        assigned_at: at,
+        assigned_by: SYSTEM_ACTOR,
+      } : {}),
       availability_status: validOwner ? 'occupied' : note ? 'unavailable' : 'available',
       ...(note ? { note } : {}),
       createdAt: at,
@@ -274,9 +304,9 @@ export const buildLegacyStorageMigrationPlan = ({
       });
     }
     const meaning = parsed[0].parsed;
-    const assignment = assignmentByOwner.get(owner);
+    const currentUnit = unitByOwner.get(owner);
     let requestType;
-    if (!assignment) {
+    if (!currentUnit) {
       if (meaning.release) {
         addIssue('blocker', 'release_without_assignment', 'member', owner);
         continue;
@@ -316,7 +346,7 @@ export const buildLegacyStorageMigrationPlan = ({
       request_type: requestType,
       requested_at: requestedAt,
       ...(meaning.preference ? { preference: meaning.preference } : {}),
-      ...(assignment ? { source_assignment: assignment._id } : {}),
+      ...(currentUnit ? { source_unit: currentUnit.unit } : {}),
       request_status: desiredStorageRequestStatus(requestType, activeLab),
       createdAt: at,
       updatedAt: at,
@@ -327,6 +357,8 @@ export const buildLegacyStorageMigrationPlan = ({
       entityType: 'storageRequest',
       entityId: request._id,
       eventType: 'legacy_request_migrated',
+      member: owner,
+      unit: currentUnit?.unit,
       cutoff: at,
       details: {
         source_member_ids: signals.map((signal) => signal.member_id).sort(),
@@ -336,13 +368,22 @@ export const buildLegacyStorageMigrationPlan = ({
     }));
   }
 
-  for (const invariant of storageStateErrors({ units, assignments, requests, now: at })) {
+  for (const invariant of storageStateErrors({ units, requests, offers: [], now: at })) {
+    addIssue('blocker', `planned_${invariant.code}`, 'migrationPlan', invariant.id, invariant);
+  }
+  for (const invariant of storageLayoutErrors({ walls: storageWalls, units })) {
     addIssue('blocker', `planned_${invariant.code}`, 'migrationPlan', invariant.id, invariant);
   }
   issues.sort(issueOrder);
   const blockers = issues.filter((entry) => entry.severity === 'blocker');
   const warnings = issues.filter((entry) => entry.severity === 'warning');
-  const documents = { storageUnits: units, storageAssignments: assignments, storageRequests: requests, storageEvents: events };
+  const documents = {
+    storageWalls,
+    storageUnits: units,
+    storageRequests: requests,
+    storageOffers: [],
+    storageEvents: events,
+  };
   const counts = {
     source: { walls: walls.length, members: members.length, memberships: memberships.length, comments: comments.length },
     planned: Object.fromEntries(Object.entries(documents).map(([name, records]) => [name, records.length])),

@@ -3,9 +3,10 @@ import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
 import { Comments } from '/imports/common/collections/comments';
 import {
+  StorageWalls,
   StorageUnits,
   StorageRequests,
-  StorageAssignments,
+  StorageOffers,
   StorageEvents,
 } from '/imports/common/collections/storage';
 import {
@@ -20,9 +21,10 @@ import {
 } from '/imports/storage/legacyMigration';
 
 const collections = {
+  storageWalls: StorageWalls,
   storageUnits: StorageUnits,
-  storageAssignments: StorageAssignments,
   storageRequests: StorageRequests,
+  storageOffers: StorageOffers,
   storageEvents: StorageEvents,
 };
 
@@ -69,19 +71,19 @@ const existingDocuments = async (documents) => Object.fromEntries(await Promise.
 
 const naturalKeyConflicts = async (documents) => {
   const conflicts = [];
+  for (const wall of documents.storageWalls) {
+    const found = await StorageWalls.findOneAsync({ _id: { $ne: wall._id }, name: wall.name });
+    if (found) conflicts.push({ collection: 'storageWalls', id: wall._id, code: 'wall_natural_key_conflict', existing_id: found._id });
+  }
   for (const unit of documents.storageUnits) {
     const found = await StorageUnits.findOneAsync({
       _id: { $ne: unit._id },
-      $or: [{ name: unit.name }, { wall: unit.wall, position: unit.position }],
+      $or: [
+        { name: unit.name },
+        { wall_id: unit.wall_id, column: unit.column, row: unit.row },
+      ],
     });
     if (found) conflicts.push({ collection: 'storageUnits', id: unit._id, code: 'unit_natural_key_conflict', existing_id: found._id });
-  }
-  for (const assignment of documents.storageAssignments) {
-    const found = await StorageAssignments.findOneAsync({
-      _id: { $ne: assignment._id }, ended_at: { $exists: false },
-      $or: [{ unit: assignment.unit }, { owner: assignment.owner }],
-    });
-    if (found) conflicts.push({ collection: 'storageAssignments', id: assignment._id, code: 'active_assignment_conflict', existing_id: found._id });
   }
   for (const request of documents.storageRequests) {
     const found = await StorageRequests.findOneAsync({
@@ -112,11 +114,12 @@ export const preflightLegacyStorageMigration = async (plan) => {
 };
 
 export const validateStorageMigrationState = async ({ legacySource } = {}) => {
-  const [readiness, units, requests, assignments, applied] = await Promise.all([
+  const [readiness, walls, units, requests, offers, applied] = await Promise.all([
     storageAllocationReadiness({ legacySource }),
+    StorageWalls.find({}).fetchAsync(),
     StorageUnits.find({}).fetchAsync(),
     StorageRequests.find({}).fetchAsync(),
-    StorageAssignments.find({}).fetchAsync(),
+    StorageOffers.find({}).fetchAsync(),
     StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_EVENT_ID),
   ]);
   const missing = readiness.missing_migrated_documents;
@@ -139,9 +142,10 @@ export const validateStorageMigrationState = async ({ legacySource } = {}) => {
       ? STORAGE_MIGRATION_FINALIZED_EVENT_ID : undefined,
     legacy_source_check_skipped: readiness.cutover_finalized,
     counts: {
+      walls: walls.length,
       units: units.length,
       requests: requests.length,
-      assignments: assignments.length,
+      offers: offers.length,
       occupied_units: units.filter((unit) => unit.availability_status === 'occupied').length,
       unclassified_units: readiness.unclassified_unit_ids.length,
     },
@@ -178,7 +182,7 @@ export const applyLegacyStorageMigration = async ({ fingerprint, cutoff, legacyS
   }
 
   const inserted = {};
-  for (const name of ['storageUnits', 'storageAssignments', 'storageRequests', 'storageEvents']) {
+  for (const name of ['storageWalls', 'storageUnits', 'storageRequests', 'storageOffers', 'storageEvents']) {
     inserted[name] = 0;
     for (const document of difference.inserts[name]) {
       try {
@@ -242,7 +246,9 @@ export const finalizeLegacyStorageCutover = async ({
     error.code = 'fingerprint_mismatch';
     throw error;
   }
-  const blocking = validation.allocation_blocked_reasons.filter((code) => code !== 'unclassified_units');
+  const blocking = validation.allocation_blocked_reasons.filter(
+    (code) => !['unclassified_units', 'cutover_not_finalized'].includes(code),
+  );
   if (blocking.length) {
     const error = new Error('Migration must be complete, coherent, and unchanged before finalization');
     error.code = 'finalization_blocked';

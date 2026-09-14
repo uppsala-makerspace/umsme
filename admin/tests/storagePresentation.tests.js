@@ -1,24 +1,26 @@
 import assert from 'assert';
 import {
-  failedChannels,
   bulkHeightImpact,
   filterStorageQueue,
   filterStorageUnits,
   groupStorageWalls,
+  joinBulkHeightResults,
   joinStorageResults,
   sameSuggestionSet,
+  storageActionReasonLabel,
   storageMemberLabel,
   storagePreferenceLabel,
   storageQueueRows,
   storageReadinessPresentation,
+  storageResultSummary,
 } from '/imports/storage/presentation';
 import { storageEventEntityIds, storageEventRows } from '/imports/storage/eventLog';
 
 describe('storage admin presentation', function () {
   const units = [
-    { _id: 'b', name: '2', wall: 'B', position: 2, floor: 'floor2', availability_status: 'occupied', owner: 'm' },
-    { _id: 'a', name: '1', wall: 'A', position: 1, floor: 'floor1', availability_status: 'available' },
-    { _id: 'c', name: '3', wall: 'B', position: 1, floor: 'floor2', height: 'high', availability_status: 'available', note: 'repair' },
+    { _id: 'b', name: '2', wall_id: 'B', wall_name: 'Wall B', column: 2, row: 1, floor: 'floor2', availability_status: 'occupied', owner: 'm' },
+    { _id: 'a', name: '1', wall_id: 'A', wall_name: 'Wall A', column: 1, row: 1, floor: 'floor1', availability_status: 'available' },
+    { _id: 'c', name: '3', wall_id: 'B', wall_name: 'Wall B', column: 1, row: 1, floor: 'floor2', height: 'high', availability_status: 'available', note: 'repair' },
   ];
 
   it('filters inventory without changing source order', function () {
@@ -27,13 +29,16 @@ describe('storage admin presentation', function () {
     assert.strictEqual(units[0]._id, 'b');
   });
 
-  it('groups walls and sorts physical positions', function () {
-    const walls = groupStorageWalls(units, [{ name: 'B', shelfSize: 2 }]);
-    assert.deepStrictEqual(walls.map((wall) => wall.name), ['A', 'B']);
+  it('renders each wall as its configured uniform grid', function () {
+    const walls = groupStorageWalls(units, [
+      { _id: 'B', name: 'Wall B', display_order: 2, column_count: 2, row_count: 2 },
+      { _id: 'A', name: 'Wall A', display_order: 1, column_count: 1, row_count: 1 },
+    ]);
+    assert.deepStrictEqual(walls.map((wall) => wall.name), ['Wall A', 'Wall B']);
     assert.deepStrictEqual(walls[1].units.map((unit) => unit._id), ['c', 'b']);
-    assert.deepStrictEqual(walls[1].shelves[0].columns.map((column) =>
-      column.units.map((unit) => unit._id)), [['c'], ['b']]);
-    assert.strictEqual(walls[0].shelves.length, 1);
+    assert.deepStrictEqual(walls[1].columns.map((column) =>
+      column.units.map((unit) => unit._id || null)), [['c', null], ['b', null]]);
+    assert.strictEqual(walls[1].columns[0].units[1].empty, true);
   });
 
   it('labels searchable member choices without exposing only an internal id', function () {
@@ -55,8 +60,7 @@ describe('storage admin presentation', function () {
         { _id: 'active', name: 'Ada', mid: 'M1', lab: new Date('2027-01-01') },
         { _id: 'expired', name: 'Grace', mid: 'M2', lab: new Date('2026-01-01') },
       ],
-      assignments: [{ _id: 'assignment', owner: 'active', unit: 'unit' }],
-      units: [{ _id: 'unit', name: 'A-42' }],
+      units: [{ _id: 'unit', name: 'A-42', owner: 'active', availability_status: 'occupied' }],
     });
     assert.deepStrictEqual(rows.map(({ _id }) => _id), ['first', 'later']);
     assert.strictEqual(rows[0].eligibilityLabel, 'Not eligible');
@@ -106,25 +110,31 @@ describe('storage admin presentation', function () {
     assert.strictEqual(byId['expired-paused'].canTogglePause, false);
   });
 
-  it('compares preview identities and finds failed channels', function () {
+  it('compares preview identities', function () {
     assert(sameSuggestionSet([{ suggestion_id: 'b' }, { suggestion_id: 'a' }], [{ suggestion_id: 'a' }, { suggestion_id: 'b' }]));
     assert(!sameSuggestionSet([{ suggestion_id: 'a' }], []));
-    assert.deepStrictEqual(failedChannels({ render_status: 'missing_template', email: { status: 'sent' }, sms: { status: 'failed' } }), ['render', 'sms']);
-    assert.deepStrictEqual(failedChannels({ render_status: 'render_failed', email: { status: 'failed' }, sms: { status: 'sent' } }), ['render', 'email']);
-    assert.deepStrictEqual(failedChannels({ render_status: 'rendered', email: { status: 'sent' }, sms: { status: 'sent' } }), []);
   });
 
-  it('uses authoritative readiness and preserves every blocker verbatim', function () {
-    for (const reason of [
-      'legacy_source_changed_after_migration',
-      'migration_manifest_incomplete',
-      'cutover_finalization_invalid',
-    ]) {
-      const source = { allocation_ready: false, allocation_blocked_reasons: [reason] };
-      const view = storageReadinessPresentation(source);
-      assert.strictEqual(view.state, 'blocked');
-      assert.strictEqual(view.reasons, source.allocation_blocked_reasons);
-    }
+  it('uses authoritative readiness and presents every blocker in plain language', function () {
+    const source = {
+      allocation_ready: false,
+      allocation_blocked_reasons: [
+        'legacy_source_changed_after_migration',
+        'migration_manifest_incomplete',
+        'cutover_finalization_invalid',
+        'cutover_not_finalized',
+        'transactions_unavailable',
+      ],
+    };
+    const view = storageReadinessPresentation(source);
+    assert.strictEqual(view.state, 'blocked');
+    assert.deepStrictEqual(view.reasons, [
+      'Legacy storage data changed after migration.',
+      'One or more migrated storage records are missing.',
+      'The storage migration cutover record is invalid.',
+      'The storage migration cutover has not been finalized.',
+      'MongoDB transaction support is required for storage changes.',
+    ]);
     const metadata = storageReadinessPresentation({
       allocation_ready: false,
       allocation_blocked_reasons: ['unclassified_units'],
@@ -147,41 +157,51 @@ describe('storage admin presentation', function () {
 
   it('joins every result status to the exact confirmed row', function () {
     const rows = [{ suggestion_id: 'one', member_name: 'Ada', unit_name: 'A-1' }];
+    const labels = {
+      applied: 'Applied', already_applied: 'Already applied', stale: 'Needs review',
+      conflict: 'Needs review', failed: 'Failed',
+    };
     for (const status of ['applied', 'already_applied', 'stale', 'conflict', 'failed']) {
       assert.deepStrictEqual(
         joinStorageResults([{ suggestion_id: 'one', status }], rows)[0],
-        { suggestion_id: 'one', status, label: 'Ada · A-1' },
+        { suggestion_id: 'one', status, label: 'Ada · A-1', statusLabel: labels[status] },
       );
     }
   });
 
+  it('summarizes batches and labels every bulk result by unit', function () {
+    assert.strictEqual(storageResultSummary([
+      { status: 'applied' }, { status: 'already_applied' },
+      { status: 'conflict' }, { status: 'failed' },
+    ]), '2 applied · 1 need review · 1 failed');
+    assert.deepStrictEqual(joinBulkHeightResults([
+      { unitId: 'a', status: 'updated' },
+      { unitId: 'missing', status: 'failed', reason: 'Gone' },
+    ], units), [
+      { unitId: 'a', status: 'updated', label: '1', statusClass: 'applied', statusLabel: 'Updated' },
+      { unitId: 'missing', status: 'failed', reason: 'Gone', label: 'Unknown unit', statusClass: 'failed', statusLabel: 'Failed' },
+    ]);
+    assert.strictEqual(storageActionReasonLabel('warning_deadline_passed'), 'The 28-day warning deadline passed');
+    assert.strictEqual(storageActionReasonLabel('unexpected_reason'), 'unexpected reason');
+  });
+
   it('resolves member and unit event filters through historical storage records', function () {
-    const records = {
-      assignments: [
-        { _id: 'a1', owner: 'm1', unit: 'u1', request: 'r1' },
-        { _id: 'a2', owner: 'm2', unit: 'u1', request: 'r2' },
-      ],
-      requests: [
-        { _id: 'r1', owner: 'm1' }, { _id: 'r2', owner: 'm2' }, { _id: 'r3', owner: 'm1' },
-      ],
-      warnings: [
-        { _id: 'w1', owner: 'm1', assignment: 'a1' },
-        { _id: 'w2', owner: 'm2', assignment: 'a2' },
-      ],
-      exemptions: [{ _id: 'e1', assignment: 'a1' }],
-      moves: [{ _id: 'mv1', owner: 'm1', from_unit: 'u1', to_unit: 'u2', from_assignment: 'a1', request: 'r3' }],
-    };
+    const records = { events: [
+      { entity_id: 'a1', member: 'm1', unit: 'u1' },
+      { entity_id: 'a2', member: 'm2', unit: 'u1' },
+      { entity_id: 'mv1', member: 'm1', unit: 'u2', related_unit: 'u1' },
+    ] };
     assert.deepStrictEqual(
       storageEventEntityIds({ memberId: 'm1', ...records }),
-      ['a1', 'e1', 'mv1', 'r1', 'r3', 'w1'],
+      ['a1', 'mv1'],
     );
     assert.deepStrictEqual(
       storageEventEntityIds({ unitId: 'u1', ...records }),
-      ['a1', 'a2', 'e1', 'mv1', 'r1', 'r2', 'r3', 'u1', 'w1', 'w2'],
+      ['a1', 'a2', 'mv1'],
     );
     assert.deepStrictEqual(
       storageEventEntityIds({ memberId: 'm1', unitId: 'u1', ...records }),
-      ['a1', 'e1', 'mv1', 'r1', 'r3', 'w1'],
+      ['a1', 'mv1'],
     );
     assert.deepStrictEqual(storageEventEntityIds({ memberId: 'm2', unitId: 'u2', ...records }), []);
     assert.strictEqual(storageEventEntityIds(records), null);
@@ -190,8 +210,8 @@ describe('storage admin presentation', function () {
   it('presents event rows with related member and storage-unit names', function () {
     const rows = storageEventRows({
       events: [
-        { _id: 'older', entity_type: 'storageAssignment', entity_id: 'a1', event_type: 'assignment_created', actor_type: 'administrator', actor: 'admin-user', occurred_at: new Date('2026-09-10') },
-        { _id: 'newer', entity_type: 'storageMove', entity_id: 'mv1', event_type: 'move_reserved', actor_type: 'member', actor: 'member-user', occurred_at: new Date('2026-09-11'), details: { to_unit: 'u2' } },
+        { _id: 'older', entity_type: 'storageUnit', entity_id: 'u1', event_type: 'unit_assigned', actor_type: 'administrator', actor: 'admin-user', member: 'm1', unit: 'u1', occurred_at: new Date('2026-09-10') },
+        { _id: 'newer', entity_type: 'storageOffer', entity_id: 'offer1', event_type: 'offer_created', actor_type: 'member', actor: 'member-user', member: 'm1', unit: 'u2', related_unit: 'u1', occurred_at: new Date('2026-09-11') },
       ],
       members: [
         { _id: 'm1', name: 'Ada Lovelace', email: 'ada@example.com' },
@@ -202,13 +222,11 @@ describe('storage admin presentation', function () {
         { _id: 'admin-user', emails: [{ address: 'admin@example.com' }] },
       ],
       units: [{ _id: 'u1', name: '1001' }, { _id: 'u2', name: '2001' }],
-      assignments: [{ _id: 'a1', owner: 'm1', unit: 'u1' }],
-      moves: [{ _id: 'mv1', owner: 'm1', from_unit: 'u1', to_unit: 'u2', from_assignment: 'a1' }],
     });
     assert.deepStrictEqual(rows.map(({ _id }) => _id), ['newer', 'older']);
     assert.strictEqual(rows[0].memberLabel, 'Ada Lovelace');
     assert.strictEqual(rows[0].unitLabel, '1001, 2001');
-    assert.strictEqual(rows[0].eventLabel, 'Move reserved');
+    assert.strictEqual(rows[0].eventLabel, 'Offer created');
     assert.strictEqual(rows[0].actorLabel, 'Member · Ada Lovelace');
     assert.strictEqual(rows[1].actorLabel, 'Administrator · Admin User');
   });

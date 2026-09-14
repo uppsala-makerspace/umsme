@@ -204,7 +204,7 @@ See [payments.md](payments.md#2-swish-payment-flow-primary) for the full step-by
 
 ## 6. Shared Database
 
-All three apps connect to the same MongoDB instance. Default connection: `mongodb://localhost:27017/umsme`.
+All three apps connect to the same MongoDB replica set. The development connection is `mongodb://localhost:27017/umsme?replicaSet=rs0`. Storage lifecycle changes require transaction support.
 
 ### Collections
 
@@ -339,4 +339,3 @@ Certain collections store bilingual content:
 ### Admin
 
 The admin interface is primarily in English (UI labels and code) with Swedish comments and some Swedish-language content in email templates and member-facing text.
-

@@ -23,16 +23,12 @@ import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Spaces } from '/imports/common/collections/spaces';
 import { StoreItems } from '/imports/common/collections/storeItems';
 import {
+  StorageWalls,
   StorageUnits,
   StorageRequests,
-  StorageAssignments,
-  StorageWarnings,
-  StorageExemptions,
-  StorageMoves,
-  StorageNotificationDeliveries,
+  StorageOffers,
   StorageEvents,
 } from '/imports/common/collections/storage';
-import { storageEventEntityIds } from '/imports/storage/eventLog';
 
 const createAuthFuncForRoles = (col, roles) => async function () {
   if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
@@ -80,13 +76,11 @@ export default () => {
       return undefined;
     }
     return [
+      StorageWalls.find(),
       StorageUnits.find(),
       StorageRequests.find(),
-      StorageAssignments.find(),
-      StorageWarnings.find(),
-      StorageExemptions.find(),
-      StorageMoves.find(),
-      StorageNotificationDeliveries.find(),
+      StorageOffers.find(),
+      Messages.find({ type: 'storage' }),
       Members.find({}, { fields: { name: 1, mid: 1, email: 1, mobile: 1, lab: 1, infamily: 1 } }),
       Meteor.users.find({}, { fields: { 'emails.address': 1, profile: 1 } }),
     ];
@@ -99,7 +93,13 @@ export default () => {
       return undefined;
     }
     if (entityIds.length > 20) throw new Meteor.Error('bad-request', 'Too many storage history entities');
-    return StorageEvents.find({ entity_id: { $in: entityIds } }, { sort: { occurred_at: -1 }, limit: 500 });
+    return StorageEvents.find({
+      $or: [
+        { entity_id: { $in: entityIds } },
+        { unit: { $in: entityIds } },
+        { related_unit: { $in: entityIds } },
+      ],
+    }, { sort: { occurred_at: -1 }, limit: 500 });
   });
 
   Meteor.publish('storageAdminEventLog', async function (filters = {}) {
@@ -116,20 +116,12 @@ export default () => {
     if (!memberId && !unitId) {
       return StorageEvents.find({}, { sort: { occurred_at: -1 }, limit: 500 });
     }
-    const [assignments, requests, warnings, exemptions, moves] = await Promise.all([
-      StorageAssignments.find().fetchAsync(),
-      StorageRequests.find().fetchAsync(),
-      StorageWarnings.find().fetchAsync(),
-      StorageExemptions.find().fetchAsync(),
-      StorageMoves.find().fetchAsync(),
-    ]);
-    const entityIds = storageEventEntityIds({
-      memberId, unitId, assignments, requests, warnings, exemptions, moves,
+    const clauses = [];
+    if (memberId) clauses.push({ member: memberId });
+    if (unitId) clauses.push({ $or: [{ unit: unitId }, { related_unit: unitId }, { entity_id: unitId }] });
+    return StorageEvents.find(clauses.length === 1 ? clauses[0] : { $and: clauses }, {
+      sort: { occurred_at: -1 }, limit: 500,
     });
-    return StorageEvents.find(
-      entityIds.length ? { entity_id: { $in: entityIds } } : { _id: '__no_storage_events__' },
-      { sort: { occurred_at: -1 }, limit: 500 },
-    );
   });
 
   Meteor.publish(null, async function () {

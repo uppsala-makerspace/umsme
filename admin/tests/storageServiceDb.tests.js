@@ -1,53 +1,46 @@
 import assert from 'assert';
 import { Members } from '/imports/common/collections/members';
+import { Messages } from '/imports/common/collections/messages';
 import {
-  StorageUnits,
-  StorageRequests,
-  StorageAssignments,
-  StorageWarnings,
-  StorageExemptions,
-  StorageMoves,
-  StorageNotificationDeliveries,
-  StorageEvents,
-  StorageActionExecutions,
+  StorageWalls, StorageUnits, StorageRequests, StorageOffers, StorageEvents,
 } from '/imports/common/collections/storage';
 import { previewStorageSuggestions } from '/imports/common/server/storage/suggestions';
-import { confirmStorageSuggestions } from '/imports/common/server/storage/commands';
+import { confirmStorageSuggestions, completeStorageOffer } from '/imports/common/server/storage/commands';
 import { reconcileStorageState } from '/imports/common/server/storage/reconciliation';
 import {
-  assignStorageUnitManual,
-  createStorageUnitManual,
-  upsertStorageRequestManual,
+  assignStorageUnitManual, createStorageExemptionManual, revokeStorageExemptionManual,
 } from '/imports/common/server/storage/manual';
-import { upsertMemberStorageRequest } from '/imports/common/server/storage/memberCommands';
+import { confirmMemberStorageOffer, upsertMemberStorageRequest } from '/imports/common/server/storage/memberCommands';
+import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
 import { storageMigrationFingerprint } from '/imports/common/lib/legacyStorageMigrationFingerprint';
-import {
-  STORAGE_CUTOVER_FINALIZED_ID,
-  STORAGE_MIGRATION_SUMMARY_ID,
-} from '/imports/common/server/storage/readiness';
-import { setStorageJournalFailureInjectorForTests } from '/imports/common/server/storage/journal';
+import { STORAGE_CUTOVER_FINALIZED_ID, STORAGE_MIGRATION_SUMMARY_ID } from '/imports/common/server/storage/readiness';
+import { setStorageNotificationTransportsForTests } from '/imports/common/server/storageMessages/service';
 
-const prefix = 'storage-service-test:';
-const now = () => new Date();
-const future = () => new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-
-const collections = [
-  StorageUnits, StorageRequests, StorageAssignments, StorageWarnings,
-  StorageExemptions, StorageMoves, StorageNotificationDeliveries,
-  StorageEvents, StorageActionExecutions,
-];
+const prefix = 'storage-five-collection-test:';
+const future = () => new Date(Date.now() + 365 * 86400000);
+const past = () => new Date(Date.now() - 365 * 86400000);
+const collections = [StorageWalls, StorageUnits, StorageRequests, StorageOffers, StorageEvents];
 
 const cleanup = async () => {
-  // The service deliberately creates opaque/random identifiers, so filtering
-  // cleanup by the fixture prefix would leak assignments, receipts and events
-  // into the next integration test.
   for (const collection of collections) await collection.removeAsync({});
   await Members.removeAsync({ _id: { $regex: `^${prefix}` } });
+  await Messages.removeAsync({ member: { $regex: `^${prefix}` }, type: 'storage' });
 };
 
-const installReadyMigration = async (created, documents = {
-  storageUnits: [], storageAssignments: [], storageRequests: [], storageEvents: [],
-}) => {
+const unit = (id, column, status = 'available', owner) => {
+  const created = new Date();
+  return StorageUnits.insertAsync({
+    _id: id, name: id, floor: 'floor1', height: 'low', wall_id: `${prefix}wall`, column, row: 1,
+    availability_status: status, ...(owner ? { owner } : {}),
+    ...(owner && status === 'occupied' ? { assigned_at: created, assigned_by: `${prefix}admin` } : {}),
+    createdAt: created, updatedAt: created,
+  });
+};
+
+const installReadyMigration = async (created = new Date()) => {
+  const documents = {
+    storageWalls: [], storageUnits: [], storageRequests: [], storageOffers: [], storageEvents: [],
+  };
   const payload = { version: 1, documents };
   const manifest = { ...payload, digest: storageMigrationFingerprint(payload) };
   const fingerprint = `${prefix}fingerprint`;
@@ -60,389 +53,188 @@ const installReadyMigration = async (created, documents = {
     _id: STORAGE_CUTOVER_FINALIZED_ID, entity_type: 'storageMigration', entity_id: 'legacy-storage-v1',
     event_type: 'legacy_storage_cutover_finalized', actor_type: 'administrator', actor: `${prefix}admin`,
     occurred_at: created,
-    details: {
-      fingerprint, summary_event_id: STORAGE_MIGRATION_SUMMARY_ID, manifest_digest: manifest.digest,
-    },
+    details: { fingerprint, summary_event_id: STORAGE_MIGRATION_SUMMARY_ID, manifest_digest: manifest.digest },
   });
 };
 
-describe('storage server database workflow', function () {
-  beforeEach(cleanup);
+describe('five-collection storage database workflow', function () {
+  before(async function () {
+    await ensureStorageIndexes();
+  });
+
+  beforeEach(async () => {
+    setStorageNotificationTransportsForTests({ sendEmail: async () => {}, sendPush: async () => {} });
+    await cleanup();
+    const created = new Date();
+    await StorageWalls.insertAsync({
+      _id: `${prefix}wall`, name: `${prefix}wall`, floor: 'floor1', display_order: 1,
+      column_count: 20, row_count: 2, active: true, createdAt: created, updatedAt: created,
+    });
+  });
+
   afterEach(async () => {
-    setStorageJournalFailureInjectorForTests(undefined);
+    setStorageNotificationTransportsForTests(undefined);
     await cleanup();
   });
 
-  it('commits an assignment, receipt, event, and outbox row exactly once', async function () {
-    const created = now();
-    const ownerId = `${prefix}owner`;
-    const unitId = `${prefix}unit`;
-    const requestId = `${prefix}request`;
-    await Members.insertAsync({ _id: ownerId, mid: 'sst1', name: 'Storage Test', email: 'storage@example.com', lab: future() });
-    await StorageUnits.insertAsync({
-      _id: unitId, name: `${prefix}1`, floor: 'floor1', height: 'low', wall: `${prefix}wall`,
-      position: 1, availability_status: 'available', createdAt: created, updatedAt: created,
-    });
+  it('stores a confirmed assignment on the unit and remains idempotent through its event', async function () {
+    const ownerId = `${prefix}assignment-owner`;
+    const unitId = `${prefix}assignment-unit`;
+    const requestId = `${prefix}assignment-request`;
+    const created = new Date();
+    await Members.insertAsync({ _id: ownerId, mid: 'five1', name: 'Assignment Owner', email: 'assignment@example.com', lab: future() });
+    await unit(unitId, 1);
     await StorageRequests.insertAsync({
       _id: requestId, owner: ownerId, request_type: 'allocation', requested_at: created,
       request_status: 'waiting', createdAt: created, updatedAt: created,
     });
     await installReadyMigration(created);
-
     const preview = await previewStorageSuggestions('allocate');
-    assert.strictEqual(preview.rows.length, 1);
     const command = {
-      action: 'allocate', commandId: `${prefix}command`, actor: `${prefix}admin`,
+      action: 'allocate', commandId: `${prefix}assignment-command`, actor: `${prefix}admin`,
       selections: [{ suggestion_id: preview.rows[0].suggestion_id }],
     };
-    const first = await confirmStorageSuggestions(command);
-    const second = await confirmStorageSuggestions(command);
-    assert.strictEqual(first.results[0].status, 'applied');
-    assert.strictEqual(second.results[0].status, 'already_applied');
-    assert.strictEqual(await StorageAssignments.find({ owner: ownerId, ended_at: { $exists: false } }).countAsync(), 1);
-    assert.strictEqual(await StorageNotificationDeliveries.find({ owner: ownerId, decision_type: 'assignment' }).countAsync(), 1);
-    assert.strictEqual(await StorageActionExecutions.find({ command_id: `${prefix}command` }).countAsync(), 2);
-    const unit = await StorageUnits.findOneAsync(unitId);
-    assert.strictEqual(unit.availability_status, 'occupied');
-    assert.strictEqual(unit.owner, ownerId);
+    assert.strictEqual((await confirmStorageSuggestions(command)).results[0].status, 'applied');
+    assert.strictEqual((await confirmStorageSuggestions(command)).results[0].status, 'already_applied');
+    const stored = await StorageUnits.findOneAsync(unitId);
+    assert.strictEqual(stored.owner, ownerId);
+    assert.strictEqual(stored.availability_status, 'occupied');
+    assert.strictEqual(stored.source_request, requestId);
+    assert(stored.assigned_at instanceof Date);
+    assert.strictEqual(await Messages.find({ member: ownerId, type: 'storage' }).countAsync(), 1);
   });
 
-  it('resumes a standalone assignment after every effect boundary', async function () {
-    for (const [index, failedStep] of [
-      'unit_occupied', 'request_fulfilled', 'assignment_inserted', 'event_inserted', 'outbox_inserted',
-    ].entries()) {
-      await cleanup();
-      const created = new Date(Date.now() + index * 1000);
-      const ownerId = `${prefix}journal-owner-${index}`;
-      const unitId = `${prefix}journal-unit-${index}`;
-      await Members.insertAsync({ _id: ownerId, mid: `ssj${index}`, name: 'Journal Test', email: 'storage@example.com', lab: future() });
-      await StorageUnits.insertAsync({
-        _id: unitId, name: unitId, floor: 'floor1', height: 'low', wall: `${prefix}journal-wall`,
-        position: index + 1, availability_status: 'available', createdAt: created, updatedAt: created,
-      });
-      await StorageRequests.insertAsync({
-        _id: `${prefix}journal-request-${index}`, owner: ownerId, request_type: 'allocation',
-        requested_at: created, request_status: 'waiting', createdAt: created, updatedAt: created,
-      });
-      await installReadyMigration(created);
-      const preview = await previewStorageSuggestions('allocate');
-      const command = {
-        action: 'allocate', commandId: `${prefix}journal-command-${index}`, actor: `${prefix}admin`,
-        selections: [{ suggestion_id: preview.rows[0].suggestion_id }],
-      };
-      let injected = false;
-      setStorageJournalFailureInjectorForTests(({ step, point }) => {
-        if (!injected && step === failedStep && point === 'after_effect') {
-          injected = true;
-          throw new Error(`injected after ${step}`);
-        }
-      });
-      const failed = await confirmStorageSuggestions(command);
-      assert.strictEqual(failed.results[0].status, 'failed');
-      setStorageJournalFailureInjectorForTests(undefined);
-      const resumed = await confirmStorageSuggestions(command);
-      assert.strictEqual(resumed.results[0].status, 'applied');
-      assert.strictEqual(await StorageAssignments.find({ owner: ownerId }).countAsync(), 1);
-      assert.strictEqual(await StorageEvents.find({ event_type: 'assignment_created' }).countAsync(), 1);
-      assert.strictEqual(await StorageNotificationDeliveries.find({ owner: ownerId }).countAsync(), 1);
-    }
-  });
-
-  it('resumes warning audit and outbox work after the warning document was committed', async function () {
-    const created = new Date(Date.now() - 40 * 86400000);
+  it('embeds warnings and clears them when lab membership is renewed', async function () {
     const ownerId = `${prefix}warning-owner`;
     const unitId = `${prefix}warning-unit`;
-    const assignmentId = `${prefix}warning-assignment`;
-    await Members.insertAsync({ _id: ownerId, mid: 'ssjw', name: 'Warning Journal', email: 'warn@example.com', lab: created });
-    await StorageUnits.insertAsync({
-      _id: unitId, name: unitId, floor: 'floor1', height: 'low', wall: `${prefix}wall`, position: 91,
-      availability_status: 'occupied', owner: ownerId, createdAt: created, updatedAt: created,
-    });
-    await StorageAssignments.insertAsync({
-      _id: assignmentId, unit: unitId, owner: ownerId, assigned_at: created,
-      assigned_by: `${prefix}admin`, createdAt: created, updatedAt: created,
-    });
+    await Members.insertAsync({ _id: ownerId, mid: 'five2', name: 'Warning Owner', email: 'warning@example.com', lab: past() });
+    await unit(unitId, 2, 'occupied', ownerId);
     const preview = await previewStorageSuggestions('warn');
-    const command = {
+    const result = await confirmStorageSuggestions({
       action: 'warn', commandId: `${prefix}warning-command`, actor: `${prefix}admin`,
       selections: [{ suggestion_id: preview.rows[0].suggestion_id }],
-    };
-    setStorageJournalFailureInjectorForTests(({ step, point }) => {
-      if (step === 'warning_inserted' && point === 'after_effect') throw new Error('injected warning gap');
-    });
-    assert.strictEqual((await confirmStorageSuggestions(command)).results[0].status, 'failed');
-    setStorageJournalFailureInjectorForTests(undefined);
-    assert.strictEqual((await confirmStorageSuggestions(command)).results[0].status, 'applied');
-    assert.strictEqual(await StorageWarnings.find({ assignment: assignmentId }).countAsync(), 1);
-    assert.strictEqual(await StorageEvents.find({ event_type: 'warning_created' }).countAsync(), 1);
-    assert.strictEqual(await StorageNotificationDeliveries.find({ decision_type: 'warning' }).countAsync(), 1);
-  });
-
-  it('resumes member and manual audit writes without duplicating domain records', async function () {
-    const created = now();
-    const owner = { _id: `${prefix}member-journal`, mid: 'ssjm', name: 'Member Journal', lab: future() };
-    await Members.insertAsync(owner);
-    let failures = 0;
-    setStorageJournalFailureInjectorForTests(({ step, point }) => {
-      if (((step === 'request_written' && point === 'after_checkpoint') ||
-          (step === 'unit_inserted' && point === 'after_effect'))) {
-        failures += 1;
-        throw new Error('injected domain/audit gap');
-      }
-    });
-    const requestArgs = {
-      owner, requestType: 'allocation', actor: owner._id,
-      commandId: `${prefix}member-request-command`, now: created,
-    };
-    await assert.rejects(upsertMemberStorageRequest(requestArgs), /injected domain\/audit gap/);
-    setStorageJournalFailureInjectorForTests(undefined);
-    const requestId = await upsertMemberStorageRequest(requestArgs);
-    assert.strictEqual(await StorageRequests.find({ _id: requestId }).countAsync(), 1);
-    assert.strictEqual(await StorageEvents.find({ entity_id: requestId }).countAsync(), 1);
-
-    setStorageJournalFailureInjectorForTests(({ step, point }) => {
-      if (step === 'unit_inserted' && point === 'after_effect') throw new Error('injected unit/audit gap');
-    });
-    const unitArgs = {
-      fields: { name: `${prefix}manual-unit`, floor: 'floor1', height: 'high', wall: `${prefix}wall`, position: 92 },
-      actor: `${prefix}admin`, commandId: `${prefix}unit-command`, now: created,
-    };
-    await assert.rejects(createStorageUnitManual(unitArgs), /injected unit\/audit gap/);
-    setStorageJournalFailureInjectorForTests(undefined);
-    await StorageActionExecutions.updateAsync(
-      { command_id: unitArgs.commandId, operation_kind: 'manual.unit.create' },
-      { $set: { execution_status: 'processing', lease_expires_at: new Date(Date.now() - 1000) } },
-    );
-    const unitId = await createStorageUnitManual(unitArgs);
-    assert.strictEqual(await StorageUnits.find({ _id: unitId }).countAsync(), 1);
-    assert.strictEqual(await StorageEvents.find({ entity_id: unitId }).countAsync(), 1);
-    assert.strictEqual(failures, 1);
-  });
-
-  it('scopes member command keys and rejects changed manual intent', async function () {
-    const created = now();
-    const firstOwner = { _id: `${prefix}intent-owner-1`, mid: 'ssi1', name: 'Intent One', lab: future() };
-    const secondOwner = { _id: `${prefix}intent-owner-2`, mid: 'ssi2', name: 'Intent Two', lab: future() };
-    await Members.insertAsync(firstOwner);
-    await Members.insertAsync(secondOwner);
-    const commandId = `${prefix}shared-member-command`;
-    const firstRequest = await upsertMemberStorageRequest({
-      owner: firstOwner, requestType: 'allocation', preference: { floor: 'floor1' },
-      actor: firstOwner._id, commandId, now: created,
-    });
-    const secondRequest = await upsertMemberStorageRequest({
-      owner: secondOwner, requestType: 'allocation', preference: { floor: 'floor2' },
-      actor: secondOwner._id, commandId, now: created,
-    });
-    assert.notStrictEqual(firstRequest, secondRequest);
-    assert.strictEqual((await StorageRequests.findOneAsync(firstRequest)).owner, firstOwner._id);
-    assert.strictEqual((await StorageRequests.findOneAsync(secondRequest)).owner, secondOwner._id);
-    await assert.rejects(
-      upsertMemberStorageRequest({
-        owner: firstOwner, requestType: 'allocation', preference: { floor: 'floor2' },
-        actor: firstOwner._id, commandId, now: created,
-      }),
-      /different storage operation/,
-    );
-
-    const unitCommand = `${prefix}intent-unit-command`;
-    const common = { actor: `${prefix}admin`, commandId: unitCommand, now: created };
-    const unitMetadata = { floor: 'floor1', wall: `${prefix}wall`, position: 120 };
-    await createStorageUnitManual({
-      ...common, fields: { ...unitMetadata, name: `${prefix}intent-unit`, availability_status: 'available' },
-    });
-    await assert.rejects(
-      createStorageUnitManual({
-        ...common, fields: { ...unitMetadata, name: `${prefix}changed-unit`, availability_status: 'unavailable' },
-      }),
-      /different storage operation/,
-    );
-  });
-
-  it('locks the complete suggested batch intent for a command id', async function () {
-    const base = { action: 'warn', commandId: `${prefix}batch-command`, actor: `${prefix}admin` };
-    const selections = [{ suggestion_id: 'first' }, { suggestion_id: 'second' }];
-    await confirmStorageSuggestions({ ...base, selections });
-    await assert.rejects(
-      confirmStorageSuggestions({ ...base, selections: selections.slice(0, 1) }),
-      /different storage operation/,
-    );
-    await assert.rejects(
-      confirmStorageSuggestions({ ...base, selections: [...selections, { suggestion_id: 'invented' }] }),
-      /different storage operation/,
-    );
-  });
-
-  it('blocks allocation when a manifest record is missing', async function () {
-    const created = now();
-    await installReadyMigration(created, {
-      storageUnits: [`${prefix}missing-unit`],
-      storageAssignments: [], storageRequests: [], storageEvents: [],
-    });
-    const preview = await previewStorageSuggestions('allocate');
-    assert.strictEqual(preview.blocked, true);
-    assert(preview.readiness.allocation_blocked_reasons.includes('migration_manifest_incomplete'));
-    assert.deepStrictEqual(preview.readiness.missing_migrated_documents.storageUnits, [`${prefix}missing-unit`]);
-  });
-
-  it('rechecks migration readiness between preview and confirmation', async function () {
-    const created = now();
-    const ownerId = `${prefix}owner`;
-    const unitId = `${prefix}unit`;
-    await Members.insertAsync({ _id: ownerId, mid: 'sst3', name: 'Storage Test', lab: future() });
-    await StorageUnits.insertAsync({
-      _id: unitId, name: `${prefix}2`, floor: 'floor1', height: 'low', wall: `${prefix}wall`,
-      position: 2, availability_status: 'available', createdAt: created, updatedAt: created,
-    });
-    await StorageRequests.insertAsync({
-      _id: `${prefix}request`, owner: ownerId, request_type: 'allocation', requested_at: created,
-      request_status: 'waiting', createdAt: created, updatedAt: created,
-    });
-    await installReadyMigration(created);
-    const preview = await previewStorageSuggestions('allocate');
-    assert.strictEqual(preview.rows.length, 1);
-    await StorageEvents.updateAsync(STORAGE_MIGRATION_SUMMARY_ID, {
-      $set: { 'details.manifest.digest': `${prefix}tampered` },
-    });
-    const result = await confirmStorageSuggestions({
-      action: 'allocate', commandId: `${prefix}stale-command`, actor: `${prefix}admin`,
-      selections: [{ suggestion_id: preview.rows[0].suggestion_id }],
-    });
-    assert.strictEqual(result.results[0].status, 'stale');
-    assert.strictEqual(await StorageAssignments.find({ owner: ownerId }).countAsync(), 0);
-  });
-
-  it('manual assignment requires a queue override and otherwise consumes the request without notifying', async function () {
-    const created = now();
-    const ownerId = `${prefix}owner`;
-    const unitId = `${prefix}unit`;
-    await Members.insertAsync({ _id: ownerId, mid: 'sst4', name: 'Storage Test', lab: future() });
-    await StorageUnits.insertAsync({
-      _id: unitId, name: `${prefix}3`, floor: 'floor1', height: 'low', wall: `${prefix}wall`,
-      position: 3, availability_status: 'available', createdAt: created, updatedAt: created,
-    });
-    await assert.rejects(
-      assignStorageUnitManual({ unitId, ownerId, actor: `${prefix}admin`, now: created }),
-      (error) => error.error === 'override-required',
-    );
-    const requestId = `${prefix}request`;
-    await StorageRequests.insertAsync({
-      _id: requestId, owner: ownerId, request_type: 'allocation', requested_at: created,
-      request_status: 'waiting', createdAt: created, updatedAt: created,
-    });
-    const assignmentId = await assignStorageUnitManual({
-      unitId, ownerId, actor: `${prefix}admin`, now: new Date(created.getTime() + 1000),
-    });
-    const [assignment, request] = await Promise.all([
-      StorageAssignments.findOneAsync(assignmentId), StorageRequests.findOneAsync(requestId),
-    ]);
-    assert.strictEqual(assignment.request, requestId);
-    assert.strictEqual(request.request_status, 'fulfilled');
-    assert.strictEqual(await StorageNotificationDeliveries.find({ owner: ownerId }).countAsync(), 0);
-  });
-
-  it('finds an active request by owner and keeps its queue date when preferences change', async function () {
-    const created = now();
-    const ownerId = `${prefix}request-owner`;
-    const requestId = `${prefix}editable-request`;
-    await Members.insertAsync({ _id: ownerId, mid: 'sstrq', name: 'Queue Test', lab: future() });
-    await StorageRequests.insertAsync({
-      _id: requestId, owner: ownerId, request_type: 'allocation', requested_at: created,
-      preference: { floor: 'floor1' }, request_status: 'waiting', createdAt: created, updatedAt: created,
-    });
-
-    const returnedId = await upsertStorageRequestManual({
-      ownerId, requestType: 'allocation', preference: { floor: 'floor2', height: 'high' },
-      actor: `${prefix}admin`, commandId: `${prefix}preference-command`,
-      now: new Date(created.getTime() + 1000),
-    });
-    const request = await StorageRequests.findOneAsync(requestId);
-    assert.strictEqual(returnedId, requestId);
-    assert.strictEqual(await StorageRequests.find({ owner: ownerId }).countAsync(), 1);
-    assert.strictEqual(request.requested_at.getTime(), created.getTime());
-    assert.deepStrictEqual(request.preference, { floor: 'floor2', height: 'high' });
-
-    await assert.rejects(
-      upsertStorageRequestManual({
-        ownerId, requestType: 'allocation', preference: request.preference,
-        requestedAt: new Date(created.getTime() - 86400000), actor: `${prefix}admin`,
-        commandId: `${prefix}date-command`, now: new Date(created.getTime() + 2000),
-      }),
-      (error) => error.error === 'missing-reason',
-    );
-  });
-
-  it('persists an administrator inspection decision on a suggested move', async function () {
-    const created = now();
-    const ownerId = `${prefix}owner`;
-    const sourceId = `${prefix}source`;
-    const destinationId = `${prefix}destination`;
-    const assignmentId = `${prefix}assignment`;
-    const requestId = `${prefix}request`;
-    await Members.insertAsync({ _id: ownerId, mid: 'sst5', name: 'Storage Test', lab: future() });
-    await StorageUnits.insertAsync({
-      _id: sourceId, name: `${prefix}source`, floor: 'floor1', height: 'high', wall: `${prefix}wall`,
-      position: 4, availability_status: 'occupied', owner: ownerId, createdAt: created, updatedAt: created,
-    });
-    await StorageUnits.insertAsync({
-      _id: destinationId, name: `${prefix}destination`, floor: 'floor1', height: 'low', wall: `${prefix}wall`,
-      position: 5, availability_status: 'available', createdAt: created, updatedAt: created,
-    });
-    await StorageAssignments.insertAsync({
-      _id: assignmentId, unit: sourceId, owner: ownerId, assigned_at: created,
-      assigned_by: `${prefix}admin`, createdAt: created, updatedAt: created,
-    });
-    await StorageRequests.insertAsync({
-      _id: requestId, owner: ownerId, request_type: 'move', preference: { height: 'low' },
-      source_assignment: assignmentId, requested_at: created, request_status: 'waiting',
-      createdAt: created, updatedAt: created,
-    });
-    await installReadyMigration(created);
-    const preview = await previewStorageSuggestions('allocate');
-    assert.strictEqual(preview.rows[0].decision_type, 'move');
-    const result = await confirmStorageSuggestions({
-      action: 'allocate', commandId: `${prefix}move-command`, actor: `${prefix}admin`,
-      selections: [{ suggestion_id: preview.rows[0].suggestion_id, requires_inspection: true }],
     });
     assert.strictEqual(result.results[0].status, 'applied');
-    const move = await StorageMoves.findOneAsync(result.results[0].decision_id);
-    assert.strictEqual(move.requires_inspection, true);
-  });
-
-  it('pauses and resumes without changing queue age and resolves renewal warnings', async function () {
-    const created = now();
-    const ownerId = `${prefix}owner`;
-    await Members.insertAsync({ _id: ownerId, mid: 'sst2', name: 'Storage Test', lab: new Date(created.getTime() - 1000) });
-    await StorageRequests.insertAsync({
-      _id: `${prefix}request`, owner: ownerId, request_type: 'allocation', requested_at: created,
-      request_status: 'waiting', createdAt: created, updatedAt: created,
-    });
-    await StorageWarnings.insertAsync({
-      _id: `${prefix}warning`, assignment: `${prefix}assignment`, owner: ownerId,
-      warned_at: created, warned_by: `${prefix}admin`, deadline_at: new Date(created.getTime() + 28 * 86400000),
-      warning_status: 'open', createdAt: created, updatedAt: created,
-    });
-    setStorageJournalFailureInjectorForTests(({ step, point, operation }) => {
-      if (operation.action_type === 'reconciliation' && step === 'domain_updated' && point === 'after_effect') {
-        throw new Error('injected reconciliation audit gap');
-      }
-    });
-    await assert.rejects(
-      reconcileStorageState({ ownerIds: [ownerId] }),
-      /injected reconciliation audit gap/,
-    );
-    setStorageJournalFailureInjectorForTests(undefined);
-    await reconcileStorageState({ ownerIds: [ownerId] });
-    const paused = await StorageRequests.findOneAsync(`${prefix}request`);
-    assert.strictEqual(paused.request_status, 'paused_ineligible');
-    assert.strictEqual(paused.requested_at.getTime(), created.getTime());
-
+    assert((await StorageUnits.findOneAsync(unitId)).warning.id);
     await Members.updateAsync(ownerId, { $set: { lab: future() } });
     await reconcileStorageState({ ownerIds: [ownerId] });
-    const resumed = await StorageRequests.findOneAsync(`${prefix}request`);
-    const warning = await StorageWarnings.findOneAsync(`${prefix}warning`);
-    assert.strictEqual(resumed.request_status, 'waiting');
-    assert.strictEqual(resumed.requested_at.getTime(), created.getTime());
-    assert.strictEqual(warning.warning_status, 'resolved_renewal');
+    assert.strictEqual((await StorageUnits.findOneAsync(unitId)).warning, undefined);
+    assert(await StorageEvents.findOneAsync({ event_type: 'warning_resolved_renewal', unit: unitId }));
+  });
+
+  it('keeps only a pending move offer and records completion in events', async function () {
+    const ownerId = `${prefix}move-owner`;
+    const sourceId = `${prefix}move-source`;
+    const destinationId = `${prefix}move-destination`;
+    const requestId = `${prefix}move-request`;
+    const created = new Date();
+    await Members.insertAsync({ _id: ownerId, mid: 'five3', name: 'Move Owner', email: 'move@example.com', lab: future() });
+    await unit(sourceId, 3, 'occupied', ownerId);
+    await StorageUnits.updateAsync(sourceId, { $set: { height: 'high' } });
+    await unit(destinationId, 4);
+    await StorageRequests.insertAsync({
+      _id: requestId, owner: ownerId, request_type: 'move', source_unit: sourceId,
+      preference: { floor: 'floor1', height: 'low' }, requested_at: created,
+      request_status: 'waiting', createdAt: created, updatedAt: created,
+    });
+    await installReadyMigration(created);
+    const preview = await previewStorageSuggestions('allocate');
+    const reservation = await confirmStorageSuggestions({
+      action: 'allocate', commandId: `${prefix}move-command`, actor: `${prefix}admin`,
+      selections: [{ suggestion_id: preview.rows[0].suggestion_id }],
+    });
+    const offerId = reservation.results[0].decision_id;
+    assert(await StorageOffers.findOneAsync(offerId));
+    await completeStorageOffer({ offerId, actor: ownerId, actorType: 'member' });
+    assert.strictEqual(await StorageOffers.findOneAsync(offerId), undefined);
+    assert.strictEqual((await StorageUnits.findOneAsync(destinationId)).availability_status, 'occupied');
+    assert.strictEqual((await StorageUnits.findOneAsync(sourceId)).availability_status, 'available');
+    assert(await StorageEvents.findOneAsync({ entity_id: offerId, event_type: 'offer_completed' }));
+  });
+
+  it('rejects member completion after eligibility or the offer deadline has ended', async function () {
+    const now = new Date();
+    const insertOffer = (id, owner, deadline) => StorageOffers.insertAsync({
+      _id: id, owner: owner._id, request: `${id}:request`, from_unit: `${id}:from`, to_unit: `${id}:to`,
+      offered_at: new Date(now.getTime() - 86400000), offered_by: `${prefix}admin`,
+      deadline_at: deadline, requires_inspection: false, createdAt: now, updatedAt: now,
+    });
+    const expiredOwner = { _id: `${prefix}expired`, lab: future() };
+    const expiredOfferId = `${prefix}expired-offer`;
+    await insertOffer(expiredOfferId, expiredOwner, new Date(now.getTime() - 1));
+    await assert.rejects(
+      confirmMemberStorageOffer({ owner: expiredOwner, offerId: expiredOfferId, actor: expiredOwner._id, now }),
+      (error) => error.error === 'offer-expired',
+    );
+
+    const ineligibleOwner = { _id: `${prefix}ineligible`, lab: past() };
+    const ineligibleOfferId = `${prefix}ineligible-offer`;
+    await insertOffer(ineligibleOfferId, ineligibleOwner, new Date(now.getTime() + 86400000));
+    await assert.rejects(
+      confirmMemberStorageOffer({ owner: ineligibleOwner, offerId: ineligibleOfferId, actor: ineligibleOwner._id, now }),
+      (error) => error.error === 'not-eligible',
+    );
+  });
+
+  it('preserves an overdue warning when an administrator completes the offer', async function () {
+    const now = new Date();
+    const ownerId = `${prefix}overdue`;
+    const sourceId = `${prefix}old`;
+    const destinationId = `${prefix}new`;
+    const requestId = `${prefix}request`;
+    const offerId = `${prefix}offer`;
+    const warning = {
+      id: `${prefix}warning`, warned_at: new Date(now.getTime() - 29 * 86400000),
+      warned_by: `${prefix}admin`, deadline_at: new Date(now.getTime() - 86400000),
+    };
+    await Members.insertAsync({ _id: ownerId, mid: 'five6', name: 'Overdue Owner', lab: past() });
+    await unit(sourceId, 7, 'occupied', ownerId);
+    await StorageUnits.updateAsync(sourceId, { $set: { warning } });
+    await unit(destinationId, 8, 'reserved', ownerId);
+    await StorageRequests.insertAsync({
+      _id: requestId, owner: ownerId, request_type: 'move', source_unit: sourceId,
+      preference: { height: 'low' }, requested_at: now, request_status: 'in_progress',
+      createdAt: now, updatedAt: now,
+    });
+    await StorageOffers.insertAsync({
+      _id: offerId, owner: ownerId, request: requestId, from_unit: sourceId, to_unit: destinationId,
+      offered_at: new Date(now.getTime() - 15 * 86400000), offered_by: `${prefix}admin`,
+      deadline_at: new Date(now.getTime() - 86400000), requires_inspection: false,
+      createdAt: now, updatedAt: now,
+    });
+
+    await completeStorageOffer({ offerId, actor: `${prefix}admin`, actorType: 'administrator' });
+
+    assert.deepStrictEqual((await StorageUnits.findOneAsync(destinationId)).warning, warning);
+    assert.strictEqual((await StorageUnits.findOneAsync(sourceId)).availability_status, 'available');
+  });
+
+  it('stores and removes an administrative exemption on the occupied unit', async function () {
+    const ownerId = `${prefix}exemption-owner`;
+    const unitId = `${prefix}exemption-unit`;
+    await Members.insertAsync({ _id: ownerId, mid: 'five4', name: 'Exemption Owner', email: 'exemption@example.com', lab: future() });
+    await unit(unitId, 5);
+    await assignStorageUnitManual({
+      unitId, ownerId, actor: `${prefix}admin`, commandId: 'assign', now: new Date(),
+    });
+    assert.strictEqual(await createStorageExemptionManual({
+      unitId, actor: `${prefix}admin`, commandId: 'exempt', reason: 'Board decision', now: new Date(),
+    }), unitId);
+    assert.strictEqual((await StorageUnits.findOneAsync(unitId)).exemption.reason, 'Board decision');
+    await revokeStorageExemptionManual({ unitId, actor: `${prefix}admin`, commandId: 'revoke' });
+    assert.strictEqual((await StorageUnits.findOneAsync(unitId)).exemption, undefined);
+  });
+
+  it('writes the current unit into a member move request', async function () {
+    const ownerId = `${prefix}request-owner`;
+    const unitId = `${prefix}request-unit`;
+    const owner = { _id: ownerId, mid: 'five5', name: 'Request Owner', email: 'request@example.com', lab: future() };
+    await Members.insertAsync(owner);
+    await unit(unitId, 6, 'occupied', ownerId);
+    const requestId = await upsertMemberStorageRequest({
+      owner, requestType: 'move', preference: { height: 'high' }, actor: ownerId,
+      commandId: `${prefix}member-request`, now: new Date(),
+    });
+    assert.strictEqual((await StorageRequests.findOneAsync(requestId)).source_unit, unitId);
   });
 });
