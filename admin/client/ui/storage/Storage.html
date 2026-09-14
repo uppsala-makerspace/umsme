@@ -86,7 +86,22 @@
         <div class="storage-subpanel"><h3>History</h3>{{#if history.length}}<ol class="storage-history">{{#each item in history}}<li><time>{{item.date}}</time> <strong>{{item.event_type}}</strong> {{item.reason}}</li>{{/each}}</ol>{{else}}<p>No recorded events.</p>{{/if}}</div>
       </section>{{/with}}
 
+      <section class="storage-panel storage-event-log">
+        <div class="storage-heading"><div><h2>Event log</h2><p>Read-only history of storage changes, newest first, up to 500 events.</p></div><button class="btn btn-default clear-storage-event-filters">Clear filters</button></div>
+        <div class="storage-event-filters">
+          <label>Member <input class="storage-event-filter" data-filter="member_id" type="search" list="storage-event-members" placeholder="Search by name, member number, or email" autocomplete="off"></label>
+          <label>Storage unit <input class="storage-event-filter" data-filter="unit_id" type="search" list="storage-event-units" placeholder="Search by unit name" autocomplete="off"></label>
+        </div>
+        {{#if eventLogRows.length}}
+          <div class="storage-event-table-wrap"><table class="table table-condensed storage-table storage-event-table"><thead><tr><th>When</th><th>Event</th><th>Member</th><th>Storage unit</th><th>Actor</th><th>Reason and details</th></tr></thead><tbody>
+            {{#each row in eventLogRows}}<tr><td><time>{{row.date}}</time></td><td><strong>{{row.eventLabel}}</strong><br><small>{{row.entityLabel}}</small></td><td>{{#if row.memberId}}<a href="/member/{{row.memberId}}">{{row.memberLabel}}</a>{{else}}{{row.memberLabel}}{{/if}}</td><td>{{row.unitLabel}}</td><td>{{row.actorLabel}}</td><td>{{row.reason}}{{#if row.detailsLabel}}<details><summary>Details</summary><pre>{{row.detailsLabel}}</pre></details>{{/if}}</td></tr>{{/each}}
+          </tbody></table></div>
+        {{else}}<p>No events match these filters.</p>{{/if}}
+      </section>
+
       <datalist id="storage-members">{{#each member in memberOptions}}<option value="{{member.pickerLabel}}" data-id="{{member._id}}"></option>{{/each}}</datalist>
+      <datalist id="storage-event-members">{{#each member in eventMemberOptions}}<option value="{{member.pickerLabel}}" data-id="{{member._id}}"></option>{{/each}}</datalist>
+      <datalist id="storage-event-units">{{#each unit in eventUnitOptions}}<option value="{{unit.name}}" data-id="{{unit._id}}"></option>{{/each}}</datalist>
     {{/unless}}
   </section>
 </template>

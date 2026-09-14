@@ -12,6 +12,7 @@ import {
   storageQueueRows,
   storageReadinessPresentation,
 } from '/imports/storage/presentation';
+import { storageEventEntityIds, storageEventRows } from '/imports/storage/eventLog';
 
 describe('storage admin presentation', function () {
   const units = [
@@ -152,5 +153,78 @@ describe('storage admin presentation', function () {
         { suggestion_id: 'one', status, label: 'Ada · A-1' },
       );
     }
+  });
+
+  it('resolves member and unit event filters through historical storage records', function () {
+    const records = {
+      assignments: [
+        { _id: 'a1', owner: 'm1', unit: 'u1', request: 'r1' },
+        { _id: 'a2', owner: 'm2', unit: 'u1', request: 'r2' },
+      ],
+      requests: [
+        { _id: 'r1', owner: 'm1' }, { _id: 'r2', owner: 'm2' }, { _id: 'r3', owner: 'm1' },
+      ],
+      warnings: [
+        { _id: 'w1', owner: 'm1', assignment: 'a1' },
+        { _id: 'w2', owner: 'm2', assignment: 'a2' },
+      ],
+      exemptions: [{ _id: 'e1', assignment: 'a1' }],
+      moves: [{ _id: 'mv1', owner: 'm1', from_unit: 'u1', to_unit: 'u2', from_assignment: 'a1', request: 'r3' }],
+    };
+    assert.deepStrictEqual(
+      storageEventEntityIds({ memberId: 'm1', ...records }),
+      ['a1', 'e1', 'mv1', 'r1', 'r3', 'w1'],
+    );
+    assert.deepStrictEqual(
+      storageEventEntityIds({ unitId: 'u1', ...records }),
+      ['a1', 'a2', 'e1', 'mv1', 'r1', 'r2', 'r3', 'u1', 'w1', 'w2'],
+    );
+    assert.deepStrictEqual(
+      storageEventEntityIds({ memberId: 'm1', unitId: 'u1', ...records }),
+      ['a1', 'e1', 'mv1', 'r1', 'r3', 'w1'],
+    );
+    assert.deepStrictEqual(storageEventEntityIds({ memberId: 'm2', unitId: 'u2', ...records }), []);
+    assert.strictEqual(storageEventEntityIds(records), null);
+  });
+
+  it('presents event rows with related member and storage-unit names', function () {
+    const rows = storageEventRows({
+      events: [
+        { _id: 'older', entity_type: 'storageAssignment', entity_id: 'a1', event_type: 'assignment_created', actor_type: 'administrator', actor: 'admin-user', occurred_at: new Date('2026-09-10') },
+        { _id: 'newer', entity_type: 'storageMove', entity_id: 'mv1', event_type: 'move_reserved', actor_type: 'member', actor: 'member-user', occurred_at: new Date('2026-09-11'), details: { to_unit: 'u2' } },
+      ],
+      members: [
+        { _id: 'm1', name: 'Ada Lovelace', email: 'ada@example.com' },
+        { _id: 'admin-member', name: 'Admin User', email: 'admin@example.com' },
+      ],
+      users: [
+        { _id: 'member-user', emails: [{ address: 'Ada@example.com' }] },
+        { _id: 'admin-user', emails: [{ address: 'admin@example.com' }] },
+      ],
+      units: [{ _id: 'u1', name: '1001' }, { _id: 'u2', name: '2001' }],
+      assignments: [{ _id: 'a1', owner: 'm1', unit: 'u1' }],
+      moves: [{ _id: 'mv1', owner: 'm1', from_unit: 'u1', to_unit: 'u2', from_assignment: 'a1' }],
+    });
+    assert.deepStrictEqual(rows.map(({ _id }) => _id), ['newer', 'older']);
+    assert.strictEqual(rows[0].memberLabel, 'Ada Lovelace');
+    assert.strictEqual(rows[0].unitLabel, '1001, 2001');
+    assert.strictEqual(rows[0].eventLabel, 'Move reserved');
+    assert.strictEqual(rows[0].actorLabel, 'Member · Ada Lovelace');
+    assert.strictEqual(rows[1].actorLabel, 'Administrator · Admin User');
+  });
+
+  it('uses readable system actor labels and never exposes an unknown actor id', function () {
+    const [seed] = storageEventRows({ events: [{
+      _id: 'seed', entity_type: 'storageMigration', entity_id: 'migration',
+      event_type: 'legacy_storage_migration_applied', actor_type: 'system',
+      actor: '__e2e_seed__', occurred_at: new Date('2026-09-11'),
+    }] });
+    assert.strictEqual(seed.actorLabel, 'System · Test data setup');
+    const [unknown] = storageEventRows({ events: [{
+      _id: 'unknown', entity_type: 'storageUnit', entity_id: 'u1',
+      event_type: 'unit_updated', actor_type: 'administrator',
+      actor: 'opaque-database-id', occurred_at: new Date('2026-09-11'),
+    }] });
+    assert.strictEqual(unknown.actorLabel, 'Administrator');
   });
 });
