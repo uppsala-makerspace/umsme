@@ -58,6 +58,10 @@ const applyAssignment = async ({ owner, unit, request }, actor, now, session, ev
   await casStorageUpdate(StorageRequests,
     { _id: request._id, request_status: 'waiting', updatedAt: request.updatedAt },
     { $set: { request_status: 'fulfilled', fulfilled_at: now, updatedAt: now } }, { session });
+  // Sent inside the transaction on purpose: the Messages id is deterministic
+  // per decision, so a retry after an aborted commit is deduplicated, and a
+  // member is never left unnotified by a crash between commit and send. The
+  // price is a premature message if this transaction is rolled back.
   const messageId = await sendStorageNotification({
     owner, decisionType: 'assignment', decisionId: unit._id, now,
     context: { owner_name: owner.name, unit_name: unit.name },

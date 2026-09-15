@@ -9,7 +9,7 @@ import { completeStorageOffer } from './commands';
 import { reconcileStorageState } from './reconciliation';
 import { storageOperationId } from './ids';
 
-const cleanPreference = (preference) => {
+export const cleanPreference = (preference) => {
   if (preference === undefined || preference === null) return undefined;
   if (typeof preference !== 'object' || Array.isArray(preference)) {
     throw new Meteor.Error('bad-preference', 'Preference must be an object');

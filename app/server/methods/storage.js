@@ -1,5 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import { check } from "meteor/check";
+import { check, Match } from "meteor/check";
 import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
 import {
   memberAndStorageOwnerForUser,
@@ -18,6 +18,8 @@ Meteor.methods({
   },
 
   async 'storage.member.upsertRequest'({ request_type, preference, command_id }) {
+    check(request_type, String);
+    check(preference, Match.Maybe(Object));
     check(command_id, String);
     const { owner } = await requirePayingStorageMember(this.userId);
     const requestId = await upsertMemberStorageRequest({
@@ -35,6 +37,7 @@ Meteor.methods({
   },
 
   async 'storage.member.cancelRequest'({ request_id, command_id }) {
+    check(request_id, String);
     check(command_id, String);
     const { owner } = await requirePayingStorageMember(this.userId);
     await cancelMemberStorageRequest({ owner, requestId: request_id, actor: this.userId, commandId: command_id });
