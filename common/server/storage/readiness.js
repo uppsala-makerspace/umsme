@@ -86,7 +86,7 @@ export const storageAllocationReadiness = async ({ legacySource } = {}) => {
   );
 
   let legacySourceChanged = false;
-  if (summary && finalizedValid && !finalized) {
+  if (summary && !finalized) {
     const currentFingerprint = await storageMigrationFingerprintForSource(
       legacySource
         ? { ...legacySource, cutoff: summary.occurred_at }

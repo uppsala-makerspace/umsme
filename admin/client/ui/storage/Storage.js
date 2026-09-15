@@ -2,7 +2,9 @@ import './Storage.html';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Random } from 'meteor/random';
 import { Roles } from 'meteor/roles';
-import { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
+import {
+  ACTIVE_STORAGE_REQUEST_STATUSES, STORAGE_OPERATOR_ROLES, hasActiveLabMembershipAt, resolveStorageOwner,
+} from '/imports/common/lib/storageRules';
 import { Members } from '/imports/common/collections/members';
 import { Messages } from '/imports/common/collections/messages';
 import {
@@ -30,15 +32,8 @@ const scopedError = (section) => {
 const operator = () => !!Meteor.userId() &&
   Roles.userIsInRole(Meteor.userId(), STORAGE_OPERATOR_ROLES);
 const formObject = (form) => Object.fromEntries(new FormData(form).entries());
-const storageOwnerIdForMember = (memberId) => {
-  const seen = new Set();
-  let member = Members.findOne(memberId);
-  while (member?.infamily && !seen.has(member._id)) {
-    seen.add(member._id);
-    member = Members.findOne(member.infamily);
-  }
-  return member?._id || memberId;
-};
+const storageOwnerIdForMember = (memberId) =>
+  resolveStorageOwner(Members.findOne(memberId), (id) => Members.findOne(id)).owner?._id || memberId;
 const stateCommand = (instance, intent) => {
   const key = `command:${intent}`;
   if (!instance.state.get(key)) instance.state.set(key, newCommandId());
@@ -47,7 +42,7 @@ const stateCommand = (instance, intent) => {
 const clearCommand = (instance, intent) => instance.state.set(`command:${intent}`, undefined);
 const activeRequestForOwner = (ownerId) => ownerId && StorageRequests.findOne({
   owner: ownerId,
-  request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] },
+  request_status: { $in: ACTIVE_STORAGE_REQUEST_STATUSES },
 });
 const setStateMapValue = (instance, stateKey, itemKey, value) => {
   instance.state.set(stateKey, {
@@ -172,7 +167,7 @@ const storageUnitView = (unit) => {
     unit: unit._id,
     assigned_at: unit.assigned_at,
   } : null;
-  const ownerEligible = owner?.lab instanceof Date && owner.lab > new Date();
+  const ownerEligible = hasActiveLabMembershipAt(owner);
   const entityIds = [unit._id, request?._id, offer?._id].filter(Boolean);
 
   return {
@@ -343,7 +338,7 @@ Template.Storage.helpers({
       const member = Members.findOne(unit.owner);
       const warning = unit.warning;
       const exemption = unit.exemption;
-      const membershipExpired = !(member?.lab instanceof Date) || member.lab <= now;
+      const membershipExpired = !hasActiveLabMembershipAt(member, now);
       const overdue = unit.availability_status === 'occupied' && !!member && membershipExpired;
       let warningState = '';
       if (overdue) warningState = exemption ? 'exempt' : (warning ? 'warned' : 'unwarned');

@@ -4,6 +4,8 @@ import {
   desiredStorageRequestStatus,
   hasActiveLabMembershipAt,
   storageExemptionDeactivationReason,
+  EDITABLE_STORAGE_REQUEST_STATUSES,
+  isEditableStorageRequest,
 } from '/imports/common/lib/storageRules';
 import { appendStorageEvent } from './events';
 import { runStorageAtomic } from './atomic';
@@ -20,7 +22,7 @@ const updateWithEvent = async ({ collection, selector, modifier, event }) => run
 });
 
 const reconcileRequest = async (request, owner, now) => {
-  if (!['waiting', 'paused_ineligible'].includes(request.request_status)) return false;
+  if (!isEditableStorageRequest(request)) return false;
   const wanted = desiredStorageRequestStatus(request.request_type, hasActiveLabMembershipAt(owner, now));
   if (wanted === request.request_status) return false;
   const changed = await updateWithEvent({
@@ -87,7 +89,7 @@ export const reconcileStorageState = async ({ ownerIds, now = new Date() } = {})
   const ownerSelector = ownerIds?.length ? { owner: { $in: [...new Set(ownerIds)] } } : {};
   const [requests, units] = await Promise.all([
     StorageRequests.find({
-      ...ownerSelector, request_status: { $in: ['waiting', 'paused_ineligible'] },
+      ...ownerSelector, request_status: { $in: EDITABLE_STORAGE_REQUEST_STATUSES },
     }).fetchAsync(),
     StorageUnits.find({
       ...ownerSelector, availability_status: 'occupied',

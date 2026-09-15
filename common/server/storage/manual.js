@@ -3,7 +3,10 @@ import { Members } from '/imports/common/collections/members';
 import {
   StorageWalls, StorageUnits, StorageRequests, StorageOffers, StorageEvents,
 } from '/imports/common/collections/storage';
-import { hasActiveLabMembershipAt, storageHeightForRow } from '/imports/common/lib/storageRules';
+import {
+  ACTIVE_STORAGE_REQUEST_STATUSES, EDITABLE_STORAGE_REQUEST_STATUSES, desiredStorageRequestStatus,
+  hasActiveLabMembershipAt, isEditableStorageRequest, isUnitOutsideWallLayout, storageHeightForRow,
+} from '/imports/common/lib/storageRules';
 import { STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument, validateStorageDocument } from './db';
 import { StorageConflictError } from './errors';
 import { cleanPreference } from './memberCommands';
@@ -35,8 +38,7 @@ const storageWallLocation = async ({ wallId, column, row, requireActive = false 
   const wall = await StorageWalls.findOneAsync(wallId);
   if (!wall) throw new Meteor.Error('not-found', 'Storage wall not found');
   if (requireActive && !wall.active) throw new Meteor.Error('bad-state', 'New units require an active wall');
-  if (!Number.isInteger(column) || !Number.isInteger(row) ||
-      column < 1 || row < 1 || column > wall.column_count || row > wall.row_count) {
+  if (isUnitOutsideWallLayout(wall, column, row)) {
     throw new Meteor.Error('bad-location', 'Storage unit coordinates are outside the wall layout');
   }
   return wall;
@@ -206,7 +208,7 @@ export const assignStorageUnitManual = async ({ unitId, ownerId, actor, commandI
   const explanation = override ? requiredReason(reason) : undefined;
   if (!eligible && !override) throw new Meteor.Error('not-eligible', 'Active lab membership required');
   const request = await StorageRequests.findOneAsync({
-    owner: owner._id, request_status: { $in: ['waiting', 'paused_ineligible'] }, request_type: 'allocation',
+    owner: owner._id, request_status: { $in: EDITABLE_STORAGE_REQUEST_STATUSES }, request_type: 'allocation',
   });
   await runStorageAtomic({
     transactional: async (session) => {
@@ -313,11 +315,11 @@ export const upsertStorageRequestManual = async ({
   if (requestType === 'allocation' && unit) throw new Meteor.Error('bad-state', 'A member with storage must request a move or release');
   if (requestType !== 'allocation' && !unit) throw new Meteor.Error('bad-state', 'Move and release requests require an active assignment');
   const existing = requestId ? await StorageRequests.findOneAsync(requestId) : await StorageRequests.findOneAsync({
-    owner: owner._id, request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] },
+    owner: owner._id, request_status: { $in: ACTIVE_STORAGE_REQUEST_STATUSES },
   });
   if (requestId && !existing) throw new Meteor.Error('not-found', 'Storage request not found');
   if (existing && existing.owner !== owner._id) throw new Meteor.Error('not-authorized', 'Request belongs to another storage owner');
-  if (existing && !['waiting', 'paused_ineligible'].includes(existing.request_status)) throw new Meteor.Error('bad-state', 'Request cannot be edited');
+  if (existing && !isEditableStorageRequest(existing)) throw new Meteor.Error('bad-state', 'Request cannot be edited');
   const queueDate = requestedAt ? new Date(requestedAt) : (existing?.requested_at || now);
   if (Number.isNaN(queueDate.getTime())) throw new Meteor.Error('bad-date', 'Invalid queue date');
   if (requestedAt && (!existing || queueDate.getTime() !== existing.requested_at.getTime())) requiredReason(reason);
@@ -327,7 +329,7 @@ export const upsertStorageRequestManual = async ({
   const prior = await priorOperation(id);
   if (prior) return prior.entity_id;
   const targetId = existing?._id || `${id}:request`;
-  const status = requestType === 'release' || hasActiveLabMembershipAt(owner, now) ? 'waiting' : 'paused_ineligible';
+  const status = desiredStorageRequestStatus(requestType, hasActiveLabMembershipAt(owner, now));
   await runStorageAtomic({
     transactional: async (session) => {
       if (existing) {
@@ -363,7 +365,7 @@ export const cancelStorageRequestManual = async ({ requestId, actor, reason, com
   const id = operationId('request.cancel', actor, commandId);
   if (await priorOperation(id)) return true;
   const request = await StorageRequests.findOneAsync(requestId);
-  if (!request || !['waiting', 'paused_ineligible'].includes(request.request_status)) {
+  if (!request || !isEditableStorageRequest(request)) {
     throw new Meteor.Error('bad-state', 'Active editable request not found');
   }
   await runStorageAtomic({
@@ -384,7 +386,7 @@ export const setStorageRequestPausedManual = async ({ requestId, paused, actor, 
   const id = operationId('request.pause', actor, commandId);
   if (await priorOperation(id)) return true;
   const request = await StorageRequests.findOneAsync(requestId);
-  if (!request || !['waiting', 'paused_ineligible'].includes(request.request_status)) {
+  if (!request || !isEditableStorageRequest(request)) {
     throw new Meteor.Error('bad-state', 'Active editable request not found');
   }
   if (request.request_type === 'release') throw new Meteor.Error('bad-state', 'Release requests do not depend on lab eligibility');

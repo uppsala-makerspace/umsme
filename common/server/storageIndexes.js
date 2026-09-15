@@ -1,6 +1,7 @@
 import {
   StorageWalls, StorageUnits, StorageRequests, StorageOffers, StorageEvents,
 } from '/imports/common/collections/storage';
+import { ACTIVE_STORAGE_REQUEST_STATUSES } from '/imports/common/lib/storageRules';
 
 const create = (collection, keys, options = {}) => collection.rawCollection().createIndex(keys, options);
 
@@ -49,7 +50,7 @@ export const ensureStorageIndexes = async () => {
   await create(StorageRequests, { owner: 1 }, {
     unique: true,
     name: 'storage_request_one_active_per_owner',
-    partialFilterExpression: { request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] } },
+    partialFilterExpression: { request_status: { $in: ACTIVE_STORAGE_REQUEST_STATUSES } },
   });
   await create(StorageRequests, { request_status: 1, request_type: 1, requested_at: 1, _id: 1 }, {
     name: 'storage_request_queue',

@@ -1,5 +1,6 @@
 import {
   desiredStorageRequestStatus,
+  hasActiveLabMembershipAt,
   legacyStoragePreference,
   resolveStorageOwner,
   storageHeightForRow,
@@ -352,7 +353,7 @@ export const buildLegacyStorageMigrationPlan = ({
       .filter((end) => !Number.isNaN(end.getTime()));
     const activeLab = labEnds.some((end) => end > at);
     const payer = membersById[owner];
-    const projectedLabActive = !!payer?.lab && new Date(payer.lab) > at;
+    const projectedLabActive = hasActiveLabMembershipAt(payer, at);
     if (activeLab !== projectedLabActive) {
       addIssue('warning', 'lab_projection_mismatch', 'member', owner, {
         memberships_active: activeLab, member_projection_active: projectedLabActive,

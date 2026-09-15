@@ -227,7 +227,7 @@ describe('storageRules', function () {
     it('suggests one reminder before the deadline and reclamation at the deadline', function () {
       assert.strictEqual(isStorageReminderEligible(warning, { now: d('2026-09-03T12:00:00.000Z') }), true);
       assert.strictEqual(isStorageReminderEligible(warning, { now: NOW }), false);
-      assert.strictEqual(isStorageReminderEligible(warning, { now: d('2026-09-04'), reminderAlreadySent: true }), false);
+      assert.strictEqual(isStorageReminderEligible({ ...warning, reminded_at: d('2026-09-03') }, { now: d('2026-09-04') }), false);
       assert.strictEqual(isStorageReclamationEligible(warning, { now: NOW }), true);
       assert.strictEqual(isStorageReclamationEligible(warning, { now: NOW, labIsActive: true }), false);
     });

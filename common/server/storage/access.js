@@ -28,17 +28,10 @@ export const storageActor = async (userId) => {
 
 export const storageOwnerForMember = async (member) => {
   if (!member) throw new Meteor.Error('not-found', 'Member not found');
-  const family = [member];
-  const loaded = new Set([member._id]);
-  let current = member;
-  while (current?.infamily && !loaded.has(current.infamily)) {
-    const payer = await Members.findOneAsync(current.infamily);
-    if (!payer) break;
-    family.push(payer);
-    loaded.add(payer._id);
-    current = payer;
-  }
-  const resolved = resolveStorageOwner(member, family);
+  // The rule rejects every chain longer than one hop, so only the direct payer
+  // is needed; a nested chain fails below as family_payer_missing.
+  const payer = member.infamily ? await Members.findOneAsync(member.infamily) : null;
+  const resolved = resolveStorageOwner(member, payer ? [member, payer] : [member]);
   if (!resolved.owner || resolved.error) {
     throw new Meteor.Error('invalid-family', `Cannot resolve storage owner: ${resolved.error}`);
   }

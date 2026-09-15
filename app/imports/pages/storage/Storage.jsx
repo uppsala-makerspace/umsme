@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { isEditableStorageRequest } from "/imports/common/lib/storageRules";
 import Button from "../../components/Button";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
@@ -107,7 +108,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
   const { unit, awaiting_clearance: awaitingClearance, offer, request, warning } = state;
   const readOnly = state.family_read_only;
   const activeLab = state.has_active_lab_membership;
-  const requestCanBeEdited = request && ["waiting", "paused_ineligible"].includes(request.request_status);
+  const requestCanBeEdited = isEditableStorageRequest(request);
 
   return (
     <MainContent className="items-center gap-4 pb-8 pt-8">

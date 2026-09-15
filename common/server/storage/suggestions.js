@@ -92,7 +92,7 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
   if (action === 'allocate') {
     const result = proposeStorageAllocations({
       units: state.units, requests: state.requests,
-      members: new Map(state.members.map((member) => [member._id, member])), now,
+      members: memberById, now,
     });
     for (const proposal of result.proposals) {
       rows.push(row({
@@ -120,8 +120,7 @@ export const buildStorageSuggestions = (action, state, now = new Date()) => {
       const owner = memberById.get(unit.owner);
       const eligible = action === 'remind'
         ? isStorageReminderEligible(unit.warning, {
-          now, reminderAlreadySent: Boolean(unit.warning.reminded_at),
-          labIsActive: hasActiveLabMembershipAt(owner, now), exemption: unit.exemption,
+          now, labIsActive: hasActiveLabMembershipAt(owner, now), exemption: unit.exemption,
         })
         : isStorageReclamationEligible(unit.warning, {
           now, labIsActive: hasActiveLabMembershipAt(owner, now), exemption: unit.exemption,

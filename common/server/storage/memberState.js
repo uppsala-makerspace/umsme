@@ -3,7 +3,7 @@ import {
   StorageRequests,
   StorageOffers,
 } from '/imports/common/collections/storage';
-import { hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
+import { ACTIVE_STORAGE_REQUEST_STATUSES, hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
 import { reconcileStorageState } from './reconciliation';
 
 const publicUnit = (unit) => unit ? {
@@ -18,7 +18,7 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
   await reconcileStorageState({ ownerIds: [owner._id], now });
   const request = omitRequestInternals(await StorageRequests.findOneAsync({
     owner: owner._id,
-    request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] },
+    request_status: { $in: ACTIVE_STORAGE_REQUEST_STATUSES },
   }));
   const unit = await StorageUnits.findOneAsync({ owner: owner._id, availability_status: 'occupied' });
   const offer = await StorageOffers.findOneAsync({ owner: owner._id });
@@ -49,7 +49,8 @@ export const storageMemberState = async ({ member, owner, familyDependent }, now
   };
 };
 
-function findAllowedPreference(preference) {
+/** The preference fields a member may see; internal keys stay on the server. */
+function publicPreference(preference) {
   if (!preference) return undefined;
   const result = {};
   if (preference.floor) result.floor = preference.floor;
@@ -61,5 +62,5 @@ const requestFields = ['_id', 'request_type', 'requested_at', 'preference', 'req
 function omitRequestInternals(request) {
   if (!request) return null;
   return Object.fromEntries(requestFields.filter((key) => request[key] !== undefined)
-    .map((key) => [key, key === 'preference' ? findAllowedPreference(request[key]) : request[key]]));
+    .map((key) => [key, key === 'preference' ? publicPreference(request[key]) : request[key]]));
 }

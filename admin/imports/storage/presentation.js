@@ -1,3 +1,7 @@
+import {
+  hasActiveLabMembershipAt, isActiveStorageRequest, isEditableStorageRequest,
+} from '/imports/common/lib/storageRules';
+
 export const STORAGE_ACTIONS = [
   { id: 'allocate', label: 'Make assignments', help: 'Assign suggested units.' },
   { id: 'warn', label: 'Send warnings', help: 'Warn overdue occupants.' },
@@ -36,8 +40,6 @@ export const storageMemberLabel = (member = {}) => [
   member.email ? `— ${member.email}` : '',
 ].filter(Boolean).join(' ');
 
-const activeRequestStatuses = new Set(['waiting', 'paused_ineligible', 'in_progress']);
-
 export const storagePreferenceLabel = (preference = {}) => {
   const floor = { floor1: 'Floor 1', floor2: 'Floor 2' }[preference.floor];
   const height = { low: 'Low', high: 'High' }[preference.height];
@@ -58,14 +60,14 @@ export const storageQueueRows = ({ requests = [], members = [], units = [], now 
     .filter((unit) => unit.availability_status === 'occupied' && unit.owner)
     .map((unit) => [unit.owner, unit]));
   return requests
-    .filter((request) => activeRequestStatuses.has(request.request_status) && request.request_type !== 'release')
+    .filter((request) => isActiveStorageRequest(request) && request.request_type !== 'release')
     .sort((left, right) => new Date(left.requested_at) - new Date(right.requested_at)
       || String(left._id).localeCompare(String(right._id)))
     .map((request) => {
       const member = memberById.get(request.owner);
       const unit = unitByOwner.get(request.owner) || unitById.get(request.source_unit);
-      const editable = ['waiting', 'paused_ineligible'].includes(request.request_status);
-      const eligible = !!member?.lab && new Date(member.lab).getTime() > new Date(now).getTime();
+      const editable = isEditableStorageRequest(request);
+      const eligible = hasActiveLabMembershipAt(member, now);
       return {
         ...request,
         memberName: member?.name || 'Unknown member',

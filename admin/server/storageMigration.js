@@ -1,3 +1,4 @@
+import { ACTIVE_STORAGE_REQUEST_STATUSES } from '/imports/common/lib/storageRules';
 import { Meteor } from 'meteor/meteor';
 import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
@@ -88,7 +89,7 @@ const naturalKeyConflicts = async (documents) => {
   for (const request of documents.storageRequests) {
     const found = await StorageRequests.findOneAsync({
       _id: { $ne: request._id }, owner: request.owner,
-      request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] },
+      request_status: { $in: ACTIVE_STORAGE_REQUEST_STATUSES },
     });
     if (found) conflicts.push({ collection: 'storageRequests', id: request._id, code: 'active_request_conflict', existing_id: found._id });
   }

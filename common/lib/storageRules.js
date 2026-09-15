@@ -4,10 +4,15 @@ export const STORAGE_MOVE_DAYS = 14;
 export const STORAGE_OPERATOR_ROLES = ['admin', 'board', 'storage'];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const ACTIVE_REQUEST_STATUSES = new Set(['waiting', 'paused_ineligible', 'in_progress']);
+/** Statuses that keep a request in the queue; the partial unique index uses the same list. */
+export const ACTIVE_STORAGE_REQUEST_STATUSES = ['waiting', 'paused_ineligible', 'in_progress'];
+/** Statuses in which the member or an administrator may still change or cancel a request. */
+export const EDITABLE_STORAGE_REQUEST_STATUSES = ['waiting', 'paused_ineligible'];
+const ACTIVE_REQUEST_STATUSES = new Set(ACTIVE_STORAGE_REQUEST_STATUSES);
 
 const byId = (members, id) => {
   if (!members || !id) return undefined;
+  if (typeof members === 'function') return members(id);
   if (members instanceof Map) return members.get(id);
   if (Array.isArray(members)) return members.find((member) => member._id === id);
   return members[id];
@@ -68,6 +73,9 @@ export const storagePreferenceMatches = (unit, preference) => {
 export const isActiveStorageRequest = (request) =>
   ACTIVE_REQUEST_STATUSES.has(request?.request_status);
 
+export const isEditableStorageRequest = (request) =>
+  EDITABLE_STORAGE_REQUEST_STATUSES.includes(request?.request_status);
+
 export const desiredStorageRequestStatus = (requestType, labIsActive) =>
   requestType === 'release' || labIsActive ? 'waiting' : 'paused_ineligible';
 
@@ -98,9 +106,9 @@ export const storageOfferDeadline = (reservedAt) =>
 
 export const isStorageReminderEligible = (
   warning,
-  { now = new Date(), reminderAlreadySent = false, labIsActive = false, exemption } = {},
+  { now = new Date(), labIsActive = false, exemption } = {},
 ) => !!warning &&
-  !warning.reminded_at && !reminderAlreadySent &&
+  !warning.reminded_at &&
   !labIsActive &&
   !isStorageExemptionActive(exemption, now) &&
   new Date(now) >= storageReminderAt(warning.warned_at) &&
@@ -131,6 +139,10 @@ export const storageUnitStateErrors = (unit) => {
 };
 
 /** Referential and coordinate invariants for the physical storage layout. */
+export const isUnitOutsideWallLayout = (wall, column, row) =>
+  !Number.isInteger(column) || !Number.isInteger(row) ||
+  column < 1 || row < 1 || column > wall.column_count || row > wall.row_count;
+
 export const storageLayoutErrors = ({ walls = [], units = [] } = {}) => {
   const errors = [];
   const wallsById = new Map(walls.map((wall) => [wall._id, wall]));
@@ -142,9 +154,7 @@ export const storageLayoutErrors = ({ walls = [], units = [] } = {}) => {
       continue;
     }
     if (unit.floor !== wall.floor) errors.push({ code: 'unit_wall_floor_mismatch', id: unit._id });
-    if (!Number.isInteger(unit.column) || !Number.isInteger(unit.row) ||
-        unit.column < 1 || unit.row < 1 ||
-        unit.column > wall.column_count || unit.row > wall.row_count) {
+    if (isUnitOutsideWallLayout(wall, unit.column, unit.row)) {
       errors.push({ code: 'unit_outside_wall_layout', id: unit._id });
       continue;
     }
@@ -219,7 +229,7 @@ export const storageStateErrors = ({
     }
   }
   for (const unit of occupied) {
-    if (unit.exemption?.exempt_until && new Date(unit.exemption.exempt_until) <= new Date(now)) {
+    if (storageExemptionDeactivationReason(unit.exemption, now) === 'expired') {
       errors.push({ code: 'expired_exemption_not_cleared', id: unit._id });
     }
   }

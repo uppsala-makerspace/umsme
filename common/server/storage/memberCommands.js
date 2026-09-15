@@ -1,7 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { StorageUnits, StorageRequests, StorageOffers, StorageEvents } from '/imports/common/collections/storage';
-import { hasActiveLabMembershipAt } from '/imports/common/lib/storageRules';
+import {
+  ACTIVE_STORAGE_REQUEST_STATUSES, hasActiveLabMembershipAt, isEditableStorageRequest,
+} from '/imports/common/lib/storageRules';
 import { appendStorageEvent } from './events';
 import { casStorageUpdate, insertStorageDocument, STORAGE_SCHEMAS } from './db';
 import { runStorageAtomic } from './atomic';
@@ -48,7 +50,7 @@ export const upsertMemberStorageRequest = async ({ owner, requestType, preferenc
     throw new Meteor.Error('not-eligible', 'Active lab membership required');
   }
   const existing = await StorageRequests.findOneAsync({
-    owner: owner._id, request_status: { $in: ['waiting', 'paused_ineligible', 'in_progress'] },
+    owner: owner._id, request_status: { $in: ACTIVE_STORAGE_REQUEST_STATUSES },
   });
   if (existing?.request_status === 'in_progress') throw new Meteor.Error('bad-state', 'A pending move cannot be edited');
 
@@ -91,7 +93,7 @@ export const cancelMemberStorageRequest = async ({ owner, requestId, actor, comm
   if (await StorageEvents.findOneAsync(eventId)) return true;
   const request = await StorageRequests.findOneAsync(requestId);
   if (!request || request.owner !== owner._id) throw new Meteor.Error('not-found', 'Request not found');
-  if (!['waiting', 'paused_ineligible'].includes(request.request_status)) {
+  if (!isEditableStorageRequest(request)) {
     throw new Meteor.Error('bad-state', 'This request cannot be cancelled');
   }
   await runStorageAtomic({
