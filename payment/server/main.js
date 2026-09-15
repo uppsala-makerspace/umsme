@@ -13,10 +13,9 @@ import './api/swish';
 import './api/status';
 import { initPush } from '/imports/common/server/push';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
+import { applyMailUrlFromSettings } from "/imports/common/server/mailUrl";
 
-if (Meteor.settings.private?.mailUrl) {
-  process.env.MAIL_URL = Meteor.settings.private.mailUrl;
-}
+applyMailUrlFromSettings();
 
 Meteor.startup(async () => {
   await ensureStorageIndexes();

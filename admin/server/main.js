@@ -15,10 +15,9 @@ import publications from './publications';
 import setupAccounts from './accounts';
 import runMigrations from './migrations';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
+import { applyMailUrlFromSettings } from '/imports/common/server/mailUrl';
 
-if (Meteor.settings?.private?.mailUrl) {
-  process.env.MAIL_URL = Meteor.settings.private.mailUrl;
-}
+applyMailUrlFromSettings();
 
 Meteor.startup(async () => {
   await adminAvailable();

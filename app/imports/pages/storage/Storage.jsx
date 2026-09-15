@@ -20,9 +20,8 @@ const formatDate = (date, language) => date
   ? new Date(date).toLocaleDateString(language === "sv" ? "sv-SE" : "en-GB")
   : "";
 
-const StatusCard = ({ tone = "gray", children, testId }) => {
+const StatusCard = ({ tone, children, testId }) => {
   const tones = {
-    gray: "border-gray-300 bg-gray-50",
     blue: "border-blue-300 bg-blue-50",
     yellow: "border-yellow-400 bg-yellow-50",
     green: "border-green-400 bg-green-50",
@@ -90,7 +89,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
       setSubmitting(null);
     }
   };
-  const cleanPreference = () => ({
+  const preferencePayload = () => ({
     ...(preference.floor ? { floor: preference.floor } : {}),
     ...(preference.height ? { height: preference.height } : {}),
   });
@@ -170,7 +169,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
           <h2 className="mb-2 text-lg font-medium">{t("boxPreference")}</h2>
           <p className="mb-3 text-sm text-gray-600">{t("boxPreferenceInfo")}</p>
           <PreferenceFields preference={preference} onChange={setPreference} disabled={!!submitting} />
-          <Button className="mt-3" fullWidth disabled={!!submitting} onClick={() => run("save", () => onUpsertRequest(request.request_type, cleanPreference()))}>
+          <Button className="mt-3" fullWidth disabled={!!submitting} onClick={() => run("save", () => onUpsertRequest(request.request_type, preferencePayload()))}>
             {submitting === "save" ? t("loading") : t("storageUpdateRequest")}
           </Button>
         </section>
@@ -179,7 +178,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
         <section className="w-full">
           <p className="mb-3 text-sm text-gray-600">{t("queueForBoxInfo")}</p>
           <PreferenceFields preference={preference} onChange={setPreference} disabled={!!submitting} />
-          <Button className="mt-3" fullWidth disabled={!!submitting} onClick={() => run("allocation", () => onUpsertRequest("allocation", cleanPreference()))}>
+          <Button className="mt-3" fullWidth disabled={!!submitting} onClick={() => run("allocation", () => onUpsertRequest("allocation", preferencePayload()))}>
             {submitting === "allocation" ? t("loading") : t("queueForBox")}
           </Button>
         </section>
@@ -191,7 +190,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
               <h2 className="text-lg font-medium">{t("requestBoxChange")}</h2>
               <p className="text-sm text-gray-600">{t("requestBoxChangeInfo")}</p>
               <PreferenceFields preference={preference} onChange={setPreference} disabled={!!submitting} />
-              <Button fullWidth disabled={!!submitting || (!preference.floor && !preference.height)} onClick={() => run("move", () => onUpsertRequest("move", cleanPreference()))}>
+              <Button fullWidth disabled={!!submitting || (!preference.floor && !preference.height)} onClick={() => run("move", () => onUpsertRequest("move", preferencePayload()))}>
                 {submitting === "move" ? t("loading") : t("storageRequestMove")}
               </Button>
             </>

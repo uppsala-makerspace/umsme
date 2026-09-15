@@ -1,9 +1,9 @@
 import { Meteor } from "meteor/meteor";
-import { Random } from "meteor/random";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router-dom";
+import { newStorageCommandId } from "/imports/common/lib/storageRules";
 import Layout from "/imports/components/Layout/Layout";
 import Storage from "./Storage";
 
@@ -18,10 +18,7 @@ const ERROR_TRANSLATIONS = {
   conflict: "storageErrorConflict",
 };
 
-const commandId = () => {
-  const id = globalThis.crypto?.randomUUID?.() || Random.id();
-  return `member-storage:${id}`;
-};
+const commandId = () => newStorageCommandId("member-storage");
 
 export default function StoragePage() {
   const user = useTracker(() => Meteor.user());
@@ -31,47 +28,40 @@ export default function StoragePage() {
   const [error, setError] = useState(null);
   const mutationInFlight = useRef(false);
   const pendingCommands = useRef(new Map());
+  const mounted = useRef(true);
+  useEffect(() => () => { mounted.current = false; }, []);
 
   const errorMessage = useCallback((exception, fallbackKey = "storageActionFailed") => {
     const translation = ERROR_TRANSLATIONS[exception?.error];
     return translation ? t(translation) : (exception?.reason || exception?.message || t(fallbackKey));
   }, [t]);
 
-  const fetchState = useCallback(async ({ showLoader = false } = {}) => {
+  // The initial load drops the stale state on failure; a refresh after a
+  // command keeps what is on screen and only reports the error.
+  const fetchState = useCallback(async ({ showLoader = false, resetOnError = false } = {}) => {
     if (showLoader) setLoading(true);
     try {
       const nextState = await Meteor.callAsync("storage.member.getState");
-      setState(nextState);
-      setError(null);
+      if (mounted.current) {
+        setState(nextState);
+        setError(null);
+      }
       return nextState;
     } catch (exception) {
-      setError(errorMessage(exception, "storageLoadFailed"));
+      if (mounted.current) {
+        if (resetOnError) setState(null);
+        setError(errorMessage(exception, "storageLoadFailed"));
+      }
       throw exception;
     } finally {
-      if (showLoader) setLoading(false);
+      if (showLoader && mounted.current) setLoading(false);
     }
   }, [errorMessage]);
 
   useEffect(() => {
-    if (!user) return undefined;
-    let active = true;
-    setLoading(true);
-    Meteor.callAsync("storage.member.getState")
-      .then((nextState) => {
-        if (!active) return;
-        setState(nextState);
-        setError(null);
-      })
-      .catch((exception) => {
-        if (!active) return;
-        setState(null);
-        setError(errorMessage(exception, "storageLoadFailed"));
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => { active = false; };
-  }, [user?._id, errorMessage]);
+    if (!user) return;
+    fetchState({ showLoader: true, resetOnError: true }).catch(() => {});
+  }, [user?._id, fetchState]);
 
   const mutate = useCallback(async (method, args, intent) => {
     if (mutationInFlight.current) return;
@@ -79,7 +69,7 @@ export default function StoragePage() {
     setError(null);
     let actionError = null;
     let succeeded = false;
-    const stableCommandId = intent && (pendingCommands.current.get(intent) || commandId(intent));
+    const stableCommandId = intent && (pendingCommands.current.get(intent) || commandId());
     if (intent && !pendingCommands.current.has(intent)) pendingCommands.current.set(intent, stableCommandId);
     try {
       await Meteor.callAsync(method, intent ? { ...args, command_id: stableCommandId } : args);

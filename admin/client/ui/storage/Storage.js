@@ -1,10 +1,9 @@
 import './Storage.html';
 import { ReactiveDict } from 'meteor/reactive-dict';
-import { Random } from 'meteor/random';
 import { Roles } from 'meteor/roles';
 import {
   ACTIVE_STORAGE_REQUEST_STATUSES, STORAGE_MOVE_DAYS, STORAGE_OPERATOR_ROLES, hasActiveLabMembershipAt,
-  resolveStorageOwner,
+  newStorageCommandId, resolveStorageOwner,
 } from '/imports/common/lib/storageRules';
 import { Members } from '/imports/common/collections/members';
 import { Messages } from '/imports/common/collections/messages';
@@ -20,7 +19,7 @@ import {
 import { storageEventRows } from '/imports/storage/eventLog';
 
 const date = (value) => value instanceof Date ? value.toLocaleString() : (value || '—');
-const newCommandId = () => globalThis.crypto?.randomUUID?.() || Random.id(32);
+const newCommandId = () => newStorageCommandId();
 const errorMessage = (error) => error?.reason || error?.message || 'The operation failed. Refresh and try again.';
 const setError = (instance, message, section = 'page') => {
   instance.state.set('error', message);

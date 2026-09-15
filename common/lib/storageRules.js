@@ -3,6 +3,13 @@ export const STORAGE_REMINDER_DAYS = 21;
 export const STORAGE_MOVE_DAYS = 14;
 export const STORAGE_OPERATOR_ROLES = ['admin', 'board', 'storage'];
 
+/** A client-side idempotency key for a storage command; a UUID where the runtime has one. */
+export const newStorageCommandId = (prefix = '') => {
+  const id = globalThis.crypto?.randomUUID?.()
+    || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  return prefix ? `${prefix}:${id}` : id;
+};
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Statuses that keep a request in the queue; the partial unique index uses the same list. */
 export const ACTIVE_STORAGE_REQUEST_STATUSES = ['waiting', 'paused_ineligible', 'in_progress'];
