@@ -40,6 +40,9 @@ const createAuthFuncForRoles = (col, roles) => async function () {
 
 const createAuthFuncFor = (col) => createAuthFuncForRoles(col, ['admin', 'board']);
 
+const isStorageOperator = async (userId) =>
+  !!userId && Roles.userIsInRoleAsync(userId, STORAGE_OPERATOR_ROLES);
+
 export default () => {
   // Treasurer included so a treasurer-only account can see member name + bank
   // details when reimbursing an expense.
@@ -72,7 +75,7 @@ export default () => {
   // publication: treasurer-only users may see members for reimbursements, but
   // must not receive operational storage state or internal unit notes.
   Meteor.publish('storageAdminDashboard', async function () {
-    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, STORAGE_OPERATOR_ROLES))) {
+    if (!(await isStorageOperator(this.userId))) {
       this.ready();
       return undefined;
     }
@@ -89,7 +92,7 @@ export default () => {
 
   Meteor.publish('storageAdminHistory', async function (entityIds) {
     check(entityIds, [String]);
-    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, STORAGE_OPERATOR_ROLES))) {
+    if (!(await isStorageOperator(this.userId))) {
       this.ready();
       return undefined;
     }
@@ -108,7 +111,7 @@ export default () => {
       member_id: Match.Maybe(String),
       unit_id: Match.Maybe(String),
     });
-    if (!this.userId || !(await Roles.userIsInRoleAsync(this.userId, STORAGE_OPERATOR_ROLES))) {
+    if (!(await isStorageOperator(this.userId))) {
       this.ready();
       return undefined;
     }

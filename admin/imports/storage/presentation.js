@@ -53,6 +53,13 @@ export const filterStorageQueue = (rows, query) => {
     .some((value) => String(value || '').toLowerCase().includes(needle)));
 };
 
+/** Whether the pause toggle applies to a request, and which way it would go. */
+export const storagePauseState = (request, eligible) => ({
+  pauseTarget: request.request_status === 'waiting',
+  canTogglePause: request.request_status === 'waiting' ? !eligible
+    : (request.request_status === 'paused_ineligible' && eligible),
+});
+
 export const storageQueueRows = ({ requests = [], members = [], units = [], now = new Date() }) => {
   const memberById = new Map(members.map((member) => [member._id, member]));
   const unitById = new Map(units.map((unit) => [unit._id, unit]));
@@ -80,10 +87,8 @@ export const storageQueueRows = ({ requests = [], members = [], units = [], now 
         eligibilityClass: eligible ? 'storage-eligible' : 'storage-ineligible',
         pauseLabel: request.request_status === 'paused_ineligible'
           ? 'Paused' : (request.request_status === 'in_progress' ? 'Assignment in progress' : 'Active'),
-        pauseTarget: request.request_status === 'waiting',
         pauseActionLabel: request.request_status === 'paused_ineligible' ? 'Resume' : 'Pause',
-        canTogglePause: request.request_status === 'waiting' ? !eligible
-          : (request.request_status === 'paused_ineligible' && eligible),
+        ...storagePauseState(request, eligible),
         editable,
       };
     });
@@ -124,7 +129,6 @@ export const groupStorageWalls = (units, walls = []) => {
           const row = rowIndex + 1;
           return byCoordinate.get(`${column}:${row}`) || {
             empty: true,
-            key: `${wall._id}:${column}:${row}`,
             column,
             row,
           };

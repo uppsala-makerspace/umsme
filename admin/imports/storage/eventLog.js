@@ -2,11 +2,9 @@ const indexById = (rows) => new Map(rows.map((row) => [row._id, row]));
 const eventLabel = (value) => String(value || 'unknown event')
   .replaceAll('_', ' ').replace(/^./, (letter) => letter.toUpperCase());
 
-const readableDetails = (details, members, units) => {
+const readableDetails = (details, memberById, unitById) => {
   if (!details) return '';
   const hidden = new Set(['owner', 'unit', 'from_unit', 'to_unit', 'request', 'warning', 'offer', 'message_id']);
-  const memberById = indexById(members);
-  const unitById = indexById(units);
   return Object.entries(details)
     .filter(([key]) => !hidden.has(key))
     .map(([key, value]) => {
@@ -50,7 +48,7 @@ export const storageEventRows = ({ events = [], members = [], units = [], users 
         eventLabel: eventLabel(event.event_type), entityLabel: eventLabel(event.entity_type),
         memberLabel: ownerIds.map((id) => memberById.get(id)?.name || 'Unknown member').join(', ') || '—',
         unitLabel: unitIds.map((id) => unitById.get(id)?.name || 'Unknown unit').join(', ') || '—',
-        actorLabel: actorLabel(event), detailsLabel: readableDetails(event.details, members, units),
+        actorLabel: actorLabel(event), detailsLabel: readableDetails(event.details, memberById, unitById),
       };
     });
 };

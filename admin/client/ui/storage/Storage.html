@@ -105,7 +105,7 @@
       </section>
 
       <datalist id="storage-members">{{#each member in memberOptions}}<option value="{{member.pickerLabel}}" data-id="{{member._id}}"></option>{{/each}}</datalist>
-      <datalist id="storage-event-members">{{#each member in eventMemberOptions}}<option value="{{member.pickerLabel}}" data-id="{{member._id}}"></option>{{/each}}</datalist>
+      <datalist id="storage-event-members">{{#each member in memberOptions}}<option value="{{member.pickerLabel}}" data-id="{{member._id}}"></option>{{/each}}</datalist>
       <datalist id="storage-event-units">{{#each unit in eventUnitOptions}}<option value="{{unit.name}}" data-id="{{unit._id}}"></option>{{/each}}</datalist>
     {{/unless}}
   </section>

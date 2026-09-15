@@ -3,7 +3,8 @@ import { ReactiveDict } from 'meteor/reactive-dict';
 import { Random } from 'meteor/random';
 import { Roles } from 'meteor/roles';
 import {
-  ACTIVE_STORAGE_REQUEST_STATUSES, STORAGE_OPERATOR_ROLES, hasActiveLabMembershipAt, resolveStorageOwner,
+  ACTIVE_STORAGE_REQUEST_STATUSES, STORAGE_MOVE_DAYS, STORAGE_OPERATOR_ROLES, hasActiveLabMembershipAt,
+  resolveStorageOwner,
 } from '/imports/common/lib/storageRules';
 import { Members } from '/imports/common/collections/members';
 import { Messages } from '/imports/common/collections/messages';
@@ -14,7 +15,7 @@ import {
   STORAGE_ACTIONS, filterStorageQueue, filterStorageUnits, groupStorageWalls,
   joinStorageResults, sameSuggestionSet, storageReadinessPresentation,
   storageActionReasonLabel, storageResultSummary,
-  storageMemberLabel, storageQueueRows, storageStatusClass, storageStatusLabel,
+  storageMemberLabel, storagePauseState, storageQueueRows, storageStatusClass, storageStatusLabel,
 } from '/imports/storage/presentation';
 import { storageEventRows } from '/imports/storage/eventLog';
 
@@ -32,6 +33,8 @@ const scopedError = (section) => {
 const operator = () => !!Meteor.userId() &&
   Roles.userIsInRole(Meteor.userId(), STORAGE_OPERATOR_ROLES);
 const formObject = (form) => Object.fromEntries(new FormData(form).entries());
+/** The datalist option whose label the user picked, if any. */
+const datalistMatch = (input) => [...(input.list?.options || [])].find((option) => option.value === input.value);
 const storageOwnerIdForMember = (memberId) =>
   resolveStorageOwner(Members.findOne(memberId), (id) => Members.findOne(id)).owner?._id || memberId;
 const stateCommand = (instance, intent) => {
@@ -68,7 +71,7 @@ const mutate = async (instance, method, payload, intent, errorSection = 'page') 
     return result;
   } catch (error) {
     setError(instance, errorMessage(error), errorSection);
-    throw error;
+    return null;
   } finally {
     instance.state.set('busy', false);
   }
@@ -133,11 +136,8 @@ const unitWallChoices = (unit) => StorageWalls.find({}, {
 const activeRequestView = (request, ownerEligible) => request && ({
   ...request,
   requestedDate: date(request.requested_at),
-  pauseTarget: request.request_status === 'waiting',
   pauseLabel: request.request_status === 'waiting' ? 'Pause as ineligible' : 'Resume',
-  canTogglePause: request.request_status === 'waiting'
-    ? !ownerEligible
-    : request.request_status === 'paused_ineligible' && ownerEligible,
+  ...storagePauseState(request, ownerEligible),
 });
 
 const storageMessagesForOwner = (ownerId) => ownerId
@@ -161,12 +161,6 @@ const storageUnitView = (unit) => {
   const request = activeRequestForOwner(unit.owner);
   const offer = unit.owner && StorageOffers.findOne({ owner: unit.owner });
   const occupied = unit.availability_status === 'occupied';
-  const occupancy = occupied ? {
-    _id: unit._id,
-    owner: unit.owner,
-    unit: unit._id,
-    assigned_at: unit.assigned_at,
-  } : null;
   const ownerEligible = hasActiveLabMembershipAt(owner);
   const entityIds = [unit._id, request?._id, offer?._id].filter(Boolean);
 
@@ -182,11 +176,9 @@ const storageUnitView = (unit) => {
     clearance: unit.availability_status === 'awaiting_clearance',
     assignable: unit.availability_status === 'available',
     canRequestRelease: occupied && !request && !offer,
-    currentOccupancy: occupancy && {
-      ...occupancy,
-      assignedDate: date(occupancy.assigned_at),
-      exemption: unit.exemption,
-    },
+    currentOccupancy: occupied ? {
+      _id: unit._id, assignedDate: date(unit.assigned_at), exemption: unit.exemption,
+    } : null,
     activeRequest: activeRequestView(request, ownerEligible),
     pendingOffer: offer && { ...offer, deadlineDate: date(offer.deadline_at) },
     messages: storageMessagesForOwner(unit.owner),
@@ -375,8 +367,6 @@ Template.Storage.helpers({
   },
   memberOptions: () => Members.find({}, { sort: { name: 1 } }).fetch()
     .map((member) => ({ ...member, pickerLabel: storageMemberLabel(member) })),
-  eventMemberOptions: () => Members.find({}, { sort: { name: 1 } }).fetch()
-    .map((member) => ({ ...member, pickerLabel: storageMemberLabel(member) })),
   eventUnitOptions: () => StorageUnits.find({}, { sort: { name: 1 } }).fetch(),
   eventLogRows() {
     const state = Template.instance().state;
@@ -443,7 +433,7 @@ Template.Storage.events({
     setRowOption(instance, event.currentTarget.dataset.id, {
       resolution,
       ...(resolution === 'extend' ? {
-        extend_to: new Date(Date.now() + 14 * 86400000),
+        extend_to: new Date(Date.now() + STORAGE_MOVE_DAYS * 86400000),
       } : {}),
     });
   },
@@ -512,19 +502,16 @@ Template.Storage.events({
     fields.row_count = Number(fields.row_count);
     fields.active = true;
     if (!fields.note) delete fields.note;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.walls.create',
-        { fields },
-        `wall.create:${JSON.stringify(fields)}`,
-        'walls',
-      );
-      form.reset();
-      instance.state.set('createWallOpen', false);
-    } catch (_) {
-      // mutate displays the error in the wall section.
-    }
+    const result = await mutate(
+      instance,
+      'adminStorage.walls.create',
+      { fields },
+      `wall.create:${JSON.stringify(fields)}`,
+      'walls',
+    );
+    if (result === null) return;
+    form.reset();
+    instance.state.set('createWallOpen', false);
   },
   async 'submit .edit-wall-form'(event, instance) {
     event.preventDefault();
@@ -539,17 +526,13 @@ Template.Storage.events({
       active: values.active === 'on',
       note: values.note || null,
     };
-    try {
-      await mutate(
-        instance,
-        'adminStorage.walls.update',
-        { wall_id, fields },
-        `wall.update:${wall_id}:${JSON.stringify(fields)}`,
-        'walls',
-      );
-    } catch (_) {
-      // mutate displays the error in the wall section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.walls.update',
+      { wall_id, fields },
+      `wall.update:${wall_id}:${JSON.stringify(fields)}`,
+      'walls',
+    );
   },
   'click .toggle-create-unit'(event, instance) {
     event.preventDefault();
@@ -562,19 +545,16 @@ Template.Storage.events({
     fields.column = Number(fields.column);
     fields.row = Number(fields.row);
     if (!fields.note) delete fields.note;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.units.create',
-        { fields },
-        `unit.create:${JSON.stringify(fields)}`,
-        'inventory',
-      );
-      form.reset();
-      instance.state.set('createUnitOpen', false);
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    const result = await mutate(
+      instance,
+      'adminStorage.units.create',
+      { fields },
+      `unit.create:${JSON.stringify(fields)}`,
+      'inventory',
+    );
+    if (result === null) return;
+    form.reset();
+    instance.state.set('createUnitOpen', false);
   },
   'input .storage-filter, change .storage-filter'(event, instance) {
     setStateMapValue(
@@ -595,7 +575,7 @@ Template.Storage.events({
   },
   'input .storage-event-filter'(e, i) {
     const input = e.currentTarget;
-    const match = [...(input.list?.options || [])].find((option) => option.value === input.value);
+    const match = datalistMatch(input);
     input.setCustomValidity(input.value && !match ? 'Choose a value from the suggestions.' : '');
     if (input.value && !match) return;
     i.state.set('eventFilters', {
@@ -632,7 +612,7 @@ Template.Storage.events({
   },
   'input .storage-member-picker'(e) {
     const input = e.currentTarget;
-    const match = [...(input.list?.options || [])].find((option) => option.value === input.value);
+    const match = datalistMatch(input);
     input.form.elements.owner_id.value = match?.dataset.id || '';
     input.setCustomValidity(input.value && !match ? 'Choose a member from the suggestions.' : '');
   },
@@ -651,17 +631,13 @@ Template.Storage.events({
       availability_status: values.availability_status,
       note: values.note || null,
     };
-    try {
-      await mutate(
-        instance,
-        'adminStorage.units.update',
-        { unit_id, fields, acknowledged: values.acknowledged === 'on' },
-        `unit.update:${unit_id}:${JSON.stringify(fields)}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.units.update',
+      { unit_id, fields, acknowledged: values.acknowledged === 'on' },
+      `unit.update:${unit_id}:${JSON.stringify(fields)}`,
+      'inventory',
+    );
   },
   async 'submit .manual-assign-form'(event, instance) {
     event.preventDefault();
@@ -672,47 +648,35 @@ Template.Storage.events({
       override: values.override === 'on',
       reason: values.reason || undefined,
     };
-    try {
-      await mutate(
-        instance,
-        'adminStorage.units.assignManual',
-        payload,
-        `assign:${JSON.stringify(payload)}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.units.assignManual',
+      payload,
+      `assign:${JSON.stringify(payload)}`,
+      'inventory',
+    );
   },
   async 'click .confirm-clearance'(event, instance) {
     const unit_id = event.currentTarget.dataset.id;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.clearances.confirm',
-        { unit_id },
-        `clear:${unit_id}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.clearances.confirm',
+      { unit_id },
+      `clear:${unit_id}`,
+      'inventory',
+    );
   },
   async 'click .mark-unit-returned'(event, instance) {
     const unit_id = event.currentTarget.dataset.id;
     const reason = prompt('Reason for marking this unit as returned:');
     if (!reason) return;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.units.markReturnedManual',
-        { unit_id, reason },
-        `return:${unit_id}:${reason}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.units.markReturnedManual',
+      { unit_id, reason },
+      `return:${unit_id}:${reason}`,
+      'inventory',
+    );
   },
   async 'click .create-exemption'(event, instance) {
     const unit_id = event.currentTarget.dataset.id;
@@ -720,64 +684,48 @@ Template.Storage.events({
     if (!reason) return;
     const until = prompt('Optional end date (YYYY-MM-DD), or blank:') || '';
     const exempt_until = until ? new Date(`${until}T23:59:59`) : undefined;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.units.createExemption',
-        { unit_id, reason, exempt_until },
-        `exempt:${unit_id}:${reason}:${until}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.units.createExemption',
+      { unit_id, reason, exempt_until },
+      `exempt:${unit_id}:${reason}:${until}`,
+      'inventory',
+    );
   },
   async 'click .revoke-exemption'(event, instance) {
     const unit_id = event.currentTarget.dataset.id;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.units.revokeExemption',
-        { unit_id },
-        `revoke:${unit_id}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.units.revokeExemption',
+      { unit_id },
+      `revoke:${unit_id}`,
+      'inventory',
+    );
   },
   async 'click .cancel-request'(event, instance) {
     const request_id = event.currentTarget.dataset.id;
     const reason = prompt('Reason for cancelling this request:');
     if (!reason) return;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.requests.cancel',
-        { request_id, reason },
-        `request.cancel:${request_id}:${reason}`,
-        'queue',
-      );
-    } catch (_) {
-      // mutate displays the error in the queue section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.requests.cancel',
+      { request_id, reason },
+      `request.cancel:${request_id}:${reason}`,
+      'queue',
+    );
   },
   async 'click .toggle-request-pause'(event, instance) {
     const request_id = event.currentTarget.dataset.id;
     const paused = event.currentTarget.dataset.paused === 'true';
     const reason = prompt(paused ? 'Reason for pausing:' : 'Reason for resuming:');
     if (!reason) return;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.requests.setPaused',
-        { request_id, paused, reason },
-        `request.pause:${request_id}:${paused}:${reason}`,
-        'queue',
-      );
-    } catch (_) {
-      // mutate displays the error in the queue section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.requests.setPaused',
+      { request_id, paused, reason },
+      `request.pause:${request_id}:${paused}:${reason}`,
+      'queue',
+    );
   },
   async 'submit .request-goal-form'(event, instance) {
     event.preventDefault();
@@ -830,66 +778,51 @@ Template.Storage.events({
         : undefined,
       reason: values.reason || undefined,
     };
-    try {
-      await mutate(
-        instance,
-        'adminStorage.requests.upsert',
-        payload,
-        `request.upsert:${JSON.stringify(payload)}`,
-        'queue',
-      );
-      instance.state.set('requestEditor', null);
-    } catch (_) {
-      // mutate displays the error in the queue section.
-    }
+    const result = await mutate(
+      instance,
+      'adminStorage.requests.upsert',
+      payload,
+      `request.upsert:${JSON.stringify(payload)}`,
+      'queue',
+    );
+    if (result === null) return;
+    instance.state.set('requestEditor', null);
   },
   async 'click .request-release'(event, instance) {
     event.preventDefault();
     const owner_id = event.currentTarget.dataset.owner;
     if (!confirm('Add a release request for this assigned unit? No automatic notification will be sent.')) return;
     const payload = { owner_id, request_type: 'release' };
-    try {
-      await mutate(
-        instance,
-        'adminStorage.requests.upsert',
-        payload,
-        `request.upsert:${JSON.stringify(payload)}`,
-        'queue',
-      );
-    } catch (_) {
-      // mutate displays the error in the queue section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.requests.upsert',
+      payload,
+      `request.upsert:${JSON.stringify(payload)}`,
+      'queue',
+    );
   },
   async 'click .complete-offer'(event, instance) {
     const offer_id = event.currentTarget.dataset.id;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.offers.completeManual',
-        { offer_id },
-        `offer.complete:${offer_id}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.offers.completeManual',
+      { offer_id },
+      `offer.complete:${offer_id}`,
+      'inventory',
+    );
   },
   async 'click .extend-offer'(event, instance) {
     const offer_id = event.currentTarget.dataset.id;
     const value = prompt('New deadline (YYYY-MM-DD):');
     const reason = value && prompt('Reason:');
     if (!value || !reason) return;
-    try {
-      await mutate(
-        instance,
-        'adminStorage.offers.extendManual',
-        { offer_id, extend_to: new Date(`${value}T23:59:59`), reason },
-        `offer.extend:${offer_id}:${value}:${reason}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.offers.extendManual',
+      { offer_id, extend_to: new Date(`${value}T23:59:59`), reason },
+      `offer.extend:${offer_id}:${value}:${reason}`,
+      'inventory',
+    );
   },
   async 'click .cancel-offer'(event, instance) {
     const offer_id = event.currentTarget.dataset.id;
@@ -898,16 +831,12 @@ Template.Storage.events({
     const cancel_request = confirm(
       'Also cancel the member request? OK cancels it; Cancel returns it to queue.',
     );
-    try {
-      await mutate(
-        instance,
-        'adminStorage.offers.cancelManual',
-        { offer_id, reason, cancel_request },
-        `offer.cancel:${offer_id}:${reason}:${cancel_request}`,
-        'inventory',
-      );
-    } catch (_) {
-      // mutate displays the error in the inventory section.
-    }
+    await mutate(
+      instance,
+      'adminStorage.offers.cancelManual',
+      { offer_id, reason, cancel_request },
+      `offer.cancel:${offer_id}:${reason}:${cancel_request}`,
+      'inventory',
+    );
   },
 });

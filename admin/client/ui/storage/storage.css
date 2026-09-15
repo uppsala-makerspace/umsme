@@ -4,8 +4,7 @@
 .storage-panel, .storage-readiness { margin: 1.5rem 0; padding: 1.25rem; border: 1px solid #ccd4da; border-radius: 6px; background: #fff; }
 .storage-inline-error { margin: .8rem 0; }
 .storage-readiness { border-left-width: 6px; }
-.storage-readiness-ready { border-left-color: #2e7d32; }
-.storage-readiness-loading, .storage-readiness-metadata { border-left-color: #ef9a00; }
+.storage-readiness-metadata { border-left-color: #ef9a00; }
 .storage-readiness-missing, .storage-readiness-blocked { border-left-color: #b71c1c; }
 .storage-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 1rem; }
 .storage-action-card { min-height: 125px; padding: 1rem; border: 1px solid #b6c2ca; border-radius: 6px; background: #f7fafc; text-align: left; }
@@ -54,7 +53,7 @@
 .storage-visual-empty { border-style: dashed; border-color: #a89b8e; background: rgba(255, 255, 255, .35); }
 .storage-visual-unit > input { position: absolute; z-index: 1; top: 2px; left: 2px; margin: 0; }
 .storage-visual-unit > button { display: flex; width: 100%; min-width: 0; flex-direction: column; justify-content: center; overflow: hidden; border: 0; background: transparent; padding: .3rem .25rem .25rem 1.25rem; text-align: center; }
-.storage-visual-unit strong, .storage-visual-unit small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.storage-visual-unit strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .storage-visual-unit em { position: absolute; right: 3px; bottom: 1px; font-weight: bold; }
 .storage-unit-selected { outline: 3px solid #1565c0; }
 .storage-status-available { border-color: #555; background: #fff; color: #222; }

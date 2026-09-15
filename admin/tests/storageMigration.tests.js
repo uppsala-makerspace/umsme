@@ -14,7 +14,7 @@ import {
   STORAGE_CUTOVER_FINALIZED_ID,
   STORAGE_MIGRATION_SUMMARY_ID,
 } from '/imports/common/server/storage/readiness';
-import { requireStorageMigrationOperator } from '/server/methods/storageMigration';
+import { requireStorageOperator } from '/imports/common/server/storage/access';
 import {
   StorageWalls,
   StorageEvents,
@@ -293,15 +293,15 @@ describe('legacy storage migration database gate', function () {
         return (rolesByUser[userId] || []).some((role) => allowed.includes(role));
       },
     };
-    await requireStorageMigrationOperator('administrator', roleService);
-    await requireStorageMigrationOperator('boardMember', roleService);
-    await requireStorageMigrationOperator('storageOperator', roleService);
+    await requireStorageOperator('administrator', roleService);
+    await requireStorageOperator('boardMember', roleService);
+    await requireStorageOperator('storageOperator', roleService);
     await assert.rejects(
-      requireStorageMigrationOperator('ordinaryMember', roleService),
+      requireStorageOperator('ordinaryMember', roleService),
       (error) => error.error === 'not-authorized',
     );
     await assert.rejects(
-      requireStorageMigrationOperator(undefined, roleService),
+      requireStorageOperator(undefined, roleService),
       (error) => error.error === 'not-authorized',
     );
   });

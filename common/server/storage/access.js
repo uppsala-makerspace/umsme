@@ -9,8 +9,8 @@ import {
 
 export { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
 
-export const requireStorageOperator = async (userId) => {
-  if (!userId || !(await Roles.userIsInRoleAsync(userId, STORAGE_OPERATOR_ROLES))) {
+export const requireStorageOperator = async (userId, roleService = Roles) => {
+  if (!userId || !(await roleService.userIsInRoleAsync(userId, STORAGE_OPERATOR_ROLES))) {
     throw new Meteor.Error('not-authorized', 'Storage, admin, or board role required');
   }
   return userId;
