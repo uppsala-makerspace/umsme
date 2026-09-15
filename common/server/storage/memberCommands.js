@@ -5,7 +5,7 @@ import {
   ACTIVE_STORAGE_REQUEST_STATUSES, hasActiveLabMembershipAt, isEditableStorageRequest,
 } from '/imports/common/lib/storageRules';
 import { appendStorageEvent } from './events';
-import { casStorageUpdate, insertStorageDocument, STORAGE_SCHEMAS } from './db';
+import { casStorageUpdate, insertStorageDocument, setUnsetModifier, STORAGE_SCHEMAS } from './db';
 import { runStorageAtomic } from './atomic';
 import { completeStorageOffer } from './commands';
 import { reconcileStorageState } from './reconciliation';
@@ -68,7 +68,7 @@ export const upsertMemberStorageRequest = async ({ owner, requestType, preferenc
         if (!normalizedPreference) $unset.preference = '';
         await casStorageUpdate(StorageRequests,
           { _id: requestId, request_status: existing.request_status, updatedAt: existing.updatedAt },
-          { $set, ...(Object.keys($unset).length ? { $unset } : {}) }, { session });
+          setUnsetModifier($set, $unset), { session });
       } else {
         await insertStorageDocument(StorageRequests, STORAGE_SCHEMAS.request, {
           _id: requestId, owner: owner._id, request_type: requestType, requested_at: now,

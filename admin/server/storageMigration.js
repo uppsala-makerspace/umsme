@@ -15,10 +15,10 @@ import {
   STORAGE_CUTOVER_FINALIZED_ID,
   STORAGE_MIGRATION_SUMMARY_ID,
 } from '/imports/common/server/storage/readiness';
+import { LEGACY_STORAGE_MIGRATION_VERSION } from '/imports/common/lib/legacyStorageMigrationFingerprint';
 import {
   buildLegacyStorageMigrationPlan,
   diffLegacyMigrationDocuments,
-  LEGACY_STORAGE_MIGRATION_VERSION,
 } from '/imports/storage/legacyMigration';
 
 const collections = {
@@ -29,8 +29,8 @@ const collections = {
   storageEvents: StorageEvents,
 };
 
-export const STORAGE_MIGRATION_SUMMARY_EVENT_ID = STORAGE_MIGRATION_SUMMARY_ID;
-export const STORAGE_MIGRATION_FINALIZED_EVENT_ID = STORAGE_CUTOVER_FINALIZED_ID;
+const migrationError = (code, message, details) =>
+  Object.assign(new Error(message), { code, ...(details === undefined ? {} : { details }) });
 
 const loadLegacySource = async () => ({
   walls: Meteor.settings.public?.storageWalls || [],
@@ -121,7 +121,7 @@ export const validateStorageMigrationState = async ({ legacySource } = {}) => {
     StorageUnits.find({}).fetchAsync(),
     StorageRequests.find({}).fetchAsync(),
     StorageOffers.find({}).fetchAsync(),
-    StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_EVENT_ID),
+    StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_ID),
   ]);
   const missing = readiness.missing_migrated_documents;
   const manifestErrors = Object.entries(missing).map(([collection, ids]) => ({
@@ -140,7 +140,7 @@ export const validateStorageMigrationState = async ({ legacySource } = {}) => {
     migration_fingerprint: applied?.details?.fingerprint,
     migration_manifest: manifest,
     cutover_finalization_event_id: readiness.cutover_finalized
-      ? STORAGE_MIGRATION_FINALIZED_EVENT_ID : undefined,
+      ? STORAGE_CUTOVER_FINALIZED_ID : undefined,
     legacy_source_check_skipped: readiness.cutover_finalized,
     counts: {
       walls: walls.length,
@@ -162,24 +162,16 @@ export const applyLegacyStorageMigration = async ({ fingerprint, cutoff, legacyS
   const source = legacySource || await loadLegacySource();
   const plan = buildLegacyStorageMigrationPlan({ ...source, cutoff: parsedCutoff });
   if (plan.fingerprint !== fingerprint) {
-    const error = new Error('Legacy storage data changed after preview');
-    error.code = 'fingerprint_mismatch';
-    throw error;
+    throw migrationError('fingerprint_mismatch', 'Legacy storage data changed after preview');
   }
   if (plan.report.blocker_count) {
-    const error = new Error(`Migration has ${plan.report.blocker_count} blocking anomaly/anomalies`);
-    error.code = 'migration_blocked';
-    error.details = plan.report;
-    throw error;
+    throw migrationError('migration_blocked', `Migration has ${plan.report.blocker_count} blocking anomaly/anomalies`, plan.report);
   }
 
   const targetPreflight = await preflightLegacyStorageMigration(plan);
   const { difference } = targetPreflight;
   if (targetPreflight.blocker_count) {
-    const error = new Error('Existing storage data conflicts with the migration plan');
-    error.code = 'target_conflict';
-    error.details = targetPreflight.blockers;
-    throw error;
+    throw migrationError('target_conflict', 'Existing storage data conflicts with the migration plan', targetPreflight.blockers);
   }
 
   const inserted = {};
@@ -203,18 +195,13 @@ export const applyLegacyStorageMigration = async ({ fingerprint, cutoff, legacyS
   }
 
   return {
-    version: plan.version,
-    cutoff: plan.cutoff,
-    fingerprint: plan.fingerprint,
-    preview_report: plan.report,
+    ...publicPlan(plan),
     target_preflight: {
       blocker_count: targetPreflight.blocker_count,
       blockers: targetPreflight.blockers,
     },
     inserted,
-    already_present: Object.fromEntries(
-      Object.entries(difference.already_present).map(([name, ids]) => [name, ids.length]),
-    ),
+    already_present: targetPreflight.already_present_counts,
     validation: await validateStorageMigrationState({ legacySource }),
   };
 };
@@ -227,38 +214,29 @@ export const finalizeLegacyStorageCutover = async ({
   fingerprint, actor, reason, now = new Date(), legacySource,
 }) => {
   if (!fingerprint || !actor || typeof reason !== 'string' || !reason.trim()) {
-    const error = new Error('Fingerprint, operator, and audit reason are required');
-    error.code = 'invalid_finalization';
-    throw error;
+    throw migrationError('invalid_finalization', 'Fingerprint, operator, and audit reason are required');
   }
-  const existing = await StorageEvents.findOneAsync(STORAGE_MIGRATION_FINALIZED_EVENT_ID);
+  const existing = await StorageEvents.findOneAsync(STORAGE_CUTOVER_FINALIZED_ID);
   if (existing) {
     const existingValidation = await validateStorageMigrationState({ legacySource });
     if (existing.details?.fingerprint !== fingerprint || !existingValidation.cutover_finalized) {
-      const error = new Error('Storage cutover was finalized for a different fingerprint');
-      error.code = 'finalization_conflict';
-      throw error;
+      throw migrationError('finalization_conflict', 'Storage cutover was finalized for a different fingerprint');
     }
     return { already_finalized: true, validation: existingValidation };
   }
   const validation = await validateStorageMigrationState({ legacySource });
   if (!validation.migration_applied || validation.migration_fingerprint !== fingerprint) {
-    const error = new Error('Applied migration fingerprint does not match');
-    error.code = 'fingerprint_mismatch';
-    throw error;
+    throw migrationError('fingerprint_mismatch', 'Applied migration fingerprint does not match');
   }
   const blocking = validation.allocation_blocked_reasons.filter(
     (code) => !['unclassified_units', 'cutover_not_finalized'].includes(code),
   );
   if (blocking.length) {
-    const error = new Error('Migration must be complete, coherent, and unchanged before finalization');
-    error.code = 'finalization_blocked';
-    error.details = blocking;
-    throw error;
+    throw migrationError('finalization_blocked', 'Migration must be complete, coherent, and unchanged before finalization', blocking);
   }
   const occurredAt = new Date(now);
   const finalization = {
-    _id: STORAGE_MIGRATION_FINALIZED_EVENT_ID,
+    _id: STORAGE_CUTOVER_FINALIZED_ID,
     entity_type: 'storageMigration',
     entity_id: LEGACY_STORAGE_MIGRATION_VERSION,
     event_type: 'legacy_storage_cutover_finalized',
@@ -268,7 +246,7 @@ export const finalizeLegacyStorageCutover = async ({
     reason: reason.trim(),
     details: {
       fingerprint,
-      summary_event_id: STORAGE_MIGRATION_SUMMARY_EVENT_ID,
+      summary_event_id: STORAGE_MIGRATION_SUMMARY_ID,
       manifest_digest: validation.migration_manifest.digest,
     },
   };
@@ -279,7 +257,7 @@ export const finalizeLegacyStorageCutover = async ({
     // Concurrent confirmations of the same applied fingerprint converge on
     // the first durable audit event. A malformed or different event is never
     // treated as an idempotent success.
-    const concurrent = await StorageEvents.findOneAsync(STORAGE_MIGRATION_FINALIZED_EVENT_ID);
+    const concurrent = await StorageEvents.findOneAsync(STORAGE_CUTOVER_FINALIZED_ID);
     const concurrentValidation = await validateStorageMigrationState({ legacySource });
     if (concurrent?.details?.fingerprint === fingerprint && concurrentValidation.cutover_finalized) {
       return { already_finalized: true, validation: concurrentValidation };

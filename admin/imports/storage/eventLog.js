@@ -54,10 +54,3 @@ export const storageEventRows = ({ events = [], members = [], units = [], users 
       };
     });
 };
-
-export const storageEventEntityIds = ({ memberId, unitId, events = [] }) => {
-  if (!memberId && !unitId) return null;
-  return events.filter((event) => (!memberId || event.member === memberId) &&
-    (!unitId || event.unit === unitId || event.related_unit === unitId || event.entity_id === unitId))
-    .map((event) => event.entity_id);
-};

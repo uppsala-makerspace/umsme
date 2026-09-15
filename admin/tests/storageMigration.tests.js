@@ -8,10 +8,12 @@ import {
   applyLegacyStorageMigration,
   finalizeLegacyStorageCutover,
   preflightLegacyStorageMigration,
-  STORAGE_MIGRATION_FINALIZED_EVENT_ID,
-  STORAGE_MIGRATION_SUMMARY_EVENT_ID,
   validateStorageMigrationState,
 } from '/server/storageMigration';
+import {
+  STORAGE_CUTOVER_FINALIZED_ID,
+  STORAGE_MIGRATION_SUMMARY_ID,
+} from '/imports/common/server/storage/readiness';
 import { requireStorageMigrationOperator } from '/server/methods/storageMigration';
 import {
   StorageWalls,
@@ -113,14 +115,14 @@ describe('legacy storage migration', function () {
 
   it('persists a deterministic completeness manifest in the summary commit marker', function () {
     const plan = buildLegacyStorageMigrationPlan(source());
-    const summary = plan.documents.storageEvents.find(({ _id }) => _id === STORAGE_MIGRATION_SUMMARY_EVENT_ID);
-    const provenance = plan.documents.storageEvents.filter(({ _id }) => _id !== STORAGE_MIGRATION_SUMMARY_EVENT_ID);
+    const summary = plan.documents.storageEvents.find(({ _id }) => _id === STORAGE_MIGRATION_SUMMARY_ID);
+    const provenance = plan.documents.storageEvents.filter(({ _id }) => _id !== STORAGE_MIGRATION_SUMMARY_ID);
     const expected = buildLegacyStorageMigrationManifest({
       ...plan.documents,
       storageEvents: provenance,
     });
     assert.deepStrictEqual(summary.details.manifest, expected);
-    assert.ok(!summary.details.manifest.documents.storageEvents.includes(STORAGE_MIGRATION_SUMMARY_EVENT_ID));
+    assert.ok(!summary.details.manifest.documents.storageEvents.includes(STORAGE_MIGRATION_SUMMARY_ID));
   });
 
   it('treats a request field as queued even when storagequeue is not true', function () {
@@ -270,7 +272,7 @@ describe('legacy storage migration database gate', function () {
     for (const request of plan.documents.storageRequests) await StorageRequests.insertAsync(request);
     for (const offer of plan.documents.storageOffers) await StorageOffers.insertAsync(offer);
     for (const migrationEvent of plan.documents.storageEvents) {
-      if (includeSummary || migrationEvent._id !== STORAGE_MIGRATION_SUMMARY_EVENT_ID) {
+      if (includeSummary || migrationEvent._id !== STORAGE_MIGRATION_SUMMARY_ID) {
         await StorageEvents.insertAsync(migrationEvent);
       }
     }
@@ -326,7 +328,7 @@ describe('legacy storage migration database gate', function () {
       }),
       (error) => error.code === 'migration_blocked',
     );
-    assert.strictEqual(await StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_EVENT_ID), undefined);
+    assert.strictEqual(await StorageEvents.findOneAsync(STORAGE_MIGRATION_SUMMARY_ID), undefined);
   });
 
   it('previews exact-ID and natural-key target conflicts without writing', async function () {
@@ -403,7 +405,7 @@ describe('legacy storage migration database gate', function () {
     assert.strictEqual(complete.allocation_ready, false);
     assert.ok(complete.allocation_blocked_reasons.includes('cutover_not_finalized'));
 
-    const provenance = plan.documents.storageEvents.find(({ _id }) => _id !== STORAGE_MIGRATION_SUMMARY_EVENT_ID);
+    const provenance = plan.documents.storageEvents.find(({ _id }) => _id !== STORAGE_MIGRATION_SUMMARY_ID);
     await StorageEvents.removeAsync(provenance._id);
     const deleted = await validateStorageMigrationState({ legacySource: source });
     assert.strictEqual(deleted.migration_manifest.complete, false);
@@ -435,7 +437,7 @@ describe('legacy storage migration database gate', function () {
       finalizations.map(({ already_finalized }) => already_finalized).sort(),
       [false, true],
     );
-    const auditEvent = await StorageEvents.findOneAsync(STORAGE_MIGRATION_FINALIZED_EVENT_ID);
+    const auditEvent = await StorageEvents.findOneAsync(STORAGE_CUTOVER_FINALIZED_ID);
     assert.strictEqual(auditEvent.actor, 'migration-review-admin');
     assert.strictEqual(auditEvent.reason, 'Legacy fields approved for retirement');
     const finalized = await validateStorageMigrationState({ legacySource: changedSource });
@@ -450,10 +452,10 @@ describe('legacy storage migration database gate', function () {
     const plan = buildLegacyStorageMigrationPlan(source);
     await insertPlan(plan);
     const summary = plan.documents.storageEvents.find(
-      ({ _id }) => _id === STORAGE_MIGRATION_SUMMARY_EVENT_ID,
+      ({ _id }) => _id === STORAGE_MIGRATION_SUMMARY_ID,
     );
     await StorageEvents.insertAsync({
-      _id: STORAGE_MIGRATION_FINALIZED_EVENT_ID,
+      _id: STORAGE_CUTOVER_FINALIZED_ID,
       entity_type: 'storageMigration',
       entity_id: plan.version,
       event_type: 'legacy_storage_cutover_typo',
@@ -463,7 +465,7 @@ describe('legacy storage migration database gate', function () {
       reason: 'Malformed event regression fixture',
       details: {
         fingerprint: plan.fingerprint,
-        summary_event_id: STORAGE_MIGRATION_SUMMARY_EVENT_ID,
+        summary_event_id: STORAGE_MIGRATION_SUMMARY_ID,
         manifest_digest: summary.details.manifest.digest,
       },
     });

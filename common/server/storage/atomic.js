@@ -46,15 +46,8 @@ export const runStorageAtomic = async ({ transactional }) => {
     await session.withTransaction(async () => {
       value = await transactional(session);
     });
-    transactionSupport = true;
     return value;
   } finally {
     await session.endSession();
   }
-};
-
-export const storageTransactionsSupported = () => transactionSupport;
-
-export const resetStorageTransactionCapabilityForTests = () => {
-  transactionSupport = undefined;
 };

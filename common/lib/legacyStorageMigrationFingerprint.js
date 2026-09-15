@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 
 export const LEGACY_STORAGE_MIGRATION_VERSION = 'legacy-storage-v1';
 
-const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
-const compareId = (a, b) => String(a?._id || '').localeCompare(String(b?._id || ''));
+export const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+export const compareId = (a, b) => String(a?._id || '').localeCompare(String(b?._id || ''));
 
 const canonicalize = (value) => {
   if (value instanceof Date) return value.toISOString();

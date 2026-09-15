@@ -7,7 +7,10 @@ import {
   ACTIVE_STORAGE_REQUEST_STATUSES, EDITABLE_STORAGE_REQUEST_STATUSES, desiredStorageRequestStatus,
   hasActiveLabMembershipAt, isEditableStorageRequest, isUnitOutsideWallLayout, storageHeightForRow,
 } from '/imports/common/lib/storageRules';
-import { STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument, validateStorageDocument } from './db';
+import {
+  STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument, pickDefined, requireFutureDate,
+  setUnsetModifier, splitSetUnset, validateStorageDocument,
+} from './db';
 import { StorageConflictError } from './errors';
 import { cleanPreference } from './memberCommands';
 import { appendStorageEvent } from './events';
@@ -56,7 +59,7 @@ export const createStorageWallManual = async ({ fields, actor, commandId, now = 
   const wallId = `${id}:wall`;
   const doc = {
     _id: wallId,
-    ...Object.fromEntries(allowedWallFields.filter((key) => fields[key] !== undefined).map((key) => [key, fields[key]])),
+    ...pickDefined(fields, allowedWallFields),
     active: fields.active === undefined ? true : fields.active,
     createdAt: now, updatedAt: now,
   };
@@ -74,7 +77,7 @@ export const updateStorageWallManual = async ({ wallId, fields, actor, commandId
   const wall = await StorageWalls.findOneAsync(wallId);
   if (!wall) throw new Meteor.Error('not-found', 'Storage wall not found');
   const wallUnits = await StorageUnits.find({ wall_id: wallId }).fetchAsync();
-  const changes = Object.fromEntries(allowedWallFields.filter((key) => fields[key] !== undefined).map((key) => [key, fields[key]]));
+  const changes = pickDefined(fields, allowedWallFields);
   const candidate = { ...wall, ...changes, updatedAt: now };
   if (!candidate.note) delete candidate.note;
   validateStorageDocument(STORAGE_SCHEMAS.wall, candidate);
@@ -86,18 +89,11 @@ export const updateStorageWallManual = async ({ wallId, fields, actor, commandId
   if (wallUnits.some((unit) => unit.column > columnCount || unit.row > rowCount)) {
     throw new Meteor.Error('wall-layout-in-use', 'The smaller wall layout would exclude existing units');
   }
-  const $set = { updatedAt: now };
-  const $unset = {};
-  for (const key of allowedWallFields) {
-    if (fields[key] === undefined) continue;
-    if (key === 'note' && !fields[key]) $unset[key] = '';
-    else $set[key] = fields[key];
-  }
+  const { $set, $unset } = splitSetUnset({ ...changes, updatedAt: now }, ['note']);
   await runStorageAtomic({
     transactional: async (session) => {
-      await casStorageUpdate(StorageWalls, { _id: wallId, updatedAt: wall.updatedAt }, {
-        $set, ...(Object.keys($unset).length ? { $unset } : {}),
-      }, { session });
+      await casStorageUpdate(StorageWalls, { _id: wallId, updatedAt: wall.updatedAt },
+        setUnsetModifier($set, $unset), { session });
       for (const unit of wallUnits) {
         const height = storageHeightForRow(unit.row, rowCount);
         if (height === unit.height) continue;
@@ -129,7 +125,7 @@ export const createStorageUnitManual = async ({ fields, actor, commandId, now = 
   const unitId = `${id}:unit`;
   const doc = {
     _id: unitId,
-    ...Object.fromEntries(allowedUnitFields.filter((key) => fields[key] !== undefined).map((key) => [key, fields[key]])),
+    ...pickDefined(fields, allowedUnitFields),
     floor: wall.floor, height: storageHeightForRow(fields.row, wall.row_count),
     availability_status: fields.availability_status || 'available',
     createdAt: now, updatedAt: now,
@@ -148,7 +144,7 @@ export const updateStorageUnitManual = async ({ unitId, fields, actor, commandId
   const unit = await StorageUnits.findOneAsync(unitId);
   if (!unit) throw new Meteor.Error('not-found', 'Storage unit not found');
   if (fields.height !== undefined) throw new Meteor.Error('bad-field', 'Storage height is derived from the wall row');
-  const changes = Object.fromEntries(allowedUnitFields.filter((key) => fields[key] !== undefined).map((key) => [key, fields[key]]));
+  const changes = pickDefined(fields, allowedUnitFields);
   const metadataChanged = ['name', 'wall_id', 'column', 'row']
     .some((key) => fields[key] !== undefined && fields[key] !== unit[key]);
   if (metadataChanged && ['occupied', 'reserved'].includes(unit.availability_status) && !acknowledged) {
@@ -167,16 +163,9 @@ export const updateStorageUnitManual = async ({ unitId, fields, actor, commandId
   const candidate = { ...unit, ...changes, floor: wall.floor, height, updatedAt: now };
   if (!candidate.note) delete candidate.note;
   validateStorageDocument(STORAGE_SCHEMAS.unit, candidate);
-  const $set = { updatedAt: now, floor: wall.floor, height };
-  const $unset = {};
-  for (const key of allowedUnitFields) {
-    if (fields[key] === undefined) continue;
-    if (key === 'note' && !fields[key]) $unset[key] = '';
-    else $set[key] = fields[key];
-  }
-  const changed = await StorageUnits.updateAsync({ _id: unitId, updatedAt: unit.updatedAt }, {
-    $set, ...(Object.keys($unset).length ? { $unset } : {}),
-  });
+  const { $set, $unset } = splitSetUnset({ ...changes, updatedAt: now, floor: wall.floor, height }, ['note']);
+  const changed = await StorageUnits.updateAsync({ _id: unitId, updatedAt: unit.updatedAt },
+    setUnsetModifier($set, $unset));
   if (!changed) throw new StorageConflictError('The unit changed. Reload and try again.');
   await event(id, {
     entityType: 'storageUnit', entityId: unitId, eventType: 'unit_updated', actor, unit: unitId,
@@ -262,8 +251,7 @@ export const createStorageExemptionManual = async ({ unitId, actor, reason, exem
   const unit = await StorageUnits.findOneAsync(unitId);
   if (!unit || unit.availability_status !== 'occupied') throw new Meteor.Error('bad-state', 'Active assignment not found');
   if (unit.exemption) throw new Meteor.Error('bad-state', 'An active exemption already exists');
-  const until = exemptUntil ? new Date(exemptUntil) : undefined;
-  if (until && (Number.isNaN(until.getTime()) || until <= now)) throw new Meteor.Error('bad-date', 'Exemption expiry must be in the future');
+  const until = exemptUntil ? requireFutureDate(exemptUntil, now, 'Exemption expiry must be in the future') : undefined;
   const exemption = {
     reason: explanation, ...(until ? { exempt_until: until } : {}), created_at: now, created_by: actor,
   };
@@ -340,9 +328,8 @@ export const upsertStorageRequestManual = async ({
         const $unset = {};
         if (!normalizedPreference) $unset.preference = '';
         if (!unit) $unset.source_unit = '';
-        await casStorageUpdate(StorageRequests, { _id: targetId, updatedAt: existing.updatedAt }, {
-          $set, ...(Object.keys($unset).length ? { $unset } : {}),
-        }, { session });
+        await casStorageUpdate(StorageRequests, { _id: targetId, updatedAt: existing.updatedAt },
+          setUnsetModifier($set, $unset), { session });
       } else {
         await insertStorageDocument(StorageRequests, STORAGE_SCHEMAS.request, {
           _id: targetId, owner: owner._id, request_type: requestType, requested_at: queueDate,
@@ -414,8 +401,7 @@ export const setStorageRequestPausedManual = async ({ requestId, paused, actor, 
 
 export const extendStorageOfferManual = async ({ offerId, extendTo, actor, reason, commandId, now = new Date() }) => {
   const explanation = requiredReason(reason);
-  const deadline = new Date(extendTo);
-  if (Number.isNaN(deadline.getTime()) || deadline <= now) throw new Meteor.Error('bad-date', 'Deadline must be in the future');
+  const deadline = requireFutureDate(extendTo, now, 'Deadline must be in the future');
   const id = operationId('offer.extend', actor, commandId);
   if (await priorOperation(id)) return true;
   const offer = await StorageOffers.findOneAsync(offerId);

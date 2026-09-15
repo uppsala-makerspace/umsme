@@ -6,9 +6,7 @@ const date = (value, locale = 'sv-SE') => value instanceof Date
   ? new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'Europe/Stockholm' }).format(value)
   : null;
 const unit = (context) => context.unit_name ? ` (${context.unit_name})` : '';
-const deadline = (context, locale = 'sv-SE') => context.deadline_at
-  ? date(context.deadline_at, locale)
-  : null;
+const deadline = (context, locale) => date(context.deadline_at, locale);
 const bilingual = (swedish, english, separator = '\n\n---\n\n') =>
   `${swedish}${separator}${english}`;
 
@@ -63,7 +61,7 @@ export const renderStorageNotification = (type, context = {}) => {
   try {
     const rendered = template(context);
     return {
-      status: 'rendered', template_id: `storage_${type}`,
+      status: 'rendered',
       sender_from: STORAGE_NOTIFICATION_FROM, reply_to: STORAGE_NOTIFICATION_REPLY_TO,
       subject: rendered.subject, email: rendered.email,
     };

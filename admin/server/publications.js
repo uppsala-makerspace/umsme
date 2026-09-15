@@ -114,15 +114,10 @@ export default () => {
     }
     const memberId = filters.member_id || undefined;
     const unitId = filters.unit_id || undefined;
-    if (!memberId && !unitId) {
-      return StorageEvents.find({}, { sort: { occurred_at: -1 } });
-    }
     const clauses = [];
     if (memberId) clauses.push({ member: memberId });
     if (unitId) clauses.push({ $or: [{ unit: unitId }, { related_unit: unitId }, { entity_id: unitId }] });
-    return StorageEvents.find(clauses.length === 1 ? clauses[0] : { $and: clauses }, {
-      sort: { occurred_at: -1 },
-    });
+    return StorageEvents.find(clauses.length ? { $and: clauses } : {}, { sort: { occurred_at: -1 } });
   });
 
   Meteor.publish(null, async function () {

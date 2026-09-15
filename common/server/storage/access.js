@@ -16,16 +16,6 @@ export const requireStorageOperator = async (userId) => {
   return userId;
 };
 
-export const storageActor = async (userId) => {
-  const user = userId ? await Meteor.users.findOneAsync(userId) : null;
-  const member = user ? await memberForUser(user) : null;
-  return {
-    actor: userId || '__system__',
-    actorMember: member || null,
-    actorName: member?.name || user?.username || (userId ? 'administrator' : 'system'),
-  };
-};
-
 export const storageOwnerForMember = async (member) => {
   if (!member) throw new Meteor.Error('not-found', 'Member not found');
   // The rule rejects every chain longer than one hop, so only the direct payer

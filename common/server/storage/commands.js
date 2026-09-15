@@ -9,7 +9,7 @@ import {
   storageOfferDeadline, storageWarningDeadline,
 } from '/imports/common/lib/storageRules';
 import { runStorageAtomic } from './atomic';
-import { STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument } from './db';
+import { STORAGE_SCHEMAS, casStorageUpdate, insertStorageDocument, requireFutureDate } from './db';
 import { appendStorageEvent } from './events';
 import { isDuplicateKeyError, StorageConflictError } from './errors';
 import { sendStorageNotification, storageMessageRecordId } from '../storageMessages/service';
@@ -24,13 +24,8 @@ const ensure = (condition, message) => {
   if (!condition) throw new StorageConflictError(message);
 };
 const removeOffer = async (offer, session) => {
-  if (session) {
-    const result = await StorageOffers.rawCollection().deleteOne({ _id: offer._id, updatedAt: offer.updatedAt }, { session });
-    if (result.deletedCount !== 1) throw new StorageConflictError();
-    return;
-  }
-  const removed = await StorageOffers.removeAsync({ _id: offer._id, updatedAt: offer.updatedAt });
-  if (removed !== 1) throw new StorageConflictError();
+  const result = await StorageOffers.rawCollection().deleteOne({ _id: offer._id, updatedAt: offer.updatedAt }, { session });
+  if (result.deletedCount !== 1) throw new StorageConflictError();
 };
 
 const recordsFor = async (row) => {
@@ -248,8 +243,7 @@ const reviewOffer = async (records, selection, actor, now, session, eventId) => 
   ensure(offer && owner, 'Move is no longer pending');
   if (selection.resolution === 'complete') return finishMove(offer, actor, 'administrator', now, session, eventId);
   if (selection.resolution === 'extend') {
-    const deadline = new Date(selection.extend_to);
-    if (Number.isNaN(deadline.getTime()) || deadline <= now) throw new Meteor.Error('bad-date', 'Move extension must be in the future');
+    const deadline = requireFutureDate(selection.extend_to, now, 'Move extension must be in the future');
     await casStorageUpdate(StorageOffers, { _id: offer._id, updatedAt: offer.updatedAt },
       { $set: { deadline_at: deadline, updatedAt: now } }, { session });
     await storageEvent({
@@ -297,10 +291,10 @@ const applySuggestedAction = async (action, records, selection, actor, now, sess
   throw new Meteor.Error('bad-action', 'Unknown storage action');
 };
 
-const executeRow = async ({ action, commandId, selection, row, actor }) => {
-  const eventId = storageOperationId('suggested', actor, action, commandId, row.suggestion_id);
-  const prior = await StorageEvents.findOneAsync(eventId);
-  if (prior) return { suggestion_id: row.suggestion_id, status: 'already_applied', ...(prior.details?.result || {}) };
+const alreadyApplied = (suggestionId, prior) =>
+  ({ suggestion_id: suggestionId, status: 'already_applied', ...(prior.details?.result || {}) });
+
+const executeRow = async ({ action, selection, row, actor, eventId }) => {
   if (action === 'allocate' && !(await storageAllocationReadiness()).allocation_ready) {
     return { suggestion_id: row.suggestion_id, status: 'stale', reason: 'Storage allocation readiness changed' };
   }
@@ -331,14 +325,16 @@ export const confirmStorageSuggestions = async ({ action, commandId, selections,
   for (const selection of normalized) {
     const eventId = storageOperationId('suggested', actor, action, commandId, selection.suggestion_id);
     const prior = await StorageEvents.findOneAsync(eventId);
-    const current = currentById.get(selection.suggestion_id);
-    if (!current) {
-      results.push(prior
-        ? { suggestion_id: selection.suggestion_id, status: 'already_applied', ...(prior.details?.result || {}) }
-        : { suggestion_id: selection.suggestion_id, status: 'stale' });
+    if (prior) {
+      results.push(alreadyApplied(selection.suggestion_id, prior));
       continue;
     }
-    results.push(await executeRow({ action, commandId, selection, row: current, actor }));
+    const current = currentById.get(selection.suggestion_id);
+    if (!current) {
+      results.push({ suggestion_id: selection.suggestion_id, status: 'stale' });
+      continue;
+    }
+    results.push(await executeRow({ action, selection, row: current, actor, eventId }));
   }
   return { command_id: commandId, results };
 };

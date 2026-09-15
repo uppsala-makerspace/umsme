@@ -5,6 +5,7 @@ import { schemas } from '/imports/common/lib/schemas';
 import { isEmailAllowed } from '/imports/common/server/emailGuard';
 import { pushMessage } from '/imports/common/server/push';
 import { isDuplicateKeyError } from '/imports/common/server/storage/errors';
+import { validateStorageDocument } from '/imports/common/server/storage/db';
 import { renderStorageNotification } from './templates';
 
 let transportOverride;
@@ -27,16 +28,7 @@ const messageDocument = ({ owner, decisionType, decisionId, rendered, sentAt }) 
   messagetext: rendered.email,
 });
 
-const validateMessageDocument = (document) => {
-  const { _id, ...fields } = document;
-  const context = schemas.message.newContext();
-  if (!context.validate(fields)) {
-    const errors = typeof context.validationErrors === 'function'
-      ? context.validationErrors()
-      : [];
-    throw new Error(`Storage message is invalid: ${errors.map((item) => item.name).join(', ') || 'schema validation failed'}`);
-  }
-};
+const validateMessageDocument = (document) => validateStorageDocument(schemas.message, document);
 
 const assertMessageMatches = (existing, expected) => {
   for (const field of ['template', 'member', 'type', 'to', 'subject', 'messagetext']) {

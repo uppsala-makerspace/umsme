@@ -8,23 +8,21 @@ import {
   storageStateErrors,
 } from '/imports/common/lib/storageRules';
 import {
+  compareId,
+  hasOwn,
   LEGACY_STORAGE_MIGRATION_VERSION,
   normalizeLegacyStorageMigrationSource,
   stableStorageMigrationString,
   storageMigrationFingerprint,
 } from '/imports/common/lib/legacyStorageMigrationFingerprint';
 
-export {
-  LEGACY_STORAGE_MIGRATION_VERSION,
-  normalizeLegacyStorageMigrationSource,
-  stableStorageMigrationString,
-  storageMigrationFingerprint,
-};
+export { LEGACY_STORAGE_MIGRATION_VERSION };
 const SYSTEM_ACTOR = '__storage_migration__';
 export const STORAGE_MIGRATION_MANIFEST_VERSION = 1;
 
-const compareId = (a, b) => String(a?._id || '').localeCompare(String(b?._id || ''));
-const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+/** A legacy member asked for storage through the free-text request field. */
+const hasLegacyRequestSignal = (member) => hasOwn(member, 'storagerequest') &&
+  member.storagerequest !== undefined && member.storagerequest !== null && member.storagerequest !== '';
 const issueOrder = (a, b) =>
   a.severity.localeCompare(b.severity) || a.code.localeCompare(b.code) ||
   String(a.entity_id || '').localeCompare(String(b.entity_id || ''));
@@ -84,7 +82,6 @@ export const buildLegacyStorageMigrationPlan = ({
 
   const definitions = new Map();
   const configuredStorageNumbers = new Set();
-  const wallPositions = new Set();
   const storageWalls = [];
   const wallNames = new Set();
   if (!walls.length) addIssue('blocker', 'missing_storage_walls', 'migration', LEGACY_STORAGE_MIGRATION_VERSION);
@@ -125,16 +122,10 @@ export const buildLegacyStorageMigrationPlan = ({
     });
     for (let number = wall.start; number <= wall.end; number += 1) {
       const position = number - wall.start + 1;
-      const layoutKey = `${wall.name}:${position}`;
       if (definitions.has(number)) {
         addIssue('blocker', 'overlapping_wall_range', 'unit', String(number));
         continue;
       }
-      if (wallPositions.has(layoutKey)) {
-        addIssue('blocker', 'duplicate_wall_position', 'unit', String(number));
-        continue;
-      }
-      wallPositions.add(layoutKey);
       const shelfOffset = (position - 1) % shelfSize;
       const row = Math.floor(shelfOffset / 2) + 1;
       definitions.set(number, {
@@ -183,9 +174,7 @@ export const buildLegacyStorageMigrationPlan = ({
     const resolved = resolveStorageOwner(member, membersById);
     ownerResolution.set(member._id, resolved);
     const hasStorage = hasOwn(member, 'storage') && member.storage !== null && member.storage !== undefined;
-    const hasRequest = member.storagequeue === true ||
-      (hasOwn(member, 'storagerequest') && member.storagerequest !== null &&
-       member.storagerequest !== undefined && member.storagerequest !== '');
+    const hasRequest = member.storagequeue === true || hasLegacyRequestSignal(member);
     if (resolved.error && (hasStorage || hasRequest)) {
       addIssue('blocker', resolved.error, 'member', member._id);
     }
@@ -292,8 +281,7 @@ export const buildLegacyStorageMigrationPlan = ({
   }
   const requestSignalsByOwner = new Map();
   for (const member of members) {
-    const requestPresent = hasOwn(member, 'storagerequest') &&
-      member.storagerequest !== undefined && member.storagerequest !== null && member.storagerequest !== '';
+    const requestPresent = hasLegacyRequestSignal(member);
     if (member.storagequeue !== true && !requestPresent) continue;
     const resolved = ownerResolution.get(member._id);
     if (!resolved?.owner || resolved.error) continue;
@@ -451,7 +439,7 @@ export const buildLegacyStorageMigrationPlan = ({
   };
 };
 
-/** Pure insert/already/conflict classifier used by the resumable adapter. */
+/** Pure insert/already-present/conflict classifier used by preflight and apply. */
 export const diffLegacyMigrationDocuments = (documents, existing = {}) => {
   const result = { inserts: {}, already_present: {}, conflicts: [] };
   for (const [collection, desired] of Object.entries(documents)) {

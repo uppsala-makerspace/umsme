@@ -21,10 +21,7 @@ import {
   upsertStorageRequestManual,
 } from '/imports/common/server/storage/manual';
 
-const operator = async (context) => {
-  await requireStorageOperator(context.userId);
-  return context.userId;
-};
+const operator = (context) => requireStorageOperator(context.userId);
 
 Meteor.methods({
   async 'adminStorage.walls.create'({ fields, command_id }) {

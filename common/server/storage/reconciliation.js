@@ -58,7 +58,6 @@ const reconcileUnit = async (unit, owner, now) => {
     if (changed) {
       warningsChanged = 1;
       unit = { ...unit, updatedAt: now };
-      delete unit.warning;
     }
   }
   const reason = storageExemptionDeactivationReason(unit.exemption, now);

@@ -12,7 +12,7 @@ import {
   storageReadinessPresentation,
   storageResultSummary,
 } from '/imports/storage/presentation';
-import { storageEventEntityIds, storageEventRows } from '/imports/storage/eventLog';
+import { storageEventRows } from '/imports/storage/eventLog';
 
 describe('storage admin presentation', function () {
   const units = [
@@ -168,28 +168,6 @@ describe('storage admin presentation', function () {
     ]), '2 applied · 1 need review · 1 failed');
     assert.strictEqual(storageActionReasonLabel('warning_deadline_passed'), 'The 28-day warning deadline passed');
     assert.strictEqual(storageActionReasonLabel('unexpected_reason'), 'unexpected reason');
-  });
-
-  it('resolves member and unit event filters through historical storage records', function () {
-    const records = { events: [
-      { entity_id: 'a1', member: 'm1', unit: 'u1' },
-      { entity_id: 'a2', member: 'm2', unit: 'u1' },
-      { entity_id: 'mv1', member: 'm1', unit: 'u2', related_unit: 'u1' },
-    ] };
-    assert.deepStrictEqual(
-      storageEventEntityIds({ memberId: 'm1', ...records }),
-      ['a1', 'mv1'],
-    );
-    assert.deepStrictEqual(
-      storageEventEntityIds({ unitId: 'u1', ...records }),
-      ['a1', 'a2', 'mv1'],
-    );
-    assert.deepStrictEqual(
-      storageEventEntityIds({ memberId: 'm1', unitId: 'u1', ...records }),
-      ['a1', 'mv1'],
-    );
-    assert.deepStrictEqual(storageEventEntityIds({ memberId: 'm2', unitId: 'u2', ...records }), []);
-    assert.strictEqual(storageEventEntityIds(records), null);
   });
 
   it('presents event rows with related member and storage-unit names', function () {
