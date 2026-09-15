@@ -30,8 +30,8 @@ export const detectStorageTransactionSupport = async () => {
 };
 
 /**
- * Run one storage row atomically. Storage lifecycle commands are disabled on
- * MongoDB deployments that cannot provide transactions.
+ * Run one storage command's writes in a single MongoDB transaction. Storage
+ * lifecycle commands are disabled on deployments without transaction support.
  */
 export const runStorageAtomic = async ({ transactional }) => {
   if (!(await detectStorageTransactionSupport())) {

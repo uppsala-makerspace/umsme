@@ -150,7 +150,8 @@ export const FamilyDependentReadOnly = {
   },
 };
 
-// The locale toolbar renders every lifecycle story in Swedish or English.
+// Pinned to English so the bilingual copy is visible in the gallery without
+// switching the locale toolbar; every other story follows the toolbar.
 export const MovePendingConfirmationEnglish = {
   ...MovePendingConfirmation,
   globals: { locale: "en" },

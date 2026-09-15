@@ -4,7 +4,8 @@ import { reconcileStorageState } from './reconciliation';
 const WATCHED = ['lab', 'family', 'infamily'];
 
 // Prompt healing for renewals and family changes. Time-based expiry is also
-// handled lazily by every storage read/preview/command.
+// handled lazily by state reads, previews, and the assignment, exemption and
+// request-upsert commands, which reconcile before they act.
 Members.after.update(async function storageMembershipSync(userId, doc, fieldNames) {
   if (!fieldNames.some((field) => WATCHED.includes(field))) return;
   const ownerId = doc.infamily || doc._id;

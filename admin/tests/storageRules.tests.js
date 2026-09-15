@@ -233,8 +233,8 @@ describe('storageRules', function () {
     });
 
     it('honours active exemptions and expires them at the exact end time', function () {
-      const active = { active: true, exempt_until: d('2026-09-10T12:00:00.001Z') };
-      const expired = { active: true, exempt_until: NOW };
+      const active = { exempt_until: d('2026-09-10T12:00:00.001Z') };
+      const expired = { exempt_until: NOW };
       assert.strictEqual(isStorageExemptionActive(active, NOW), true);
       assert.strictEqual(isStorageExemptionActive(expired, NOW), false);
       assert.strictEqual(isStorageReclamationEligible(warning, { now: NOW, exemption: active }), false);

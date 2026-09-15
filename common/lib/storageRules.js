@@ -87,9 +87,9 @@ export const desiredStorageRequestStatus = (requestType, labIsActive) =>
   requestType === 'release' || labIsActive ? 'waiting' : 'paused_ineligible';
 
 /**
- * The exemption unique index follows `active`, while time-based expiry follows
- * `exempt_until`. Before previews and before creating/replacing an exemption,
- * Phase 3 must CAS rows with a non-null result to `{active: false, updatedAt}`.
+ * Why an exemption should be cleared, or null while it still applies. An
+ * exemption is an embedded object on the unit with an optional `exempt_until`;
+ * reconciliation $unsets the whole object once this returns a reason.
  */
 export const storageExemptionDeactivationReason = (exemption, now = new Date()) => {
   if (!exemption) return null;
