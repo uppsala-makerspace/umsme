@@ -242,6 +242,33 @@ Template.Storage.onCreated(function () {
   this.autorun(() => {
     if (Meteor.userId() && operator()) this.refresh();
   });
+  let readinessTimer;
+  let readinessVersion = 0;
+  this.autorun(() => {
+    if (!operator()) return;
+    // Depend only on published records, never on the result of the status call.
+    for (const collection of [StorageWalls, StorageUnits, StorageRequests, StorageOffers, StorageEvents, Members]) {
+      collection.find().fetch();
+    }
+    const version = ++readinessVersion;
+    Meteor.clearTimeout(readinessTimer);
+    readinessTimer = Meteor.setTimeout(async () => {
+      try {
+        const readiness = await Meteor.callAsync('storageMigration.status');
+        if (!this.isDestroyed && version === readinessVersion) this.state.set('readiness', readiness);
+      } catch (error) {
+        if (!this.isDestroyed && version === readinessVersion) setError(this, errorMessage(error), 'page');
+      }
+    }, 200);
+  });
+  this.stopReadinessRefresh = () => {
+    readinessVersion += 1;
+    Meteor.clearTimeout(readinessTimer);
+  };
+});
+
+Template.Storage.onDestroyed(function () {
+  this.stopReadinessRefresh();
 });
 
 Template.Storage.helpers({

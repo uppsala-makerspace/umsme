@@ -528,6 +528,9 @@ members see the same storage information in read-only form.
 
 ## 6. Migration and deployment story
 
+See the [deployment runbook](storage-deployment.md) for executable preview,
+apply, verification, and finalization steps.
+
 Migration is a controlled deployment task, not an administrator-dashboard
 workflow. Deployment starts with a dry run and does not run it as an
 unreviewed application-startup side effect.

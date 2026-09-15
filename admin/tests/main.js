@@ -9,6 +9,7 @@ import "./familyRules.tests";
 import "./revenueSeries.tests";
 import "./groupRules.tests";
 import "./storageRules.tests";
+import "./storageDigest.tests";
 import "./storageMessages.tests";
 import "./storageMigration.tests";
 import "./storageService.tests";

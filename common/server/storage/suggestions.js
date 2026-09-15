@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { canonicalStorageValue as canonical, storageDigest } from '/imports/common/lib/storageDigest';
 import { Meteor } from 'meteor/meteor';
 import { Members } from '/imports/common/collections/members';
 import { Messages } from '/imports/common/collections/messages';
@@ -20,16 +20,7 @@ export const STORAGE_SUGGESTION_ACTIONS = [
 ];
 
 const iso = (value) => value instanceof Date ? value.toISOString() : value;
-const canonical = (value) => {
-  if (Array.isArray(value)) return value.map(canonical);
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonical(value[key])]));
-  }
-  return iso(value);
-};
-
-export const storageSuggestionId = (action, state) => crypto.createHash('sha256')
-  .update(JSON.stringify(canonical({ action, state }))).digest('hex');
+export const storageSuggestionId = (action, state) => storageDigest({ action, state });
 
 const version = (record) => record
   ? `${record._id}:${iso(record.updatedAt)}:${iso(record.lab)}:${iso(record.senddate)}`

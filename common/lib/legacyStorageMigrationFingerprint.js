@@ -1,25 +1,12 @@
-import { createHash } from 'node:crypto';
+import { stableStorageString, storageDigest } from './storageDigest';
 
 export const LEGACY_STORAGE_MIGRATION_VERSION = 'legacy-storage-v1';
 
 export const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
 export const compareId = (a, b) => String(a?._id || '').localeCompare(String(b?._id || ''));
 
-const canonicalize = (value) => {
-  if (value instanceof Date) return value.toISOString();
-  if (Array.isArray(value)) return value.map(canonicalize);
-  if (value && typeof value === 'object') {
-    return Object.keys(value).sort().reduce((result, key) => {
-      result[key] = canonicalize(value[key]);
-      return result;
-    }, {});
-  }
-  return value;
-};
-
-export const stableStorageMigrationString = (value) => JSON.stringify(canonicalize(value));
-export const storageMigrationFingerprint = (value) =>
-  createHash('sha256').update(stableStorageMigrationString(value)).digest('hex');
+export const stableStorageMigrationString = stableStorageString;
+export const storageMigrationFingerprint = storageDigest;
 
 /**
  * Keep this projection shared by migration and readiness checks. Adding an

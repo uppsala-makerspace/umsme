@@ -7,6 +7,7 @@ import {
 import { previewStorageSuggestions } from '/imports/common/server/storage/suggestions';
 import { confirmStorageSuggestions, completeStorageOffer } from '/imports/common/server/storage/commands';
 import { reconcileStorageState } from '/imports/common/server/storage/reconciliation';
+import { cancelStorageOfferManual, extendStorageOfferManual, markStorageUnitReturnedManual, confirmStorageClearanceManual } from '/imports/common/server/storage/manual';
 import {
   assignStorageUnitManual, createStorageExemptionManual, createStorageUnitManual,
   revokeStorageExemptionManual, updateStorageUnitManual, updateStorageWallManual,
@@ -131,6 +132,45 @@ describe('five-collection storage database workflow', function () {
       unitId, fields: { row: 1 }, actor, commandId: 'move-to-top-row',
     });
     assert.strictEqual((await StorageUnits.findOneAsync(unitId)).height, 'high');
+  });
+
+  it('extends and cancels a move, then returns and clears the source without messages', async function () {
+    const owner = `${prefix}transition-owner`;
+    const source = `${prefix}transition-source`;
+    const destination = `${prefix}transition-destination`;
+    const request = `${prefix}transition-request`;
+    const offer = `${prefix}transition-offer`;
+    const now = new Date();
+    const actor = `${prefix}admin`;
+    await unit(source, 1, 'occupied', owner);
+    await unit(destination, 2, 'reserved', owner);
+    await StorageRequests.insertAsync({
+      _id: request, owner, request_type: 'move', source_unit: source,
+      request_status: 'in_progress', requested_at: now, createdAt: now, updatedAt: now,
+    });
+    await StorageOffers.insertAsync({
+      _id: offer, owner, request, from_unit: source, to_unit: destination,
+      offered_at: now, offered_by: actor, deadline_at: future(), requires_inspection: false,
+      createdAt: now, updatedAt: now,
+    });
+    const deadline = future();
+    await extendStorageOfferManual({ offerId: offer, extendTo: deadline, actor, reason: 'requested', commandId: 'extend' });
+    assert.strictEqual((await StorageOffers.findOneAsync(offer)).deadline_at.getTime(), deadline.getTime());
+    await cancelStorageOfferManual({ offerId: offer, actor, reason: 'requested', commandId: 'cancel' });
+    assert.strictEqual(await StorageOffers.findOneAsync(offer), undefined);
+    assert.strictEqual((await StorageUnits.findOneAsync(destination)).owner, undefined);
+    const queued = await StorageRequests.findOneAsync(request);
+    assert.strictEqual(queued.request_status, 'waiting');
+    assert.strictEqual(queued.requested_at.getTime(), now.getTime());
+    await markStorageUnitReturnedManual({ unitId: source, actor, reason: 'collected', commandId: 'return' });
+    assert.strictEqual((await StorageUnits.findOneAsync(source)).owner, owner);
+    await confirmStorageClearanceManual({ unitId: source, actor, commandId: 'clear' });
+    const cleared = await StorageUnits.findOneAsync(source);
+    assert.strictEqual(cleared.availability_status, 'available');
+    assert.strictEqual(cleared.owner, undefined);
+    assert.strictEqual(cleared.assigned_at, undefined);
+    assert.strictEqual(await Messages.find({ member: owner }).countAsync(), 0);
+    assert.strictEqual(await StorageEvents.find({ member: owner }).countAsync(), 4);
   });
 
   it('embeds warnings and clears them when lab membership is renewed', async function () {

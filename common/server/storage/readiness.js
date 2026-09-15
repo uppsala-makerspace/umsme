@@ -1,8 +1,3 @@
-import crypto from 'node:crypto';
-import { Meteor } from 'meteor/meteor';
-import { Members } from '/imports/common/collections/members';
-import { Memberships } from '/imports/common/collections/memberships';
-import { Comments } from '/imports/common/collections/comments';
 import {
   StorageWalls,
   StorageUnits,
@@ -12,33 +7,15 @@ import {
 } from '/imports/common/collections/storage';
 import {
   LEGACY_STORAGE_MIGRATION_VERSION,
-  stableStorageMigrationString,
   storageMigrationFingerprintForSource,
 } from '/imports/common/lib/legacyStorageMigrationFingerprint';
 import { storageLayoutErrors, storageStateErrors } from '/imports/common/lib/storageRules';
 import { detectStorageTransactionSupport } from './atomic';
+import { STORAGE_COLLECTIONS as manifestCollections, loadLegacyStorageSource as loadLegacySource } from './migrationSource';
+import { storageDigest as digest } from '/imports/common/lib/storageDigest';
 
 export const STORAGE_MIGRATION_SUMMARY_ID = `${LEGACY_STORAGE_MIGRATION_VERSION}:event:summary`;
 export const STORAGE_CUTOVER_FINALIZED_ID = `${LEGACY_STORAGE_MIGRATION_VERSION}:event:cutover-finalized`;
-
-const manifestCollections = {
-  storageWalls: StorageWalls,
-  storageUnits: StorageUnits,
-  storageRequests: StorageRequests,
-  storageOffers: StorageOffers,
-  storageEvents: StorageEvents,
-};
-
-const digest = (value) => crypto.createHash('sha256')
-  .update(stableStorageMigrationString(value)).digest('hex');
-
-const loadLegacySource = async (cutoff) => ({
-  walls: Meteor.settings.public?.storageWalls || [],
-  members: await Members.find({}).fetchAsync(),
-  memberships: await Memberships.find({}).fetchAsync(),
-  comments: await Comments.find({ about: { $regex: '^_box' } }).fetchAsync(),
-  cutoff,
-});
 
 const inspectManifest = async (manifest) => {
   const expectedNames = Object.keys(manifestCollections);

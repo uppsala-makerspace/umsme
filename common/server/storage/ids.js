@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { storageTextDigest } from '/imports/common/lib/storageDigest';
 
-export const storageOperationId = (...parts) => crypto.createHash('sha256')
-  .update(parts.map((part) => String(part)).join(':')).digest('hex').slice(0, 32);
+export const storageOperationId = (...parts) =>
+  storageTextDigest(parts.map((part) => String(part)).join(':')).slice(0, 32);

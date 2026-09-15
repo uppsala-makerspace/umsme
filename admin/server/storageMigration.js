@@ -1,8 +1,4 @@
 import { ACTIVE_STORAGE_REQUEST_STATUSES } from '/imports/common/lib/storageRules';
-import { Meteor } from 'meteor/meteor';
-import { Members } from '/imports/common/collections/members';
-import { Memberships } from '/imports/common/collections/memberships';
-import { Comments } from '/imports/common/collections/comments';
 import {
   StorageWalls,
   StorageUnits,
@@ -21,23 +17,11 @@ import {
   diffLegacyMigrationDocuments,
 } from '/imports/storage/legacyMigration';
 
-const collections = {
-  storageWalls: StorageWalls,
-  storageUnits: StorageUnits,
-  storageRequests: StorageRequests,
-  storageOffers: StorageOffers,
-  storageEvents: StorageEvents,
-};
+import { STORAGE_COLLECTIONS as collections, loadLegacyStorageSource as loadLegacySource } from '/imports/common/server/storage/migrationSource';
 
 const migrationError = (code, message, details) =>
   Object.assign(new Error(message), { code, ...(details === undefined ? {} : { details }) });
 
-const loadLegacySource = async () => ({
-  walls: Meteor.settings.public?.storageWalls || [],
-  members: await Members.find({}).fetchAsync(),
-  memberships: await Memberships.find({}).fetchAsync(),
-  comments: await Comments.find({ about: { $regex: '^_box' } }).fetchAsync(),
-});
 
 const publicPlan = (plan) => ({
   version: plan.version,

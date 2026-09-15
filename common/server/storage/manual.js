@@ -15,6 +15,7 @@ import { StorageConflictError } from './errors';
 import { cleanPreference } from './memberCommands';
 import { appendStorageEvent } from './events';
 import { completeStorageOffer } from './commands';
+import { markUnitForClearance, clearStorageUnit, extendStorageOffer, cancelStorageOffer } from './transitions';
 import { runStorageAtomic } from './atomic';
 import { reconcileStorageState } from './reconciliation';
 import { storageOwnerForMember } from './access';
@@ -230,10 +231,7 @@ export const markStorageUnitReturnedManual = async ({ unitId, actor, reason, com
   }
   await runStorageAtomic({
     transactional: async (session) => {
-      await casStorageUpdate(StorageUnits,
-        { _id: unit._id, availability_status: 'occupied', owner: unit.owner, updatedAt: unit.updatedAt },
-        { $set: { availability_status: 'awaiting_clearance', updatedAt: now }, $unset: { warning: '', exemption: '' } },
-        { session });
+      await markUnitForClearance(unit, now, session);
       await event(id, {
         entityType: 'storageUnit', entityId: unit._id, eventType: 'manual_unit_marked_returned',
         actor, member: unit.owner, unit: unit._id, occurredAt: now, reason: explanation,
@@ -408,8 +406,7 @@ export const extendStorageOfferManual = async ({ offerId, extendTo, actor, reaso
   if (!offer) throw new Meteor.Error('bad-state', 'Pending move not found');
   await runStorageAtomic({
     transactional: async (session) => {
-      await casStorageUpdate(StorageOffers, { _id: offerId, updatedAt: offer.updatedAt },
-        { $set: { deadline_at: deadline, updatedAt: now } }, { session });
+      await extendStorageOffer(offer, deadline, now, session);
       await event(id, {
         entityType: 'storageOffer', entityId: offerId, eventType: 'manual_offer_extended', actor,
         member: offer.owner, unit: offer.to_unit, relatedUnit: offer.from_unit,
@@ -432,21 +429,7 @@ export const cancelStorageOfferManual = async ({ offerId, actor, reason, cancelR
   if (!unit || !request) throw new Meteor.Error('not-found', 'Move references are missing');
   await runStorageAtomic({
     transactional: async (session) => {
-      await casStorageUpdate(StorageUnits,
-        { _id: unit._id, availability_status: 'reserved', owner: offer.owner, updatedAt: unit.updatedAt },
-        { $set: { availability_status: 'available', updatedAt: now }, $unset: { owner: '' } },
-        { session });
-      await casStorageUpdate(StorageRequests,
-        { _id: request._id, request_status: 'in_progress', updatedAt: request.updatedAt },
-        cancelRequest
-          ? { $set: { request_status: 'cancelled', cancelled_at: now, updatedAt: now } }
-          : { $set: { request_status: 'waiting', updatedAt: now }, $unset: { cancelled_at: '', fulfilled_at: '' } },
-        { session });
-      const removed = await StorageOffers.rawCollection().deleteOne(
-        { _id: offer._id, updatedAt: offer.updatedAt },
-        { session },
-      );
-      if (removed.deletedCount !== 1) throw new StorageConflictError('The offer changed. Reload and try again.');
+      await cancelStorageOffer({ offer, unit, request, cancelRequest, now, session });
       await event(id, {
         entityType: 'storageOffer', entityId: offerId, eventType: 'manual_offer_cancelled', actor,
         member: offer.owner, unit: offer.to_unit, relatedUnit: offer.from_unit,
@@ -466,11 +449,7 @@ export const confirmStorageClearanceManual = async ({ unitId, actor, commandId, 
   }
   await runStorageAtomic({
     transactional: async (session) => {
-      await casStorageUpdate(StorageUnits,
-        { _id: unitId, availability_status: 'awaiting_clearance', updatedAt: unit.updatedAt }, {
-          $set: { availability_status: 'available', updatedAt: now },
-          $unset: { owner: '', assigned_at: '', assigned_by: '', source_request: '', warning: '', exemption: '' },
-        }, { session });
+      await clearStorageUnit(unit, now, session);
       await event(id, {
         entityType: 'storageUnit', entityId: unitId, eventType: 'manual_physical_clearance_confirmed',
         actor, member: unit.owner, unit: unitId, occurredAt: now,
