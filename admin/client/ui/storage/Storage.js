@@ -433,6 +433,15 @@ Template.Storage.events({
     event.preventDefault();
     instance.state.set('previewAction', '');
   },
+  'click .select-all-suggestions'(event, instance) {
+    event.preventDefault();
+    instance.state.set('selected', {});
+  },
+  'click .deselect-all-suggestions'(event, instance) {
+    event.preventDefault();
+    const rows = instance.state.get('preview')?.rows || [];
+    instance.state.set('selected', Object.fromEntries(rows.map(({ suggestion_id }) => [suggestion_id, false])));
+  },
   'change .select-suggestion'(event, instance) {
     setStateMapValue(
       instance,
