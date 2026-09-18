@@ -19,6 +19,7 @@ import {
 import { storageEventRows } from '/imports/storage/eventLog';
 
 const date = (value) => value instanceof Date ? value.toLocaleString() : (value || '—');
+const day = (value) => value instanceof Date ? value.toLocaleDateString() : (value || '—');
 const newCommandId = () => newStorageCommandId();
 const errorMessage = (error) => error?.reason || error?.message || 'The operation failed. Refresh and try again.';
 const setError = (instance, message, section = 'page') => {
@@ -112,14 +113,15 @@ const requestEditorView = (editor) => {
     requestType,
     chooseMember: !request,
     memberName: member ? storageMemberLabel(member) : '',
-    title: request ? 'Change preference' : newRequestTitle,
+    title: request ? 'Edit request' : newRequestTitle,
     description: request
-      ? 'Update what this member prefers without changing their place in the queue.'
+      ? 'Update what this member prefers without changing their place in the queue. Expand Advanced to correct the waiting date.'
       : newRequestDescription,
-    submitLabel: request ? 'Save preference' : newRequestSubmitLabel,
+    submitLabel: request ? 'Save changes' : newRequestSubmitLabel,
     floorAny: !preference.floor, floor1: preference.floor === 'floor1', floor2: preference.floor === 'floor2',
     heightAny: !preference.height, heightLow: preference.height === 'low', heightHigh: preference.height === 'high',
-    waitingSince: request ? date(request.requested_at) : null,
+    waitingSince: request ? day(request.requested_at) : null,
+    waitingSinceExact: request ? date(request.requested_at) : null,
   };
 };
 
@@ -334,7 +336,7 @@ Template.Storage.helpers({
       units: StorageUnits.find().fetch(),
     });
     return filterStorageQueue(rows, state.get('queueQuery'))
-      .map((row) => ({ ...row, waitingSince: date(row.requested_at) }));
+      .map((row) => ({ ...row, waitingSince: day(row.requested_at), waitingSinceExact: date(row.requested_at) }));
   },
   requestEditor: () => requestEditorView(Template.instance().state.get('requestEditor')),
   wallOptions: () => StorageWalls.find({}, { sort: { display_order: 1, name: 1 } }).fetch(),
@@ -623,13 +625,9 @@ Template.Storage.events({
     event.preventDefault();
     instance.state.set('requestEditor', null);
   },
-  'click .edit-queue-preference, click .correct-queue-date'(event, instance) {
+  'click .edit-queue-request'(event, instance) {
     event.preventDefault();
-    instance.state.set('requestEditor', {
-      mode: 'edit',
-      requestId: event.currentTarget.dataset.id,
-      advancedOpen: event.currentTarget.classList.contains('correct-queue-date'),
-    });
+    instance.state.set('requestEditor', { mode: 'edit', requestId: event.currentTarget.dataset.id });
   },
   'input .queue-date-correction'(e) {
     const reason = e.currentTarget.form.elements.reason;
