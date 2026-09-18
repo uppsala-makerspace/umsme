@@ -14,7 +14,7 @@ const templates = {
   assignment: (c) => ({
     subject: bilingual('Du har fått en hyllplats', 'You have been assigned a storage unit', ' — '),
     email: bilingual(
-      `Hej ${c.owner_name || ''}!\n\nDu är i kö för en hyllplats i Uppsala Makerspace. Du har tilldelats hyllplats${unit(c)}. Om du vill byta låda kan du ställa dig i kö igen i appen. Kontakta oss genom att svara på detta mejl om du har frågor.\n\nVänliga hälsningar\nUppsala Makerspace`,
+      `Hej ${c.owner_name || ''}!\n\nDu är i kö för en hyllplats i Uppsala Makerspace. Du har tilldelats hyllplats${unit(c)}. Om du vill byta hyllplats kan du ställa dig i kö igen i appen. Kontakta oss genom att svara på detta mejl om du har frågor.\n\nVänliga hälsningar\nUppsala Makerspace`,
       `Hello ${c.owner_name || ''}!\n\nYou are in the queue for a storage unit at Uppsala Makerspace. You have been assigned storage unit${unit(c)}. If you would like a different unit, you can join the queue again in the app. Contact us by replying to this email if you have any questions.\n\nKind regards\nUppsala Makerspace`,
     ),
   }),
