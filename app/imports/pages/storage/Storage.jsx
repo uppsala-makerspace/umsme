@@ -73,6 +73,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
   const { t, i18n } = useTranslation();
   const [preference, setPreference] = useState({ floor: "", height: "" });
   const [submitting, setSubmitting] = useState(null);
+  const [confirmingRelease, setConfirmingRelease] = useState(false);
 
   useEffect(() => {
     setPreference({
@@ -80,6 +81,7 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
       height: state?.request?.preference?.height || "",
     });
   }, [state?.request?._id, state?.request?.preference?.floor, state?.request?.preference?.height]);
+  useEffect(() => { setConfirmingRelease(false); }, [state?.request?._id, state?.unit?._id]);
 
   const run = async (action, callback) => {
     setSubmitting(action);
@@ -195,13 +197,23 @@ const Storage = ({ state, loading, error, onRetry, onUpsertRequest, onCancelRequ
               </Button>
             </>
           )}
-          <Button variant="secondary" fullWidth disabled={!!submitting} onClick={() => {
-            if (window.confirm(t("storageReleaseConfirm"))) {
-              run("release", () => onUpsertRequest("release", {}));
-            }
-          }}>
-            {submitting === "release" ? t("loading") : t("storageRequestRelease")}
-          </Button>
+          {confirmingRelease ? (
+            <StatusCard tone="yellow" testId="storage-release-confirm">
+              <p className="text-sm">{t("storageReleaseConfirm")}</p>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <Button variant="danger" fullWidth disabled={!!submitting} onClick={() => run("release", () => onUpsertRequest("release", {}))}>
+                  {submitting === "release" ? t("loading") : t("storageReleaseConfirmYes")}
+                </Button>
+                <Button variant="secondary" fullWidth disabled={!!submitting} onClick={() => setConfirmingRelease(false)}>
+                  {t("cancel")}
+                </Button>
+              </div>
+            </StatusCard>
+          ) : (
+            <Button variant="secondary" fullWidth disabled={!!submitting} onClick={() => setConfirmingRelease(true)}>
+              {t("storageRequestRelease")}
+            </Button>
+          )}
           <p className="text-xs text-gray-600">{t("storageReleaseHelp")}</p>
         </section>
       )}

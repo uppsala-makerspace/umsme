@@ -240,6 +240,7 @@
   "storageRequestMove": "Ask for a different unit",
   "storageRequestRelease": "Return this storage unit",
   "storageReleaseConfirm": "Do you want to return your storage unit? An administrator must approve it before the unit is released.",
+  "storageReleaseConfirmYes": "Yes, return it",
   "storageReleaseHelp": "The unit remains assigned to you until an administrator approves the return and later confirms that it is empty.",
   "storageCancelRequest": "Withdraw request",
   "storageLoadFailed": "We could not load your storage information. Please try again.",

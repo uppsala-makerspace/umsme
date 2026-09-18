@@ -239,6 +239,7 @@
   "storageRequestMove": "Önska annan hyllplats",
   "storageRequestRelease": "Lämna tillbaka hyllplatsen",
   "storageReleaseConfirm": "Vill du lämna tillbaka din hyllplats? En administratör måste godkänna det innan hyllplatsen blir ledig.",
+  "storageReleaseConfirmYes": "Ja, lämna tillbaka",
   "storageReleaseHelp": "Hyllplatsen är tilldelad dig tills en administratör godkänner återlämningen och senare bekräftar att den är tömd.",
   "storageCancelRequest": "Ta bort önskemålet",
   "storageLoadFailed": "Det gick inte att hämta din förvaringsinformation. Försök igen.",
