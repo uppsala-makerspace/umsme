@@ -8,7 +8,7 @@ import { memberStatus } from '/imports/common/lib/utils';
 import moment from 'moment';
 
 
-const niceDate = (date) => {
+export const niceDate = (date) => {
   if (date) {
     return moment(date).format("YYYY-MM-DD");
   }
@@ -90,22 +90,19 @@ export const findBestTemplate = async (params) => {
  * @param {string} templateId
  * @param {{membershipId?: string, paymentId?: string}|string} [context]
  */
-export const messageData = async (memberId, templateId, context) => {
-  const { membershipId, paymentId } =
-    typeof context === "string" ? { membershipId: context } : (context || {});
+/**
+ * The "common variables" every template can use, built from a member document.
+ * Shared by the membership messages below and the automatic storage messages.
+ */
+export const memberTemplateData = async (member) => {
   let familyMembers = [];
-  await Members.find({infamily: memberId}).forEachAsync((m) => familyMembers.push(m.name));
+  await Members.find({ infamily: member._id }).forEachAsync((m) => familyMembers.push(m.name));
   familyMembers = familyMembers.join(', ');
-  const member = await Members.findOneAsync(memberId);
-  const messageTemplate = await MessageTemplates.findOneAsync(templateId);
-  if (!member || !messageTemplate) {
-    return {};
-  }
   // memberStatus is async — without the await, status is a Promise and
   // status.memberStart/labStart come out undefined, which silently emptied the
   // memberStartDate and labStartDate variables in every template.
   const status = await memberStatus(member);
-  const data = {
+  return {
     id: member._id,
     mid: member.mid,
     name: member.name,
@@ -118,8 +115,19 @@ export const messageData = async (memberId, templateId, context) => {
     memberStartDate: niceDate(status.memberStart),
     memberEndDate: niceDate(member.member),
     labStartDate: niceDate(status.labStart),
-    labEndDate: niceDate(member.lab)
+    labEndDate: niceDate(member.lab),
   };
+};
+
+export const messageData = async (memberId, templateId, context) => {
+  const { membershipId, paymentId } =
+    typeof context === "string" ? { membershipId: context } : (context || {});
+  const member = await Members.findOneAsync(memberId);
+  const messageTemplate = await MessageTemplates.findOneAsync(templateId);
+  if (!member || !messageTemplate) {
+    return {};
+  }
+  const data = await memberTemplateData(member);
   if (membershipId) {
     const membership = await Memberships.findOneAsync(membershipId);
     data.amount = membership.amount;

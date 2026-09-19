@@ -19,7 +19,7 @@ export const storageMessageRecordId = (decisionType, decisionId) =>
 
 const messageDocument = ({ owner, decisionType, decisionId, rendered, sentAt }) => ({
   _id: storageMessageRecordId(decisionType, decisionId),
-  template: 'storage',
+  template: rendered.template_id,
   member: owner._id,
   type: 'storage',
   to: owner.email || 'In-app',
@@ -42,6 +42,11 @@ const assertMessageMatches = (existing, expected) => {
  * Use the established email, member-message, and app-push flow. Storage does
  * not keep a separate queue, channel state, delivery history, or retry ledger.
  * A member without email still gets the persistent in-app message.
+ *
+ * The text comes from the administrator-editable template of the decision's
+ * type, so a message rendered once is compared by content on a retry: a
+ * template edited between the two attempts is reported as a conflict rather
+ * than silently sending a second, different message.
  */
 export const sendStorageNotification = async ({
   owner,
@@ -50,7 +55,7 @@ export const sendStorageNotification = async ({
   context,
   now = new Date(),
 }) => {
-  const rendered = renderStorageNotification(decisionType, context);
+  const rendered = await renderStorageNotification(decisionType, { ...context, owner });
   if (rendered.status !== 'rendered') throw new Error(rendered.error);
   const deliverEmail = Boolean(owner?.email && Meteor.settings.deliverMails);
   if (deliverEmail && !isEmailAllowed(owner.email)) {

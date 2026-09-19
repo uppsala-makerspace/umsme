@@ -58,7 +58,7 @@ const applyAssignment = async ({ owner, unit, request }, actor, now, session, ev
   // price is a premature message if this transaction is rolled back.
   const messageId = await sendStorageNotification({
     owner, decisionType: 'assignment', decisionId: unit._id, now,
-    context: { owner_name: owner.name, unit_name: unit.name },
+    context: { unit_name: unit.name },
   });
   await storageEvent({
     id: eventId, entityType: 'storageUnit', entityId: unit._id, eventType: 'unit_assigned',
@@ -88,7 +88,7 @@ const reserveMove = async ({ owner, unit, sourceUnit, request }, selection, acto
   }, { session });
   const messageId = await sendStorageNotification({
     owner, decisionType: 'move', decisionId: offerId, now,
-    context: { owner_name: owner.name, unit_name: unit.name, from_unit: sourceUnit._id, deadline_at: deadline },
+    context: { unit_name: unit.name, from_unit: sourceUnit._id, deadline_at: deadline },
   });
   await storageEvent({
     id: eventId, entityType: 'storageOffer', entityId: offerId, eventType: 'offer_created',
@@ -113,7 +113,7 @@ const applyWarning = async ({ owner, unit }, actor, now, session, eventId) => {
     { $set: { warning, updatedAt: now } }, { session });
   const messageId = await sendStorageNotification({
     owner, decisionType: 'warning', decisionId: warningId, now,
-    context: { owner_name: owner.name, deadline_at: warning.deadline_at },
+    context: { deadline_at: warning.deadline_at },
   });
   await casStorageUpdate(StorageUnits,
     { _id: unit._id, 'warning.id': warningId, updatedAt: now },
@@ -137,7 +137,7 @@ const applyReminder = async ({ owner, unit }, actor, now, session, eventId) => {
     { $set: { 'warning.reminded_at': now, updatedAt: now } }, { session });
   const messageId = await sendStorageNotification({
     owner, decisionType: 'reminder', decisionId: warning.id, now,
-    context: { owner_name: owner.name, deadline_at: warning.deadline_at },
+    context: { deadline_at: warning.deadline_at },
   });
   await storageEvent({
     id: eventId, entityType: 'storageUnit', entityId: unit._id, eventType: 'reminder_confirmed',
@@ -171,7 +171,7 @@ const endForClearance = async ({ owner, unit, request }, selection, actor, now, 
   const decisionType = reason === 'reclaimed' ? 'reclamation' : 'voluntary_release';
   const messageId = await sendStorageNotification({
     owner, decisionType, decisionId: unit._id, now,
-    context: { owner_name: owner.name, unit_name: unit.name },
+    context: { unit_name: unit.name },
   });
   await storageEvent({
     id: eventId, entityType: 'storageUnit', entityId: unit._id, eventType: 'unit_marked_returned',

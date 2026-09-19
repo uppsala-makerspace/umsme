@@ -167,8 +167,14 @@ Confirmed suggested actions send member communication for:
 - reclamation; and
 - acknowledgement of a voluntary return.
 
-The message contains Swedish first and English second, separated by dashes.
-It is stored in the existing `Messages` collection. The existing app-push
+The text of each message is an administrator-editable template in the
+existing Templates collection, one message type per decision (`storageAssignment`,
+`storageMove`, `storageWarning`, `storageReminder`, `storageReclamation`,
+`storageRelease`). Templates use the same underscore syntax and common member
+variables as the membership messages, plus `unitName` and `deadline`. Admin seeds
+a default template for any type that has none at startup. By convention the text
+contains Swedish first and English second, separated by dashes.
+The rendered message is stored in the existing `Messages` collection. The existing app-push
 function is used, and email is sent when the paying member has an address.
 Email uses:
 

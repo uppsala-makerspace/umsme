@@ -370,10 +370,10 @@ export const models = {
     type: {
       label: "Message type",
       type: String,
-      max: 15,
+      max: 25,
       autoform: {
-        noselect: true,
-        type: "select-radio-inline",
+        type: "select",
+        firstOption: "(Select a type)",
         options: {
           welcome: "Welcome",
           confirmation: "Confirmation",
@@ -381,6 +381,15 @@ export const models = {
           reminder: "Reminder",
           status: "Status",
           invite: "Invite",
+          // Automatic storage messages, one per confirmed storage decision.
+          // The server picks the template by type; see
+          // common/server/storageMessages/templates.js.
+          storageAssignment: "Storage: assignment",
+          storageMove: "Storage: move offer",
+          storageWarning: "Storage: warning",
+          storageReminder: "Storage: reminder",
+          storageReclamation: "Storage: reclamation",
+          storageRelease: "Storage: voluntary release",
         },
       },
     },

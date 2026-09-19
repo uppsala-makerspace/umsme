@@ -17,6 +17,7 @@ import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
 import { storageMigrationFingerprint } from '/imports/common/lib/legacyStorageMigrationFingerprint';
 import { STORAGE_CUTOVER_FINALIZED_ID, STORAGE_MIGRATION_SUMMARY_ID } from '/imports/common/server/storage/readiness';
 import { setStorageNotificationTransportsForTests } from '/imports/common/server/storageMessages/service';
+import { ensureStorageMessageTemplates } from '/imports/common/server/storageMessages/defaults';
 
 const prefix = 'storage-five-collection-test:';
 const future = () => new Date(Date.now() + 365 * 86400000);
@@ -63,6 +64,7 @@ const installReadyMigration = async (created = new Date()) => {
 describe('five-collection storage database workflow', function () {
   before(async function () {
     await ensureStorageIndexes();
+    await ensureStorageMessageTemplates();
   });
 
   beforeEach(async () => {
