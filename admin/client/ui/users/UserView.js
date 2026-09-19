@@ -47,6 +47,10 @@ Template.UserView.helpers({
     const id = FlowRouter.getParam('_id');
     return Roles.userIsInRoleAsync(id, 'treasurer');
   },
+  storageAsync() {
+    const id = FlowRouter.getParam('_id');
+    return Roles.userIsInRoleAsync(id, 'storage');
+  },
   linkedMember() {
     const id = FlowRouter.getParam('_id');
     const user = Meteor.users.findOne(id);
@@ -80,6 +84,14 @@ Template.UserView.events({
   'click .addToTreasurerGroup': async function (event) {
     const id = FlowRouter.getParam('_id');
     await Meteor.callAsync('addToTreasurerGroup', id);
+  },
+  'click .removeFromStorageGroup': async function () {
+    const id = FlowRouter.getParam('_id');
+    await Meteor.callAsync('removeFromStorageGroup', id);
+  },
+  'click .addToStorageGroup': async function () {
+    const id = FlowRouter.getParam('_id');
+    await Meteor.callAsync('addToStorageGroup', id);
   },
   'click .deleteUser': async function (event) {
     const id = FlowRouter.getParam('_id');

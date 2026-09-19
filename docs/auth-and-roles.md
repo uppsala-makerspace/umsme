@@ -170,6 +170,7 @@ This applies to: mail sending, bank operations, lock management, member updates,
 |------|-------|-------------|
 | `admin` | Global | Full access to admin app publications and all admin methods. Can manage other users' roles. |
 | `board` | Global | Read access to admin app publications (same as admin for data viewing). Cannot execute admin methods. |
+| `storage` | Global | Access to the storage dashboard, storage operations, and migration controls only. |
 | `admin-locks` | Global | Checked alongside `admin` in the app's `checkIsAdmin` method and for push notification testing. Does not grant admin publication access. |
 
 ### Certificate Roles (Dynamic)
@@ -185,7 +186,9 @@ See [certificates.md](certificates.md) for full certificate system documentation
 
 ### Role Lifecycle
 
-Roles are created with `Roles.createRoleAsync(name, { unlessExists: true })`. The `admin` role is created at startup of the admin app (in `admin/server/adminAvailable.js`).
+Roles are created with `Roles.createRoleAsync(name, { unlessExists: true })`.
+The admin app creates the `admin`, `board`, `treasurer`, and `storage` roles at
+startup (in `admin/server/adminAvailable.js`).
 
 ## 8. Role Management
 
@@ -197,8 +200,11 @@ Role assignment is managed from the admin app's user view (`admin/client/ui/user
 | `removeFromAdminGroup(userId)` | Removes user from `admin` role | Caller must be `admin` |
 | `addToBoardGroup(userId)` | Adds user to `board` role | Caller must be `admin` |
 | `removeFromBoardGroup(userId)` | Removes user from `board` role | Caller must be `admin` |
+| `addToStorageGroup(userId)` | Adds user to the dedicated `storage` role | Caller must be `admin` |
+| `removeFromStorageGroup(userId)` | Removes user from the dedicated `storage` role | Caller must be `admin` |
 
-Only users with the `admin` role can modify role assignments. The `board` role does not grant role management privileges.
+Only users with the `admin` role can modify role assignments. Neither the
+`board` nor `storage` role grants role management privileges.
 
 **Linked roles are group-managed.** A Group (see groups/workshops) can set `linkedRole` (e.g. `board`); its active membership is then the source of truth for that role and `common/server/linkedRoleSync.js` overwrites manual assignments on every sync (membership edits, group form saves, and user login). For a linked role, manage people through the group's member list instead of the buttons above. The `admin` role can never be linked.
 

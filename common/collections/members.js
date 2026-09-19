@@ -6,3 +6,9 @@ import { allow } from './allow';
 export const Members = new Mongo.Collection('members');
 Members.attachSchema(schemas.member);
 allow(Members);
+
+const legacyStorageFields = ['storage', 'storagequeue', 'storagerequest'];
+Members.deny({
+  insert: (userId, document) => legacyStorageFields.some((field) => document[field] !== undefined),
+  update: (userId, document, fields) => (fields || []).some((field) => legacyStorageFields.includes(field)),
+});

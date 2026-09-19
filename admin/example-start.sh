@@ -7,8 +7,10 @@ export METEOR_SETTINGS=$(cat settings.json )
 export PORT=3000
 # Make sure to change to provide a valid password instead of "PASSWORD"
 export MAIL_URL=smtp://umsme@uppsalamakerspace.se:PASSWORD@mail.uppsalamakerspace.se:587?tls.rejectUnauthorized=false
-# Assumes mongod is started separately with umsme database
-export MONGO_URL=mongodb://localhost:27017/umsme
+# Storage lifecycle changes require a MongoDB replica set for transactions.
+export MONGO_URL=mongodb://localhost:27017/umsme?replicaSet=rs0
+# Required for reactive ordered event-log publications.
+export MONGO_OPLOG_URL=mongodb://localhost:27017/local?replicaSet=rs0
 export ROOT_URL=https://umsme.uppsalamakerspace.se
 
 cd bundle
