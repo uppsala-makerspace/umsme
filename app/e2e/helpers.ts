@@ -128,7 +128,7 @@ export const selectors = {
 
   // Home page
   homeLogo: 'img[alt="UM Logo"]',
-  homeGreeting: 'h3.text-h3',
+  homeGreeting: 'main h3',
   homeLiabilityButton: 'a[href="/liability"] button',
   homeUnlockLink: 'a[href="/unlock"].wideButton',
   homeCalendarLink: 'a[href="/calendar"].wideButton',
@@ -156,6 +156,7 @@ export const selectors = {
   addFamilyMemberButton: `button:has-text("${en.AddFamilyMember}")`,
   familyEmailInput: '#family_member_email',
   saveButton: `button:has-text("${en.Save}")`,
+  sendInviteButton: `button:has-text("${en.SendInvite}")`,
   trashIcon: '.fa-trash',
 
   // Email verification page (language-independent selectors)

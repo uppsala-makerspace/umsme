@@ -9,6 +9,10 @@
 
 const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+// Canonical form of an email address as stored on Members and Invites:
+// lowercased and trimmed. Use before storing or looking up by email.
+export const normalizeEmail = (email) => String(email ?? "").trim().toLowerCase();
+
 // Lowercased, trimmed email addresses on a user account. Pass verifiedOnly to
 // restrict to verified addresses (used for identity/security decisions).
 export const normalizedEmails = (user, { verifiedOnly = false } = {}) =>

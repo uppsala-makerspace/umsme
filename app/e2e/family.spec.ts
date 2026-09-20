@@ -14,7 +14,7 @@ test.describe('Family Membership', () => {
     await expect(page.locator(selectors.memberName)).toContainText(testUsers.familyPayer.name);
 
     // Verify family members section is visible
-    await expect(page.getByText(en.FamilyMembers)).toBeVisible();
+    await expect(page.getByText(en.FamilyMembers, { exact: true })).toBeVisible();
 
     // Verify add family member button is visible
     await expect(page.locator(selectors.addFamilyMemberButton)).toBeVisible();
@@ -33,11 +33,12 @@ test.describe('Family Membership', () => {
     // Verify email input is visible
     await expect(page.locator(selectors.familyEmailInput)).toBeVisible();
 
-    // Fill in the email of the user to invite
-    await page.locator(selectors.familyEmailInput).fill(testUsers.toInvite.email);
+    // Fill in the email of the user to invite. Typed in capitals: the server
+    // must store it lowercased so the invited member's account finds it.
+    await page.locator(selectors.familyEmailInput).fill(testUsers.toInvite.email.toUpperCase());
 
-    // Click save button
-    await page.locator(selectors.saveButton).click();
+    // Send the invite
+    await page.locator(selectors.sendInviteButton).click();
 
     // Wait for the invite to be processed
     await page.waitForTimeout(1000);

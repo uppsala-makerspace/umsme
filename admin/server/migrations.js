@@ -1,4 +1,6 @@
 import { Groups } from '/imports/common/collections/groups';
+import Invites from '/imports/common/collections/Invites';
+import { normalizeEmail } from '/imports/common/lib/memberMatch';
 
 /**
  * One-off data migrations, run at admin startup.
@@ -44,7 +46,42 @@ const closeSteeringGroupsToRequests = async () => {
   }
 };
 
+/**
+ * 2026-09: family invites used to store the email exactly as typed, while
+ * member emails are lowercased, so an invite typed with capitals was never
+ * found for the invited member. New invites are normalised on insert; this
+ * fixes the ones already stored. An invite that would collide with an
+ * existing lowercased invite to the same family is dropped as a duplicate.
+ */
+const lowercaseInviteEmails = async () => {
+  const collection = Invites.rawCollection();
+  const invites = await collection
+    .find({ email: { $regex: '[A-Z]|^\\s|\\s$' } })
+    .toArray();
+  let updated = 0;
+  let removed = 0;
+  for (const invite of invites) {
+    const email = normalizeEmail(invite.email);
+    const duplicate = await collection.findOne({
+      _id: { $ne: invite._id },
+      email,
+      infamily: invite.infamily,
+    });
+    if (duplicate) {
+      await collection.deleteOne({ _id: invite._id });
+      removed += 1;
+    } else {
+      await collection.updateOne({ _id: invite._id }, { $set: { email } });
+      updated += 1;
+    }
+  }
+  if (updated || removed) {
+    console.log(`[migration] invite emails lowercased: ${updated} updated, ${removed} duplicate(s) removed`);
+  }
+};
+
 export default async () => {
   await renameWorkshopGroupType();
   await closeSteeringGroupsToRequests();
+  await lowercaseInviteEmails();
 };

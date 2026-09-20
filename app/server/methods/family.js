@@ -7,6 +7,7 @@ import { Messages } from "/imports/common/collections/messages";
 import { findBestTemplate, messageData } from "/imports/common/lib/message";
 import { isEmailAllowed } from "/imports/common/server/emailGuard";
 import {findMemberForUser} from "/server/methods/utils";
+import { normalizeEmail } from "/imports/common/lib/memberMatch";
 
 Meteor.methods({
   async inviteFamilyMember({email}) {
@@ -25,11 +26,14 @@ Meteor.methods({
       );
     }
 
+    // Invites are stored lowercased like member emails, so the invited person
+    // is found by their member email regardless of how the address was typed.
+    email = normalizeEmail(email);
+
     // Inviting yourself would make you a member of your own family: accepting
     // sets infamily to your own _id, which hides your memberships everywhere
-    // and stops the family cascade from reaching your dependents. Compared
-    // case-insensitively — member emails are stored lowercased, invites are not.
-    if (String(email).toLowerCase() === String(member.email).toLowerCase()) {
+    // and stops the family cascade from reaching your dependents.
+    if (email === member.email) {
       throw new Meteor.Error(
         "self-invite",
         "You cannot invite yourself to your own family"
@@ -94,6 +98,7 @@ Meteor.methods({
         "No user or the user is not fully registered"
       );
     }
+    email = normalizeEmail(email);
     const invite = await Invites.findOneAsync({email, infamily: member._id});
 
     if (!invite) {
@@ -188,7 +193,7 @@ Meteor.methods({
       );
     }
 
-    email = email?.toLowerCase();
+    email = normalizeEmail(email);
     const familyMember = await Members.findOneAsync({email, infamily: member._id});
     if (!familyMember) {
       throw new Meteor.Error(
