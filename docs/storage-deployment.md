@@ -1,8 +1,11 @@
 # Storage deployment runbook
 
-Run migration during the coordinated deployment window. Use the authenticated
-admin application's browser console with an admin, board, or storage account.
-Keep legacy storage writers stopped until cutover completes.
+Run migration during the coordinated deployment window. There is no
+migration page in admin, by design: the four `storageMigration.*` methods are
+called from the browser's developer console (F12, *Console* tab) while signed
+in to the deployed admin application with an admin, board, or storage account.
+`Meteor` is a global on the page, so the snippets below can be pasted as they
+are, one at a time. Keep legacy storage writers stopped until cutover completes.
 
 ## Preview
 
