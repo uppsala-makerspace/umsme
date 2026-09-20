@@ -12,7 +12,7 @@
       {{#if previewOpen}}<section class="storage-panel storage-preview">
         <div class="storage-heading"><div><h2>{{previewTitle}}</h2><p>Preview generated {{previewGenerated}}. Uncheck rows to exclude them.</p></div><button class="btn btn-link close-preview">Close</button></div>
         {{#if previewError}}<div class="alert alert-danger storage-inline-error" role="alert">{{previewError}}</div>{{/if}}
-        {{#if previewBlocked}}<div class="alert alert-warning">Blocked by migration readiness. Resolve the listed issues and refresh.</div>{{/if}}
+        {{#if previewBlocked}}<div class="alert alert-warning">Blocked by allocation readiness. Resolve the listed issues and refresh.</div>{{/if}}
         {{#if previewEmpty}}<p>No actions are currently suggested.</p>{{/if}}
         {{#unless previewEmpty}}
           <div class="storage-selection-actions"><button class="btn btn-xs btn-default select-all-suggestions">Select all</button><button class="btn btn-xs btn-default deselect-all-suggestions">Deselect all</button></div>

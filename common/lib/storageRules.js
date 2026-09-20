@@ -57,16 +57,6 @@ export const storageHeightForRow = (row, rowCount) => {
   return row <= Math.floor(rowCount / 2) ? 'high' : 'low';
 };
 
-export const legacyStoragePreference = (value) => {
-  if (value === undefined || value === null || value === '') return { preference: undefined };
-  if (value === 'none') return { release: true };
-  const match = /^(floor1|floor2)(L|U)?$/.exec(value);
-  if (!match) return { error: 'invalid_preference' };
-  const preference = { floor: match[1] };
-  if (match[2]) preference.height = match[2] === 'L' ? 'low' : 'high';
-  return { preference };
-};
-
 export const preferenceSpecificity = (preference) =>
   Number(!!preference?.floor) + Number(!!preference?.height);
 

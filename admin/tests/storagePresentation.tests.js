@@ -117,21 +117,15 @@ describe('storage admin presentation', function () {
     const source = {
       allocation_ready: false,
       allocation_blocked_reasons: [
-        'legacy_source_changed_after_migration',
-        'migration_manifest_incomplete',
-        'cutover_finalization_invalid',
-        'cutover_not_finalized',
         'transactions_unavailable',
+        'storage_invariant_errors',
       ],
     };
     const view = storageReadinessPresentation(source);
     assert.strictEqual(view.state, 'blocked');
     assert.deepStrictEqual(view.reasons, [
-      'Legacy storage data changed after migration.',
-      'One or more migrated storage records are missing.',
-      'The storage migration cutover record is invalid.',
-      'The storage migration cutover has not been finalized.',
       'MongoDB transaction support is required for storage changes.',
+      'Stored assignments or unit states are inconsistent.',
     ]);
     const metadata = storageReadinessPresentation({
       allocation_ready: false,
@@ -141,7 +135,7 @@ describe('storage admin presentation', function () {
     assert.strictEqual(metadata.state, 'metadata');
     const mixed = storageReadinessPresentation({
       allocation_ready: false,
-      allocation_blocked_reasons: ['unclassified_units', 'migration_manifest_invalid'],
+      allocation_blocked_reasons: ['unclassified_units', 'transactions_unavailable'],
     });
     assert.strictEqual(mixed.state, 'blocked');
     assert.strictEqual(storageReadinessPresentation({ allocation_ready: true, allocation_blocked_reasons: [] }).state, 'ready');
@@ -196,8 +190,8 @@ describe('storage admin presentation', function () {
 
   it('uses readable system actor labels and never exposes an unknown actor id', function () {
     const [seed] = storageEventRows({ events: [{
-      _id: 'seed', entity_type: 'storageMigration', entity_id: 'migration',
-      event_type: 'legacy_storage_migration_applied', actor_type: 'system',
+      _id: 'seed', entity_type: 'storageUnit', entity_id: 'u0',
+      event_type: 'unit_created', actor_type: 'system',
       actor: '__e2e_seed__', occurred_at: new Date('2026-09-11'),
     }] });
     assert.strictEqual(seed.actorLabel, 'System · Test data setup');

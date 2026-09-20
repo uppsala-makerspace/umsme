@@ -5,7 +5,7 @@
 .storage-inline-error { margin: .8rem 0; }
 .storage-readiness { border-left-width: 6px; }
 .storage-readiness-metadata { border-left-color: #ef9a00; }
-.storage-readiness-missing, .storage-readiness-blocked { border-left-color: #b71c1c; }
+.storage-readiness-blocked { border-left-color: #b71c1c; }
 .storage-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 1rem; }
 .storage-action-card { min-height: 125px; padding: 1rem; border: 1px solid #b6c2ca; border-radius: 6px; background: #f7fafc; text-align: left; }
 .storage-action-card:hover:not(:disabled), .storage-action-card:focus { border-color: #1976d2; box-shadow: 0 0 0 2px rgba(25,118,210,.16); }

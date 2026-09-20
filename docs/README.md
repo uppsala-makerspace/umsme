@@ -48,8 +48,7 @@ same data layer and business rules.
 | ------------------------------------------------- | ------------------------------------------------- |
 | [architecture.md](architecture.md)                | How the three apps work together, shared DB, deployment |
 | [data-model.md](data-model.md)                    | All collections, schemas, and relationships       |
-| [storage-redesign.md](storage-redesign.md)        | Storage inventory, allocation, warnings, and implementation plan |
-| [storage-implementation-plan.md](storage-implementation-plan.md) | Phased delivery plan, ownership, gates, and verification |
+| [storage-redesign.md](storage-redesign.md)        | Storage inventory, allocation, warnings, and administrator flow |
 | [business-rules.md](business-rules.md)            | Membership types, pricing, renewals, family rules |
 | [payments.md](payments.md)                        | Swish and Bankgiro payment flows                  |
 | [expenses.md](expenses.md)                        | Expense reimbursement workflow and receipts       |

@@ -139,12 +139,6 @@ export const groupStorageWalls = (units, walls = []) => {
 };
 
 const readinessReasonLabels = {
-  migration_not_applied: 'The storage migration has not been applied.',
-  migration_manifest_invalid: 'The storage migration manifest is invalid.',
-  migration_manifest_incomplete: 'One or more migrated storage records are missing.',
-  cutover_finalization_invalid: 'The storage migration cutover record is invalid.',
-  cutover_not_finalized: 'The storage migration cutover has not been finalized.',
-  legacy_source_changed_after_migration: 'Legacy storage data changed after migration.',
   transactions_unavailable: 'MongoDB transaction support is required for storage changes.',
   unclassified_units: 'One or more available units need an upper or lower classification.',
   storage_invariant_errors: 'Stored assignments or unit states are inconsistent.',
@@ -155,13 +149,13 @@ export const storageReadinessReasonLabel = (reason) =>
   readinessReasonLabels[reason] || String(reason || 'Unknown readiness problem').replaceAll('_', ' ');
 
 export const storageReadinessPresentation = (readiness) => {
-  if (!readiness) return { state: 'loading', label: 'Checking migration readiness…', detail: '', reasons: [] };
+  if (!readiness) return { state: 'loading', label: 'Checking allocation readiness…', detail: '', reasons: [] };
   const reasonCodes = Array.isArray(readiness.allocation_blocked_reasons)
     ? readiness.allocation_blocked_reasons
     : [];
   const reasons = reasonCodes.map(storageReadinessReasonLabel);
   if (readiness.allocation_ready === true) {
-    return { state: 'ready', label: 'Ready.', detail: 'Migration and invariant checks passed.', reasons };
+    return { state: 'ready', label: 'Ready.', detail: 'Transaction and invariant checks passed.', reasons };
   }
   if (reasonCodes.length === 1 && reasonCodes[0] === 'unclassified_units') {
     return {
@@ -170,8 +164,8 @@ export const storageReadinessPresentation = (readiness) => {
     };
   }
   return {
-    state: reasonCodes.includes('migration_not_applied') ? 'missing' : 'blocked',
-    label: reasonCodes.includes('migration_not_applied') ? 'Migration missing.' : 'Allocation blocked.',
+    state: 'blocked',
+    label: 'Allocation blocked.',
     detail: 'Automatic allocation remains disabled until every authoritative blocker is resolved.',
     reasons,
   };

@@ -225,7 +225,7 @@ Template.Storage.onCreated(function () {
     if (!operator()) return;
     this.state.set('loading', true);
     try {
-      const readiness = await Meteor.callAsync('storageMigration.status');
+      const readiness = await Meteor.callAsync('adminStorage.readiness');
       // Previews reconcile the same lifecycle records. Load them sequentially
       // so the first reconciliation completes before the next read begins.
       const mapped = {};
@@ -256,7 +256,7 @@ Template.Storage.onCreated(function () {
     Meteor.clearTimeout(readinessTimer);
     readinessTimer = Meteor.setTimeout(async () => {
       try {
-        const readiness = await Meteor.callAsync('storageMigration.status');
+        const readiness = await Meteor.callAsync('adminStorage.readiness');
         if (!this.isDestroyed && version === readinessVersion) this.state.set('readiness', readiness);
       } catch (error) {
         if (!this.isDestroyed && version === readinessVersion) setError(this, errorMessage(error), 'page');

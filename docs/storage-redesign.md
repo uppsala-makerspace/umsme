@@ -532,85 +532,14 @@ their belongings.
 The paying family member controls the shared request and unit. Other family
 members see the same storage information in read-only form.
 
-## 6. Migration and deployment story
+## 6. Migration
 
-See the [deployment runbook](storage-deployment.md) for executable preview,
-apply, verification, and finalization steps.
-
-Migration is a controlled deployment task, not an administrator-dashboard
-workflow. Deployment starts with a dry run and does not run it as an
-unreviewed application-startup side effect.
-
-The migration tools are restricted to administrators, board members, and
-storage-role users:
-
-- `storageMigration.preview` scans the legacy source, reports anomalies and
-  target conflicts, and creates a stable source fingerprint;
-- `storageMigration.apply` accepts that exact fingerprint, scans again, and
-  refuses to write if the source changed or blockers remain;
-- `storageMigration.status` verifies the migration manifest, document counts,
-  invariants, and source fingerprint; and
-- `storageMigration.finalizeCutover` records the reviewed decision to retire
-  the legacy source.
-
-Deterministic document identifiers make an interrupted apply resumable. A
-matching record is accepted on rerun. A different record is reported and is
-never overwritten. Automatic allocation remains disabled until the
-authoritative readiness checks pass.
-
-### 6.1 Inventory migration
-
-The migration creates walls and units from the current configured ranges. The
-wall definition supplies the floor and grid dimensions. Unit numbers and
-coordinates are derived from those ranges.
-
-Height is derived from the generated row and the wall's row count. The top half
-is high and the remaining rows are low, including the middle row of an odd-row
-wall. A missing or inconsistent derived value blocks automatic allocation.
-
-Legacy `_box_<number>` comments become internal unit notes. A commented unit
-without an owner becomes unavailable so it is not assigned by mistake.
-
-Each valid `Member.storage` value becomes current ownership on the matching
-unit. The old system has no reliable assignment time, so the migration uses the
-cutoff time and records that limitation in the event history.
-
-### 6.2 Queue migration
-
-A member is treated as queued when `storagequeue === true` or a legacy
-`storagerequest` is present. This preserves move and release requests that may
-not have set the queue flag.
-
-For each effective queued paying member, the migration:
-
-- approximates `requested_at` from the start of their earliest membership;
-- converts the legacy floor and low/upper preference;
-- creates an allocation request when they have no unit;
-- creates a move request when they have a unit and a location preference; or
-- creates a release request when the old value is `none`.
-
-Family claims are consolidated under the paying member. Duplicate ownership,
-unknown units, conflicting family claims, and other unsafe cases are blockers
-in the dry-run report.
-
-Existing owners with expired lab memberships enter the new system as overdue
-and unwarned. They do not receive an immediate warning during migration. The
-first warning still requires an administrator-confirmed batch.
-
-### 6.3 Cutover
-
-The deployment sequence is:
-
-1. Restore recent production data in a safe test environment.
-2. Run the preview and resolve every blocker.
-3. Verify that production MongoDB is a replica set with transaction support.
-4. Verify wall layouts and their derived unit heights.
-5. Deploy the shared schema, server methods, admin UI, and member UI together.
-6. Disable all legacy storage write paths in the same maintenance window.
-7. Apply the reviewed migration and verify counts and sample records.
-8. Exercise every preview with delivery disabled or restricted.
-9. Finalize the cutover after operational review.
-10. Remove legacy member fields and settings-backed inventory in a later cleanup.
+The legacy member fields `storage`, `storagequeue` and `storagerequest` were
+migrated into the five storage collections in September 2026 with a one-off
+preview, apply and finalize tool. The tool, its fingerprinting of the legacy
+source and the `public.storageWalls` setting it read were removed once the
+cutover had run. The legacy member fields still exist on `members` and are
+denied for writes; removing them is a separate cleanup.
 
 ## 7. Safety and verification
 
@@ -627,12 +556,7 @@ The implemented test suite covers:
 - automatic versus manual communication policy;
 - the existing message, email, and app-push integration;
 - event-log presentation and filtering;
-- role checks and conflicting updates; and
-- migration fingerprints, blockers, interrupted applies, and reruns.
-
-Before production cutover, these scenarios must also be checked against a copy
-of production data. Email and push delivery should use restricted settings
-during that rehearsal.
+- role checks and conflicting updates.
 
 ## 8. Remaining deployment choices
 

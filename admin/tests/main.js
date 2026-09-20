@@ -11,7 +11,6 @@ import "./groupRules.tests";
 import "./storageRules.tests";
 import "./storageDigest.tests";
 import "./storageMessages.tests";
-import "./storageMigration.tests";
 import "./storageService.tests";
 import "./storageServiceDb.tests";
 import "./storageIndexes.tests";

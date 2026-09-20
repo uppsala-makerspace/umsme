@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { check, Match } from 'meteor/check';
 import { requireStorageOperator } from '/imports/common/server/storage/access';
 import { previewStorageSuggestions } from '/imports/common/server/storage/suggestions';
+import { storageAllocationReadiness } from '/imports/common/server/storage/readiness';
 import { confirmStorageSuggestions } from '/imports/common/server/storage/commands';
 import {
   assignStorageUnitManual,
@@ -35,6 +36,11 @@ Meteor.methods({
     check(fields, Object);
     check(command_id, String);
     return updateStorageWallManual({ wallId: wall_id, fields, commandId: command_id, actor: await operator(this) });
+  },
+
+  async 'adminStorage.readiness'() {
+    await operator(this);
+    return storageAllocationReadiness();
   },
 
   async 'adminStorage.preview'({ action }) {

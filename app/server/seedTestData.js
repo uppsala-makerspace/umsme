@@ -13,10 +13,6 @@ import { Memberships } from '/imports/common/collections/memberships';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import Invites from '/imports/common/collections/Invites';
 import {
-  LEGACY_STORAGE_MIGRATION_VERSION,
-  storageMigrationFingerprint,
-} from '/imports/common/lib/legacyStorageMigrationFingerprint';
-import {
   StorageEvents, StorageOffers, StorageRequests, StorageWalls, StorageUnits,
 } from '/imports/common/collections/storage';
 
@@ -424,55 +420,6 @@ if (process.env.SEED_TEST_DATA === 'true') {
       await insertUnit(String(1000 + position), position, status);
     }
 
-    // Mark the local fixture as having completed the administrator-confirmed
-    // legacy cutover. The empty manifest is intentional: all records above
-    // are native v2 fixture data rather than documents owned by the migration.
-    // Production can only create these commit markers through the guarded
-    // preview/apply/finalize workflow.
-    const migrationDocuments = {
-      storageWalls: [],
-      storageUnits: [],
-      storageRequests: [],
-      storageOffers: [],
-      storageEvents: [],
-    };
-    const manifestPayload = { version: 1, documents: migrationDocuments };
-    const migrationManifest = {
-      ...manifestPayload,
-      digest: storageMigrationFingerprint(manifestPayload),
-    };
-    const migrationFingerprint = storageMigrationFingerprint({ fixture: 'umsme-local-storage-v2' });
-    const migrationSummaryId = `${LEGACY_STORAGE_MIGRATION_VERSION}:event:summary`;
-    await StorageEvents.insertAsync({
-      _id: migrationSummaryId,
-      entity_type: 'storageMigration',
-      entity_id: LEGACY_STORAGE_MIGRATION_VERSION,
-      event_type: 'legacy_storage_migration_applied',
-      actor_type: 'system',
-      actor: '__e2e_seed__',
-      occurred_at: now,
-      details: {
-        fingerprint: migrationFingerprint,
-        manifest: migrationManifest,
-        fixture: true,
-      },
-    });
-    await StorageEvents.insertAsync({
-      _id: `${LEGACY_STORAGE_MIGRATION_VERSION}:event:cutover-finalized`,
-      entity_type: 'storageMigration',
-      entity_id: LEGACY_STORAGE_MIGRATION_VERSION,
-      event_type: 'legacy_storage_cutover_finalized',
-      actor_type: 'administrator',
-      actor: memberIdMap['admin@test.com'],
-      occurred_at: now,
-      reason: 'Local dummy-data fixture',
-      details: {
-        fingerprint: migrationFingerprint,
-        summary_event_id: migrationSummaryId,
-        manifest_digest: migrationManifest.digest,
-        fixture: true,
-      },
-    });
 
     console.log('[E2E] Test database seeding completed!');
     console.log('[E2E] Test users:');

@@ -6,7 +6,6 @@ import {
   isStorageOfferReviewDue,
   isStorageReclamationEligible,
   isStorageReminderEligible,
-  legacyStoragePreference,
   preferenceSpecificity,
   proposeStorageAllocations,
   resolveStorageOwner,
@@ -91,15 +90,6 @@ describe('storageRules', function () {
       );
       assert.strictEqual(storageHeightForRow(1, 1), 'low');
       assert.strictEqual(storageHeightForRow(0, 6), undefined);
-    });
-
-    it('maps every legacy preference', function () {
-      assert.deepStrictEqual(legacyStoragePreference('floor1'), { preference: { floor: 'floor1' } });
-      assert.deepStrictEqual(legacyStoragePreference('floor1L'), { preference: { floor: 'floor1', height: 'low' } });
-      assert.deepStrictEqual(legacyStoragePreference('floor2U'), { preference: { floor: 'floor2', height: 'high' } });
-      assert.deepStrictEqual(legacyStoragePreference('none'), { release: true });
-      assert.deepStrictEqual(legacyStoragePreference(), { preference: undefined });
-      assert.strictEqual(legacyStoragePreference('basement').error, 'invalid_preference');
     });
 
     it('matches all specified components and counts specificity', function () {

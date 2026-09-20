@@ -30,11 +30,11 @@ test.describe.serial('Member storage', () => {
     await expect(page.getByTestId('storage-occupied')).toContainText('1001');
     const releaseButton = page.getByRole('button', { name: en.storageRequestRelease });
     await expect(releaseButton).toBeVisible();
-    const confirmation = page.waitForEvent('dialog');
     await releaseButton.click();
-    const dialog = await confirmation;
-    expect(dialog.message()).toBe(en.storageReleaseConfirm);
-    await dialog.dismiss();
+    const confirmation = page.getByTestId('storage-release-confirm');
+    await expect(confirmation).toContainText(en.storageReleaseConfirm);
+    await confirmation.getByRole('button', { name: en.cancel }).click();
+    await expect(confirmation).not.toBeVisible();
     await expect(page.getByTestId('storage-occupied')).toContainText('1001');
     await expect(page.getByTestId('storage-family-read-only')).not.toBeVisible();
   });

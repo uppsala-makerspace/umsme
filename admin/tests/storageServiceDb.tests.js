@@ -14,8 +14,6 @@ import {
 } from '/imports/common/server/storage/manual';
 import { confirmMemberStorageOffer, upsertMemberStorageRequest } from '/imports/common/server/storage/memberCommands';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
-import { storageMigrationFingerprint } from '/imports/common/lib/legacyStorageMigrationFingerprint';
-import { STORAGE_CUTOVER_FINALIZED_ID, STORAGE_MIGRATION_SUMMARY_ID } from '/imports/common/server/storage/readiness';
 import { setStorageNotificationTransportsForTests } from '/imports/common/server/storageMessages/service';
 import { ensureStorageMessageTemplates } from '/imports/common/server/storageMessages/defaults';
 
@@ -38,26 +36,6 @@ const unit = (id, column, status = 'available', owner, row = 2) => {
     availability_status: status, ...(owner ? { owner } : {}),
     ...(owner && status === 'occupied' ? { assigned_at: created, assigned_by: `${prefix}admin` } : {}),
     createdAt: created, updatedAt: created,
-  });
-};
-
-const installReadyMigration = async (created = new Date()) => {
-  const documents = {
-    storageWalls: [], storageUnits: [], storageRequests: [], storageOffers: [], storageEvents: [],
-  };
-  const payload = { version: 1, documents };
-  const manifest = { ...payload, digest: storageMigrationFingerprint(payload) };
-  const fingerprint = `${prefix}fingerprint`;
-  await StorageEvents.insertAsync({
-    _id: STORAGE_MIGRATION_SUMMARY_ID, entity_type: 'storageMigration', entity_id: 'legacy-storage-v1',
-    event_type: 'legacy_storage_migration_applied', actor_type: 'administrator', actor: `${prefix}admin`,
-    occurred_at: created, details: { fingerprint, manifest },
-  });
-  await StorageEvents.insertAsync({
-    _id: STORAGE_CUTOVER_FINALIZED_ID, entity_type: 'storageMigration', entity_id: 'legacy-storage-v1',
-    event_type: 'legacy_storage_cutover_finalized', actor_type: 'administrator', actor: `${prefix}admin`,
-    occurred_at: created,
-    details: { fingerprint, summary_event_id: STORAGE_MIGRATION_SUMMARY_ID, manifest_digest: manifest.digest },
   });
 };
 
@@ -93,7 +71,6 @@ describe('five-collection storage database workflow', function () {
       _id: requestId, owner: ownerId, request_type: 'allocation', requested_at: created,
       request_status: 'waiting', createdAt: created, updatedAt: created,
     });
-    await installReadyMigration(created);
     const preview = await previewStorageSuggestions('allocate');
     const command = {
       action: 'allocate', commandId: `${prefix}assignment-command`, actor: `${prefix}admin`,
@@ -207,7 +184,6 @@ describe('five-collection storage database workflow', function () {
       preference: { floor: 'floor1', height: 'low' }, requested_at: created,
       request_status: 'waiting', createdAt: created, updatedAt: created,
     });
-    await installReadyMigration(created);
     const preview = await previewStorageSuggestions('allocate');
     const reservation = await confirmStorageSuggestions({
       action: 'allocate', commandId: `${prefix}move-command`, actor: `${prefix}admin`,
