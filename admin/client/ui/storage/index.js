@@ -7,4 +7,3 @@ FlowRouter.route('/storage', {
     this.render('AppBody', {main: 'Storage'});
   }
 });
-

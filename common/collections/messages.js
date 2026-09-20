@@ -6,3 +6,14 @@ import { allow } from './allow';
 export const Messages = new Mongo.Collection('messages');
 Messages.attachSchema(schemas.message);
 allow(Messages);
+
+export const isStorageGeneratedMessage = (document) =>
+  typeof document?._id === 'string' && document._id.startsWith('storage-notification:');
+
+// Ordinary message composition keeps its historical allow rules. Only the
+// deterministic storage messages created by the server are server-owned.
+Messages.deny({
+  insert(userId, document) { return isStorageGeneratedMessage(document); },
+  update(userId, document) { return isStorageGeneratedMessage(document); },
+  remove(userId, document) { return isStorageGeneratedMessage(document); },
+});

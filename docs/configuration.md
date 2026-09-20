@@ -44,6 +44,18 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `private.googleDrive` | Receipt storage for expenses; same block as the app (see section 12). Admin uses it to download receipts for review. |
 | `private.receiptTokenSecret` | Secret for signing receipt-image URLs (see section 12). If unset, a random per-process secret is used. |
 
+Storage walls are configured in `public.storageWalls`. Every wall requires a
+unique `name`, `floor` (`floor1` or `floor2`), inclusive integer `start` and
+`end` box numbers, and an even `shelfSize`. `shelfSize` defaults to 12. A wall
+with missing or invalid metadata blocks migration; errors for individual boxes
+within that wall are suppressed because they are consequences of the wall error.
+
+The admin process also needs `MONGO_OPLOG_URL`, for example
+`mongodb://localhost:27017/local?replicaSet=rs0`. Start the applications only
+after the replica set has been initialized with `rs.initiate()` and has elected
+a primary. Transactions use `MONGO_URL`; the oplog connection keeps sorted
+storage event publications reactive without polling-driver limitations.
+
 ---
 
 ## 3. App Settings
@@ -58,7 +70,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `public.oauth`                    | Enabled OAuth providers                    |
 | `private.vapidPrivateKey`         | VAPID private key for push                 |
 | `private.paymentOptionsPath`      | Path to payment options JSON               |
-| `private.mailUrl`                 | SMTP connection URL                        |
+| `private.mailUrl`                 | SMTP connection URL (deployment secret)    |
 | `private.homeAssistant`           | Home Assistant URL, token, lock configs (see below) |
 | `private.swish`                   | Swish API config (see below)               |
 | `private.roomsPath`               | Path to rooms config JSON                  |
@@ -205,10 +217,24 @@ Facebook OAuth infrastructure is present but currently commented out.
 
 Email requires:
 
-1. The `MAIL_URL` environment variable (admin) or `private.mailUrl` setting (app) pointing to an SMTP server.
+1. The `MAIL_URL` environment variable or `private.mailUrl` setting pointing to an SMTP server.
 2. `Meteor.settings.deliverMails` must be truthy in the admin app. If not set, all email sending methods will refuse to send.
 
 Sender addresses are configured via `Meteor.settings.from` (string or array) and `Meteor.settings.noreply`.
+
+### Storage notifications
+
+Storage email always uses `Uppsala Makerspace Hyllplats
+<hyllplats@uppsalamakerspace.se>` with the same reply-to address. Configure the
+admin deployment with `deliverMails: true` and either a secret `MAIL_URL`
+environment variable or `private.mailUrl`. For Gmail/Google Workspace SMTP the
+shape is `smtps://GMAIL_USERNAME:GMAIL_APP_PASSWORD@smtp.gmail.com:465`; keep
+the real username and app password in deployment secrets, not this repository.
+
+Storage decisions use the existing `Messages` collection and app-push
+implementation. There is no storage-specific worker, delivery collection, SMS
+provider, or retry configuration. A member without an email address still gets
+the persistent in-app message.
 
 ### Membership reminder cron
 
@@ -387,7 +413,7 @@ The "Open in admin" links in the expense manager events are built from `public.a
 
 - Node.js (version matching the Meteor requirement)
 - Meteor 3.1+
-- MongoDB (local instance)
+- MongoDB (local replica set)
 
 ### Running the Apps
 
@@ -407,7 +433,17 @@ cd payment/
 npm run dev            # Runs with settings.json on port 3003
 ```
 
-All three apps must point to the same MongoDB instance. In development, Meteor's built-in MongoDB (port 3001) is used by default; for multi-app development, configure `MONGO_URL` to point all apps to the same database.
+All three apps must point to the same MongoDB instance. Storage lifecycle changes require MongoDB transaction support. Configure local and production MongoDB as a replica set and include its name in `MONGO_URL`.
+
+For local development, configure MongoDB with `replication.replSetName: rs0`,
+start MongoDB, and initialize the replica set once:
+
+```bash
+mongosh --eval 'rs.initiate()'
+```
+
+The development scripts connect with
+`mongodb://localhost:27017/umsme?replicaSet=rs0`.
 
 ### Testing
 

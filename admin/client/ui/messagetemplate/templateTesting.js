@@ -30,6 +30,9 @@ export const SAMPLE_DATA = {
   itemCode: 'lera',
   comment: 'Anna Andersson',
   purchaseDate: '2026-05-11',
+  // Automatic storage messages (template types "storage…").
+  unitName: '1001',
+  deadline: '2026-06-08',
 };
 
 const TEMPLATE_FIELDS = ['subject', 'messagetext', 'sms'];

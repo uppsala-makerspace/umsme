@@ -42,7 +42,7 @@ Uses symlink to access shared code from `../common/`:
 - Business rules from `lib/rules.js`
 
 ### Database
-Connects to the same MongoDB as admin and app (`mongodb://localhost:27017/umsme`).
+Connects to the same MongoDB replica set as admin and app (`mongodb://localhost:27017/umsme?replicaSet=rs0`).
 
 ## Key Files
 

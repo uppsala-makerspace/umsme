@@ -6,7 +6,7 @@
 
 - Node.js
 - Meteor
-- MongoDB running on `localhost:27017`
+- MongoDB running on `localhost:27017` as replica set `rs0`
 
 ### Installation
 
@@ -18,6 +18,13 @@ npm install
 ### Running the App
 
 Before you can start the application you need to make sure you have created a `settings.json` file, you can take inspiration from `settings_example.json`.
+
+Configure the local MongoDB server with `replication.replSetName: rs0`. Start it,
+then initialize it once:
+
+```bash
+mongosh --eval 'rs.initiate()'
+```
 
 ```bash
 npm run dev
@@ -86,7 +93,7 @@ The project uses Playwright for end-to-end testing.
 
 ### Prerequisites
 
-- MongoDB running on `localhost:27017`
+- MongoDB running on `localhost:27017` as replica set `rs0`
 - Playwright browsers installed: `npx playwright install chromium`
 
 ### Running E2E Tests

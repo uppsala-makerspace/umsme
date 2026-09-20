@@ -112,6 +112,31 @@
         </tr>
         </tbody>
     </table>
+    <h2>Specific variables - available in the storage templates</h2>
+    The six storage types (assignment, move offer, warning, reminder, reclamation, voluntary release) are sent
+    automatically when an administrator confirms a storage action. Exactly one non-deprecated template per type
+    is expected; the template flagged "Automatic" is preferred when several exist. Write the Swedish text first and
+    the English text second. Subject and text are sent as email when the member has an address, and always as an
+    app message.
+    <table class="table">
+        <thead><tr>
+            <th>Variable</th>
+            <th>Type</th>
+            <th>Explanation</th>
+        </tr></thead>
+        <tbody>
+        <tr>
+            <td>unitName</td>
+            <td>string</td>
+            <td>The storage unit the message is about, e.g. "1001". Empty when the decision has no unit.</td>
+        </tr>
+        <tr>
+            <td>deadline</td>
+            <td>date</td>
+            <td>The deadline of the decision: when a move must be completed, or when a warned member must act. Empty when there is none.</td>
+        </tr>
+        </tbody>
+    </table>
     <h2>Example - reminder template</h2>
     <pre>Hej &lt;%= name %&gt;,
 

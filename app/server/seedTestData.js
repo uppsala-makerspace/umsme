@@ -12,6 +12,13 @@ import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import Invites from '/imports/common/collections/Invites';
+import {
+  LEGACY_STORAGE_MIGRATION_VERSION,
+  storageMigrationFingerprint,
+} from '/imports/common/lib/legacyStorageMigrationFingerprint';
+import {
+  StorageEvents, StorageOffers, StorageRequests, StorageWalls, StorageUnits,
+} from '/imports/common/collections/storage';
 
 // Only run in test environment
 if (process.env.SEED_TEST_DATA === 'true') {
@@ -22,6 +29,8 @@ if (process.env.SEED_TEST_DATA === 'true') {
     const now = new Date();
     const oneYearFromNow = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
     const threeMonthsFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+    const twoWeeksFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const fiveDaysFromNow = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const liabilityDate = new Date('2024-01-01');
 
@@ -32,6 +41,13 @@ if (process.env.SEED_TEST_DATA === 'true') {
     await Memberships.removeAsync({});
     await LiabilityDocuments.removeAsync({});
     await Invites.removeAsync({});
+    await Promise.all([
+      StorageEvents.removeAsync({}),
+      StorageOffers.removeAsync({}),
+      StorageRequests.removeAsync({}),
+      StorageWalls.removeAsync({}),
+      StorageUnits.removeAsync({}),
+    ]);
 
     // Create admin role if it doesn't exist
     console.log('[E2E] Creating admin role...');
@@ -102,6 +118,86 @@ if (process.env.SEED_TEST_DATA === 'true') {
         birthyear: 1980,
         liabilityDate: liabilityDate,
         family: true,
+        membershipType: 'labandmember',
+        hasLabAccess: true
+      },
+      {
+        email: 'storage-dependent@test.com',
+        password: 'password123',
+        verified: true,
+        mid: 'M008',
+        name: 'Storage Family Member',
+        mobile: '0708901234',
+        birthyear: 1998,
+        liabilityDate: liabilityDate,
+        family: false,
+        membershipType: null,
+        hasLabAccess: false,
+        infamilyEmail: 'family@test.com'
+      },
+      {
+        email: 'storage-warning@test.com',
+        password: 'password123',
+        verified: true,
+        mid: 'M009',
+        name: 'Storage Warning Member',
+        mobile: '0709012345',
+        birthyear: 1982,
+        liabilityDate: liabilityDate,
+        family: false,
+        membershipType: null,
+        hasLabAccess: false,
+        expiredLab: true
+      },
+      {
+        email: 'storage-clearance@test.com',
+        password: 'password123',
+        verified: true,
+        mid: 'M010',
+        name: 'Storage Clearance Member',
+        mobile: '0700123456',
+        birthyear: 1983,
+        liabilityDate: liabilityDate,
+        family: false,
+        membershipType: null,
+        hasLabAccess: false
+      },
+      {
+        email: 'storage-move@test.com',
+        password: 'password123',
+        verified: true,
+        mid: 'M011',
+        name: 'Storage Move Member',
+        mobile: '0701123456',
+        birthyear: 1984,
+        liabilityDate: liabilityDate,
+        family: false,
+        membershipType: 'labandmember',
+        hasLabAccess: true
+      },
+      {
+        email: 'storage-retry@test.com',
+        password: 'password123',
+        verified: true,
+        mid: 'M012',
+        name: 'Storage Retry Member',
+        mobile: '0702123456',
+        birthyear: 1986,
+        liabilityDate: liabilityDate,
+        family: false,
+        membershipType: 'labandmember',
+        hasLabAccess: true
+      },
+      {
+        email: 'storage-queue@test.com',
+        password: 'password123',
+        verified: true,
+        mid: 'M013',
+        name: 'Storage Queue Member',
+        mobile: '0703123456',
+        birthyear: 1987,
+        liabilityDate: liabilityDate,
+        family: false,
         membershipType: 'labandmember',
         hasLabAccess: true
       },
@@ -195,6 +291,9 @@ if (process.env.SEED_TEST_DATA === 'true') {
           birthyear: userData.birthyear,
           family: userData.family
         };
+        if (userData.infamilyEmail) memberDoc.infamily = memberIdMap[userData.infamilyEmail];
+        if (userData.hasLabAccess) memberDoc.lab = threeMonthsFromNow;
+        if (userData.expiredLab) memberDoc.lab = oneMonthAgo;
         // Only set liabilityDate if provided (null/undefined means no liability approved)
         if (userData.liabilityDate) {
           memberDoc.liabilityDate = userData.liabilityDate;
@@ -233,11 +332,159 @@ if (process.env.SEED_TEST_DATA === 'true') {
       infamily: familyPayerId
     });
 
+    // Isolated v2 storage fixtures. The ordinary and retry members start
+    // empty; each other lifecycle owns distinct units and records.
+    const wallDefinitions = [
+      { _id: 'storage-fixture-wall-1', name: 'Floor 1, Wall 1', floor: 'floor1', display_order: 1, column_count: 8, row_count: 6, start: 1, end: 48 },
+      { _id: 'storage-fixture-wall-2', name: 'Floor 1, Wall 2', floor: 'floor1', display_order: 2, column_count: 4, row_count: 5, start: 49, end: 68 },
+      { _id: 'storage-fixture-wall-3', name: 'Floor 2, Wall 1', floor: 'floor2', display_order: 3, column_count: 4, row_count: 6, start: 69, end: 92 },
+    ];
+    for (const { start, end, ...wall } of wallDefinitions) {
+      await StorageWalls.insertAsync({ ...wall, active: true, createdAt: now, updatedAt: now });
+    }
+    const unitLocation = (position) => {
+      const wall = wallDefinitions.find(({ start, end }) => position >= start && position <= end);
+      const offset = position - wall.start;
+      const sectionSize = wall.row_count * 2;
+      return {
+        wall_id: wall._id,
+        floor: wall.floor,
+        column: Math.floor(offset / sectionSize) * 2 + (offset % 2) + 1,
+        row: Math.floor((offset % sectionSize) / 2) + 1,
+      };
+    };
+    const insertUnit = (name, position, availabilityStatus, owner) => StorageUnits.insertAsync({
+      name,
+      ...(owner ? { owner } : {}),
+      ...(owner && availabilityStatus === 'occupied' ? {
+        assigned_at: oneMonthAgo, assigned_by: '__e2e_seed__',
+      } : {}),
+      ...unitLocation(position),
+      height: position <= 24 ? 'low' : 'high',
+      availability_status: availabilityStatus,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await insertUnit('1001', 1, 'occupied', familyPayerId);
+
+    const warningOwnerId = memberIdMap['storage-warning@test.com'];
+    const warningUnitId = await insertUnit('1002', 2, 'occupied', warningOwnerId);
+    await StorageUnits.updateAsync(warningUnitId, { $set: { warning: {
+      id: 'storage-fixture-warning',
+      warned_at: new Date(now.getTime() - 23 * 24 * 60 * 60 * 1000),
+      warned_by: '__e2e_seed__', deadline_at: fiveDaysFromNow,
+    } } });
+
+    const clearanceOwnerId = memberIdMap['storage-clearance@test.com'];
+    await insertUnit('1003', 3, 'awaiting_clearance', clearanceOwnerId);
+
+    const moveOwnerId = memberIdMap['storage-move@test.com'];
+    const moveSourceId = await insertUnit('1004', 4, 'occupied', moveOwnerId);
+    const moveDestinationId = await insertUnit('1005', 5, 'reserved', moveOwnerId);
+    const moveRequestId = await StorageRequests.insertAsync({
+      owner: moveOwnerId,
+      request_type: 'move',
+      requested_at: oneMonthAgo,
+      preference: { floor: 'floor1', height: 'low' },
+      request_status: 'in_progress',
+      createdAt: now,
+      updatedAt: now,
+    });
+    await StorageUnits.updateAsync(moveSourceId, { $set: { source_request: moveRequestId } });
+    await StorageRequests.updateAsync(moveRequestId, { $set: { source_unit: moveSourceId } });
+    await StorageOffers.insertAsync({
+      owner: moveOwnerId,
+      request: moveRequestId,
+      from_unit: moveSourceId,
+      to_unit: moveDestinationId,
+      offered_at: now,
+      offered_by: '__e2e_seed__',
+      deadline_at: twoWeeksFromNow,
+      requires_inspection: false,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    const queueOwnerId = memberIdMap['storage-queue@test.com'];
+    await insertUnit('1006', 6, 'available');
+    await StorageRequests.insertAsync({
+      owner: queueOwnerId,
+      request_type: 'allocation',
+      requested_at: oneMonthAgo,
+      preference: { floor: 'floor1', height: 'low' },
+      request_status: 'waiting',
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    // Fill three walls, including one five-row wall. A few unavailable units
+    // make the status visualization realistic; the remainder are assignable.
+    for (let position = 7; position <= 92; position += 1) {
+      const status = position % 13 === 0 ? 'unavailable' : 'available';
+      await insertUnit(String(1000 + position), position, status);
+    }
+
+    // Mark the local fixture as having completed the administrator-confirmed
+    // legacy cutover. The empty manifest is intentional: all records above
+    // are native v2 fixture data rather than documents owned by the migration.
+    // Production can only create these commit markers through the guarded
+    // preview/apply/finalize workflow.
+    const migrationDocuments = {
+      storageWalls: [],
+      storageUnits: [],
+      storageRequests: [],
+      storageOffers: [],
+      storageEvents: [],
+    };
+    const manifestPayload = { version: 1, documents: migrationDocuments };
+    const migrationManifest = {
+      ...manifestPayload,
+      digest: storageMigrationFingerprint(manifestPayload),
+    };
+    const migrationFingerprint = storageMigrationFingerprint({ fixture: 'umsme-local-storage-v2' });
+    const migrationSummaryId = `${LEGACY_STORAGE_MIGRATION_VERSION}:event:summary`;
+    await StorageEvents.insertAsync({
+      _id: migrationSummaryId,
+      entity_type: 'storageMigration',
+      entity_id: LEGACY_STORAGE_MIGRATION_VERSION,
+      event_type: 'legacy_storage_migration_applied',
+      actor_type: 'system',
+      actor: '__e2e_seed__',
+      occurred_at: now,
+      details: {
+        fingerprint: migrationFingerprint,
+        manifest: migrationManifest,
+        fixture: true,
+      },
+    });
+    await StorageEvents.insertAsync({
+      _id: `${LEGACY_STORAGE_MIGRATION_VERSION}:event:cutover-finalized`,
+      entity_type: 'storageMigration',
+      entity_id: LEGACY_STORAGE_MIGRATION_VERSION,
+      event_type: 'legacy_storage_cutover_finalized',
+      actor_type: 'administrator',
+      actor: memberIdMap['admin@test.com'],
+      occurred_at: now,
+      reason: 'Local dummy-data fixture',
+      details: {
+        fingerprint: migrationFingerprint,
+        summary_event_id: migrationSummaryId,
+        manifest_digest: migrationManifest.digest,
+        fixture: true,
+      },
+    });
+
     console.log('[E2E] Test database seeding completed!');
     console.log('[E2E] Test users:');
     console.log('[E2E]   - member@test.com / password123 (active member with liability)');
     console.log('[E2E]   - noliability@test.com / password123 (active member without liability)');
     console.log('[E2E]   - family@test.com / password123 (family payer)');
+    console.log('[E2E]   - storage-dependent@test.com / password123 (read-only storage dependent)');
+    console.log('[E2E]   - storage-warning@test.com / password123 (expired owner with warning)');
+    console.log('[E2E]   - storage-clearance@test.com / password123 (awaiting clearance)');
+    console.log('[E2E]   - storage-move@test.com / password123 (pending move)');
+    console.log('[E2E]   - storage-retry@test.com / password123 (mutation retry)');
+    console.log('[E2E]   - storage-queue@test.com / password123 (eligible allocation queue)');
     console.log('[E2E]   - invited@test.com / password123 (has pending family invite)');
     console.log('[E2E]   - toinvite@test.com / password123 (available to invite)');
     console.log('[E2E]   - unverified@test.com / password123 (unverified email)');

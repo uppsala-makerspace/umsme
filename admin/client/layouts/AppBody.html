@@ -6,6 +6,7 @@
     <nav id="sidebar">
         <ul id="menu">
             <li><a href="/">Home</a></li>
+            {{#if isInRole "admin,board,treasurer"}}
             <li class="menu-section" data-section="members">
                 <div class="menu-heading">Members</div>
                 <ul class="menu-items">
@@ -63,20 +64,23 @@
                     <li><a href="/admin">Batch operations</a></li>
                 </ul>
             </li>
+            {{else}}
+            <li><a href="/storage">Storage</a></li>
+            {{/if}}
         </ul>
     </nav>
     {{#if currentUser}}
-      {{#if isInRole "admin,board,treasurer"}}
+      {{#if isInRole "admin,board,treasurer,storage"}}
         <div class="admin-panel">
             <div id="main">
                 {{> Template.dynamic template=main}}
             </div>
         </div>
       {{/if}}
-      {{#unless isInRole "admin,board,treasurer"}}
+      {{#unless isInRole "admin,board,treasurer,storage"}}
          <br>
          <br>
-        <h1>You are not an admin</h1>
+        <h1>You do not have access to this administration system</h1>
       {{/unless}}
     {{/if}}
     {{#unless currentUser}}
