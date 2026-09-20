@@ -1,9 +1,27 @@
+import { Meteor } from 'meteor/meteor';
 import { template as compile } from 'underscore';
 import { findBestTemplate, memberTemplateData, niceDate } from '/imports/common/lib/message';
 
-export const STORAGE_NOTIFICATION_FROM =
+export const STORAGE_NOTIFICATION_DEFAULT_FROM =
   'Uppsala Makerspace Hyllplats <hyllplats@uppsalamakerspace.se>';
-export const STORAGE_NOTIFICATION_REPLY_TO = 'hyllplats@uppsalamakerspace.se';
+export const STORAGE_NOTIFICATION_DEFAULT_REPLY_TO = 'hyllplats@uppsalamakerspace.se';
+
+/**
+ * Sender and reply-to for storage email. Overridable per app under
+ * `private.storageNotifications` in settings.json (`from`, `replyTo`); the
+ * defaults above apply when a key is missing or blank. Read at send time so a
+ * test can change the settings without restarting.
+ */
+const storageNotificationSettings = () => Meteor.settings?.private?.storageNotifications || {};
+
+const nonBlank = (value, fallback) =>
+  (typeof value === 'string' && value.trim() ? value.trim() : fallback);
+
+export const storageNotificationFrom = () =>
+  nonBlank(storageNotificationSettings().from, STORAGE_NOTIFICATION_DEFAULT_FROM);
+
+export const storageNotificationReplyTo = () =>
+  nonBlank(storageNotificationSettings().replyTo, STORAGE_NOTIFICATION_DEFAULT_REPLY_TO);
 
 /**
  * Storage decision type -> message template type in the Templates collection.
@@ -64,8 +82,8 @@ export const renderStorageNotification = async (decisionType, context = {}) => {
     return {
       status: 'rendered',
       template_id: messageTemplate._id,
-      sender_from: STORAGE_NOTIFICATION_FROM,
-      reply_to: STORAGE_NOTIFICATION_REPLY_TO,
+      sender_from: storageNotificationFrom(),
+      reply_to: storageNotificationReplyTo(),
       subject: compile(messageTemplate.subject)(data),
       email: compile(messageTemplate.messagetext)(data),
     };

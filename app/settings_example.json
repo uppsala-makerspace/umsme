@@ -59,6 +59,10 @@
       "botToken": "xoxb-your-slack-bot-token"
     },
     "mailUrl": "smtp://user:password@smtp.example.com:587",
+    "storageNotifications": {
+      "from": "Uppsala Makerspace Hyllplats <hyllplats@uppsalamakerspace.se>",
+      "replyTo": "hyllplats@uppsalamakerspace.se"
+    },
     "managerEvents": {
       "channels": [
         {

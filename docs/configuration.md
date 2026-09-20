@@ -224,8 +224,20 @@ Sender addresses are configured via `Meteor.settings.from` (string or array) and
 
 ### Storage notifications
 
-Storage email always uses `Uppsala Makerspace Hyllplats
-<hyllplats@uppsalamakerspace.se>` with the same reply-to address. Configure the
+Storage email is sent from `Uppsala Makerspace Hyllplats
+<hyllplats@uppsalamakerspace.se>` with the same reply-to address by default.
+Override either address per app under `private.storageNotifications`:
+
+```json
+"private": {
+  "storageNotifications": {
+    "from": "Uppsala Makerspace Hyllplats <hyllplats@uppsalamakerspace.se>",
+    "replyTo": "hyllplats@uppsalamakerspace.se"
+  }
+}
+```
+
+A missing or blank key keeps the default. Configure the
 admin deployment with `deliverMails: true` and either a secret `MAIL_URL`
 environment variable or `private.mailUrl`. For Gmail/Google Workspace SMTP the
 shape is `smtps://GMAIL_USERNAME:GMAIL_APP_PASSWORD@smtp.gmail.com:465`; keep

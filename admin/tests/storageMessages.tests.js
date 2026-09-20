@@ -10,9 +10,11 @@ import {
 import {
   renderStorageNotification,
   STORAGE_DECISION_TYPES,
-  STORAGE_NOTIFICATION_FROM,
-  STORAGE_NOTIFICATION_REPLY_TO,
+  STORAGE_NOTIFICATION_DEFAULT_FROM,
+  STORAGE_NOTIFICATION_DEFAULT_REPLY_TO,
   STORAGE_TEMPLATE_TYPES,
+  storageNotificationFrom,
+  storageNotificationReplyTo,
 } from '/imports/common/server/storageMessages/templates';
 import {
   ensureStorageMessageTemplates,
@@ -60,13 +62,34 @@ describe('storage messages', function () {
         owner, unit_name: '1001', deadline_at: new Date('2026-10-01T00:00:00Z'),
       });
       assert.strictEqual(rendered.status, 'rendered', type);
-      assert.strictEqual(rendered.sender_from, STORAGE_NOTIFICATION_FROM);
-      assert.strictEqual(rendered.reply_to, STORAGE_NOTIFICATION_REPLY_TO);
+      assert.strictEqual(rendered.sender_from, storageNotificationFrom());
+      assert.strictEqual(rendered.reply_to, storageNotificationReplyTo());
       assert.ok(rendered.template_id);
       assert.match(rendered.subject, / — /);
       assert.match(rendered.email, /\n\n---\n\n/);
       assert.doesNotMatch(rendered.email, /<%/);
       assert.strictEqual(rendered.sms, undefined);
+    }
+  });
+
+  it('takes sender and reply-to from private.storageNotifications, falling back to the defaults', async function () {
+    Meteor.settings.private = Meteor.settings.private || {};
+    const original = Meteor.settings.private.storageNotifications;
+    try {
+      delete Meteor.settings.private.storageNotifications;
+      assert.strictEqual(storageNotificationFrom(), STORAGE_NOTIFICATION_DEFAULT_FROM);
+      assert.strictEqual(storageNotificationReplyTo(), STORAGE_NOTIFICATION_DEFAULT_REPLY_TO);
+
+      Meteor.settings.private.storageNotifications = {
+        from: 'Förrådet <forrad@example.com>',
+        replyTo: ' ',
+      };
+      const rendered = await renderStorageNotification('assignment', { owner, unit_name: '1001' });
+      assert.strictEqual(rendered.sender_from, 'Förrådet <forrad@example.com>');
+      assert.strictEqual(rendered.reply_to, STORAGE_NOTIFICATION_DEFAULT_REPLY_TO);
+    } finally {
+      if (original === undefined) delete Meteor.settings.private.storageNotifications;
+      else Meteor.settings.private.storageNotifications = original;
     }
   });
 
