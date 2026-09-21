@@ -10,7 +10,7 @@ const dist = resolve(root, "dist");
 // Tutorials grouped by tag. Adding a new tag is "add another key with its
 // slug list"; new slugs need matching {lang}/{slug}.md files.
 const TUTORIALS = {
-  app: ["installApp", "existingMembers", "newMembers", "renewMembership", "manageFamily"],
+  app: ["installApp", "permissions", "existingMembers", "newMembers", "renewMembership", "manageFamily"],
 };
 
 const LANGS = {

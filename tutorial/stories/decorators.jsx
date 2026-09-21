@@ -8,26 +8,29 @@ import { member as memberFixture } from "./fixtures";
 
 // Browser-API stubs for tutorial screenshots. These run once per session
 // when the first tutorial story loads.
-//   - Pretend notification permission is granted so NotificationBell shows
-//     the count badge instead of the amber "!" warning.
+//   - Report notification permission from window.__TUTORIAL_NOTIF__ (set
+//     per-story in withLayout below, default "granted") so NotificationBell
+//     shows the count badge — or, for the permissions tutorial, the amber
+//     "!" warning.
 //   - Override matchMedia for the PWA-mode query, with the answer driven
 //     per-story by window.__TUTORIAL_PWA__ (set in withLayout below).
 if (typeof window !== "undefined") {
+  window.__TUTORIAL_NOTIF__ = "granted";
   Object.defineProperty(window, "Notification", {
     value: {
-      permission: "granted",
-      requestPermission: () => Promise.resolve("granted"),
+      get permission() { return window.__TUTORIAL_NOTIF__; },
+      requestPermission: () => Promise.resolve(window.__TUTORIAL_NOTIF__),
     },
     writable: true,
     configurable: true,
   });
   // TopBar's useEffect overrides the initial `isGranted` state with the
-  // result of navigator.permissions.query — patch that to also report
-  // granted so the bell never falls back to the amber "!" warning.
+  // result of navigator.permissions.query — patch that to report the same
+  // per-story state.
   if (navigator.permissions) {
     navigator.permissions.query = () =>
       Promise.resolve({
-        state: "granted",
+        state: window.__TUTORIAL_NOTIF__,
         addEventListener: () => {},
         removeEventListener: () => {},
       });
@@ -103,6 +106,9 @@ const Navigator = ({ to }) => {
  *   isPWA               render as if we're inside the installed PWA, so
  *                       TopBar shows the InstalledIcon instead of the
  *                       Install button (default false)
+ *   notificationPermission  what Notification.permission reports:
+ *                       "granted" (default) or "default"/"denied" for the
+ *                       amber "!" on the bell
  *   file                filename stem for the screenshot script
  */
 export const withLayout = (Story, ctx) => {
@@ -117,6 +123,7 @@ export const withLayout = (Story, ctx) => {
       try { localStorage.setItem("pwa-install-dismissed", "true"); } catch {}
     }
     window.__TUTORIAL_PWA__ = !!t.isPWA;
+    window.__TUTORIAL_NOTIF__ = t.notificationPermission ?? "granted";
   }
   return (
     <Providers unreadCount={t.unreadCount} hasMember={t.hasMember !== false}>

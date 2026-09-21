@@ -102,24 +102,6 @@ export const LocationDeniedBrowser = {
     userPosition: null,
     proximityRange: 100,
     isAdmin: false,
-    isPWAOverride: false,
-  },
-};
-
-export const LocationDeniedPWA = {
-  args: {
-    doors: doorsWithLocation,
-    opening: defaultOpening,
-    onOpenDoor: (door) => console.log(`Opening ${door}`),
-
-    liabilityDate,
-    liabilityOutdated: false,
-    registered: true,
-    locationPermission: "denied",
-    userPosition: null,
-    proximityRange: 100,
-    isAdmin: false,
-    isPWAOverride: true,
   },
 };
 

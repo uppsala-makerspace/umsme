@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import {
   getDistanceTo,
   formatDistance,
@@ -13,6 +14,10 @@ import Loader from "../../components/Loader";
 import MainContent from "../../components/MainContent";
 import LocationHelp from "./LocationHelp";
 import "./unlockDoors.css";
+
+// Guide on granting location (and notification) permission on Android and
+// iPhone, built from tutorial/{sv,en}/permissions.md.
+const PERMISSIONS_GUIDE_URL = "https://tutorial.uppsalamakerspace.se/app/permissions/";
 
 const Unlock = ({
   loading,
@@ -29,7 +34,6 @@ const Unlock = ({
   locationPermission,
   proximityRange,
   isAdmin,
-  isPWAOverride,
   locationError,
   locating,
   onRetryLocation,
@@ -39,12 +43,6 @@ const Unlock = ({
   if (loading) {
     return <MainContent className="unlock"><Loader /></MainContent>;
   }
-
-  // Detect if running as installed PWA (can be overridden for testing)
-  const isPWA =
-    isPWAOverride ??
-    (window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true);
 
   const liabilityNeedsAttention = !liabilityDate || liabilityOutdated;
 
@@ -135,7 +133,19 @@ const Unlock = ({
         <div className="text-center mb-8 p-4 bg-red-50 rounded-lg border border-red-200">
           <p className="text-red-500 text-sm font-semibold mb-2">{t("locationDenied")}</p>
           <p className="text-gray-500 text-sm leading-snug">
-            {t(isPWA ? "locationDeniedInstructionsPWA" : "locationDeniedInstructionsBrowser")}
+            {t("locationDeniedGuide")}{" "}
+            <a
+              href={PERMISSIONS_GUIDE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-green font-semibold"
+            >
+              {t("locationDeniedGuideLink")}
+              <ArrowTopRightOnSquareIcon
+                className="inline w-4 h-4 ml-1 -mt-0.5"
+                aria-hidden="true"
+              />
+            </a>
           </p>
         </div>
       )}
@@ -200,7 +210,6 @@ Unlock.propTypes = {
   locationPermission: PropTypes.oneOf(["pending", "granted", "denied", "unavailable"]),
   proximityRange: PropTypes.number,
   isAdmin: PropTypes.bool,
-  isPWAOverride: PropTypes.bool,
   loading: PropTypes.bool,
   locationError: PropTypes.oneOf(["timeout", "unavailable"]),
   locating: PropTypes.bool,
@@ -212,7 +221,6 @@ Unlock.defaultProps = {
   locationPermission: "pending",
   proximityRange: 100,
   isAdmin: false,
-  isPWAOverride: undefined,
   loading: false,
   locationError: null,
   locating: false,
