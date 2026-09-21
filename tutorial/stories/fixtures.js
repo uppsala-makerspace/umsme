@@ -236,7 +236,7 @@ export const doorsList = [
   },
 ];
 
-// Far-away user position (~196 km from Uppsala) so the doors page shows the
-// "you are far away" state with the distance label that the manual screenshot
-// was captured in.
-export const userFarAway = { lat: 58.0, long: 16.0 };
+// User position ~2.3 km north of the makerspace (across town), so the doors
+// page shows grey door tiles with a plausible distance label and the
+// "door won't turn green?" help panel underneath.
+export const userAcrossTown = { lat: 59.8787, long: 17.639 };
