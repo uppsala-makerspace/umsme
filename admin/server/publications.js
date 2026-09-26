@@ -17,6 +17,7 @@ import { Announcements } from '/imports/common/collections/announcements';
 import Invites from '/imports/common/collections/Invites';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
+import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
 import { Groups } from '/imports/common/collections/groups';
 import { Workshops } from '/imports/common/collections/workshops';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
@@ -65,6 +66,7 @@ export default () => {
   Meteor.publish('invites', createAuthFuncFor(Invites));
   Meteor.publish('expenses', createAuthFuncForRoles(Expenses, ['admin', 'board', 'treasurer']));
   Meteor.publish('expenseAccounts', createAuthFuncForRoles(ExpenseAccounts, ['admin', 'board', 'treasurer']));
+  Meteor.publish('expenseBudgets', createAuthFuncForRoles(ExpenseBudgets, ['admin', 'board', 'treasurer']));
   Meteor.publish('groups', createAuthFuncFor(Groups));
   Meteor.publish('workshops', createAuthFuncFor(Workshops));
   Meteor.publish('groupMemberships', createAuthFuncFor(GroupMemberships));

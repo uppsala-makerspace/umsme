@@ -25,6 +25,7 @@ const baseData = {
       confirmedAt: d("2026-05-16"),
       rejectedAt: null,
       bookkeepingAccount: "6110",
+      bookkeepingAccountName: "Kontorsmateriel",
       reimbursedDate: d("2026-05-20"),
       reimbursedAt: d("2026-05-21"),
       receiptUrl: "https://placehold.co/700x1000?text=Kvitto",

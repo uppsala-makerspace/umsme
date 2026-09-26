@@ -106,7 +106,7 @@ export const ReimbursedLocked = {
     expense: expense({
       status: "reimbursed", amount: 540, expenseAccountId: "a1", accountName: "Material",
       submittedAt: new Date("2026-05-15"), confirmedByName: "Bo Berg", confirmedAt: new Date("2026-05-16"),
-      bookkeepingAccount: "6110", reimbursedDate: new Date("2026-05-20"),
+      bookkeepingAccount: "6110", bookkeepingAccountName: "Kontorsmateriel", reimbursedDate: new Date("2026-05-20"),
     }),
     accounts,
     ...baseActions,

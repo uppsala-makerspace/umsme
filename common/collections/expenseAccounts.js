@@ -4,6 +4,7 @@ import { Roles } from 'meteor/roles';
 import { schemas } from '/imports/common/lib/schemas';
 import { allow } from './allow';
 import { Expenses } from './expenses';
+import { ExpenseBudgets } from './expenseBudgets';
 import { GroupMemberships } from './groupMemberships';
 
 export const ExpenseAccounts = new Mongo.Collection('expenseAccounts');
@@ -65,10 +66,13 @@ ExpenseAccounts.deny({
       nextArray(current, modifier, 'approverMemberIds')
     );
   },
-  // An account that has been used by any expense must not be removable.
+  // An account that has been used by any expense, or has a budget, must not
+  // be removable: either would leave history pointing at nothing.
   async remove(userId, doc) {
     if (await notAdminish(userId)) return true;
     const used = await Expenses.findOneAsync({ expenseAccountId: doc._id });
-    return !!used;
+    if (used) return true;
+    const budgeted = await ExpenseBudgets.findOneAsync({ expenseAccountId: doc._id });
+    return !!budgeted;
   },
 });

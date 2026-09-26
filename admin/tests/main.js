@@ -2,6 +2,7 @@ import assert from "assert";
 import "./accounting.tests";
 import "./stats.tests";
 import "./expenseApproval.tests";
+import "./expenseBudget.tests";
 import "./slug.tests";
 import "./publicDirectory.tests";
 import "./storeRules.tests";

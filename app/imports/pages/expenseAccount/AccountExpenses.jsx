@@ -260,7 +260,10 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
                     {e.bookkeepingAccount && (
                       <>
                         <dt className="text-gray-500">{t("expenseBookkeepingAccount")}</dt>
-                        <dd className="m-0">{e.bookkeepingAccount}</dd>
+                        <dd className="m-0">
+                          {e.bookkeepingAccount}
+                          {e.bookkeepingAccountName && ` ${e.bookkeepingAccountName}`}
+                        </dd>
                       </>
                     )}
                     {e.reimbursedDate && (

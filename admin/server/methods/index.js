@@ -12,6 +12,7 @@ import './doorunlocks';
 import './invites';
 import './tests';
 import './expenses';
+import './expenseBudgets';
 import './accounting';
 import './groups';
 import './workshops';

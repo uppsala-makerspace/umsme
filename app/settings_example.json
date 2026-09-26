@@ -109,5 +109,13 @@
       "loginStyle": "popup"
     }
   },
-  "env": "development"
+  "env": "development",
+  "accounting": {
+    "expense": {
+      "accountOptions": [
+        { "account": "5010", "name": "Lokalkostnader" },
+        { "account": "6110", "name": "Kontorsmateriel" }
+      ]
+    }
+  }
 }

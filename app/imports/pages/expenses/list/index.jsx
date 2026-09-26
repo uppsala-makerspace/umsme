@@ -1,7 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import Expenses from "./Expenses.jsx";
 
@@ -14,6 +14,11 @@ export default () => {
   const [isApprover, setIsApprover] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams();
+  const budgetView = searchParams.get("tab") === "accounts" && searchParams.get("view") === "budget";
+  const [budgetYear, setBudgetYear] = useState(new Date().getFullYear());
+  const [budgetOverview, setBudgetOverview] = useState(null);
+  const [budgetError, setBudgetError] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -40,6 +45,29 @@ export default () => {
     fetchData();
   }, [user?._id, fetchData]);
 
+  // The budget overview is only fetched once the budget view is opened, and
+  // again when the year changes. It waits for the initial load so the calls
+  // stay sequential (see app/CLAUDE.md).
+  useEffect(() => {
+    if (!user || !budgetView || loading) return;
+    let cancelled = false;
+    setBudgetOverview(null);
+    Meteor.callAsync("expenses.getBudgetOverview", budgetYear)
+      .then((result) => {
+        if (cancelled) return;
+        setBudgetOverview(result);
+        setBudgetError(null);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("Error fetching budget overview:", err);
+        setBudgetError(err.reason || err.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?._id, budgetView, budgetYear, loading]);
+
   if (!Meteor.userId()) {
     return <Navigate to="/login" />;
   }
@@ -54,6 +82,15 @@ export default () => {
         toApprove={toApprove}
         recentlyReviewed={recentlyReviewed}
         accounts={accounts}
+        budgetOverview={{
+          loading: !budgetOverview && !budgetError,
+          error: budgetError,
+          year: budgetYear,
+          availableYears: budgetOverview?.availableYears || [budgetYear],
+          accounts: budgetOverview?.accounts || [],
+          bookkeeping: budgetOverview?.bookkeeping || [],
+        }}
+        onBudgetYearChange={setBudgetYear}
       />
     </Layout>
   );

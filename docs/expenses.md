@@ -99,6 +99,48 @@ while editing, the saved one otherwise). Back navigation everywhere is the
 standard top-bar arrow — the account page is registered in `DETAIL_PAGES`
 (`app/imports/components/TopBar/index.jsx`) with `/groups` as its fallback.
 
+### Budgets
+
+Each expense account can have a **budget per calendar year**. It is set and
+revised in the admin app, on the account's page, by anyone with the `admin`,
+`board` or `treasurer` role (`expenseBudgets.add` in
+`admin/server/methods/expenseBudgets.js`).
+
+- A budget is never edited in place. Revising it adds a new entry in the
+  `expenseBudgets` collection with an amount, a date, a comment and who set
+  it. An entry made by mistake can be removed (`expenseBudgets.remove`); the
+  previous entry for the year then applies again. The first entry of a year may skip the comment; every later one must say
+  why the budget changed.
+- The budget in force is the entry with the **latest date**; the time it was
+  saved breaks ties. The others are its history, shown in admin newest first.
+- An expense counts towards the year of its **receipt date**, the same rule as
+  the account overview's year filter.
+- An account that has a budget cannot be deleted, just like one with expenses.
+
+In the app, the **Accounts** tab on `/expenses` has a **List / Budget**
+toggle (`?tab=accounts&view=budget`). The budget view, served by
+`expenses.getBudgetOverview`, shows the same accounts as the list, per account
+with the year's budget, what is spent, what is **remaining** and a bar that
+turns red when overspent. A dropdown chooses what counts as spent:
+
+| Choice | Statuses counted |
+| --- | --- |
+| Confirmed and reimbursed (default) | `confirmed`, `reimbursed` |
+| Submitted, confirmed and reimbursed | `submitted`, `confirmed`, `reimbursed` |
+| Reimbursed only | `reimbursed` |
+
+Rejected expenses and drafts never count.
+
+The view also shows **where the money was booked**: reimbursed expenses summed
+per bookkeeping account, once across all shown accounts and once per expense
+account. The bookkeeping account is chosen at reimbursement, so this part
+counts only reimbursed expenses, whatever the dropdown says. The names come
+from `accounting.expense.accountOptions`, which the app's `settings.json` needs
+too — the same list as the admin app's. Without it only the account numbers
+show. The rules live in
+`common/lib/expenseBudget.js`, which both apps use and
+`admin/tests/expenseBudget.tests.js` covers.
+
 ## 4. Lifecycle
 
 Statuses (`expenses.status`): `pending → submitted → confirmed → reimbursed`,
@@ -204,6 +246,12 @@ profile save never clobbers them).
 `expenseAccounts`: `name`, `explanation`, `dimensions` (dimension nr →
 object code), `groupIds` (owning groups), `approverMemberIds` (expense
 approvers, from those groups), `createdAt`.
+
+`expenseBudgets`: one document per budget revision — `expenseAccountId`,
+`year`, `amount`, `setAt`, `comment`, `setBy` (member id, omitted for actors
+without a member record), `createdAt`. Never edited; entries are only added or,
+to correct a mistake, removed. All client writes are denied, so the only way in
+is through the admin methods.
 
 Client writes to `expenseAccounts` are admin/board-only, and a deny rule
 rejects approvers who are not active members of the account's groups

@@ -898,6 +898,20 @@ export const models = {
       autoform: { omit: true },
     },
   },
+  // One revision of an expense account's budget for a calendar year. Revisions
+  // are never edited, only added (or removed to fix a mistake): the one with the
+  // latest setAt (createdAt breaks ties) is the budget in force, the rest are
+  // its history. See common/lib/expenseBudget.js.
+  expenseBudget: {
+    expenseAccountId: { label: "Expense account", type: String, max: 50 },
+    year: { label: "Year", type: Number, min: 2000, max: 2100 },
+    amount: { label: "Budget (kr)", type: Number, min: 0 },
+    setAt: { label: "Date", type: Date },
+    comment: { label: "Comment", type: String, max: 1000, optional: true },
+    // Member _id of whoever set it; omitted for actors without a member record.
+    setBy: { label: "Set by", type: String, max: 50, optional: true },
+    createdAt: { label: "Created", type: Date },
+  },
   expense: {
     memberId: { label: "Member", type: String, max: 50 },
     driveFileId: { label: "Receipt file id", type: String, max: 200 },

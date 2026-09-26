@@ -287,6 +287,7 @@ const ExpenseDetail = ({
             <div>
               <span className="font-semibold">{t("expenseBookkeepingAccount")}:</span>{" "}
               {expense.bookkeepingAccount}
+              {expense.bookkeepingAccountName && ` ${expense.bookkeepingAccountName}`}
             </div>
           )}
           {expense.reimbursedDate && (

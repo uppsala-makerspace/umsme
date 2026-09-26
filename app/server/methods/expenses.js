@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { Expenses } from "/imports/common/collections/expenses";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
+import { ExpenseBudgets } from "/imports/common/collections/expenseBudgets";
 import { uploadImage, deleteImage } from "/imports/common/server/googleDrive";
 import { publishManagerEvent, ManagerEventType, blockquote } from "/imports/common/server/managerEvents";
 import { adminLink } from "/imports/common/lib/links";
@@ -16,8 +17,18 @@ import {
   canViewExpenseAccount,
 } from "./utils";
 import { canReviewExpense, canViewExpense } from "/imports/common/lib/expenseApproval";
+import { sortRevisions } from "/imports/common/lib/expenseBudget";
 
 const EDITABLE_STATES = ["pending", "rejected"];
+
+// Bookkeeping account number → name, from the same settings list the admin
+// app offers at reimbursement (settings.accounting.expense.accountOptions).
+// Null when the list is missing or lacks the number; the number still shows.
+const bookkeepingNames = () =>
+  Object.fromEntries(
+    (Meteor.settings.accounting?.expense?.accountOptions || []).map((o) => [o.account, o.name])
+  );
+const bookkeepingAccountName = (account) => (account && bookkeepingNames()[account]) || null;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB safety ceiling (client downscales)
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
@@ -320,6 +331,7 @@ Meteor.methods({
       ...expense,
       accountName,
       confirmedByName: confirmer?.name || null,
+      bookkeepingAccountName: bookkeepingAccountName(expense.bookkeepingAccount),
       rejectedByName: rejecter?.name || null,
       receiptUrl: receiptUrlFor(expense._id, expense.driveFileId),
       isOwn,
@@ -480,6 +492,108 @@ Meteor.methods({
   },
 
   /**
+   * Budget overview for the accounts tab's budget view: every account the
+   * member may look at (the same rule as expenses.getMyAccounts), with the
+   * budget in force for the year and what has been claimed on it so far.
+   *
+   * The totals come per status so the client can switch between ways of
+   * counting what is spent (see BUDGET_SPENT_MODES) without another call.
+   * The year is that of the receipt date, as on the account page.
+   */
+  "expenses.getBudgetOverview": async (year) => {
+    const member = await requireMember();
+    const selectedYear = Number(year) || new Date().getFullYear();
+    const { accounts } = await visibleExpenseAccountsFor(member);
+    const accountIds = accounts.map((a) => a._id);
+
+    const expenses = await Expenses.find(
+      {
+        expenseAccountId: { $in: accountIds },
+        status: { $in: ["submitted", "confirmed", "reimbursed"] },
+      },
+      { fields: { expenseAccountId: 1, status: 1, amount: 1, date: 1, bookkeepingAccount: 1 } }
+    ).fetchAsync();
+    const budgets = await ExpenseBudgets.find({ expenseAccountId: { $in: accountIds } }).fetchAsync();
+
+    const availableYears = [
+      ...new Set([
+        new Date().getFullYear(),
+        ...expenses.map((e) => new Date(e.date).getFullYear()),
+        ...budgets.map((b) => b.year),
+      ]),
+    ].sort((a, b) => b - a);
+
+    // What has been booked where: the bookkeeping account is chosen when an
+    // expense is reimbursed, so only reimbursed expenses count. Names come
+    // from the same settings list the admin app offers at reimbursement.
+    const names = bookkeepingNames();
+    const totalsById = {};
+    const bookedById = {};
+    const bookedTotal = {};
+    for (const e of expenses) {
+      if (new Date(e.date).getFullYear() !== selectedYear) continue;
+      const totals = (totalsById[e.expenseAccountId] ||= { submitted: 0, confirmed: 0, reimbursed: 0 });
+      totals[e.status] += e.amount || 0;
+      if (e.status === "reimbursed" && e.bookkeepingAccount) {
+        const booked = (bookedById[e.expenseAccountId] ||= {});
+        booked[e.bookkeepingAccount] = (booked[e.bookkeepingAccount] || 0) + (e.amount || 0);
+        bookedTotal[e.bookkeepingAccount] = (bookedTotal[e.bookkeepingAccount] || 0) + (e.amount || 0);
+      }
+    }
+    const bookkeepingRows = (byAccount = {}) =>
+      Object.entries(byAccount)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([account, amount]) => ({ account, name: names[account] || null, amount }));
+
+    const revisionsById = {};
+    for (const b of budgets) {
+      if (b.year !== selectedYear) continue;
+      (revisionsById[b.expenseAccountId] ||= []).push(b);
+    }
+
+    // Names for the groups (to tell same-named accounts apart) and for whoever
+    // last set each budget, one query each.
+    const groupIds = [...new Set(accounts.flatMap((a) => a.groupIds || []))];
+    const groupById = Object.fromEntries(
+      (await Groups.find({ _id: { $in: groupIds } }, { fields: { name: 1 } }).fetchAsync())
+        .map((g) => [g._id, g])
+    );
+    const current = Object.fromEntries(
+      Object.entries(revisionsById).map(([id, revs]) => [id, sortRevisions(revs)[0]])
+    );
+    const setByIds = [...new Set(Object.values(current).map((r) => r.setBy).filter(Boolean))];
+    const nameById = Object.fromEntries(
+      (await Members.find({ _id: { $in: setByIds } }, { fields: { name: 1 } }).fetchAsync())
+        .map((m) => [m._id, m.name])
+    );
+
+    return {
+      year: selectedYear,
+      availableYears,
+      bookkeeping: bookkeepingRows(bookedTotal),
+      accounts: accounts.map((a) => {
+        const rev = current[a._id];
+        return {
+          _id: a._id,
+          name: a.name,
+          groupNames: (a.groupIds || []).map((id) => groupById[id]?.name).filter(Boolean),
+          budget: rev ? rev.amount : null,
+          lastRevision: rev
+            ? {
+                setAt: rev.setAt,
+                comment: rev.comment || null,
+                setByName: rev.setBy ? nameById[rev.setBy] || null : null,
+                count: revisionsById[a._id].length,
+              }
+            : null,
+          totals: totalsById[a._id] || { submitted: 0, confirmed: 0, reimbursed: 0 },
+          bookkeeping: bookkeepingRows(bookedById[a._id]),
+        };
+      }),
+    };
+  },
+
+  /**
    * All expenses booked on one account, for the group's overview. Visible to
    * active members of any of the account's groups (and admin/board): the group
    * needs to see what it has spent, so this deliberately shows other members'
@@ -543,6 +657,7 @@ Meteor.methods({
         confirmedAt: e.confirmedAt || null,
         rejectedAt: e.rejectedAt || null,
         bookkeepingAccount: e.bookkeepingAccount || null,
+        bookkeepingAccountName: bookkeepingAccountName(e.bookkeepingAccount),
         reimbursedDate: e.reimbursedDate || null,
         reimbursedAt: e.reimbursedAt || null,
         // Signed capability URL — authorization happened above, so the group's

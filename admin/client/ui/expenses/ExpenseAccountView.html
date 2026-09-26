@@ -35,6 +35,75 @@
 
     <hr>
 
+    <h2>Budget</h2>
+    <p class="text-muted">The budget for a calendar year. An expense counts towards the year of its receipt date.
+        Revising adds a new entry; earlier ones are kept as history. Admin, board and treasurer may set it.</p>
+
+    <div class="form-inline" style="margin-bottom: 15px">
+        <label class="control-label" for="budgetYear">Year</label>
+        <select id="budgetYear" class="form-control budgetYearSelect">
+            {{#each budgetYears}}
+            <option value="{{this}}" {{budgetYearSelected this}}>{{this}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    {{#if budget}}
+    <p style="font-size: 1.6em"><strong>{{budget.amountText}}</strong>
+        <small class="text-muted">in force since {{budget.dateText}}</small></p>
+    {{else}}
+    <p><em>No budget set for {{budgetYear}}.</em></p>
+    {{/if}}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{#if budget}}Revise budget{{else}}Set budget{{/if}} for {{budgetYear}}</h3>
+        </div>
+        <div class="panel-body">
+            <form class="budgetForm">
+                <div class="form-group">
+                    <label class="control-label" for="budgetAmount">Budget (kr)</label>
+                    <input id="budgetAmount" name="amount" type="number" min="0" step="0.01" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="budgetDate">Date</label>
+                    <input id="budgetDate" name="setAt" type="date" class="form-control" value="{{today}}" required>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="budgetComment">Comment{{#if budget}} (required){{/if}}</label>
+                    <textarea id="budgetComment" name="comment" rows="2" class="form-control" {{commentAttrs}}></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">{{#if budget}}Revise{{else}}Set{{/if}}</button>
+            </form>
+        </div>
+    </div>
+
+    {{#if budgetRevisions.length}}
+    <table class="table table-condensed">
+        <thead><tr><th>Date</th><th>Budget</th><th>Comment</th><th>Set by</th><th></th></tr></thead>
+        <tbody>
+        {{#each budgetRevisions}}
+        <tr class="{{#if current}}info{{/if}}">
+            <td>{{dateText}}</td>
+            <td>{{amountText}}</td>
+            <td>{{comment}}</td>
+            <td>{{#if setBy}}<a href="/member/{{setBy}}">{{setByName}}</a>{{else}}<em>admin</em>{{/if}}</td>
+            <td class="text-right" style="white-space: nowrap">
+                {{#if isDeletingBudget _id}}
+                <button class="btn btn-danger btn-xs confirmDeleteBudget" data-id="{{_id}}">Delete</button>
+                <button class="btn btn-default btn-xs cancelDeleteBudget">Cancel</button>
+                {{else}}
+                <a class="deleteBudget text-danger" data-id="{{_id}}">Remove</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+    {{/if}}
+
+    <hr>
+
     <h2>Expense approvers <small><a class="showApproverSelector">Add</a></small></h2>
     <p class="text-muted">Members who may approve expenses on this account (the guideline requires at least two).
         Only active members of the account's groups can be picked.

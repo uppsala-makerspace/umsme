@@ -7,6 +7,7 @@ import Loader from "../../../components/Loader";
 import Button from "../../../components/Button";
 import Tabs from "../../../components/Tabs";
 import ExpenseItem from "../components/ExpenseItem";
+import AccountBudgets from "./AccountBudgets";
 import { EXPENSE_STATUSES, formatDate, statusDate } from "../utils";
 import { localized } from "/imports/common/lib/groupRules";
 
@@ -18,6 +19,8 @@ const Expenses = ({
   toApprove,
   recentlyReviewed,
   accounts,
+  budgetOverview,
+  onBudgetYearChange,
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -82,6 +85,15 @@ const Expenses = ({
     },
     { key: "accounts", label: t("expenseAccountsTab") },
   ].filter(Boolean);
+
+  // The accounts tab shows either the plain list or the budget view.
+  const accountsView = searchParams.get("view") === "budget" ? "budget" : "list";
+  const setAccountsView = (view) => {
+    const next = new URLSearchParams(searchParams);
+    if (view === "list") next.delete("view");
+    else next.set("view", view);
+    setSearchParams(next, { replace: true });
+  };
 
   // Unknown or not-available (?tab=approve without approval rights) falls back
   // to the default rather than showing nothing.
@@ -175,10 +187,29 @@ const Expenses = ({
 
       {activeTab === "accounts" && (
         <section className="mb-8">
-          <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">
-            {t("expenseAccountsHeading")}
-          </h3>
-          {accounts.length === 0 ? (
+          <div className="flex justify-between items-center gap-3 mb-4 border-b border-gray-200 pb-2">
+            <h3 className="text-lg m-0 text-gray-700">{t("expenseAccountsHeading")}</h3>
+            {/* List or budget view of the same accounts. Kept in the URL like
+                the tab, so the back arrow from an account returns to it. */}
+            <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden text-sm" role="group">
+              {["list", "budget"].map((view) => (
+                <button
+                  key={view}
+                  type="button"
+                  onClick={() => setAccountsView(view)}
+                  aria-pressed={accountsView === view}
+                  className={`px-3 py-1 border-none cursor-pointer ${
+                    accountsView === view ? "bg-brand-green text-white" : "bg-white text-gray-600"
+                  }`}
+                >
+                  {t(view === "list" ? "expenseListView" : "expenseBudgetView")}
+                </button>
+              ))}
+            </div>
+          </div>
+          {accountsView === "budget" ? (
+            <AccountBudgets {...budgetOverview} onYearChange={onBudgetYearChange} />
+          ) : accounts.length === 0 ? (
             <p className="text-center text-gray-500 p-8 italic">{t("expenseNoAccounts")}</p>
           ) : (
             <ul className="list-none p-0 m-0">
@@ -228,6 +259,9 @@ Expenses.propTypes = {
   toApprove: PropTypes.array,
   recentlyReviewed: PropTypes.array,
   accounts: PropTypes.array,
+  // Props for AccountBudgets except onYearChange: { loading, error, year, availableYears, accounts, bookkeeping }.
+  budgetOverview: PropTypes.object,
+  onBudgetYearChange: PropTypes.func,
 };
 
 Expenses.defaultProps = {
@@ -238,6 +272,8 @@ Expenses.defaultProps = {
   toApprove: [],
   recentlyReviewed: [],
   accounts: [],
+  budgetOverview: { loading: true, year: new Date().getFullYear() },
+  onBudgetYearChange: () => {},
 };
 
 export default Expenses;

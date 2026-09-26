@@ -3,6 +3,8 @@ import { ReactiveVar } from 'meteor/reactive-var';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Expenses } from '/imports/common/collections/expenses';
+import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
+import { sortRevisions } from '/imports/common/lib/expenseBudget';
 import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Members } from '/imports/common/collections/members';
@@ -15,8 +17,34 @@ Template.ExpenseAccountView.onCreated(function () {
   Meteor.subscribe('groups');
   Meteor.subscribe('groupMemberships');
   Meteor.subscribe('members');
+  Meteor.subscribe('expenseBudgets');
   this.showApproverSelector = new ReactiveVar(false);
+  this.budgetYear = new ReactiveVar(new Date().getFullYear());
+  // The budget entry awaiting a second click to delete. An inline two-step
+  // rather than confirm(): the native dialog does not always get drawn.
+  this.deletingBudget = new ReactiveVar(null);
 });
+
+const kr = (n) => `${Number(n).toLocaleString('sv-SE', { maximumFractionDigits: 2 })} kr`;
+const isoDate = (d) => {
+  const date = new Date(d);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+// Revisions for the selected year, newest first and ready for display.
+const budgetRevisionsFor = (year) => {
+  const revisions = sortRevisions(
+    ExpenseBudgets.find({ expenseAccountId: FlowRouter.getParam('_id'), year }).fetch()
+  );
+  return revisions.map((r, i) => ({
+    ...r,
+    current: i === 0,
+    amountText: kr(r.amount),
+    dateText: isoDate(r.setAt),
+    setByName: r.setBy ? Members.findOne(r.setBy)?.name || r.setBy : null,
+  }));
+};
 
 const currentAccount = () => ExpenseAccounts.findOne(FlowRouter.getParam('_id'));
 
@@ -81,6 +109,36 @@ Template.ExpenseAccountView.helpers({
   tooFewApprovers() {
     return (currentAccount()?.approverMemberIds || []).length === 1;
   },
+  // This year and next, plus every year that already has a budget.
+  budgetYears() {
+    const thisYear = new Date().getFullYear();
+    const years = new Set([thisYear, thisYear + 1]);
+    ExpenseBudgets.find({ expenseAccountId: FlowRouter.getParam('_id') })
+      .forEach((b) => years.add(b.year));
+    return [...years].sort((a, b) => b - a);
+  },
+  budgetYear() {
+    return Template.instance().budgetYear.get();
+  },
+  budgetYearSelected(year) {
+    return Template.instance().budgetYear.get() === year ? 'selected' : '';
+  },
+  budgetRevisions() {
+    return budgetRevisionsFor(Template.instance().budgetYear.get());
+  },
+  budget() {
+    return budgetRevisionsFor(Template.instance().budgetYear.get())[0] || null;
+  },
+  today() {
+    return isoDate(new Date());
+  },
+  isDeletingBudget(id) {
+    return Template.instance().deletingBudget.get() === id;
+  },
+  // A revision must say why the budget changed; the first entry need not.
+  commentAttrs() {
+    return budgetRevisionsFor(Template.instance().budgetYear.get()).length ? { required: true } : {};
+  },
 });
 
 Template.ExpenseAccountView.events({
@@ -109,6 +167,45 @@ Template.ExpenseAccountView.events({
       if (err) alert('Could not add approver: ' + err.message);
     });
     template.showApproverSelector.set(false);
+  },
+  'change .budgetYearSelect': function (event, template) {
+    template.budgetYear.set(Number(event.currentTarget.value));
+    template.deletingBudget.set(null);
+  },
+  'click .deleteBudget': function (event, template) {
+    event.preventDefault();
+    template.deletingBudget.set(event.currentTarget.dataset.id);
+  },
+  'click .cancelDeleteBudget': function (event, template) {
+    template.deletingBudget.set(null);
+  },
+  'click .confirmDeleteBudget': function (event, template) {
+    Meteor.call('expenseBudgets.remove', event.currentTarget.dataset.id, (err) => {
+      if (err) alert('Could not remove the budget entry: ' + (err.reason || err.message));
+      template.deletingBudget.set(null);
+    });
+  },
+  'submit .budgetForm': function (event, template) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const amount = Number(form.amount.value);
+    // A date input yields YYYY-MM-DD; read it as local noon so it cannot slip
+    // into the neighbouring day in any timezone.
+    const setAt = new Date(`${form.setAt.value}T12:00:00`);
+    Meteor.call('expenseBudgets.add', {
+      expenseAccountId: FlowRouter.getParam('_id'),
+      year: template.budgetYear.get(),
+      amount,
+      setAt,
+      comment: form.comment.value,
+    }, (err) => {
+      if (err) {
+        alert('Could not save the budget: ' + (err.reason || err.message));
+        return;
+      }
+      form.amount.value = '';
+      form.comment.value = '';
+    });
   },
   'click .removeApprover': function (event) {
     const id = FlowRouter.getParam('_id');
