@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ChevronDownIcon, ChevronUpIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon, PhotoIcon, PlusIcon } from "@heroicons/react/24/outline";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Button from "../../components/Button";
@@ -101,14 +101,6 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
       <h2 className="text-2xl m-0 mb-1">{account.name}</h2>
       <p className="text-sm text-gray-500 mt-0 mb-4">{t("expenseAccount")}</p>
 
-      {newExpenseTo && (
-        <div className="mb-6">
-          <Button fullWidth onClick={() => navigate(newExpenseTo)}>
-            {t("expenseNew")}
-          </Button>
-        </div>
-      )}
-
       {/* Year on the left, the status filter on the right; both only as wide
           as their content, as in the budget view. */}
       <div className="flex items-start justify-between gap-3 mb-4">
@@ -187,6 +179,18 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
           {bookedOpen && booked.length > 0 && <BookedPanel rows={booked} className="mt-3" />}
         </section>
       )}
+
+      {/* The expenses themselves start here, below the budget. Making a new
+          one belongs with them, so its button sits on the heading's row. */}
+      <div className="flex items-center justify-between gap-3 mt-6 mb-3">
+        <h3 className="text-lg font-semibold m-0">{t("expenses")}</h3>
+        {newExpenseTo && (
+          <Button onClick={() => navigate(newExpenseTo)} className="!py-1.5 !px-3 !text-sm !gap-1.5">
+            <PlusIcon className="w-4 h-4" aria-hidden="true" />
+            {t("expenseNew")}
+          </Button>
+        )}
+      </div>
 
       <div className="grid grid-cols-3 gap-2 mb-6">
         {SUMMED_STATUSES.map((status) => (
