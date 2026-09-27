@@ -5,8 +5,8 @@ import { remaining } from "/imports/common/lib/expenseBudget";
 const kr = (amount) => `${Math.round((amount || 0) * 100) / 100} kr`;
 
 /**
- * Remaining amount, a bar for the share spent (red once overspent) and the
- * spent and budget figures under it. `large` is the summary's bigger variant.
+ * Spent amount, a bar for the share spent (red once overspent) and what is
+ * left and the budget under it. `large` is the summary's bigger variant.
  */
 const BudgetBar = ({ budget, spent, large = false }) => {
   const { t } = useTranslation();
@@ -17,13 +17,13 @@ const BudgetBar = ({ budget, spent, large = false }) => {
   return (
     <>
       <span className={`flex justify-between items-baseline ${large ? "mt-2" : "mt-3"}`}>
-        <span className="text-sm text-gray-600">{t("expenseBudgetRemaining")}</span>
+        <span className="text-sm text-gray-600">{t("expenseBudgetSpent")}</span>
         <span
           className={`font-semibold ${large ? "text-2xl" : "text-lg"} ${
             over ? "text-red-600" : "text-gray-900"
           }`}
         >
-          {kr(left)}
+          {kr(spent)}
         </span>
       </span>
       <span
@@ -39,8 +39,8 @@ const BudgetBar = ({ budget, spent, large = false }) => {
         />
       </span>
       <span className={`flex justify-between text-gray-500 mt-1 ${large ? "text-sm" : "text-xs"}`}>
-        <span>
-          {t("expenseBudgetSpent")} {kr(spent)}
+        <span className={over ? "text-red-600" : ""}>
+          {t("expenseBudgetRemaining")} {kr(left)}
         </span>
         <span>
           {t("expenseBudget")} {kr(budget)}

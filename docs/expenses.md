@@ -87,7 +87,7 @@ on that account, served by `expenses.getAccountExpenses`:
 
 - A year filter (defaults to the current year, "all years" available), applied
   to the **receipt date**.
-- The **budget** for the selected year, if one is set: what is left, with the
+- The **budget** for the selected year, if one is set: what is spent, with the
   same progress bar as the budget view. What counts as spent follows the
   status filter; rejected expenses never count. Years that only have a budget
   can be picked too. "All years" shows no budget. The box folds out to show
