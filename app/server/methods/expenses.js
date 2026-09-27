@@ -651,8 +651,13 @@ Meteor.methods({
       { sort: { date: -1 } }
     ).fetchAsync();
 
+    // Years with expenses or a budget, so a budgeted year can be opened
+    // before anything has been spent in it.
+    const budgetYears = (
+      await ExpenseBudgets.find({ expenseAccountId: accountId }, { fields: { year: 1 } }).fetchAsync()
+    ).map((b) => b.year);
     const availableYears = [
-      ...new Set(all.map((e) => new Date(e.date).getFullYear())),
+      ...new Set([...all.map((e) => new Date(e.date).getFullYear()), ...budgetYears]),
     ].sort((a, b) => b - a);
 
     const selectedYear = year ? Number(year) : null;
@@ -672,10 +677,31 @@ Meteor.methods({
       nameById[m._id] = m.name;
     }
 
+    // The budget in force for the selected year, if any. "All years" has no
+    // single budget to show.
+    let budget = null;
+    if (selectedYear) {
+      const revisions = await ExpenseBudgets.find({ expenseAccountId: accountId, year: selectedYear }).fetchAsync();
+      const current = sortRevisions(revisions)[0];
+      if (current) {
+        const setter = current.setBy
+          ? await Members.findOneAsync(current.setBy, { fields: { name: 1 } })
+          : null;
+        budget = {
+          amount: current.amount,
+          setAt: current.setAt,
+          comment: current.comment || null,
+          setByName: setter?.name || null,
+          count: revisions.length,
+        };
+      }
+    }
+
     return {
       account: { _id: account._id, name: account.name, explanation: account.explanation },
       availableYears,
       year: selectedYear,
+      budget,
       expenses: shown.map((e) => ({
         _id: e._id,
         memberName: nameById[e.memberId] || e.memberId,

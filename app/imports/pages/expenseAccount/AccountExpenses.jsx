@@ -11,6 +11,9 @@ import { formatDate, statusDate, statusGroupKey } from "../expenses/utils";
 import ExpenseDocument from "../expenses/components/ExpenseDocument";
 import InvoiceBadge from "../expenses/components/InvoiceBadge";
 import StatusFilterTrigger, { statusSummary as summarize } from "../expenses/components/StatusFilterTrigger";
+import BudgetBar from "../expenses/components/BudgetBar";
+import { bookkeepingRowsFor, BookedToggle, BookedPanel } from "../expenses/components/BookedBreakdown";
+import { spentFor } from "/imports/common/lib/expenseBudget";
 import { isInvoice } from "/imports/common/lib/expenseType";
 
 // Same status accents as the member's own expense list (ExpenseItem).
@@ -49,6 +52,8 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
   // Which statuses to list. Purely client-side: the year filter decides what
   // the server sends, this decides what is shown of it.
   const [statuses, setStatuses] = useState(DEFAULT_STATUSES);
+  // Whether the budget box's "booked at reimbursement" breakdown is folded out.
+  const [bookedOpen, setBookedOpen] = useState(false);
 
   if (loading) {
     return (
@@ -66,7 +71,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
     );
   }
 
-  const { account, expenses = [], availableYears = [], year } = data;
+  const { account, expenses = [], availableYears = [], year, budget = null } = data;
 
   // The totals stay a summary of the whole year, whatever the status filter
   // hides — they are what the account stands at, not what is on screen.
@@ -80,6 +85,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
   );
 
   const shown = expenses.filter((e) => statuses.includes(e.status));
+  const booked = bookkeepingRowsFor(expenses);
 
   const toggle = (id) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
@@ -150,6 +156,37 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
           />
         </div>
       </div>
+
+      {/* The year's budget, counting as spent what the status filter shows —
+          the same checkboxes as in the budget view. Rejected expenses never
+          count, even when shown. */}
+      {year && (
+        <section className="relative mb-4 p-4 rounded-lg bg-white border border-gray-200">
+          <h3 className="text-sm font-semibold text-gray-700 m-0">{t("expenseBudgetForYear", { year })}</h3>
+          {booked.length > 0 && (
+            <BookedToggle
+              open={bookedOpen}
+              onToggle={() => setBookedOpen((prev) => !prev)}
+              className="absolute top-2 right-2"
+            />
+          )}
+          {budget ? (
+            <>
+              <BudgetBar budget={budget.amount} spent={spentFor(totals, statuses)} />
+              {budget.count > 1 && (
+                <span className="block text-xs text-gray-500 mt-2">
+                  {t("expenseBudgetRevised", { date: formatDate(budget.setAt, lang) })}
+                  {budget.comment && <>: {budget.comment}</>}
+                </span>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-gray-500 italic m-0 mt-1">{t("expenseBudgetNone")}</p>
+          )}
+          {/* Where the year's reimbursements on this account were booked. */}
+          {bookedOpen && booked.length > 0 && <BookedPanel rows={booked} className="mt-3" />}
+        </section>
+      )}
 
       <div className="grid grid-cols-3 gap-2 mb-6">
         {SUMMED_STATUSES.map((status) => (

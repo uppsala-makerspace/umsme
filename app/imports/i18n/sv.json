@@ -557,6 +557,7 @@
   "expenseBudgetRevised": "Reviderad {{date}}",
   "expenseBudgetBooked": "Bokfört vid återbetalning",
   "expenseBudgetTotal": "Alla konton",
+  "expenseBudgetForYear": "Budget {{year}}",
   "expenseBudgetNoneAtAll": "Inget konto har någon budget för året.",
   "expenseBudgetUnbudgetedSpent": "Därtill {{amount}} förbrukat på konton utan budget.",
   "expenseBudgetSpentTotal": "Förbrukat totalt {{amount}}.",

@@ -558,6 +558,7 @@
   "expenseBudgetRevised": "Revised {{date}}",
   "expenseBudgetBooked": "Booked at reimbursement",
   "expenseBudgetTotal": "All accounts",
+  "expenseBudgetForYear": "Budget {{year}}",
   "expenseBudgetNoneAtAll": "No account has a budget for the year.",
   "expenseBudgetUnbudgetedSpent": "Plus {{amount}} spent on accounts without a budget.",
   "expenseBudgetSpentTotal": "{{amount}} spent in total.",

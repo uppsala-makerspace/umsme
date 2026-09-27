@@ -94,8 +94,28 @@ export default {
   tags: ["autodocs"],
 };
 
+const budget = {
+  amount: 5000,
+  setAt: new Date("2026-04-02"),
+  comment: "Höjd inför höstens kurser",
+  setByName: "Kim Kassör",
+  count: 2,
+};
+
 export const Default = {
-  args: { data: baseData, newExpenseTo: "/expenses/new?account=acc1", expenseTo: (id) => `/expenses/${id}` },
+  args: { data: { ...baseData, budget }, newExpenseTo: "/expenses/new?account=acc1", expenseTo: (id) => `/expenses/${id}` },
+};
+
+export const Overspent = {
+  args: {
+    data: { ...baseData, budget: { ...budget, amount: 1000, count: 1 } },
+    newExpenseTo: "/expenses/new?account=acc1",
+    expenseTo: (id) => `/expenses/${id}`,
+  },
+};
+
+export const NoBudget = {
+  args: { data: { ...baseData, budget: null }, newExpenseTo: "/expenses/new?account=acc1", expenseTo: (id) => `/expenses/${id}` },
 };
 
 export const AllYears = {

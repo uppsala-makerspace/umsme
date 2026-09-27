@@ -6,13 +6,14 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Loader from "../../../components/Loader";
 import CheckboxDropdown from "../../../components/CheckboxDropdown";
 import StatusFilterTrigger, { statusSummary } from "../components/StatusFilterTrigger";
+import BudgetBar from "../components/BudgetBar";
+import { BookkeepingRows, BookedToggle, BookedPanel } from "../components/BookedBreakdown";
 import { formatDate, statusGroupKey } from "../utils";
 import { localized } from "/imports/common/lib/groupRules";
 import {
   BUDGET_SPENT_STATUSES,
   DEFAULT_BUDGET_SPENT_STATUSES,
   spentFor,
-  remaining,
 } from "/imports/common/lib/expenseBudget";
 
 const kr = (amount) => `${Math.round((amount || 0) * 100) / 100} kr`;
@@ -40,67 +41,6 @@ const Select = ({ id, label, value, onChange, children, className = "", selectCl
   </div>
 );
 
-/** Reimbursed amounts per bookkeeping account, e.g. "6110 Kontorsmateriel  1200 kr". */
-const BookkeepingRows = ({ rows, className = "" }) => (
-  <span className={`block ${className}`}>
-    {rows.map((r) => (
-      <span key={r.account} className="flex justify-between gap-3">
-        <span className="min-w-0 truncate">
-          {r.account}
-          {r.name && ` ${r.name}`}
-        </span>
-        <span className="whitespace-nowrap">{kr(r.amount)}</span>
-      </span>
-    ))}
-  </span>
-);
-
-/**
- * Remaining amount, a bar for the share spent (red once overspent) and the
- * spent and budget figures under it. `large` is the summary's bigger variant.
- */
-const BudgetBar = ({ budget, spent, large = false }) => {
-  const { t } = useTranslation();
-  const left = remaining(budget, spent);
-  const over = left < 0;
-  // A zero budget with spending is fully used; with nothing spent it is empty.
-  const share = budget > 0 ? Math.min(spent / budget, 1) : spent > 0 ? 1 : 0;
-  return (
-    <>
-      <span className={`flex justify-between items-baseline ${large ? "mt-2" : "mt-3"}`}>
-        <span className="text-sm text-gray-600">{t("expenseBudgetRemaining")}</span>
-        <span
-          className={`font-semibold ${large ? "text-2xl" : "text-lg"} ${
-            over ? "text-red-600" : "text-gray-900"
-          }`}
-        >
-          {kr(left)}
-        </span>
-      </span>
-      <span
-        className={`block ${large ? "h-3" : "h-2"} mt-2 rounded-full bg-gray-200 overflow-hidden`}
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(share * 100)}
-      >
-        <span
-          className={`block h-full rounded-full ${over ? "bg-red-500" : "bg-brand-green"}`}
-          style={{ width: `${share * 100}%` }}
-        />
-      </span>
-      <span className={`flex justify-between text-gray-500 mt-1 ${large ? "text-sm" : "text-xs"}`}>
-        <span>
-          {t("expenseBudgetSpent")} {kr(spent)}
-        </span>
-        <span>
-          {t("expenseBudget")} {kr(budget)}
-        </span>
-      </span>
-    </>
-  );
-};
-
 /**
  * Budget view of the expense accounts tab: per account, the year's budget,
  * what is spent against it and what is left. How "spent" is counted is the
@@ -111,6 +51,9 @@ const AccountBudgets = ({ loading, error, year, availableYears, accounts, bookke
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const [statuses, setStatuses] = useState(DEFAULT_BUDGET_SPENT_STATUSES);
+  // Accounts whose "booked at reimbursement" breakdown is folded out.
+  const [openBooked, setOpenBooked] = useState({});
+  const toggleBooked = (id) => setOpenBooked((prev) => ({ ...prev, [id]: !prev[id] }));
   const toggleStatus = (status) =>
     setStatuses((prev) =>
       prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
@@ -209,13 +152,17 @@ const AccountBudgets = ({ loading, error, year, availableYears, accounts, bookke
           {accounts.map((a) => {
             const spent = spentFor(a.totals, statuses);
             const hasBudget = a.budget !== null;
+            const hasBooked = a.bookkeeping?.length > 0;
             return (
-              <li key={a._id} className="mb-3">
+              <li key={a._id} className="relative mb-3 rounded-lg bg-white border border-gray-200 overflow-hidden">
+                {/* The card opens the account. The breakdown folds out in
+                    place, so its toggle sits outside the link, over the
+                    card's top-right corner. */}
                 <Link
                   to={`/expense-accounts/${a._id}`}
-                  className="block p-4 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
+                  className="block p-4 no-underline text-inherit hover:bg-gray-50"
                 >
-                  <span className="block font-semibold leading-snug">{a.name}</span>
+                  <span className={`block font-semibold leading-snug ${hasBooked ? "pr-8" : ""}`}>{a.name}</span>
                   {a.groupNames.length > 0 && (
                     <span className="block text-xs text-gray-500 mt-0.5">
                       {a.groupNames.map((n) => localized(n, lang)).join(", ")}
@@ -240,13 +187,17 @@ const AccountBudgets = ({ loading, error, year, availableYears, accounts, bookke
                       </span>
                     </span>
                   )}
-                  {a.bookkeeping?.length > 0 && (
-                    <span className="block mt-3 pt-2 border-t border-gray-100 text-xs text-gray-500">
-                      <span className="block mb-0.5">{t("expenseBudgetBooked")}</span>
-                      <BookkeepingRows rows={a.bookkeeping} />
-                    </span>
-                  )}
                 </Link>
+                {hasBooked && (
+                  <>
+                    <BookedToggle
+                      open={!!openBooked[a._id]}
+                      onToggle={() => toggleBooked(a._id)}
+                      className="absolute top-2 right-2"
+                    />
+                    {openBooked[a._id] && <BookedPanel rows={a.bookkeeping} className="mx-4 pb-3" />}
+                  </>
+                )}
               </li>
             );
           })}
