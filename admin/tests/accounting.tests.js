@@ -218,6 +218,21 @@ if (Meteor.isServer) {
       return { vers, sie: iconv.decode(buildSie(vers, { company: ACCOUNTING.company, dimensionNames: { 1: 'Kostnadsställe', 6: 'Projekt' } }, new Date(2026, 6, 14)), 'cp437') };
     };
 
+    it('names a paid invoice after its supplier, booked like a receipt', function () {
+      const row = { transdag: new Date(2026, 5, 3), belopp: -1200 };
+      const expense = {
+        _id: 'e9', type: 'invoice', place: 'Biltema', amount: 1200, bookkeepingAccount: '5460',
+        expenseAccountId: 'ea1', memberId: 'm1', driveFileId: 'df9',
+      };
+      const [ver] = toVerifications([{ row, kind: 'U', expense }], {
+        config: ACCOUNTING,
+        expenseAccountsById: { ea1: { dimensions: { 1: 'VERKSTAD' } } },
+        memberNameById: { m1: 'Bob Böös' },
+      });
+      assert.strictEqual(ver.text, 'Faktura e9 Biltema (Bob Böös) faktura: https://drive.google.com/file/d/df9/view');
+      assert.deepStrictEqual(ver.trans.map((t) => [t.account, t.amount]), [['5460', 1200], [ACCOUNTING.bankAccount, -1200]]);
+    });
+
     it('every verification balances to zero', function () {
       const { vers } = build();
       for (const v of vers) {

@@ -1,3 +1,5 @@
+import { isInvoice } from "/imports/common/lib/expenseType";
+
 export const EXPENSE_STATUSES = ["pending", "submitted", "rejected", "confirmed", "reimbursed"];
 
 export const EDITABLE_STATUSES = ["pending", "rejected"];
@@ -27,15 +29,33 @@ export const statusDate = (expense) => {
     case "rejected":
       return { labelKey: "expenseDateLabelRejected", value: expense.rejectedAt || expense.date };
     case "reimbursed":
-      // The actual payment date when known, else when it was marked paid.
+      // The actual payment date when known, else when it was marked paid. An
+      // invoice is paid to the supplier rather than reimbursed to the member.
       return {
-        labelKey: "expenseDateLabelReimbursed",
+        labelKey: isInvoice(expense) ? "expenseDateLabelPaid" : "expenseDateLabelReimbursed",
         value: expense.reimbursedDate || expense.reimbursedAt || expense.date,
       };
     default:
       return { labelKey: "expenseDateLabelDate", value: expense.date };
   }
 };
+
+/**
+ * The i18n key naming one expense's status. Same as `expenseStatus_<status>`
+ * except that a reimbursed invoice reads "paid".
+ */
+export const statusLabelKey = (expense) =>
+  expense.status === "reimbursed" && isInvoice(expense)
+    ? "expenseStatus_paid"
+    : `expenseStatus_${expense.status}`;
+
+/**
+ * The i18n key naming a status as a group of expenses — list headings, totals,
+ * the status filter. The reimbursed group holds reimbursed receipts and paid
+ * invoices alike, so it is named for both.
+ */
+export const statusGroupKey = (status) =>
+  status === "reimbursed" ? "expenseStatus_reimbursedOrPaid" : `expenseStatus_${status}`;
 
 export const formatDate = (date, lang) => {
   if (!date) return "";
@@ -75,5 +95,24 @@ export const downscaleImage = (file, maxEdge = 1600, quality = 0.8) =>
       };
       img.src = reader.result;
     };
+    reader.readAsDataURL(file);
+  });
+
+/** Largest document accepted; matches the server's limit. */
+export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Read a File as-is into { base64, mimeType }, for PDF invoices that must not
+ * go through the image downscaler.
+ */
+export const readFileAsBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read-failed"));
+    reader.onload = () =>
+      resolve({
+        base64: String(reader.result).replace(/^data:[^;]+;base64,/, ""),
+        mimeType: file.type,
+      });
     reader.readAsDataURL(file);
   });

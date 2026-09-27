@@ -7,7 +7,7 @@ import './ExpenseList.html';
 // Work-queue views keyed by route name: filter the Expenses table by status.
 const MODES = {
   expensesConfirm: { status: 'submitted', heading: 'Expenses to confirm' },
-  expensesReimburse: { status: 'confirmed', heading: 'Expenses to reimburse' },
+  expensesReimburse: { status: 'confirmed', heading: 'Expenses to reimburse or pay', split: true },
 };
 
 Template.ExpenseList.onCreated(function () {
@@ -23,6 +23,17 @@ Template.ExpenseList.helpers({
   selector() {
     const mode = MODES[FlowRouter.getRouteName()];
     return mode ? { status: mode.status } : {};
+  },
+  // The reimburse queue splits in two: invoices to pay the supplier (by due
+  // date) and receipts to reimburse the member.
+  split() {
+    return !!MODES[FlowRouter.getRouteName()]?.split;
+  },
+  invoiceSelector() {
+    return { status: MODES[FlowRouter.getRouteName()]?.status, type: 'invoice' };
+  },
+  receiptSelector() {
+    return { status: MODES[FlowRouter.getRouteName()]?.status, type: { $ne: 'invoice' } };
   },
 });
 

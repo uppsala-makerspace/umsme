@@ -44,13 +44,26 @@ export default () => {
     fetchData();
   }, [user?._id, fetchData]);
 
+  // Server refusals (e.g. a PDF turned into a receipt) are shown rather than
+  // lost; the form keeps what the member typed.
+  const reportError = (err) => alert(err.reason || err.message);
   const onSave = async (fields) => {
-    await Meteor.callAsync("expenses.update", expenseId, fields);
+    try {
+      await Meteor.callAsync("expenses.update", expenseId, fields);
+    } catch (err) {
+      reportError(err);
+      return;
+    }
     navigate(doneTo);
   };
   const onSubmit = async (fields) => {
-    await Meteor.callAsync("expenses.update", expenseId, fields);
-    await Meteor.callAsync("expenses.submit", expenseId);
+    try {
+      await Meteor.callAsync("expenses.update", expenseId, fields);
+      await Meteor.callAsync("expenses.submit", expenseId);
+    } catch (err) {
+      reportError(err);
+      return;
+    }
     // Came from an account page: the member is done, take them back there.
     // On the standalone page, stay and show the submitted state as before.
     if (returnTo) {
@@ -63,8 +76,13 @@ export default () => {
     await Meteor.callAsync("expenses.retract", expenseId);
     await fetchData();
   };
-  const onReplacePhoto = async ({ base64, mimeType }) => {
-    await Meteor.callAsync("expenses.replacePhoto", expenseId, base64, mimeType);
+  const onReplacePhoto = async ({ base64, mimeType, type }) => {
+    try {
+      await Meteor.callAsync("expenses.replacePhoto", expenseId, base64, mimeType, type);
+    } catch (err) {
+      reportError(err);
+      return;
+    }
     await fetchData();
   };
   const onAbort = async () => {

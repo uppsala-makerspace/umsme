@@ -18,6 +18,7 @@ import {
 } from "./utils";
 import { canReviewExpense, canViewExpense } from "/imports/common/lib/expenseApproval";
 import { sortRevisions } from "/imports/common/lib/expenseBudget";
+import { EXPENSE_TYPES, DOCUMENT_MIME, isInvoice } from "/imports/common/lib/expenseType";
 
 const EDITABLE_STATES = ["pending", "rejected"];
 
@@ -30,7 +31,6 @@ const bookkeepingNames = () =>
   );
 const bookkeepingAccountName = (account) => (account && bookkeepingNames()[account]) || null;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB safety ceiling (client downscales)
-const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
 const requireMember = async () => {
   const member = await findMemberForUser();
@@ -89,13 +89,21 @@ const reviewedLine = async (expense, verb, { by, note } = {}) => {
   const url = adminLink(`expense/${expense._id}`);
   const link = url ? `\n<${url}|Open in admin>` : "";
   const noteText = note ? `\n${blockquote(note)}` : "";
-  return `*${submitter?.name || expense.memberId}*'s expense of ${expense.amount} kr — ` +
+  return `*${submitter?.name || expense.memberId}*'s ${kindWord(expense)} of ${expense.amount} kr — ` +
     `\`${account?.name || "?"}\` was ${verb} by ${by}.${noteText}${link}`;
 };
 
-const decodeImage = (imageBase64, mimeType) => {
-  if (!ALLOWED_MIME.includes(mimeType)) {
-    throw new Meteor.Error("bad-image", "Unsupported image type");
+// "expense" or "invoice", for manager-event texts.
+const kindWord = (expense) => (isInvoice(expense) ? "invoice" : "expense");
+
+const checkType = (type) => {
+  if (!EXPENSE_TYPES.includes(type)) throw new Meteor.Error("bad-type", "Unknown expense type");
+};
+
+// Decode an uploaded receipt or invoice: an image or a PDF.
+const decodeDocument = (imageBase64, mimeType) => {
+  if (!DOCUMENT_MIME.includes(mimeType)) {
+    throw new Meteor.Error("bad-image", "Unsupported file type");
   }
   // Accept both raw base64 and data URIs.
   const base64 = String(imageBase64 || "").replace(/^data:[^;]+;base64,/, "");
@@ -112,10 +120,11 @@ Meteor.methods({
    * `expenseAccountId` preselects the account (used when starting from a
    * group's account page); it must be one the member may spend on.
    */
-  "expenses.create": async (imageBase64, mimeType, expenseAccountId) => {
+  "expenses.create": async (imageBase64, mimeType, expenseAccountId, type = "receipt") => {
     const member = await requireMember();
+    checkType(type);
     await requireAllowedAccount(expenseAccountId, member);
-    const buffer = decodeImage(imageBase64, mimeType);
+    const buffer = decodeDocument(imageBase64, mimeType);
     const now = new Date();
     const driveFileId = await uploadImage({
       buffer,
@@ -125,6 +134,7 @@ Meteor.methods({
     });
     return Expenses.insertAsync({
       memberId: member._id,
+      type,
       driveFileId,
       mimeType,
       status: "pending",
@@ -137,7 +147,10 @@ Meteor.methods({
   /**
    * Update editable fields of an own draft/submitted/rejected expense.
    */
-  "expenses.update": async (expenseId, { amount, expenseAccountId, place, date, note } = {}) => {
+  "expenses.update": async (
+    expenseId,
+    { type, amount, expenseAccountId, place, date, dueDate, note } = {}
+  ) => {
     const member = await requireMember();
     const expense = await requireOwnExpense(expenseId, member);
     if (!EDITABLE_STATES.includes(expense.status)) {
@@ -145,6 +158,15 @@ Meteor.methods({
     }
     const $set = {};
     const $unset = {};
+    if (type !== undefined) {
+      checkType(type);
+      $set.type = type;
+      if (type === "receipt") $unset.dueDate = "";
+    }
+    const resultingType = type !== undefined ? type : expense.type || "receipt";
+    if (dueDate !== undefined && resultingType === "invoice") {
+      if (dueDate) $set.dueDate = new Date(dueDate); else $unset.dueDate = "";
+    }
     if (amount !== undefined) {
       if (amount === null || amount === "") {
         $unset.amount = "";
@@ -183,20 +205,27 @@ Meteor.methods({
   /**
    * Replace the receipt photo on an editable expense.
    */
-  "expenses.replacePhoto": async (expenseId, imageBase64, mimeType) => {
+  "expenses.replacePhoto": async (expenseId, imageBase64, mimeType, type) => {
     const member = await requireMember();
     const expense = await requireOwnExpense(expenseId, member);
     if (!EDITABLE_STATES.includes(expense.status)) {
       throw new Meteor.Error("not-editable", "This expense can no longer be edited");
     }
-    const buffer = decodeImage(imageBase64, mimeType);
+    // The form may have switched the type without saving yet; save the
+    // document with the type the member is looking at.
+    const newType = type === undefined ? expense.type || "receipt" : type;
+    checkType(newType);
+    const buffer = decodeDocument(imageBase64, mimeType);
     const driveFileId = await uploadImage({
       buffer,
       baseName: `${member._id}-${Date.now()}`,
       mimeType,
       date: expense.date || new Date(),
     });
-    await Expenses.updateAsync(expenseId, { $set: { driveFileId, mimeType } });
+    await Expenses.updateAsync(expenseId, {
+      $set: { driveFileId, mimeType, type: newType },
+      ...(newType === "receipt" ? { $unset: { dueDate: "" } } : {}),
+    });
     await deleteImage(expense.driveFileId);
     return true;
   },
@@ -216,6 +245,9 @@ Meteor.methods({
     if (!expense.expenseAccountId) {
       throw new Meteor.Error("missing-account", "Choose an expense account before submitting");
     }
+    if (isInvoice(expense) && !expense.dueDate) {
+      throw new Meteor.Error("missing-due-date", "Enter the invoice's due date before submitting");
+    }
     // Group membership can change between drafting and submitting.
     await requireAllowedAccount(expense.expenseAccountId, member);
     await Expenses.updateAsync(expenseId, {
@@ -227,9 +259,10 @@ Meteor.methods({
     const url = adminLink(`expense/${expenseId}`);
     const link = url ? `\n<${url}|Open in admin>` : "";
     const note = expense.note ? `\n${blockquote(expense.note)}` : "";
+    const due = isInvoice(expense) ? `, due ${expense.dueDate.toISOString().slice(0, 10)}` : "";
     await publishManagerEvent(ManagerEventType.EXPENSE_SUBMITTED, {
-      subject: "Expense submitted",
-      body: `*${member.name}* submitted an expense of ${expense.amount} kr — \`${account?.name || "?"}\`.${note}${link}`,
+      subject: isInvoice(expense) ? "Invoice submitted" : "Expense submitted",
+      body: `*${member.name}* submitted an ${kindWord(expense)} of ${expense.amount} kr — \`${account?.name || "?"}\`${due}.${note}${link}`,
     });
     return true;
   },
@@ -252,8 +285,8 @@ Meteor.methods({
     const url = adminLink(`expense/${expenseId}`);
     const link = url ? `\n<${url}|Open in admin>` : "";
     await publishManagerEvent(ManagerEventType.EXPENSE_RETRACTED, {
-      subject: "Expense recalled",
-      body: `*${member.name}* recalled an expense of ${expense.amount} kr — \`${account?.name || "?"}\`.${link}`,
+      subject: isInvoice(expense) ? "Invoice recalled" : "Expense recalled",
+      body: `*${member.name}* recalled an ${kindWord(expense)} of ${expense.amount} kr — \`${account?.name || "?"}\`.${link}`,
     });
     return true;
   },
@@ -386,6 +419,8 @@ Meteor.methods({
 
     const enrich = (e) => ({
       _id: e._id,
+      type: e.type || "receipt",
+      dueDate: e.dueDate || null,
       amount: e.amount,
       date: e.date,
       place: e.place,
@@ -648,6 +683,9 @@ Meteor.methods({
         // expenses without exposing member ids.
         isMine: e.memberId === member._id,
         status: e.status,
+        type: e.type || "receipt",
+        dueDate: e.dueDate || null,
+        mimeType: e.mimeType || null,
         date: e.date,
         amount: e.amount || 0,
         place: e.place || null,

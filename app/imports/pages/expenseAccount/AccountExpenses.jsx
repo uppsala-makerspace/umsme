@@ -7,7 +7,10 @@ import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
 import Button from "../../components/Button";
 import CheckboxDropdown from "../../components/CheckboxDropdown";
-import { formatDate, statusDate } from "../expenses/utils";
+import { formatDate, statusDate, statusGroupKey } from "../expenses/utils";
+import ExpenseDocument from "../expenses/components/ExpenseDocument";
+import InvoiceBadge from "../expenses/components/InvoiceBadge";
+import { isInvoice } from "/imports/common/lib/expenseType";
 
 // Same status accents as the member's own expense list (ExpenseItem).
 const statusAccent = {
@@ -109,7 +112,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
       : statuses.length === 0
         ? t("expenseNoStatuses")
         : statuses.length === 1
-          ? t(`expenseStatus_${statuses[0]}`)
+          ? t(statusGroupKey(statuses[0]))
           // `n`, not `count`: the latter would pull in i18next's plural
           // machinery, and this string never needs it.
           : t("expenseStatusesSelected", { n: statuses.length });
@@ -162,7 +165,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
           <CheckboxDropdown
             options={FILTER_STATUSES.map((status) => ({
               key: status,
-              label: t(`expenseStatus_${status}`),
+              label: t(statusGroupKey(status)),
             }))}
             selected={statuses}
             onToggle={toggleStatus}
@@ -177,7 +180,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
       <div className="grid grid-cols-3 gap-2 mb-6">
         {SUMMED_STATUSES.map((status) => (
           <div key={status} className="p-3 rounded-lg bg-white border border-gray-200 text-center">
-            <span className="block text-xs text-gray-500">{t(`expenseStatus_${status}`)}</span>
+            <span className="block text-xs text-gray-500">{t(statusGroupKey(status))}</span>
             <span className="block font-semibold mt-1">{kr(totals[status])}</span>
           </div>
         ))}
@@ -215,6 +218,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
                     <span className="block text-xs text-gray-500 mt-1">
                       {t(dated.labelKey)} · {formatDate(dated.value, lang)}
                     </span>
+                    <InvoiceBadge expense={e} className="mt-1" />
                   </span>
                   <span className="font-semibold whitespace-nowrap">{kr(e.amount)}</span>
                   {isOpen ? (
@@ -226,9 +230,15 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
 
                 {isOpen && (
                   <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 m-0 px-4 pb-4 text-sm">
-                    <dt className="text-gray-500">{t("expenseDate")}</dt>
+                    <dt className="text-gray-500">{t(isInvoice(e) ? "expenseInvoiceDate" : "expenseDate")}</dt>
                     <dd className="m-0">{formatDate(e.date, lang)}</dd>
-                    <dt className="text-gray-500">{t("expensePlace")}</dt>
+                    {isInvoice(e) && e.dueDate && (
+                      <>
+                        <dt className="text-gray-500">{t("expenseDueDate")}</dt>
+                        <dd className="m-0">{formatDate(e.dueDate, lang)}</dd>
+                      </>
+                    )}
+                    <dt className="text-gray-500">{t(isInvoice(e) ? "expenseSupplier" : "expensePlace")}</dt>
                     <dd className="m-0">{dash(e.place)}</dd>
                     <dt className="text-gray-500">{t("expenseNote")}</dt>
                     <dd className="m-0 break-words">{dash(truncate(e.note))}</dd>
@@ -268,7 +278,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
                     )}
                     {e.reimbursedDate && (
                       <>
-                        <dt className="text-gray-500">{t("expenseReimbursedDate")}</dt>
+                        <dt className="text-gray-500">{t(isInvoice(e) ? "expensePaidDate" : "expenseReimbursedDate")}</dt>
                         <dd className="m-0">{formatDate(e.reimbursedDate, lang)}</dd>
                       </>
                     )}
@@ -284,7 +294,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
                         className="flex items-center gap-2 p-0 bg-transparent border-none text-sm text-gray-600 underline cursor-pointer hover:text-black"
                       >
                         <PhotoIcon className="w-5 h-5" aria-hidden="true" />
-                        {t("expenseShowReceipt")}
+                        {t(isInvoice(e) ? "expenseShowInvoice" : "expenseShowReceipt")}
                       </button>
                     ) : (
                       <span />
@@ -330,13 +340,11 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
               </button>
             </div>
             <div className="p-4 overflow-y-auto">
-              <a href={receipt.receiptUrl} target="_blank" rel="noreferrer">
-                <img
-                  src={receipt.receiptUrl}
-                  alt={t("expenseReceipt")}
-                  className="w-full rounded border border-gray-200"
-                />
-              </a>
+              <ExpenseDocument
+                url={receipt.receiptUrl}
+                mimeType={receipt.mimeType}
+                invoice={isInvoice(receipt)}
+              />
             </div>
             <div className="p-4 border-t">
               <Button onClick={() => setReceipt(null)} fullWidth>

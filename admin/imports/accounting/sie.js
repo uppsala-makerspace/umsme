@@ -44,10 +44,15 @@ export const toVerifications = (matches, ctx) => {
     if (kind === 'U') {
       const account = expenseAccountsById[expense.expenseAccountId];
       const memberName = memberNameById[expense.memberId] || expense.memberId;
+      // An invoice is paid to the supplier, so it is named for the supplier;
+      // the member who submitted it follows for traceability.
+      const text = expense.type === 'invoice'
+        ? `Faktura ${expense._id} ${expense.place || ''} (${memberName}) faktura: ${driveLink(expense.driveFileId)}`
+        : `Utlägg ${expense._id} ${memberName} kvitto: ${driveLink(expense.driveFileId)}`;
       return {
         series: config.expense?.series || 'U',
         date: row.transdag,
-        text: `Utlägg ${expense._id} ${memberName} kvitto: ${driveLink(expense.driveFileId)}`,
+        text: text.replace(/\s+/g, ' '),
         trans: [
           { account: expense.bookkeepingAccount, dimension: account?.dimensions || null, amount: -row.belopp },
           { account: bank, dimension: null, amount: row.belopp },

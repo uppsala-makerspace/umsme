@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CameraIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import Button from "../../../components/Button";
-import { downscaleImage } from "../utils";
+import { downscaleImage, readFileAsBase64, MAX_DOCUMENT_BYTES } from "../utils";
 
 /**
  * Receipt photo picker. Offers two actions so both are available on every
@@ -13,8 +13,11 @@ import { downscaleImage } from "../utils";
  *
  * `overlay` renders two compact icon pills meant to be absolutely positioned
  * over an existing photo; otherwise two full-width buttons sit side by side.
+ *
+ * The upload also accepts a PDF, passed on untouched rather than downscaled.
+ * `invoice` switches the labels to the invoice wording.
  */
-const ReceiptCapture = ({ onCapture, busy, overlay = false }) => {
+const ReceiptCapture = ({ onCapture, busy, overlay = false, invoice = false }) => {
   const { t } = useTranslation();
   const cameraRef = useRef(null);
   const fileRef = useRef(null);
@@ -24,9 +27,14 @@ const ReceiptCapture = ({ onCapture, busy, overlay = false }) => {
     const file = e.target.files?.[0];
     e.target.value = ""; // allow re-picking the same file
     if (!file) return;
+    const pdf = file.type === "application/pdf";
+    if (pdf && file.size > MAX_DOCUMENT_BYTES) {
+      alert(t("expenseFileTooLarge"));
+      return;
+    }
     setWorking(true);
     try {
-      const { base64, mimeType } = await downscaleImage(file);
+      const { base64, mimeType } = pdf ? await readFileAsBase64(file) : await downscaleImage(file);
       await onCapture({ base64, mimeType });
     } catch (err) {
       console.error("Receipt capture failed:", err);
@@ -37,8 +45,8 @@ const ReceiptCapture = ({ onCapture, busy, overlay = false }) => {
   };
 
   const disabled = busy || working;
-  const cameraLabel = t("expenseTakePhoto");
-  const uploadLabel = t("expenseUploadReceipt");
+  const cameraLabel = t(invoice ? "expenseTakePhotoInvoice" : "expenseTakePhoto");
+  const uploadLabel = t(invoice ? "expenseUploadInvoice" : "expenseUploadReceipt");
 
   return (
     <>
@@ -55,7 +63,7 @@ const ReceiptCapture = ({ onCapture, busy, overlay = false }) => {
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept="image/*,application/pdf"
         className="hidden"
         onChange={handleFile}
       />

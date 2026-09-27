@@ -1,6 +1,6 @@
 <template name="ExpenseView">
     <a href="/expenses" style="float: right">Back to expenses</a>
-    <h1>Expense <span class="label label-{{statusClass}}">{{expense.status}}</span></h1>
+    <h1>{{#if isInvoice}}Invoice{{else}}Expense{{/if}} <span class="label label-{{statusClass}}">{{statusText}}</span></h1>
 
     {{#if expense}}
     <div class="row">
@@ -8,22 +8,28 @@
             <table class="table table-condensed">
                 <tbody>
                     <tr><th>Member</th><td><a href="/member/{{expense.memberId}}" target="_blank">{{memberName}}&nbsp;↗</a></td></tr>
-                    <tr><th>Date</th><td>{{formatDate expense.date}}</td></tr>
+                    <tr><th>Type</th><td>{{#if isInvoice}}<span class="label label-warning">Invoice</span> — the association pays the supplier{{else}}Receipt — reimburse the member{{/if}}</td></tr>
+                    <tr><th>{{#if isInvoice}}Invoice date{{else}}Date{{/if}}</th><td>{{formatDate expense.date}}</td></tr>
+                    {{#if isInvoice}}
+                    <tr><th>Due date</th><td>{{#if expense.dueDate}}<strong>{{formatDate expense.dueDate}}</strong>{{else}}<em>—</em>{{/if}}</td></tr>
+                    {{/if}}
                     <tr><th>Amount</th><td>{{#if expense.amount}}{{expense.amount}} kr{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Account</th><td>{{accountName}}{{#if accountDimensions}} <small class="text-muted">[{{accountDimensions}}]</small>{{/if}}</td></tr>
-                    <tr><th>Place</th><td>{{#if expense.place}}{{expense.place}}{{else}}<em>—</em>{{/if}}</td></tr>
+                    <tr><th>{{#if isInvoice}}Supplier{{else}}Place{{/if}}</th><td>{{#if expense.place}}{{expense.place}}{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Note</th><td>{{#if expense.note}}{{expense.note}}{{else}}<em>—</em>{{/if}}</td></tr>
                     <tr><th>Created</th><td>{{formatDate expense.createdAt}}</td></tr>
                     {{#if expense.bookkeepingAccount}}
                     <tr><th>Bookkeeping account</th><td><code>{{bookkeepingAccountLabel}}</code></td></tr>
                     {{/if}}
                     {{#if expense.reimbursedDate}}
-                    <tr><th>Reimbursed date</th><td>{{formatDate expense.reimbursedDate}}</td></tr>
+                    <tr><th>{{#if isInvoice}}Payment date{{else}}Reimbursed date{{/if}}</th><td>{{formatDate expense.reimbursedDate}}</td></tr>
                     {{/if}}
                     <tr>
-                        <th>Bank account</th>
+                        <th>{{#if isInvoice}}Pay to{{else}}Bank account{{/if}}</th>
                         <td>
-                            {{#if hasBankAccount}}
+                            {{#if isInvoice}}
+                                <em>the supplier, using the payment details on the invoice</em>
+                            {{else if hasBankAccount}}
                                 {{#if bank.name}}<strong>{{bank.name}}</strong> — {{/if}}clearing <code>{{bank.clearing}}</code>, account <code>{{bank.number}}</code>
                                 {{#if bank.holder}}
                                     <div style="margin-top: 4px;">account holder: <strong>{{bank.holder}}</strong></div>
@@ -54,7 +60,7 @@
                 <button class="btn btn-danger rejectExpense">Reject…</button>
                 {{/if}}
                 {{#if isReimbursed}}
-                <button class="btn btn-default unreimburseExpense">Undo "mark as reimbursed"</button>
+                <button class="btn btn-default unreimburseExpense">Undo "mark as {{#if isInvoice}}paid{{else}}reimbursed{{/if}}"</button>
                 {{/if}}
             </div>
 
@@ -71,10 +77,10 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="reimburseDate">Reimbursement date</label>
+                        <label for="reimburseDate">{{#if isInvoice}}Payment date{{else}}Reimbursement date{{/if}}</label>
                         <input type="date" id="reimburseDate" class="form-control reimburseDate" value="{{defaultReimburseDate}}">
                     </div>
-                    <button class="btn btn-success reimburseExpense">Mark as reimbursed</button>
+                    <button class="btn btn-success reimburseExpense">Mark as {{#if isInvoice}}paid{{else}}reimbursed{{/if}}</button>
                 </div>
             </div>
             {{/if}}
@@ -95,7 +101,11 @@
 
         <div class="col-md-6">
             {{#if receipt}}
-            <img src="{{receipt}}" alt="Receipt" class="receiptThumb" style="max-width: 100%; border: 1px solid #ddd; cursor: zoom-in;" title="Click to enlarge">
+                {{#if isPdf}}
+                <a href="{{receipt}}" target="_blank" rel="noreferrer" class="btn btn-default btn-lg">Open PDF {{#if isInvoice}}invoice{{else}}receipt{{/if}}&nbsp;↗</a>
+                {{else}}
+                <img src="{{receipt}}" alt="Receipt" class="receiptThumb" style="max-width: 100%; border: 1px solid #ddd; cursor: zoom-in;" title="Click to enlarge">
+                {{/if}}
             {{else}}
             <p class="text-muted">Loading receipt…</p>
             {{/if}}

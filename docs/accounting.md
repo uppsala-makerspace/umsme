@@ -33,7 +33,7 @@ touching the others — see section 9.
 
 | Category            | Series | Source of truth                              | Output   |
 | ------------------- | ------ | -------------------------------------------- | -------- |
-| Expense reimbursements | `U` | Expenses collection (status `reimbursed`)    | SIE      |
+| Expense reimbursements and paid invoices | `U` | Expenses collection (status `reimbursed`)    | SIE      |
 | Member payments (Swish) | `M` | Payments collection                          | SIE      |
 | Standard income (clay, courses…) | `S` | Payments collection + configured codes | SIE  |
 | Everything else (rent, insurance, Bankgiro/PG…) | `K` | Not in UMSME | remaining CSV |
@@ -226,9 +226,11 @@ listing what the candidates claimed.
 
 ### d) Everything else → remaining CSV
 
-Aggregated Bankgiro/PG deposits, rent, autogiro, direct supplier payments,
-and Swish rows without a counterpart in the payments table all pass through
-untouched.
+Aggregated Bankgiro/PG deposits, rent, autogiro, supplier payments that were
+not submitted as invoice expenses, and Swish rows without a counterpart in the
+payments table all pass through untouched. An invoice submitted in the app and
+marked paid matches like a reimbursement (rule a), on the payment date; its
+verification text reads `Faktura <id> <supplier> (<member>) faktura: <link>`.
 
 ## 8. Diagnostics
 

@@ -113,6 +113,52 @@ export const ReimbursedLocked = {
   },
 };
 
+// An invoice uploaded as a PDF: the document shows as a card.
+export const InvoiceDraftPdf = {
+  args: {
+    expense: expense({
+      type: "invoice", mimeType: "application/pdf", amount: 1840, expenseAccountId: "a2",
+      place: "Biltema", dueDate: new Date("2026-10-15"),
+    }),
+    receiptUrl: "#",
+    accounts,
+    ...baseActions,
+  },
+};
+
+// A receipt can be a PDF too.
+export const ReceiptDraftPdf = {
+  args: {
+    expense: expense({ type: "receipt", mimeType: "application/pdf", amount: 349, expenseAccountId: "a1" }),
+    receiptUrl: "#",
+    accounts,
+    ...baseActions,
+  },
+};
+
+// An invoice without a due date cannot be submitted yet.
+export const InvoiceMissingDueDate = {
+  args: {
+    expense: expense({ type: "invoice", mimeType: "image/jpeg", amount: 1840, expenseAccountId: "a2" }),
+    accounts,
+    ...baseActions,
+  },
+};
+
+export const InvoicePaid = {
+  args: {
+    expense: expense({
+      type: "invoice", mimeType: "application/pdf", status: "reimbursed", amount: 1840,
+      expenseAccountId: "a2", accountName: "Verktyg", place: "Biltema", dueDate: new Date("2026-10-15"),
+      submittedAt: new Date("2026-09-20"), confirmedByName: "Bo Berg", confirmedAt: new Date("2026-09-21"),
+      bookkeepingAccount: "5460", bookkeepingAccountName: "Förbrukningsmaterial", reimbursedDate: new Date("2026-10-10"),
+    }),
+    receiptUrl: "#",
+    accounts,
+    ...baseActions,
+  },
+};
+
 export const Loading = {
   args: { loading: true, ...baseActions },
 };

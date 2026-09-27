@@ -7,8 +7,10 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Button from "../../../components/Button";
 import ReceiptCapture from "../components/ReceiptCapture";
+import ExpenseDocument from "../components/ExpenseDocument";
 import PlaceAutocomplete from "../components/PlaceAutocomplete";
-import { isEditable, formatDate, toDateInputValue } from "../utils";
+import { isEditable, formatDate, toDateInputValue, statusLabelKey } from "../utils";
+import { isPdf } from "/imports/common/lib/expenseType";
 
 const ExpenseDetail = ({
   loading,
@@ -27,6 +29,8 @@ const ExpenseDetail = ({
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
+  const [type, setType] = useState("receipt");
+  const [dueDate, setDueDate] = useState("");
   const [amount, setAmount] = useState("");
   const [expenseAccountId, setExpenseAccountId] = useState("");
   const [place, setPlace] = useState("");
@@ -38,6 +42,8 @@ const ExpenseDetail = ({
 
   useEffect(() => {
     if (expense) {
+      setType(expense.type || "receipt");
+      setDueDate(toDateInputValue(expense.dueDate));
       setAmount(expense.amount != null ? String(expense.amount) : "");
       setExpenseAccountId(expense.expenseAccountId || "");
       setPlace(expense.place || "");
@@ -66,7 +72,11 @@ const ExpenseDetail = ({
   // reviewer opening the same expense gets the read-only view.
   const isReviewer = expense.isOwn === false;
   const editable = !isReviewer && isEditable(expense.status);
-  const canSubmit = !!amount && Number(amount) > 0 && !!expenseAccountId;
+  // While editing, the type picked in the form; otherwise the saved one.
+  const invoice = (editable ? type : expense.type) === "invoice";
+  const pdf = isPdf(expense.mimeType);
+  const canSubmit =
+    !!amount && Number(amount) > 0 && !!expenseAccountId && (!invoice || !!dueDate);
 
   // The account currently in play: the picked one while editing, the saved one
   // otherwise. Its overview page is not group-scoped, so the id is enough.
@@ -85,6 +95,8 @@ const ExpenseDetail = ({
   };
 
   const formFields = () => ({
+    type,
+    dueDate: invoice && dueDate ? new Date(dueDate) : null,
     amount: amount === "" ? null : Number(amount),
     expenseAccountId: expenseAccountId || null,
     place,
@@ -99,8 +111,8 @@ const ExpenseDetail = ({
 
   return (
     <MainContent>
-      <h2 className="text-2xl mb-1">{t("expense")}</h2>
-      <p className="text-sm text-gray-500 mb-4">{t(`expenseStatus_${expense.status}`)}</p>
+      <h2 className="text-2xl mb-1">{t(invoice ? "expenseTypeInvoice" : "expenseTypeReceipt")}</h2>
+      <p className="text-sm text-gray-500 mb-4">{t(statusLabelKey({ ...expense, type: invoice ? "invoice" : "receipt" }))}</p>
 
       {expense.status === "rejected" && expense.rejectionReason && (
         <div className="p-4 mb-6 bg-red-50 border border-red-200 rounded-lg">
@@ -113,18 +125,19 @@ const ExpenseDetail = ({
 
       {receiptUrl ? (
         <div className="relative mb-6">
-          <a href={receiptUrl} target="_blank" rel="noreferrer">
-            <img
-              src={receiptUrl}
-              alt={t("expenseReceipt")}
-              className="w-full rounded-lg border border-gray-200"
-            />
-          </a>
+          {/* The replace buttons float bottom-right; a PDF card needs room for them. */}
+          <ExpenseDocument
+            url={receiptUrl}
+            mimeType={expense.mimeType}
+            invoice={invoice}
+            className={editable && pdf ? "pb-14" : ""}
+          />
           {editable && (
             <ReceiptCapture
               overlay
+              invoice={invoice}
               busy={actionLoading}
-              onCapture={(img) => run(onReplacePhoto, img)}
+              onCapture={(img) => run(onReplacePhoto, { ...img, type })}
             />
           )}
         </div>
@@ -134,6 +147,28 @@ const ExpenseDetail = ({
 
       {editable ? (
         <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium">{t("expenseType")}</span>
+            <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden" role="group">
+              {["receipt", "invoice"].map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  onClick={() => setType(choice)}
+                  aria-pressed={type === choice}
+                  className={`flex-1 px-3 py-2 border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
+                    type === choice ? "bg-brand-green text-white" : "bg-white text-gray-700"
+                  }`}
+                >
+                  {t(choice === "invoice" ? "expenseTypeInvoice" : "expenseTypeReceipt")}
+                </button>
+              ))}
+            </div>
+            <span className="text-xs text-gray-500">
+              {t(invoice ? "expenseTypeInvoiceHint" : "expenseTypeReceiptHint")}
+            </span>
+          </div>
+
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">{t("expenseAmount")}</span>
             <input
@@ -169,18 +204,18 @@ const ExpenseDetail = ({
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">{t("expensePlace")}</span>
+            <span className="text-sm font-medium">{t(invoice ? "expenseSupplier" : "expensePlace")}</span>
             <PlaceAutocomplete
               value={place}
               onChange={setPlace}
               suggestions={placeSuggestions}
-              placeholder={t("expensePlacePlaceholder")}
+              placeholder={t(invoice ? "expenseSupplierPlaceholder" : "expensePlacePlaceholder")}
               className="border border-gray-300 rounded p-3 w-full"
             />
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">{t("expenseDate")}</span>
+            <span className="text-sm font-medium">{t(invoice ? "expenseInvoiceDate" : "expenseDate")}</span>
             <input
               type="date"
               value={date}
@@ -189,6 +224,18 @@ const ExpenseDetail = ({
             />
           </label>
 
+          {invoice && (
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">{t("expenseDueDate")}</span>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="border border-gray-300 rounded p-3"
+              />
+            </label>
+          )}
+
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">{t("expenseNote")}</span>
             <textarea
@@ -196,7 +243,7 @@ const ExpenseDetail = ({
               onChange={(e) => setNote(e.target.value)}
               rows={3}
               className="border border-gray-300 rounded p-3"
-              placeholder={t("expenseNotePlaceholder")}
+              placeholder={t(invoice ? "expenseNotePlaceholderInvoice" : "expenseNotePlaceholder")}
             />
           </label>
 
@@ -215,7 +262,7 @@ const ExpenseDetail = ({
           {!canSubmit && (
             <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-300 rounded-lg text-sm text-yellow-800">
               <InformationCircleIcon className="w-5 h-5 flex-shrink-0" />
-              <span>{t("expenseSubmitHint")}</span>
+              <span>{t(invoice ? "expenseSubmitHintInvoice" : "expenseSubmitHint")}</span>
             </div>
           )}
 
@@ -250,8 +297,21 @@ const ExpenseDetail = ({
               expense.accountName || "—"
             )}
           </div>
-          {expense.place && <div><span className="font-semibold">{t("expensePlace")}:</span> {expense.place}</div>}
-          <div><span className="font-semibold">{t("expenseDate")}:</span> {formatDate(expense.date, lang)}</div>
+          {expense.place && (
+            <div>
+              <span className="font-semibold">{t(invoice ? "expenseSupplier" : "expensePlace")}:</span>{" "}
+              {expense.place}
+            </div>
+          )}
+          <div>
+            <span className="font-semibold">{t(invoice ? "expenseInvoiceDate" : "expenseDate")}:</span>{" "}
+            {formatDate(expense.date, lang)}
+          </div>
+          {invoice && expense.dueDate && (
+            <div>
+              <span className="font-semibold">{t("expenseDueDate")}:</span> {formatDate(expense.dueDate, lang)}
+            </div>
+          )}
           {expense.note && <div><span className="font-semibold">{t("expenseNote")}:</span> {expense.note}</div>}
 
           {/* The review trail: each entry appears once it has happened. */}
@@ -292,7 +352,7 @@ const ExpenseDetail = ({
           )}
           {expense.reimbursedDate && (
             <div>
-              <span className="font-semibold">{t("expenseReimbursedDate")}:</span>{" "}
+              <span className="font-semibold">{t(invoice ? "expensePaidDate" : "expenseReimbursedDate")}:</span>{" "}
               {formatDate(expense.reimbursedDate, lang)}
             </div>
           )}

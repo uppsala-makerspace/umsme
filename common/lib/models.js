@@ -914,8 +914,20 @@ export const models = {
   },
   expense: {
     memberId: { label: "Member", type: String, max: 50 },
-    driveFileId: { label: "Receipt file id", type: String, max: 200 },
-    mimeType: { label: "Receipt mime type", type: String, max: 100 },
+    // A receipt (kvitto: the member has paid and is reimbursed) or an invoice
+    // (faktura: the association pays the supplier). The workflow is the same;
+    // for an invoice the final `reimbursed` status means "paid". Missing means
+    // receipt, so expenses from before the field existed need no migration.
+    type: {
+      label: "Type",
+      type: String,
+      allowedValues: ["receipt", "invoice"],
+      defaultValue: "receipt",
+      optional: true,
+    },
+    // The receipt photo or invoice document (an image, or a PDF for invoices).
+    driveFileId: { label: "Document file id", type: String, max: 200 },
+    mimeType: { label: "Document mime type", type: String, max: 100 },
     status: {
       label: "Status",
       type: String,
@@ -923,7 +935,10 @@ export const models = {
       defaultValue: "pending",
       allowedValues: ["pending", "submitted", "confirmed", "rejected", "reimbursed"],
     },
-    date: { label: "Receipt date", type: Date },
+    // Receipt date, or invoice date for an invoice.
+    date: { label: "Document date", type: Date },
+    // When an invoice must be paid. Required to submit an invoice; unused for receipts.
+    dueDate: { label: "Due date", type: Date, optional: true },
     createdAt: {
       label: "Created",
       type: Date,
@@ -936,8 +951,9 @@ export const models = {
       max: 50,
       optional: true,
     },
+    // Place of purchase, or the supplier for an invoice.
     place: {
-      label: "Place of purchase",
+      label: "Place of purchase / supplier",
       type: String,
       max: 200,
       optional: true,

@@ -7,6 +7,7 @@ import { memberForUser } from '/imports/common/server/memberForUser';
 import { publishManagerEvent, ManagerEventType, blockquote } from '/imports/common/server/managerEvents';
 import { adminLink } from '/imports/common/lib/links';
 import { receiptUrlFor } from '/imports/common/server/receiptToken';
+import { isInvoice } from '/imports/common/lib/expenseType';
 
 // Build a Slack-mrkdwn description of an expense for manager events, with a
 // link back to the admin app (settings.public.adminUrl; omitted if unset).
@@ -19,7 +20,8 @@ const expenseLine = async (expense, verb, { by, note } = {}) => {
   const noteText = note ? `\n${blockquote(note)}` : '';
   const url = adminLink(`expense/${expense._id}`);
   const link = url ? `\n<${url}|Open in admin>` : '';
-  return `*${member?.name || expense.memberId}*'s expense of ${expense.amount} kr — ` +
+  const kind = isInvoice(expense) ? 'invoice' : 'expense';
+  return `*${member?.name || expense.memberId}*'s ${kind} of ${expense.amount} kr — ` +
     `\`${account?.name || "?"}\` was ${verb}${byText}.${noteText}${link}`;
 };
 
@@ -71,7 +73,7 @@ Meteor.methods({
       $set: withActor({ status: 'confirmed', confirmedAt: new Date() }, 'confirmedBy', me),
     });
     await publishManagerEvent(ManagerEventType.EXPENSE_CONFIRMED, {
-      subject: 'Expense confirmed',
+      subject: isInvoice(expense) ? 'Invoice confirmed' : 'Expense confirmed',
       body: await expenseLine(expense, 'confirmed', { by: actor?.name || 'admin' }),
     });
     return true;
@@ -103,7 +105,7 @@ Meteor.methods({
       $unset: { confirmedAt: '', confirmedBy: '' },
     });
     await publishManagerEvent(ManagerEventType.EXPENSE_REJECTED, {
-      subject: 'Expense rejected',
+      subject: isInvoice(expense) ? 'Invoice rejected' : 'Expense rejected',
       body: await expenseLine(expense, 'rejected', { note: trimmedReason }),
     });
     return true;
@@ -140,8 +142,8 @@ Meteor.methods({
       }, 'reimbursedBy', me),
     });
     await publishManagerEvent(ManagerEventType.EXPENSE_REIMBURSED, {
-      subject: 'Expense reimbursed',
-      body: await expenseLine(expense, 'reimbursed'),
+      subject: isInvoice(expense) ? 'Invoice paid' : 'Expense reimbursed',
+      body: await expenseLine(expense, isInvoice(expense) ? 'paid' : 'reimbursed'),
     });
     return true;
   },
@@ -161,8 +163,8 @@ Meteor.methods({
       $unset: { reimbursedAt: '', reimbursedBy: '' },
     });
     await publishManagerEvent(ManagerEventType.EXPENSE_UNREIMBURSED, {
-      subject: 'Reimbursement undone',
-      body: await expenseLine(expense, 'un-marked as reimbursed'),
+      subject: isInvoice(expense) ? 'Payment undone' : 'Reimbursement undone',
+      body: await expenseLine(expense, isInvoice(expense) ? 'un-marked as paid' : 'un-marked as reimbursed'),
     });
     return true;
   },

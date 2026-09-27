@@ -7,8 +7,9 @@ import Loader from "../../../components/Loader";
 import Button from "../../../components/Button";
 import Tabs from "../../../components/Tabs";
 import ExpenseItem from "../components/ExpenseItem";
+import InvoiceBadge from "../components/InvoiceBadge";
 import AccountBudgets from "./AccountBudgets";
-import { EXPENSE_STATUSES, formatDate, statusDate } from "../utils";
+import { EXPENSE_STATUSES, formatDate, statusDate, statusGroupKey } from "../utils";
 import { localized } from "/imports/common/lib/groupRules";
 
 const Expenses = ({
@@ -62,6 +63,7 @@ const Expenses = ({
       <span className="inline-block rounded-full bg-gray-100 text-gray-700 text-xs px-2 py-1 mt-1">
         {e.accountName || t("expenseDraft")}
       </span>
+      <InvoiceBadge expense={e} className="mt-1 ml-1" />
       <div className="flex justify-between gap-3 text-sm text-gray-500 mt-1">
         <span>{e.amount ? `${e.amount} kr` : t("expenseNoAmount")}</span>
         <span className="whitespace-nowrap text-gray-600">
@@ -129,7 +131,7 @@ const Expenses = ({
             byStatus[status].length > 0 ? (
               <section className="mb-8" key={status}>
                 <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">
-                  {t(`expenseStatus_${status}`)}
+                  {t(statusGroupKey(status))}
                 </h3>
                 <ul className="list-none p-0 m-0">
                   {byStatus[status].map((e) => {
@@ -142,6 +144,7 @@ const Expenses = ({
                         <span className="inline-block rounded-full bg-gray-100 text-gray-700 text-xs px-2 py-1 mt-1">
                           {e.accountName || t("expenseDraft")}
                         </span>
+                        <InvoiceBadge expense={e} className="mt-1 ml-1" />
                         <div className="flex justify-between gap-3 text-sm text-gray-500 mt-1">
                           <span>{e.amount ? `${e.amount} kr` : t("expenseNoAmount")}</span>
                           <span className="whitespace-nowrap text-gray-600">

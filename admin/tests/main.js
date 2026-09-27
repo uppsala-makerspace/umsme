@@ -3,6 +3,7 @@ import "./accounting.tests";
 import "./stats.tests";
 import "./expenseApproval.tests";
 import "./expenseBudget.tests";
+import "./expenseType.tests";
 import "./slug.tests";
 import "./publicDirectory.tests";
 import "./storeRules.tests";

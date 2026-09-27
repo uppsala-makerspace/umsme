@@ -1,4 +1,12 @@
 <template name="ExpenseList">
     <h1>{{heading}}</h1>
+    {{#if split}}
+    <h2>Invoices to pay</h2>
+    <p class="text-muted">Pay the supplier using the details on the invoice. Soonest due date first.</p>
+    {{> tabular table=TabularTables.InvoicesToPay selector=invoiceSelector class="table table-hover table-striped table-bordered table-condensed expenseList"}}
+    <h2>Receipts to reimburse</h2>
+    {{> tabular table=TabularTables.Expenses selector=receiptSelector class="table table-hover table-striped table-bordered table-condensed expenseList"}}
+    {{else}}
     {{> tabular table=TabularTables.Expenses selector=selector class="table table-hover table-striped table-bordered table-condensed expenseList"}}
+    {{/if}}
 </template>

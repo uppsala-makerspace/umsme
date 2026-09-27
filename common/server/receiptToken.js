@@ -122,6 +122,8 @@ export const makeReceiptHandler = () => async (req, res) => {
 
   res.writeHead(200, {
     "Content-Type": expense.mimeType || "application/octet-stream",
+    // Open in the browser rather than download, which matters for PDF invoices.
+    "Content-Disposition": "inline",
     "Content-Length": buffer.length,
     "Cache-Control": "private, max-age=86400",
     ETag: etag,

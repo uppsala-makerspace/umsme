@@ -5,6 +5,7 @@ import moment from 'moment';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
+import { isInvoice, isPdf } from '/imports/common/lib/expenseType';
 
 import './ExpenseView.html';
 
@@ -56,6 +57,17 @@ Template.ExpenseView.helpers({
   },
   isReimbursed() {
     return currentExpense()?.status === 'reimbursed';
+  },
+  isInvoice() {
+    return isInvoice(currentExpense());
+  },
+  isPdf() {
+    return isPdf(currentExpense()?.mimeType);
+  },
+  // A reimbursed invoice is paid; the stored status is the same.
+  statusText() {
+    const e = currentExpense();
+    return e?.status === 'reimbursed' && isInvoice(e) ? 'paid' : e?.status;
   },
   memberName() {
     const e = currentExpense();
@@ -194,7 +206,7 @@ Template.ExpenseView.events({
       alert('Pick a reimbursement date.');
       return;
     }
-    if (!confirm('Mark this expense as reimbursed?')) return;
+    if (!confirm(isInvoice(currentExpense()) ? 'Mark this invoice as paid?' : 'Mark this expense as reimbursed?')) return;
     // Interpret the date input as a local calendar date.
     const date = new Date(`${dateStr}T00:00:00`);
     Meteor.call('expenses.reimburse', id, account, date, (err) => {

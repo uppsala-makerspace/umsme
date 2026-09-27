@@ -13,6 +13,30 @@ The feature spans all of `common/`, `app/`, and `admin/`. Reimbursed expenses
 feed verification series `U` in the accounting export — see
 [accounting.md](accounting.md).
 
+### Receipt or invoice
+
+A new expense starts with a choice (`/expenses/new?type=receipt|invoice`):
+
+- **Receipt (kvitto)** — the member has paid and is reimbursed.
+- **Invoice (faktura)** — not paid yet; the treasurer pays the supplier. It
+  needs a **due date** to be submitted, and the place field is the **supplier**.
+
+Either can be a photo or a **PDF** (at most 10 MB). Photos are downscaled in
+the browser; a PDF is stored as is and opened in a new tab rather than shown
+inline.
+
+The workflow is the same for both. An invoice's final step is "paid" rather
+than "reimbursed", but the stored status is `reimbursed` either way, so
+budgets, the bookkeeping export and bank matching need no special case. The
+type can be changed while the expense is editable. Field
+`type` (`receipt` | `invoice`, missing means receipt) and `dueDate` on the
+expense; the rules are in `common/lib/expenseType.js`.
+
+In admin the reimburse queue splits into **Invoices to pay**, soonest due date
+first, and **Receipts to reimburse**. An invoice's page says "Mark as paid",
+shows the due date, and points to the payment details on the invoice instead
+of the member's bank account.
+
 ## 2. Access Control
 
 Expense features in the member app are visible only to members for whom
@@ -218,7 +242,8 @@ An account used by any expense cannot be deleted.
 ## 7. Member Bank Details
 
 So the treasurer can actually pay, members with expense access get a bank
-section on their profile page (app): bank name, clearing number, account
+section on their profile page (app). It is only used for receipts; an invoice
+is paid to the supplier with the details on the invoice. The section has: bank name, clearing number, account
 number, and account-holder name (the holder is sometimes not the member).
 The numbers are stored as entered — no zero-padding or combining; the
 treasurer's bank validates the format. The admin expense view shows them
