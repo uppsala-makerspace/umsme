@@ -11,16 +11,13 @@
  */
 
 /**
- * Which expense statuses count as spent, per way of counting. The member app
- * lets the viewer switch between them; `approved` is the default.
+ * The statuses that can count as spent, in workflow order. The member app lets
+ * the viewer pick any of them; confirmed and reimbursed are on by default.
+ * Rejected expenses and drafts never count.
  */
-export const BUDGET_SPENT_MODES = {
-  approved: ["confirmed", "reimbursed"],
-  claimed: ["submitted", "confirmed", "reimbursed"],
-  paid: ["reimbursed"],
-};
+export const BUDGET_SPENT_STATUSES = ["submitted", "confirmed", "reimbursed"];
 
-export const DEFAULT_BUDGET_SPENT_MODE = "approved";
+export const DEFAULT_BUDGET_SPENT_STATUSES = ["confirmed", "reimbursed"];
 
 const time = (d) => (d ? new Date(d).getTime() : 0);
 
@@ -44,16 +41,17 @@ export const sortRevisions = (revisions = []) =>
 export const currentBudget = (revisions = []) => sortRevisions(revisions)[0] || null;
 
 /**
- * What has been spent under a given way of counting.
+ * What has been spent, counting the chosen statuses. Anything outside
+ * BUDGET_SPENT_STATUSES is ignored, so a rejected expense can never count.
  *
  * @param {Object<string, number>} totalsByStatus  e.g. { submitted: 120, confirmed: 800 }
- * @param {string} mode  A key of BUDGET_SPENT_MODES; unknown falls back to the default
+ * @param {Array<string>} statuses  Statuses to count; defaults to confirmed and reimbursed
  * @return {number}
  */
-export const spentFor = (totalsByStatus = {}, mode = DEFAULT_BUDGET_SPENT_MODE) => {
-  const statuses = BUDGET_SPENT_MODES[mode] || BUDGET_SPENT_MODES[DEFAULT_BUDGET_SPENT_MODE];
-  return statuses.reduce((sum, status) => sum + (Number(totalsByStatus[status]) || 0), 0);
-};
+export const spentFor = (totalsByStatus = {}, statuses = DEFAULT_BUDGET_SPENT_STATUSES) =>
+  statuses
+    .filter((status) => BUDGET_SPENT_STATUSES.includes(status))
+    .reduce((sum, status) => sum + (Number(totalsByStatus[status]) || 0), 0);
 
 /**
  * What is left of the budget. Negative when it is overspent; null when there

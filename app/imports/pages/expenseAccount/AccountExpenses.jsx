@@ -10,6 +10,7 @@ import CheckboxDropdown from "../../components/CheckboxDropdown";
 import { formatDate, statusDate, statusGroupKey } from "../expenses/utils";
 import ExpenseDocument from "../expenses/components/ExpenseDocument";
 import InvoiceBadge from "../expenses/components/InvoiceBadge";
+import StatusFilterTrigger, { statusSummary as summarize } from "../expenses/components/StatusFilterTrigger";
 import { isInvoice } from "/imports/common/lib/expenseType";
 
 // Same status accents as the member's own expense list (ExpenseItem).
@@ -37,23 +38,6 @@ const truncate = (text) =>
 const dash = (value) => (value === null || value === undefined || value === "" ? "—" : value);
 
 const kr = (amount) => `${Math.round((amount || 0) * 100) / 100} kr`;
-
-/**
- * The status filter's trigger: a button sized and styled like the year picker
- * beside it, showing a summary of the selection. The popover itself comes from
- * CheckboxDropdown, shared with the group list.
- */
-const StatusFilterTrigger = ({ open, toggle, summary }) => (
-  <button
-    type="button"
-    aria-expanded={open}
-    onClick={toggle}
-    className="w-full flex items-center justify-between gap-2 p-2 border border-gray-300 rounded-lg bg-white text-left cursor-pointer"
-  >
-    <span className="truncate">{summary}</span>
-    <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
-  </button>
-);
 
 const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYearChange }) => {
   const { t, i18n } = useTranslation();
@@ -104,18 +88,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
       prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
     );
 
-  // Naming the single choice beats "1 vald"; beyond that the labels are too
-  // long to list, so fall back to a count.
-  const statusSummary =
-    statuses.length === FILTER_STATUSES.length
-      ? t("expenseAllStatuses")
-      : statuses.length === 0
-        ? t("expenseNoStatuses")
-        : statuses.length === 1
-          ? t(statusGroupKey(statuses[0]))
-          // `n`, not `count`: the latter would pull in i18next's plural
-          // machinery, and this string never needs it.
-          : t("expenseStatusesSelected", { n: statuses.length });
+  const statusSummary = summarize(t, statuses, FILTER_STATUSES);
 
   return (
     <MainContent>
@@ -130,9 +103,9 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
         </div>
       )}
 
-      {/* Year and status side by side: the year picker keeps its natural
-          width, the status filter takes the rest. */}
-      <div className="flex flex-wrap items-start gap-3 mb-4">
+      {/* Year on the left, the status filter on the right; both only as wide
+          as their content, as in the budget view. */}
+      <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex-none">
           <label htmlFor="expenseYear" className="block text-sm text-gray-600 mb-1">
             {t("expenseYear")}
@@ -160,8 +133,8 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
           </div>
         </div>
 
-        <div className="flex-1 min-w-0">
-          <span className="block text-sm text-gray-600 mb-1">{t("expenseStatusFilter")}</span>
+        <div className="flex-none">
+          <span className="block text-sm text-gray-600 mb-1 text-right">{t("expenseStatusFilter")}</span>
           <CheckboxDropdown
             options={FILTER_STATUSES.map((status) => ({
               key: status,
@@ -169,7 +142,8 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
             }))}
             selected={statuses}
             onToggle={toggleStatus}
-            panelClassName="w-full min-w-max"
+            align="right"
+            panelClassName="min-w-max"
             renderTrigger={({ open, toggle }) => (
               <StatusFilterTrigger open={open} toggle={toggle} summary={statusSummary} />
             )}

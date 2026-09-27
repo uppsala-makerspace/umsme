@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Loader from "../../../components/Loader";
-import { formatDate } from "../utils";
+import CheckboxDropdown from "../../../components/CheckboxDropdown";
+import StatusFilterTrigger, { statusSummary } from "../components/StatusFilterTrigger";
+import { formatDate, statusGroupKey } from "../utils";
 import { localized } from "/imports/common/lib/groupRules";
 import {
-  BUDGET_SPENT_MODES,
-  DEFAULT_BUDGET_SPENT_MODE,
+  BUDGET_SPENT_STATUSES,
+  DEFAULT_BUDGET_SPENT_STATUSES,
   spentFor,
   remaining,
 } from "/imports/common/lib/expenseBudget";
@@ -54,20 +56,82 @@ const BookkeepingRows = ({ rows, className = "" }) => (
 );
 
 /**
+ * Remaining amount, a bar for the share spent (red once overspent) and the
+ * spent and budget figures under it. `large` is the summary's bigger variant.
+ */
+const BudgetBar = ({ budget, spent, large = false }) => {
+  const { t } = useTranslation();
+  const left = remaining(budget, spent);
+  const over = left < 0;
+  // A zero budget with spending is fully used; with nothing spent it is empty.
+  const share = budget > 0 ? Math.min(spent / budget, 1) : spent > 0 ? 1 : 0;
+  return (
+    <>
+      <span className={`flex justify-between items-baseline ${large ? "mt-2" : "mt-3"}`}>
+        <span className="text-sm text-gray-600">{t("expenseBudgetRemaining")}</span>
+        <span
+          className={`font-semibold ${large ? "text-2xl" : "text-lg"} ${
+            over ? "text-red-600" : "text-gray-900"
+          }`}
+        >
+          {kr(left)}
+        </span>
+      </span>
+      <span
+        className={`block ${large ? "h-3" : "h-2"} mt-2 rounded-full bg-gray-200 overflow-hidden`}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(share * 100)}
+      >
+        <span
+          className={`block h-full rounded-full ${over ? "bg-red-500" : "bg-brand-green"}`}
+          style={{ width: `${share * 100}%` }}
+        />
+      </span>
+      <span className={`flex justify-between text-gray-500 mt-1 ${large ? "text-sm" : "text-xs"}`}>
+        <span>
+          {t("expenseBudgetSpent")} {kr(spent)}
+        </span>
+        <span>
+          {t("expenseBudget")} {kr(budget)}
+        </span>
+      </span>
+    </>
+  );
+};
+
+/**
  * Budget view of the expense accounts tab: per account, the year's budget,
  * what is spent against it and what is left. How "spent" is counted is the
- * viewer's choice — approved and paid by default — and changes only the
- * arithmetic, so it is local state rather than a new fetch.
+ * viewer's choice of statuses — confirmed and reimbursed by default — and
+ * changes only the arithmetic, so it is local state rather than a new fetch.
  */
 const AccountBudgets = ({ loading, error, year, availableYears, accounts, bookkeeping, onYearChange }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
-  const [mode, setMode] = useState(DEFAULT_BUDGET_SPENT_MODE);
+  const [statuses, setStatuses] = useState(DEFAULT_BUDGET_SPENT_STATUSES);
+  const toggleStatus = (status) =>
+    setStatuses((prev) =>
+      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
+    );
+
+  // Totals across every account shown: the budgets added up, and spending
+  // split by whether the account has a budget to spend against.
+  const summary = accounts.reduce(
+    (acc, a) => {
+      const spent = spentFor(a.totals, statuses);
+      if (a.budget === null) return { ...acc, unbudgetedSpent: acc.unbudgetedSpent + spent };
+      return { ...acc, budget: acc.budget + a.budget, spent: acc.spent + spent, budgeted: acc.budgeted + 1 };
+    },
+    { budget: 0, spent: 0, unbudgetedSpent: 0, budgeted: 0 }
+  );
 
   return (
     <div>
-      {/* The spent-mode labels are long, so that select gets a row of its own. */}
-      <div className="flex flex-wrap items-start gap-3 mb-4">
+      {/* Year on the left, what counts as spent on the right; both only as
+          wide as their content. */}
+      <div className="flex items-start justify-between gap-3 mb-4">
         <Select
           id="budgetYear"
           label={t("expenseYear")}
@@ -81,20 +145,26 @@ const AccountBudgets = ({ loading, error, year, availableYears, accounts, bookke
             </option>
           ))}
         </Select>
-        <Select
-          id="budgetSpentMode"
-          label={t("expenseBudgetCountAs")}
-          value={mode}
-          onChange={setMode}
-          className="basis-full"
-          selectClassName="text-sm"
-        >
-          {Object.keys(BUDGET_SPENT_MODES).map((m) => (
-            <option key={m} value={m}>
-              {t(`expenseBudgetMode_${m}`)}
-            </option>
-          ))}
-        </Select>
+        <div className="flex-none">
+          <span className="block text-sm text-gray-600 mb-1 text-right">{t("expenseBudgetCountAs")}</span>
+          <CheckboxDropdown
+            options={BUDGET_SPENT_STATUSES.map((status) => ({
+              key: status,
+              label: t(statusGroupKey(status)),
+            }))}
+            selected={statuses}
+            onToggle={toggleStatus}
+            align="right"
+            panelClassName="min-w-max"
+            renderTrigger={({ open, toggle }) => (
+              <StatusFilterTrigger
+                open={open}
+                toggle={toggle}
+                summary={statusSummary(t, statuses, BUDGET_SPENT_STATUSES)}
+              />
+            )}
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -105,25 +175,40 @@ const AccountBudgets = ({ loading, error, year, availableYears, accounts, bookke
         <p className="text-center text-gray-500 p-8 italic">{t("expenseNoAccounts")}</p>
       ) : (
         <>
-        {/* Where the year's reimbursements were booked, across every account
-            shown. The bookkeeping account is picked at reimbursement, so this
-            counts reimbursed expenses whatever the dropdown says. */}
-        {bookkeeping.length > 0 && (
-          <section className="mb-4 p-4 rounded-lg bg-white border border-gray-200">
-            <h4 className="text-sm font-semibold text-gray-700 m-0 mb-2">{t("expenseBudgetBooked")}</h4>
-            <BookkeepingRows rows={bookkeeping} className="text-sm text-gray-700" />
-          </section>
-        )}
+        {/* The whole picture first, set apart from the accounts by a rule
+            rather than drawn as another card: all budgets together against
+            what is spent on those accounts. Spending on accounts without a
+            budget cannot eat into a budget, so it is reported beside it. */}
+        <section className="mb-5 pb-5 border-b-2 border-gray-300">
+          <h3 className="text-lg font-semibold m-0">{t("expenseBudgetTotal")}</h3>
+          {summary.budgeted > 0 ? (
+            <BudgetBar budget={summary.budget} spent={summary.spent} large />
+          ) : (
+            <span className="flex justify-between items-baseline mt-2">
+              <span className="text-sm text-gray-500 italic">{t("expenseBudgetNoneAtAll")}</span>
+            </span>
+          )}
+          {summary.unbudgetedSpent > 0 && (
+            <p className="text-sm text-gray-500 mt-2 mb-0">
+              {t(summary.budgeted > 0 ? "expenseBudgetUnbudgetedSpent" : "expenseBudgetSpentTotal", {
+                amount: kr(summary.unbudgetedSpent),
+              })}
+            </p>
+          )}
+          {/* Where the year's reimbursements were booked, across every account
+              shown. The bookkeeping account is picked at reimbursement, so this
+              counts reimbursed expenses whatever the checkboxes say. */}
+          {bookkeeping.length > 0 && (
+            <div className="mt-4">
+              <h4 className="text-sm font-semibold text-gray-700 m-0 mb-1">{t("expenseBudgetBooked")}</h4>
+              <BookkeepingRows rows={bookkeeping} className="text-sm text-gray-700" />
+            </div>
+          )}
+        </section>
         <ul className="list-none p-0 m-0">
           {accounts.map((a) => {
-            const spent = spentFor(a.totals, mode);
-            const left = remaining(a.budget, spent);
+            const spent = spentFor(a.totals, statuses);
             const hasBudget = a.budget !== null;
-            const over = hasBudget && left < 0;
-            // A zero budget with spending is fully used; with nothing spent it is empty.
-            const share = hasBudget
-              ? a.budget > 0 ? Math.min(spent / a.budget, 1) : spent > 0 ? 1 : 0
-              : 0;
             return (
               <li key={a._id} className="mb-3">
                 <Link
@@ -139,32 +224,7 @@ const AccountBudgets = ({ loading, error, year, availableYears, accounts, bookke
 
                   {hasBudget ? (
                     <>
-                      <span className="flex justify-between items-baseline mt-3">
-                        <span className="text-sm text-gray-600">{t("expenseBudgetRemaining")}</span>
-                        <span className={`text-lg font-semibold ${over ? "text-red-600" : "text-gray-900"}`}>
-                          {kr(left)}
-                        </span>
-                      </span>
-                      <span
-                        className="block h-2 mt-2 rounded-full bg-gray-100 overflow-hidden"
-                        role="progressbar"
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={Math.round(share * 100)}
-                      >
-                        <span
-                          className={`block h-full rounded-full ${over ? "bg-red-500" : "bg-brand-green"}`}
-                          style={{ width: `${share * 100}%` }}
-                        />
-                      </span>
-                      <span className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span>
-                          {t("expenseBudgetSpent")} {kr(spent)}
-                        </span>
-                        <span>
-                          {t("expenseBudget")} {kr(a.budget)}
-                        </span>
-                      </span>
+                      <BudgetBar budget={a.budget} spent={spent} />
                       {a.lastRevision && a.lastRevision.count > 1 && (
                         <span className="block text-xs text-gray-500 mt-2">
                           {t("expenseBudgetRevised", { date: formatDate(a.lastRevision.setAt, lang) })}

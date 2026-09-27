@@ -144,21 +144,17 @@ revised in the admin app, on the account's page, by anyone with the `admin`,
 In the app, the **Accounts** tab on `/expenses` has a **List / Budget**
 toggle (`?tab=accounts&view=budget`). The budget view, served by
 `expenses.getBudgetOverview`, shows the same accounts as the list, per account
-with the year's budget, what is spent, what is **remaining** and a bar that
-turns red when overspent. A dropdown chooses what counts as spent:
-
-| Choice | Statuses counted |
-| --- | --- |
-| Confirmed and reimbursed (default) | `confirmed`, `reimbursed` |
-| Submitted, confirmed and reimbursed | `submitted`, `confirmed`, `reimbursed` |
-| Reimbursed only | `reimbursed` |
+with the year's budget, what is spent, what is **remaining** and a bar
+that turns red when overspent. Checkboxes next to the year choose which
+statuses count as spent: **submitted**, **confirmed** and **reimbursed**
+(which includes paid invoices). Confirmed and reimbursed are on by default.
 
 Rejected expenses and drafts never count.
 
 The view also shows **where the money was booked**: reimbursed expenses summed
 per bookkeeping account, once across all shown accounts and once per expense
 account. The bookkeeping account is chosen at reimbursement, so this part
-counts only reimbursed expenses, whatever the dropdown says. The names come
+counts only reimbursed expenses, whatever the checkboxes say. The names come
 from `accounting.expense.accountOptions`, which the app's `settings.json` needs
 too — the same list as the admin app's. Without it only the account numbers
 show. The rules live in

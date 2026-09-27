@@ -1,7 +1,7 @@
 import assert from 'assert';
 import {
-  BUDGET_SPENT_MODES,
-  DEFAULT_BUDGET_SPENT_MODE,
+  BUDGET_SPENT_STATUSES,
+  DEFAULT_BUDGET_SPENT_STATUSES,
   currentBudget,
   sortRevisions,
   spentFor,
@@ -45,27 +45,24 @@ describe('expenseBudget', function () {
     const totals = { submitted: 100, confirmed: 300, reimbursed: 500, rejected: 999 };
 
     it('defaults to confirmed plus reimbursed', function () {
-      assert.strictEqual(DEFAULT_BUDGET_SPENT_MODE, 'approved');
+      assert.deepStrictEqual(DEFAULT_BUDGET_SPENT_STATUSES, ['confirmed', 'reimbursed']);
       assert.strictEqual(spentFor(totals), 800);
     });
 
-    it('counts every claim in claimed mode', function () {
-      assert.strictEqual(spentFor(totals, 'claimed'), 900);
+    it('counts exactly the chosen statuses', function () {
+      assert.strictEqual(spentFor(totals, ['submitted', 'confirmed', 'reimbursed']), 900);
+      assert.strictEqual(spentFor(totals, ['reimbursed']), 500);
+      assert.strictEqual(spentFor(totals, ['submitted']), 100);
+      assert.strictEqual(spentFor(totals, []), 0);
     });
 
-    it('counts only money paid out in paid mode', function () {
-      assert.strictEqual(spentFor(totals, 'paid'), 500);
+    it('never counts rejected expenses, even when asked to', function () {
+      assert.ok(!BUDGET_SPENT_STATUSES.includes('rejected'));
+      assert.strictEqual(spentFor(totals, ['rejected', 'confirmed']), 300);
     });
 
-    it('never counts rejected expenses', function () {
-      for (const statuses of Object.values(BUDGET_SPENT_MODES)) {
-        assert.ok(!statuses.includes('rejected'));
-      }
-    });
-
-    it('falls back to the default for an unknown mode and treats missing totals as zero', function () {
-      assert.strictEqual(spentFor(totals, 'nonsense'), 800);
-      assert.strictEqual(spentFor({}, 'claimed'), 0);
+    it('treats missing totals as zero', function () {
+      assert.strictEqual(spentFor({}, BUDGET_SPENT_STATUSES), 0);
     });
   });
 
