@@ -14,7 +14,7 @@ import {
 } from '/imports/common/server/storage/manual';
 import { confirmMemberStorageOffer, upsertMemberStorageRequest } from '/imports/common/server/storage/memberCommands';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
-import { setStorageNotificationTransportsForTests } from '/imports/common/server/storageMessages/service';
+import { sendStorageNotification, setStorageNotificationTransportsForTests } from '/imports/common/server/storageMessages/service';
 import { ensureStorageMessageTemplates } from '/imports/common/server/storageMessages/defaults';
 
 const prefix = 'storage-five-collection-test:';
@@ -85,6 +85,73 @@ describe('five-collection storage database workflow', function () {
     assert(stored.assigned_at instanceof Date);
     assert.strictEqual(await Messages.find({ member: ownerId, type: 'storage' }).countAsync(), 1);
   });
+
+  for (const returnAction of ['release', 'reclaim']) {
+    it(`sends distinct assignment and ${returnAction} messages for successive owners of one unit`, async function () {
+      const unitId = `${prefix}reused-unit`;
+      const actor = `${prefix}admin`;
+      const decisionType = returnAction === 'release' ? 'voluntary_release' : 'reclamation';
+      let pushes = 0;
+      setStorageNotificationTransportsForTests({
+        sendEmail: async () => {}, sendPush: async () => { pushes += 1; },
+      });
+      await unit(unitId, 1);
+      // Existing production messages used the unit as their key. They must
+      // remain intact and must not prevent a new assignment or return.
+      const oldOwner = { _id: `${prefix}old-owner`, name: 'Previous Owner' };
+      for (const type of ['assignment', decisionType]) {
+        await sendStorageNotification({
+          owner: oldOwner, decisionType: type, decisionId: unitId,
+          context: { unit_name: unitId },
+        });
+      }
+      const confirm = async (action, cycle) => {
+        const preview = await previewStorageSuggestions(action);
+        assert.strictEqual(preview.rows.length, 1, action);
+        const command = {
+          action, actor, commandId: `${prefix}${action}-${cycle}`,
+          selections: [{ suggestion_id: preview.rows[0].suggestion_id }],
+        };
+        const result = (await confirmStorageSuggestions(command)).results[0];
+        assert.strictEqual(result.status, 'applied', result.reason);
+        const pushCount = pushes;
+        const retry = (await confirmStorageSuggestions(command)).results[0];
+        assert.strictEqual(retry.status, 'already_applied');
+        assert.strictEqual(pushes, pushCount, 'retry must not send another message');
+        return result;
+      };
+      const messageIds = [];
+      for (const cycle of [1, 2]) {
+        const owner = `${prefix}reused-owner-${cycle}`;
+        await Members.insertAsync({ _id: owner, mid: `reuse${cycle}`, name: `Owner ${cycle}`, lab: future() });
+        const now = new Date();
+        await StorageRequests.insertAsync({
+          _id: `${owner}:allocation`, owner, request_type: 'allocation',
+          request_status: 'waiting', requested_at: now, createdAt: now, updatedAt: now,
+        });
+        messageIds.push((await confirm('allocate', cycle)).message_id);
+        assert.strictEqual((await StorageUnits.findOneAsync(unitId)).owner, owner);
+        if (returnAction === 'release') {
+          await upsertMemberStorageRequest({ owner: await Members.findOneAsync(owner),
+            requestType: 'release', preference: {}, actor: owner, commandId: `${owner}:release` });
+        } else {
+          await Members.updateAsync(owner, { $set: { lab: past() } });
+          await confirm('warn', cycle);
+          await StorageUnits.updateAsync(unitId, { $set: {
+            'warning.warned_at': new Date(Date.now() - 29 * 86400000),
+            'warning.deadline_at': new Date(Date.now() - 86400000),
+          } });
+        }
+        messageIds.push((await confirm(returnAction, cycle)).message_id);
+        assert.strictEqual((await StorageUnits.findOneAsync(unitId)).availability_status, 'awaiting_clearance');
+        await confirmStorageClearanceManual({ unitId, actor, commandId: `clear-${cycle}` });
+        assert.strictEqual(await Messages.find({ member: owner, type: 'storage' }).countAsync(),
+          returnAction === 'release' ? 2 : 3);
+      }
+      assert.strictEqual(new Set(messageIds).size, 4);
+      assert.strictEqual(await Messages.find({ member: oldOwner._id }).countAsync(), 2);
+    });
+  }
 
   it('derives height when units and wall layouts change', async function () {
     const wallId = `${prefix}wall`;

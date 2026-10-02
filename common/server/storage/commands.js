@@ -57,7 +57,7 @@ const applyAssignment = async ({ owner, unit, request }, actor, now, session, ev
   // member is never left unnotified by a crash between commit and send. The
   // price is a premature message if this transaction is rolled back.
   const messageId = await sendStorageNotification({
-    owner, decisionType: 'assignment', decisionId: unit._id, now,
+    owner, decisionType: 'assignment', decisionId: eventId, now,
     context: { unit_name: unit.name },
   });
   await storageEvent({
@@ -170,7 +170,7 @@ const endForClearance = async ({ owner, unit, request }, selection, actor, now, 
   }
   const decisionType = reason === 'reclaimed' ? 'reclamation' : 'voluntary_release';
   const messageId = await sendStorageNotification({
-    owner, decisionType, decisionId: unit._id, now,
+    owner, decisionType, decisionId: eventId, now,
     context: { unit_name: unit.name },
   });
   await storageEvent({
