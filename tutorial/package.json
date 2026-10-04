@@ -8,7 +8,7 @@
     "shoot": "node screenshot.js"
   },
   "dependencies": {
-    "markdown-it": "^14.1.0",
+    "markdown-it": "^14.2.0",
     "ws": "^8.18.0"
   }
 }
