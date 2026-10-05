@@ -17,6 +17,7 @@ import SpaceMapSection from "../../../components/SpaceMapSection";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
+import AreaOfInterestTag from "../../../components/AreaOfInterestTag";
 
 // One group row in the "get involved" / "related groups" lists, in the same
 // style as the groups list page. The responsible steering group is rendered
@@ -90,6 +91,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     mapView,
     canEdit,
   } = data;
+  const isAreaOfInterest = workshop.kind === "areaOfInterest";
   const slackUrl = workshop.slackChannel
     ? getSlackChannelUrl(workshop.slackChannel, slackTeam, slackChannelIds)
     : undefined;
@@ -123,7 +125,8 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
           empty:hidden rather than repeating the badge's own rule about which
           statuses render — an established workshop shows nothing, and the
           wrapper must not leave a gap behind. */}
-      <div className="-mt-2 mb-2 empty:hidden">
+      <div className="-mt-2 mb-2 flex flex-wrap gap-1 empty:hidden">
+        {isAreaOfInterest && <AreaOfInterestTag />}
         <WorkshopStatusBadge status={workshop.status} />
       </div>
 
@@ -160,7 +163,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
       {certificates.length > 0 && (
         <section className="mb-6">
           <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
-            {t("workshopCertificates")}
+            {t(isAreaOfInterest ? "areaOfInterestCertificates" : "workshopCertificates")}
           </h3>
           <ul className="list-none p-0 m-0">
             {certificates.map((cert) => (
@@ -181,7 +184,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
       {group && (
         <section className="mb-6">
           <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
-            {t("engageInWorkshop")}
+            {t(isAreaOfInterest ? "engageInAreaOfInterest" : "engageInWorkshop")}
           </h3>
           <ul className="list-none p-0 m-0">
             <GroupRow group={group} highlighted />

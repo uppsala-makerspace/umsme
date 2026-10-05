@@ -26,7 +26,7 @@ const baseData = {
   parentGroup: null,
   childGroups: [{ _id: "grp6", name: { sv: "Ugnsgruppen" } }],
   relatedGroups: [
-    { _id: "grp7", name: { sv: "Cykelgruppen", en: "Bike kitchen" }, type: "interest" },
+    { _id: "grp7", name: { sv: "Kioskgruppen", en: "Kiosk group" }, type: "function" },
     { _id: "grp8", name: { sv: "IT-gruppen" }, type: "function" },
   ],
   workshop: { _id: "ws1", name: { sv: "Träverkstad" } },
@@ -82,13 +82,13 @@ export const NotActiveMember = {
 export const NoMap = {
   args: {
     loading: false,
-    // Interest group without an explicit space: the Slack and Guides cards
+    // Function group without an explicit space: the Slack and Guides cards
     // stand alone, no empty map card.
     data: {
       ...baseData,
       group: {
         ...baseData.group,
-        type: "interest",
+        type: "function",
         guidesUrl: "https://tutorial.uppsalamakerspace.se/bike/",
       },
       workshop: null,
@@ -291,13 +291,13 @@ export const SteeringMemberCanEdit = {
   },
 };
 
-export const InterestMemberCannotEdit = {
+export const FunctionMemberCannotEdit = {
   args: {
     data: {
       ...baseData,
       group: {
         ...baseData.group,
-        type: "interest",
+        type: "function",
         myState: "active",
         myIsResponsible: false,
         myCanEdit: false,

@@ -1,6 +1,6 @@
 /**
- * Shapes the listing published for the public website: the workshops and open
- * groups, the map's spaces, and the link between them.
+ * Shapes the listing published for the public website: the workshops, areas
+ * of interest and open groups, the map's spaces, and the link between them.
  *
  * Pure: takes documents already read from the database plus URL builders, so
  * the selection rules and the JSON shape can be unit tested without Meteor.
@@ -10,16 +10,22 @@ import { withUniqueSlugs } from "./slug";
 import { SPACE_COLORS, spaceColorName } from "./spaceColors";
 
 /**
- * Only workshops that exist for members to use. A forming workshop is not
- * there yet and a decommissioned one is gone; neither belongs on a public page.
+ * Only workshops and areas of interest that exist for members to use. A forming
+ * one is not there yet and a decommissioned one is gone; neither belongs on a
+ * public page.
  */
 export const PUBLIC_WORKSHOP_STATUSES = ["established", "trial"];
 
 /**
  * Only the groups anyone can join. Steering and responsibility groups are the
- * internal machinery around a workshop and say nothing to an outsider.
+ * internal machinery around a workshop or area of interest and say nothing to an
+ * outsider.
  */
-export const PUBLIC_GROUP_TYPES = ["interest", "function"];
+export const PUBLIC_GROUP_TYPES = ["function"];
+
+// Areas of interest share the workshops collection; a document without a kind
+// predates them and is a workshop.
+const workshopKind = (w) => (w.kind === "areaOfInterest" ? "areaOfInterest" : "workshop");
 
 // Skip keys with no value rather than publishing nulls: the consumer can then
 // test for presence instead of for presence-and-non-null.
@@ -65,7 +71,7 @@ const spaceLinksFor = (doc, spaceById) => {
  * Build the export.
  *
  * @param {object} args
- * @param {Array<object>} args.workshops  all workshops; filtered here
+ * @param {Array<object>} args.workshops  all workshops and areas of interest; filtered here
  * @param {Array<object>} args.groups     all groups; filtered here
  * @param {Array<object>} args.spaces     all spaces; all are published
  * @param {(spaceDocId: string) => string|null} args.iconUrlFor
@@ -82,14 +88,15 @@ export const buildDirectory = ({
   const published = [
     ...workshops
       .filter((w) => PUBLIC_WORKSHOP_STATUSES.includes(w.status))
-      .map((w) => ({ doc: w, kind: "workshop" })),
+      .map((w) => ({ doc: w, kind: workshopKind(w) })),
     ...groups
       .filter((g) => PUBLIC_GROUP_TYPES.includes(g.type))
       .map((g) => ({ doc: g, kind: "group" })),
   ];
 
-  // Workshops and groups share one list, so the slugs must be unique across
-  // both — hence one pass over the combined set rather than one per kind.
+  // Workshops, areas of interest and groups share one list, so the slugs must be
+  // unique across all of them — hence one pass over the combined set rather
+  // than one per kind.
   const slugById = new Map(
     withUniqueSlugs(published.map(({ doc }) => ({ _id: doc._id, source: doc.name?.sv })))
       .map(({ _id, slug }) => [_id, slug])
@@ -101,9 +108,10 @@ export const buildDirectory = ({
     return withoutEmpty({
       id: slugById.get(doc._id),
       kind,
-      // A workshop's status and a group's type are different kinds of fact, so
-      // they get different keys rather than one field meaning two things.
-      ...(kind === "workshop" ? { status: doc.status } : { type: doc.type }),
+      // The status of a workshop or area of interest and a group's type are
+      // different kinds of fact, so they get different keys rather than one
+      // field meaning two things.
+      ...(kind === "group" ? { type: doc.type } : { status: doc.status }),
       icon: doc.primarySpaceId ? iconUrlFor(doc.primarySpaceId) : null,
       name: bilingual(doc.name),
       tag: bilingual(doc.tag),
@@ -124,8 +132,8 @@ export const buildDirectory = ({
     const id = slugById.get(doc._id);
     for (const spaceDocId of [doc.primarySpaceId, ...(doc.secondarySpaceIds || [])]) {
       if (!spaceById.has(spaceDocId)) continue;
-      const bucket = occupants.get(spaceDocId) || { workshops: [], groups: [] };
-      bucket[kind === "workshop" ? "workshops" : "groups"].push(id);
+      const bucket = occupants.get(spaceDocId) || { workshops: [], areasOfInterest: [], groups: [] };
+      bucket[{ workshop: "workshops", areaOfInterest: "areasOfInterest", group: "groups" }[kind]].push(id);
       occupants.set(spaceDocId, bucket);
     }
   }
@@ -133,7 +141,7 @@ export const buildDirectory = ({
   // Every space is published, linked or not: an unoccupied room is still a room
   // on the floor plan and has to be drawable.
   const exportedSpaces = spaces.map((space) => {
-    const bucket = occupants.get(space._id) || { workshops: [], groups: [] };
+    const bucket = occupants.get(space._id) || { workshops: [], areasOfInterest: [], groups: [] };
     return withoutEmpty({
       spaceId: space.spaceId,
       floor: space.floor,
@@ -142,8 +150,10 @@ export const buildDirectory = ({
       icon: iconUrlFor(space._id),
       iconSize: space.iconSize ?? null,
       // A space corresponds to at most one workshop (the app's rule, see
-      // data.rooms), so this is singular while groups is a list.
+      // data.rooms), so this is singular while areas of interest and groups are
+      // lists — an area of interest spans rooms that belong to workshops.
       workshop: bucket.workshops[0] || null,
+      areasOfInterest: bucket.areasOfInterest.length > 0 ? bucket.areasOfInterest : null,
       groups: bucket.groups.length > 0 ? bucket.groups : null,
     });
   });

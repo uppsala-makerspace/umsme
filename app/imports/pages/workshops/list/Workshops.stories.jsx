@@ -33,6 +33,21 @@ const sampleWorkshops = [
     description: { sv: "Analog fotoframkallning." },
     status: "decommissioned",
   },
+  {
+    _id: "ia1",
+    kind: "areaOfInterest",
+    name: { sv: "Vinylskärning", en: "Vinyl cutting" },
+    description: { sv: "Dekaler, t-shirttryck, skyltar och stenciler med vinylskäraren." },
+    status: "trial",
+    imageUrl: "https://placehold.co/600x300?text=Vinyl",
+  },
+  {
+    _id: "ia2",
+    kind: "areaOfInterest",
+    name: { sv: "Lördagskurser", en: "Saturday courses" },
+    description: { sv: "Kurser för medlemmar varannan lördag, i flera verkstäder." },
+    status: "established",
+  },
 ];
 
 export default {
@@ -44,6 +59,24 @@ export const Default = {
   args: {
     loading: false,
     workshops: sampleWorkshops,
+    initialKind: "workshop",
+  },
+};
+
+export const AreasOfInterest = {
+  args: {
+    loading: false,
+    workshops: sampleWorkshops,
+    initialKind: "areaOfInterest",
+  },
+};
+
+// Workshops exist but no area of interest yet: the switch shows its own empty text.
+export const NoAreasOfInterest = {
+  args: {
+    loading: false,
+    workshops: sampleWorkshops.filter((w) => w.kind !== "areaOfInterest"),
+    initialKind: "areaOfInterest",
   },
 };
 

@@ -6,6 +6,7 @@ import { Attestations } from '/imports/common/collections/attestations';
 import { Members } from '/imports/common/collections/members';
 import { Workshops } from '/imports/common/collections/workshops';
 import { wouldCreateCycle } from '/imports/common/lib/rules';
+import { isAreaOfInterest } from '/imports/common/lib/groupRules';
 import '/imports/tabular/members';
 import '/imports/tabular/attestations';
 import '/imports/tabular/certificates';
@@ -179,6 +180,9 @@ Template.CertificateView.helpers({
   },
   allWorkshops() {
     return Workshops.find({}, { sort: { 'name.sv': 1 } });
+  },
+  isAreaOfInterestDoc(doc) {
+    return isAreaOfInterest(doc);
   },
   certificateWorkshop() {
     const cert = Certificates.findOne(FlowRouter.getParam('_id'));

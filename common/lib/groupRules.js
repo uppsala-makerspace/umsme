@@ -1,6 +1,8 @@
 /**
  * Pure (client + server safe) business rules for groups (grupper) and
- * workshops (verkstäder), per the workshops-and-groups guideline.
+ * workshops (verkstäder), per the workshops-and-groups guideline. Areas
+ * of interest (intresseområden) are a kind of workshop: same collection, same
+ * steering-group link, lighter requirements.
  *
  * Completeness mirrors the guideline's checklists: entities can be drafted
  * incrementally in admin (the schemas only require a Swedish name and type),
@@ -9,7 +11,8 @@
  * rather than stored, so it can never drift.
  */
 
-export const GROUP_TYPES = ["steering", "function", "interest", "responsibility"];
+export const GROUP_TYPES = ["steering", "function", "responsibility"];
+export const WORKSHOP_KINDS = ["workshop", "areaOfInterest"];
 export const WORKSHOP_STATUSES = ["established", "trial", "forming", "decommissioned"];
 export const JOIN_POLICIES = ["open", "request-any", "request-responsible"];
 
@@ -65,11 +68,18 @@ export const groupCompleteness = (group) => {
   return { complete: missing.length === 0, missing };
 };
 
+// A workshop document without a kind predates the field and is a workshop.
+export const isAreaOfInterest = (workshop) => workshop?.kind === "areaOfInterest";
+
 /**
  * Guideline requirements on a workshop: a name ending in "verkstad" or
  * "verkstaden" (definite form), a description, a representative image, a
  * Slack channel, and a responsible steering group with at least two active
  * members.
+ *
+ * An area of interest is lighter: it occupies no space of its own to keep in
+ * order, so one active member in its steering group is enough, and its name is
+ * free.
  *
  * @param {object} workshop
  * @param {object|null} group  The linked responsible group (or null).
@@ -86,23 +96,22 @@ export const workshopCompleteness = (workshop, group, activeMemberCount = 0) => 
   if (!workshop?.slackChannel) missing.push("slackChannel");
   if (!workshop?.groupId || !group) {
     missing.push("groupId");
-  } else if (activeMemberCount < 2) {
+  } else if (activeMemberCount < (isAreaOfInterest(workshop) ? 1 : 2)) {
     missing.push("groupMembers");
   }
-  if (workshop?.name?.sv && !/verkstad(en)?$/i.test(workshop.name.sv.trim())) {
+  if (
+    !isAreaOfInterest(workshop) &&
+    workshop?.name?.sv &&
+    !/verkstad(en)?$/i.test(workshop.name.sv.trim())
+  ) {
     warnings.push("nameSuffix");
   }
   return { complete: missing.length === 0, missing, warnings };
 };
 
-// Website visibility: established and trial workshops only, and only once
-// complete. Forming/decommissioned workshops are app/admin-internal.
+// Website visibility: established and trial workshops and areas of interest
+// only, and only once complete. Forming/decommissioned ones are
+// app/admin-internal.
 export const isWorkshopPublic = (workshop, group, activeMemberCount = 0) =>
   ["established", "trial"].includes(workshop?.status) &&
   workshopCompleteness(workshop, group, activeMemberCount).complete;
-
-// Website visibility: only interest groups are presented on the website —
-// steering groups are represented through their workshop, and function and
-// responsibility groups are app-internal.
-export const isGroupPublic = (group) =>
-  group?.type === "interest" && groupCompleteness(group).complete;

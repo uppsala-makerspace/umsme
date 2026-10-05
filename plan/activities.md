@@ -82,6 +82,8 @@ testade i `admin/tests/` som `storeRules` och `groupRules`.
 | `certificateGrant` | `onAttendance \| manual` | hur målet delas ut; bara när `targetCertificateId` är satt. Se *Certifikat* |
 | `createdBy`, `createdAt`, `updatedAt` | | |
 
+> **Notering (2026-10):** intressegrupper har ersatts av intresseområden, som är en sorts verkstad (`workshop.kind: "areaOfInterest"`). En aktivitet som visas på ett intresseområde kopplas därför via `workshopId`, och `displayGroupId` behövs troligen inte längre. Se `docs/groups-and-workshops.md`.
+
 ### `activityOccasions` — en gång det händer
 
 | Fält | Anm. |

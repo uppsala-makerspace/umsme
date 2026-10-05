@@ -96,7 +96,7 @@ export default () => {
               slackChannel: group.slackChannel || "",
               guidesUrl: group.guidesUrl || "",
             }}
-            showGuidesUrl={group.type === "interest" || group.type === "function"}
+            showGuidesUrl={group.type === "function"}
             saving={saving}
             onSave={handleSave}
             onImageSelect={handleImageSelect}

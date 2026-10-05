@@ -54,11 +54,21 @@ Groups.deny({
     // (fields are only fetched when declared up front, which proved
     // unreliable), so read the current document ourselves.
     const current = (await Groups.findOneAsync(doc._id)) || doc;
+    // A steering group that something points at — a responsibility subgroup,
+    // or a workshop or area of interest it runs — must stay a steering group, or
+    // those links stop meaning anything.
+    const type = nextValue(current, modifier, 'type');
+    if (current.type === 'steering' && type !== 'steering') {
+      const dependent =
+        (await Groups.findOneAsync({ parentGroupId: current._id })) ||
+        (await Workshops.findOneAsync({ groupId: current._id }));
+      if (dependent) return true;
+    }
     return violatesGroupRules(
       {
         linkedRole: nextValue(current, modifier, 'linkedRole'),
         joinPolicy: nextValue(current, modifier, 'joinPolicy'),
-        type: nextValue(current, modifier, 'type'),
+        type,
         parentGroupId: nextValue(current, modifier, 'parentGroupId'),
       },
       current._id

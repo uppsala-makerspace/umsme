@@ -988,8 +988,8 @@ export const models = {
     reimbursedDate: { label: "Reimbursed date", type: Date, optional: true, autoform: { omit: true } },
   },
   // A group (grupp) per the workshops-and-groups guideline: an organised set
-  // of members with a shared responsibility or interest. Steering groups own
-  // a workshop; responsibility groups are subgroups of a steering group.
+  // of members with a shared responsibility. Steering groups own a workshop or
+  // an area of interest; responsibility groups are subgroups of a steering group.
   group: {
     name: {
       label: "Name",
@@ -1072,14 +1072,13 @@ export const models = {
     type: {
       label: "Type",
       type: String,
-      allowedValues: ["steering", "function", "interest", "responsibility"],
+      allowedValues: ["steering", "function", "responsibility"],
       autoform: {
         type: "select",
         firstOption: "(Select a type)",
         options: [
           { label: "Steering group (styrgrupp)", value: "steering" },
           { label: "Function group (funktionsgrupp)", value: "function" },
-          { label: "Interest group (intressegrupp)", value: "interest" },
           { label: "Responsibility group (ansvarsgrupp)", value: "responsibility" },
         ],
       },
@@ -1090,9 +1089,9 @@ export const models = {
       max: 80,
       optional: true,
     },
-    // Link to guides/tutorials. Shown as a card on interest and function group
-    // pages, like workshops. (Workshop and responsibility groups get guides via
-    // their connected workshop instead.)
+    // Link to guides/tutorials. Shown as a card on function group pages, like
+    // workshops. (Steering and responsibility groups get guides via their
+    // connected workshop or area of interest instead.)
     guidesUrl: {
       label: "Guides URL",
       type: String,
@@ -1117,8 +1116,9 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
-    // Workshops this group is related to (e.g. an interest group that partly
-    // operates in a workshop). Listed on those workshops' pages in the app.
+    // Workshops and areas of interest this group is related to (e.g. a function
+    // group that partly operates in a workshop). Listed on their pages in the
+    // app.
     relatedWorkshopIds: {
       label: "Related workshops",
       type: Array,
@@ -1214,6 +1214,11 @@ export const models = {
   },
   // A workshop (verkstad): a space with tools and machines for a certain kind
   // of making. Always cared for by exactly one steering group.
+  //
+  // The same document also describes an area of interest (intresseområde, kind
+  // "areaOfInterest"): something coordinated around an interest that may span
+  // several workshops' spaces. Nobody joins either one; the people who run it
+  // are its steering group. See groupRules.js for where the two differ.
   workshop: {
     name: {
       label: "Name",
@@ -1292,6 +1297,20 @@ export const models = {
       max: 10000,
       optional: true,
       autoform: { type: "textarea", rows: 10 },
+    },
+    // Missing on documents that predate areas of interest, which are workshops.
+    kind: {
+      label: "Kind",
+      type: String,
+      allowedValues: ["workshop", "areaOfInterest"],
+      defaultValue: "workshop",
+      autoform: {
+        type: "select",
+        options: [
+          { label: "Workshop (verkstad)", value: "workshop" },
+          { label: "Area of interest (intresseområde)", value: "areaOfInterest" },
+        ],
+      },
     },
     status: {
       label: "Status",

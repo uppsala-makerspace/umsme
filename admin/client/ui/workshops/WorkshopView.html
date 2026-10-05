@@ -1,6 +1,6 @@
 <template name="WorkshopView">
     <a href="/workshops" style="float: right">Back to workshops</a>
-    <h1>Workshop: {{workshop.name.sv}}{{#if workshop.name.en}} / {{workshop.name.en}}{{/if}}
+    <h1>{{kindLabel}}: {{workshop.name.sv}}{{#if workshop.name.en}} / {{workshop.name.en}}{{/if}}
         {{#if completeness.complete}}
             <span class="label label-success">Complete</span>
         {{else}}
@@ -20,10 +20,10 @@
     {{/if}}
 
     {{#if isDeletable}}
-    <p><button class="btn btn-danger deleteWorkshop">Delete workshop</button></p>
+    <p><button class="btn btn-danger deleteWorkshop">Delete {{kindNoun}}</button></p>
     {{else}}
     <div class="alert alert-info">
-        Remove the image and any certificates linked to this workshop before it can be deleted.
+        Remove the image and any certificates linked to this {{kindNoun}} before it can be deleted.
     </div>
     {{/if}}
 
@@ -47,7 +47,11 @@
     <hr>
 
     <h2>Responsible group</h2>
+    {{#if isAreaOfInterest}}
+    <p class="text-muted">Every area of interest is run by one steering group (with at least one member). Its members edit the area of interest in the app; expense accounts for it go on the steering group.</p>
+    {{else}}
     <p class="text-muted">Every workshop is cared for by exactly one steering group (with at least two members).</p>
+    {{/if}}
     <form class="form-inline">
         <select class="form-control workshopGroupSelect">
             <option value="" {{noGroupSelected}}>(No group)</option>
@@ -75,6 +79,6 @@
         {{/each}}
     </ul>
     {{else}}
-    <p><em>No certificates linked to this workshop.</em> Link them from each certificate's page under <a href="/certificates">Certificates</a>.</p>
+    <p><em>No certificates linked to this {{kindNoun}}.</em> Link them from each certificate's page under <a href="/certificates">Certificates</a>.</p>
     {{/if}}
 </template>

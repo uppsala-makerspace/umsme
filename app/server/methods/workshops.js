@@ -38,6 +38,7 @@ const groupSummary = async (groupDoc, memberId) => ({
 
 const publicWorkshopFields = (workshop) => ({
   _id: workshop._id,
+  kind: workshop.kind || "workshop",
   name: workshop.name,
   description: workshop.description,
   rules: workshop.rules,
@@ -97,7 +98,7 @@ Meteor.methods({
       }
     }
 
-    // Groups that declared this workshop as related (e.g. an interest group
+    // Groups that declared this workshop as related (e.g. a function group
     // that partly operates here).
     const relatedGroups = [];
     const related = await Groups.find(

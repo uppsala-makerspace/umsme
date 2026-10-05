@@ -193,15 +193,14 @@ const GroupDetail = ({
         )}
       </section>
 
-      {/* The Workshop, Slack and Guides cards. With a map (interest/function
-          groups with an explicit space, or workshop/activity groups whose
-          connected workshop has spaces) they share the map-integrated section;
-          without one, they stand alone in a plain grid — no empty map card.
-          Guides are only for interest/function groups (others get them via
-          their workshop). */}
+      {/* The Workshop, Slack and Guides cards. With a map (function groups
+          with an explicit space, or steering/activity groups whose connected
+          workshop has spaces) they share the map-integrated section; without
+          one, they stand alone in a plain grid — no empty map card. Guides are
+          only for function groups (others get them via their workshop). */}
       {(() => {
         const showGuides =
-          (group.type === "interest" || group.type === "function") && group.guidesUrl;
+          group.type === "function" && group.guidesUrl;
         const hasRules = !!localized(group.rules, lang);
         const cards = (
           <>
@@ -209,7 +208,7 @@ const GroupDetail = ({
               <InfoCard
                 to={`/workshops/${workshop._id}`}
                 Icon={WrenchScrewdriverIcon}
-                title={t("workshop")}
+                title={t(workshop.kind === "areaOfInterest" ? "areaOfInterest" : "workshop")}
                 subtitle={localized(workshop.name, lang)}
               />
             )}

@@ -12,6 +12,7 @@ import "./storeRules.tests";
 import "./familyRules.tests";
 import "./revenueSeries.tests";
 import "./groupRules.tests";
+import "./areaOfInterestMigration.tests";
 import "./storageRules.tests";
 import "./storageDigest.tests";
 import "./storageMessages.tests";

@@ -8,12 +8,12 @@ import Input from "../../../components/Input";
 import GroupCard from "../../../components/GroupCard";
 import CheckboxDropdown from "../../../components/CheckboxDropdown";
 
-// One flat list: interest groups first, then function groups, and last the
-// workshop-bound groups (steering groups and their responsibility subgroups).
-// Each row carries a type tag instead of section headings.
-const TYPE_ORDER = ["interest", "function", "steering", "responsibility"];
+// One flat list: function groups first, and last the workshop-bound groups
+// (steering groups and their responsibility subgroups). Each row carries a
+// type tag instead of section headings.
+const TYPE_ORDER = ["function", "steering", "responsibility"];
 
-// The filter's options: "mine" sits on top, apart from the four types, because
+// The filter's options: "mine" sits on top, apart from the three types, because
 // it works differently — see the filter predicate below. Steering groups are
 // off by default: they are workshop-bound and reached naturally through the
 // workshop, so they mostly just take up room here.
@@ -23,7 +23,6 @@ const DEFAULT_FILTER = FILTER_KEYS.filter((key) => key !== "steering");
 // Type labels come from the same i18n keys the type tag uses, so a tag and its
 // filter option can never disagree.
 const TYPE_LABEL_KEYS = {
-  interest: "groupTypeInterest",
   function: "groupTypeFunction",
   steering: "groupTypeSteering",
   responsibility: "groupTypeResponsibility",

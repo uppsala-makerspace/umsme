@@ -9,6 +9,28 @@ import WorkshopCard from "../../../components/WorkshopCard";
 
 // Remembered detailed/compact choice (see the toggle next to the search box).
 const COMPACT_KEY = "workshopsListCompact";
+// Remembered choice between workshops and areas of interest (the switch on top).
+const KIND_KEY = "workshopsListKind";
+const KINDS = ["workshop", "areaOfInterest"];
+
+// A document without a kind predates areas of interest and is a workshop.
+const kindOf = (workshop) => workshop.kind || "workshop";
+
+const readStored = (key) => {
+  try {
+    return typeof localStorage !== "undefined" ? localStorage.getItem(key) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
+const writeStored = (key, value) => {
+  try {
+    if (typeof localStorage !== "undefined") localStorage.setItem(key, value);
+  } catch (e) {
+    // Private mode or blocked storage: the choice just isn't remembered.
+  }
+};
 
 // Case-insensitive match against both languages of name and description.
 const matchesSearch = (workshop, needle) => {
@@ -25,12 +47,14 @@ const matchesSearch = (workshop, needle) => {
   return haystack.includes(needle);
 };
 
-const Workshops = ({ loading, workshops }) => {
+const Workshops = ({ loading, workshops, initialKind }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const [compact, setCompact] = useState(
-    () => typeof localStorage !== "undefined" && localStorage.getItem(COMPACT_KEY) === "true"
-  );
+  const [compact, setCompact] = useState(() => readStored(COMPACT_KEY) === "true");
+  const [kind, setKind] = useState(() => {
+    const stored = initialKind || readStored(KIND_KEY);
+    return KINDS.includes(stored) ? stored : "workshop";
+  });
 
   if (loading) {
     return (
@@ -43,14 +67,19 @@ const Workshops = ({ loading, workshops }) => {
   const toggleCompact = () => {
     const next = !compact;
     setCompact(next);
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(COMPACT_KEY, String(next));
-    }
+    writeStored(COMPACT_KEY, String(next));
   };
   const ToggleIcon = compact ? Squares2X2Icon : QueueListIcon;
 
+  const chooseKind = (next) => {
+    setKind(next);
+    writeStored(KIND_KEY, next);
+  };
+
+  const ofKind = workshops.filter((w) => kindOf(w) === kind);
   const needle = search.trim().toLowerCase();
-  const visibleWorkshops = workshops.filter((w) => matchesSearch(w, needle));
+  const visibleWorkshops = ofKind.filter((w) => matchesSearch(w, needle));
+  const isAreasOfInterest = kind === "areaOfInterest";
 
   // Trial workshops go last, in both views: the established ones are what a
   // member is usually looking for. sort is stable, so the two groups keep
@@ -61,13 +90,29 @@ const Workshops = ({ loading, workshops }) => {
 
   return (
     <MainContent>
+      <div className="flex mb-3 rounded-lg border border-gray-300 overflow-hidden text-sm" role="group">
+        {KINDS.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => chooseKind(option)}
+            aria-pressed={kind === option}
+            className={`flex-1 px-3 py-2 border-none cursor-pointer font-semibold ${
+              kind === option ? "bg-brand-green text-white" : "bg-white text-gray-600"
+            }`}
+          >
+            {t(option === "workshop" ? "workshops" : "areasOfInterest")}
+          </button>
+        ))}
+      </div>
+
       <div className="flex items-center gap-2 mb-4">
         <Input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t("searchWorkshops")}
-          aria-label={t("searchWorkshops")}
+          placeholder={t(isAreasOfInterest ? "searchAreasOfInterest" : "searchWorkshops")}
+          aria-label={t(isAreasOfInterest ? "searchAreasOfInterest" : "searchWorkshops")}
           className="mb-0 flex-1"
         />
         <button
@@ -80,10 +125,14 @@ const Workshops = ({ loading, workshops }) => {
         </button>
       </div>
 
-      {workshops.length === 0 ? (
-        <p className="text-center text-gray-500 p-8 italic">{t("noWorkshops")}</p>
+      {ofKind.length === 0 ? (
+        <p className="text-center text-gray-500 p-8 italic">
+          {t(isAreasOfInterest ? "noAreasOfInterest" : "noWorkshops")}
+        </p>
       ) : visibleWorkshops.length === 0 ? (
-        <p className="text-center text-gray-500 p-8 italic">{t("noWorkshopsFound")}</p>
+        <p className="text-center text-gray-500 p-8 italic">
+          {t(isAreasOfInterest ? "noAreasOfInterestFound" : "noWorkshopsFound")}
+        </p>
       ) : (
         <ul className={`list-none p-0 m-0 ${compact ? "grid grid-cols-2 gap-3" : ""}`}>
           {ordered.map((workshop) => (
@@ -98,6 +147,8 @@ const Workshops = ({ loading, workshops }) => {
 Workshops.propTypes = {
   loading: PropTypes.bool,
   workshops: PropTypes.array,
+  // Forces the switch (stories); otherwise the remembered choice is used.
+  initialKind: PropTypes.oneOf(KINDS),
 };
 
 Workshops.defaultProps = {

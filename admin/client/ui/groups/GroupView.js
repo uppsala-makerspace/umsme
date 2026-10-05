@@ -6,7 +6,7 @@ import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Workshops } from '/imports/common/collections/workshops';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
-import { groupCompleteness } from '/imports/common/lib/groupRules';
+import { groupCompleteness, isAreaOfInterest } from '/imports/common/lib/groupRules';
 import '/imports/tabular/members';
 import '../spaces/EntitySpaces';
 import './GroupView.html';
@@ -131,10 +131,10 @@ Template.GroupView.helpers({
   isResponsibilityGroup() {
     return Groups.findOne(groupId())?.type === 'responsibility';
   },
-  // Only interest and function groups pick spaces directly; workshop and
-  // responsibility groups inherit them from their connected workshop.
+  // Only function groups pick spaces directly; steering and responsibility
+  // groups inherit them from their connected workshop or area of interest.
   canChooseSpaces() {
-    return ['interest', 'function'].includes(Groups.findOne(groupId())?.type);
+    return Groups.findOne(groupId())?.type === 'function';
   },
   parentGroup() {
     const group = Groups.findOne(groupId());
@@ -186,6 +186,9 @@ Template.GroupView.helpers({
   },
   workshop() {
     return Workshops.findOne({ groupId: groupId() });
+  },
+  workshopKindNoun() {
+    return isAreaOfInterest(Workshops.findOne({ groupId: groupId() })) ? 'area of interest' : 'workshop';
   },
   childGroups() {
     return Groups.find({ parentGroupId: groupId() }, { sort: { 'name.sv': 1 } });

@@ -26,7 +26,7 @@ const sampleData = {
     { _id: "grp3", name: { sv: "Verktygsvårdsgruppen" }, type: "responsibility", memberCount: 3, myState: "pending" },
   ],
   relatedGroups: [
-    { _id: "grp4", name: { sv: "Cykelgruppen", en: "Bike kitchen" }, type: "interest", memberCount: 7, myState: null },
+    { _id: "grp4", name: { sv: "IT-gruppen", en: "IT group" }, type: "function", memberCount: 7, myState: null },
   ],
   certificates: [
     { _id: "cert1", name: { sv: "Bandsåg", en: "Band saw" } },
@@ -102,6 +102,40 @@ export const ManySpaceIcons = {
     },
     slackTeam: "T123",
     slackChannelIds: { "träverkstaden": "C123" },
+  },
+};
+
+// An area of interest: tagged under the title, its spaces spread over other
+// workshops' rooms, run by a steering group like a workshop.
+export const AreaOfInterest = {
+  args: {
+    loading: false,
+    data: {
+      ...sampleData,
+      workshop: {
+        _id: "ia1",
+        kind: "areaOfInterest",
+        name: { sv: "Vinylskärning", en: "Vinyl cutting" },
+        description: {
+          sv: "Dekaler, t-shirttryck, skyltar och stenciler med vinylskäraren. Vi håller den igång, ser till att det finns vinyl och håller intron.",
+        },
+        status: "established",
+        slackChannel: "vinyl",
+        imageUrl: "https://placehold.co/800x400?text=Vinyl",
+      },
+      group: {
+        _id: "grp9",
+        name: { sv: "Vinylgänget" },
+        type: "steering",
+        memberCount: 4,
+        myState: null,
+      },
+      responsibilityGroups: [],
+      relatedGroups: [],
+      certificates: [{ _id: "cert3", name: { sv: "Vinylskäraren" } }],
+    },
+    slackTeam: "T123",
+    slackChannelIds: { vinyl: "C789" },
   },
 };
 

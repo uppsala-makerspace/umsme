@@ -43,9 +43,9 @@ const sampleGroups = [
   },
   {
     _id: "grp5",
-    description: { sv: "Vi bygger modelljärnväg i skala H0 och arrangerar körkvällar." },
-    name: { sv: "Modelljärnvägsgruppen" },
-    type: "interest",
+    description: { sv: "Vi håller ordning på kiosken och fyller på varje vecka." },
+    name: { sv: "Kioskgruppen" },
+    type: "function",
     joinPolicy: "open",
     memberCount: 12,
     myState: null,

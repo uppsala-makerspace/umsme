@@ -7,7 +7,7 @@ import { workshopImageUrlFor, groupImageUrlFor, spaceIconUrlFor } from "./worksh
 
 /**
  * WebApp.handlers callback serving what the public website builds from: the
- * workshops and open groups, the map's spaces, and the link between them.
+ * workshops, areas of interest and open groups, the map's spaces, and the link between them.
  * Mounted at /api/public (see the mounting app's server/api/).
  *
  * URL shape:
@@ -70,7 +70,7 @@ export const makePublicDirectoryHandler = () => async (req, res) => {
     spaces,
     iconUrlFor: (spaceDocId) => absolute(spaceIconUrlFor(spaceById.get(spaceDocId))),
     imageUrlFor: ({ doc, kind }) =>
-      absolute(kind === "workshop" ? workshopImageUrlFor(doc) : groupImageUrlFor(doc)),
+      absolute(kind === "group" ? groupImageUrlFor(doc) : workshopImageUrlFor(doc)),
   });
 
   const payload = JSON.stringify(directory);

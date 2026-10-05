@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
  * which the membership chips (member/responsible and pending) use.
  */
 const tags = {
-  interest: { labelKey: "groupTypeInterest", classes: "bg-purple-100 text-purple-800" },
   function: { labelKey: "groupTypeFunction", classes: "bg-gray-200 text-gray-700" },
   steering: { labelKey: "groupTypeSteering", classes: "bg-rose-100 text-rose-800" },
   responsibility: { labelKey: "groupTypeResponsibility", classes: "bg-blue-100 text-blue-800" },

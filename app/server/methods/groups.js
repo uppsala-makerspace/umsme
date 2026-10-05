@@ -183,7 +183,7 @@ Meteor.methods({
     ).fetchAsync();
 
     // Related groups (mutual): those this group lists, plus those that list
-    // this group. Only interest and function groups have relations.
+    // this group.
     const relatedGroups = [];
     const relatedGroupDocs = await Groups.find(
       {
@@ -207,12 +207,12 @@ Meteor.methods({
       workshop = await Workshops.findOneAsync({ groupId: group.parentGroupId });
     }
 
-    // Which spaces the map shows: interest and function groups pick their own
-    // (only shown when they set one explicitly); workshop and responsibility
-    // (activity) groups inherit them from their connected workshop. Null →
-    // no map card at all.
+    // Which spaces the map shows: function groups pick their own (only shown
+    // when they set one explicitly); steering and responsibility (activity)
+    // groups inherit them from their connected workshop or area of interest.
+    // Null → no map card at all.
     const mapView =
-      group.type === "interest" || group.type === "function"
+      group.type === "function"
         ? await spacesMapView(group)
         : workshop
           ? await spacesMapView(workshop)
@@ -255,7 +255,9 @@ Meteor.methods({
         : null,
       childGroups: childGroups.map((g) => ({ _id: g._id, name: g.name })),
       relatedGroups,
-      workshop: workshop ? { _id: workshop._id, name: workshop.name } : null,
+      workshop: workshop
+        ? { _id: workshop._id, name: workshop.name, kind: workshop.kind || "workshop" }
+        : null,
       canSeeMembers,
       canJoin: activeCaller,
       canApprove: userCanApprove,

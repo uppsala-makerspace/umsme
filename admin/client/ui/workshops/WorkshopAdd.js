@@ -14,7 +14,11 @@ Template.WorkshopAdd.helpers({
     return Workshops;
   },
   workshopGroups() {
-    return Groups.find({ type: 'workshop' }, { sort: { 'name.sv': 1 } });
+    return Groups.find({ type: 'steering' }, { sort: { 'name.sv': 1 } });
+  },
+  // Reactive to the kind currently selected in the AutoForm.
+  isAreaOfInterest() {
+    return AutoForm.getFieldValue('kind', 'insertWorkshopForm') === 'areaOfInterest';
   },
 });
 

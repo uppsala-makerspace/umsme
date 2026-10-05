@@ -5,7 +5,7 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Certificates } from '/imports/common/collections/certificates';
-import { workshopCompleteness } from '/imports/common/lib/groupRules';
+import { workshopCompleteness, isAreaOfInterest } from '/imports/common/lib/groupRules';
 import '../spaces/EntitySpaces';
 import './WorkshopView.html';
 
@@ -39,6 +39,15 @@ Template.WorkshopView.helpers({
   workshop() {
     return Workshops.findOne(workshopId());
   },
+  isAreaOfInterest() {
+    return isAreaOfInterest(Workshops.findOne(workshopId()));
+  },
+  kindLabel() {
+    return isAreaOfInterest(Workshops.findOne(workshopId())) ? 'Area of interest' : 'Workshop';
+  },
+  kindNoun() {
+    return isAreaOfInterest(Workshops.findOne(workshopId())) ? 'area of interest' : 'workshop';
+  },
   completeness() {
     return completeness();
   },
@@ -66,7 +75,7 @@ Template.WorkshopView.helpers({
     return Template.instance().uploading.get() ? 'disabled' : '';
   },
   workshopGroups() {
-    return Groups.find({ type: 'workshop' }, { sort: { 'name.sv': 1 } });
+    return Groups.find({ type: 'steering' }, { sort: { 'name.sv': 1 } });
   },
   group() {
     const workshop = Workshops.findOne(workshopId());
@@ -93,7 +102,7 @@ Template.WorkshopView.helpers({
 
 Template.WorkshopView.events({
   'click .deleteWorkshop': function () {
-    if (!confirm('Delete this workshop?')) return;
+    if (!confirm('Delete this?')) return;
     Workshops.remove(workshopId(), (err) => {
       if (err) {
         alert('Delete failed: ' + err.message);
@@ -130,7 +139,7 @@ Template.WorkshopView.events({
     reader.readAsDataURL(file);
   },
   'click .removeImage': function () {
-    if (!confirm('Remove the workshop image?')) return;
+    if (!confirm('Remove the image?')) return;
     Meteor.call('adminWorkshops.removeImage', workshopId(), (err) => {
       if (err) alert('Remove failed: ' + err.message);
     });

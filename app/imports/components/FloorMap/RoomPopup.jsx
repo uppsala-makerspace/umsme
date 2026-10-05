@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import GroupCard from "/imports/components/GroupCard";
+import AreaOfInterestTag from "/imports/components/AreaOfInterestTag";
 import WorkshopStatusBadge from "/imports/pages/workshops/components/WorkshopStatusBadge";
 import { localized } from "/imports/common/lib/groupRules";
 import { markdownExcerpt } from "/imports/utils/markdown";
@@ -36,6 +37,7 @@ const RoomPopup = ({ room, onClose, slackChannelIds, slackTeam }) => {
   if (!room) return null;
 
   const workshop = room.workshop || null;
+  const areasOfInterest = room.areasOfInterest || [];
   const groups = room.groups || [];
   const name = room.name?.[lang] || room.name?.en || "";
   const description = room.description?.[lang] || room.description?.en || "";
@@ -108,11 +110,26 @@ const RoomPopup = ({ room, onClose, slackChannelIds, slackTeam }) => {
             })}
           </div>
         )}
-        {groups.length > 0 && (
-          /* Secondary section: the groups sit on a shaded, edge-to-edge
-             background below the (white) workshop/space information. */
+        {(areasOfInterest.length > 0 || groups.length > 0) && (
+          /* Secondary section: areas of interest active here and the groups sit
+             on a shaded, edge-to-edge background below the (white)
+             workshop/space information. */
           <div className="-mx-6 -mb-6 mt-4 px-6 pt-4 pb-1 bg-gray-100 rounded-b-xl">
             <ul className="list-none p-0 m-0">
+              {areasOfInterest.map((area) => (
+                <li key={area._id} className="mb-3 rounded-lg bg-white border border-gray-200 overflow-hidden list-none">
+                  <Link
+                    to={`/workshops/${area._id}`}
+                    className="flex justify-between items-center p-3 no-underline text-inherit transition-colors hover:bg-gray-50"
+                  >
+                    <span className="flex items-center gap-2 font-semibold leading-snug">
+                      {localized(area.name, lang)}
+                      <AreaOfInterestTag />
+                    </span>
+                    <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+                  </Link>
+                </li>
+              ))}
               {groups.map((group) => (
                 <GroupCard key={group._id} group={group} compact />
               ))}

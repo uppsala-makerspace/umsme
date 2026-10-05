@@ -21,19 +21,25 @@ const WORKSHOPS = [
   // is not in `entries` to point at.
   { _id: 'w3', name: { sv: 'Glasverkstad' }, status: 'forming', primarySpaceId: 's5' },
   { _id: 'w4', name: { sv: 'Mörkrumsverkstad' }, status: 'decommissioned' },
+  // Areas of interest share the collection: published like workshops, but with
+  // their own kind, and never a space's single `workshop`.
+  {
+    _id: 'ia1',
+    kind: 'areaOfInterest',
+    name: { sv: 'Modelljärnväg' },
+    status: 'established',
+    imageFileId: 'img-ia1',
+    primarySpaceId: 's2',
+  },
+  { _id: 'ia2', kind: 'areaOfInterest', name: { sv: 'Biohacking' }, status: 'forming' },
 ];
 
 const GROUPS = [
-  {
-    _id: 'g1',
-    name: { sv: 'Modelljärnvägsgruppen' },
-    type: 'interest',
-    imageFileId: 'img-g1',
-    primarySpaceId: 's2',
-  },
-  { _id: 'g2', name: { sv: 'IT-gruppen' }, type: 'function' },
+  { _id: 'g2', name: { sv: 'IT-gruppen' }, type: 'function', imageFileId: 'img-g2' },
   { _id: 'g3', name: { sv: 'Trägruppen' }, type: 'steering' },
   { _id: 'g4', name: { sv: 'Ugnsgruppen' }, type: 'responsibility' },
+  // A leftover interest group (the type is gone) must not be published.
+  { _id: 'g5', name: { sv: 'Gamla intressegruppen' }, type: 'interest' },
 ];
 
 const SPACES = [
@@ -54,11 +60,12 @@ const SPACES = [
 ];
 
 // Stand-ins for the real URL builders, so the shape can be checked without
-// Meteor: absolute, and null when the entity has nothing to serve.
+// Meteor: absolute, and null when the entity has nothing to serve. Like the
+// real one, workshops and areas of interest share the workshop image route.
 const iconUrlFor = (spaceId) => `https://umsme.example/api/spaces/${spaceId}/icon?v=ico`;
 const imageUrlFor = ({ doc, kind }) =>
   doc.imageFileId
-    ? `https://umsme.example/api/${kind}s/${doc._id}/image?v=${doc.imageFileId}`
+    ? `https://umsme.example/api/${kind === 'group' ? 'groups' : 'workshops'}/${doc._id}/image?v=${doc.imageFileId}`
     : null;
 
 // buildDirectory returns { entries, spaces, palette }; most assertions below
@@ -84,15 +91,27 @@ describe('publicDirectory', function () {
       assert.deepStrictEqual(kinds, ['textilverkstad', 'keramikverkstad']);
     });
 
-    it('publishes only interest and function groups', function () {
-      assert.deepStrictEqual(PUBLIC_GROUP_TYPES, ['interest', 'function']);
-      const ids = build().filter((e) => e.kind === 'group').map((e) => e.id);
-      assert.deepStrictEqual(ids, ['modelljarnvagsgruppen', 'it-gruppen']);
+    it('publishes established and trial areas of interest under their own kind', function () {
+      const ids = build().filter((e) => e.kind === 'areaOfInterest').map((e) => e.id);
+      assert.deepStrictEqual(ids, ['modelljarnvag']);
     });
 
-    it('leaves out forming, decommissioned, steering and responsibility', function () {
+    it('publishes only function groups', function () {
+      assert.deepStrictEqual(PUBLIC_GROUP_TYPES, ['function']);
+      const ids = build().filter((e) => e.kind === 'group').map((e) => e.id);
+      assert.deepStrictEqual(ids, ['it-gruppen']);
+    });
+
+    it('leaves out forming, decommissioned, steering, responsibility and interest groups', function () {
       const ids = build().map((e) => e.id);
-      for (const gone of ['glasverkstad', 'morkrumsverkstad', 'tragruppen', 'ugnsgruppen']) {
+      for (const gone of [
+        'glasverkstad',
+        'morkrumsverkstad',
+        'biohacking',
+        'tragruppen',
+        'ugnsgruppen',
+        'gamla-intressegruppen',
+      ]) {
         assert.ok(!ids.includes(gone), gone);
       }
     });
@@ -106,6 +125,13 @@ describe('publicDirectory', function () {
     it('gives a workshop a status and no type', function () {
       const entry = byId(build(), 'textilverkstad');
       assert.strictEqual(entry.kind, 'workshop');
+      assert.strictEqual(entry.status, 'established');
+      assert.ok(!('type' in entry));
+    });
+
+    it('gives an area of interest a status and no type', function () {
+      const entry = byId(build(), 'modelljarnvag');
+      assert.strictEqual(entry.kind, 'areaOfInterest');
       assert.strictEqual(entry.status, 'established');
       assert.ok(!('type' in entry));
     });
@@ -152,8 +178,15 @@ describe('publicDirectory', function () {
 
     it('builds the group image url from the group route', function () {
       assert.strictEqual(
-        byId(build(), 'modelljarnvagsgruppen').image,
-        'https://umsme.example/api/groups/g1/image?v=img-g1'
+        byId(build(), 'it-gruppen').image,
+        'https://umsme.example/api/groups/g2/image?v=img-g2'
+      );
+    });
+
+    it('builds the area of interest image url from the workshop route', function () {
+      assert.strictEqual(
+        byId(build(), 'modelljarnvag').image,
+        'https://umsme.example/api/workshops/ia1/image?v=img-ia1'
       );
     });
   });
@@ -224,15 +257,31 @@ describe('publicDirectory', function () {
       assert.strictEqual(space('textile_workshop', 'floor2').workshop, 'textilverkstad');
     });
 
-    it('lists groups separately from the workshop', function () {
+    it('lists areas of interest separately from the workshop', function () {
       const kitchen = space('kitchen', 'floor1');
       assert.strictEqual(kitchen.workshop, 'textilverkstad');
-      assert.deepStrictEqual(kitchen.groups, ['modelljarnvagsgruppen']);
+      assert.deepStrictEqual(kitchen.areasOfInterest, ['modelljarnvag']);
+      assert.ok(!('groups' in kitchen));
+    });
+
+    it('never makes an area of interest a space’s workshop', function () {
+      const { spaces: only } = buildDirectory({
+        workshops: [
+          { _id: 'ia9', kind: 'areaOfInterest', name: { sv: 'Vinyl' }, status: 'trial', primarySpaceId: 's4' },
+        ],
+        spaces: SPACES,
+        iconUrlFor,
+        imageUrlFor,
+      });
+      const storage = only.find((s) => s.spaceId === 'storage');
+      assert.ok(!('workshop' in storage));
+      assert.deepStrictEqual(storage.areasOfInterest, ['vinyl']);
     });
 
     it('leaves an unoccupied space without links', function () {
       const storage = space('storage', 'floor1');
       assert.ok(!('workshop' in storage));
+      assert.ok(!('areasOfInterest' in storage));
       assert.ok(!('groups' in storage));
       assert.deepStrictEqual(storage.name, { sv: 'Förrådet' });
     });
@@ -246,6 +295,7 @@ describe('publicDirectory', function () {
       const ids = new Set(buildAll().entries.map((e) => e.id));
       for (const s of spaces()) {
         if (s.workshop) assert.ok(ids.has(s.workshop), s.workshop);
+        for (const a of s.areasOfInterest || []) assert.ok(ids.has(a), a);
         for (const g of s.groups || []) assert.ok(ids.has(g), g);
       }
     });
@@ -280,7 +330,7 @@ describe('publicDirectory', function () {
     it('keeps slugs unique across workshops and groups together', function () {
       const { entries } = buildDirectory({
         workshops: [{ _id: 'w9', name: { sv: 'Textil' }, status: 'trial' }],
-        groups: [{ _id: 'g9', name: { sv: 'Textil' }, type: 'interest' }],
+        groups: [{ _id: 'g9', name: { sv: 'Textil' }, type: 'function' }],
         iconUrlFor,
         imageUrlFor,
       });

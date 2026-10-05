@@ -55,6 +55,7 @@ same data layer and business rules.
 | [accounting.md](accounting.md)                    | Bank statement matching and SIE export for bookkeeping |
 | [door-access.md](door-access.md)                  | Door unlocking via Home Assistant and legacy Danalock |
 | [certificates.md](certificates.md)                | Certificate types and attestation workflow         |
+| [groups-and-workshops.md](groups-and-workshops.md) | Workshops, areas of interest, group types and edit rights |
 | [messaging-notifications.md](messaging-notifications.md) | Email, push notifications, templates       |
 | [auth-and-roles.md](auth-and-roles.md)            | Authentication, authorization, and member onboarding |
 | [configuration.md](configuration.md)              | Settings, deployment, and development setup          |

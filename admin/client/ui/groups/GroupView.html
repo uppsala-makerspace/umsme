@@ -91,7 +91,7 @@
     <hr>
 
     <h2>Related workshops</h2>
-    <p class="text-muted">Workshops this group is related to (e.g. an interest group that partly operates in a workshop). Shown as "Relaterade grupper" on those workshops' pages in the app.</p>
+    <p class="text-muted">Workshops and areas of interest this group is related to (e.g. a function group that partly operates in a workshop). Shown as "Relaterade grupper" on those workshops' pages in the app.</p>
     {{#if hasRelatedWorkshops}}
     <ul class="list-group">
         {{#each relatedWorkshops}}
@@ -189,7 +189,7 @@
 
     <h2>Related</h2>
     {{#if workshop}}
-    <p>Responsible for workshop: <a href="/workshop/{{workshop._id}}">{{workshop.name.sv}}</a></p>
+    <p>Responsible for {{workshopKindNoun}}: <a href="/workshop/{{workshop._id}}">{{workshop.name.sv}}</a></p>
     {{/if}}
     {{#if hasChildGroups}}
     <p>Responsibility groups:</p>

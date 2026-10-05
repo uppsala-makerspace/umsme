@@ -45,8 +45,8 @@ Meteor.methods({
    * ({ floor1: { spaceId: {...} }, floor2: {...} }). Built solely from the
    * Spaces collection (managed in admin, seeded via its import) — before the
    * import has run the map simply has no markers. Each room also carries
-   * preview data for the workshops and groups linked to the space, shown in
-   * the map popup.
+   * preview data for the workshops, areas of interest and groups linked to the
+   * space, shown in the map popup.
    */
   async "data.rooms"() {
     const spaces = await Spaces.find({}).fetchAsync();
@@ -59,10 +59,13 @@ Meteor.methods({
     const bySpace = {};
     const addLink = (kind, spaceDbId, entry) => {
       if (!spaceDbId) return;
-      bySpace[spaceDbId] = bySpace[spaceDbId] || { workshops: [], groups: [] };
+      bySpace[spaceDbId] = bySpace[spaceDbId] || { workshops: [], areasOfInterest: [], groups: [] };
       bySpace[spaceDbId][kind].push(entry);
     };
+    // Areas of interest share the collection but never become a space's hero:
+    // they span several spaces and live in other workshops' rooms.
     for (const workshop of await Workshops.find(linkSelector).fetchAsync()) {
+      const kind = workshop.kind === "areaOfInterest" ? "areasOfInterest" : "workshops";
       const entry = {
         _id: workshop._id,
         name: workshop.name,
@@ -70,11 +73,11 @@ Meteor.methods({
         status: workshop.status,
         imageUrl: workshopImageUrlFor(workshop),
       };
-      addLink("workshops", workshop.primarySpaceId, entry);
-      for (const id of workshop.secondarySpaceIds || []) addLink("workshops", id, entry);
+      addLink(kind, workshop.primarySpaceId, entry);
+      for (const id of workshop.secondarySpaceIds || []) addLink(kind, id, entry);
     }
-    // Steering groups are represented by their workshop; the popup previews
-    // interest/function/responsibility groups.
+    // Steering groups are represented by their workshop or area of interest; the
+    // popup previews function/responsibility groups.
     for (const group of await Groups.find({ ...linkSelector, type: { $ne: "steering" } }).fetchAsync()) {
       const entry = {
         _id: group._id,
@@ -94,7 +97,7 @@ Meteor.methods({
 
     const rooms = { floor1: {}, floor2: {} };
     for (const space of spaces) {
-      const links = bySpace[space._id] || { workshops: [], groups: [] };
+      const links = bySpace[space._id] || { workshops: [], areasOfInterest: [], groups: [] };
       rooms[space.floor] = rooms[space.floor] || {};
       rooms[space.floor][space.spaceId] = {
         name: space.name,
@@ -105,6 +108,7 @@ Meteor.methods({
         // A space corresponds to at most one workshop; it becomes the
         // popup's hero and replaces the space's own information.
         workshop: [...links.workshops].sort(byName)[0] || null,
+        areasOfInterest: [...links.areasOfInterest].sort(byName),
         groups: [...links.groups].sort(byName),
       };
     }
