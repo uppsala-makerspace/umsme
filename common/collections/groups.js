@@ -2,7 +2,6 @@ import { Mongo } from 'meteor/mongo';
 import 'meteor/aldeed:collection2/static';
 import { Roles } from 'meteor/roles';
 import { schemas } from '/imports/common/lib/schemas';
-import { STEERABLE_GROUP_TYPES } from '/imports/common/lib/groupRules';
 import { allow } from './allow';
 import { Workshops } from './workshops';
 import { GroupMemberships } from './groupMemberships';
@@ -32,12 +31,7 @@ const nextValue = (doc, modifier, field) => {
 //   and a role-granting group must not be open to self-joining.
 // - A responsibility group requires a parent, and a parent must be a workshop
 //   group other than the group itself.
-// - Only interest and function groups may have a steering group, and it must
-//   be a steering group other than the group itself.
-const violatesGroupRules = async (
-  { linkedRole, joinPolicy, type, parentGroupId, steeringGroupId },
-  selfId
-) => {
+const violatesGroupRules = async ({ linkedRole, joinPolicy, type, parentGroupId }, selfId) => {
   if (linkedRole === 'admin') return true;
   if (linkedRole && joinPolicy === 'open') return true;
   if (type === 'responsibility' && !parentGroupId) return true;
@@ -45,12 +39,6 @@ const violatesGroupRules = async (
     if (selfId && parentGroupId === selfId) return true;
     const parent = await Groups.findOneAsync(parentGroupId);
     if (!parent || parent.type !== 'steering') return true;
-  }
-  if (steeringGroupId) {
-    if (!STEERABLE_GROUP_TYPES.includes(type)) return true;
-    if (selfId && steeringGroupId === selfId) return true;
-    const steering = await Groups.findOneAsync(steeringGroupId);
-    if (!steering || steering.type !== 'steering') return true;
   }
   return false;
 };
@@ -66,22 +54,12 @@ Groups.deny({
     // (fields are only fetched when declared up front, which proved
     // unreliable), so read the current document ourselves.
     const current = (await Groups.findOneAsync(doc._id)) || doc;
-    // A steering group that others point at (as parent or steering group)
-    // must stay a steering group, or those links stop meaning anything.
-    const type = nextValue(current, modifier, 'type');
-    if (current.type === 'steering' && type !== 'steering') {
-      const dependent = await Groups.findOneAsync({
-        $or: [{ parentGroupId: current._id }, { steeringGroupId: current._id }],
-      });
-      if (dependent) return true;
-    }
     return violatesGroupRules(
       {
         linkedRole: nextValue(current, modifier, 'linkedRole'),
         joinPolicy: nextValue(current, modifier, 'joinPolicy'),
-        type,
+        type: nextValue(current, modifier, 'type'),
         parentGroupId: nextValue(current, modifier, 'parentGroupId'),
-        steeringGroupId: nextValue(current, modifier, 'steeringGroupId'),
       },
       current._id
     );
@@ -97,8 +75,7 @@ Groups.deny({
       (await Workshops.findOneAsync({ groupId: doc._id })) ||
       (await GroupMemberships.findOneAsync({ groupId: doc._id })) ||
       (await ExpenseAccounts.findOneAsync({ groupIds: doc._id })) ||
-      (await Groups.findOneAsync({ parentGroupId: doc._id })) ||
-      (await Groups.findOneAsync({ steeringGroupId: doc._id }));
+      (await Groups.findOneAsync({ parentGroupId: doc._id }));
     return !!referenced;
   },
 });

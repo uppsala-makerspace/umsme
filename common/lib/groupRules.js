@@ -13,12 +13,6 @@ export const GROUP_TYPES = ["steering", "function", "interest", "responsibility"
 export const WORKSHOP_STATUSES = ["established", "trial", "forming", "decommissioned"];
 export const JOIN_POLICIES = ["open", "request-any", "request-responsible"];
 
-// Group types that may be governed by a steering group (steeringGroupId). Its
-// members then act as the group's responsible: they edit it, approve requests
-// and remove members. The group's own members gain nothing from it — expense
-// accounts meant for the few go on the steering group.
-export const STEERABLE_GROUP_TYPES = ["interest", "function"];
-
 /**
  * Whether members may ask to join this group on their own.
  *
@@ -36,21 +30,16 @@ export const canRequestToJoin = (group) => group?.allowJoinRequests !== false;
  * group, its workshop's.
  *
  * A steering group is run collectively, so everyone in it maintains the
- * information. Every other kind of group keeps this with its responsible — and,
- * for an interest or function group with a steering group, with whoever may
- * edit that steering group. What may be changed is unaffected: description,
- * rules, Slack channel, guides link and image, never name, status, spaces or
- * who is responsible.
+ * information. Every other kind of group keeps this with its responsible. What
+ * may be changed is unaffected: description, rules, Slack channel, guides link
+ * and image, never name, status, spaces or who is responsible.
  *
  * A pending request is not membership.
  *
- * @param {{isResponsible: boolean, groupType: string, membershipState: string|null,
- *   governsViaSteeringGroup?: boolean}} args
+ * @param {{isResponsible: boolean, groupType: string, membershipState: string|null}} args
  */
-export const mayEditGroup = ({ isResponsible, groupType, membershipState, governsViaSteeringGroup }) =>
-  !!isResponsible ||
-  !!governsViaSteeringGroup ||
-  (groupType === "steering" && membershipState === "active");
+export const mayEditGroup = ({ isResponsible, groupType, membershipState }) =>
+  !!isResponsible || (groupType === "steering" && membershipState === "active");
 
 // Localised field access with Swedish fallback: {sv, en} -> string.
 export const localized = (field, lang) =>

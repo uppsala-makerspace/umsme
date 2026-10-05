@@ -15,7 +15,6 @@ import {
   isActiveMember,
   isGroupResponsible,
   canEditGroup,
-  governsViaSteeringGroup,
   applyWhitelistedUpdate,
   spacesMapView,
 } from "./utils";
@@ -42,15 +41,13 @@ const isAdminish = async () =>
 /**
  * Whether a member may approve/reject join requests for a group, per its join
  * policy: request-any → any active group member; request-responsible → only
- * the group responsible. Admin/board may always, and so may whoever governs
- * the group through its steering group, whatever the policy. Since approving
- * means seeing other members' names, it additionally requires an active
- * makerspace membership (registered + paid, not expired).
+ * the group responsible. Admin/board may always. Since approving means seeing
+ * other members' names, it additionally requires an active makerspace
+ * membership (registered + paid, not expired).
  */
 const canApprove = async (group, member) => {
   if (await isAdminish()) return true;
   if (!(await isActiveMember(member))) return false;
-  if (await governsViaSteeringGroup(member, group)) return true;
   if (group.joinPolicy === "request-responsible") {
     return group.responsibleMemberId === member._id;
   }
@@ -68,13 +65,10 @@ const canApprove = async (group, member) => {
  * Deliberately narrower than canApprove: adding follows the group's join policy,
  * which under request-any is every member of the group, and letting each member
  * throw the others out is not the same decision. Removal stays with the group
- * responsible and whoever governs the group through its steering group, plus
- * admin/board.
+ * responsible, plus admin/board.
  */
 const canRemoveMembers = async (group, member) =>
-  isGroupResponsible(member, group) ||
-  (await governsViaSteeringGroup(member, group)) ||
-  (await isAdminish());
+  isGroupResponsible(member, group) || (await isAdminish());
 
 const groupSummary = async (group, memberId) => {
   const memberCount = await GroupMemberships.find({
@@ -104,7 +98,6 @@ const groupSummary = async (group, memberId) => {
       isResponsible: group.responsibleMemberId === memberId,
       groupType: group.type,
       membershipState: myMembership?.state || null,
-      governsViaSteeringGroup: await governsViaSteeringGroup({ _id: memberId }, group),
     }),
   };
 };
@@ -152,15 +145,11 @@ Meteor.methods({
 
     const activeCaller = await isActiveMember(member);
 
-    const admin = await isAdminish();
-    const governs = await governsViaSteeringGroup(member, group);
-
     // Member names are only for active makerspace members (registered + paid,
-    // not expired) that have joined this group or govern it through its
-    // steering group, or admin/board. The group responsible's NAME is public;
-    // everyone always gets the member count.
+    // not expired) that have joined this group, or admin/board. The group
+    // responsible's NAME is public; everyone always gets the member count.
     const canSeeMembers =
-      admin || ((summary.myState === "active" || governs) && activeCaller);
+      (await isAdminish()) || (summary.myState === "active" && activeCaller);
 
     const members = [];
     if (canSeeMembers) {
@@ -190,16 +179,6 @@ Meteor.methods({
       : null;
     const childGroups = await Groups.find(
       { parentGroupId: groupId },
-      { sort: { "name.sv": 1 } }
-    ).fetchAsync();
-
-    // Steering relation for interest and function groups, both ways: the
-    // group's steering group, and the groups a steering group governs.
-    const steeringGroup = group.steeringGroupId
-      ? await Groups.findOneAsync(group.steeringGroupId)
-      : null;
-    const governedGroups = await Groups.find(
-      { steeringGroupId: groupId },
       { sort: { "name.sv": 1 } }
     ).fetchAsync();
 
@@ -240,15 +219,11 @@ Meteor.methods({
           : null;
 
     // The group's expense accounts, for members only: they show what the group
-    // spends on, and only its members may make expenses on them. Those who
-    // govern the group also get the steering group's accounts here — that is
-    // where accounts go that the group's members at large may not spend on.
-    const accountGroupIds = [groupId];
-    if (steeringGroup && (governs || admin)) accountGroupIds.push(steeringGroup._id);
+    // spends on, and only its members may make expenses on them.
     const expenseAccounts = canSeeMembers
       ? (
           await ExpenseAccounts.find(
-            { groupIds: { $in: accountGroupIds } },
+            { groupIds: groupId },
             { sort: { name: 1 }, fields: { name: 1 } }
           ).fetchAsync()
         ).map((a) => ({ _id: a._id, name: a.name }))
@@ -279,10 +254,6 @@ Meteor.methods({
         ? { _id: parentGroup._id, name: parentGroup.name }
         : null,
       childGroups: childGroups.map((g) => ({ _id: g._id, name: g.name })),
-      steeringGroup: steeringGroup
-        ? { _id: steeringGroup._id, name: steeringGroup.name }
-        : null,
-      governedGroups: governedGroups.map((g) => ({ _id: g._id, name: g.name, type: g.type })),
       relatedGroups,
       workshop: workshop ? { _id: workshop._id, name: workshop.name } : null,
       canSeeMembers,
@@ -541,9 +512,8 @@ Meteor.methods({
   },
 
   /**
-   * Edit descriptive fields of a group: the group responsible, anyone in the
-   * group when it is a steering group, or anyone governing it through its
-   * steering group — no admin role required. Only the
+   * Edit descriptive fields of a group: the group responsible, or anyone in the
+   * group when it is a steering group — no admin role required. Only the
    * whitelisted fields (description, rules, Slack channel, guides) can change;
    * name, type, spaces, join policy, responsible, parent and linked role are off
    * limits whoever is calling.

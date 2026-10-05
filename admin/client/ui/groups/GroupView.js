@@ -6,7 +6,7 @@ import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Workshops } from '/imports/common/collections/workshops';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
-import { groupCompleteness, STEERABLE_GROUP_TYPES } from '/imports/common/lib/groupRules';
+import { groupCompleteness } from '/imports/common/lib/groupRules';
 import '/imports/tabular/members';
 import '../spaces/EntitySpaces';
 import './GroupView.html';
@@ -98,8 +98,7 @@ Template.GroupView.helpers({
       Workshops.findOne({ groupId: id }) ||
       GroupMemberships.findOne({ groupId: id }) ||
       ExpenseAccounts.findOne({ groupIds: id }) ||
-      Groups.findOne({ parentGroupId: id }) ||
-      Groups.findOne({ steeringGroupId: id })
+      Groups.findOne({ parentGroupId: id })
     );
   },
   imageUrl() {
@@ -146,27 +145,6 @@ Template.GroupView.helpers({
   },
   noParentSelected() {
     return Groups.findOne(groupId())?.parentGroupId ? '' : 'selected';
-  },
-  // Interest and function groups may be governed by a steering group whose
-  // members then act as the group's responsible (see STEERABLE_GROUP_TYPES).
-  canHaveSteeringGroup() {
-    return STEERABLE_GROUP_TYPES.includes(Groups.findOne(groupId())?.type);
-  },
-  steeringGroup() {
-    const group = Groups.findOne(groupId());
-    return group?.steeringGroupId ? Groups.findOne(group.steeringGroupId) : null;
-  },
-  steeringSelected(id) {
-    return Groups.findOne(groupId())?.steeringGroupId === id ? 'selected' : '';
-  },
-  noSteeringSelected() {
-    return Groups.findOne(groupId())?.steeringGroupId ? '' : 'selected';
-  },
-  governedGroups() {
-    return Groups.find({ steeringGroupId: groupId() }, { sort: { 'name.sv': 1 } });
-  },
-  hasGovernedGroups() {
-    return Groups.find({ steeringGroupId: groupId() }).count() > 0;
   },
   relatedWorkshops() {
     const ids = Groups.findOne(groupId())?.relatedWorkshopIds || [];
@@ -297,15 +275,6 @@ Template.GroupView.events({
     const modifier = value
       ? { $set: { parentGroupId: value } }
       : { $unset: { parentGroupId: '' } };
-    Groups.update(groupId(), modifier, (err) => {
-      if (err) alert('Update failed: ' + err.message);
-    });
-  },
-  'click .saveSteeringGroup': function (event, template) {
-    const value = template.find('.steeringGroupSelect').value;
-    const modifier = value
-      ? { $set: { steeringGroupId: value } }
-      : { $unset: { steeringGroupId: '' } };
     Groups.update(groupId(), modifier, (err) => {
       if (err) alert('Update failed: ' + err.message);
     });

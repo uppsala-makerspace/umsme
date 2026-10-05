@@ -294,41 +294,22 @@ export const isGroupResponsible = (member, group) =>
   !!member && !!group && group.responsibleMemberId === member._id;
 
 /**
- * Whether the member governs a group through its steering group
- * (steeringGroupId): anyone who may edit the steering group acts as the
- * group's responsible.
- */
-export const governsViaSteeringGroup = async (member, group) => {
-  if (!member || !group?.steeringGroupId) return false;
-  const steering = await Groups.findOneAsync(group.steeringGroupId);
-  return !!steering && canEditGroup(member, steering);
-};
-
-/**
- * Whether the member may edit a group's descriptive fields: its responsible,
- * anyone in it when it is a steering group, or anyone governing it through its
- * steering group. See mayEditGroup for the rule; this only supplies it with the
- * caller's membership.
+ * Whether the member may edit a group's descriptive fields: its responsible, or
+ * anyone in it when it is a steering group. See mayEditGroup for the rule; this
+ * only supplies it with the caller's membership.
  */
 export const canEditGroup = async (member, group) => {
   if (!member || !group) return false;
   if (isGroupResponsible(member, group)) return true;
-  if (group.type === 'steering') {
-    const membership = await GroupMemberships.findOneAsync({
-      groupId: group._id,
-      memberId: member._id,
-    });
-    return mayEditGroup({
-      isResponsible: false,
-      groupType: group.type,
-      membershipState: membership?.state || null,
-    });
-  }
+  if (group.type !== 'steering') return false; // no lookup for the common case
+  const membership = await GroupMemberships.findOneAsync({
+    groupId: group._id,
+    memberId: member._id,
+  });
   return mayEditGroup({
     isResponsible: false,
     groupType: group.type,
-    membershipState: null,
-    governsViaSteeringGroup: await governsViaSteeringGroup(member, group),
+    membershipState: membership?.state || null,
   });
 };
 

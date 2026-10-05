@@ -158,56 +158,6 @@ export const ResponsibilitySubgroup = {
   },
 };
 
-// An interest group governed by a steering group, seen by one of the steering
-// group's members: they edit and approve like the responsible, and see the
-// steering group's expense account alongside the group's own.
-export const SteeredInterestGroup = {
-  args: {
-    loading: false,
-    data: {
-      ...baseData,
-      group: {
-        ...baseData.group,
-        _id: "grp7",
-        name: { sv: "Cykelgruppen", en: "Bike kitchen" },
-        type: "interest",
-        description: { sv: "Vi lagar cyklar tillsammans varje torsdag." },
-        myCanEdit: true,
-      },
-      steeringGroup: { _id: "grp9", name: { sv: "Cykelgruppens styrgrupp" } },
-      childGroups: [],
-      relatedGroups: [],
-      workshop: null,
-      canApprove: true,
-      canRemoveMembers: true,
-      expenseAccounts: [{ _id: "acc3", name: "Cykelgruppen — reservdelar" }],
-      mapView: null,
-    },
-  },
-};
-
-// The steering group's own page lists the groups it governs.
-export const SteeringGroupGoverningInterestGroup = {
-  args: {
-    loading: false,
-    data: {
-      ...baseData,
-      group: {
-        ...baseData.group,
-        _id: "grp9",
-        name: { sv: "Cykelgruppens styrgrupp" },
-        description: { sv: "Styr Cykelgruppen och sköter dess inköp." },
-      },
-      childGroups: [],
-      relatedGroups: [],
-      governedGroups: [{ _id: "grp7", name: { sv: "Cykelgruppen" }, type: "interest" }],
-      workshop: null,
-      expenseAccounts: [{ _id: "acc3", name: "Cykelgruppen — reservdelar" }],
-      mapView: null,
-    },
-  },
-};
-
 export const Loading = {
   args: {
     loading: true,

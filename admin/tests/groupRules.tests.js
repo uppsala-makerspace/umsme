@@ -25,19 +25,6 @@ describe('Group rules', function () {
       assert.strictEqual(may({ groupType: 'steering', membershipState: 'pending' }), false);
     });
 
-    it('lets whoever governs the group through its steering group edit', function () {
-      for (const groupType of ['function', 'interest']) {
-        assert.strictEqual(may({ groupType, governsViaSteeringGroup: true }), true, groupType);
-      }
-    });
-
-    it('gives a governed group\'s own members nothing extra', function () {
-      assert.strictEqual(
-        may({ groupType: 'interest', membershipState: 'active', governsViaSteeringGroup: false }),
-        false
-      );
-    });
-
     it('says no to someone outside the group', function () {
       assert.strictEqual(may({ groupType: 'steering' }), false);
       assert.strictEqual(may({ groupType: 'interest' }), false);
