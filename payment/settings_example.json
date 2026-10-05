@@ -1,5 +1,6 @@
 {
   "private": {
+    "recipientWhitelist": [],
     "mailUrl": "smtp://user:password@smtp.example.com:587",
     "managerEvents": {
       "channels": [

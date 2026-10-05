@@ -1,5 +1,6 @@
 import webpush from "web-push";
 import { PushSubs } from "/imports/common/collections/pushSubs";
+import { allowedPushSubscriptions } from "/imports/common/server/recipientGuard";
 import { Members } from "/imports/common/collections/members";
 import { Messages } from "/imports/common/collections/messages";
 import { Announcements } from "/imports/common/collections/announcements";
@@ -33,12 +34,21 @@ export const initPush = () => {
  * Send a push notification payload to a list of subscriptions.
  * Auto-cleans up 410/404 (gone) subscriptions.
  *
+ * Every push goes through here, so this is where the recipient whitelist is
+ * applied: with `private.recipientWhitelist` set, only subscriptions of users
+ * with a listed email address are used, and none at all when the list is
+ * empty (see recipientGuard.js).
+ *
  * @param {Array} subs - Array of push subscription documents from PushSubs
  * @param {Object} payload - Notification payload (will be JSON-stringified)
  */
 export const sendPushToSubscriptions = async (subs, payload) => {
+  const allowed = await allowedPushSubscriptions(subs);
+  if (allowed.length < subs.length) {
+    console.log(`[push] recipientWhitelist: skipped ${subs.length - allowed.length} of ${subs.length} subscription(s)`);
+  }
   const payloadStr = JSON.stringify(payload);
-  for (const sub of subs) {
+  for (const sub of allowed) {
     try {
       await webpush.sendNotification(
         {

@@ -24,6 +24,7 @@
     }
   },
   "private": {
+    "recipientWhitelist": [],
     "vapidPrivateKey": "Some key here",
     "googleDrive": {
       "backend": "drive",

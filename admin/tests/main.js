@@ -4,6 +4,7 @@ import "./stats.tests";
 import "./expenseApproval.tests";
 import "./expenseBudget.tests";
 import "./expenseType.tests";
+import "./recipientGuard.tests";
 import "./slug.tests";
 import "./publicDirectory.tests";
 import "./storeRules.tests";

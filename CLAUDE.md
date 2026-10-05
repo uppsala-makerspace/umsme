@@ -92,6 +92,23 @@ Settings live per-app because Meteor settings are per-app:
 Dev tip: set `"webhookUrl": "console:dev"` on a channel to log the
 formatted payload to stdout instead of POSTing to Slack.
 
+## Developing against a copy of production
+
+Local databases are often copies of production, full of real members, their
+emails and their push subscriptions. Two settings keep dev from contacting them:
+
+- `private.recipientWhitelist` (in each app's `settings.json`): when set,
+  mail and push reach only these addresses, and an empty list reaches no one.
+  Enforced in `common/server/recipientGuard.js` — `isEmailAllowed` for mail
+  and `sendPushToSubscriptions` for every push. Production leaves the key out,
+  which means everyone. The example settings ship with an empty list, so a
+  fresh dev setup contacts no one until you add your own addresses. The older
+  `private.emailWhitelist` is still honoured when the new key is absent, with
+  its old meaning (empty means everyone).
+- Local VAPID keys: dev uses its own `vapidPublicKey`/`vapidPrivateKey`, so
+  push to subscriptions copied from production is rejected by the push
+  services. Never put the production keys in a dev `settings.json`.
+
 ## Git Commits
 
 Do not include "Generated with Claude Code" or "Co-Authored-By" footers in commit messages.
