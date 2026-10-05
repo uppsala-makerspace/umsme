@@ -78,6 +78,8 @@ const GroupDetail = ({
     responsibleName,
     parentGroup,
     childGroups,
+    steeringGroup,
+    governedGroups = [],
     relatedGroups = [],
     workshop,
     canSeeMembers,
@@ -129,6 +131,15 @@ const GroupDetail = ({
             <span>{t("partOfGroup")}</span>
             <Link to={`/groups/${parentGroup._id}`} className="text-brand-green no-underline hover:underline">
               {localized(parentGroup.name, lang)}
+            </Link>
+          </>
+        )}
+        {steeringGroup && (
+          <>
+            <span>·</span>
+            <span>{t("steeredByGroup")}</span>
+            <Link to={`/groups/${steeringGroup._id}`} className="text-brand-green no-underline hover:underline">
+              {localized(steeringGroup.name, lang)}
             </Link>
           </>
         )}
@@ -500,6 +511,31 @@ const GroupDetail = ({
                   className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
                 >
                   <span className="font-semibold">{localized(child.name, lang)}</span>
+                  <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Interest and function groups this steering group governs */}
+      {governedGroups.length > 0 && (
+        <section className="mb-6">
+          <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
+            {t("groupsSectionGoverned")}
+          </h3>
+          <ul className="list-none p-0 m-0">
+            {governedGroups.map((governed) => (
+              <li key={governed._id} className="mb-2">
+                <Link
+                  to={`/groups/${governed._id}`}
+                  className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
+                >
+                  <span className="flex items-center gap-2 font-semibold">
+                    {localized(governed.name, lang)}
+                    <GroupTypeTag type={governed.type} />
+                  </span>
                   <span className="text-gray-400 text-xl ml-2">&rarr;</span>
                 </Link>
               </li>

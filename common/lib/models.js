@@ -1117,6 +1117,16 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // Optional steering group governing an interest or function group: its
+    // members act as this group's responsible (see STEERABLE_GROUP_TYPES).
+    // Enforced by deny rules on the collection, like parentGroupId.
+    steeringGroupId: {
+      label: "Steering group",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
     // Workshops this group is related to (e.g. an interest group that partly
     // operates in a workshop). Listed on those workshops' pages in the app.
     relatedWorkshopIds: {

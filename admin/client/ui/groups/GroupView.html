@@ -82,6 +82,25 @@
     </form>
     {{/if}}
 
+    {{#if canHaveSteeringGroup}}
+    <hr>
+
+    <h2>Steering group</h2>
+    <p class="text-muted">Optional. The steering group's members act as this group's responsible: they edit its texts, approve requests and remove members. Expense accounts that only they should spend on go on the steering group.</p>
+    <form class="form-inline">
+        <select class="form-control steeringGroupSelect">
+            <option value="" {{noSteeringSelected}}>(No steering group)</option>
+            {{#each workshopGroups}}
+            <option value="{{_id}}" {{steeringSelected _id}}>{{name.sv}}</option>
+            {{/each}}
+        </select>
+        <button type="button" class="btn btn-default saveSteeringGroup">Save</button>
+        {{#if steeringGroup}}
+            <a href="/group/{{steeringGroup._id}}">Open {{steeringGroup.name.sv}}</a>
+        {{/if}}
+    </form>
+    {{/if}}
+
     {{#if canChooseSpaces}}
     <hr>
 
@@ -195,6 +214,14 @@
     <p>Responsibility groups:</p>
     <ul>
         {{#each childGroups}}
+        <li><a href="/group/{{_id}}">{{name.sv}}</a></li>
+        {{/each}}
+    </ul>
+    {{/if}}
+    {{#if hasGovernedGroups}}
+    <p>Governs:</p>
+    <ul>
+        {{#each governedGroups}}
         <li><a href="/group/{{_id}}">{{name.sv}}</a></li>
         {{/each}}
     </ul>
