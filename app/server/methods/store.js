@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import { check, Match } from "meteor/check";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import { StoreItems } from "/imports/common/collections/storeItems";
 import { Payments } from "/imports/common/collections/payments";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
@@ -125,7 +125,7 @@ Meteor.methods({
     const commented = commentFor(item, rawComment);
     if (commented.error) throw new Meteor.Error(commented.error, "Comment required");
 
-    const externalId = uuidv4().replace(/-/g, "").toUpperCase();
+    const externalId = randomUUID().replace(/-/g, "").toUpperCase();
     await initiatedPayments.insertAsync({
       externalId,
       member: member._id,

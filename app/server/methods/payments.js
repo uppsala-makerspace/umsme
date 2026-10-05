@@ -1,5 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import { getSwishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
@@ -100,7 +100,7 @@ Meteor.methods({
     }
 
     const { amount } = paymentTypes[paymentType];
-    const externalId = uuidv4().replace(/-/g, "").toUpperCase();
+    const externalId = randomUUID().replace(/-/g, "").toUpperCase();
 
     await initiatedPayments.insertAsync({
       externalId,

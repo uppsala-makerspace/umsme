@@ -14,7 +14,7 @@ import { findBestTemplate, messageData } from "/imports/common/lib/message";
 import { isEmailAllowed } from "/imports/common/server/emailGuard";
 import { pushMessage } from "/imports/common/server/push";
 import { publishManagerEvent, ManagerEventType, blockquote } from "/imports/common/server/managerEvents";
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 /**
  * Add payment record to database.
@@ -24,7 +24,7 @@ import { v4 as uuidv4 } from 'uuid';
  * @returns {Promise<Object>} The created payment document with _id
  */
 export async function addPayment(paymentData) {
-  const hash = uuidv4().replace(/-/g, "").substring(0, 40);
+  const hash = randomUUID().replace(/-/g, "").substring(0, 40);
   const doc = {
     ...paymentData,
     hash,
