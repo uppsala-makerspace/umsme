@@ -2,6 +2,7 @@ import { WebApp } from "meteor/webapp";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Attestations } from "/imports/common/collections/attestations";
 import { Members } from "/imports/common/collections/members";
+import { flagParam, rfidExport } from "/imports/common/lib/certificateRfid";
 
 // Access control for this endpoint is enforced upstream in nginx via
 // `allow`/`deny` directives on the location block. Anything reaching the
@@ -14,7 +15,9 @@ const sendJson = (res, status, body) => {
 
 WebApp.handlers.use("/api/certificates", async (req, res) => {
   // The mount strips the prefix; req.url begins with "/<certId>/rfid"
-  const url = req.url.split("?")[0];
+  const [url, query = ""] = req.url.split("?");
+  // ?includeNames adds a members list with each tag's owner (docs/certificates.md).
+  const includeNames = flagParam(new URLSearchParams(query).get("includeNames"));
   const match = url.match(/^\/([^/]+)\/rfid\/?$/);
   if (!match) {
     res.writeHead(404);
@@ -42,15 +45,10 @@ WebApp.handlers.use("/api/certificates", async (req, res) => {
   }).fetchAsync();
 
   const memberIds = [...new Set(attestations.map(a => a.memberId))];
-  const members = await Members.find({
-    _id: { $in: memberIds },
-    rfid: { $exists: true, $ne: "" },
-  }).fetchAsync();
+  const members = await Members.find(
+    { _id: { $in: memberIds }, rfid: { $exists: true, $ne: "" } },
+    { fields: { rfid: 1, name: 1 } }
+  ).fetchAsync();
 
-  const rfids = members.map(m => m.rfid).filter(Boolean);
-
-  sendJson(res, 200, {
-    name: certificate.name?.sv || certificate.name?.en || "",
-    rfids,
-  });
+  sendJson(res, 200, rfidExport(certificate, members, { includeNames }));
 });

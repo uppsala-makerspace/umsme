@@ -242,6 +242,67 @@ All methods are defined in `app/server/methods/certificates.js`.
 | `certificates.getMandatoryStatus` | Any logged-in user | Returns the mandatory certificate (if any) and whether the current user holds a valid attestation for it. |
 | `certificates.remove(attestationId)` | Requesting member or certifiers | Removes a pending attestation. The requesting member can always remove their own. A certifier can remove a pending attestation only if it has a `comment`. Cannot remove confirmed attestations. |
 
+## 10. RFID Export
+
+Equipment that only some members may use (a laser cutter, say) can fetch the
+RFID tags of everyone holding the certificate. The admin app serves:
+
+```
+GET /api/certificates/<certificateId>/rfid
+GET /api/certificates/<certificateId>/rfid?includeNames
+```
+
+The certificate's page in admin links to both.
+
+**Who is included:** members with a confirmed attestation (`certifierId` set)
+that has not expired (no `endDate`, or `endDate` in the future), and a
+non-empty `rfid` on their member record. Pending attestations never count.
+
+**Response without parameters**, unchanged from before `includeNames` existed:
+
+```json
+{
+  "name": "Laserskärare",
+  "rfids": ["04A1B2C3", "04D4E5F6"]
+}
+```
+
+- `name` — the certificate's Swedish name, falling back to English.
+- `rfids` — the tags, one per included member, in no particular order.
+
+**Response with `?includeNames`** — the same fields plus `members`:
+
+```json
+{
+  "name": "Laserskärare",
+  "rfids": ["04A1B2C3", "04D4E5F6"],
+  "members": [
+    { "rfid": "04A1B2C3", "name": "Anna Andersson" },
+    { "rfid": "04D4E5F6", "name": "Bo Berg" }
+  ]
+}
+```
+
+- `members` — one entry per tag in `rfids`, with the member's name (`""` if
+  the member has none), sorted by name.
+- `rfids` is still there, so a consumer that only reads `rfids` works with
+  either form.
+
+`includeNames` is on when present without a value, or set to `true` or `1`.
+`false`, `0` or leaving it out gives the plain form.
+
+**Errors:** `404` with `{"error": "Certificate not found"}` for an unknown
+certificate id, an empty `404` for any other path under `/api/certificates`,
+and `405` for anything but `GET`.
+
+**Access:** the endpoint has no login. It is restricted by an IP allowlist in
+nginx in front of the admin app, so only the equipment's network can reach it.
+With `includeNames` the response holds member names as well as tags, so keep
+that allowlist tight.
+
+The handler is `admin/server/api/certificatesRfid.js`; the response is built by
+`rfidExport` in `common/lib/certificateRfid.js`.
+
 ## Related Documentation
 
 - [door-access.md](door-access.md) -- How mandatory certificates gate door unlocking
