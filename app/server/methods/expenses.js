@@ -16,7 +16,7 @@ import {
   visibleExpenseAccountsFor,
   canViewExpenseAccount,
 } from "./utils";
-import { canReviewExpense, canViewExpense } from "/imports/common/lib/expenseApproval";
+import { canReviewExpense, canViewExpense, canUnapproveExpense } from "/imports/common/lib/expenseApproval";
 import { sortRevisions } from "/imports/common/lib/expenseBudget";
 import { EXPENSE_TYPES, DOCUMENT_MIME, isInvoice } from "/imports/common/lib/expenseType";
 
@@ -339,6 +339,7 @@ Meteor.methods({
       ? null
       : { memberId: member._id, accountIds: await approvableAccountIdsFor(member) };
     const canApprove = !isOwn && canReviewExpense(found, reviewer);
+    const canUnapprove = !isOwn && canUnapproveExpense(found, reviewer);
     if (!isOwn && !canViewExpense(found, reviewer)) {
       throw new Meteor.Error("not-authorized", "Not your expense");
     }
@@ -369,6 +370,7 @@ Meteor.methods({
       receiptUrl: receiptUrlFor(expense._id, expense.driveFileId),
       isOwn,
       canApprove,
+      canUnapprove,
       submitterName: submitter?.name || null,
     };
   },
@@ -451,6 +453,42 @@ Meteor.methods({
     await publishManagerEvent(ManagerEventType.EXPENSE_CONFIRMED, {
       subject: "Expense confirmed",
       body: await reviewedLine(expense, "confirmed", { by: member.name }),
+    });
+    return true;
+  },
+
+  /**
+   * Undo an approval: a confirmed expense goes back to submitted and waits for
+   * review again. Allowed to anyone who may review the account (not only
+   * whoever approved), never the submitter, and only until the treasurer has
+   * paid it — see canUnapproveExpense.
+   */
+  "expenses.unapprove": async (expenseId) => {
+    const member = await requireMember();
+    const expense = await Expenses.findOneAsync(expenseId);
+    if (!expense) throw new Meteor.Error("not-found", "Expense not found");
+    const accountIds = await approvableAccountIdsFor(member);
+    if (!canUnapproveExpense(expense, { memberId: member._id, accountIds })) {
+      if (expense.memberId === member._id) {
+        throw new Meteor.Error("self-review", "You cannot review your own expense");
+      }
+      if (expense.status !== "confirmed") {
+        throw new Meteor.Error("bad-state", "Only confirmed expenses can be un-approved");
+      }
+      throw new Meteor.Error("not-authorized", "You may not review this expense");
+    }
+    // Conditional on the status, so a reimbursement made in admin meanwhile
+    // is never undone by this.
+    const changed = await Expenses.updateAsync(
+      { _id: expenseId, status: "confirmed" },
+      { $set: { status: "submitted" }, $unset: { confirmedAt: "", confirmedBy: "" } }
+    );
+    if (!changed) {
+      throw new Meteor.Error("bad-state", "The expense is no longer confirmed");
+    }
+    await publishManagerEvent(ManagerEventType.EXPENSE_UNCONFIRMED, {
+      subject: isInvoice(expense) ? "Invoice approval undone" : "Expense approval undone",
+      body: await reviewedLine(expense, "un-approved", { by: member.name }),
     });
     return true;
   },
@@ -665,6 +703,10 @@ Meteor.methods({
       ? all.filter((e) => new Date(e.date).getFullYear() === selectedYear)
       : all;
 
+    // What the caller may do with each expense as a reviewer: open it (to see
+    // it, or undo an approval) and, while submitted, approve or reject it.
+    const reviewer = { memberId: member._id, accountIds: await approvableAccountIdsFor(member) };
+
     // Resolve member and confirmer names in one round trip.
     const memberIds = [
       ...new Set(shown.flatMap((e) => [e.memberId, e.confirmedBy]).filter(Boolean)),
@@ -708,6 +750,8 @@ Meteor.methods({
         // Lets the client offer an edit shortcut for the caller's own
         // expenses without exposing member ids.
         isMine: e.memberId === member._id,
+        canOpen: e.memberId === member._id || canViewExpense(e, reviewer),
+        canReview: canReviewExpense(e, reviewer),
         status: e.status,
         type: e.type || "receipt",
         dueDate: e.dueDate || null,

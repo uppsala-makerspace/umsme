@@ -100,6 +100,8 @@ This section is for you if you are an **approver** for an expense account. Appro
 
 As an approver you get an extra tab, **Approve**, under Expenses. A number on the tab shows how many expenses are waiting.
 
+You also find the expenses on the account's own page. An expense waiting for you is marked **Waiting for you**. Expand the card and tap **Review →** to open it.
+
 ![The Approve tab with waiting expenses](../screens/expenses-approve-list-en.png)
 
 Open an expense and check that:
@@ -116,6 +118,10 @@ Then tap **Approve** or **Reject**:
 - **Reject** requires a reason. It is shown to whoever submitted the expense, so say what needs correcting.
 
 You can't approve your own expenses; someone else approves them. Expenses you have reviewed show under **Recently reviewed** on the same tab.
+
+### Undo an approval
+
+If you approved by mistake, you can undo it as long as the treasurer hasn't paid the expense. Open the expense, for example under **Recently reviewed**, tap **Undo approval** and then **Yes, undo the approval**. The expense goes back to **Submitted** and can be reviewed again. Any approver of the account can undo, not only the one who approved.
 
 ## 5. Follow the group's budget
 

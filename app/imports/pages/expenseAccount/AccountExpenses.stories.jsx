@@ -15,6 +15,7 @@ const baseData = {
       _id: "e1",
       memberName: "Anna Andersson",
       isMine: true,
+      canOpen: true,
       status: "reimbursed",
       date: d("2026-05-14"),
       amount: 1249.5,
@@ -34,6 +35,7 @@ const baseData = {
       _id: "e2",
       memberName: "Cecilia Carlsson",
       isMine: false,
+      canOpen: true,
       status: "confirmed",
       date: d("2026-06-02"),
       amount: 430,
@@ -52,6 +54,7 @@ const baseData = {
       _id: "e3",
       memberName: "David Dahl",
       isMine: true,
+      canOpen: true,
       status: "submitted",
       date: d("2026-06-11"),
       amount: 89.9,
@@ -125,6 +128,32 @@ export const AllYears = {
 export const EmptyYear = {
   args: {
     data: { ...baseData, year: 2024, expenses: [] },
+    newExpenseTo: "/expenses/new?account=acc1",
+    expenseTo: (id) => `/expenses/${id}`,
+  },
+};
+
+// A reviewer's view: someone else's submitted expense on an account you
+// approve for is marked "Waiting for you" and opens with Review.
+export const WaitingForReview = {
+  args: {
+    data: {
+      ...baseData,
+      expenses: [
+        {
+          ...baseData.expenses[1],
+          _id: "e5",
+          memberName: "Dan Dahl",
+          status: "submitted",
+          submittedAt: new Date("2026-06-20"),
+          confirmedByName: null,
+          confirmedAt: null,
+          canOpen: true,
+          canReview: true,
+        },
+        ...baseData.expenses,
+      ],
+    },
     newExpenseTo: "/expenses/new?account=acc1",
     expenseTo: (id) => `/expenses/${id}`,
   },

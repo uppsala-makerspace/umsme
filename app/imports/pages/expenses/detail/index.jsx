@@ -99,6 +99,14 @@ export default () => {
       alert(err.reason || err.message);
     }
   };
+  const onUnapprove = async () => {
+    try {
+      await Meteor.callAsync("expenses.unapprove", expenseId);
+      await fetchData();
+    } catch (err) {
+      alert(err.reason || err.message);
+    }
+  };
   const onReject = async (reason) => {
     try {
       await Meteor.callAsync("expenses.reject", expenseId, reason);
@@ -128,6 +136,7 @@ export default () => {
         onReplacePhoto={onReplacePhoto}
         onApprove={onApprove}
         onReject={onReject}
+        onUnapprove={onUnapprove}
       />
     </Layout>
   );

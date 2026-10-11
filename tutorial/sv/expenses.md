@@ -100,6 +100,8 @@ Det här avsnittet gäller dig som är **godkännare** för ett utläggskonto. G
 
 Som godkännare har du en extra flik, **Godkänna**, under Utlägg. En siffra på fliken visar hur många utlägg som väntar.
 
+Du hittar också utläggen på kontots egen sida. Ett utlägg som väntar på dig är märkt **Väntar på dig**. Fäll ut kortet och tryck på **Granska →** för att öppna det.
+
 ![Fliken Godkänna med väntande utlägg](../screens/expenses-approve-list-sv.png)
 
 Öppna ett utlägg och kontrollera att:
@@ -116,6 +118,10 @@ Tryck sedan på **Godkänn** eller **Avslå**:
 - **Avslå** kräver att du skriver en anledning. Den visas för den som skickade in utlägget, så skriv vad som behöver rättas.
 
 Du kan inte godkänna dina egna utlägg; de godkänns av någon annan. Utlägg du har granskat syns under **Nyligen granskade** på samma flik.
+
+### Ångra ett godkännande
+
+Godkände du av misstag kan du ångra det så länge kassören inte har betalat utlägget. Öppna utlägget, till exempel under **Nyligen granskade**, och tryck på **Ångra godkännande** och sedan **Ja, ångra godkännandet**. Utlägget går tillbaka till **Inskickat** och kan granskas igen. Alla godkännare för kontot kan ångra, inte bara den som godkände.
 
 ## 5. Följ gruppens budget
 

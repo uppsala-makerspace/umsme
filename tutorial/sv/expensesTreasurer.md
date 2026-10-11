@@ -49,6 +49,7 @@ Betalningsdatumet och bokföringskontot används för den automatiska matchninge
 ## 5. Om något blev fel
 
 - **Fel konto eller datum:** klicka på **Undo "mark as reimbursed"** (eller *paid*). Utlägget går tillbaka till Confirmed, med kontot och datumet kvar ifyllda, och du kan markera det igen.
+- **Godkänt av misstag:** klicka på **Undo confirmation** och sedan **Yes, undo the confirmation**. Utlägget går tillbaka till Submitted och måste godkännas igen, i admin eller av en godkännare i appen. Det går bara så länge utlägget inte är betalt.
 - **Utlägget ska inte betalas:** klicka på **Reject…** och skriv en anledning. Medlemmen ser anledningen i appen och kan rätta och skicka in igen.
 
 Du kan inte återbetala dina egna utlägg; det får någon annan göra.

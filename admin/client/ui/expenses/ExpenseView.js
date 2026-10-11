@@ -25,6 +25,9 @@ Template.ExpenseView.onCreated(function () {
   this.receiptOpen = new ReactiveVar(false);
   this.zoomed = new ReactiveVar(false);
   this.rejecting = new ReactiveVar(false);
+  // Undoing a confirmation asks for a second click on the page rather than
+  // window.confirm(), which some browsers fail to draw.
+  this.unconfirming = new ReactiveVar(false);
   this.accounting = new ReactiveVar(null);
   Meteor.call('accounting.config', (err, res) => {
     if (!err) this.accounting.set(res);
@@ -138,6 +141,9 @@ Template.ExpenseView.helpers({
   rejecting() {
     return Template.instance().rejecting.get();
   },
+  unconfirming() {
+    return Template.instance().unconfirming.get();
+  },
   receiptFullStyle() {
     const base = 'display: inline-block; margin: 0 auto;';
     return Template.instance().zoomed.get()
@@ -211,6 +217,19 @@ Template.ExpenseView.events({
     const date = new Date(`${dateStr}T00:00:00`);
     Meteor.call('expenses.reimburse', id, account, date, (err) => {
       if (err) alert('Reimburse failed: ' + err.reason);
+    });
+  },
+  'click .unconfirmExpense': function (event, instance) {
+    instance.unconfirming.set(true);
+  },
+  'click .cancelUnconfirmExpense': function (event, instance) {
+    instance.unconfirming.set(false);
+  },
+  'click .confirmUnconfirmExpense': function (event, instance) {
+    const id = FlowRouter.getParam('_id');
+    Meteor.call('expenses.unconfirm', id, (err) => {
+      instance.unconfirming.set(false);
+      if (err) alert('Undo failed: ' + (err.reason || err.message));
     });
   },
   'click .unreimburseExpense': function () {

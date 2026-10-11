@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -52,6 +52,16 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
   // Which statuses to list. Purely client-side: the year filter decides what
   // the server sends, this decides what is shown of it.
   const [statuses, setStatuses] = useState(DEFAULT_STATUSES);
+  // Expenses waiting for this member's review are submitted, which the default
+  // filter hides. Show submitted too whenever there is one, so an approver
+  // opening the account sees what waits for them. Only adds, never removes,
+  // so a choice the member made is kept.
+  const waitingForMe = (data?.expenses || []).some((e) => e.canReview);
+  useEffect(() => {
+    if (waitingForMe) {
+      setStatuses((prev) => (prev.includes("submitted") ? prev : ["submitted", ...prev]));
+    }
+  }, [waitingForMe]);
   // Whether the budget box's "booked at reimbursement" breakdown is folded out.
   const [bookedOpen, setBookedOpen] = useState(false);
 
@@ -214,7 +224,9 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
             // The label is the singular status name and the date is the one
             // that status change refers to.
             const dated = statusDate(e);
-            const canOpen = !!expenseTo && e.isMine;
+            // Your own expenses, and those you may see as a reviewer, open on
+            // the expense's page; there a reviewer approves, rejects or undoes.
+            const canOpen = !!expenseTo && (e.canOpen ?? e.isMine);
             return (
               <li
                 key={e._id}
@@ -234,6 +246,11 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
                       {t(dated.labelKey)} · {formatDate(dated.value, lang)}
                     </span>
                     <InvoiceBadge expense={e} className="mt-1" />
+                    {e.canReview && (
+                      <span className="inline-block rounded-full bg-blue-100 text-blue-800 text-xs px-2 py-1 mt-1 ml-1">
+                        {t("expenseWaitingForYou")}
+                      </span>
+                    )}
                   </span>
                   <span className="font-semibold whitespace-nowrap">{kr(e.amount)}</span>
                   {isOpen ? (
@@ -319,7 +336,7 @@ const AccountExpenses = ({ loading, error, data, newExpenseTo, expenseTo, onYear
                         to={expenseTo(e._id)}
                         className="flex items-center gap-1 text-sm text-gray-600 underline hover:text-black"
                       >
-                        {t("show")} &rarr;
+                        {t(e.canReview ? "expenseReview" : "show")} &rarr;
                       </Link>
                     )}
                   </div>

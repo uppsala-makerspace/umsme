@@ -27,6 +27,7 @@ export const ManagerEventType = {
   EXPENSE_SUBMITTED: "expenseSubmitted",
   EXPENSE_RETRACTED: "expenseRetracted",
   EXPENSE_CONFIRMED: "expenseConfirmed",
+  EXPENSE_UNCONFIRMED: "expenseUnconfirmed",
   EXPENSE_REJECTED: "expenseRejected",
   EXPENSE_REIMBURSED: "expenseReimbursed",
   EXPENSE_UNREIMBURSED: "expenseUnreimbursed",

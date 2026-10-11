@@ -49,6 +49,7 @@ The payment date and bookkeeping account are used for the automatic matching aga
 ## 5. If something went wrong
 
 - **Wrong account or date:** click **Undo "mark as reimbursed"** (or *paid*). The expense goes back to Confirmed with the account and date still filled in, and you can mark it again.
+- **Approved by mistake:** click **Undo confirmation** and then **Yes, undo the confirmation**. The expense goes back to Submitted and must be approved again, in admin or by an approver in the app. This only works until the expense has been paid.
 - **The expense shouldn't be paid:** click **Reject…** and write a reason. The member sees the reason in the app and can correct and submit again.
 
 You can't reimburse your own expenses; someone else has to.

@@ -80,6 +80,33 @@ Meteor.methods({
   },
 
   /**
+   * Undo a confirmation: a confirmed expense goes back to submitted and waits
+   * for review again. For approvals made by mistake, here or in the app. Same
+   * roles as rejecting, never on your own expense, and only until it has been
+   * reimbursed or paid.
+   */
+  'expenses.unconfirm': async (expenseId) => {
+    await requireRole(['admin', 'board', 'treasurer']);
+    const expense = await getExpense(expenseId);
+    if (expense.status !== 'confirmed') {
+      throw new Meteor.Error('bad-state', 'Only confirmed expenses can be un-confirmed');
+    }
+    const actor = await actingMember();
+    assertNotOwnExpense(expense, actor?._id || null);
+    // Conditional on the status, so a reimbursement made meanwhile is never undone.
+    const changed = await Expenses.updateAsync(
+      { _id: expenseId, status: 'confirmed' },
+      { $set: { status: 'submitted' }, $unset: { confirmedAt: '', confirmedBy: '' } }
+    );
+    if (!changed) throw new Meteor.Error('bad-state', 'The expense is no longer confirmed');
+    await publishManagerEvent(ManagerEventType.EXPENSE_UNCONFIRMED, {
+      subject: isInvoice(expense) ? 'Invoice approval undone' : 'Expense approval undone',
+      body: await expenseLine(expense, 'un-confirmed', { by: actor?.name || 'admin' }),
+    });
+    return true;
+  },
+
+  /**
    * Reject a submitted or confirmed expense with a reason. Confirmers
    * (admin/board) and the treasurer may reject.
    */

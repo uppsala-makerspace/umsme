@@ -118,10 +118,16 @@ button opens `/expenses/new?account=<id>&returnTo=<the account page>`, so
 choice) and finishing the expense returns to the account page. The `returnTo`
 parameter is honoured by the new/detail pages for save, submit and abort, and
 only when it is an in-app path (`safeReturnTo` in
-`app/imports/pages/expenses/utils.js`). The member's own expenses get a **Show**
-link in the expanded card that opens the expense page (where a submitted expense
-can be retracted and a rejected one edited), carrying the same `returnTo`; the
-DTO's `isMine` flag drives it without exposing member ids.
+`app/imports/pages/expenses/utils.js`). The expanded card has a link to the
+expense page, carrying the same `returnTo`, for the member's own expenses
+(where a submitted expense can be retracted and a rejected one edited) and for
+every expense the member may see as a reviewer (`canViewExpense`). A submitted
+expense the member may approve is marked **Waiting for you** and its link reads
+**Review** instead of **Show**. The status filter normally starts at confirmed
+and reimbursed, but adds submitted when something waits for the member, so an
+approver sees it straight away; on the expense page they approve or reject it,
+or undo an approval. The DTO's `canOpen` and `canReview` flags drive this
+without exposing member ids.
 
 The expense's own page shows the same review trail once the expense is locked:
 submitted date, who confirmed it and when, the bookkeeping account and the
@@ -172,7 +178,7 @@ show. The rules live in
 ## 4. Lifecycle
 
 Statuses (`expenses.status`): `pending → submitted → confirmed → reimbursed`,
-with `rejected` as a side exit and two backward transitions.
+with `rejected` as a side exit and three backward transitions (undoing a confirmation exists in both apps).
 
 | Transition | Who (where) | Method | Notes |
 | --- | --- | --- | --- |
@@ -182,13 +188,17 @@ with `rejected` as a side exit and two backward transitions.
 | `submitted` → `pending` | member (app) | `expenses.retract` | pull back for editing |
 | `pending`/`rejected` → deleted | member (app) | `expenses.abort` | deletes the expense and trashes the Drive file |
 | `submitted` → `confirmed` | admin/board (admin) | `expenses.confirm` | sets `confirmedAt/By` |
+| `submitted` → `confirmed` | account approver or admin/board/treasurer (app) | `expenses.approve` | not your own; sets `confirmedAt/By` |
+| `submitted` → `rejected` | account approver or admin/board/treasurer (app) | `expenses.reject` | reason required |
+| `confirmed` → `submitted` | account approver or admin/board/treasurer (app) | `expenses.unapprove` | undo an approval made by mistake; anyone who may review the account, not your own; clears `confirmedAt/By`; refused once reimbursed |
+| `confirmed` → `submitted` | admin/board/treasurer (admin) | `expenses.unconfirm` | undo a confirmation; not your own; clears `confirmedAt/By`; refused once reimbursed |
 | `submitted`/`confirmed` → `rejected` | admin/board/treasurer (admin) | `expenses.reject` | reason required (shown to the member); clears `confirmedAt/By` |
 | `confirmed` → `reimbursed` | treasurer/admin (admin) | `expenses.reimburse` | sets `bookkeepingAccount`, `reimbursedDate`, `reimbursedAt/By` — see [accounting.md](accounting.md) §4 |
 | `reimbursed` → `confirmed` | treasurer/admin (admin) | `expenses.unreimburse` | keeps `bookkeepingAccount`/`reimbursedDate` as defaults for a redo |
 
 All writes go through server methods; direct client writes to the collection
 are denied. Every step publishes a manager event (`expenseSubmitted`,
-`expenseRetracted`, `expenseConfirmed`, `expenseRejected`,
+`expenseRetracted`, `expenseConfirmed`, `expenseUnconfirmed`, `expenseRejected`,
 `expenseReimbursed`, `expenseUnreimbursed`) that typically lands in Slack.
 
 ## 5. Receipts

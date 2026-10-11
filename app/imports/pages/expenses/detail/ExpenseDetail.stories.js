@@ -22,6 +22,7 @@ const baseActions = {
   onReplacePhoto: fn(),
   onApprove: fn(),
   onReject: fn(),
+  onUnapprove: fn(),
 };
 
 const expense = (overrides) => ({
@@ -62,6 +63,23 @@ export const ToApprove = {
     }),
     accounts,
     ...baseActions,
+  },
+};
+
+// Approved but not yet paid: the reviewer can undo the approval, which sends
+// the expense back to submitted. Confirmed in place before it happens.
+export const ConfirmedUnapprovable = {
+  args: {
+    expense: expense({
+      status: "confirmed", amount: 1450, expenseAccountId: "a2", accountName: "Verktyg",
+      note: "Sticksåg till träverkstaden", place: "Bauhaus",
+      submittedAt: new Date("2026-07-20"), submitterName: "Cecilia Ek",
+      confirmedByName: "Bo Berg", confirmedAt: new Date("2026-07-21"),
+      isOwn: false, canApprove: false, canUnapprove: true,
+    }),
+    accounts,
+    ...baseActions,
+    onUnapprove: fn(),
   },
 };
 

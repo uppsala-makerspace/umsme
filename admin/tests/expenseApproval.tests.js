@@ -4,6 +4,7 @@ import {
   approvableAccountIds,
   canReviewExpense,
   canViewExpense,
+  canUnapproveExpense,
 } from '/imports/common/lib/expenseApproval';
 
 // Three accounts: Alice approves A, Bob approves B, C has no approvers at all.
@@ -120,6 +121,30 @@ describe('expenseApproval', function () {
     it('refuses when nothing is passed', function () {
       assert.strictEqual(canViewExpense(null, alice), false);
       assert.strictEqual(canViewExpense(submitted()), false);
+    });
+  });
+  describe('canUnapproveExpense', function () {
+    const reviewer = { memberId: 'alice', accountIds: ['accA'] };
+    const confirmed = (over = {}) => submitted({ status: 'confirmed', ...over });
+
+    it('lets a reviewer of the account undo a confirmed expense', function () {
+      assert.strictEqual(canUnapproveExpense(confirmed(), reviewer), true);
+    });
+
+    it('only while confirmed', function () {
+      for (const status of ['pending', 'submitted', 'rejected', 'reimbursed']) {
+        assert.strictEqual(canUnapproveExpense(confirmed({ status }), reviewer), false, status);
+      }
+    });
+
+    it('never on your own expense', function () {
+      assert.strictEqual(canUnapproveExpense(confirmed({ memberId: 'alice' }), reviewer), false);
+    });
+
+    it('not on an account you do not review, or without an account', function () {
+      assert.strictEqual(canUnapproveExpense(confirmed({ expenseAccountId: 'accC' }), reviewer), false);
+      assert.strictEqual(canUnapproveExpense(confirmed({ expenseAccountId: undefined }), reviewer), false);
+      assert.strictEqual(canUnapproveExpense(null, reviewer), false);
     });
   });
 });

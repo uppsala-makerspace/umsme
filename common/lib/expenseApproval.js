@@ -71,3 +71,21 @@ export const canReviewExpense = (expense, { memberId, accountIds = [] } = {}) =>
   if (expense.memberId === memberId) return false;
   return accountIds.includes(expense.expenseAccountId);
 };
+
+/**
+ * Whether this member may undo the approval of this expense, sending it back
+ * to `submitted` for another review. The same people who may approve it may
+ * undo it — not only whoever approved — so a second approver can catch a
+ * mistake too. Only while it is `confirmed`: once the treasurer has paid it,
+ * correcting it is an admin task.
+ *
+ * @param {object} expense
+ * @param {{memberId: string, accountIds: Array<string>}} reviewer
+ * @return {boolean}
+ */
+export const canUnapproveExpense = (expense, { memberId, accountIds = [] } = {}) => {
+  if (!expense || expense.status !== "confirmed") return false;
+  if (!expense.expenseAccountId) return false;
+  if (expense.memberId === memberId) return false;
+  return accountIds.includes(expense.expenseAccountId);
+};

@@ -26,6 +26,7 @@ const ExpenseDetail = ({
   onReplacePhoto,
   onApprove,
   onReject,
+  onUnapprove,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
@@ -38,6 +39,8 @@ const ExpenseDetail = ({
   const [note, setNote] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [showRejectReason, setShowRejectReason] = useState(false);
+  // Undoing an approval is confirmed in place, not with window.confirm().
+  const [confirmingUnapprove, setConfirmingUnapprove] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
@@ -419,6 +422,49 @@ const ExpenseDetail = ({
                 </div>
               )}
             </>
+          ) : expense.canUnapprove ? (
+            /* Approved, but not yet paid: a reviewer may send it back to
+               submitted, e.g. after approving by mistake. */
+            <>
+              <div className="flex items-start gap-2 p-3 mt-2 bg-yellow-50 border border-yellow-300 rounded-lg text-yellow-800">
+                <InformationCircleIcon className="w-5 h-5 flex-shrink-0" />
+                <span>{t("expenseUnapproveHint")}</span>
+              </div>
+              {confirmingUnapprove ? (
+                <div className="flex gap-3">
+                  <Button
+                    variant="danger"
+                    className="flex-1"
+                    disabled={actionLoading}
+                    onClick={() =>
+                      run(async () => {
+                        await onUnapprove();
+                        setConfirmingUnapprove(false);
+                      })
+                    }
+                  >
+                    {t("expenseUnapproveConfirm")}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="flex-1"
+                    disabled={actionLoading}
+                    onClick={() => setConfirmingUnapprove(false)}
+                  >
+                    {t("cancel")}
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  disabled={actionLoading}
+                  onClick={() => setConfirmingUnapprove(true)}
+                >
+                  {t("expenseUnapprove")}
+                </Button>
+              )}
+            </>
           ) : isReviewer ? (
             /* Already reviewed, or not this reviewer's to act on: nothing to
                offer — the status and the reason above say it all. */
@@ -461,6 +507,7 @@ ExpenseDetail.propTypes = {
   onReplacePhoto: PropTypes.func,
   onApprove: PropTypes.func,
   onReject: PropTypes.func,
+  onUnapprove: PropTypes.func,
 };
 
 ExpenseDetail.defaultProps = {
@@ -477,6 +524,7 @@ ExpenseDetail.defaultProps = {
   onReplacePhoto: () => {},
   onApprove: () => {},
   onReject: () => {},
+  onUnapprove: () => {},
 };
 
 export default ExpenseDetail;
