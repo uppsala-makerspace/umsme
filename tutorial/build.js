@@ -11,6 +11,7 @@ const dist = resolve(root, "dist");
 // slug list"; new slugs need matching {lang}/{slug}.md files.
 const TUTORIALS = {
   app: ["installApp", "permissions", "existingMembers", "newMembers", "renewMembership", "manageFamily"],
+  expenses: ["expenses", "expensesTreasurer"],
 };
 
 const LANGS = {
@@ -20,7 +21,7 @@ const LANGS = {
     tocTitle: "Contents",
     tagsTitle: "Tags",
     allLabel: "All",
-    tagLabels: { app: "App" },
+    tagLabels: { app: "App", expenses: "Expenses" },
   },
   sv: {
     switcherLabel: "EN",
@@ -28,7 +29,7 @@ const LANGS = {
     tocTitle: "Innehåll",
     tagsTitle: "Etiketter",
     allLabel: "Alla",
-    tagLabels: { app: "App" },
+    tagLabels: { app: "App", expenses: "Utlägg" },
   },
 };
 

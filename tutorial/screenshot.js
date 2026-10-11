@@ -1,6 +1,7 @@
 // Generates tutorial screenshots from Storybook's Tutorial/* stories.
 //
 // Usage: cd tutorial && npm run shoot
+//        ONLY=tutorial-expenses npm run shoot   (only stories whose id starts with this)
 // Pre-req: Storybook must already be running (cd app && npm run storybook).
 //
 // Output goes to tutorial/screens-generated/ — never to tutorial/screens/.
@@ -69,7 +70,7 @@ const main = async () => {
   // 1. Discover Tutorial/* stories from Storybook's index.
   const idx = await httpGetJson(`${STORYBOOK}/index.json`);
   const entries = Object.values(idx.entries ?? idx.stories ?? {})
-    .filter((e) => e.id?.startsWith("tutorial-") && e.type !== "docs");
+    .filter((e) => e.id?.startsWith(process.env.ONLY || "tutorial-") && e.type !== "docs");
 
   if (!entries.length) {
     console.error("No Tutorial/* stories found at", STORYBOOK);
@@ -96,7 +97,10 @@ const main = async () => {
       "--headless=new",
       "about:blank",
     ],
-    { stdio: "ignore", detached: true },
+    // Native date inputs format by Chrome's UI language, which headless Linux
+    // Chrome takes from the environment. Swedish gives YYYY-MM-DD, which reads
+    // fine in both languages.
+    { stdio: "ignore", detached: true, env: { ...process.env, LANGUAGE: "sv_SE", LANG: "sv_SE.UTF-8", LC_ALL: "sv_SE.UTF-8" } },
   );
   chrome.unref();
 
