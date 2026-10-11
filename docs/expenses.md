@@ -63,8 +63,10 @@ account belongs to one or more **groups**, which decides who may spend on it:
 - `expenseAccount.approverMemberIds` — the expense approvers (the guideline
   requires at least two). They must be **active members of the account's
   groups**; the admin picker only offers those, and a deny rule on the
-  collection enforces it server-side. Removing a group from an account drops
-  approvers who are no longer eligible.
+  collection enforces it server-side. In admin, groups are added and removed
+  one at a time on the account page; removing a group that would leave an
+  approver outside the account's groups asks for confirmation, naming them,
+  and then drops those approvers in the same update.
 
 Helpers in `app/server/methods/utils.js` implement the access rules:
 `myActiveGroupIds`, `myGroupExpenseAccounts`, `seesAllExpenseAccounts`

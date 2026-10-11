@@ -25,8 +25,9 @@ AutoForm.hooks({
       doc.createdAt = new Date();
       const dims = readDimensionInputs();
       if (Object.keys(dims).length) doc.dimensions = dims;
-      const select = document.querySelector('.expenseAccountGroupSelect');
-      const groupIds = select ? [...select.selectedOptions].map((o) => o.value).filter(Boolean) : [];
+      const groupIds = [...document.querySelectorAll('.expenseAccountGroupCheckbox:checked')].map(
+        (box) => box.value
+      );
       if (groupIds.length) doc.groupIds = groupIds;
       ExpenseAccounts.insert(doc);
       this.done();

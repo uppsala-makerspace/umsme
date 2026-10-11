@@ -23,6 +23,9 @@ Template.ExpenseAccountView.onCreated(function () {
   // The budget entry awaiting a second click to delete. An inline two-step
   // rather than confirm(): the native dialog does not always get drawn.
   this.deletingBudget = new ReactiveVar(null);
+  // The group awaiting confirmation because removing it would also remove
+  // approvers. Inline two-step for the same reason as deletingBudget.
+  this.removingGroup = new ReactiveVar(null);
 });
 
 const kr = (n) => `${Number(n).toLocaleString('sv-SE', { maximumFractionDigits: 2 })} kr`;
@@ -48,6 +51,38 @@ const budgetRevisionsFor = (year) => {
 
 const currentAccount = () => ExpenseAccounts.findOne(FlowRouter.getParam('_id'));
 
+// Approvers must be active members of the account's groups (the deny rule in
+// common/collections/expenseAccounts.js), so removing a group can cost
+// approvers. Splits the current approvers into those who stay with the given
+// groups and those who would have to go.
+const approversWith = (groupIds) => {
+  const approvers = currentAccount()?.approverMemberIds || [];
+  const eligible = new Set(
+    GroupMemberships.find({
+      groupId: { $in: groupIds },
+      memberId: { $in: approvers },
+      state: 'active',
+    }).map((ms) => ms.memberId)
+  );
+  return {
+    kept: approvers.filter((id) => eligible.has(id)),
+    lost: approvers.filter((id) => !eligible.has(id)),
+  };
+};
+
+const groupIdsWithout = (groupId) =>
+  (currentAccount()?.groupIds || []).filter((id) => id !== groupId);
+
+// Removing a group, together with the approvers it takes along — one update,
+// so the deny rule never sees an approver outside the account's groups.
+const removeGroup = (groupId, kept) => {
+  const modifier = { $pull: { groupIds: groupId } };
+  if (kept) modifier.$set = { approverMemberIds: kept };
+  ExpenseAccounts.update(FlowRouter.getParam('_id'), modifier, (err) => {
+    if (err) alert('Could not remove the group: ' + err.message);
+  });
+};
+
 Template.ExpenseAccountView.helpers({
   ExpenseAccounts() {
     return ExpenseAccounts;
@@ -58,8 +93,20 @@ Template.ExpenseAccountView.helpers({
   isUsed() {
     return !!Expenses.findOne({ expenseAccountId: FlowRouter.getParam('_id') });
   },
-  allGroups() {
-    return Groups.find({}, { sort: { 'name.sv': 1 } });
+  addableGroups() {
+    const ids = currentAccount()?.groupIds || [];
+    return Groups.find({ _id: { $nin: ids } }, { sort: { 'name.sv': 1 } });
+  },
+  isRemovingGroup(id) {
+    return Template.instance().removingGroup.get() === id;
+  },
+  removalApproverNames(id) {
+    return approversWith(groupIdsWithout(id))
+      .lost.map((memberId) => Members.findOne(memberId)?.name || memberId)
+      .join(', ');
+  },
+  removalOneApprover(id) {
+    return approversWith(groupIdsWithout(id)).lost.length === 1;
   },
   accountGroups() {
     const ids = currentAccount()?.groupIds || [];
@@ -67,9 +114,6 @@ Template.ExpenseAccountView.helpers({
   },
   hasGroups() {
     return (currentAccount()?.groupIds || []).length > 0;
-  },
-  groupSelected(id) {
-    return (currentAccount()?.groupIds || []).includes(id) ? 'selected' : '';
   },
   showApproverSelector() {
     return Template.instance().showApproverSelector.get();
@@ -153,6 +197,33 @@ Template.ExpenseAccountView.events({
       FlowRouter.go('/expenses/accounts');
     });
   },
+  'click .addGroup': function (event, template) {
+    const select = template.find('.expenseAccountGroupSelect');
+    if (!select.value) return;
+    ExpenseAccounts.update(FlowRouter.getParam('_id'), { $addToSet: { groupIds: select.value } }, (err) => {
+      if (err) alert('Could not add the group: ' + err.message);
+    });
+    select.value = '';
+  },
+  'click .removeGroup': function (event, template) {
+    event.preventDefault();
+    const groupId = event.currentTarget.dataset.id;
+    const { lost } = approversWith(groupIdsWithout(groupId));
+    if (lost.length) {
+      // Costs approvers: ask first, naming them (see removalApproverNames).
+      template.removingGroup.set(groupId);
+      return;
+    }
+    removeGroup(groupId);
+  },
+  'click .confirmRemoveGroup': function (event, template) {
+    const groupId = event.currentTarget.dataset.id;
+    removeGroup(groupId, approversWith(groupIdsWithout(groupId)).kept);
+    template.removingGroup.set(null);
+  },
+  'click .cancelRemoveGroup': function (event, template) {
+    template.removingGroup.set(null);
+  },
   'click .showApproverSelector': function (event, template) {
     template.showApproverSelector.set(true);
   },
@@ -216,8 +287,9 @@ Template.ExpenseAccountView.events({
 AutoForm.hooks({
   editExpenseAccountForm: {
     // Merge the custom dimension inputs into the update modifier; unset the
-    // whole map when the treasurer clears every object field. Same for the
-    // group select, which also lives outside AutoForm's schema fields.
+    // whole map when the treasurer clears every object field. Groups and
+    // approvers are not part of the form: they are changed one at a time in
+    // their own sections, so saving the form never touches them.
     before: {
       update: function (modifier) {
         const dims = readDimensionInputs();
@@ -227,33 +299,6 @@ AutoForm.hooks({
         } else {
           modifier.$unset = modifier.$unset || {};
           modifier.$unset.dimensions = '';
-        }
-        const select = document.querySelector('.expenseAccountGroupSelect');
-        const groupIds = select ? [...select.selectedOptions].map((o) => o.value).filter(Boolean) : [];
-        if (groupIds.length) {
-          modifier.$set = modifier.$set || {};
-          modifier.$set.groupIds = groupIds;
-        } else {
-          modifier.$unset = modifier.$unset || {};
-          modifier.$unset.groupIds = '';
-        }
-        // Approvers must stay active members of the account's groups, so drop
-        // any who fall outside the new selection — otherwise the deny rule
-        // would reject the whole update with a confusing error.
-        const approvers = currentAccount()?.approverMemberIds || [];
-        if (approvers.length) {
-          const eligible = new Set(
-            GroupMemberships.find({
-              groupId: { $in: groupIds },
-              memberId: { $in: approvers },
-              state: 'active',
-            }).map((ms) => ms.memberId)
-          );
-          const kept = approvers.filter((id) => eligible.has(id));
-          if (kept.length !== approvers.length) {
-            modifier.$set = modifier.$set || {};
-            modifier.$set.approverMemberIds = kept;
-          }
         }
         return modifier;
       },
