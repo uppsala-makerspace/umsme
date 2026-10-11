@@ -891,6 +891,16 @@ export const models = {
       autoform: { omit: true },
     },
     "approverMemberIds.$": { type: String, autoform: { omit: true } },
+    // Groups whose active members may all approve expenses on this account,
+    // in addition to approverMemberIds. Any group, not only the account's own
+    // (e.g. a finance group approving for several accounts).
+    approverGroupIds: {
+      label: "Approver groups",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "approverGroupIds.$": { type: String, autoform: { omit: true } },
     createdAt: {
       label: "Created",
       type: Date,

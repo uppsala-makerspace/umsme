@@ -96,7 +96,7 @@ Once the expense is confirmed you can no longer change it. Contact the treasurer
 
 ## 4. Approve an expense
 
-This section is for you if you are an **approver** for an expense account. Approvers are chosen among the group's members, and each account should have at least two.
+This section is for you if you are an **approver** for an expense account. Approvers can be individual members of the account's groups or a whole group, whose active members may then all approve. Each account should have at least two people who can approve.
 
 As an approver you get an extra tab, **Approve**, under Expenses. A number on the tab shows how many expenses are waiting.
 

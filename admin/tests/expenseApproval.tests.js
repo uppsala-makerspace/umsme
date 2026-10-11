@@ -36,6 +36,15 @@ describe('expenseApproval', function () {
       assert.deepStrictEqual(approvableAccountIds(ACCOUNTS, null, true).length, 3);
     });
 
+    it('gives the active members of an approver group that account', function () {
+      const accounts = [...ACCOUNTS, { _id: 'accD', name: 'Ekonomi', approverGroupIds: ['finance'] }];
+      assert.deepStrictEqual(approvableAccountIds(accounts, 'carol', false, ['finance']), ['accD']);
+      assert.deepStrictEqual(approvableAccountIds(accounts, 'carol', false, ['other']), []);
+      // Named and via group together, without duplicates.
+      const both = [{ _id: 'accE', approverMemberIds: ['alice'], approverGroupIds: ['finance'] }];
+      assert.deepStrictEqual(approvableAccountIds(both, 'alice', false, ['finance']), ['accE']);
+    });
+
     it('limits a named approver to the accounts naming them', function () {
       assert.deepStrictEqual(approvableAccountIds(ACCOUNTS, 'alice', false), ['accA', 'accB']);
       assert.deepStrictEqual(approvableAccountIds(ACCOUNTS, 'bob', false), ['accB']);

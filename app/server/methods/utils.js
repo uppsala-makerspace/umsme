@@ -65,15 +65,23 @@ const hasReviewerRole = async () => {
 /**
  * The expense accounts whose expenses this member may review, i.e. approve or
  * reject. Distinct from expenseAccountsFor, which is about *spending*: being in
- * an account's owning group grants no review rights, only `approverMemberIds`
- * (or one of the reviewer roles) does.
+ * an account's owning group grants no review rights; `approverMemberIds`, active
+ * membership in one of `approverGroupIds`, or one of the reviewer roles does.
  *
  * @return {Promise<Array<string>>} account ids
  */
 export const approvableAccountIdsFor = async (member) => {
   if (!member?._id) return [];
-  const accounts = await ExpenseAccounts.find({}, { fields: { approverMemberIds: 1 } }).fetchAsync();
-  return approvableAccountIds(accounts, member._id, await hasReviewerRole());
+  const accounts = await ExpenseAccounts.find(
+    {},
+    { fields: { approverMemberIds: 1, approverGroupIds: 1 } }
+  ).fetchAsync();
+  return approvableAccountIds(
+    accounts,
+    member._id,
+    await hasReviewerRole(),
+    await myActiveGroupIds(member)
+  );
 };
 
 /** Whether this member may review anyone's expenses at all. */

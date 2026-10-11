@@ -67,6 +67,13 @@ account belongs to one or more **groups**, which decides who may spend on it:
   one at a time on the account page; removing a group that would leave an
   approver outside the account's groups asks for confirmation, naming them,
   and then drops those approvers in the same update.
+- `expenseAccount.approverGroupIds` — whole groups whose **active members**
+  may all approve on the account, in addition to the named approvers. Any
+  group may be chosen, not only the account's own, so for example a finance
+  group can approve for several accounts. The admin page lists them with their
+  number of active members, and the "at least two" warning counts named
+  approvers and approver-group members together. A group named here cannot be
+  deleted.
 
 Helpers in `app/server/methods/utils.js` implement the access rules:
 `myActiveGroupIds`, `myGroupExpenseAccounts`, `seesAllExpenseAccounts`
@@ -284,7 +291,8 @@ profile save never clobbers them).
 
 `expenseAccounts`: `name`, `explanation`, `dimensions` (dimension nr →
 object code), `groupIds` (owning groups), `approverMemberIds` (expense
-approvers, from those groups), `createdAt`.
+approvers, from those groups), `approverGroupIds` (groups whose active members
+may approve), `createdAt`.
 
 `expenseBudgets`: one document per budget revision — `expenseAccountId`,
 `year`, `amount`, `setAt`, `comment`, `setBy` (member id, omitted for actors

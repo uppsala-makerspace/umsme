@@ -96,7 +96,7 @@ När utlägget är bekräftat kan du inte längre ändra det. Hör av dig till k
 
 ## 4. Godkänn ett utlägg
 
-Det här avsnittet gäller dig som är **godkännare** för ett utläggskonto. Godkännarna väljs bland gruppens medlemmar, och varje konto bör ha minst två.
+Det här avsnittet gäller dig som är **godkännare** för ett utläggskonto. Godkännare kan vara enskilda medlemmar i kontots grupper eller en hel grupp, vars aktiva medlemmar då alla får godkänna. Varje konto bör ha minst två personer som kan godkänna.
 
 Som godkännare har du en extra flik, **Godkänna**, under Utlägg. En siffra på fliken visar hur många utlägg som väntar.
 

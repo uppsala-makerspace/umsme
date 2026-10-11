@@ -150,8 +150,30 @@ Template.ExpenseAccountView.helpers({
   hasApprovers() {
     return (currentAccount()?.approverMemberIds || []).length > 0;
   },
+  // Fewer than two distinct people can approve: named approvers plus the
+  // active members of the approver groups.
   tooFewApprovers() {
-    return (currentAccount()?.approverMemberIds || []).length === 1;
+    const account = currentAccount();
+    if (!account) return false;
+    const people = new Set(account.approverMemberIds || []);
+    GroupMemberships.find({ groupId: { $in: account.approverGroupIds || [] }, state: 'active' })
+      .forEach((ms) => people.add(ms.memberId));
+    return people.size < 2;
+  },
+  approverGroups() {
+    const ids = currentAccount()?.approverGroupIds || [];
+    return Groups.find({ _id: { $in: ids } }, { sort: { 'name.sv': 1 } }).map((g) => {
+      const activeCount = GroupMemberships.find({ groupId: g._id, state: 'active' }).count();
+      return { ...g, activeCount, oneMember: activeCount === 1 };
+    });
+  },
+  hasApproverGroups() {
+    return (currentAccount()?.approverGroupIds || []).length > 0;
+  },
+  // Any group may approve, not only the account's own (e.g. a finance group).
+  addableApproverGroups() {
+    const ids = currentAccount()?.approverGroupIds || [];
+    return Groups.find({ _id: { $nin: ids } }, { sort: { 'name.sv': 1 } });
   },
   // This year and next, plus every year that already has a budget.
   budgetYears() {
@@ -276,6 +298,20 @@ Template.ExpenseAccountView.events({
       }
       form.amount.value = '';
       form.comment.value = '';
+    });
+  },
+  'click .addApproverGroup': function (event, template) {
+    const select = template.find('.approverGroupSelect');
+    if (!select.value) return;
+    ExpenseAccounts.update(FlowRouter.getParam('_id'), { $addToSet: { approverGroupIds: select.value } }, (err) => {
+      if (err) alert('Could not add the approver group: ' + err.message);
+    });
+    select.value = '';
+  },
+  'click .removeApproverGroup': function (event) {
+    event.preventDefault();
+    ExpenseAccounts.update(FlowRouter.getParam('_id'), { $pull: { approverGroupIds: event.currentTarget.dataset.id } }, (err) => {
+      if (err) alert('Could not remove the approver group: ' + err.message);
     });
   },
   'click .removeApprover': function (event) {

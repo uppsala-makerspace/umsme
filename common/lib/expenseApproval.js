@@ -7,26 +7,33 @@
  *
  * Note the deliberate split from *spending* rights: an account's `groupIds`
  * decide who may charge an expense to it (see expenseAccountsFor), while
- * `approverMemberIds` decides who may review one. Being in the owning group
- * grants no review rights at all.
+ * `approverMemberIds` and `approverGroupIds` decide who may review one. Being in
+ * the owning group grants no review rights, unless that group is also listed
+ * among the approver groups.
  */
 
 /** Roles that may review every expense, regardless of account. */
 export const REVIEWER_ROLES = ["admin", "board", "treasurer"];
 
 /**
- * The accounts whose expenses this member may review.
+ * The accounts whose expenses this member may review: those naming the member
+ * as an approver, or naming a group the member is an active member of.
  *
  * @param {Array<object>} accounts  All expense accounts
  * @param {string} memberId
  * @param {boolean} hasReviewerRole  Holds admin/board/treasurer
+ * @param {Array<string>} memberGroupIds  Groups the member is an active member of
  * @return {Array<string>} account ids
  */
-export const approvableAccountIds = (accounts, memberId, hasReviewerRole) => {
+export const approvableAccountIds = (accounts, memberId, hasReviewerRole, memberGroupIds = []) => {
   if (hasReviewerRole) return accounts.map((a) => a._id);
   if (!memberId) return [];
   return accounts
-    .filter((a) => (a.approverMemberIds || []).includes(memberId))
+    .filter(
+      (a) =>
+        (a.approverMemberIds || []).includes(memberId) ||
+        (a.approverGroupIds || []).some((g) => memberGroupIds.includes(g))
+    )
     .map((a) => a._id);
 };
 

@@ -7,7 +7,7 @@ import { models } from '/imports/common/lib/models';
 import { extractor } from '/imports/common/lib/fieldsUtils';
 
 const accountDefaults = {
-  filter: ['createdAt', 'dimensions', 'groupIds', 'approverMemberIds'],
+  filter: ['createdAt', 'dimensions', 'groupIds', 'approverMemberIds', 'approverGroupIds'],
 };
 
 new Tabular.Table({
