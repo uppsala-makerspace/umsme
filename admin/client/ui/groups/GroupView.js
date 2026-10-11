@@ -131,6 +131,12 @@ Template.GroupView.helpers({
   isResponsibilityGroup() {
     return Groups.findOne(groupId())?.type === 'responsibility';
   },
+  // Shown for every group but steering groups, not only responsibility groups:
+  // the deny rules reject a responsibility group without a parent, so the
+  // parent has to be in place before the type can change to responsibility.
+  canChooseParent() {
+    return Groups.findOne(groupId())?.type !== 'steering';
+  },
   // Only function groups pick spaces directly; steering and responsibility
   // groups inherit them from their connected workshop or area of interest.
   canChooseSpaces() {
