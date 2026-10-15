@@ -39,7 +39,6 @@ export default () => {
         google={google}
         facebook={facebook}
         errorKey={errorKey}
-        onError={setErrorKey}
         onChange={() => setErrorKey(null)}
       />
     </Layout>

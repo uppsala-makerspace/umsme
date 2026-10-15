@@ -1,31 +1,21 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { LoginButton } from "./LoginButton";
+import SocialLogins from "./SocialLogins";
 import { LogRegSwitcher } from "../../components/LogRegSwitch/LogRegSwitcher";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Logo from "../../components/Logo";
 import MainContent from "../../components/MainContent";
-import OrDivider from "../../components/OrDivider";
 import WarningIcon from "../../components/WarningIcon";
-
-const googleConf = {
-  buttonTextKey: "loginGoogle",
-  icon: "/images/GoogleLogo.png"
-};
-
-const facebookConf = {
-  buttonTextKey: "loginFacebook",
-  icon: "/images/FacebookLogo.png"
-};
 
 /**
  * The login form. `errorKey` is an i18n key for why the last attempt failed,
  * shown under the fields; `onChange` lets the container clear it as soon as
- * the member edits a field, and `onError` lets the social buttons report too.
+ * the member edits a field. Google/Facebook sit above the tabs and report their
+ * own failures (SocialLogins).
  */
-export default ({ google, facebook, onSubmit, errorKey = null, onError = () => {}, onChange = () => {} }) => {
+export default ({ google, facebook, onSubmit, errorKey = null, onChange = () => {} }) => {
   const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -44,6 +34,8 @@ export default ({ google, facebook, onSubmit, errorKey = null, onError = () => {
           <WarningIcon />
           <span>{t("useExistingEmailInfo")} <span className="underline">{t("checkEmailLink")}</span></span>
         </Link>
+
+        <SocialLogins google={google} facebook={facebook} />
 
         <LogRegSwitcher />
 
@@ -77,24 +69,14 @@ export default ({ google, facebook, onSubmit, errorKey = null, onError = () => {
             {t(errorKey)}
           </p>
         )}
-        <p className="text-center">
-          <Link to="/forgotPassword" className="text-sm -mt-1">
+        <p className="text-center mt-0 mb-6">
+          <Link to="/forgotPassword" className="text-sm">
             {t("ForgotPassword")}
           </Link>
         </p>
-        <div className="flex flex-col gap-3">
-          <Button type="submit" variant="primary" fullWidth>
-            {t("login")}
-          </Button>
-
-          {(google || facebook) && <OrDivider />}
-          {google && (
-            <LoginButton conf={{...googleConf, ...google}} onError={onError} />
-          )}
-          {facebook && (
-            <LoginButton conf={{...facebookConf, ...facebook}} onError={onError} />
-          )}
-        </div>
+        <Button type="submit" variant="primary" fullWidth>
+          {t("login")}
+        </Button>
       </form>
     </MainContent>
   );
