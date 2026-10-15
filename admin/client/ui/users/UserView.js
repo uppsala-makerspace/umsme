@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import { ReactiveVar } from 'meteor/reactive-var';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Comments } from '/imports/common/collections/comments';
 import { Members } from '/imports/common/collections/members';
@@ -11,6 +12,10 @@ import '../comment/CommentList';
 
 
 Template.UserView.onCreated(function() {
+  // Resetting a password asks for a second click on the page (not
+  // window.confirm(), which some browsers fail to draw), then reports back.
+  this.confirmingReset = new ReactiveVar(false);
+  this.resetMessage = new ReactiveVar(null);
   Meteor.subscribe('users');
   Meteor.subscribe('roles');
   Meteor.subscribe('members');
@@ -50,6 +55,12 @@ Template.UserView.helpers({
   storageAsync() {
     const id = FlowRouter.getParam('_id');
     return Roles.userIsInRoleAsync(id, 'storage');
+  },
+  confirmingReset() {
+    return Template.instance().confirmingReset.get();
+  },
+  resetMessage() {
+    return Template.instance().resetMessage.get();
   },
   linkedMember() {
     const id = FlowRouter.getParam('_id');
@@ -101,12 +112,28 @@ Template.UserView.events({
       FlowRouter.go('/users');
     }
   },
-  'click .resetPassword': async function (event) {
-    const id = FlowRouter.getParam('_id');
-    if (confirm('Delete this user')) {
-      Comments.find({about: id}).forEach((comm) => {Comments.remove(comm._id);});
-      await Meteor.users.removeAsync(id);
-      FlowRouter.go('/users');
+  'click .resetPassword': function (event, instance) {
+    const password = instance.find('#passwordReset').value;
+    if (!password) {
+      instance.resetMessage.set({ kind: 'warning', text: 'Enter a new password first.' });
+      return;
     }
-  }
+    instance.resetMessage.set(null);
+    instance.confirmingReset.set(true);
+  },
+  'click .cancelResetPassword': function (event, instance) {
+    instance.confirmingReset.set(false);
+  },
+  'click .confirmResetPassword': async function (event, instance) {
+    const id = FlowRouter.getParam('_id');
+    const field = instance.find('#passwordReset');
+    instance.confirmingReset.set(false);
+    try {
+      await Meteor.callAsync('setUserPassword', id, field.value);
+      field.value = '';
+      instance.resetMessage.set({ kind: 'success', text: 'The password has been changed and the user logged out everywhere.' });
+    } catch (err) {
+      instance.resetMessage.set({ kind: 'danger', text: 'Could not change the password: ' + (err.reason || err.message) });
+    }
+  },
 });
