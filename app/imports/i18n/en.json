@@ -15,6 +15,7 @@
   "loginGoogle": "Continue with Google",
   "loginFacebook": "Continue with Facebook",
   "loginFailed": "Login failed.",
+  "loginWrongCredentials": "Wrong email or password.",
   "useExistingEmailInfo": "If you are already a member, create an account with the email you used previously.",
   "checkEmailLink": "Check here",
   "checkEmailTitle": "Check your membership email",

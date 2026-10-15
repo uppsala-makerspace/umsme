@@ -20,7 +20,12 @@ const facebookConf = {
   icon: "/images/FacebookLogo.png"
 };
 
-export default ({google, facebook, onSubmit}) => {
+/**
+ * The login form. `errorKey` is an i18n key for why the last attempt failed,
+ * shown under the fields; `onChange` lets the container clear it as soon as
+ * the member edits a field, and `onError` lets the social buttons report too.
+ */
+export default ({ google, facebook, onSubmit, errorKey = null, onError = () => {}, onChange = () => {} }) => {
   const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -48,7 +53,10 @@ export default ({google, facebook, onSubmit}) => {
           type="text"
           placeholder={t("exEmail")}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            onChange();
+          }}
           required
         />
 
@@ -59,8 +67,16 @@ export default ({google, facebook, onSubmit}) => {
           placeholder={t("password")}
           name="password"
           required
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            onChange();
+          }}
         />
+        {errorKey && (
+          <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3 mt-1 mb-3">
+            {t(errorKey)}
+          </p>
+        )}
         <p className="text-center">
           <Link to="/forgotPassword" className="text-sm -mt-1">
             {t("ForgotPassword")}
@@ -73,10 +89,10 @@ export default ({google, facebook, onSubmit}) => {
 
           {(google || facebook) && <OrDivider />}
           {google && (
-            <LoginButton conf={{...googleConf, ...google}}/>
+            <LoginButton conf={{...googleConf, ...google}} onError={onError} />
           )}
           {facebook && (
-            <LoginButton conf={{...facebookConf, ...facebook}}/>
+            <LoginButton conf={{...facebookConf, ...facebook}} onError={onError} />
           )}
         </div>
       </form>

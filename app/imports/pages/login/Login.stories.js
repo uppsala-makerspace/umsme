@@ -15,3 +15,10 @@ export const LoginPage = {
     facebook: {method}
   }
 };
+export const WrongPassword = {
+  args: {
+    google: {method},
+    facebook: {method},
+    errorKey: "loginWrongCredentials",
+  }
+};

@@ -2,14 +2,15 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../../components/Button";
 
-export const LoginButton = ({conf}) => {
+export const LoginButton = ({ conf, onError = () => {} }) => {
   const { t } = useTranslation();
   const buttonText = !conf ? "Please wait" : t(conf.buttonTextKey);
 
   const handleClick = () => {
     conf.method({}, (err) => {
-      if (err) {
-        alert(t("loginFailed"));
+      // Closing the provider's popup is not a failure worth reporting.
+      if (err && err.errorType !== "Accounts.LoginCancelledError") {
+        onError("loginFailed");
       }
     });
   };
