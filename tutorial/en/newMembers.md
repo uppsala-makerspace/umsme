@@ -10,7 +10,7 @@ Open the app. You'll land on the login screen. Tap **Create account** to switch 
 
 ![Login screen](../screens/login-en.png)
 
-Enter your email, choose a password, and confirm it. Then tap **Create account**. (You can also use **Continue with Google** if you'd rather sign in with your Google account.)
+Enter your email, choose a password, and confirm it. Then tap **Create account**. (You can also use **Sign in with Google** at the top if you'd rather sign in with your Google account.)
 
 ![Create account form](../screens/register-en.png)
 
@@ -18,7 +18,7 @@ Enter your email, choose a password, and confirm it. Then tap **Create account**
 
 The app will send a verification email to the address you used. Open it and click the verification link to activate the account, then return to the app.
 
-> If you signed up with **Continue with Google**, your email is already verified — you can skip this step.
+> If you signed up with **Sign in with Google**, your email is already verified — you can skip this step.
 
 ## 3. Tell us about yourself
 

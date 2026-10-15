@@ -10,7 +10,7 @@ Skärmbilderna visar flödet för **Årligt Medlemskap Labb**. Om du istället v
 
 ![Inloggningssidan](../screens/login-sv.png)
 
-Fyll i din e-post, välj ett lösenord och bekräfta det. Tryck sedan på **Skapa konto**. (Du kan också använda **Fortsätt med Google** om du hellre vill logga in med ditt Google-konto.)
+Fyll i din e-post, välj ett lösenord och bekräfta det. Tryck sedan på **Skapa konto**. (Du kan också använda **Logga in med Google** överst om du hellre vill logga in med ditt Google-konto.)
 
 ![Formulär för att skapa konto](../screens/register-sv.png)
 
@@ -18,7 +18,7 @@ Fyll i din e-post, välj ett lösenord och bekräfta det. Tryck sedan på **Skap
 
 Appen skickar ett bekräftelsemejl till adressen du angav. Öppna mejlet och klicka på bekräftelselänken för att aktivera kontot, och återvänd sedan till appen.
 
-> Om du registrerade dig med **Fortsätt med Google** är din e-post redan verifierad — du kan hoppa över detta steg.
+> Om du registrerade dig med **Logga in med Google** är din e-post redan verifierad — du kan hoppa över detta steg.
 
 ## 3. Berätta om dig själv
 

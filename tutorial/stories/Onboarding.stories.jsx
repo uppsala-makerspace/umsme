@@ -25,14 +25,18 @@ const minimalShell = {
 // Filename: login-{lang}.png
 export const Login = {
   render: (args) => <LoginPage {...args} />,
-  args: { onSubmit: fn() },
+  // Google is on in production (Facebook is not), so the frame shows its
+  // button above the tabs.
+  args: { onSubmit: fn(), google: { method: fn() } },
   parameters: { tutorial: { ...minimalShell, path: "/login", file: "login" } },
 };
 
 // Filename: register-{lang}.png
 export const Register = {
   render: (args) => <RegisterPage {...args} />,
-  args: { onSubmit: fn() },
+  // Google is on in production (Facebook is not), so the frame shows its
+  // button above the tabs.
+  args: { onSubmit: fn(), google: { method: fn() } },
   parameters: { tutorial: { ...minimalShell, path: "/register", file: "register" } },
 };
 

@@ -16,7 +16,7 @@ Skriv in den e-postadress du tror att du använde när du blev medlem. Om den fi
 
 När du har bekräftat vilken e-post som finns i registret går du tillbaka till inloggningssidan och trycker på **Skapa konto**. Använd samma e-post — det är så appen kopplar ihop ditt nya konto med ditt befintliga medlemskap.
 
-Välj ett lösenord och tryck på **Skapa konto**. (Eller välj **Fortsätt med Google** om e-posten i registret är ett Google-konto — då loggas du in utan lösenord.)
+Välj ett lösenord och tryck på **Skapa konto**. (Eller välj **Logga in med Google** överst om e-posten i registret är ett Google-konto — då loggas du in utan lösenord.)
 
 ![Formulär för att skapa konto](../screens/register-sv.png)
 
@@ -24,7 +24,7 @@ Välj ett lösenord och tryck på **Skapa konto**. (Eller välj **Fortsätt med 
 
 Appen skickar en bekräftelselänk till din e-post. Öppna mejlet och klicka på länken för att aktivera kontot, och återvänd sedan till appen.
 
-> Om du använde **Fortsätt med Google** är din e-post redan verifierad — du kan hoppa över detta steg.
+> Om du använde **Logga in med Google** är din e-post redan verifierad — du kan hoppa över detta steg.
 
 ## 4. Godkänn ansvarsförbindelsen
 

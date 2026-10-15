@@ -16,7 +16,7 @@ Enter the email address you think you used when signing up. If it matches, you'l
 
 Once you've confirmed which email is on file, go back to the login screen and tap **Create account**. Use the same email — that's how the app links your new account to your existing membership.
 
-Set a password and tap **Create account**. (Or use **Continue with Google** if the email on file is a Google account — that signs you in without a password.)
+Set a password and tap **Create account**. (Or use **Sign in with Google** at the top if the email on file is a Google account — that signs you in without a password.)
 
 ![Create account form](../screens/register-en.png)
 
@@ -24,7 +24,7 @@ Set a password and tap **Create account**. (Or use **Continue with Google** if t
 
 The app sends a verification link to your email. Open it and click the link to activate the account, then return to the app.
 
-> If you used **Continue with Google**, your email is already verified — you can skip this step.
+> If you used **Sign in with Google**, your email is already verified — you can skip this step.
 
 ## 4. Approve the liability agreement
 
