@@ -72,6 +72,13 @@ Template.ExpenseView.helpers({
     const e = currentExpense();
     return e?.status === 'reimbursed' && isInvoice(e) ? 'paid' : e?.status;
   },
+  // Who rejected it. rejectedBy is a member id, left out when the rejecter
+  // had no member record (the bare admin login), which the template shows as
+  // "admin".
+  rejectedByName() {
+    const id = currentExpense()?.rejectedBy;
+    return id ? Members.findOne(id)?.name || id : null;
+  },
   memberName() {
     const e = currentExpense();
     const m = e && Members.findOne(e.memberId);

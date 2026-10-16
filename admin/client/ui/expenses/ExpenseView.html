@@ -54,6 +54,12 @@
             {{#if expense.rejectionReason}}
             <div class="alert alert-warning">
                 <strong>Rejection reason:</strong> {{expense.rejectionReason}}
+                {{#if expense.rejectedAt}}
+                <div style="margin-top: 6px;">
+                    Rejected by {{#if expense.rejectedBy}}<a href="/member/{{expense.rejectedBy}}">{{rejectedByName}}</a>{{else}}<em>admin</em>{{/if}}
+                    on {{formatDate expense.rejectedAt}}
+                </div>
+                {{/if}}
             </div>
             {{/if}}
 
