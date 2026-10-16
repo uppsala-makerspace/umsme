@@ -89,7 +89,7 @@ of members and who is responsible.
 - **Visibility**: established and trial workshops and areas of interest are
   presented on the public website. Function groups are published there too.
   Steering and responsibility groups show only through what they run. See
-  `PUBLIC_API_FOR_WEBSITE.md`.
+  [public-api.md](public-api.md).
 
 Certificates are shown on the page of a workshop or area of interest. The right to
 certify is set per certificate and does not come from group membership.
