@@ -162,6 +162,31 @@ if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')
 
 This applies to: mail sending, bank operations, lock management, member updates, and role management.
 
+**Login** (`admin/server/accounts.js`):
+
+The admin app shares the users collection with the member app, so every member's
+account could log in to it. A `validateLoginAttempt` hook refuses accounts that hold
+none of `admin`, `board`, `treasurer` or `storage` — the same roles the admin UI
+requires to show anything. It applies to resume logins too, so a token from the
+member app is refused.
+
+**Direct client writes** (`common/collections/allow.js`):
+
+Meteor defines insert/update/remove methods for every collection (`/members/update`
+and so on). They are callable over DDP by any logged-in connection to any of the
+three apps, whether or not the collection is published there. The shared `allow()`
+therefore only lets `admin`, `board` and `treasurer` write. Some collections narrow
+this further with their own deny rules (groups, workshops, spaces, expense accounts,
+group memberships, store items: admin and board only), and `Meteor.users` is
+admin and board only.
+
+The member app never writes collections directly; everything goes through methods.
+`Meteor.roles` and `Meteor.roleAssignment` have no allow rules at all: roles change
+only through server methods such as `addToAdminGroup`. The payment app has no roles
+package, so it refuses every direct client write.
+
+Tests: `admin/tests/clientWriteRules.tests.js`.
+
 ## 7. Roles
 
 ### Built-in Roles

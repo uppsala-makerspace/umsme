@@ -20,6 +20,7 @@ import "./storageService.tests";
 import "./storageServiceDb.tests";
 import "./storageIndexes.tests";
 import "./storagePresentation.tests";
+import "./clientWriteRules.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

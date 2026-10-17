@@ -1,5 +1,27 @@
+import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
+import { Roles } from "meteor/roles";
 import { ServiceConfiguration } from "meteor/service-configuration";
+
+/**
+ * The roles that see anything in the admin UI (AppBody.html shows a "no
+ * access" page to everyone else).
+ */
+export const ADMIN_ACCESS_ROLES = ["admin", "board", "treasurer", "storage"];
+
+/**
+ * Refuse logins from accounts with none of those roles. The users collection
+ * is shared with the member app, so every member's account could otherwise
+ * log in here, and with it reach the DDP methods this server exposes.
+ * Applies to resume logins too, so a member's app token is refused as well.
+ */
+export const checkAdminLoginAttempt = async (attempt) => {
+  if (!attempt.allowed || !attempt.user) return attempt.allowed;
+  if (await Roles.userIsInRoleAsync(attempt.user._id, ADMIN_ACCESS_ROLES)) return true;
+  throw new Meteor.Error(403, "This account has no access to the administration system");
+};
+
+Accounts.validateLoginAttempt(checkAdminLoginAttempt);
 
 /**
  * If a user has already been created with a matching email, allow them to

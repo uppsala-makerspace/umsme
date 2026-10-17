@@ -3,6 +3,10 @@ import { allow } from './allow';
 
 // Collection exists already
 //Meteor.users.attachSchema(schemas.users);
-allow(Meteor.users);
-allow(Meteor.roles);
-allow(Meteor.roleAssignment);
+
+// UserView edits and removes accounts; only admin and board see them.
+allow(Meteor.users, ['admin', 'board']);
+
+// No allow rules on Meteor.roles or Meteor.roleAssignment: roles are changed
+// only through server methods (addToAdminGroup and the like). An allow rule
+// here would let a client grant itself any role.
