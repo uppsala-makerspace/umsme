@@ -62,7 +62,18 @@
         {{#if isTab 'store'}}
         <h2>Webshop purchases</h2>
         <p class="text-muted">Payments linked to a store item. The bookkeeping account comes from the item itself.</p>
-        {{> tabular table=TabularTables.StorePayments class="table table-hover table-striped table-bordered table-condensed paymentList"}}
+        <form class="form-inline storeItemFilter">
+            <div class="form-group">
+                <label for="storeItemFilter">Store item</label>
+                <select class="form-control" id="storeItemFilter" name="storeItem">
+                    <option value="all" selected={{selectedStoreItem "all"}}>All items</option>
+                    {{#each item in storeItems}}
+                    <option value="{{item._id}}" selected={{selectedStoreItem item._id}}>{{item.label}}</option>
+                    {{/each}}
+                </select>
+            </div>
+        </form>
+        {{> tabular table=TabularTables.StorePayments selector=storeSelector class="table table-hover table-striped table-bordered table-condensed paymentList"}}
         {{/if}}
     </div>
     {{/if}}

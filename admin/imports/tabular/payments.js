@@ -105,7 +105,8 @@ new Tabular.Table({
   name: "StorePayments",
   columns: extractor(models.payment, { filter: [...filteredFields, 'clarification'], append: appendColumns, enhance: enhanceColumns }),
   changeSelector(selector) {
-    return { ...selector, storeItem: { $exists: true } };
+    // The page may narrow it to one item; otherwise any linked item.
+    return { ...selector, storeItem: typeof selector.storeItem === 'string' ? selector.storeItem : { $exists: true } };
   }
 });
 

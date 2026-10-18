@@ -2,12 +2,16 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './Payments.html';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import '/imports/tabular/payments';
+import { StoreItems } from '/imports/common/collections/storeItems';
+import './paymentsStyle.css';
 
 
 Template.Payments.onCreated(function() {
   Meteor.subscribe('payments');
+  Meteor.subscribe('storeItems');
   this.state = new ReactiveDict();
   this.state.set('activeTab', 'manual');
+  this.state.set('storeItem', 'all');
   this.state.set('status', 'unknown');
   this.state.set('image', 'unknown');
   Meteor.call('checkBank', (err, res) => {
@@ -22,6 +26,20 @@ Template.Payments.onCreated(function() {
 Template.Payments.helpers({
   isTab(tabName) {
     return Template.instance().state.get('activeTab') === tabName;
+  },
+  storeItems() {
+    return StoreItems.find({}, { sort: { 'name.sv': 1 } }).map((item) => ({
+      _id: item._id,
+      label: `${item.name?.sv || item.code} (${item.code})${item.status === 'hidden' ? ' – hidden' : ''}`,
+    }));
+  },
+  // null, not '', so Blaze leaves the attribute out on the other options.
+  selectedStoreItem(id) {
+    return Template.instance().state.get('storeItem') === id ? 'selected' : null;
+  },
+  storeSelector() {
+    const id = Template.instance().state.get('storeItem');
+    return id && id !== 'all' ? { storeItem: id } : {};
   },
   status() {
     const state = Template.instance().state;
@@ -77,6 +95,9 @@ Template.Payments.events({
   'click .tab-store'(event, instance) {
     event.preventDefault();
     instance.state.set('activeTab', 'store');
+  },
+  'change .storeItemFilter select'(event, instance) {
+    instance.state.set('storeItem', event.currentTarget.value);
   },
   'click .checkBank': function (event, instance) {
     check(instance.state);
