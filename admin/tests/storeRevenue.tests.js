@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { summarizeRevenue, revenueYears } from '/imports/common/lib/storeRevenue';
+import { summarizeRevenue, revenueYears, maySeeWorkshopRevenue } from '/imports/common/lib/storeRevenue';
 
 const items = new Map([
   ['clay', { name: { sv: 'Lera', en: 'Clay' }, sharedWith: [] }],
@@ -52,5 +52,30 @@ describe('store revenue', function () {
     assert.deepStrictEqual(Object.keys(p).sort(), ['_id', 'amount', 'comment', 'date', 'itemId', 'itemName']);
     assert.strictEqual(p.comment, 'Kurs 3');
     assert.deepStrictEqual(p.itemName, { sv: 'Lera', en: 'Clay' });
+  });
+
+  describe('who sees it', function () {
+    const may = (args) => maySeeWorkshopRevenue({
+      groupType: 'steering', membershipState: null, isResponsible: false, hasRole: false, ...args,
+    });
+
+    it('lets active steering group members in', function () {
+      assert.strictEqual(may({ membershipState: 'active' }), true);
+      assert.strictEqual(may({ isResponsible: true }), true);
+    });
+
+    it('keeps out a pending request and non-members', function () {
+      assert.strictEqual(may({ membershipState: 'pending' }), false);
+      assert.strictEqual(may({}), false);
+    });
+
+    it('does not count membership of a group that is not a steering group', function () {
+      assert.strictEqual(may({ groupType: 'function', membershipState: 'active', isResponsible: true }), false);
+      assert.strictEqual(may({ groupType: null, membershipState: 'active' }), false);
+    });
+
+    it('lets admin, board and treasurer in regardless', function () {
+      assert.strictEqual(may({ groupType: null, hasRole: true }), true);
+    });
   });
 });

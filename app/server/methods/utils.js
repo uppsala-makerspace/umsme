@@ -1,5 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import { Roles } from "meteor/roles";
+import { REVENUE_ROLES, maySeeWorkshopRevenue } from "/imports/common/lib/storeRevenue";
 import { Members } from "/imports/common/collections/members";
 import { Spaces } from "/imports/common/collections/spaces";
 import { Groups } from "/imports/common/collections/groups";
@@ -333,13 +334,23 @@ export const canEditWorkshop = async (member, workshop) => {
 };
 
 /**
- * Whether the member may see the web shop sales of a workshop's items: those
- * who run it (the same people who may edit it), and admin and board.
+ * Whether the member may see the web shop sales of a workshop's items: the
+ * members of its steering group, and admin, board and treasurer. See
+ * maySeeWorkshopRevenue for the rule.
  */
 export const canSeeWorkshopRevenue = async (member, workshop) => {
-  if (await canEditWorkshop(member, workshop)) return true;
   const userId = Meteor.userId();
-  return !!userId && (await Roles.userIsInRoleAsync(userId, ["admin", "board"]));
+  const hasRole = !!userId && (await Roles.userIsInRoleAsync(userId, REVENUE_ROLES));
+  const group = workshop?.groupId ? await Groups.findOneAsync(workshop.groupId) : null;
+  const membership = member && group
+    ? await GroupMemberships.findOneAsync({ groupId: group._id, memberId: member._id })
+    : null;
+  return maySeeWorkshopRevenue({
+    groupType: group?.type || null,
+    membershipState: membership?.state || null,
+    isResponsible: isGroupResponsible(member, group),
+    hasRole,
+  });
 };
 
 /**

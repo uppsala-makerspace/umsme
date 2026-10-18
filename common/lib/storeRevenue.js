@@ -6,6 +6,21 @@
  * method that reads the database is store.getWorkshopRevenue in the app.
  */
 
+/** Roles that see every workshop's web shop sales. */
+export const REVENUE_ROLES = ['admin', 'board', 'treasurer'];
+
+/**
+ * Who sees a workshop's web shop sales: the members of its steering group
+ * (active, or its responsible), and the roles above. A pending request to join
+ * is not membership, and a group of another type does not count even if the
+ * workshop points at it.
+ *
+ * @param {{groupType: string|null, membershipState: string|null, isResponsible: boolean, hasRole: boolean}} args
+ */
+export const maySeeWorkshopRevenue = ({ groupType, membershipState, isResponsible, hasRole }) =>
+  !!hasRole
+  || (groupType === 'steering' && (!!isResponsible || membershipState === 'active'));
+
 /** Years with any payment, newest first. */
 export const revenueYears = (payments) =>
   [...new Set(payments.map((p) => new Date(p.date).getFullYear()))].sort((a, b) => b - a);
