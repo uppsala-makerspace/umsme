@@ -1,0 +1,13 @@
+/* Lined up with the table below, whose cells DataTables pads by 15px. */
+.expenseFilters {
+  padding: 0 15px;
+  margin-bottom: 1em;
+}
+
+.expenseFilters .form-group {
+  margin-right: 1.5em;
+}
+
+.expenseFilters label {
+  margin-right: 0.4em;
+}

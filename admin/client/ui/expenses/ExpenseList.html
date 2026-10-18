@@ -15,6 +15,28 @@
     {{> tabular table=TabularTables.Expenses selector=receiptSelector class="table table-hover table-striped table-bordered table-condensed expenseList"}}
     {{/if}}
     {{else}}
+    {{#if filterable}}
+    <form class="form-inline expenseFilters">
+        <div class="form-group">
+            <label for="expenseStatus">Status</label>
+            <select class="form-control" id="expenseStatus" name="status">
+                <option value="" selected={{selectedStatus ""}}>All</option>
+                {{#each status in statuses}}
+                <option value="{{status}}" selected={{selectedStatus status}}>{{status}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="expenseFrom">From</label>
+            <input type="date" class="form-control" id="expenseFrom" name="from" value="{{filters.from}}">
+        </div>
+        <div class="form-group">
+            <label for="expenseTo">To</label>
+            <input type="date" class="form-control" id="expenseTo" name="to" value="{{filters.to}}">
+        </div>
+        {{#if filtered}}<button type="button" class="btn btn-default clearExpenseFilters">Clear filters</button>{{/if}}
+    </form>
+    {{/if}}
     {{> tabular table=TabularTables.Expenses selector=selector class="table table-hover table-striped table-bordered table-condensed expenseList"}}
     {{/if}}
 </template>

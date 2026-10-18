@@ -4,15 +4,25 @@ import '/imports/tabular/expenses';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
-import { reimbursedSelector, todayIso, sumAmounts } from '/imports/expenses/reimbursedFilter';
+import {
+  EXPENSE_STATUSES, expenseListSelector, reimbursedSelector, todayIso, sumAmounts,
+} from '/imports/expenses/expenseFilters';
 
 import './ExpenseList.html';
+import './expenseListStyle.css';
 
 // Work-queue views keyed by route name: filter the Expenses table by status.
 const MODES = {
   expensesConfirm: { status: 'submitted', heading: 'Expenses to confirm' },
   expensesReimburse: { status: 'confirmed', heading: 'Expenses to reimburse or pay', split: true },
 };
+
+// Filters of the /expenses list, kept in the URL; none are set by default.
+const listFilters = () => ({
+  status: FlowRouter.getQueryParam('status') || '',
+  from: FlowRouter.getQueryParam('from') || '',
+  to: FlowRouter.getQueryParam('to') || '',
+});
 
 Template.ExpenseList.onCreated(function () {
   Meteor.subscribe('expenses');
@@ -26,8 +36,17 @@ Template.ExpenseList.helpers({
   },
   selector() {
     const mode = MODES[FlowRouter.getRouteName()];
-    return mode ? { status: mode.status } : {};
+    return mode ? { status: mode.status } : expenseListSelector(listFilters());
   },
+  // The plain /expenses list can be narrowed by status and expense date.
+  filterable() {
+    return !MODES[FlowRouter.getRouteName()];
+  },
+  filters() { return listFilters(); },
+  filtered() { return Object.values(listFilters()).some(Boolean); },
+  statuses() { return EXPENSE_STATUSES; },
+  // null, not '', so Blaze leaves the attribute out on the other options.
+  selectedStatus(status) { return listFilters().status === status ? 'selected' : null; },
   // The reimburse queue splits in two: invoices to pay the supplier (by due
   // date) and receipts to reimburse the member.
   split() {
@@ -45,6 +64,17 @@ Template.ExpenseList.helpers({
 });
 
 Template.ExpenseList.events({
+  'change .expenseFilters select, change .expenseFilters input'(event) {
+    const { name, value } = event.currentTarget;
+    // "All" is anything that is not a status: Blaze drops an empty value
+    // attribute, so that option's value is its text.
+    const keep = name === 'status' ? EXPENSE_STATUSES.includes(value) : !!value;
+    FlowRouter.setQueryParams({ [name]: keep ? value : null });
+  },
+  'click .clearExpenseFilters'(event) {
+    event.preventDefault();
+    FlowRouter.setQueryParams({ status: null, from: null, to: null });
+  },
   'click .showQueue'() {
     FlowRouter.setQueryParams({ view: null, from: null, to: null });
   },
