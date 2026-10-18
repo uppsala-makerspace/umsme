@@ -23,6 +23,8 @@
         <p class="text-muted">Rewrites every member's <code>email</code> field to lowercase so user-to-member lookups stop missing on case mismatches. Skips members whose lowercased email would collide with another existing member.</p>
         <button class="lowercaseMemberEmails btn btn-primary">Lowercase now</button>
 
+        {{> MemberMerge}}
+
         <h1>Grant mandatory certificate to all members</h1>
         {{#if mandatoryCertificate}}
         <p>Mandatory certificate: <strong>{{mandatoryCertificate.name.sv}}</strong></p>

@@ -4,6 +4,7 @@ import { Members } from '/imports/common/collections/members';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
 import './Admin.html';
+import './MemberMerge';
 
 Template.AdminConsole.helpers({
   mandatoryCertificate() {

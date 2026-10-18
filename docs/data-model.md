@@ -458,6 +458,35 @@ Members can request and be assigned physical storage boxes at the makerspace.
 
 ---
 
+## 5b. Merging Duplicate Members
+
+Admin → **Merge members** takes a source and a destination member number. A
+preview lists what will move, warnings (overlapping memberships, a family above
+four, accounts that only find the source by email) and blockers (same member,
+one in the other's family, the source in a family, both holding a storage unit,
+an active storage request or a storage offer). The merge points every reference
+to the source at the destination, removes the source, recomputes the
+destination's cached dates and notes the merge in a comment on it.
+
+The destination takes over year of birth, gender, mobile, RFID and bank details
+(the four bank fields together) where it has none, the source's liability date
+when it is later, and board acceptance (`registered`). The destination's own
+values always win. Anything else on the source member is lost; move it by hand
+first.
+
+The fields moved are listed in `admin/server/memberMerge.js`: membership `mid`,
+`member` on payments, initiated payments and messages, comment `about`,
+`infamily` on members and invites, attestation `memberId`/`certifierId`
+(dropping a source attestation for a certificate the destination already has),
+certificate `certifiers[]`, test attempts, expense `memberId`/`confirmedBy`/
+`rejectedBy`/`reimbursedBy`, budget `setBy`, expense account
+`approverMemberIds[]`, group `responsibleMemberId`, group membership
+`memberId`/`approvedBy` (keeping the active row when both are in a group),
+door unlock `memberid`, and storage `owner`/`member`.
+
+**A new field that stores a member `_id` must be added there**, or merging leaves
+it pointing at a removed member.
+
 ## 6. Key Enums
 
 ### Membership types (`Membership.type`)

@@ -19,3 +19,4 @@ import './workshops';
 import './spaces';
 import './storeItems';
 import './storageV2';
+import './members';

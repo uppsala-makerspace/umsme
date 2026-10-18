@@ -1,0 +1,85 @@
+<template name="MemberMerge">
+  <h1>Merge members</h1>
+  <p class="text-muted">Moves everything that refers to the source member (memberships, payments, messages,
+    door unlocks, attestations, group memberships, storage, …) to the destination member, then deletes the
+    source. Year of birth, gender, mobile, RFID and bank details the destination lacks are taken from the
+    source, as are a later liability date and board acceptance. Anything else on the source member itself is
+    lost; move it to the destination yourself first.</p>
+  <form class="form-inline memberMergeForm">
+    <div class="form-group">
+      <label for="mergeSourceMid">Source member number (deleted)</label>
+      <input type="text" class="form-control" id="mergeSourceMid" name="sourceMid" value="{{sourceMid}}">
+    </div>
+    <div class="form-group">
+      <label for="mergeDestMid">Destination member number (kept)</label>
+      <input type="text" class="form-control" id="mergeDestMid" name="destMid" value="{{destMid}}">
+    </div>
+    <button type="submit" class="btn btn-default" disabled="{{busy}}">Preview</button>
+  </form>
+
+  {{#if error}}
+    <div class="alert alert-danger" style="margin-top: 1em">{{error}}</div>
+  {{/if}}
+
+  {{#with plan}}
+    <div class="row" style="margin-top: 1em">
+      {{#each side in sides}}
+        <div class="col-sm-6">
+          <h3>{{side.title}}: <a href="/member/{{side.member._id}}">{{side.member.name}}</a>
+            <small>{{side.member.mid}}</small></h3>
+          <p>{{side.member.email}}</p>
+          <ul>
+            {{#each ms in side.member.memberships}}
+              <li>{{ms.type}} {{ms.start}} – {{ms.end}}</li>
+            {{else}}
+              <li class="text-muted">No memberships</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/each}}
+    </div>
+
+    <h3>Moved to the destination</h3>
+    {{#if moves.length}}
+      <table class="table table-condensed" style="width: auto">
+        {{#each move in moves}}
+          <tr><td>{{move.label}}</td><td class="text-right">{{move.count}}</td></tr>
+        {{/each}}
+      </table>
+    {{else}}
+      <p class="text-muted">Nothing refers to the source member.</p>
+    {{/if}}
+
+    {{#if copies.length}}
+      <h3>Filled in on the destination</h3>
+      <table class="table table-condensed" style="width: auto">
+        {{#each copy in copies}}
+          <tr><td>{{copy.label}}</td><td>{{copy.shown}}</td></tr>
+        {{/each}}
+      </table>
+    {{/if}}
+
+    {{#each blocker in blockers}}
+      <div class="alert alert-danger">{{blocker}}</div>
+    {{/each}}
+    {{#each warning in warnings}}
+      <div class="alert alert-warning">{{warning}}</div>
+    {{/each}}
+
+    {{#unless blockers.length}}
+      {{#if confirming}}
+        <button class="btn btn-danger confirmMerge" disabled="{{busy}}">Yes, merge and delete {{source.mid}}</button>
+        <button class="btn btn-default cancelMerge" disabled="{{busy}}">Cancel</button>
+      {{else}}
+        <button class="btn btn-primary startMerge">Merge</button>
+      {{/if}}
+    {{/unless}}
+  {{/with}}
+
+  {{#with done}}
+    <div class="alert alert-success" style="margin-top: 1em">
+      Merged {{source.mid}} ({{source.name}}) into
+      <a href="/member/{{dest._id}}">{{dest.name}} ({{dest.mid}})</a>.
+    </div>
+  {{/with}}
+</template>
