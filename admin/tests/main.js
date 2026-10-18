@@ -23,6 +23,7 @@ import "./storagePresentation.tests";
 import "./clientWriteRules.tests";
 import "./memberMerge.tests";
 import "./expenseFilters.tests";
+import "./storeRevenue.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

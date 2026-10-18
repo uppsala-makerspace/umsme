@@ -64,6 +64,15 @@ export const Default = {
   },
 };
 
+// As seen by someone who runs the workshop, when the web shop sells something
+// for it: the administration section at the bottom.
+export const WithRevenueLink = {
+  args: {
+    ...Default.args,
+    data: { ...sampleData, canSeeRevenue: true },
+  },
+};
+
 export const ManySpaceIcons = {
   args: {
     loading: false,

@@ -3,6 +3,7 @@ import { ReactiveVar } from 'meteor/reactive-var';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { StoreItems } from '/imports/common/collections/storeItems';
 import { Payments } from '/imports/common/collections/payments';
+import { Workshops } from '/imports/common/collections/workshops';
 import { hasFixedPrice } from '/imports/common/lib/storeRules';
 import './StoreItemView.html';
 
@@ -13,6 +14,7 @@ const purchases = () => Payments.find({ storeItem: itemId() });
 Template.StoreItemView.onCreated(function () {
   Meteor.subscribe('storeItems');
   Meteor.subscribe('payments');
+  Meteor.subscribe('workshops');
   this.uploading = new ReactiveVar(false);
 });
 
@@ -54,6 +56,16 @@ Template.StoreItemView.helpers({
   uploadingAttr() {
     return Template.instance().uploading.get() ? 'disabled' : '';
   },
+  workshops() {
+    const linked = StoreItems.findOne(itemId())?.workshopIds || [];
+    return Workshops.find({}, { sort: { 'name.sv': 1 } }).map((w) => ({
+      _id: w._id,
+      name: w.name?.sv || w._id,
+      isArea: w.kind === 'areaOfInterest',
+      // null, not false, so Blaze leaves the attribute out.
+      checked: linked.includes(w._id) ? 'checked' : null,
+    }));
+  },
   hasPurchases() {
     return purchases().count() > 0;
   },
@@ -66,6 +78,13 @@ Template.StoreItemView.helpers({
 });
 
 Template.StoreItemView.events({
+  'change .storeItemWorkshop': function (event) {
+    const { value, checked } = event.currentTarget;
+    const modifier = checked ? { $addToSet: { workshopIds: value } } : { $pull: { workshopIds: value } };
+    StoreItems.update(itemId(), modifier, (err) => {
+      if (err) alert('Saving failed: ' + err.message);
+    });
+  },
   'click .deleteStoreItem': function () {
     if (!confirm('Delete this store item?')) return;
     StoreItems.remove(itemId(), (err) => {

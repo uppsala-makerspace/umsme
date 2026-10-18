@@ -1484,6 +1484,16 @@ export const models = {
       type: String,
       max: 10,
     },
+    // The workshops and areas of interest the item is sold for. Their steering
+    // groups see the item's sales in the app; an item shared by several shows
+    // its full sales to each. Set on the item's admin page.
+    workshopIds: {
+      label: "Workshops / areas of interest",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "workshopIds.$": { type: String, autoform: { omit: true } },
     // Same shape as settings.accounting.standardIncome.codes[].dimension:
     // { "6": "KERAMIK" }.
     dimension: {

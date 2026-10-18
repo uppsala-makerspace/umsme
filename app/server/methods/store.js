@@ -4,7 +4,9 @@ import { randomUUID } from "crypto";
 import { StoreItems } from "/imports/common/collections/storeItems";
 import { Payments } from "/imports/common/collections/payments";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
-import { findMemberForUser, sanitizeForSwish } from "/server/methods/utils";
+import { Workshops } from "/imports/common/collections/workshops";
+import { findMemberForUser, sanitizeForSwish, canSeeWorkshopRevenue } from "/server/methods/utils";
+import { summarizeRevenue, revenueYears } from "/imports/common/lib/storeRevenue";
 import { memberStatus } from "/imports/common/lib/utils";
 import { amountFor, commentFor, canBuy, swishMessageFor } from "/imports/common/lib/storeRules";
 import { storeItemImageUrlFor } from "/imports/common/server/workshopImage";
@@ -152,6 +154,43 @@ Meteor.methods({
    * `membership` is carried so the app can send a membership payment to its
    * existing page and a purchase to the new one.
    */
+  async "store.getWorkshopRevenue"(workshopId, year) {
+    check(workshopId, String);
+    check(year, Match.Maybe(Match.Integer));
+    const member = await requireMember();
+    const workshop = await Workshops.findOneAsync(workshopId);
+    if (!workshop) throw new Meteor.Error("not-found", "Workshop not found");
+    if (!(await canSeeWorkshopRevenue(member, workshop))) {
+      throw new Meteor.Error("not-authorized", "Only the workshop's steering group may see its sales");
+    }
+
+    const items = await StoreItems.find(
+      { workshopIds: workshopId },
+      { fields: { name: 1, workshopIds: 1 }, sort: { sortOrder: 1, "name.sv": 1 } }
+    ).fetchAsync();
+    // The other workshops an item belongs to, so a shared item's total is not
+    // read as this workshop's own.
+    const otherIds = [...new Set(items.flatMap((i) => i.workshopIds).filter((id) => id !== workshopId))];
+    const others = await Workshops.find({ _id: { $in: otherIds } }, { fields: { name: 1 } }).fetchAsync();
+    const otherName = new Map(others.map((w) => [w._id, w.name?.sv || w.name?.en || ""]));
+    const itemsById = new Map(items.map((i) => [i._id, {
+      name: i.name,
+      sharedWith: i.workshopIds.filter((id) => id !== workshopId).map((id) => otherName.get(id)).filter(Boolean),
+    }]));
+
+    const payments = await Payments.find(
+      { storeItem: { $in: [...itemsById.keys()] } },
+      { fields: { date: 1, amount: 1, comment: 1, storeItem: 1 } }
+    ).fetchAsync();
+
+    return {
+      workshop: { _id: workshop._id, name: workshop.name, kind: workshop.kind || "workshop" },
+      availableYears: revenueYears(payments),
+      year: year ?? null,
+      ...summarizeRevenue(payments, itemsById, year ?? null),
+    };
+  },
+
   async "store.getMyPayments"() {
     const member = await requireMember();
     const payments = await Payments.find(

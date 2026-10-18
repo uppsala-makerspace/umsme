@@ -4,11 +4,13 @@ import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Spaces } from "/imports/common/collections/spaces";
+import { StoreItems } from "/imports/common/collections/storeItems";
 import { workshopImageUrlFor, spaceIconUrlFor } from "/imports/common/server/workshopImage";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
 import {
   findMemberForUser,
   canEditWorkshop,
+  canSeeWorkshopRevenue,
   applyWhitelistedUpdate,
   spacesMapView,
 } from "./utils";
@@ -121,6 +123,10 @@ Meteor.methods({
       certificates,
       mapView: await spacesMapView(workshop),
       canEdit: await canEditWorkshop(member, workshop),
+      // Only offered when the web shop sells something for the workshop.
+      canSeeRevenue:
+        (await StoreItems.find({ workshopIds: workshopId }).countAsync()) > 0
+        && (await canSeeWorkshopRevenue(member, workshop)),
     };
   },
 

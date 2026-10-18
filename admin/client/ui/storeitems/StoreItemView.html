@@ -40,6 +40,20 @@
         </button>
     </form>
 
+    <h2>Workshops / areas of interest</h2>
+    <p class="text-muted">The steering groups of the ones ticked see this item's sales in the app.
+        An item can belong to several; each then sees all of its sales.</p>
+    <div class="storeItemWorkshops">
+        {{#each workshop in workshops}}
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" class="storeItemWorkshop" value="{{workshop._id}}" checked={{workshop.checked}}>
+                {{workshop.name}}{{#if workshop.isArea}} <span class="text-muted">(area of interest)</span>{{/if}}
+            </label>
+        </div>
+        {{/each}}
+    </div>
+
     <h2>Edit</h2>
     {{> quickForm collection=StoreItems doc=item id="storeItemViewForm" omitFields="_id" type="update" buttonContent="Update"}}
 

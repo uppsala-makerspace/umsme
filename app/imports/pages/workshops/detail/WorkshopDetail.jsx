@@ -90,6 +90,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     certificates,
     mapView,
     canEdit,
+    canSeeRevenue,
   } = data;
   const isAreaOfInterest = workshop.kind === "areaOfInterest";
   const slackUrl = workshop.slackChannel
@@ -204,6 +205,27 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
             {relatedGroups.map((relatedGroup) => (
               <GroupRow key={relatedGroup._id} group={relatedGroup} />
             ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Administrative, so last: only for those who run the workshop, and
+          only when the web shop sells something for it. */}
+      {canSeeRevenue && (
+        <section className="mb-6">
+          <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
+            {t("workshopAdministration")}
+          </h3>
+          <ul className="list-none p-0 m-0">
+            <li className="mb-2">
+              <Link
+                to={`/workshops/${workshop._id}/revenue`}
+                className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
+              >
+                <span className="font-semibold">{t("revenueTitle")}</span>
+                <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+              </Link>
+            </li>
           </ul>
         </section>
       )}

@@ -333,6 +333,16 @@ export const canEditWorkshop = async (member, workshop) => {
 };
 
 /**
+ * Whether the member may see the web shop sales of a workshop's items: those
+ * who run it (the same people who may edit it), and admin and board.
+ */
+export const canSeeWorkshopRevenue = async (member, workshop) => {
+  if (await canEditWorkshop(member, workshop)) return true;
+  const userId = Meteor.userId();
+  return !!userId && (await Roles.userIsInRoleAsync(userId, ["admin", "board"]));
+};
+
+/**
  * Apply a whitelisted update: $set non-empty values, $unset empty ones (so
  * optional fields can be cleared), skipping undefined values entirely. Keys
  * may be dotted (e.g. "description.sv"). The caller decides the whitelist —
