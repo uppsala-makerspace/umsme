@@ -18,6 +18,8 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
+import { Certificates } from '/imports/common/collections/certificates';
+import { Attestations } from '/imports/common/collections/attestations';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
@@ -87,7 +89,7 @@ export const buildE2e = async ({ people, now }) => {
   await group({ name: { sv: 'E2E edit group' }, type: 'function' });
   await group({ name: { sv: 'E2E links group' }, type: 'function' });
   await group({ name: { sv: 'E2E delete group' }, type: 'function' });
-  await Workshops.insertAsync({
+  const ceramics = await Workshops.insertAsync({
     name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established',
     primarySpaceId: ceramicsRoom, groupId: ceramicsGroup, createdAt: now,
   });
@@ -95,6 +97,28 @@ export const buildE2e = async ({ people, now }) => {
   await Workshops.insertAsync({ name: { sv: 'E2E edit verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E links verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E delete verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
+  // Certificates: the kiln under the ceramics workshop (a certifier, a
+  // holder), the wheel that needs it first, and one each for the admin tests
+  // that edit, delete, mark mandatory, grant and revoke. None is mandatory to
+  // begin with: a mandatory certificate would keep the app's personas from
+  // the doors.
+  const certificate = (fields) => Certificates.insertAsync(fields);
+  const attest = (certificateId, persona, fields = {}) => Attestations.insertAsync({
+    certificateId, memberId: members[persona]._id, certifierId: members.steering._id,
+    startDate: days(-30), confirmedAt: days(-30), ...fields,
+  });
+  const kiln = await certificate({
+    name: { sv: 'Keramikugn', en: 'Ceramics kiln' }, description: { sv: 'Får bränna i ugnen.' },
+    workshopId: ceramics, certifiers: [members.steering._id], defaultValidityDays: 365,
+  });
+  await attest(kiln, 'member', { endDate: days(335) });
+  await certificate({ name: { sv: 'Drejskiva', en: 'Pottery wheel' }, workshopId: ceramics, prerequisites: [kiln] });
+  for (const purpose of ['edit', 'delete', 'mandatory', 'grant']) {
+    await certificate({ name: { sv: `E2E ${purpose} certificate` } });
+  }
+  const revoke = await certificate({ name: { sv: 'E2E revoke certificate' } });
+  await attest(revoke, 'base');
+
   const clay = await makeStoreItem({
     code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150, bookkeepingAccount: '3010',
     requiresMembership: true, commentRequired: false,
