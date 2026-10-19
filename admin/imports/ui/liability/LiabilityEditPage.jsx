@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import { LiabilityForm } from './LiabilityForm';
 import { useLiabilityDocument, formValues, saveLiabilityDocument, removeLiabilityDocument } from './data';
 import { useNavigate } from '../navigation';
