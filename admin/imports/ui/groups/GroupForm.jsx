@@ -108,20 +108,6 @@ export const GroupForm = ({
 
       <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Name (Swedish)" required fullWidth {...text('nameSv')} />
-          <TextField label="Name (English)" fullWidth {...text('nameEn')} />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Tag (Swedish)" fullWidth helperText="Short label on the public website" {...text('tagSv')} />
-          <TextField label="Tag (English)" fullWidth {...text('tagEn')} />
-        </Stack>
-        <Stack spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Description (Swedish, markdown)" multiline minRows={4} fullWidth {...text('descriptionSv')} />
-          <TextField label="Description (English, markdown)" multiline minRows={4} fullWidth {...text('descriptionEn')} />
-          <TextField label="Rules (Swedish, markdown)" multiline minRows={3} fullWidth {...text('rulesSv')} />
-          <TextField label="Rules (English, markdown)" multiline minRows={3} fullWidth {...text('rulesEn')} />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
           <TextField label="Type" select required fullWidth slotProps={native} {...text('type')}>
             <option value="">(Select a type)</option>
             {TYPES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -137,6 +123,20 @@ export const GroupForm = ({
               {parent && <Link href={`/group/${parent._id}`} variant="body2">Open {parent.name?.sv}</Link>}
             </Box>
           )}
+        </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+          <TextField label="Name (Swedish)" required fullWidth {...text('nameSv')} />
+          <TextField label="Name (English)" fullWidth {...text('nameEn')} />
+        </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+          <TextField label="Tag (Swedish)" fullWidth helperText="Short label on the public website" {...text('tagSv')} />
+          <TextField label="Tag (English)" fullWidth {...text('tagEn')} />
+        </Stack>
+        <Stack spacing={2} sx={{ mb: 2 }}>
+          <TextField label="Description (Swedish, markdown)" multiline minRows={4} fullWidth {...text('descriptionSv')} />
+          <TextField label="Description (English, markdown)" multiline minRows={4} fullWidth {...text('descriptionEn')} />
+          <TextField label="Rules (Swedish, markdown)" multiline minRows={3} fullWidth {...text('rulesSv')} />
+          <TextField label="Rules (English, markdown)" multiline minRows={3} fullWidth {...text('rulesEn')} />
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
           <TextField label="Slack channel" fullWidth {...text('slackChannel')} />
