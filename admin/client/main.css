@@ -174,8 +174,24 @@ body {
   margin: 6px 20px !important;
 }
 
-.login-buttons-dropdown-align-right a.login-link-text {
-  color: white;
+/* "Sign in ▾" and the signed-in name in the top bar, as a light button on the
+   dark red. The id selector outranks accounts-ui's own link colour; links
+   inside the sign-in dialog keep theirs. */
+#login-buttons a.login-link-text {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #600;
+  font-weight: bold;
+  line-height: 20px;
+  text-decoration: none;
+}
+#login-buttons a.login-link-text:hover,
+#login-buttons a.login-link-text:focus {
+  background-color: #f6e3e3;
+  color: #900;
+  text-decoration: none;
 }
 
 #login-dropdown-list {
