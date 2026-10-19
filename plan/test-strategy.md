@@ -137,12 +137,15 @@ Ingen CI tills vidare; allt körs lokalt.
 
 ## Ordning
 
-1. Byggstenar, PRNG och skyddet i `common/server/seed/`.
-2. Scenariot `e2e`; flytta appens seedning dit och få appens 20 e2e-tester
-   gröna mot den.
-3. Scenariot `demo` och `./scripts/demo.sh`, med README-avsnitt.
-4. Playwright i admin och e2e-tester för pilotmodulen `liability` mot
+1. ~~Byggstenar, PRNG och skyddet i `common/server/seed/`.~~ Klart (fb698c7).
+2. ~~Scenariot `demo` och `./scripts/demo.sh`, med README-avsnitt.~~ Klart;
+   tidigarelagt före e2e. Personerna ligger i `scenarios/personas.js` på
+   `example.org`.
+3. ~~Regeln i `CLAUDE.md`.~~ Klart, tillsammans med demo.
+4. Scenariot `e2e`; flytta appens seedning dit och få appens 20 e2e-tester
+   gröna mot den. Testernas adresser (`member@test.com` …) byts mot
+   personerna på `example.org`.
+5. Playwright i admin och e2e-tester för pilotmodulen `liability` mot
    Blaze-versionen.
-5. Regeln i `CLAUDE.md`.
 
 Sedan steg 0 och piloten i `plan/migration.md`.

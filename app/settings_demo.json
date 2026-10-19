@@ -1,0 +1,78 @@
+{
+  "public": {
+    "checkPath": "http://localhost:3001/check#",
+    "adminUrl": "http://localhost:3000",
+    "swish": {
+      "disabled": true,
+      "disabledMessage": {
+        "sv": "Swish är avstängt i demoläget.",
+        "en": "Swish is turned off in the demo."
+      }
+    },
+    "otherPaymentOptionsUrl": "https://www.uppsalamakerspace.se/bli-medlem/",
+    "vapidPublicKey": "BNI6pdhR7C8akwjNwFS3pRFjlukg1Jrz249svg6hyA8hCOAr88mDj8y0aAn5kJ55HBPaNLlJAV1prwewSgZxHNE",
+    "googleCalendar": {
+      "apiKey": "demo",
+      "calendarId": "demo@group.calendar.google.com"
+    },
+    "slack": {
+      "team": "DEMO",
+      "channels": []
+    },
+    "oauth": {
+      "google": false,
+      "facebook": false
+    }
+  },
+  "private": {
+    "recipientWhitelist": [],
+    "vapidPrivateKey": "DUAGJzj65SNU-OYXle2rRbCNAXENLkV2H24NHjjVQac",
+    "googleDrive": {
+      "backend": "local",
+      "localPath": "../.demo-data/receipts"
+    },
+    "workshopImages": {
+      "localPath": "../.demo-data/workshop-images"
+    },
+    "mapIcons": {
+      "localPath": "../.demo-data/map-icons"
+    },
+    "receiptTokenSecret": "demo-receipt-token-secret-not-for-production",
+    "managerEvents": {
+      "channels": [
+        {
+          "name": "demo",
+          "type": "slack",
+          "webhookUrl": "console:demo",
+          "subscriptions": ["expenseSubmitted", "expenseRetracted", "groupJoinRequested", "groupJoinApproved", "boxRequest"]
+        }
+      ]
+    },
+    "paymentOptionsPath": "private/paymentOptions.json",
+    "termsOfPurchaseMembershipEn": "private/termsOfPurchaseMembership.en.md",
+    "termsOfPurchaseMembershipSv": "private/termsOfPurchaseMembership.sv.md",
+    "slackChannelsPath": "private/slack-channels.json",
+    "storageNotifications": {
+      "from": "Uppsala Makerspace Hyllplats <hyllplats@example.org>",
+      "replyTo": "hyllplats@example.org"
+    },
+    "homeAssistant": {
+      "url": "http://localhost:8123",
+      "token": "demo",
+      "locks": [
+        { "id": "outerDoor", "entityId": "switch.outer_door", "type": "switch" },
+        { "id": "upperFloor", "entityId": "lock.upper_floor", "type": "lock" }
+      ]
+    }
+  },
+  "serviceConfigurations": {},
+  "env": "demo",
+  "accounting": {
+    "expense": {
+      "accountOptions": [
+        { "account": "5010", "name": "Lokalkostnader" },
+        { "account": "6110", "name": "Kontorsmateriel" }
+      ]
+    }
+  }
+}

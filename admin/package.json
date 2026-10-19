@@ -4,6 +4,8 @@
   "scripts": {
     "build": "meteor build dist --architecture os.linux.x86_64",
     "start": "meteor run --settings settings.json",
+    "demo": "MONGO_URL=mongodb://localhost:27017/umsme-demo?replicaSet=rs0 meteor run --port 3000 --settings settings_demo.json",
+    "seed:demo": "SEED=demo npm run demo",
     "test": "TEST_CLIENT=0 TEST_SERVER=1 meteor test --once --port 3100 --driver-package meteortesting:mocha"
   },
   "dependencies": {

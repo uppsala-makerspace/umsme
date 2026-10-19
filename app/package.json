@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "MONGO_URL=mongodb://localhost:27017/umsme?replicaSet=rs0 meteor --port 3001 --settings settings.json",
+    "demo": "MONGO_URL=mongodb://localhost:27017/umsme-demo?replicaSet=rs0 meteor --port 3001 --settings settings_demo.json",
     "test": "npm run test:e2e",
     "visualize": "MONGO_URL=mongodb://localhost:27017/umsme?replicaSet=rs0 meteor --production --extra-packages bundle-visualizer --settings settings.json",
     "storybook": "storybook dev -p 6006",

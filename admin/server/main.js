@@ -14,6 +14,7 @@ import adminAvailable from './adminAvailable';
 import publications from './publications';
 import setupAccounts from './accounts';
 import runMigrations from './migrations';
+import runSeed from './seed';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
 import { ensureStorageMessageTemplates } from '/imports/common/server/storageMessages/defaults';
 import { applyMailUrlFromSettings } from '/imports/common/server/mailUrl';
@@ -21,10 +22,12 @@ import { applyMailUrlFromSettings } from '/imports/common/server/mailUrl';
 applyMailUrlFromSettings();
 
 Meteor.startup(async () => {
+  const seedSummary = await runSeed();
   await adminAvailable();
   await setupAccounts();
   await ensureStorageIndexes();
   await ensureStorageMessageTemplates();
   await runMigrations();
   publications();
+  if (seedSummary) console.log(seedSummary().map((line) => `[seed] ${line}`).join('\n'));
 });

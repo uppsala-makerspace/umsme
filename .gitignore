@@ -14,3 +14,5 @@ tests-data-example/
 inbox
 certs/
 admin/dist/
+# Demo data: receipts and logs written by scripts/demo.sh
+.demo-data/

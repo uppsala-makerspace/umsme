@@ -1,0 +1,66 @@
+{
+  "adminpassword": "admin",
+  "from": ["kansliet@example.org", "no-reply@example.org"],
+  "noreply": "no-reply@example.org",
+  "syncNrOfTransactions": 20,
+  "deliverMails": false,
+  "reminderCron": {
+    "enabled": false
+  },
+  "accounting": {
+    "company": { "orgNo": "000000-0000", "name": "Demoföreningen" },
+    "bankAccount": "1930",
+    "matchWindowDays": 5,
+    "dimensions": [
+      { "nr": 1, "name": "Kostnadsställe" },
+      { "nr": 6, "name": "Projekt" }
+    ],
+    "expense": {
+      "series": "U",
+      "accountOptions": [
+        { "account": "5010", "name": "Lokalkostnader" },
+        { "account": "6110", "name": "Kontorsmateriel" }
+      ]
+    },
+    "memberPayment": { "series": "M", "account": "3110", "dimension": { "1": "MEDLEM" } },
+    "standardIncome": {
+      "series": "S",
+      "codes": [
+        { "code": "LERA", "account": "3010", "dimension": { "6": "VERK" } }
+      ]
+    }
+  },
+  "public": {
+    "adminUrl": "http://localhost:3000",
+    "checkPath": "http://localhost:3001/check#",
+    "vapidPublicKey": "BNI6pdhR7C8akwjNwFS3pRFjlukg1Jrz249svg6hyA8hCOAr88mDj8y0aAn5kJ55HBPaNLlJAV1prwewSgZxHNE"
+  },
+  "private": {
+    "recipientWhitelist": [],
+    "vapidPrivateKey": "DUAGJzj65SNU-OYXle2rRbCNAXENLkV2H24NHjjVQac",
+    "notifyExpiringTime": "at 09:00 am",
+    "googleDrive": {
+      "backend": "local",
+      "localPath": "../.demo-data/receipts"
+    },
+    "workshopImages": {
+      "localPath": "../.demo-data/workshop-images"
+    },
+    "mapIcons": {
+      "localPath": "../.demo-data/map-icons"
+    },
+    "receiptTokenSecret": "demo-receipt-token-secret-not-for-production",
+    "managerEvents": {
+      "channels": [
+        {
+          "name": "demo",
+          "type": "slack",
+          "webhookUrl": "console:demo",
+          "subscriptions": ["expenseConfirmed", "expenseRejected", "expenseReimbursed", "expenseUnreimbursed"]
+        }
+      ]
+    }
+  },
+  "serviceConfigurations": {},
+  "env": "demo"
+}

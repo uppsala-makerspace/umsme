@@ -109,6 +109,21 @@ emails and their push subscriptions. Two settings keep dev from contacting them:
   push to subscriptions copied from production is rejected by the push
   services. Never put the production keys in a dev `settings.json`.
 
+## Demo and test data
+
+`./scripts/demo.sh` seeds the database `umsme-demo` and starts all three apps
+against it. Seeding runs in admin at startup when `SEED=demo` is set; the
+scenario is `common/server/seed/scenarios/demo.js`, built from the blocks in
+`common/server/seed/`, with the named logins in `scenarios/personas.js`.
+Seeding empties the database first, so `assertSeedTarget` refuses any database
+whose name does not end in `-demo` (or `-e2e`) and any settings whose
+`private.recipientWhitelist` is not an empty list.
+
+Keep the seed in step with the code: a new field, rule or collection needs a
+counterpart in the building blocks and in the demo scenario, so that the demo
+shows it and the data stays valid. Membership dates always come from payments
+(`pay()` in `seed/members.js`), never set by hand.
+
 ## Git Commits
 
 Do not include "Generated with Claude Code" or "Co-Authored-By" footers in commit messages.

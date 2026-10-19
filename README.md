@@ -8,6 +8,34 @@ This is a monorepo containing three Meteor applications:
 
 See the README in each directory for more details.
 
+## Trying it out with demo data
+
+```bash
+./scripts/demo.sh            # seed fresh demo data, then start all three apps
+./scripts/demo.sh --no-seed  # start on the demo data already there
+```
+
+Admin runs on http://localhost:3000, the app on http://localhost:3001 and
+payment on :3003, all against the local database `umsme-demo`. You need a
+local MongoDB running as replica set `rs0`, and nothing else on those ports.
+
+The demo is an invented association of about 200 members with three years of
+history, groups and workshops, certificates, storage, expenses and a web shop.
+Log in to admin as `admin` / `admin`, or anywhere with one of the people below
+and the password `password123`; the full list is printed when seeding finishes.
+
+| Login | Who |
+|-------|-----|
+| `admin@example.org`, `board@example.org`, `treasurer@example.org`, `storage@example.org` | One per admin role |
+| `member@example.org` | Active lab member |
+| `family@example.org` | Family payer with two family members |
+| `expiring@example.org`, `expired@example.org` | Membership ending soon, and ended |
+| `pending@example.org`, `excluded@example.org` | Waiting for board approval, and excluded |
+| `group-leader@example.org`, `steering@example.org` | Wood workshop steering group |
+
+Swish, the bank, the door locks and Slack are turned off; what they would have
+produced is part of the data. Mail and push are created but never sent.
+
 ## Common
 
 The `common` directory contains schema definitions, collections, and utility functions shared across all applications. It is accessible via symlinks from each app's `imports/common`.

@@ -42,6 +42,10 @@ export const makeMember = async ({ registered = true, ...fields }) => {
  * push or manager event: those are side effects of a live payment, not part
  * of the data.
  *
+ * `via: 'swish'` is a payment made in the app, which carries the Swish
+ * reference as externalId; `via: 'bankgiro'` is one that came in through the
+ * bank sync, identified by the member id in the message.
+ *
  * @param {object} member
  * @param {string} paymentType a key of PRICES
  * @param {{ at?: Date, via?: 'swish'|'bankgiro' }} options
@@ -56,13 +60,16 @@ export const pay = async (member, paymentType, { at = new Date(), via = 'swish' 
   }
   const amount = PRICES[paymentType];
   const paymentId = await Payments.insertAsync({
-    hash: randomUUID().replace(/-/g, '').substring(0, 40),
+    hash: randomHex(),
     type: via,
     amount,
     date: at,
     name: current.name,
     ...(current.mobile ? { mobile: current.mobile } : {}),
     member: current._id,
+    ...(via === 'swish'
+      ? { externalId: randomHex(32).toUpperCase(), message: paymentType }
+      : { message: current.mid }),
   });
   const membershipId = await Memberships.insertAsync({
     mid: current._id,
@@ -112,6 +119,8 @@ export const joinFamily = async (dependent, payer) => {
 /** A pending invitation for `email` to join `payer`'s family. */
 export const inviteToFamily = (email, payer) =>
   Invites.insertAsync({ email: email.toLowerCase(), infamily: payer._id });
+
+export const randomHex = (length = 40) => `${randomUUID()}${randomUUID()}`.replace(/-/g, '').substring(0, length);
 
 /** Recompute a payer's denormalized dates and copy them to the family. */
 const syncMemberDates = async (memberId) => {

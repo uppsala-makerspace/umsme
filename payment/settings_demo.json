@@ -1,0 +1,17 @@
+{
+  "private": {
+    "recipientWhitelist": [],
+    "managerEvents": {
+      "channels": [
+        {
+          "name": "demo",
+          "type": "slack",
+          "webhookUrl": "console:demo",
+          "subscriptions": ["newMemberPayment", "membershipRenewed", "quarterlyLabPayment", "storePurchase"]
+        }
+      ]
+    }
+  },
+  "noreply": "no-reply@example.org",
+  "swish": {}
+}
