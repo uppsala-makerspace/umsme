@@ -88,6 +88,9 @@ npm run test:e2e
 
 # Run tests with Playwright UI (for debugging)
 npm run test:e2e:ui
+
+# Against development mode, with readable browser stack traces
+E2E_DEV=1 npm run test:e2e
 ```
 
 The test runner will:

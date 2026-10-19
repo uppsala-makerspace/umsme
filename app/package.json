@@ -12,7 +12,8 @@
     "build-storybook": "storybook build",
     "build:css": "tailwindcss -i ./client/main.css -o ./client/tailwind.output.css",
     "watch:css": "tailwindcss -i ./client/main.css -o ./client/tailwind.output.css --watch",
-    "start:test": "SEED=e2e MONGO_URL=mongodb://localhost:27017/umsme-e2e?replicaSet=rs0 meteor --port 3002 --settings settings_test.json",
+    "start:test": "SEED=e2e MONGO_URL=mongodb://localhost:27017/umsme-e2e?replicaSet=rs0 meteor --production --port 3002 --settings settings_test.json",
+    "start:test:dev": "SEED=e2e MONGO_URL=mongodb://localhost:27017/umsme-e2e?replicaSet=rs0 meteor --port 3002 --settings settings_test.json",
     "test:e2e": "npx playwright test",
     "test:e2e:ui": "npx playwright test --ui"
   },

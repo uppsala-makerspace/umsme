@@ -27,8 +27,12 @@ export default defineConfig({
   // The app seeds the e2e database at startup (SEED=e2e empties umsme-e2e and
   // fills it from common/server/seed/scenarios/e2e.js). Never reused, so every
   // run starts on fresh data.
+  //
+  // Production mode (minified client) makes the tests about 20% faster for
+  // ~2 s more startup. E2E_DEV=1 runs against development mode instead, with
+  // readable stack traces in the browser for debugging a failing test.
   webServer: {
-    command: 'npm run start:test',
+    command: process.env.E2E_DEV ? 'npm run start:test:dev' : 'npm run start:test',
     url: 'http://localhost:3002',
     reuseExistingServer: false,
     timeout: 180000,
