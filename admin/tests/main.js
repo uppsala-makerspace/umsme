@@ -26,6 +26,7 @@ import "./expenseFilters.tests";
 import "./storeRevenue.tests";
 import "./userPublications.tests";
 import "./seed.tests";
+import "./liability.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

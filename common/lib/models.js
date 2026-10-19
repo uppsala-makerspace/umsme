@@ -596,6 +596,9 @@ export const models = {
   liabilityDocument: {
     title: { label: "Title", type: String, max: 200 },
     date: { label: "Date", type: Date },
+    // Set by the domain functions on every write, and compared on update so
+    // that a save cannot silently overwrite someone else's change.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
     text: {
       label: "Document text",
       type: Object,

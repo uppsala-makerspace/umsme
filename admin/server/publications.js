@@ -31,6 +31,7 @@ import {
   StorageEvents,
 } from '/imports/common/collections/storage';
 import { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
+import { hasRole, DOMAIN_ROLES } from '/imports/common/server/authz';
 
 export const PUBLISHED_USER_FIELDS = { username: 1, emails: 1, createdAt: 1 };
 
@@ -136,6 +137,19 @@ export default () => {
     if (memberId) clauses.push({ member: memberId });
     if (unitId) clauses.push({ $or: [{ unit: unitId }, { related_unit: unitId }, { entity_id: unitId }] });
     return StorageEvents.find(clauses.length ? { $and: clauses } : {}, { sort: { occurred_at: -1 } });
+  });
+
+  // Narrow publications, one per view (plan/migration.md): the list gets
+  // only what it shows, the document view the one document.
+  Meteor.publish('admin.liability.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.liability))) return this.ready();
+    return LiabilityDocuments.find({}, { fields: { title: 1, date: 1 }, sort: { date: -1 } });
+  });
+
+  Meteor.publish('admin.liability.document', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.liability))) return this.ready();
+    return LiabilityDocuments.find(docId);
   });
 
   Meteor.publish(null, async function () {

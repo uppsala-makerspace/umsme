@@ -16,6 +16,7 @@ import setupAccounts from './accounts';
 import runMigrations from './migrations';
 import { runSeedFromEnv } from '/imports/common/server/seed/runFromEnv';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
+import { ensureAuditLogIndexes } from '/imports/common/server/auditLog';
 import { ensureStorageMessageTemplates } from '/imports/common/server/storageMessages/defaults';
 import { applyMailUrlFromSettings } from '/imports/common/server/mailUrl';
 
@@ -26,6 +27,7 @@ Meteor.startup(async () => {
   await adminAvailable();
   await setupAccounts();
   await ensureStorageIndexes();
+  await ensureAuditLogIndexes();
   await ensureStorageMessageTemplates();
   await runMigrations();
   publications();

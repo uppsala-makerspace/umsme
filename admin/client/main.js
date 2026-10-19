@@ -30,6 +30,7 @@ import './ui/pending';
 import './ui/reminders';
 import './ui/excluded';
 import './layouts/AppBody.js';
+import './react/ReactPage';
 import './layouts/Home.html';
 import { Accounts } from 'meteor/accounts-base';
 import { AutoFormThemeBootstrap3 } from 'meteor/communitypackages:autoform-bootstrap3/static';
