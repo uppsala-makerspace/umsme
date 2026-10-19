@@ -6,32 +6,32 @@
 
 meteor-base@1.5.2             # Packages every Meteor app needs to have
 mobile-experience@1.1.2       # Packages for a great mobile UX
-mongo@2.1.4                   # The database Meteor supports right now
+mongo@2.5.1                   # The database Meteor supports right now
 reactive-var@1.0.13            # Reactive variable for tracker
 tracker@1.3.4                 # Meteor's client-side reactive programming library
 
-standard-minifier-js@3.1.1    # JS minifier run for production mode
+standard-minifier-js@3.2.0    # JS minifier run for production mode
 es5-shim@4.8.1                # ECMAScript 5 compatibility for older browsers
-ecmascript@0.16.13              # Enable ECMAScript2015+ syntax in app code
-typescript@5.6.6              # Enable TypeScript syntax in .ts and .tsx modules
-shell-server@0.6.2            # Server-side component of the `meteor shell` command
+ecmascript@0.19.1              # Enable ECMAScript2015+ syntax in app code
+typescript@5.11.1              # Enable TypeScript syntax in .ts and .tsx modules
+shell-server@0.7.1            # Server-side component of the `meteor shell` command
 
 
 
-hot-module-replacement@0.5.4  # Update code in development without reloading the page
+hot-module-replacement@0.6.0  # Update code in development without reloading the page
 momentjs:moment
-email@3.1.2
-fetch@0.1.6
-session@1.2.2
+email@3.2.0
+fetch@0.2.0
+session@1.2.3
 react-meteor-data
-accounts-base@3.1.2
+accounts-base@3.3.1
 accounts-google@1.4.1
 service-configuration@1.3.5
 accounts-facebook@1.3.4
-roles@1.0.1
+roles@1.1.0
 npm-bcrypt
-webapp@2.0.7
+webapp@2.3.0
 aldeed:collection2
-static-html@1.4.0
-accounts-password@3.2.1
+static-html@1.5.0
+accounts-password@3.3.1
 matb33:collection-hooks@2.1.0

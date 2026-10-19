@@ -9,7 +9,7 @@ This is a system that aims to:
 
 ## INSTALL - developer mode
 
-You need a modern node version, typically node 22.
+You need a modern node version, typically node 24 (Meteor 3.5 bundles run on Node 24).
 
     cd umsme/admin
     curl https://install.meteor.com/ | sh
@@ -32,7 +32,7 @@ First you have build for the right architecture, the `npm run build` command cor
 
 **In the deployment environment:**
 
-* Make sure you have recent version of node on your server, node 22 is suitable. Also make sure you have mongod installed separately.
+* Make sure you have recent version of node on your server, node 24 is required for Meteor 3.5. Also make sure you have mongod installed separately.
 * Initialize your built bundle, see the `example-install.sh` script for how to do this.
 * Locate the `example-start.sh` and copy to `start.sh`.
 * Take notice on the section on how to set the `MAIL_URL` should be configured if you want to be able to send emails.

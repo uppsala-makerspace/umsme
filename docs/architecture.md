@@ -14,7 +14,7 @@ The three apps serve distinct roles:
 
 | App       | Purpose                        | Port | Stack                         |
 |-----------|--------------------------------|------|-------------------------------|
-| admin     | Staff dashboard                | 3000 | Meteor 3.1 + Blaze + Bootstrap 3 |
+| admin     | Staff dashboard                | 3000 | Meteor 3.5 + Blaze + Bootstrap 3 |
 | app       | Member self-service PWA        | 3001 | Meteor + React 19 + Tailwind CSS |
 | payment   | Payment callback receiver      | 3003 | Meteor (server-only, no UI)   |
 

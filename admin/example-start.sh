@@ -16,7 +16,7 @@ export ROOT_URL=https://umsme.uppsalamakerspace.se
 cd bundle
 
 # Point to where the nodejs binary is
-NODE_BINARY=/root/.nvm/versions/node/v22.15.1/bin/node
+NODE_BINARY=/root/.nvm/versions/node/v24.15.0/bin/node
 echo Using node version `$NODE_BINARY --version`
 echo Starting UMSME
 

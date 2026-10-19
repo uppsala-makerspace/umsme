@@ -28,7 +28,7 @@ meteor reset               # Reset dev database (stops app first)
 ## Architecture
 
 ### Technology Stack
-- **Framework:** Meteor 3.1.2 with Blaze templating
+- **Framework:** Meteor 3.5.3 with Blaze templating
 - **Database:** MongoDB with Collection2 (schema validation)
 - **Routing:** FlowRouter (ostrio:flow-router-extra)
 - **Forms:** AutoForm with Bootstrap 3 theme
