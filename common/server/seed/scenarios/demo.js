@@ -15,7 +15,6 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
-import { StoreItems } from '/imports/common/collections/storeItems';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
 import { Expenses } from '/imports/common/collections/expenses';
@@ -31,6 +30,7 @@ import { makeUser } from '../accounts';
 import { makeMember, pay, joinFamily, randomHex, PRICES } from '../members';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeMessageTemplate } from '../documents';
+import { makeStoreItem, makePurchase } from '../shop';
 import { PERSONAS, PASSWORD, FIRST_FREE_MID } from './personas';
 import { makeLiabilityVersions, liabilityFields, makePersonas } from './build';
 
@@ -298,7 +298,7 @@ export const buildDemo = async ({ random, people, now }) => {
   await attest(laser, personas.base, { start: days(-1), certifierId: personas.steering._id, pending: true });
 
   // --- Web shop and purchases ---------------------------------------------
-  const storeItem = (fields) => StoreItems.insertAsync({ status: 'available', createdAt: days(-400), ...fields });
+  const storeItem = (fields) => makeStoreItem({ createdAt: days(-400), ...fields });
   const clay = await storeItem({
     code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150,
     requiresMembership: true, bookkeepingAccount: '3010', workshopIds: [workshops.ceramics], sortOrder: 1,
@@ -311,15 +311,15 @@ export const buildDemo = async ({ random, people, now }) => {
     code: 'gava', name: { sv: 'Gåva', en: 'Donation' }, minPrice: 20, maxPrice: 5000,
     commentRequired: false, bookkeepingAccount: '3990', sortOrder: 3,
   });
-  const items = [[clay, 'lera', 150], [laserTime, 'laser', 50], [donation, 'gava', null]];
+  const items = [
+    { _id: clay, code: 'lera', price: 150 },
+    { _id: laserTime, code: 'laser', price: 50 },
+    { _id: donation, code: 'gava' },
+  ];
   for (let n = 0; n < 60; n += 1) {
-    const [itemId, code, price] = random.pick(items);
-    const buyer = random.pick(active);
-    await Payments.insertAsync({
-      hash: randomHex(), type: 'swish', amount: price || random.pick([50, 100, 200, 500]),
-      date: days(-random.int(1, 500)), name: buyer.name, mobile: buyer.mobile, member: buyer._id,
-      externalId: randomHex(32).toUpperCase(), message: `ws:${code} ${buyer.name}`.substring(0, 50),
-      storeItem: itemId, itemCode: code,
+    const item = random.pick(items);
+    await makePurchase(random.pick(active), item, {
+      at: days(-random.int(1, 500)), amount: item.price || random.pick([50, 100, 200, 500]),
     });
   }
 

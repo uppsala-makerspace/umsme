@@ -22,6 +22,7 @@ export { makeUser } from './accounts';
 export { PRICES, makeMember, pay, payHistory, joinFamily, inviteToFamily } from './members';
 export { makeLiabilityDocument, makeMessageTemplate } from './documents';
 export { makeStorageWalls, makeStorageUnit, storageLocation } from './storage';
+export { makeStoreItem, makePurchase } from './shop';
 
 /**
  * Empty the database and run `build` to fill it.

@@ -13,6 +13,8 @@ import { StorageUnits, StorageRequests, StorageOffers } from '/imports/common/co
 import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
+import { makeStoreItem, makePurchase } from '../shop';
+import { Workshops } from '/imports/common/collections/workshops';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
@@ -45,6 +47,27 @@ export const buildE2e = async ({ people, now }) => {
   const { members, userIds } = await makePersonas([...PERSONAS, ...E2E_PERSONAS], { people, days, now, liability });
   for (const [key, userId] of Object.entries(userIds)) {
     await Accounts._insertLoginToken(userId, { token: e2eLoginToken(key), when: now });
+  }
+
+  // Web shop: an item that has been bought (so it cannot be deleted), one with
+  // a buyer-set price, and one each for the admin tests that edit and delete.
+  // A workshop to link items to.
+  await Workshops.insertAsync({ name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established' });
+  const clay = await makeStoreItem({
+    code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150, bookkeepingAccount: '3010',
+    requiresMembership: true, commentRequired: false,
+  });
+  await makePurchase(members.member, { _id: clay, code: 'lera', price: 150 }, { at: days(-10) });
+  await makePurchase(members.base, { _id: clay, code: 'lera', price: 150 }, { at: days(-3) });
+  await makeStoreItem({
+    code: 'gava', name: { sv: 'Gåva', en: 'Donation' }, minPrice: 20, maxPrice: 5000, bookkeepingAccount: '3990',
+    requiresMembership: false, commentRequired: false,
+  });
+  for (const purpose of ['edit', 'delete']) {
+    await makeStoreItem({
+      code: `e2e-${purpose}`, name: { sv: `E2E ${purpose} item` }, price: 25, bookkeepingAccount: '3011',
+      requiresMembership: false, commentRequired: false,
+    });
   }
 
   // Storage last, so that the storage hooks see the members' final dates.
