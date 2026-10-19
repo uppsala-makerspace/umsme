@@ -165,6 +165,8 @@ Copy `example-settings.json` to `settings.json` and configure:
 - `lockUsername/lockPassword` - Door lock API credentials
 - `deliverMails` - Set false to disable email sending
 - `reminderCron.enabled` - Must be explicitly `true` to send membership-expiry reminders (mail + push). Leave unset/false in dev so a copied member DB never triggers reminders.
+- `lockApi` - `"fake"` puts a stand-in for the Danalock API in place (`server/lock/`), its state in the collection `fakeLockApi`, seeded by the demo and e2e scenarios. Leave unset in production.
+- `bankproxy` - The umsme-bank proxy's URL, or `"fake"` for a stand-in (`server/bank/`) whose transactions and sign-in state live in `fakeBankApi`, seeded likewise. `settings_demo.json` sets both to `"fake"`.
 
 Email requires `MAIL_URL` environment variable (see example-start.sh).
 

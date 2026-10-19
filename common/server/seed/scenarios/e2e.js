@@ -18,6 +18,7 @@ import { makeFakeLock } from '../lock';
 import { makeFakeBank } from '../bank';
 import { makeMember, pay } from '../members';
 import { Payments } from '/imports/common/collections/payments';
+import { uploadImage } from '/imports/common/server/googleDrive';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Groups } from '/imports/common/collections/groups';
@@ -198,8 +199,18 @@ export const buildE2e = async ({ people, now }) => {
   });
   await ExpenseBudgets.insertAsync({ expenseAccountId: ceramicsAccount, year: now.getFullYear(), amount: 5000, setAt: days(-90), setBy: members.treasurer._id, createdAt: days(-90) });
   for (const purpose of ['edit', 'delete', 'links', 'budget']) await account(`E2E ${purpose} account`, { groupIds: [premisesGroup] });
-  const expense = (place, status, fields = {}) => Expenses.insertAsync({
-    memberId: members.steering._id, type: 'receipt', driveFileId: `e2e/${place}.svg`, mimeType: 'image/svg+xml',
+  // A receipt picture each, where the receipt store keeps them; without one
+  // configured the expense goes without.
+  const receipt = async (place) => {
+    const buffer = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100"><text x="10" y="50">${place}</text></svg>`);
+    try {
+      return await uploadImage({ buffer, baseName: `e2e-${place.replaceAll(' ', '-')}`, mimeType: 'image/svg+xml', date: now });
+    } catch (error) {
+      return `e2e/${place}.svg`;
+    }
+  };
+  const expense = async (place, status, fields = {}) => Expenses.insertAsync({
+    memberId: members.steering._id, type: 'receipt', driveFileId: await receipt(place), mimeType: 'image/svg+xml',
     status, date: days(-20), createdAt: days(-20), amount: 250, expenseAccountId: ceramicsAccount, place, note: 'Glasyr',
     ...(status !== 'pending' ? { submittedAt: days(-19) } : {}),
     ...(['confirmed', 'reimbursed'].includes(status) ? { confirmedAt: days(-18), confirmedBy: members.groupLeader._id } : {}),

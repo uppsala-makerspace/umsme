@@ -254,6 +254,9 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | lock | ✓ | ✓ (metoder `lock.*`) | ✓ | ✓ (lås-API:t bakom `lockApi()`, fejk med `"lockApi": "fake"`) |
 | door | ✓ | ✓ (`doorUnlocks.*`) | ✓ | ✓ (publiceringarna `unlocks`, `doorunlocks` borttagna) |
 | check | ✓ (fanns) | – | ✓ | ✓ (publika sidor i Clean-layouten: `reactRoute(..., { layout: 'Clean' })`) |
+| storage | ✓ (fanns) | ✓ (fanns) | ✓ | ✓ (`prompt()`/`confirm()` ersatta av en dialog) |
+| expenses | ✓ | ✓ | ✓ | ✓ (listorna pagineras på servern; publiceringarna `expenses`, `expenseAccounts`, `expenseBudgets`, `groups`, `workshops`, `groupMemberships`, `spaces` borttagna) |
+| membership, bank | ✓ | ✓ (metoder `payments.*`, `memberships.*`) | ✓ | ✓ (bankproxyn bakom `bankApi()`, fejk med `"bankproxy": "fake"`; `MembershipList` på medlemssidan är Blaze till våg 4) |
 
 ## Beslut (2026-10-19)
 
