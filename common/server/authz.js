@@ -20,6 +20,8 @@ export const DOMAIN_ROLES = {
   stats: ['admin', 'board'],
   lock: ['admin'],
   doors: ['admin', 'board'],
+  expenses: ['admin', 'board', 'treasurer'],
+  expenseAccounts: ['admin', 'board'],
 };
 
 /** Whether the user holds any of the roles. */

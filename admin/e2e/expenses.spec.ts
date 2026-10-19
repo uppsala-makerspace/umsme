@@ -127,6 +127,21 @@ test.describe('Expense accounts', () => {
     await expect(page.getByText(/1\s500 kr/).first()).toBeVisible();
   });
 
+  test('sets the groups and approvers, on save', async ({ page }) => {
+    await openAccount(page, 'E2E links account');
+    await page.getByRole('combobox', { name: 'Groups', exact: true }).fill('keramik');
+    await page.getByRole('listbox').getByRole('option', { name: 'Styrgrupp Keramik' }).click();
+    await page.getByRole('combobox', { name: 'Approvers', exact: true }).fill('Gustav');
+    await page.getByRole('listbox').getByRole('option', { name: 'Gustav Gruppledare' }).click();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
+
+    await openAccount(page, 'E2E links account');
+    await expect(page.getByRole('link', { name: 'Gustav Gruppledare' })).toBeVisible();
+    await page.getByRole('img', { name: 'Remove Styrgrupp Keramik' }).click();
+    await expect(page.getByText(/saving removes this approver/i)).toContainText('Gustav Gruppledare');
+  });
+
   test('deletes an account nothing uses', async ({ page }) => {
     await openAccount(page, 'E2E delete account');
     await deleteConfirmed(page);

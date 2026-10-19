@@ -25,4 +25,5 @@ import './messageTemplates';
 import './memberLookup';
 import './certificates';
 import './announcements';
+import './expenseAccounts';
 import './stats';

@@ -8,6 +8,9 @@ import { publishManagerEvent, ManagerEventType, blockquote } from '/imports/comm
 import { adminLink } from '/imports/common/lib/links';
 import { receiptUrlFor } from '/imports/common/server/receiptToken';
 import { isInvoice } from '/imports/common/lib/expenseType';
+import { check, Match } from 'meteor/check';
+import { requireRole as requireUserRole, DOMAIN_ROLES } from '/imports/common/server/authz';
+import { expensesPage, reimbursedList, expensePayee } from '../expenses/lists';
 
 // Build a Slack-mrkdwn description of an expense for manager events, with a
 // link back to the admin app (settings.public.adminUrl; omitted if unset).
@@ -57,6 +60,34 @@ const assertNotOwnExpense = (expense, me) => {
 const withActor = (fields, actorField, me) => (me ? { ...fields, [actorField]: me } : fields);
 
 Meteor.methods({
+  /** A page of the expenses or one of the work queues, with names. */
+  async 'expenses.page'(options) {
+    check(options, {
+      view: String,
+      filters: Match.Optional({ status: Match.Optional(String), from: Match.Optional(String), to: Match.Optional(String) }),
+      search: Match.Optional(String),
+      sort: Match.Optional(Match.OneOf(null, { field: String, direction: Match.OneOf('asc', 'desc') })),
+      page: Match.Optional(Match.Integer),
+      pageSize: Match.Optional(Match.Integer),
+    });
+    await requireUserRole(this.userId, DOMAIN_ROLES.expenses);
+    return expensesPage({ ...options, sort: options.sort || undefined });
+  },
+
+  /** What was reimbursed or paid between two YYYY-MM-DD dates (either may be empty), and the sum. */
+  async 'expenses.reimbursed'(range) {
+    check(range, { from: Match.Optional(String), to: Match.Optional(String) });
+    await requireUserRole(this.userId, DOMAIN_ROLES.expenses);
+    return reimbursedList(range);
+  },
+
+  /** Who submitted an expense and where to pay them, who rejected it, and its account. */
+  async 'expenses.payee'(expenseId) {
+    check(expenseId, String);
+    await requireUserRole(this.userId, DOMAIN_ROLES.expenses);
+    return expensePayee(expenseId);
+  },
+
   /**
    * Confirm a submitted expense (admin/board, not the submitter).
    */

@@ -69,13 +69,6 @@ export default () => {
   Meteor.publish('certificates', createAuthFuncFor(Certificates));
   Meteor.publish('announcements', createAuthFuncFor(Announcements));
   Meteor.publish('invites', createAuthFuncFor(Invites));
-  Meteor.publish('expenses', createAuthFuncForRoles(Expenses, ['admin', 'board', 'treasurer']));
-  Meteor.publish('expenseAccounts', createAuthFuncForRoles(ExpenseAccounts, ['admin', 'board', 'treasurer']));
-  Meteor.publish('expenseBudgets', createAuthFuncForRoles(ExpenseBudgets, ['admin', 'board', 'treasurer']));
-  Meteor.publish('groups', createAuthFuncFor(Groups));
-  Meteor.publish('workshops', createAuthFuncFor(Workshops));
-  Meteor.publish('groupMemberships', createAuthFuncFor(GroupMemberships));
-  Meteor.publish('spaces', createAuthFuncFor(Spaces));
   Meteor.publish('storeItems', createAuthFuncFor(StoreItems));
 
   // Storage is deliberately published separately from the broad members
@@ -241,10 +234,36 @@ export default () => {
     return Announcements.find(docId);
   });
 
+  // Expense accounts with what the list, the choices and the dimension
+  // suggestions need; one account; its budgets; one expense.
+  Meteor.publish('admin.expenseAccounts.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.expenses))) return this.ready();
+    return ExpenseAccounts.find({}, { fields: { name: 1, explanation: 1, groupIds: 1, approverMemberIds: 1, approverGroupIds: 1, dimensions: 1 } });
+  });
+
+  Meteor.publish('admin.expenseAccounts.account', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.expenses))) return this.ready();
+    return ExpenseAccounts.find(docId);
+  });
+
+  Meteor.publish('admin.expenseBudgets.ofAccount', async function (accountId) {
+    check(accountId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.expenses))) return this.ready();
+    return ExpenseBudgets.find({ expenseAccountId: accountId });
+  });
+
+  Meteor.publish('admin.expenses.expense', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.expenses))) return this.ready();
+    return Expenses.find(docId);
+  });
+
   // What the group and workshop pages link to and choose among: names, and
   // what decides which choices make sense (a group's type, a workshop's group).
+  // The treasurer sees the names too, on the expense accounts.
   Meteor.publish('admin.groupsAndWorkshops.choices', async function () {
-    if (!(await hasRole(this.userId, DOMAIN_ROLES.groups))) return this.ready();
+    if (!(await hasRole(this.userId, [...new Set([...DOMAIN_ROLES.groups, ...DOMAIN_ROLES.expenses])]))) return this.ready();
     return [
       Groups.find({}, { fields: { name: 1, type: 1, parentGroupId: 1 } }),
       Workshops.find({}, { fields: { name: 1, kind: 1, groupId: 1 } }),

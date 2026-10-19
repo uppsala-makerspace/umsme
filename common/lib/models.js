@@ -915,6 +915,8 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   // One revision of an expense account's budget for a calendar year. Revisions
   // are never edited, only added (or removed to fix a mistake): the one with the
