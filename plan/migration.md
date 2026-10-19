@@ -270,3 +270,19 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 - **Delade komponenter:** inga mellan admin (MUI) och appen (Tailwind).
 - **Cron-jobb, migreringar och publika API:er** ligger kvar i admin.
   Domänfunktionerna läggs ändå i `common/server/` så att de kan flyttas senare.
+
+## Beslut (2026-10-19, inför våg 1–4 på grenen `admin-react-waves`)
+
+- **Externa tjänster:** lås-API:t och bankproxyn får ett fejkläge i
+  settings, så att e2e och demo kör hela flödena utan riktiga tjänster.
+- **Stora listor** (medlemmar, betalningar): paginering, sortering och
+  sökning på servern via en metod, inte realtid. Sökning, sortering och
+  sidbyte hämtar på nytt.
+- **Admin-konsolen:** sammanslagning, låssynk och obligatoriskt certifikat
+  porteras; engångsverktygen noteras i `plan/open-questions.md` så att
+  användaren väljer vilka som tas bort.
+- **Certifikat:** porteras med dagens datamodell; Omtag A
+  (`plan/group-ownership-and-certificates.md`) görs senare.
+- Rollerna är dagens; rollöversynen ingår inte. Diagrammen behåller Chart.js.
+  Sista steget (layout, router, paket) ingår inte i den här omgången.
+
