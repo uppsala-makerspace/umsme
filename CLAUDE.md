@@ -46,7 +46,7 @@ When working on this monorepo:
 | Dev server | `npm run sigma` (port 3000) | `npm run dev` (port 3001) | `npm run dev` (port 3003) |
 | Tests | `npm test` | `npm run test:e2e` | `npm test` |
 | Build | `npm run build` | `npm run build` | `npm run build` |
-| Component dev | N/A | `npm run storybook` | N/A |
+| Component dev | `npm run storybook` (port 6007) | `npm run storybook` (port 6006) | N/A |
 
 ## Scripts
 

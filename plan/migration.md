@@ -74,7 +74,8 @@ Blaze-versionen. Görs innan något i admin ändras.
 ## Steg 0 — Grunden (en gång, före första modulen)
 
 **Klart 2026-10-19** tillsammans med piloten `liability` (8e6bdff–f90b90c),
-utom Storybook och en publicering av `AuditLog`, som kommer när de behövs.
+utom en publicering av `AuditLog`, som kommer när den behövs. Storybook i
+admin (port 6007) med stories för liabilitys två rena komponenter.
 
 **Server**
 
@@ -118,7 +119,8 @@ utom Storybook och en publicering av `AuditLog`, som kommer när de behövs.
 - Sidor i `admin/imports/ui/<modul>/`: en container (`XxxPage.jsx`) som
   hämtar data och anropar metoder, och en ren komponent (`Xxx.jsx`) som bara
   ritar. Data och metodanrop i `data.js` (se `liability/data.js`).
-- Storybook i admin när den första modulen behöver den, med MUI-temat.
+- Storybook i admin (`npm run storybook`, port 6007), med MUI-temat och
+  Bootstrap 3 som i admin. Varje ren komponent har stories bredvid sig.
 - Stora listor (medlemmar, betalningar) använder MUI X DataGrid mot en
   paginerad publicering eller metod, och ersätter `aldeed:tabular`. Små
   listor som liabilitys använder MUI:s vanliga `Table`.
@@ -248,7 +250,7 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
   tillgänglighet (fokus i dialoger), till priset av +112 KB gzip JavaScript.
   Skillnaden växer i de tunga modulerna: tabeller med paginering på servern,
   autocomplete, datumväljare. Admin och appen får olika formspråk.
-- **Storybook:** i admin när den behövs, med MUI-temat.
+- **Storybook:** egen instans i admin, port 6007, med MUI-temat.
 - **Delade komponenter:** inga mellan admin (MUI) och appen (Tailwind).
 - **Cron-jobb, migreringar och publika API:er** ligger kvar i admin.
   Domänfunktionerna läggs ändå i `common/server/` så att de kan flyttas senare.

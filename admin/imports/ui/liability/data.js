@@ -1,11 +1,11 @@
 import { Meteor } from 'meteor/meteor';
 import { useTracker } from 'meteor/react-meteor-data';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
+import { toDateInput, fromDateInput } from './dates';
 
 /**
- * Data for the liability pages, the same whichever components draw them:
- * the narrow publications, the methods, and dates as the date field shows
- * them.
+ * Data for the liability pages: the narrow publications and the methods.
+ * The pages' containers use this; the pure components never do.
  */
 
 /** The versions, newest first: only title and date. */
@@ -23,15 +23,6 @@ export const useLiabilityDocument = (docId) => useTracker(() => {
   const handle = Meteor.subscribe('admin.liability.document', docId);
   return { loading: !handle.ready(), document: LiabilityDocuments.findOne(docId) };
 }, [docId]);
-
-/**
- * A date as YYYY-MM-DD, for the date field and the list. Read in UTC: the
- * date field stores the chosen day at midnight UTC.
- */
-export const toDateInput = (date) => (date ? new Date(date).toISOString().substring(0, 10) : '');
-
-/** The value of a date field as a Date at midnight UTC, or null if empty. */
-export const fromDateInput = (value) => (value ? new Date(`${value}T00:00:00Z`) : null);
 
 /** The form's values for a version, or empty ones for a new version. */
 export const formValues = (document) => ({

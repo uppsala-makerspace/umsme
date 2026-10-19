@@ -20,6 +20,9 @@ npm run test-app           # Run full-app tests with watch mode
 npm run test:e2e           # Playwright e2e tests (port 3200, database umsme-admin-e2e)
 E2E_DEV=1 npm run test:e2e # The same against development mode, for debugging
 
+# Component development
+npm run storybook          # Storybook for the React pages, port 6007
+
 # Production build
 meteor build ../umsme-build --architecture os.linux.x86_64
 
@@ -85,7 +88,12 @@ done and is the pattern to follow:
   `requireRole` from `common/server/authz.js`, narrow publications
   `admin.<domain>.<view>` with field projections.
 - Client: pages in `imports/ui/<module>/` as a container (`XxxPage.jsx`) and a
-  pure component (`Xxx.jsx`), data and method calls in `data.js`, routed with
+  pure component (`Xxx.jsx`) with stories next to it (`Xxx.stories.jsx`).
+  Data and method calls go in `data.js`, which only containers import; a pure
+  component imports nothing from Meteor, so Storybook can show it without
+  stubs (put helpers it needs, like `liability/dates.js`, in Meteor-free
+  files). Storybook renders with the MUI theme on top of Bootstrap 3, as
+  admin does. Pages are routed with
   `reactRoute()` from `client/react/reactRoute.js`. Navigate through
   `imports/ui/navigation.js`, never FlowRouter directly.
 - MUI: import each component from its own path

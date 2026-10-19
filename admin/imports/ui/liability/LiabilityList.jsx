@@ -11,7 +11,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import { toDateInput } from './data';
+import { toDateInput } from './dates';
 
 /** The liability agreement versions, newest first. The newest is in force. */
 export const LiabilityList = ({ loading, documents }) => (
