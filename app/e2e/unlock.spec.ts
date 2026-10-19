@@ -1,14 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { testUsers, login, selectors } from './helpers';
+import { openAs, selectors } from './helpers';
 import en from '../imports/i18n/en.json';
 
 test.describe('Unlock Page', () => {
   test('should show liability message on unlock page when liability not approved', async ({ page }) => {
     // Login as member without liability approval (using noliability2 to avoid conflict with liability approval test)
-    await login(page, testUsers.noliability2.email, testUsers.noliability2.password);
-
-    // Navigate to unlock page
-    await page.goto('/unlock');
+    await openAs(page, 'noliability2', '/unlock');
 
     // Should show liability message
     await expect(page.getByText(en.homeLiabilityNotApproved)).toBeVisible();
@@ -23,10 +20,7 @@ test.describe('Unlock Page', () => {
 
   test('should show door buttons on unlock page when liability is approved', async ({ page }) => {
     // Login as member with approved liability
-    await login(page, testUsers.member.email, testUsers.member.password);
-
-    // Navigate to unlock page
-    await page.goto('/unlock');
+    await openAs(page, 'member', '/unlock');
 
     // Door buttons should be visible
     await expect(page.locator(selectors.doorButton).first()).toBeVisible();
@@ -43,7 +37,7 @@ test.describe('Unlock Page', () => {
 
   test('should navigate from home to unlock page via button', async ({ page }) => {
     // Login as member with approved liability
-    await login(page, testUsers.member.email, testUsers.member.password);
+    await openAs(page, 'member');
 
     // Should see unlock link on home page
     await expect(page.locator(selectors.homeUnlockLink)).toBeVisible();

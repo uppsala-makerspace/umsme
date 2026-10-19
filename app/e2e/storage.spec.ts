@@ -1,12 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { login, testUsers } from './helpers';
+import { openAs } from './helpers';
 import en from '../imports/i18n/en.json';
 import sv from '../imports/i18n/sv.json';
 
-test.describe.serial('Member storage', () => {
+test.describe('Member storage', () => {
   test('creates, updates, and cancels an allocation request from authoritative state', async ({ page }) => {
-    await login(page, testUsers.member.email, testUsers.member.password);
-    await page.goto('/storage');
+    await openAs(page, 'storageRequester', '/storage');
 
     await expect(page.getByTestId('storage-none')).toHaveText(en.noBoxAssigned);
     await page.getByLabel(en.storagePreferredFloor).selectOption('floor2');
@@ -24,8 +23,7 @@ test.describe.serial('Member storage', () => {
   });
 
   test('shows a paying family member its assigned unit and available actions', async ({ page }) => {
-    await login(page, testUsers.family.email, testUsers.family.password);
-    await page.goto('/storage');
+    await openAs(page, 'family', '/storage');
 
     await expect(page.getByTestId('storage-occupied')).toContainText('1001');
     const releaseButton = page.getByRole('button', { name: en.storageRequestRelease });
@@ -40,8 +38,7 @@ test.describe.serial('Member storage', () => {
   });
 
   test('shows an expired occupant their open warning and deadline', async ({ page }) => {
-    await login(page, testUsers.storageWarning.email, testUsers.storageWarning.password);
-    await page.goto('/storage');
+    await openAs(page, 'storageWarning', '/storage');
 
     await expect(page.getByTestId('storage-occupied')).toContainText('1002');
     await expect(page.getByTestId('storage-warning')).toContainText(en.storageWarningTitle);
@@ -52,16 +49,14 @@ test.describe.serial('Member storage', () => {
   });
 
   test('shows reclaimed storage as awaiting physical clearance', async ({ page }) => {
-    await login(page, testUsers.storageClearance.email, testUsers.storageClearance.password);
-    await page.goto('/storage');
+    await openAs(page, 'storageClearance', '/storage');
 
     await expect(page.getByTestId('storage-awaiting-clearance')).toContainText('1003');
     await expect(page.getByRole('button', { name: en.queueForBox })).not.toBeVisible();
   });
 
   test('confirms a pending move and refetches the resulting assignment', async ({ page }) => {
-    await login(page, testUsers.storageMove.email, testUsers.storageMove.password);
-    await page.goto('/storage');
+    await openAs(page, 'storageMove', '/storage');
 
     await expect(page.getByTestId('storage-occupied')).toContainText('1004');
     await expect(page.getByTestId('storage-move-pending')).toContainText('1005');
@@ -73,8 +68,7 @@ test.describe.serial('Member storage', () => {
   });
 
   test('shows a mutation error, refetches, and retries with the stable submission id', async ({ page }) => {
-    await login(page, testUsers.storageRetry.email, testUsers.storageRetry.password);
-    await page.goto('/storage');
+    await openAs(page, 'storageRetry', '/storage');
     await expect(page.getByTestId('storage-none')).toBeVisible();
 
     await page.evaluate(() => {
@@ -118,8 +112,7 @@ test.describe.serial('Member storage', () => {
   });
 
   test('shows shared storage read-only to a family dependent in Swedish', async ({ page }) => {
-    await login(page, testUsers.familyMember.email, testUsers.familyMember.password);
-    await page.goto('/storage');
+    await openAs(page, 'familyMember', '/storage');
     await page.getByRole('button', { name: /SV\s*ENG/ }).click();
 
     await expect(page.getByTestId('storage-family-read-only')).toContainText('Familjens gemensamma förvaring');

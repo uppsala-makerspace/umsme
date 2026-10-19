@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { testUsers, login, selectors } from './helpers';
+import { openAs, selectors } from './helpers';
 import en from '../imports/i18n/en.json';
 
 test.describe('Liability Agreement', () => {
   test('should show liability agreement page and allow approval', async ({ page }) => {
     // Login as member without liability (noliability@example.org)
-    await login(page, testUsers.noliability.email, testUsers.noliability.password);
+    await openAs(page, 'noliability');
 
     // On home page, should see liability message since user hasn't approved
     await expect(page.getByText(en.homeLiabilityNotApproved)).toBeVisible();
@@ -41,9 +41,6 @@ test.describe('Liability Agreement', () => {
     // Click approve button
     await approveButton.click();
 
-    // Wait for approval to be processed
-    await page.waitForTimeout(1000);
-
     // Should now show green banner indicating approved
     await expect(page.locator(selectors.liabilityStatusGreen)).toBeVisible();
     await expect(page.getByText(en.liabilityApproved)).toBeVisible();
@@ -54,10 +51,7 @@ test.describe('Liability Agreement', () => {
 
   test('should show approved status for member with approved liability', async ({ page }) => {
     // Login as member with approved liability
-    await login(page, testUsers.member.email, testUsers.member.password);
-
-    // Navigate directly to liability page
-    await page.goto('/liability');
+    await openAs(page, 'member', '/liability');
 
     // Should show green banner indicating approved
     await expect(page.locator(selectors.liabilityStatusGreen)).toBeVisible();

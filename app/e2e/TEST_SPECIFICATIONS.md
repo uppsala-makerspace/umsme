@@ -287,6 +287,17 @@ When adding a new E2E test:
    - Scope to `main` or `nav` to tell page content from the navigation; avoid CSS classes, which change with styling
    - Use `.first()` when multiple elements might match
 
+### Logging in, and running in parallel
+
+- Start a test with `openAs(page, '<persona key>', '/path')`: the e2e seed gives
+  every persona a known login token, so the page opens already logged in,
+  without the login page. Only tests about logging in use the login page.
+- Tests run in parallel and in any order. A test that changes data (approves,
+  invites, accepts, requests) uses a persona of its own, added to
+  `E2E_PERSONAS`; read-only tests may share personas.
+- Wait for what should appear (`expect(...).toBeVisible()`), never for a fixed
+  time (`waitForTimeout`).
+
 ### Test Users Available
 
 The personas in `common/server/seed/scenarios/personas.js`, all with the

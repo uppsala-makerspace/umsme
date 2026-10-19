@@ -2,10 +2,12 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: false,
+  // Tests run in parallel and in any order: a test that changes data uses a
+  // persona of its own (see E2E_PERSONAS in personas.js).
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1,
+  workers: 4,
   reporter: [['html', { outputFolder: '/tmp/playwright-report' }]],
   outputDir: '/tmp/playwright-results',
   use: {

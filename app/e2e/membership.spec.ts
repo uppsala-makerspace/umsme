@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { testUsers, login, selectors, firstName } from './helpers';
+import { testUsers, openAs, selectors, firstName } from './helpers';
 import en from '../imports/i18n/en.json';
 
 test.describe('Membership Status', () => {
   test('should display membership status on home page for active member', async ({ page }) => {
     // Login as member with active membership and liability
-    await login(page, testUsers.member.email, testUsers.member.password);
+    await openAs(page, 'member');
 
     // Verify we're on the home page
     await expect(page).toHaveURL('/');
@@ -20,10 +20,7 @@ test.describe('Membership Status', () => {
 
   test('should display membership details on account page', async ({ page }) => {
     // Login as member
-    await login(page, testUsers.member.email, testUsers.member.password);
-
-    // Navigate to account page
-    await page.goto('/account');
+    await openAs(page, 'member', '/account');
 
     // Verify member name is displayed
     await expect(page.locator(selectors.memberName)).toContainText(testUsers.member.name);

@@ -98,7 +98,9 @@ The test runner will:
 4. Shut down both servers
 
 The test users are the personas in `common/server/seed/scenarios/personas.js`;
-`e2e/helpers.ts` reads them from there.
+`e2e/helpers.ts` reads them from there. Tests open pages already logged in
+(`openAs`) and run four at a time; see `e2e/TEST_SPECIFICATIONS.md` for the
+rules that make that work.
 
 ### Test Structure
 

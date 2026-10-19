@@ -2,19 +2,26 @@
  * The e2e scenario: the personas and the fixtures the e2e tests rely on,
  * nothing more. See plan/test-strategy.md.
  *
+ * Every persona gets a known login token (e2eLoginToken), so that tests can
+ * start logged in.
+ *
  * The storage fixtures are positional: tests look for units by name, 1001 to
  * 1006, and each storage lifecycle owns its own units.
  */
+import { Accounts } from 'meteor/accounts-base';
 import { StorageUnits, StorageRequests, StorageOffers } from '/imports/common/collections/storage';
 import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
-import { PERSONAS, E2E_PERSONAS } from './personas';
+import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
 export const buildE2e = async ({ people, now }) => {
   const days = (n) => daysFromNow(n, now);
   const liability = await makeLiabilityVersions(days);
-  const { members } = await makePersonas([...PERSONAS, ...E2E_PERSONAS], { people, days, now, liability });
+  const { members, userIds } = await makePersonas([...PERSONAS, ...E2E_PERSONAS], { people, days, now, liability });
+  for (const [key, userId] of Object.entries(userIds)) {
+    await Accounts._insertLoginToken(userId, { token: e2eLoginToken(key), when: now });
+  }
 
   // Storage last, so that the storage hooks see the members' final dates.
   const walls = await makeStorageWalls([

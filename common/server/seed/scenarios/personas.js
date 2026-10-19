@@ -2,9 +2,10 @@
  * Named people with known logins, one per state worth looking at. Both the
  * demo and the e2e scenario contain all of PERSONAS, so that anyone exploring
  * the demo can log in as the same person an e2e test uses. E2E_PERSONAS are
- * the few that only make sense with a test's own fixtures (storage
- * lifecycles, a second member without liability for a test that approves the
- * first one's); they exist in the e2e scenario only.
+ * the few that only make sense with a test's own fixtures; they exist in the
+ * e2e scenario only. A test that changes data gets a persona of its own, so
+ * that the tests can run in parallel and in any order (the liability test
+ * approves noliability's agreement, so the unlock test uses noliability2).
  *
  * Every address is on example.org; the shared password is PASSWORD. Member
  * numbers are fixed (see withMids), so that tests can look for them.
@@ -91,6 +92,15 @@ const E2E_ONLY = [
   { key: 'toInvite', email: at('toinvite'), name: 'Tove Tillgänglig',
     description: 'member who can be invited to a family',
     payments: [['memberBase', -30]] },
+  { key: 'familyInviter', email: at('family-inviter'), name: 'Ivar Inbjudare',
+    description: 'family payer without family members, for the invite tests',
+    payments: [['familyLab', -60]] },
+  { key: 'inviteAccepter', email: at('invite-accepter'), name: 'Alva Accepterar', invitedBy: 'familyInviter',
+    description: 'has a pending invitation to the family of family-inviter, which the accept test accepts',
+    payments: [['memberBase', -40]] },
+  { key: 'storageRequester', email: at('storage-requester'), name: 'Sixten Sökande',
+    description: 'lab member without storage, for the request test',
+    payments: [['memberLab', -30]] },
   { key: 'storageWarning', email: at('storage-warning'), name: 'Vera Varnad',
     description: 'lab expired, has storage unit 1002 with a warning',
     payments: [['memberLab', -400]] },
@@ -112,6 +122,13 @@ const withMids = (people, first) => {
   let next = first;
   return people.map((person) => (person.member === false ? person : { ...person, mid: String(next++) }));
 };
+
+/**
+ * The login token the e2e scenario gives each persona. A test puts it in
+ * localStorage before the page loads and starts out logged in, without going
+ * through the login page.
+ */
+export const e2eLoginToken = (key) => `e2e-login-token-${key}`;
 
 const memberCount = (people) => people.filter((person) => person.member !== false).length;
 

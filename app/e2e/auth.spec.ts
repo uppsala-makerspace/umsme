@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { testUsers, login, selectors, setLanguageEnglish, firstName } from './helpers';
+import { testUsers, selectors, setLanguageEnglish, firstName } from './helpers';
 
 test.describe('Authentication', () => {
   test('should sign in with email and password and land on home page', async ({ page }) => {

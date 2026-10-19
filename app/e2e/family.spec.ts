@@ -1,14 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { testUsers, login, selectors } from './helpers';
+import { testUsers, openAs, selectors } from './helpers';
 import en from '../imports/i18n/en.json';
 
 test.describe('Family Membership', () => {
   test('should display family members on account page for family payer', async ({ page }) => {
     // Login as family payer
-    await login(page, testUsers.family.email, testUsers.family.password);
-
-    // Navigate to account page
-    await page.goto('/account');
+    await openAs(page, 'family', '/account');
 
     // Verify member name is displayed
     await expect(page.locator(selectors.memberName)).toContainText(testUsers.family.name);
@@ -21,11 +18,8 @@ test.describe('Family Membership', () => {
   });
 
   test('should invite a new family member', async ({ page }) => {
-    // Login as family payer
-    await login(page, testUsers.family.email, testUsers.family.password);
-
-    // Navigate to account page
-    await page.goto('/account');
+    // A family of its own: the invite fills a place the other family tests count
+    await openAs(page, 'familyInviter', '/account');
 
     // Click add family member button
     await page.locator(selectors.addFamilyMemberButton).click();
@@ -40,9 +34,6 @@ test.describe('Family Membership', () => {
     // Send the invite
     await page.locator(selectors.sendInviteButton).click();
 
-    // Wait for the invite to be processed
-    await page.waitForTimeout(1000);
-
     // Verify the invites section shows the invited email
     await expect(page.getByText(en.Invites)).toBeVisible();
     await expect(page.getByText(testUsers.toInvite.email)).toBeVisible();
@@ -50,7 +41,7 @@ test.describe('Family Membership', () => {
 
   test('should show pending family invite on home page', async ({ page }) => {
     // Login as invited member (has a pending invite from the family persona)
-    await login(page, testUsers.invited.email, testUsers.invited.password);
+    await openAs(page, 'invited');
 
     // Verify we see the family invite message (check for part of the text)
     await expect(page.getByText(en.familyInviteText, { exact: false })).toBeVisible();
@@ -61,17 +52,14 @@ test.describe('Family Membership', () => {
   });
 
   test('should accept family invite', async ({ page }) => {
-    // Login as invited member
-    await login(page, testUsers.invited.email, testUsers.invited.password);
+    // A persona of its own: accepting changes the data the pending-invite test reads
+    await openAs(page, 'inviteAccepter');
 
     // Verify we see the family invite
     await expect(page.getByText(en.familyInviteText, { exact: false })).toBeVisible();
 
     // Click accept button
     await page.getByText(en.acceptInvite).click();
-
-    // Wait for the action to complete and page to update
-    await page.waitForTimeout(1000);
 
     // After accepting, should see normal home page (not the invite screen)
     // The greeting should be visible without the invite message
