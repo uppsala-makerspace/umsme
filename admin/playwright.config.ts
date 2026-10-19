@@ -11,7 +11,7 @@ export default defineConfig({
   reporter: [['html', { outputFolder: '/tmp/playwright-report-admin', open: 'never' }]],
   outputDir: '/tmp/playwright-results-admin',
   use: {
-    baseURL: 'http://localhost:3020',
+    baseURL: 'http://localhost:3200',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     locale: 'en-US',
@@ -33,7 +33,7 @@ export default defineConfig({
   // mode instead, with readable stack traces for debugging a failing test.
   webServer: {
     command: process.env.E2E_DEV ? 'npm run start:test:dev' : 'npm run start:test',
-    url: 'http://localhost:3020',
+    url: 'http://localhost:3200',
     reuseExistingServer: false,
     timeout: 180000,
     stdout: 'pipe',

@@ -104,8 +104,9 @@ seedas i appen, som har samma paket (`runSeedFromEnv` anropas av båda):
   `app/settings_demo.json`, `payment/settings_demo.json` (och motsvarande för
   e2e), utan hemligheter, incheckade.
 
-`./scripts/demo.sh` i roten seedar `umsme-demo` och startar admin (3000), app
-(3001) och payment (3003) mot den. Det är kommandot en ny utvecklare kör.
+`./scripts/demo.sh` i roten seedar `umsme-demo` och startar admin (3100), app
+(3101) och payment (3103) mot den, bredvid utvecklingsservrarna på 3000, 3001
+och 3003. Det är kommandot en ny utvecklare kör.
 
 Bara lokalt; ingen delad demo-instans.
 
@@ -150,7 +151,7 @@ Ingen CI tills vidare; allt körs lokalt.
    också har `E2E_PERSONAS` för de personer bara lagringstesterna behöver.
    Appens `seedTestData.js` och skriptet `seed:dev` (som seedade
    huvuddatabasen `umsme`) är borttagna.
-5. ~~Playwright i admin~~ Klart: port 3020, egen databas `umsme-admin-e2e`
+5. ~~Playwright i admin~~ Klart: port 3200, egen databas `umsme-admin-e2e`
    så att admins och appens sviter kan köras samtidigt, samma mönster som
    appen (`openAs`, parallellt, produktionsläge). `openAs` och testpersonerna
    delas via `common/e2e/personas.ts`. Fyra rökprov i `e2e/access.spec.ts`.

@@ -25,7 +25,7 @@
       ]
     }
   },
-  "swishCallback": "http://localhost:3002/api/swish",
+  "swishCallback": "http://localhost:3201/api/swish",
   "serviceConfigurations": {},
   "env": "test"
 }

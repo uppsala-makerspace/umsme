@@ -15,9 +15,10 @@ See the README in each directory for more details.
 ./scripts/demo.sh --no-seed  # start on the demo data already there
 ```
 
-Admin runs on http://localhost:3000, the app on http://localhost:3001 and
-payment on :3003, all against the local database `umsme-demo`. You need a
-local MongoDB running as replica set `rs0`, and nothing else on those ports.
+Admin runs on http://localhost:3100, the app on http://localhost:3101 and
+payment on :3103, all against the local database `umsme-demo`, so your
+development servers on 3000, 3001 and 3003 can keep running. You need a
+local MongoDB running as replica set `rs0`.
 
 The demo is an invented association of about 200 members with three years of
 history, groups and workshops, certificates, storage, expenses and a web shop.

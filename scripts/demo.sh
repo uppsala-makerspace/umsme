@@ -6,7 +6,8 @@
 #   ./scripts/demo.sh            seed the demo data, then start all three
 #   ./scripts/demo.sh --no-seed  start all three on the data already there
 #
-# Admin http://localhost:3000, app http://localhost:3001, payment :3003.
+# Admin http://localhost:3100, app http://localhost:3101, payment :3103: next
+# to the development servers on 3000, 3001 and 3003, which can keep running.
 # Needs a local MongoDB running as replica set rs0. Ctrl+C stops everything.
 
 set -euo pipefail
@@ -16,15 +17,16 @@ LOGS="$ROOT/.demo-data/logs"
 SEED=1
 [[ "${1:-}" == "--no-seed" ]] && SEED=0
 
-for port in 3000 3001 3003; do
+for port in 3100 3101 3103; do
   if (echo > "/dev/tcp/127.0.0.1/$port") 2>/dev/null; then
-    echo "Port $port is in use. Stop the dev servers first (admin 3000, app 3001, payment 3003)." >&2
+    echo "Port $port is in use. Is a demo already running (admin 3100, app 3101, payment 3103)?" >&2
     exit 1
   fi
 done
 
 mkdir -p "$LOGS"
-trap 'trap - EXIT INT TERM; kill 0' EXIT INT TERM
+# SIGINT, as Ctrl+C sends: the meteor tool ignores SIGTERM.
+trap 'trap - EXIT INT TERM; kill -INT 0' EXIT INT TERM
 
 # start <app> <npm script>: run it in the background, prefixed and logged.
 start() {

@@ -31,8 +31,8 @@
     }
   },
   "public": {
-    "adminUrl": "http://localhost:3000",
-    "checkPath": "http://localhost:3001/check#",
+    "adminUrl": "http://localhost:3100",
+    "checkPath": "http://localhost:3101/check#",
     "vapidPublicKey": "BNI6pdhR7C8akwjNwFS3pRFjlukg1Jrz249svg6hyA8hCOAr88mDj8y0aAn5kJ55HBPaNLlJAV1prwewSgZxHNE"
   },
   "private": {

@@ -94,7 +94,7 @@ E2E_DEV=1 npm run test:e2e
 ```
 
 The test runner will:
-1. Start the app on port 3002 with `SEED=e2e`, which first empties and seeds
+1. Start the app on port 3201 with `SEED=e2e`, which first empties and seeds
    the separate database `umsme-e2e` (`common/server/seed/scenarios/e2e.js`)
 2. Run all Playwright tests
 3. Shut down the server
@@ -131,4 +131,4 @@ To start the test server manually (useful for debugging):
 npm run start:test
 ```
 
-This starts the app on `http://localhost:3002` with test data seeded.
+This starts the app on `http://localhost:3201` with test data seeded.

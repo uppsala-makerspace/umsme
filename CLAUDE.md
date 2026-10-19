@@ -43,7 +43,7 @@ When working on this monorepo:
 
 | Task | Admin | App | Payment |
 |------|-------|-----|---------|
-| Dev server | `npm run sigma` | `npm run dev` (port 3001) | `npm run dev` (port 3003) |
+| Dev server | `npm run sigma` (port 3000) | `npm run dev` (port 3001) | `npm run dev` (port 3003) |
 | Tests | `npm test` | `npm run test:e2e` | `npm test` |
 | Build | `npm run build` | `npm run build` | `npm run build` |
 | Component dev | N/A | `npm run storybook` | N/A |
@@ -110,6 +110,14 @@ emails and their push subscriptions. Two settings keep dev from contacting them:
   services. Never put the production keys in a dev `settings.json`.
 
 ## Demo and test data
+
+Each environment has its own ports and database, so they can all run at once:
+
+| Environment | Admin | App | Payment | Database |
+|-------------|-------|-----|---------|----------|
+| Development | 3000 | 3001 | 3003 | `umsme` |
+| Demo (`./scripts/demo.sh`) | 3100 | 3101 | 3103 | `umsme-demo` |
+| E2e (`npm run test:e2e`) | 3200 | 3201 | – | `umsme-admin-e2e`, `umsme-e2e` |
 
 `./scripts/demo.sh` seeds the database `umsme-demo` and starts all three apps
 against it. Seeding runs at startup when `SEED=demo` or `SEED=e2e` is set

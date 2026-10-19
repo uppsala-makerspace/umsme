@@ -17,7 +17,7 @@ meteor                     # Direct meteor run
 # Testing
 npm test                   # Run tests once with Mocha
 npm run test-app           # Run full-app tests with watch mode
-npm run test:e2e           # Playwright e2e tests (port 3020, database umsme-admin-e2e)
+npm run test:e2e           # Playwright e2e tests (port 3200, database umsme-admin-e2e)
 E2E_DEV=1 npm run test:e2e # The same against development mode, for debugging
 
 # Production build
@@ -77,7 +77,7 @@ The `imports/common` symlink points to `../../common/` containing:
 ## E2e tests
 
 Playwright tests live in `e2e/`. `npm run test:e2e` starts admin in
-production mode on port 3020 with `SEED=e2e`, which empties and seeds the
+production mode on port 3200 with `SEED=e2e`, which empties and seeds the
 database `umsme-admin-e2e` (separate from the app's `umsme-e2e`, so both
 suites can run at once) before the tests start.
 

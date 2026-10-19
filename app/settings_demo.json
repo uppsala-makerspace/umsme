@@ -1,7 +1,7 @@
 {
   "public": {
-    "checkPath": "http://localhost:3001/check#",
-    "adminUrl": "http://localhost:3000",
+    "checkPath": "http://localhost:3101/check#",
+    "adminUrl": "http://localhost:3100",
     "swish": {
       "disabled": true,
       "disabledMessage": {
