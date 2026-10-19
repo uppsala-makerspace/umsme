@@ -12,7 +12,7 @@ import { Accounts } from 'meteor/accounts-base';
 import { StorageUnits, StorageRequests, StorageOffers } from '/imports/common/collections/storage';
 import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
-import { makeLiabilityDocument } from '../documents';
+import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
@@ -27,6 +27,19 @@ export const buildE2e = async ({ people, now }) => {
       title: `E2E ${purpose} target`, date: new Date(Date.UTC(2020, 0, purpose === 'edit' ? 1 : 2)),
       sv: `Dokument för testet som ${purpose === 'edit' ? 'ändrar' : 'raderar'}.`,
       en: `Document for the ${purpose} test.`,
+    });
+  }
+  // Message templates: one to look at, and one each for the admin tests that
+  // edit and delete. (Admin's startup adds the storage templates.)
+  await makeMessageTemplate({
+    name: 'Välkommen', type: 'welcome', membershiptype: 'member', membertype: 'normal',
+    subject: 'Välkommen till Uppsala Makerspace', messagetext: 'Hej <%= name %>!\n\nDitt medlemsnummer är <%= mid %>.',
+    created: days(-500),
+  });
+  for (const purpose of ['edit', 'delete']) {
+    await makeMessageTemplate({
+      name: `E2E ${purpose} template`, type: 'status',
+      subject: `Template for the ${purpose} test`, messagetext: 'Hej <%= name %>!', created: days(-100),
     });
   }
   const { members, userIds } = await makePersonas([...PERSONAS, ...E2E_PERSONAS], { people, days, now, liability });

@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, expectSearch, sortBy } from './lists';
+import { field, action, createButton, saveButton, deleteConfirmed } from './forms';
 
 // The liability agreement versions: list, add, edit, delete, and who sees
 // them. Written against the Blaze pages and meant to pass unchanged against
@@ -11,17 +12,6 @@ const CURRENT = 'Ansvarsförbindelse 2025';
 const OLDER = 'Ansvarsförbindelse 2023';
 
 const documentRows = dataRows;
-
-/**
- * A form field by its accessible name, as a screen reader announces it. Not
- * getByLabel: that reads the label's text, which with MUI includes the
- * required-field asterisk.
- */
-const field = (page: Page, name: string) => page.getByRole('textbox', { name, exact: true });
-
-/** A button, or a link styled as one, by its name. */
-const action = (page: Page, name: RegExp) =>
-  page.getByRole('button', { name }).or(page.getByRole('link', { name })).or(page.getByText(name)).first();
 
 const openDocument = async (page: Page, title: string) => {
   await openAs(page, 'admin', '/liability');
@@ -69,7 +59,7 @@ test.describe('Liability documents', () => {
     await field(page, 'Date').fill('2021-03-15');
     await field(page, 'Document text (Swedish)').fill('# Ny version\n\nVar rädd om dig.');
     await field(page, 'Document text (English)').fill('# New version\n\nTake care.');
-    await action(page, /^(submit|save|create|add)$/i).click();
+    await createButton(page).click();
 
     await expect(page.getByText('E2E added version', { exact: true })).toBeVisible();
     await page.getByText('E2E added version', { exact: true }).click();
@@ -82,7 +72,7 @@ test.describe('Liability documents', () => {
     await openAs(page, 'admin', '/liability/add');
     await field(page, 'Date').fill('2021-04-01');
     await field(page, 'Document text (Swedish)').fill('Utan titel');
-    await action(page, /^(submit|save|create|add)$/i).click();
+    await createButton(page).click();
 
     // However the page says so (today the browser's own required-field
     // bubble), nothing is saved: no version with this date shows up.
@@ -96,7 +86,7 @@ test.describe('Liability documents', () => {
     await openDocument(page, 'E2E edit target');
     await field(page, 'Title').fill('E2E edited');
     await field(page, 'Document text (English)').fill('Edited text.');
-    await action(page, /update|save/i).click();
+    await saveButton(page).click();
 
     await expect(page.getByText('E2E edited', { exact: true })).toBeVisible();
     await expect(page.getByText('E2E edit target', { exact: true })).not.toBeVisible();
@@ -106,8 +96,7 @@ test.describe('Liability documents', () => {
 
   test('deletes a version after confirmation', async ({ page }) => {
     await openDocument(page, 'E2E delete target');
-    await action(page, /^delete$/i).click();
-    await page.getByRole('dialog').getByRole('button', { name: /^delete$/i }).click();
+    await deleteConfirmed(page);
 
     await expect(page.getByText(CURRENT, { exact: true })).toBeVisible();
     await expect(page.getByText('E2E delete target', { exact: true })).not.toBeVisible();

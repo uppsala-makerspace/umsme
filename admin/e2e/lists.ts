@@ -11,9 +11,12 @@ export const dataRows = (page: Page) => page.getByRole('row').filter({ hasNot: p
 /** Type in the list's search box. */
 export const search = (page: Page, text: string) => page.getByRole('searchbox').fill(text);
 
-/** Sort by a column, as clicking its heading does. */
+/**
+ * Sort by a column, as clicking its heading does; again for descending. The
+ * name is matched at the start: DataTables adds "Title: Activate to sort".
+ */
 export const sortBy = (page: Page, column: string) =>
-  page.getByRole('columnheader', { name: column, exact: true }).click();
+  page.getByRole('columnheader', { name: new RegExp(`^${column}\\b`) }).first().click();
 
 /** The search finds `found` and filters out `filtered`. */
 export const expectSearch = async (page: Page, text: string, found: string, filtered: string) => {

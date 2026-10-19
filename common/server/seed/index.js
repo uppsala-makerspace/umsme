@@ -20,7 +20,7 @@ export { createPeople } from './people';
 export { DAY_MS, daysFromNow, monthsFromNow } from './dates';
 export { makeUser } from './accounts';
 export { PRICES, makeMember, pay, payHistory, joinFamily, inviteToFamily } from './members';
-export { makeLiabilityDocument } from './documents';
+export { makeLiabilityDocument, makeMessageTemplate } from './documents';
 export { makeStorageWalls, makeStorageUnit, storageLocation } from './storage';
 
 /**

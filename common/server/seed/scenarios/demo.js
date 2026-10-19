@@ -22,7 +22,6 @@ import { Expenses } from '/imports/common/collections/expenses';
 import { Announcements } from '/imports/common/collections/announcements';
 import { Mails } from '/imports/common/collections/mails';
 import { Messages } from '/imports/common/collections/messages';
-import { MessageTemplates } from '/imports/common/collections/templates';
 import { Comments } from '/imports/common/collections/comments';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { StorageRequests } from '/imports/common/collections/storage';
@@ -31,6 +30,7 @@ import { daysFromNow, DAY_MS } from '../dates';
 import { makeUser } from '../accounts';
 import { makeMember, pay, joinFamily, randomHex, PRICES } from '../members';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
+import { makeMessageTemplate } from '../documents';
 import { PERSONAS, PASSWORD, FIRST_FREE_MID } from './personas';
 import { makeLiabilityVersions, liabilityFields, makePersonas } from './build';
 
@@ -44,20 +44,18 @@ export const buildDemo = async ({ random, people, now }) => {
   const liability = await makeLiabilityVersions(days);
 
   // --- Message templates ----------------------------------------------------
-  const template = (fields) => MessageTemplates.insertAsync({
-    deprecated: false, created: days(-1000), modified: days(-300), ...fields,
-  });
+  const template = (fields) => makeMessageTemplate({ created: days(-1000), modified: days(-300), ...fields });
   const welcomeTemplate = await template({
     name: 'Välkommen', type: 'welcome', subject: 'Välkommen till Uppsala Makerspace',
-    messagetext: 'Hej {{name}}!\n\nVälkommen som medlem. Ditt medlemsnummer är {{mid}}.',
+    messagetext: 'Hej <%= name %>!\n\nVälkommen som medlem. Ditt medlemsnummer är <%= mid %>.',
   });
   const confirmationTemplate = await template({
     name: 'Bekräftelse', type: 'confirmation', auto: true, subject: 'Tack för din betalning',
-    messagetext: 'Hej {{name}}!\n\nVi har tagit emot din betalning. Ditt medlemskap gäller till {{memberend}}.',
+    messagetext: 'Hej <%= name %>!\n\nVi har tagit emot din betalning. Ditt medlemskap gäller till <%= memberEndDate %>.',
   });
   const reminderTemplate = await template({
     name: 'Påminnelse', type: 'reminder', subject: 'Dags att förnya ditt medlemskap',
-    messagetext: 'Hej {{name}}!\n\nDitt medlemskap går ut {{memberend}}. Förnya i appen.',
+    messagetext: 'Hej <%= name %>!\n\nDitt medlemskap går ut <%= memberEndDate %>. Förnya i appen.',
   });
 
   // --- Members ----------------------------------------------------------------
