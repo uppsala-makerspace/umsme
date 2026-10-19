@@ -74,6 +74,26 @@ The `imports/common` symlink points to `../../common/` containing:
 - Templates use `Template.dynamic` for dynamic rendering
 - Forms generated from schemas using AutoForm
 
+## React pages (migration in progress)
+
+Admin is moving module by module from Blaze to React with MUI; see
+`plan/migration.md` for the order and the per-module steps. `liability` is
+done and is the pattern to follow:
+
+- Server: domain functions in `common/server/<domain>/` (every write records
+  to `AuditLog`), methods `<domain>.<action>` with `check()` and
+  `requireRole` from `common/server/authz.js`, narrow publications
+  `admin.<domain>.<view>` with field projections.
+- Client: pages in `imports/ui/<module>/` as a container (`XxxPage.jsx`) and a
+  pure component (`Xxx.jsx`), data and method calls in `data.js`, routed with
+  `reactRoute()` from `client/react/reactRoute.js`. Navigate through
+  `imports/ui/navigation.js`, never FlowRouter directly.
+- MUI: import each component from its own path
+  (`import Button from '@mui/material/Button'`), never from `'@mui/material'`:
+  Meteor does not tree-shake, and the barrel import pulls in all of MUI.
+- No client writes: a migrated collection loses its `allow` rules once no
+  Blaze page writes to it.
+
 ## E2e tests
 
 Playwright tests live in `e2e/`. `npm run test:e2e` starts admin in

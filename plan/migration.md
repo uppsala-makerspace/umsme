@@ -73,8 +73,8 @@ Blaze-versionen. Görs innan något i admin ändras.
 
 ## Steg 0 — Grunden (en gång, före första modulen)
 
-Görs tillsammans med pilotmodulen (se modulordningen) så att mönstret prövas
-på riktigt innan det används brett.
+**Klart 2026-10-19** tillsammans med piloten `liability` (8e6bdff–f90b90c),
+utom Storybook och en publicering av `AuditLog`, som kommer när de behövs.
 
 **Server**
 
@@ -95,33 +95,33 @@ på riktigt innan det används brett.
 **Klient**
 
 - React 19 och `react-meteor-data` i admin (samma versioner som appen).
-- Tailwind 3.4 (samma som appen) med `preflight` **avstängt** och avgränsat
-  till React-sidornas rot (`important: '#react-page'`), så att Bootstrap-sidorna
-  inte ändrar utseende. Bootstraps globala stilar läcker åt andra hållet in i
-  React-sidorna; hanteras i komponenterna tills Bootstrap tas bort.
-- Blaze-mallen `ReactPage` som monterar en React-komponent med `createRoot`
-  och avmonterar den när mallen försvinner. En migrerad route:
+- **MUI** som komponentbibliotek (beslut 2026-10-19, se nedan), med temat i
+  `admin/imports/ui/theme.js`. Importera varje komponent från sin egen sökväg
+  (`import Button from '@mui/material/Button'`), aldrig från `'@mui/material'`:
+  Meteors bundler gör ingen tree shaking, och samlingsimporten drar in hela
+  MUI. Temats `htmlFontSize: 10` kompenserar för Bootstrap 3:s
+  `html { font-size: 10px }` och tas bort med Bootstrap. MUI:s stilar är
+  avgränsade, så Bootstrap-sidorna påverkas inte.
+- Blaze-mallen `ReactPage` (`admin/client/react/`) som monterar en
+  React-komponent och avmonterar den när mallen försvinner. En migrerad route:
 
   ```js
-  FlowRouter.route('/liability/:_id', {
-    action(params) {
-      this.render('AppBody', { main: 'ReactPage', component: LiabilityPage, props: params });
-    },
-  });
+  reactRoute('/liability/:_id', 'liabilityview', LiabilityEditPage);
   ```
+
+  `reactRoute` lägger också på MUI-temat.
 
 - Navigeringsadapter `useNavigate()` i `admin/imports/ui/navigation.js` som
   anropar `FlowRouter.go` nu och React Router senare. React-sidor importerar
   aldrig FlowRouter direkt; route-parametrar kommer som props till
   containern. Vanliga `<a href>` fungerar som de är.
-- Samma uppdelning som appen: container `index.jsx`, ren komponent
-  `XXX.jsx`, `XXX.stories.jsx`.
-- Egen Storybook i `admin/.storybook` (port 6007, `npm run storybook`) med
-  admins Tailwind-konfiguration och Bootstrap 3, och appens Meteor-stubbar via
-  alias.
-- Komponenter i `admin/imports/ui/` för det som de flesta moduler behöver: tabell med sökning och
-  paginering (TanStack Table mot en paginerad publicering eller metod, ersätter
-  `aldeed:tabular`), formulärfält, bekräftelsedialog, felvisning.
+- Sidor i `admin/imports/ui/<modul>/`: en container (`XxxPage.jsx`) som
+  hämtar data och anropar metoder, och en ren komponent (`Xxx.jsx`) som bara
+  ritar. Data och metodanrop i `data.js` (se `liability/data.js`).
+- Storybook i admin när den första modulen behöver den, med MUI-temat.
+- Stora listor (medlemmar, betalningar) använder MUI X DataGrid mot en
+  paginerad publicering eller metod, och ersätter `aldeed:tabular`. Små
+  listor som liabilitys använder MUI:s vanliga `Table`.
 
 ## Per modul
 
@@ -217,7 +217,7 @@ När ingen Blaze-modul finns kvar:
    eget inloggningsformulär.
 2. FlowRouter ersätts med React Router i en routetabell; bara
    navigeringsadaptern och routetabellen ändras.
-3. Tailwind `preflight` slås på och avgränsningen tas bort.
+3. `htmlFontSize: 10` tas bort ur MUI-temat.
 4. Paket bort: `blaze-html-templates`, `blaze-hot`, `aldeed:autoform`,
    `communitypackages:autoform-bootstrap3`, `aldeed:tabular`,
    `ostrio:flow-router-extra`, `accounts-ui`, `jquery`, `session`, Bootstrap,
@@ -230,8 +230,8 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 
 | Modul | Server | Publiceringar | React | Blaze borta |
 |---|---|---|---|---|
-| (steg 0) | | | | |
-| liability | | | | |
+| (steg 0) | ✓ | ✓ | ✓ | – |
+| liability | ✓ | ✓ | ✓ (MUI) | ✓ |
 
 ## Beslut (2026-10-19)
 
@@ -242,11 +242,13 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
   `docId`, ändrade fält med före- och eftervärden, `at`. Gallras efter ett år
   (TTL-index på `at`). Läses av admin och board. `StorageEvents` ligger kvar
   som lagringens domänhändelser.
-- **Storybook:** egen instans i admin (`admin/.storybook`, port 6007) med
-  admins Tailwind-konfiguration och Bootstrap 3 laddad, så att stories ser ut
-  som i admin under övergången. Meteor-stubbarna återanvänds från appen via
-  alias.
-- **Delade komponenter:** admin bygger egna i `admin/imports/ui/`. En komponent
-  flyttas till `common/ui/` först när den behövs i båda apparna.
+- **Komponentbibliotek: MUI** (2026-10-19). Piloten byggdes i två versioner,
+  Tailwind med egna komponenter och MUI, mot samma e2e-tester. MUI gav 183
+  nya rader mot 312 (sex egna komponenter behövdes inte) och färdig
+  tillgänglighet (fokus i dialoger), till priset av +112 KB gzip JavaScript.
+  Skillnaden växer i de tunga modulerna: tabeller med paginering på servern,
+  autocomplete, datumväljare. Admin och appen får olika formspråk.
+- **Storybook:** i admin när den behövs, med MUI-temat.
+- **Delade komponenter:** inga mellan admin (MUI) och appen (Tailwind).
 - **Cron-jobb, migreringar och publika API:er** ligger kvar i admin.
   Domänfunktionerna läggs ändå i `common/server/` så att de kan flyttas senare.
