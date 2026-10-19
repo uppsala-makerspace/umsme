@@ -12,8 +12,7 @@
     "build-storybook": "storybook build",
     "build:css": "tailwindcss -i ./client/main.css -o ./client/tailwind.output.css",
     "watch:css": "tailwindcss -i ./client/main.css -o ./client/tailwind.output.css --watch",
-    "start:test": "SEED_TEST_DATA=true MONGO_URL=mongodb://localhost:27017/umsapp-e2e-test?replicaSet=rs0 meteor --port 3002 --settings settings_test.json",
-    "seed:dev": "SEED_TEST_DATA=true SEED_ONLY=true MONGO_URL=mongodb://localhost:27017/umsme?replicaSet=rs0 meteor --port 3001 --settings settings.json",
+    "start:test": "MONGO_URL=mongodb://localhost:27017/umsme-e2e?replicaSet=rs0 meteor --port 3002 --settings settings_test.json",
     "test:e2e": "npx playwright test",
     "test:e2e:ui": "npx playwright test --ui"
   },

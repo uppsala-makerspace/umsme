@@ -29,10 +29,10 @@ import { StorageRequests } from '/imports/common/collections/storage';
 import { uploadImage } from '/imports/common/server/googleDrive';
 import { daysFromNow, DAY_MS } from '../dates';
 import { makeUser } from '../accounts';
-import { makeMember, pay, joinFamily, inviteToFamily, randomHex, PRICES } from '../members';
-import { makeLiabilityDocument } from '../documents';
+import { makeMember, pay, joinFamily, randomHex, PRICES } from '../members';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
-import { PERSONAS, PASSWORD } from './personas';
+import { PERSONAS, PASSWORD, FIRST_FREE_MID } from './personas';
+import { makeLiabilityVersions, liabilityFields, makePersonas } from './build';
 
 const BULK_MEMBERS = 175;
 
@@ -41,18 +41,7 @@ export const buildDemo = async ({ random, people, now }) => {
   const log = (message) => console.log(`[seed] demo: ${message}`);
 
   // --- Liability agreement: an older and a current version ----------------
-  const oldLiability = days(-900);
-  const currentLiability = days(-400);
-  await makeLiabilityDocument({
-    title: 'Ansvarsförbindelse 2023', date: oldLiability,
-    sv: '# Ansvarsförbindelse\n\nÄldre version.\n\n1. Var försiktig\n2. Städa efter dig',
-    en: '# Liability agreement\n\nOlder version.\n\n1. Be careful\n2. Clean up after yourself',
-  });
-  await makeLiabilityDocument({
-    title: 'Ansvarsförbindelse 2025', date: currentLiability,
-    sv: '# Ansvarsförbindelse\n\nJag använder lokalen och maskinerna på egen risk.\n\n1. Var försiktig\n2. Städa efter dig\n3. Fråga om du är osäker\n4. Gå aldrig ifrån en maskin som är igång',
-    en: '# Liability agreement\n\nI use the premises and machines at my own risk.\n\n1. Be careful\n2. Clean up after yourself\n3. Ask if unsure\n4. Never leave a running machine',
-  });
+  const liability = await makeLiabilityVersions(days);
 
   // --- Message templates ----------------------------------------------------
   const template = (fields) => MessageTemplates.insertAsync({
@@ -72,40 +61,11 @@ export const buildDemo = async ({ random, people, now }) => {
   });
 
   // --- Members ----------------------------------------------------------------
-  let midCounter = 100;
+  let midCounter = FIRST_FREE_MID - 1;
   const nextMid = () => String((midCounter += 1));
-  const liabilityFor = (kind) => {
-    if (kind === 'none') return {};
-    if (kind === 'outdated') return { liabilityDate: oldLiability };
-    return { liabilityDate: currentLiability };
-  };
+  const liabilityFor = (state) => liabilityFields(state, liability);
 
-  const personas = {};
-  const loginUserIds = {};
-  for (const persona of PERSONAS) {
-    people.reserve(persona.email);
-    loginUserIds[persona.key] = await makeUser({
-      email: persona.email, password: PASSWORD, verified: persona.verified !== false, roles: persona.roles || [],
-    });
-    if (persona.member === false) continue;
-    const generated = people.person();
-    const member = await makeMember({
-      mid: nextMid(),
-      name: persona.name,
-      email: persona.email,
-      mobile: generated.mobile,
-      birthyear: persona.birthyearOffset ? now.getFullYear() + persona.birthyearOffset : generated.birthyear,
-      ...liabilityFor(persona.liability),
-      registered: persona.registered !== false,
-      ...(persona.excluded ? { excluded: true } : {}),
-    });
-    for (const [type, offset] of persona.payments || []) await pay(member, type, { at: days(offset) });
-    personas[persona.key] = member;
-  }
-  for (const persona of PERSONAS) {
-    if (persona.familyOf) personas[persona.key] = await joinFamily(personas[persona.key], personas[persona.familyOf]);
-    if (persona.invitedBy) await inviteToFamily(persona.email, personas[persona.invitedBy]);
-  }
+  const { members: personas, userIds: loginUserIds } = await makePersonas(PERSONAS, { people, days, now, liability });
   log(`${Object.keys(personas).length} personas`);
 
   // Everyone else. Each gets a profile, then a payment history that ends
@@ -139,7 +99,7 @@ export const buildDemo = async ({ random, people, now }) => {
   while (bulkCount < BULK_MEMBERS) {
     const kind = pickProfile();
     const person = people.person();
-    const liability = random.chance(0.06) ? 'none' : random.chance(0.12) ? 'outdated' : 'current';
+    const liabilityState = random.chance(0.06) ? 'none' : random.chance(0.12) ? 'outdated' : 'current';
     const member = await makeMember({
       mid: nextMid(),
       name: person.name,
@@ -147,7 +107,7 @@ export const buildDemo = async ({ random, people, now }) => {
       mobile: person.mobile,
       birthyear: person.birthyear,
       gender: random.chance(0.1) ? 'undisclosed' : person.gender,
-      ...liabilityFor(liability),
+      ...liabilityFor(liabilityState),
       registered: kind !== 'unpaid' || random.chance(0.5),
       ...(kind === 'excluded' ? { excluded: true } : {}),
     });

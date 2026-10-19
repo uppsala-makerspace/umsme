@@ -15,6 +15,7 @@
     }
   },
   "private": {
+    "recipientWhitelist": [],
     "homeAssistant": {
       "url": "http://localhost:8123",
       "token": "test-token",

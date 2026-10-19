@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { testUsers, login, selectors, setLanguageEnglish } from './helpers';
+import { testUsers, login, selectors, setLanguageEnglish, firstName } from './helpers';
 
 test.describe('Authentication', () => {
   test('should sign in with email and password and land on home page', async ({ page }) => {
@@ -24,7 +24,7 @@ test.describe('Authentication', () => {
     await page.waitForURL('/');
 
     // Verify we're on the home page with the user's name displayed
-    await expect(page.locator(selectors.homeGreeting)).toContainText('Test');
+    await expect(page.locator(selectors.homeGreeting)).toContainText(firstName(testUsers.member));
   });
 
   test('should redirect unverified user to email verification page', async ({ page }) => {

@@ -142,9 +142,12 @@ Ingen CI tills vidare; allt körs lokalt.
    tidigarelagt före e2e. Personerna ligger i `scenarios/personas.js` på
    `example.org`.
 3. ~~Regeln i `CLAUDE.md`.~~ Klart, tillsammans med demo.
-4. Scenariot `e2e`; flytta appens seedning dit och få appens 20 e2e-tester
-   gröna mot den. Testernas adresser (`member@test.com` …) byts mot
-   personerna på `example.org`.
+4. ~~Scenariot `e2e`; flytta appens seedning dit och få appens 20 e2e-tester
+   gröna mot den.~~ Klart. Admin seedar `umsme-e2e` på port 3012 innan appen
+   startar; `e2e/helpers.ts` läser personerna direkt ur `personas.js`, som
+   också har `E2E_PERSONAS` för de personer bara lagringstesterna behöver.
+   Appens `seedTestData.js` och skriptet `seed:dev` (som seedade
+   huvuddatabasen `umsme`) är borttagna.
 5. Playwright i admin och e2e-tester för pilotmodulen `liability` mot
    Blaze-versionen.
 

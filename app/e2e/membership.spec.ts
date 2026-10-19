@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { testUsers, login, selectors } from './helpers';
+import { testUsers, login, selectors, firstName } from './helpers';
 import en from '../imports/i18n/en.json';
 
 test.describe('Membership Status', () => {
@@ -11,7 +11,7 @@ test.describe('Membership Status', () => {
     await expect(page).toHaveURL('/');
 
     // Verify user greeting with first name
-    await expect(page.locator(selectors.homeGreeting)).toContainText('Test');
+    await expect(page.locator(selectors.homeGreeting)).toContainText(firstName(testUsers.member));
 
     // Since member has approved liability, they should see unlock and calendar buttons
     await expect(page.locator(selectors.homeUnlockLink)).toBeVisible();
@@ -29,7 +29,7 @@ test.describe('Membership Status', () => {
     await expect(page.locator(selectors.memberName)).toContainText(testUsers.member.name);
 
     // Verify member ID is displayed
-    await expect(page.getByText('M001')).toBeVisible();
+    await expect(page.getByText(testUsers.member.mid!)).toBeVisible();
 
     // Verify membership type is displayed
     await expect(page.getByText(en.TypeOfMembership)).toBeVisible();

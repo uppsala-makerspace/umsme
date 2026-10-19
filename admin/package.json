@@ -6,6 +6,7 @@
     "start": "meteor run --settings settings.json",
     "demo": "MONGO_URL=mongodb://localhost:27017/umsme-demo?replicaSet=rs0 meteor run --port 3000 --settings settings_demo.json",
     "seed:demo": "SEED=demo npm run demo",
+    "seed:e2e": "SEED=e2e MONGO_URL=mongodb://localhost:27017/umsme-e2e?replicaSet=rs0 meteor run --port 3012 --settings settings_demo.json",
     "test": "TEST_CLIENT=0 TEST_SERVER=1 meteor test --once --port 3100 --driver-package meteortesting:mocha"
   },
   "dependencies": {

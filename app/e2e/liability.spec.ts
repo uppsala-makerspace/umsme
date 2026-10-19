@@ -4,7 +4,7 @@ import en from '../imports/i18n/en.json';
 
 test.describe('Liability Agreement', () => {
   test('should show liability agreement page and allow approval', async ({ page }) => {
-    // Login as member without liability (noliability@test.com)
+    // Login as member without liability (noliability@example.org)
     await login(page, testUsers.noliability.email, testUsers.noliability.password);
 
     // On home page, should see liability message since user hasn't approved

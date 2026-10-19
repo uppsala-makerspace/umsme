@@ -12,10 +12,6 @@ import { applyMailUrlFromSettings } from "/imports/common/server/mailUrl";
 
 applyMailUrlFromSettings();
 
-// E2E test data seeding - only load in test mode
-if (process.env.SEED_TEST_DATA === 'true') {
-  import("./seedTestData");
-}
 
 Meteor.startup(async () => {
   await ensureStorageIndexes();

@@ -32,28 +32,12 @@ npm run dev
 
 The app runs on `http://localhost:3001` by default.
 
-## Development with Test Data
+## Development with Demo Data
 
-To populate your development database with test users for manual testing:
-
-```bash
-npm run seed:dev
-```
-
-This seeds the `umsme` database with test accounts. Press `Ctrl+C` after you see "Seeding complete" to exit. You can then run the normal dev server and log in with these credentials:
-
-| Email | Password | Description |
-|-------|----------|-------------|
-| member@test.com | password123 | Active member with approved liability |
-| noliability@test.com | password123 | Active member without liability approval |
-| noliability2@test.com | password123 | Active member without liability approval |
-| family@test.com | password123 | Family membership payer |
-| invited@test.com | password123 | Member with pending family invite |
-| toinvite@test.com | password123 | Member available for family invitation |
-| unverified@test.com | password123 | User with unverified email |
-| admin@test.com | adminadmin | Admin user with admin role |
-
-**Warning:** This script clears existing data in the `users`, `members`, `membership`, `liabilityDocuments`, and `invites` collections before seeding.
+To explore the app with realistic data, run `./scripts/demo.sh` from the
+repository root. It seeds the separate database `umsme-demo` and starts admin,
+app and payment against it; see the root README for the logins. Your own
+development database is never touched.
 
 ## UI Development with Storybook
 
@@ -107,10 +91,14 @@ npm run test:e2e:ui
 ```
 
 The test runner will:
-1. Start a test server on port 3002 with a separate database (`umsapp-e2e-test`)
-2. Seed the test database with fixture data
+1. Start admin on port 3012 with `SEED=e2e`, which empties and seeds the
+   separate database `umsme-e2e` (`common/server/seed/scenarios/e2e.js`)
+2. Start the app on port 3002 against the same database
 3. Run all Playwright tests
-4. Shut down the test server
+4. Shut down both servers
+
+The test users are the personas in `common/server/seed/scenarios/personas.js`;
+`e2e/helpers.ts` reads them from there.
 
 ### Test Structure
 

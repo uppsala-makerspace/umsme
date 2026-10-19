@@ -1,8 +1,10 @@
 import { seedScenario } from '/imports/common/server/seed';
 import { buildDemo, demoLoginSummary } from '/imports/common/server/seed/scenarios/demo';
+import { buildE2e, e2eLoginSummary } from '/imports/common/server/seed/scenarios/e2e';
 
 const SCENARIOS = {
   demo: { build: buildDemo, summary: demoLoginSummary },
+  e2e: { build: buildE2e, summary: e2eLoginSummary },
 };
 
 /**

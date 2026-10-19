@@ -5,13 +5,13 @@ import en from '../imports/i18n/en.json';
 test.describe('Family Membership', () => {
   test('should display family members on account page for family payer', async ({ page }) => {
     // Login as family payer
-    await login(page, testUsers.familyPayer.email, testUsers.familyPayer.password);
+    await login(page, testUsers.family.email, testUsers.family.password);
 
     // Navigate to account page
     await page.goto('/account');
 
     // Verify member name is displayed
-    await expect(page.locator(selectors.memberName)).toContainText(testUsers.familyPayer.name);
+    await expect(page.locator(selectors.memberName)).toContainText(testUsers.family.name);
 
     // Verify family members section is visible
     await expect(page.getByText(en.FamilyMembers, { exact: true })).toBeVisible();
@@ -22,7 +22,7 @@ test.describe('Family Membership', () => {
 
   test('should invite a new family member', async ({ page }) => {
     // Login as family payer
-    await login(page, testUsers.familyPayer.email, testUsers.familyPayer.password);
+    await login(page, testUsers.family.email, testUsers.family.password);
 
     // Navigate to account page
     await page.goto('/account');
@@ -49,7 +49,7 @@ test.describe('Family Membership', () => {
   });
 
   test('should show pending family invite on home page', async ({ page }) => {
-    // Login as invited member (has pending invite from family@test.com)
+    // Login as invited member (has a pending invite from the family persona)
     await login(page, testUsers.invited.email, testUsers.invited.password);
 
     // Verify we see the family invite message (check for part of the text)

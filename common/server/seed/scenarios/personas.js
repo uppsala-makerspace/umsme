@@ -1,9 +1,15 @@
 /**
- * Named people with known logins, one per state worth looking at. The demo
- * scenario contains all of them, so that anyone exploring can log in as the
- * same person an e2e test uses.
+ * Named people with known logins, one per state worth looking at. Both the
+ * demo and the e2e scenario contain all of PERSONAS, so that anyone exploring
+ * the demo can log in as the same person an e2e test uses. E2E_PERSONAS are
+ * the few that only make sense with a test's own fixtures (storage
+ * lifecycles, a second member without liability for a test that approves the
+ * first one's); they exist in the e2e scenario only.
  *
- * Every address is on example.org; the shared password is PASSWORD.
+ * Every address is on example.org; the shared password is PASSWORD. Member
+ * numbers are fixed (see withMids), so that tests can look for them.
+ *
+ * No imports: the app's Playwright helpers read this file directly.
  */
 export const PASSWORD = 'password123';
 
@@ -13,7 +19,7 @@ const at = (local) => `${local}@example.org`;
  * `payments` lists [paymentType, daysFromNow] pairs, oldest first.
  * `roles` are admin roles; `member: false` means a login without a member.
  */
-export const PERSONAS = [
+const SHARED = [
   { key: 'admin', email: at('admin'), name: 'Astrid Admin', roles: ['admin'],
     description: 'admin role, lab member',
     payments: [['memberLab', -700], ['memberLab', -335]] },
@@ -77,3 +83,40 @@ export const PERSONAS = [
   { key: 'unverified', email: at('unverified'), name: null, verified: false, member: false,
     description: 'signed up, email not verified, no member yet' },
 ];
+
+const E2E_ONLY = [
+  { key: 'noliability2', email: at('noliability2'), name: 'Nanna Ansvarslös', liability: 'none',
+    description: 'second member without liability, for the unlock test',
+    payments: [['memberLab', -20]] },
+  { key: 'toInvite', email: at('toinvite'), name: 'Tove Tillgänglig',
+    description: 'member who can be invited to a family',
+    payments: [['memberBase', -30]] },
+  { key: 'storageWarning', email: at('storage-warning'), name: 'Vera Varnad',
+    description: 'lab expired, has storage unit 1002 with a warning',
+    payments: [['memberLab', -400]] },
+  { key: 'storageClearance', email: at('storage-clearance'), name: 'Rolf Rensning',
+    description: 'storage unit 1003 awaiting clearance' },
+  { key: 'storageMove', email: at('storage-move'), name: 'Mona Flytt',
+    description: 'has unit 1004 and an offer to move to 1005',
+    payments: [['memberLab', -30]] },
+  { key: 'storageRetry', email: at('storage-retry'), name: 'Rasmus Retry',
+    description: 'lab member without storage, for the retry test',
+    payments: [['memberLab', -30]] },
+  { key: 'storageQueue', email: at('storage-queue'), name: 'Kim Kö',
+    description: 'waiting in the storage queue',
+    payments: [['memberLab', -30]] },
+];
+
+/** Member numbers from 101, in list order, for everyone who is a member. */
+const withMids = (people, first) => {
+  let next = first;
+  return people.map((person) => (person.member === false ? person : { ...person, mid: String(next++) }));
+};
+
+const memberCount = (people) => people.filter((person) => person.member !== false).length;
+
+export const PERSONAS = withMids(SHARED, 101);
+export const E2E_PERSONAS = withMids(E2E_ONLY, 101 + memberCount(SHARED));
+
+/** The first number after the personas, for generated members. */
+export const FIRST_FREE_MID = 101 + memberCount(SHARED) + memberCount(E2E_ONLY);

@@ -17,14 +17,14 @@ Each test specification should include:
 
 ### Test: Sign in with email and password
 
-**User**: member@test.com (verified user with active membership)
+**User**: member@example.org (verified user with active membership)
 
 **Preconditions**: User is not logged in
 
 **Steps**:
 1. Navigate to the login page
 2. Verify the login form is displayed (logo and email input visible)
-3. Enter email: member@test.com
+3. Enter email: member@example.org
 4. Enter password: password123
 5. Click the login button
 
@@ -36,13 +36,13 @@ Each test specification should include:
 
 ### Test: Redirect unverified user to email verification page
 
-**User**: unverified@test.com (user with unverified email)
+**User**: unverified@example.org (user with unverified email)
 
 **Preconditions**: User is not logged in
 
 **Steps**:
 1. Navigate to the login page
-2. Enter email: unverified@test.com
+2. Enter email: unverified@example.org
 3. Enter password: password123
 4. Click the login button
 
@@ -57,12 +57,12 @@ Each test specification should include:
 
 ### Test: Display family members section for family payer
 
-**User**: family@test.com (family membership payer)
+**User**: family@example.org (family membership payer)
 
 **Preconditions**: User is logged in
 
 **Steps**:
-1. Log in as family@test.com
+1. Log in as family@example.org
 2. Navigate to the account page (/account)
 
 **Expected results**:
@@ -74,32 +74,32 @@ Each test specification should include:
 
 ### Test: Invite a new family member
 
-**User**: family@test.com (family membership payer)
+**User**: family@example.org (family membership payer)
 
-**Preconditions**: User is logged in, toinvite@test.com exists and is not in a family
+**Preconditions**: User is logged in, toinvite@example.org exists and is not in a family
 
 **Steps**:
-1. Log in as family@test.com
+1. Log in as family@example.org
 2. Navigate to the account page (/account)
 3. Click the "Add family member" button
-4. Enter email: toinvite@test.com in the family member email input
+4. Enter email: toinvite@example.org in the family member email input
 5. Click the "Save" button
 6. Wait for the invite to be processed
 
 **Expected results**:
 - The "Invites" section is visible
-- The invited email (toinvite@test.com) is displayed in the invites list
+- The invited email (toinvite@example.org) is displayed in the invites list
 
 ---
 
 ### Test: Show pending family invite on home page
 
-**User**: invited@test.com (user with pending family invite)
+**User**: invited@example.org (user with pending family invite)
 
-**Preconditions**: User has a pending family invite from family@test.com
+**Preconditions**: User has a pending family invite from family@example.org
 
 **Steps**:
-1. Log in as invited@test.com
+1. Log in as invited@example.org
 
 **Expected results**:
 - The family invite message is displayed on the home page
@@ -110,12 +110,12 @@ Each test specification should include:
 
 ### Test: Accept family invite
 
-**User**: invited@test.com (user with pending family invite)
+**User**: invited@example.org (user with pending family invite)
 
-**Preconditions**: User has a pending family invite from family@test.com
+**Preconditions**: User has a pending family invite from family@example.org
 
 **Steps**:
-1. Log in as invited@test.com
+1. Log in as invited@example.org
 2. Verify the family invite message is displayed
 3. Click the "Accept invite" button
 4. Wait for the action to complete
@@ -131,12 +131,12 @@ Each test specification should include:
 
 ### Test: Show liability agreement page and allow approval
 
-**User**: noliability@test.com (user without approved liability)
+**User**: noliability@example.org (user without approved liability)
 
 **Preconditions**: User has not approved the liability agreement
 
 **Steps**:
-1. Log in as noliability@test.com
+1. Log in as noliability@example.org
 2. Verify the liability warning message is shown on the home page
 3. Click the button to go to the liability page
 4. Wait for navigation to /liability
@@ -165,12 +165,12 @@ Each test specification should include:
 
 ### Test: Show approved status for member with approved liability
 
-**User**: member@test.com (user with approved liability)
+**User**: member@example.org (user with approved liability)
 
 **Preconditions**: User has already approved the liability agreement
 
 **Steps**:
-1. Log in as member@test.com
+1. Log in as member@example.org
 2. Navigate to the liability page (/liability)
 
 **Expected results**:
@@ -183,12 +183,12 @@ Each test specification should include:
 
 ### Test: Display membership status on home page for active member
 
-**User**: member@test.com (active member with approved liability)
+**User**: member@example.org (active member with approved liability)
 
 **Preconditions**: User has active membership and approved liability
 
 **Steps**:
-1. Log in as member@test.com
+1. Log in as member@example.org
 
 **Expected results**:
 - User is on the home page (/)
@@ -200,12 +200,12 @@ Each test specification should include:
 
 ### Test: Display membership details on account page
 
-**User**: member@test.com (active member)
+**User**: member@example.org (active member)
 
 **Preconditions**: User has active membership
 
 **Steps**:
-1. Log in as member@test.com
+1. Log in as member@example.org
 2. Navigate to the account page (/account)
 
 **Expected results**:
@@ -221,14 +221,14 @@ Each test specification should include:
 
 ### Test: Show liability message on unlock page when liability not approved
 
-**User**: noliability2@test.com (user without approved liability)
+**User**: noliability2@example.org (user without approved liability)
 
 **Note**: Uses noliability2 instead of noliability to avoid conflict with the liability approval test which modifies noliability's state.
 
 **Preconditions**: User has NOT approved the liability agreement
 
 **Steps**:
-1. Log in as noliability2@test.com
+1. Log in as noliability2@example.org
 2. Navigate to the unlock page (/unlock)
 
 **Expected results**:
@@ -240,12 +240,12 @@ Each test specification should include:
 
 ### Test: Show door buttons on unlock page when liability is approved
 
-**User**: member@test.com (user with approved liability and lab access)
+**User**: member@example.org (user with approved liability and lab access)
 
 **Preconditions**: User has approved liability and active lab membership
 
 **Steps**:
-1. Log in as member@test.com
+1. Log in as member@example.org
 2. Navigate to the unlock page (/unlock)
 
 **Expected results**:
@@ -257,12 +257,12 @@ Each test specification should include:
 
 ### Test: Navigate from home to unlock page via button
 
-**User**: member@test.com (user with approved liability)
+**User**: member@example.org (user with approved liability)
 
 **Preconditions**: User has approved liability and active membership
 
 **Steps**:
-1. Log in as member@test.com
+1. Log in as member@example.org
 2. Verify the "Open doors" link is visible on the home page
 3. Click the "Open doors" link
 
@@ -277,25 +277,18 @@ Each test specification should include:
 When adding a new E2E test:
 
 1. **Write the specification first** in this document following the format above
-2. **Identify the test user** - use existing test users from helpers.ts or add a new one to seedTestData.js if needed
+2. **Identify the test user** - use existing test users from helpers.ts or add a new one to `common/server/seed/scenarios/personas.js` if needed (to `E2E_PERSONAS` when it only makes sense with the test's own fixtures, which go in `scenarios/e2e.js`)
 3. **Generate the test** - use the specification to create the Playwright test, referencing:
    - `helpers.ts` for login function, selectors, and test users
    - `en.json` for i18n text strings (tests run in English)
 4. **Use appropriate selectors**:
    - Prefer `getByRole()` for buttons and headings
    - Use `getByText(en.translationKey)` for translated text
-   - Use CSS selectors with `.wideButton` class to distinguish main page buttons from navigation
+   - Scope to `main` or `nav` to tell page content from the navigation; avoid CSS classes, which change with styling
    - Use `.first()` when multiple elements might match
 
 ### Test Users Available
 
-| Email | Password | Description |
-|-------|----------|-------------|
-| member@test.com | password123 | Active member with approved liability |
-| noliability@test.com | password123 | Active member without liability approval (used by liability approval test) |
-| noliability2@test.com | password123 | Active member without liability approval (used by unlock test) |
-| family@test.com | password123 | Family membership payer |
-| invited@test.com | password123 | Member with pending family invite |
-| toinvite@test.com | password123 | Member available for family invitation |
-| unverified@test.com | password123 | User with unverified email |
-| admin@test.com | adminadmin | Admin user with admin role |
+The personas in `common/server/seed/scenarios/personas.js`, all with the
+password `password123`: `PERSONAS` (also in the demo) and `E2E_PERSONAS`
+(e2e only). `helpers.ts` exposes them as `testUsers`, by key.

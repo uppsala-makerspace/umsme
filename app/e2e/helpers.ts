@@ -1,5 +1,6 @@
 import { Page, expect } from '@playwright/test';
 import en from '../imports/i18n/en.json';
+import { PERSONAS, E2E_PERSONAS, PASSWORD } from '../imports/common/server/seed/scenarios/personas.js';
 
 /**
  * Set the app language to English
@@ -12,75 +13,19 @@ export async function setLanguageEnglish(page: Page): Promise<void> {
 }
 
 /**
- * Test user credentials
+ * Test users: the seeded personas, by key (member, family, familyMember,
+ * noliability, storageWarning, …). See common/server/seed/scenarios/personas.js.
  */
-export const testUsers = {
-  member: {
-    email: 'member@test.com',
-    password: 'password123',
-    name: 'Test Member',
-  },
-  noliability: {
-    email: 'noliability@test.com',
-    password: 'password123',
-    name: 'No Liability Member',
-  },
-  noliability2: {
-    email: 'noliability2@test.com',
-    password: 'password123',
-    name: 'No Liability Member 2',
-  },
-  familyPayer: {
-    email: 'family@test.com',
-    password: 'password123',
-    name: 'Family Payer',
-  },
-  storageDependent: {
-    email: 'storage-dependent@test.com',
-    password: 'password123',
-    name: 'Storage Family Member',
-  },
-  storageWarning: {
-    email: 'storage-warning@test.com',
-    password: 'password123',
-    name: 'Storage Warning Member',
-  },
-  storageClearance: {
-    email: 'storage-clearance@test.com',
-    password: 'password123',
-    name: 'Storage Clearance Member',
-  },
-  storageMove: {
-    email: 'storage-move@test.com',
-    password: 'password123',
-    name: 'Storage Move Member',
-  },
-  storageRetry: {
-    email: 'storage-retry@test.com',
-    password: 'password123',
-    name: 'Storage Retry Member',
-  },
-  invited: {
-    email: 'invited@test.com',
-    password: 'password123',
-    name: 'Invited Member',
-  },
-  toInvite: {
-    email: 'toinvite@test.com',
-    password: 'password123',
-    name: 'To Invite Member',
-  },
-  unverified: {
-    email: 'unverified@test.com',
-    password: 'password123',
-    name: null,
-  },
-  admin: {
-    email: 'admin@test.com',
-    password: 'adminadmin',
-    name: 'Admin User',
-  },
-};
+type TestUser = { email: string; password: string; name: string | null; mid?: string };
+export const testUsers: Record<string, TestUser> = Object.fromEntries(
+  [...PERSONAS, ...E2E_PERSONAS].map((persona) => [
+    persona.key,
+    { email: persona.email, password: PASSWORD, name: persona.name, mid: persona.mid },
+  ]),
+);
+
+/** The name the home page greets a user with. */
+export const firstName = (user: TestUser) => (user.name || '').split(' ')[0];
 
 /**
  * Login helper - logs in a user with email and password

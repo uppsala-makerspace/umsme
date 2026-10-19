@@ -24,7 +24,7 @@ test.describe.serial('Member storage', () => {
   });
 
   test('shows a paying family member its assigned unit and available actions', async ({ page }) => {
-    await login(page, testUsers.familyPayer.email, testUsers.familyPayer.password);
+    await login(page, testUsers.family.email, testUsers.family.password);
     await page.goto('/storage');
 
     await expect(page.getByTestId('storage-occupied')).toContainText('1001');
@@ -118,7 +118,7 @@ test.describe.serial('Member storage', () => {
   });
 
   test('shows shared storage read-only to a family dependent in Swedish', async ({ page }) => {
-    await login(page, testUsers.storageDependent.email, testUsers.storageDependent.password);
+    await login(page, testUsers.familyMember.email, testUsers.familyMember.password);
     await page.goto('/storage');
     await page.getByRole('button', { name: /SV\s*ENG/ }).click();
 
