@@ -242,6 +242,7 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | (steg 0) | ✓ | ✓ | ✓ | – |
 | liability | ✓ | ✓ | ✓ (MUI) | ✓ |
 | messagetemplate | ✓ | ✓ | ✓ | ✓ (dokumentationen är en Blaze-brygga till React-versionen tills mail och announcement migreras) |
+| storeitems | ✓ | ✓ | ✓ | ✓ |
 
 ## Beslut (2026-10-19)
 

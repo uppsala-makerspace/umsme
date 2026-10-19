@@ -1,25 +1,7 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './StoreItemList';
-import './StoreItemAdd';
-import './StoreItemView';
+import { reactRoute } from '../../react/reactRoute';
+import { StoreItemListPage } from '/imports/ui/storeItems/StoreItemListPage';
+import { StoreItemEditPage } from '/imports/ui/storeItems/StoreItemEditPage';
 
-FlowRouter.route('/storeitems', {
-  name: 'storeitems',
-  action() {
-    this.render('AppBody', { main: 'StoreItemList' });
-  },
-});
-
-FlowRouter.route('/storeitems/add', {
-  name: 'addstoreitem',
-  action() {
-    this.render('AppBody', { main: 'StoreItemAdd' });
-  },
-});
-
-FlowRouter.route('/storeitem/:_id', {
-  name: 'storeitemview',
-  action() {
-    this.render('AppBody', { main: 'StoreItemView' });
-  },
-});
+reactRoute('/storeitems', 'storeitems', StoreItemListPage);
+reactRoute('/storeitems/add', 'addstoreitem', StoreItemEditPage);
+reactRoute('/storeitem/:_id', 'storeitemview', StoreItemEditPage);

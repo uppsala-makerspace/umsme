@@ -164,6 +164,25 @@ export default () => {
     return MessageTemplates.find(docId);
   });
 
+  Meteor.publish('admin.storeItems.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.storeItems))) return this.ready();
+    return StoreItems.find({}, {
+      fields: { code: 1, name: 1, price: 1, minPrice: 1, maxPrice: 1, requiresMembership: 1, bookkeepingAccount: 1, status: 1, workshopIds: 1 },
+    });
+  });
+
+  Meteor.publish('admin.storeItems.item', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.storeItems))) return this.ready();
+    return StoreItems.find(docId);
+  });
+
+  // The workshops an item can be linked to: names only.
+  Meteor.publish('admin.storeItems.workshops', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.storeItems))) return this.ready();
+    return Workshops.find({}, { fields: { name: 1, kind: 1 } });
+  });
+
   Meteor.publish(null, async function () {
     if (this.userId) {
       if ((await Roles.userIsInRoleAsync(this.userId, 'admin'))) return Meteor.roleAssignment.find();

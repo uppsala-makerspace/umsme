@@ -1547,6 +1547,8 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   // A space (yta) in the premises, shown on the app's map. Imported from
   // rooms.json once and managed in admin thereafter. spaceId + floor tie the

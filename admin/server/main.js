@@ -1,6 +1,5 @@
 import { Meteor } from 'meteor/meteor';
 import '/imports/common/collections/users';
-import '/imports/common/collections/storeItemsDeny';
 import '/imports/common/server/familyCascade';
 import '/imports/common/server/storage/membershipSync';
 import './cronjob';
