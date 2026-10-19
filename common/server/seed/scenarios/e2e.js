@@ -20,6 +20,8 @@ import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
+import { Announcements } from '/imports/common/collections/announcements';
+import { Mails } from '/imports/common/collections/mails';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
@@ -118,6 +120,28 @@ export const buildE2e = async ({ people, now }) => {
   }
   const revoke = await certificate({ name: { sv: 'E2E revoke certificate' } });
   await attest(revoke, 'base');
+
+  // Announcements: one sent, with its mail, and drafts to look at, edit,
+  // send and delete.
+  const sentAt = days(-60);
+  const newsletterMail = await Mails.insertAsync({
+    from: 'kansliet@example.org', recipients: 'members', family: true, to: [members.member.email],
+    subject: 'Nyhetsbrev oktober', senddate: sentAt, template: '# Nyheter\n\nVälkommen på **städdag**!', formatted: true,
+  });
+  await Announcements.insertAsync({
+    type: 'newsletter', subjectSv: 'Nyhetsbrev oktober', bodySv: '# Nyheter\n\nVälkommen på **städdag**!',
+    status: 'sent', createdAt: days(-61), sentAt, mailId: newsletterMail,
+  });
+  await Announcements.insertAsync({
+    type: 'information', subjectSv: 'Stängt under jul', subjectEn: 'Closed over Christmas',
+    bodySv: 'Lokalen är stängd 23 december till 2 januari.', status: 'draft', createdAt: days(-5),
+  });
+  for (const purpose of ['edit', 'delete']) {
+    await Announcements.insertAsync({
+      type: 'information', subjectSv: `E2E ${purpose} announcement`, bodySv: `Utskick för testet som ${purpose === 'edit' ? 'ändrar' : 'raderar'}.`,
+      status: 'draft', createdAt: days(-3),
+    });
+  }
 
   const clay = await makeStoreItem({
     code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150, bookkeepingAccount: '3010',
