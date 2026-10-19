@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
+import { CommentsFor } from '../comments/CommentsFor';
 import { useNavigate } from '../navigation';
-import { BlazeTemplate } from '../components/BlazeTemplate';
 import { searchMembers } from '../groups/choices';
 import { PaymentView } from './PaymentView';
 import {
@@ -34,7 +34,7 @@ export const PaymentViewPage = ({ _id }) => {
   return (
     <PaymentView
       detail={detail} busy={busy} error={error} search={searchMembers}
-      comments={<BlazeTemplate name="CommentList" data={{ about: _id }} />}
+      comments={<CommentsFor about={_id} />}
       on={{
         assign: act((memberId) => assignMember(_id, memberId)),
         unassign: act(() => unassignMember(_id)),

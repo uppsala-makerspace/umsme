@@ -6,7 +6,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { userSelectorForMember } from '/imports/common/lib/memberMatch';
 import 'meteor/aldeed:autoform/static'
 
-import '../comment/CommentList';
+import '../comment';
 import './MemberView.html';
 import './MemberStatus';
 import '../message/MessageList';

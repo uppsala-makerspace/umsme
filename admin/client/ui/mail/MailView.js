@@ -6,7 +6,7 @@ import { marked } from 'marked';
 import { Comments } from '/imports/common/collections/comments';
 import './MailView.html';
 import './Recipients';
-import '../comment/CommentList';
+import '../comment';
 
 
 Template.MailView.onCreated(function() {

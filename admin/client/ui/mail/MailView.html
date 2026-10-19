@@ -18,5 +18,5 @@
     {{else}}
     {{> quickForm collection=Mails doc=mail id="mailForm" omitFields="_id" type="readonly" buttonContent="Go back to mail list"}}
     {{/if}}
-    {{>CommentList about=id}}
+    {{> ReactSlot component=commentsComponent props=(commentsAbout id)}}
 </template>

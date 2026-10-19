@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { CommentsFor } from '../comments/CommentsFor';
 import { useNavigate } from '../navigation';
 import { BlazeTemplate } from '../components/BlazeTemplate';
 import { MembershipForm } from './MembershipForm';
@@ -76,7 +77,7 @@ export const MembershipViewPage = ({ _id }) => {
           <Typography variant="h5" component="h2" sx={{ mb: 1 }}>Messages</Typography>
           <BlazeTemplate name="InitiateMessage" data={{ member: member._id, membership: _id }} />
           <BlazeTemplate name="MessageList" data={{ membership: _id }} />
-          <BlazeTemplate name="CommentList" data={{ about: _id }} />
+          <CommentsFor about={_id} />
         </Box>
       )}
     />

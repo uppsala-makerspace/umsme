@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { testTemplates } from '/imports/common/lib/messageTemplates';
-import { BlazeTemplate } from '../components/BlazeTemplate';
+import { CommentsFor } from '../comments/CommentsFor';
 import { useNavigate } from '../navigation';
 import { MessageTemplateForm } from './MessageTemplateForm';
 import { useMessageTemplate, formValues, saveMessageTemplate, removeMessageTemplate } from './data';
-import '/client/ui/comment/CommentList';
 
 /** /templates/add without an id, /template/:_id with one. */
 export const MessageTemplateEditPage = ({ _id }) => {
@@ -61,7 +60,7 @@ export const MessageTemplateEditPage = ({ _id }) => {
       busy={busy}
       error={error}
     >
-      {_id && <Box sx={{ mt: 4 }}><BlazeTemplate name="CommentList" data={{ about: _id }} /></Box>}
+      {_id && <Box sx={{ mt: 4 }}><CommentsFor about={_id} /></Box>}
     </MessageTemplateForm>
   );
 };

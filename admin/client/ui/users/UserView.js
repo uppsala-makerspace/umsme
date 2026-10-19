@@ -8,7 +8,7 @@ import { memberSelectorForUser } from '/imports/common/lib/memberMatch';
 import { Roles } from 'meteor/roles';
 
 import './UserView.html';
-import '../comment/CommentList';
+import '../comment';
 
 
 Template.UserView.onCreated(function() {

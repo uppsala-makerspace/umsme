@@ -256,6 +256,13 @@ export default () => {
     return Expenses.find(docId);
   });
 
+  // The comments about one thing: a member, a payment, a mail…
+  Meteor.publish('admin.comments.about', async function (about) {
+    check(about, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.comments))) return this.ready();
+    return Comments.find({ about });
+  });
+
   // What the group and workshop pages link to and choose among: names, and
   // what decides which choices make sense (a group's type, a workshop's group).
   // The treasurer sees the names too, on the expense accounts.

@@ -43,6 +43,6 @@
     {{>ReminderMessage member=id}}
     {{> MessageList member=id}}
     {{/unless}}
-    {{>CommentList about=id}}
+    {{> ReactSlot component=commentsComponent props=(commentsAbout id)}}
     {{> ReactSlot component=certificatesSection props=certificatesProps}}
 </template>
