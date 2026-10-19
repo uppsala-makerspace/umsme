@@ -30,6 +30,7 @@ import { makeUser } from '../accounts';
 import { makeMember, pay, joinFamily, randomHex, PRICES } from '../members';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeFakeLock } from '../lock';
+import { makeFakeBank } from '../bank';
 import { makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
 import { PERSONAS, PASSWORD, FIRST_FREE_MID } from './personas';
@@ -434,6 +435,14 @@ export const buildDemo = async ({ random, people, now }) => {
   }
 
   // --- Storage ---------------------------------------------------------------
+  // --- The fake bank (settings "bankproxy": "fake") ------------------------
+  // Deposits from the last few days, not yet in Payments: what synchronizing
+  // the bank finds.
+  await makeFakeBank(pickMembers(active, 4).map((member, i) => ({
+    amount: [PRICES.memberBase, PRICES.memberLab, 75, PRICES.memberBase][i], date: days(-(i + 1)),
+    swish: { name: member.name, mobile: `4670${String(1000000 + i)}`, message: i === 2 ? 'kaffe' : `Medlemskap ${member.name.split(' ')[0]}` },
+  })));
+
   // --- The fake door lock (settings "lockApi": "fake") -------------------
   // Most lab members with the right end date and some door openings; a few
   // a month short, a few invited without an account yet.

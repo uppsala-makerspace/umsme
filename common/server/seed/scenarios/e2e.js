@@ -15,6 +15,9 @@ import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
 import { makeFakeLock } from '../lock';
+import { makeFakeBank } from '../bank';
+import { makeMember, pay } from '../members';
+import { Payments } from '/imports/common/collections/payments';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Groups } from '/imports/common/collections/groups';
@@ -210,6 +213,27 @@ export const buildE2e = async ({ people, now }) => {
   await expense('E2E invoice', 'confirmed', { type: 'invoice', dueDate: days(10), amount: 1200 });
   await expense('E2E unreimburse', 'reimbursed');
   await expense('E2E paid', 'reimbursed', { amount: 480 });
+
+  // Payments to file by hand: untreated ones to connect to a member, to mark
+  // as other and to delete, and one connected to a member that needs its
+  // membership. Two members of their own, with a membership each, for the
+  // tests that edit and delete one.
+  const payment = (message, fields = {}) => Payments.insertAsync({
+    hash: `e2e-${message}`, type: 'swish', amount: 200, date: days(-4), message, name: 'Okänd Betalare', mobile: '46700000099', ...fields,
+  });
+  await payment('E2E connect payment');
+  await payment('E2E other payment');
+  await payment('E2E delete payment');
+  await payment('E2E membership payment', { member: members.newcomer._id });
+  for (const [mid, purpose] of [['901', 'edit'], ['902', 'delete']]) {
+    const member = await makeMember({ mid, name: `E2E ${purpose} membership`, email: `e2e-${purpose}-membership@example.org` });
+    await pay(member, 'memberBase', { at: days(-100), via: 'bankgiro' });
+  }
+  // The fake bank: two Swish deposits not yet in Payments.
+  await makeFakeBank([
+    { amount: 200, date: days(-1), swish: { name: 'Bo Basmedlem', mobile: '46700000106', message: 'E2E bank medlemskap' } },
+    { amount: 75, date: days(-1), swish: { name: 'Gäst Gästsson', mobile: '46700000200', message: 'E2E bank kaffe' } },
+  ]);
 
   // Storage last, so that the storage hooks see the members' final dates.
   const walls = await makeStorageWalls([
