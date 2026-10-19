@@ -35,6 +35,16 @@ test.describe('Membership status', () => {
     await expect(page.getByRole('heading', { name: /^lab access$/i })).toBeVisible();
   });
 
+  test('refuses a wrong combination', async ({ page }) => {
+    await page.goto('/check');
+    const form = page.locator('form').filter({ hasText: /check your status page/i });
+    await form.getByRole('textbox').fill(maja.email);
+    await form.getByRole('spinbutton').fill('9999');
+    await form.getByRole('button', { name: /go to status page/i }).click();
+    await expect(page.getByText(/wrong combination/i)).toBeVisible();
+    await expect(page).toHaveURL(/\/check$/);
+  });
+
   test('tells when a link leads to no member', async ({ page }) => {
     await page.goto('/check/nosuchmember');
     await expect(page.getByRole('heading', { name: /no member with this id/i })).toBeVisible();

@@ -12,13 +12,17 @@ export const themed = (component) => (props) =>
   createElement(NavigationContext.Provider, { value: go },
     createElement(ThemeProvider, { theme }, createElement(component, props)));
 
-/** A route that shows a React page; the route parameters become its props. */
-export const reactRoute = (path, name, component) => {
+/**
+ * A route that shows a React page; the route parameters become its props.
+ * The page sits in admin's layout, or in another Blaze layout named by
+ * `layout` (the public pages use 'Clean').
+ */
+export const reactRoute = (path, name, component, { layout = 'AppBody' } = {}) => {
   const page = themed(component);
   return FlowRouter.route(path, {
     name,
     action(params) {
-      this.render('AppBody', { main: 'ReactPage', component: page, props: { ...params } });
+      this.render(layout, { main: 'ReactPage', component: page, props: { ...params } });
     },
   });
 };

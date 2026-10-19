@@ -1,18 +1,7 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "../../layouts/Clean.html";
-import './Find';
-import './View';
+import { reactRoute } from '../../react/reactRoute';
+import { FindStatusPage } from '/imports/ui/check/FindStatusPage';
+import { MemberStatusPage } from '/imports/ui/check/MemberStatusPage';
+import '../../layouts/Clean.html';
 
-FlowRouter.route('/check', {
-  name: 'check',
-  action() {
-    this.render('Clean', {main: 'Find'});
-  }
-});
-
-FlowRouter.route('/check/:_id', {
-  name: 'memberview',
-  action(params) {
-    this.render('Clean', {main: 'View'});
-  }
-});
+reactRoute('/check', 'check', FindStatusPage, { layout: 'Clean' });
+reactRoute('/check/:_id', 'memberview', MemberStatusPage, { layout: 'Clean' });

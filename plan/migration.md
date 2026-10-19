@@ -248,6 +248,12 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | groups | ✓ | ✓ | ✓ | ✓ (de breda publiceringarna `groups`, `workshops`, `groupMemberships` finns kvar för utlägg och certifikat) |
 | certificates | ✓ | ✓ | ✓ | ✓ (medlemssidans certifikat är React i Blaze-sidan via `ReactSlot`; `certificates` publiceras brett för admin-konsolen tills den migreras; `attestations` borttagen) |
 | announcement | ✓ | ✓ | ✓ | ✓ (själva utskicket och markeringen som skickad är mail-modulens, som fortfarande skriver `Announcements` direkt, så dess `allow` och den breda publiceringen `announcements` ligger kvar till mail) |
+| excluded, reminders | ✓ | ✓ | ✓ | ✓ (medlemslistan pagineras på servern: `adminMembers.page`, `ServerDataList`, `useServerList`) |
+| history, stats, revenue | ✓ | ✓ (metoder `stats.*`) | ✓ | ✓ |
+| accounting | ✓ (fanns) | – | ✓ | ✓ |
+| lock | ✓ | ✓ (metoder `lock.*`) | ✓ | ✓ (lås-API:t bakom `lockApi()`, fejk med `"lockApi": "fake"`) |
+| door | ✓ | ✓ (`doorUnlocks.*`) | ✓ | ✓ (publiceringarna `unlocks`, `doorunlocks` borttagna) |
+| check | ✓ (fanns) | – | ✓ | ✓ (publika sidor i Clean-layouten: `reactRoute(..., { layout: 'Clean' })`) |
 
 ## Beslut (2026-10-19)
 
