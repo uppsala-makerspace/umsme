@@ -32,6 +32,8 @@ import {
 } from '/imports/common/collections/storage';
 import { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
 
+export const PUBLISHED_USER_FIELDS = { username: 1, emails: 1, createdAt: 1 };
+
 const createAuthFuncForRoles = (col, roles) => async function () {
   if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
     return col.find();
@@ -56,7 +58,16 @@ export default () => {
   Meteor.publish('comments', createAuthFuncFor(Comments));
   Meteor.publish('unlocks', createAuthFuncFor(Unlocks));
   Meteor.publish('doorunlocks', createAuthFuncFor(DoorUnlocks));
-  Meteor.publish('users', createAuthFuncFor(Meteor.users));
+  // Never the whole document: `services` holds password hashes, login tokens
+  // and Google access tokens, and `profile` an admin's personal number. The
+  // pages need only these; the logged-in user's own profile comes with the
+  // default user publication.
+  Meteor.publish('users', async function () {
+    if (this.userId && (await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))) {
+      return Meteor.users.find({}, { fields: PUBLISHED_USER_FIELDS });
+    }
+    this.ready();
+  });
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
   Meteor.publish('initiatedPayments', createAuthFuncFor(initiatedPayments));
   Meteor.publish('liabilityDocuments', createAuthFuncFor(LiabilityDocuments));
@@ -88,7 +99,9 @@ export default () => {
       StorageOffers.find(),
       Messages.find({ type: 'storage' }),
       Members.find({}, { fields: { name: 1, mid: 1, email: 1, mobile: 1, lab: 1, infamily: 1 } }),
-      Meteor.users.find({}, { fields: { 'emails.address': 1, profile: 1 } }),
+      // profile.name only: the event log falls back to it, and the rest of
+      // profile holds an admin's personal number.
+      Meteor.users.find({}, { fields: { 'emails.address': 1, 'profile.name': 1 } }),
     ];
   });
 

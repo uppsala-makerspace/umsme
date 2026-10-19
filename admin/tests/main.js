@@ -24,6 +24,7 @@ import "./clientWriteRules.tests";
 import "./memberMerge.tests";
 import "./expenseFilters.tests";
 import "./storeRevenue.tests";
+import "./userPublications.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {
