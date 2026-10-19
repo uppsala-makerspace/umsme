@@ -26,4 +26,5 @@ import './memberLookup';
 import './certificates';
 import './announcements';
 import './expenseAccounts';
+import './payments';
 import './stats';

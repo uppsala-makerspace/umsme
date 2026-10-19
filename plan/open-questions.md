@@ -30,3 +30,16 @@ Varje punkt: modul, frågan, vad som är gjort i väntan.
   den följa `private.doorunlockMail` som cron-jobbet gör? Gjort i väntan:
   orörd.
 
+## bank, membership
+
+- **Mobilnumret följer med när en betalning kopplas till en medlem.** Blaze-
+  koden försökte kopiera betalningens mobilnummer till en medlem som saknar
+  ett, men det blev aldrig av (ett `findOneAsync` utan `await`). Nu görs det
+  (`assignPaymentMember`). Önskat? Gjort i väntan: som koden avsåg.
+- **`setPnr` skriver över hela `profile`** på användaren (`$set: { profile:
+  { pnr } }`), och tar alltså bort t.ex. `profile.name`. Ska bara `profile.pnr`
+  sättas? Gjort i väntan: orört.
+- **Medlemskapssidan sparar och går till medlemmen**, som Blaze gjorde
+  ("Update and go back to member"). Ska den stanna kvar med "Saved." som de
+  andra React-sidorna? Gjort i väntan: som Blaze.
+

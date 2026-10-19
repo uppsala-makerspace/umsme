@@ -244,6 +244,8 @@ export const models = {
     family: { label: "Family", type: Boolean, optional: true },
     memberend: { label: "Membership end", type: Date, optional: true },
     labend: { label: "Lab membership end", type: Date, optional: true },
+    // Set by the domain functions on every admin write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   note: {
     _id: { label: "Id", type: String, max: 10 },

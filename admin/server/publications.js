@@ -7,7 +7,6 @@ import { Messages } from '/imports/common/collections/messages';
 import { Payments } from '/imports/common/collections/payments';
 import { Mails } from '/imports/common/collections/mails';
 import { Comments } from '/imports/common/collections/comments';
-import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Announcements } from '/imports/common/collections/announcements';
@@ -65,11 +64,9 @@ export default () => {
     this.ready();
   });
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
-  Meteor.publish('initiatedPayments', createAuthFuncFor(initiatedPayments));
   Meteor.publish('certificates', createAuthFuncFor(Certificates));
   Meteor.publish('announcements', createAuthFuncFor(Announcements));
   Meteor.publish('invites', createAuthFuncFor(Invites));
-  Meteor.publish('storeItems', createAuthFuncFor(StoreItems));
 
   // Storage is deliberately published separately from the broad members
   // publication: treasurer-only users may see members for reimbursements, but

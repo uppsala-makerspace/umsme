@@ -66,6 +66,14 @@ test.describe('Payments', () => {
     await expect(page.getByRole('heading', { name: /connect to member/i })).toBeVisible();
   });
 
+  test('connects a payment to a member', async ({ page }) => {
+    await openPayment(page, 'E2E connect payment');
+    await page.getByRole('combobox', { name: 'Member', exact: true }).fill('Maja');
+    await page.getByRole('listbox').getByRole('option', { name: /Maja Medlem/ }).click();
+    await page.getByRole('button', { name: /^connect$/i }).click();
+    await expect(page.getByRole('heading', { name: /connected to member/i })).toContainText('Maja Medlem');
+  });
+
   test('marks a payment as for another purpose', async ({ page }) => {
     await openPayment(page, 'E2E other payment');
     await action(page, /^(switch|mark as other)/i).click();
