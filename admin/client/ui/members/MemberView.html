@@ -44,5 +44,5 @@
     {{> MessageList member=id}}
     {{/unless}}
     {{>CommentList about=id}}
-    {{> MemberAttestations member=id}}
+    {{> ReactSlot component=certificatesSection props=certificatesProps}}
 </template>

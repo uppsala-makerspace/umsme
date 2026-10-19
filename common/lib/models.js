@@ -734,6 +734,9 @@ export const models = {
       type: Number,
       min: 0,
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
+    createdAt: { label: "Created", type: Date, optional: true, autoform: { omit: true } },
   },
   attestation: {
     certificateId: {

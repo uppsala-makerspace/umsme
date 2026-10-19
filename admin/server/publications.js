@@ -12,7 +12,6 @@ import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Certificates } from '/imports/common/collections/certificates';
-import { Attestations } from '/imports/common/collections/attestations';
 import { Announcements } from '/imports/common/collections/announcements';
 import Invites from '/imports/common/collections/Invites';
 import { Expenses } from '/imports/common/collections/expenses';
@@ -72,7 +71,6 @@ export default () => {
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
   Meteor.publish('initiatedPayments', createAuthFuncFor(initiatedPayments));
   Meteor.publish('certificates', createAuthFuncFor(Certificates));
-  Meteor.publish('attestations', createAuthFuncFor(Attestations));
   Meteor.publish('announcements', createAuthFuncFor(Announcements));
   Meteor.publish('invites', createAuthFuncFor(Invites));
   Meteor.publish('expenses', createAuthFuncForRoles(Expenses, ['admin', 'board', 'treasurer']));
@@ -221,6 +219,19 @@ export default () => {
     check(docId, String);
     if (!(await hasRole(this.userId, DOMAIN_ROLES.workshops))) return this.ready();
     return Workshops.find(docId);
+  });
+
+  // The certificates, with what the list shows and what choosing a
+  // prerequisite needs (each one's own prerequisites, to keep out cycles).
+  Meteor.publish('admin.certificates.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.certificates))) return this.ready();
+    return Certificates.find({}, { fields: { name: 1, workshopId: 1, mandatory: 1, defaultValidityDays: 1, certifierRole: 1, prerequisites: 1, test: 1 } });
+  });
+
+  Meteor.publish('admin.certificates.certificate', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.certificates))) return this.ready();
+    return Certificates.find(docId);
   });
 
   // What the group and workshop pages link to and choose among: names, and

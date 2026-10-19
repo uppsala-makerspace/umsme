@@ -99,7 +99,7 @@ export const buildE2e = async ({ people, now }) => {
   await Workshops.insertAsync({ name: { sv: 'E2E delete verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   // Certificates: the kiln under the ceramics workshop (a certifier, a
   // holder), the wheel that needs it first, and one each for the admin tests
-  // that edit, delete, mark mandatory, grant and revoke. None is mandatory to
+  // that edit, link, delete, mark mandatory, grant and revoke. None is mandatory to
   // begin with: a mandatory certificate would keep the app's personas from
   // the doors.
   const certificate = (fields) => Certificates.insertAsync(fields);
@@ -113,7 +113,7 @@ export const buildE2e = async ({ people, now }) => {
   });
   await attest(kiln, 'member', { endDate: days(335) });
   await certificate({ name: { sv: 'Drejskiva', en: 'Pottery wheel' }, workshopId: ceramics, prerequisites: [kiln] });
-  for (const purpose of ['edit', 'delete', 'mandatory', 'grant']) {
+  for (const purpose of ['edit', 'links', 'delete', 'mandatory', 'grant']) {
     await certificate({ name: { sv: `E2E ${purpose} certificate` } });
   }
   const revoke = await certificate({ name: { sv: 'E2E revoke certificate' } });

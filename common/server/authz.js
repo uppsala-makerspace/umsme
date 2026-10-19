@@ -15,6 +15,7 @@ export const DOMAIN_ROLES = {
   groups: ['admin', 'board'],
   workshops: ['admin', 'board'],
   memberLookup: ['admin', 'board'],
+  certificates: ['admin', 'board'],
 };
 
 /** Whether the user holds any of the roles. */

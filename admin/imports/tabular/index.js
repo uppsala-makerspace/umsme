@@ -5,8 +5,6 @@ import './messages';
 import './mails';
 import './payments';
 import './users';
-import './certificates';
-import './attestations';
 import './announcements';
 import './doorUnlocks';
 import './expenses';

@@ -76,6 +76,44 @@ test.describe('Certificates', () => {
     await expect(page.getByRole('link', { name: KILN })).toBeVisible();
   });
 
+  test('sets the workshop, a certifier and a prerequisite, on save', async ({ page }) => {
+    await openCertificate(page, 'E2E links certificate');
+    await page.getByRole('combobox', { name: 'Workshop or area of interest' }).selectOption({ label: 'Keramikverkstaden' });
+    await page.getByRole('combobox', { name: 'Add to certifiers' }).fill('Sara Sty');
+    await page.getByRole('listbox').getByRole('option', { name: /Sara Styrgrupp/ }).click();
+    await page.getByRole('combobox', { name: 'Certificates needed first' }).fill('ugn');
+    await page.getByRole('listbox').getByRole('option', { name: KILN }).click();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
+
+    await openCertificate(page, 'E2E links certificate');
+    await expect(page.getByRole('link', { name: 'Open Keramikverkstaden' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Sara Styrgrupp/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: KILN, exact: true })).toBeVisible();
+    await page.getByRole('img', { name: 'Remove Sara Styrgrupp' }).click();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
+    await openCertificate(page, 'E2E links certificate');
+    await expect(page.getByText(/no certifiers by name/i)).toBeVisible();
+  });
+
+  test('grants a certificate to a member', async ({ page }) => {
+    await openCertificate(page, 'E2E grant certificate');
+    await page.getByRole('combobox', { name: 'Member', exact: true }).fill('Nora');
+    await page.getByRole('listbox').getByRole('option', { name: /Nora Ny/ }).click();
+    await expect(page.getByRole('combobox', { name: 'Certified by' })).toHaveValue(/Astrid Admin/);
+    await action(page, /^grant certificate$/i).click();
+    await expect(rows(page).filter({ hasText: 'Nora Ny' })).toContainText('Astrid Admin');
+  });
+
+  test('grants a certificate on the member\'s page', async ({ page }) => {
+    await openCertificate(page, KILN);
+    await page.getByRole('link', { name: 'Maja Medlem' }).first().click();
+    await page.getByRole('combobox', { name: 'Certificate', exact: true }).selectOption({ label: WHEEL });
+    await action(page, /^grant certificate$/i).click();
+    await expect(rows(page).filter({ hasText: WHEEL })).toBeVisible();
+  });
+
   test('revokes a holder\'s certificate', async ({ page }) => {
     await openCertificate(page, 'E2E revoke certificate');
     const holder = rows(page).filter({ hasText: 'Bo Basmedlem' });

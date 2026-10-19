@@ -246,6 +246,7 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | spaces | ✓ | ✓ | ✓ | ✓ (EntitySpaces borttagen; utrymmen väljs nu i verkstads- och gruppformulären) |
 | workshops | ✓ | ✓ | ✓ | ✓ |
 | groups | ✓ | ✓ | ✓ | ✓ (de breda publiceringarna `groups`, `workshops`, `groupMemberships` finns kvar för utlägg och certifikat) |
+| certificates | ✓ | ✓ | ✓ | ✓ (medlemssidans certifikat är React i Blaze-sidan via `ReactSlot`; `certificates` publiceras brett för admin-konsolen tills den migreras; `attestations` borttagen) |
 
 ## Beslut (2026-10-19)
 

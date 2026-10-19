@@ -15,7 +15,8 @@ import '../family/FamilyList';
 import '../family/FamilyInviteList';
 import '../family/MemberInvitesReceived';
 import '../message/ReminderMessage';
-import '../certificates/MemberAttestations';
+import '../../react/ReactSlot';
+import { MemberCertificatesSection } from '/imports/ui/certificates/MemberCertificatesSection';
 
 Template.MemberView.onCreated(function() {
   Meteor.subscribe('members');
@@ -73,6 +74,12 @@ Template.MemberView.events({
 });
 
 Template.MemberView.helpers({
+  certificatesSection() {
+    return MemberCertificatesSection;
+  },
+  certificatesProps() {
+    return { memberId: FlowRouter.getParam('_id') };
+  },
   Members() {
     return Members;
   },
