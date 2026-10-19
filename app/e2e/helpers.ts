@@ -1,6 +1,8 @@
 import { Page, expect } from '@playwright/test';
 import en from '../imports/i18n/en.json';
-import { PERSONAS, E2E_PERSONAS, PASSWORD, e2eLoginToken } from '../imports/common/server/seed/scenarios/personas.js';
+import { testUsers, openAs, type TestUser } from '../imports/common/e2e/personas';
+
+export { testUsers, openAs };
 
 /**
  * Set the app language to English
@@ -12,37 +14,8 @@ export async function setLanguageEnglish(page: Page): Promise<void> {
   });
 }
 
-/**
- * Test users: the seeded personas, by key (member, family, familyMember,
- * noliability, storageWarning, …). See common/server/seed/scenarios/personas.js.
- */
-type TestUser = { email: string; password: string; name: string | null; mid?: string };
-export const testUsers: Record<string, TestUser> = Object.fromEntries(
-  [...PERSONAS, ...E2E_PERSONAS].map((persona) => [
-    persona.key,
-    { email: persona.email, password: PASSWORD, name: persona.name, mid: persona.mid },
-  ]),
-);
-
 /** The name the home page greets a user with. */
 export const firstName = (user: TestUser) => (user.name || '').split(' ')[0];
-
-/**
- * Open a page as a persona, already logged in: the e2e scenario gives every
- * persona a known login token, which goes into localStorage before the page
- * loads. No login page, no extra page load. The language is English.
- *
- * Use the login page itself only in tests about logging in.
- */
-export async function openAs(page: Page, key: string, path = '/'): Promise<void> {
-  if (!testUsers[key]) throw new Error(`No persona "${key}"`);
-  const token = e2eLoginToken(key);
-  await page.addInitScript((loginToken) => {
-    localStorage.setItem('language', 'en');
-    localStorage.setItem('Meteor.loginToken', loginToken);
-  }, token);
-  await page.goto(path);
-}
 
 /**
  * Logout helper

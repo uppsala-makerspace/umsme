@@ -150,7 +150,10 @@ Ingen CI tills vidare; allt körs lokalt.
    också har `E2E_PERSONAS` för de personer bara lagringstesterna behöver.
    Appens `seedTestData.js` och skriptet `seed:dev` (som seedade
    huvuddatabasen `umsme`) är borttagna.
-5. Playwright i admin och e2e-tester för pilotmodulen `liability` mot
-   Blaze-versionen.
+5. ~~Playwright i admin~~ Klart: port 3020, egen databas `umsme-admin-e2e`
+   så att admins och appens sviter kan köras samtidigt, samma mönster som
+   appen (`openAs`, parallellt, produktionsläge). `openAs` och testpersonerna
+   delas via `common/e2e/personas.ts`. Fyra rökprov i `e2e/access.spec.ts`.
+6. E2e-tester för pilotmodulen `liability` mot Blaze-versionen.
 
 Sedan steg 0 och piloten i `plan/migration.md`.

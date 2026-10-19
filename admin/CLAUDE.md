@@ -17,6 +17,8 @@ meteor                     # Direct meteor run
 # Testing
 npm test                   # Run tests once with Mocha
 npm run test-app           # Run full-app tests with watch mode
+npm run test:e2e           # Playwright e2e tests (port 3020, database umsme-admin-e2e)
+E2E_DEV=1 npm run test:e2e # The same against development mode, for debugging
 
 # Production build
 meteor build ../umsme-build --architecture os.linux.x86_64
@@ -71,6 +73,25 @@ The `imports/common` symlink points to `../../common/` containing:
 - Each feature in `client/ui/` has its own folder with .html (Blaze) and .js files
 - Templates use `Template.dynamic` for dynamic rendering
 - Forms generated from schemas using AutoForm
+
+## E2e tests
+
+Playwright tests live in `e2e/`. `npm run test:e2e` starts admin in
+production mode on port 3020 with `SEED=e2e`, which empties and seeds the
+database `umsme-admin-e2e` (separate from the app's `umsme-e2e`, so both
+suites can run at once) before the tests start.
+
+- Start a test with `openAs(page, '<persona key>', '/path')` from
+  `e2e/helpers.ts`: every persona has a seeded login token, so the page opens
+  logged in. The personas are in `common/server/seed/scenarios/personas.js`;
+  `admin`, `board`, `treasurer` and `storage` have the admin roles.
+- Tests run in parallel and in any order. A test that changes data uses a
+  persona or fixtures of its own (`E2E_PERSONAS`, `scenarios/e2e.js`);
+  read-only tests may share.
+- Select by what the user sees (`getByRole`, `getByLabel`, visible text),
+  never by CSS classes or DOM structure: the same tests must pass when a
+  module moves from Blaze to React (see `plan/migration.md`).
+- Wait for what should appear (`expect(...).toBeVisible()`), never a fixed time.
 
 ## Dev gotchas
 
