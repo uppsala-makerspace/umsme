@@ -65,27 +65,21 @@
                 </ul>
             </li>
             {{else}}
-            <li><a href="/storage">Storage</a></li>
+              {{#if isInRole "storage"}}
+              <li><a href="/storage">Storage</a></li>
+              {{/if}}
             {{/if}}
         </ul>
     </nav>
-    {{#if currentUser}}
-      {{#if isInRole "admin,board,treasurer,storage"}}
-        <div class="admin-panel">
-            <div id="main">
-                {{> Template.dynamic template=main}}
-            </div>
-        </div>
+    <div id="main">
+      {{#if currentUser}}
+        {{#if isInRole "admin,board,treasurer,storage"}}
+          {{> Template.dynamic template=main}}
+        {{else}}
+          <h1>You do not have access to this administration system</h1>
+        {{/if}}
+      {{else}}
+        <h1>You have to sign in first!</h1>
       {{/if}}
-      {{#unless isInRole "admin,board,treasurer,storage"}}
-         <br>
-         <br>
-        <h1>You do not have access to this administration system</h1>
-      {{/unless}}
-    {{/if}}
-    {{#unless currentUser}}
-    <br>
-    <br>
-    <h1>You have to sign in first!</h1>
-    {{/unless}}
+    </div>
 </template>
