@@ -88,8 +88,10 @@ I både `e2e` och `demo`:
 
 ## Köra
 
-Seedningen körs i admin, inne i Meteor, så att Collection2, roles och
-accounts fungerar som vanligt:
+Seedningen körs inne i Meteor, så att Collection2, roles och accounts
+fungerar som vanligt. Demon seedas i admin, vars egen uppstart sedan lägger
+till admin-inloggningen och mallarna för lagringsmeddelanden; appens e2e
+seedas i appen, som har samma paket (`runSeedFromEnv` anropas av båda):
 
 - `SEED=e2e` eller `SEED=demo` vid start av admin seedar och fortsätter
   sedan köra.
@@ -143,8 +145,8 @@ Ingen CI tills vidare; allt körs lokalt.
    `example.org`.
 3. ~~Regeln i `CLAUDE.md`.~~ Klart, tillsammans med demo.
 4. ~~Scenariot `e2e`; flytta appens seedning dit och få appens 20 e2e-tester
-   gröna mot den.~~ Klart. Admin seedar `umsme-e2e` på port 3012 innan appen
-   startar; `e2e/helpers.ts` läser personerna direkt ur `personas.js`, som
+   gröna mot den.~~ Klart. Appen seedar `umsme-e2e` själv vid start
+   (`SEED=e2e`), så ingen admin behöver köras för appens tester; `e2e/helpers.ts` läser personerna direkt ur `personas.js`, som
    också har `E2E_PERSONAS` för de personer bara lagringstesterna behöver.
    Appens `seedTestData.js` och skriptet `seed:dev` (som seedade
    huvuddatabasen `umsme`) är borttagna.

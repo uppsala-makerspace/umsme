@@ -24,26 +24,15 @@ export default defineConfig({
     },
   ],
 
-  // Admin seeds the e2e database first (SEED=e2e empties umsme-e2e and fills it
-  // from common/server/seed/scenarios/e2e.js); the app then runs against it.
-  // Playwright starts these in order and waits for each.
-  webServer: [
-    {
-      command: 'npm run seed:e2e',
-      cwd: '../admin',
-      url: 'http://localhost:3012',
-      reuseExistingServer: false,
-      timeout: 180000,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
-    {
-      command: 'npm run start:test',
-      url: 'http://localhost:3002',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120000,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
-  ],
+  // The app seeds the e2e database at startup (SEED=e2e empties umsme-e2e and
+  // fills it from common/server/seed/scenarios/e2e.js). Never reused, so every
+  // run starts on fresh data.
+  webServer: {
+    command: 'npm run start:test',
+    url: 'http://localhost:3002',
+    reuseExistingServer: false,
+    timeout: 180000,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  },
 });

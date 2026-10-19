@@ -91,11 +91,10 @@ npm run test:e2e:ui
 ```
 
 The test runner will:
-1. Start admin on port 3012 with `SEED=e2e`, which empties and seeds the
-   separate database `umsme-e2e` (`common/server/seed/scenarios/e2e.js`)
-2. Start the app on port 3002 against the same database
-3. Run all Playwright tests
-4. Shut down both servers
+1. Start the app on port 3002 with `SEED=e2e`, which first empties and seeds
+   the separate database `umsme-e2e` (`common/server/seed/scenarios/e2e.js`)
+2. Run all Playwright tests
+3. Shut down the server
 
 The test users are the personas in `common/server/seed/scenarios/personas.js`;
 `e2e/helpers.ts` reads them from there. Tests open pages already logged in

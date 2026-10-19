@@ -112,8 +112,10 @@ emails and their push subscriptions. Two settings keep dev from contacting them:
 ## Demo and test data
 
 `./scripts/demo.sh` seeds the database `umsme-demo` and starts all three apps
-against it. Seeding runs in admin at startup when `SEED=demo` is set; the
-scenario is `common/server/seed/scenarios/demo.js`, built from the blocks in
+against it. Seeding runs at startup when `SEED=demo` or `SEED=e2e` is set
+(`runSeedFromEnv` in `common/server/seed/runFromEnv.js`, called by admin and
+the app): the demo seeds in admin, the app's e2e tests in the app. The
+scenarios are in `common/server/seed/scenarios/`, built from the blocks in
 `common/server/seed/`, with the named logins in `scenarios/personas.js`.
 Seeding empties the database first, so `assertSeedTarget` refuses any database
 whose name does not end in `-demo` (or `-e2e`) and any settings whose
