@@ -7,7 +7,7 @@ import { useNavigate } from '../navigation';
 export const PAGE_SIZES = [25, 50, 100];
 
 /** The toolbar: a search box over all columns, always open. */
-const SearchToolbar = () => (
+export const SearchToolbar = () => (
   <Toolbar style={{ justifyContent: 'flex-start' }}>
     <QuickFilter defaultExpanded>
       <QuickFilterControl
@@ -33,7 +33,7 @@ const SearchToolbar = () => (
  * columns.jsx.
  *
  * With `rows` it sorts, searches and pages in the browser, which suits small
- * lists. Large lists will page on the server (plan/migration.md).
+ * lists. Large lists page on the server: ServerDataList.
  *
  * With `rowHref` the whole row opens the row's page: a click anywhere, Enter
  * on a cell, or Ctrl/Cmd-click for a new tab. Most lists should give one;

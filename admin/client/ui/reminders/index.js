@@ -1,9 +1,4 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './Reminders';
+import { reactRoute } from '../../react/reactRoute';
+import { RemindersPage } from '/imports/ui/members/RemindersPage';
 
-FlowRouter.route('/reminders', {
-  name: 'reminders',
-  action() {
-    this.render('AppBody', { main: 'Reminders' });
-  },
-});
+reactRoute('/reminders', 'reminders', RemindersPage);
