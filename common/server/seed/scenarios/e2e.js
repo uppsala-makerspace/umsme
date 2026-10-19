@@ -14,6 +14,7 @@ import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
+import { makeFakeLock } from '../lock';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Groups } from '/imports/common/collections/groups';
@@ -159,6 +160,18 @@ export const buildE2e = async ({ people, now }) => {
       requiresMembership: false, commentRequired: false,
     });
   }
+
+  // The fake door lock: Maja right, Dagny thirty days short (and Ulla, for
+  // the test that fixes it), Kalle invited but without an account, Fredrik
+  // without an end date; Olle has no lock username at all. Maja has opened
+  // the door a few times.
+  await makeFakeLock([
+    { member: members.member, visits: [1, 2, 5, 10, 40] },
+    { member: members.discounted, end: -30 },
+    { member: members.excluded, end: -30 },
+    { member: members.quarterly, account: false },
+    { member: members.family, end: 'forever' },
+  ], { now });
 
   // Storage last, so that the storage hooks see the members' final dates.
   const walls = await makeStorageWalls([

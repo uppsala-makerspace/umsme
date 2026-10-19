@@ -1,91 +1,12 @@
-import { fetch, Headers } from 'meteor/fetch';
+import { lockApi } from '../lock';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { Members } from '/imports/common/collections/members';
 import { Email } from 'meteor/email';
 import { isEmailAllowed } from '/imports/common/server/emailGuard';
 
-let assumeUser;
-let lockid;
-let groupid;
-let authTime;
-let headers;
-let headersJSON;
-
-const logResponse = (response) => {
-  console.log(`Status: ${response.status}`);
-  console.log(`Content type: ${response.headers.get("content-type")}`);
-}
-
-/**
- * Requires the settings to contain:
- *
- * lockUsername
- * lockPassword
- * lockAssumeUser
- * lockName
- * groupLockName
- *
- * @return {Promise<void>}
- */
-export const authenticate = async () => {
-  if (!authTime || (new Date().getTime() - authTime.getTime()) > 3600000) {
-    authTime = new Date();
-    const params = {
-      'grant_type': 'password',
-      'client_id': 'danalock-web',
-      'username': Meteor.settings.lockUsername,
-      'password': Meteor.settings.lockPassword,
-    };
-    try {
-      // Login and construct authorization key
-      const loginRequest = await fetch('https://api.danalock.com/oauth2/token', {
-        method: 'POST',
-        headers: new Headers({'Content-Type': 'application/json'}),
-        body: JSON.stringify(params)
-      });
-      const credentials = await loginRequest.json();
-      const Authorization = `${credentials.token_type} ${credentials.access_token}`;
-
-      // Fetch available identities, keep the assumedUser
-      const identitiesRequest = await fetch('https://api.danalock.com/user/v1/identities', {
-        headers: new Headers({'Accept': 'application/json', Authorization}),
-      });
-      const identities = await identitiesRequest.json();
-      assumeUser = identities.find(obj => obj.domain.indexOf(Meteor.settings.lockAssumeUser) !== -1).id;
-
-      // Create headers object for fetch containing the authorization with the assumeUser from settings
-      headers = new Headers({
-        Authorization,
-        'X-Assume-User': assumeUser,
-        'Accept': 'application/json'
-      });
-      // Same but with JSON payload
-      headersJSON = new Headers({
-        Authorization,
-        'X-Assume-User': assumeUser,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      });
-
-      // Find the lockid based on the lockName in settings
-      const locksRequest = await fetch('https://api.danalock.com/locks/v1?page=0', {headers});
-      const locks = await locksRequest.json();
-      lockid = locks.find(l => l.name.indexOf(Meteor.settings.lockName) !== -1).id;
-
-      // Find the groupid based on the groupLockName in settings
-      const groupsRequest = await fetch('https://api.danalock.com/groups/v1?page=0', {headers});
-      const groups = await groupsRequest.json();
-      console.log(groups);
-      groupid = groups.find(l => l.name.indexOf(Meteor.settings.groupLockName) !== -1).id;
-    } catch (e) {
-      console.log(e);
-    }
-  }
-};
-
+/** Copy the door's latest openings from the lock into DoorUnlocks. */
 export const syncUnlocks = async () => {
-  const lockLogRequest = await fetch(`https://api.danalock.com/log/v1/lock/${lockid}?page=0&perpage=50`, {headers});
-  const lockLog = await lockLogRequest.json();
+  const lockLog = await lockApi().log({ page: 0, perPage: 50 });
   let importedCount = 0;
   for(let i=0; i<lockLog.length;i++) {
     const event = lockLog[i];
@@ -112,7 +33,6 @@ export const syncUnlocks = async () => {
 Meteor.methods({
   'syncLockHistory': async () => {
     if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      await authenticate();
       return syncUnlocks();
     }
   },
@@ -120,7 +40,6 @@ Meteor.methods({
     if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
       throw new Meteor.Error('Not authorized');
     }
-    await authenticate();
     await syncUnlocks();
     const today = new Date();
     const yesterday = new Date();
@@ -144,7 +63,6 @@ Meteor.methods({
     if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
       throw new Meteor.Error('Not authorized');
     }
-    await authenticate();
     const afterDate = new Date();
     afterDate.setMonth(afterDate.getMonth()-6);
     let isAfter = true;
@@ -152,8 +70,7 @@ Meteor.methods({
     let visits = [];
     while (isAfter) {
       console.log(`Fetching page ${page}`);
-      const lockOpeningsRequest = await fetch(`https://api.danalock.com/log/v1/lock/${lockid}?page=${page}&perpage=50`, {headers});
-      const lockOpenings = await lockOpeningsRequest.json();
+      const lockOpenings = await lockApi().log({ page, perPage: 50 });
       page ++;
       visits = visits.concat(lockOpenings);
       if (lockOpenings.length === 0) {
@@ -170,83 +87,20 @@ Meteor.methods({
     if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
       throw new Meteor.Error('Not authorized');
     }
-    await authenticate();
-    const users0 = await (await fetch('https://api.danalock.com/users/v1?page=0', {headers})).json();
-    const users1 = await (await fetch('https://api.danalock.com/users/v1?page=1', {headers})).json();
-    const users = users0.concat(users1);
-    const calendars0 = await (await fetch('https://api.danalock.com/links/v1/calendars?page=0', {headers})).json();
-    const calendars1 = await (await fetch('https://api.danalock.com/links/v1/calendars?page=1', {headers})).json();
-    const calendars = calendars0.concat(calendars1);
-    const links0 = await (await fetch('https://api.danalock.com/links/v1/group_user_links?page=0', {headers})).json();
-    const links1 = await (await fetch('https://api.danalock.com/links/v1/group_user_links?page=1', {headers})).json();
-    const links = links0.concat(links1);
-    return { users, calendars, links };
+    return lockApi().status();
   },
   'setCalenderEndDate': async (calendar, endDate, link) => {
     if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
       throw new Meteor.Error('Not authorized');
     }
-    // Set new end date in the old calendar object
-    calendar.rule_sets[0].end_time = endDate;
-
-    // Create a new calendar object from the updated old calendar object
-    const newCalendarRequest = await fetch('https://api.danalock.com/links/v1/calendars',
-      {
-        method: 'POST',
-        headers: headersJSON,
-        body: JSON.stringify(calendar)
-      });
-    logResponse(newCalendarRequest);
-    const newCalendar = await newCalendarRequest.json();
-    const newCalId = newCalendar.id;
-
-    // Update the link to point to the new calendar.
-    const linkUpdateRequest = await fetch(`https://api.danalock.com/links/v1/${link.id}`, {
-      method: 'PATCH',
-      headers: headersJSON,
-      body: JSON.stringify({calendar_id: newCalId})
-    });
-    logResponse(linkUpdateRequest);
-
-    // Remove the old calendar object
-    const calendarDeleteRequest = await fetch(`https://api.danalock.com/links/v1/calendars/${calendar.id}`, { method: 'DELETE', headers });
-    logResponse(calendarDeleteRequest);
+    await lockApi().setCalendarEndDate(calendar, endDate, link);
   },
 
   'createCalendarEndDate': async (userid, endDate) => {
     if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
       throw new Meteor.Error('Not authorized');
     }
-    console.log(`Creating end date calender for ${userid} with enddate ${endDate}`);
-    // Create a new calender
-    const calBody = JSON.stringify({
-      "start_time": new Date().toISOString(),
-      "refresh_interval": 86400,
-      "rule_sets": [{
-        "end_time": endDate,
-        "number_of_weeks": null,
-        "week_days": null,
-        "daily_start": null,
-        "daily_end": null
-      }]
-    });
-    const calRequest = await fetch('https://api.danalock.com/links/v1/calendars',
-      { method: 'POST', headers: headersJSON, body: calBody });
-    logResponse(calRequest);
-    const cal = await calRequest.json();
-    const calId = cal.id;
-    console.log(`Calendar id is ${calId}`);
-
-    // Create a new link to connect the calendar to the user
-    const linkBody = JSON.stringify({
-      "user_id": userid,
-      "group_id": groupid,
-      "calendar_id": calId,
-      "link_profile": "user"
-    });
-    const linkResponse = await fetch('https://api.danalock.com/links/v1', { method: 'POST', headers: headersJSON, body: linkBody });
-    logResponse(linkResponse);
-    console.log('Created a link');
+    await lockApi().createCalendarEndDate(userid, endDate);
   }
 });
 

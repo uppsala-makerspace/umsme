@@ -29,6 +29,7 @@ import { daysFromNow, DAY_MS } from '../dates';
 import { makeUser } from '../accounts';
 import { makeMember, pay, joinFamily, randomHex, PRICES } from '../members';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
+import { makeFakeLock } from '../lock';
 import { makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
 import { PERSONAS, PASSWORD, FIRST_FREE_MID } from './personas';
@@ -433,6 +434,22 @@ export const buildDemo = async ({ random, people, now }) => {
   }
 
   // --- Storage ---------------------------------------------------------------
+  // --- The fake door lock (settings "lockApi": "fake") -------------------
+  // Most lab members with the right end date and some door openings; a few
+  // a month short, a few invited without an account yet.
+  const lockMembers = pickMembers(labMembers, 30, [personas.member._id, personas.discounted._id]);
+  await makeFakeLock([
+    { member: personas.member, visits: [1, 3, 8, 15, 30] },
+    { member: personas.discounted, end: -30 },
+    ...lockMembers.map((member, i) => ({
+      member,
+      ...(i % 10 === 3 ? { end: -31 } : {}),
+      ...(i % 10 === 7 ? { account: false } : {}),
+      visits: Array.from({ length: random.int(0, 25) }, () => random.int(0, 180)),
+    })),
+  ], { now });
+  log(`${lockMembers.length + 2} members with a fake lock account`);
+
   // Last, so that the storage hooks see the members' final dates.
   const walls = await makeStorageWalls([
     { _id: 'demo-wall-1', name: 'Våning 1, vägg 1', floor: 'floor1', column_count: 8, row_count: 6 },
