@@ -30,6 +30,13 @@ export const StoreItemList = ({ loading, items }) => (
       What members can buy in the app&apos;s web shop. Without a price the buyer sets the amount (clay by weight, a donation).
       Purchases are booked on the item&apos;s bookkeeping account.
     </Typography>
-    <DataList rows={items} columns={columns} loading={loading} empty="No items yet." defaultSort={{ field: 'code', sort: 'asc' }} />
+    <DataList
+      rowHref={(item) => `/storeitem/${item._id}`}
+      rows={items}
+      columns={columns}
+      loading={loading}
+      empty="No items yet."
+      defaultSort={{ field: 'code', sort: 'asc' }}
+    />
   </Box>
 );

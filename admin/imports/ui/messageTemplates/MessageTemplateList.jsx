@@ -32,6 +32,7 @@ export const MessageTemplateList = ({ loading, templates }) => (
       A message uses the template of its type that best matches the member&apos;s membership and member type; deprecated templates are skipped.
     </Typography>
     <DataList
+      rowHref={(template) => `/template/${template._id}`}
       rows={templates}
       columns={columns}
       loading={loading}

@@ -41,6 +41,13 @@ export const SpaceList = ({ loading, spaces, onImport, importResult, importing =
         Imported {importResult.imported}, skipped {importResult.skipped} already there, {importResult.icons} icons uploaded.
       </Alert>
     )}
-    <DataList rows={spaces} columns={columns} loading={loading} empty="No spaces yet." defaultSort={{ field: 'spaceId', sort: 'asc' }} />
+    <DataList
+      rowHref={(space) => `/space/${space._id}`}
+      rows={spaces}
+      columns={columns}
+      loading={loading}
+      empty="No spaces yet."
+      defaultSort={{ field: 'spaceId', sort: 'asc' }}
+    />
   </Box>
 );

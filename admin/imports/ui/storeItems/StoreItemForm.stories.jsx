@@ -28,7 +28,7 @@ const Editable = ({ values: initial, workshops: initialWorkshops, ...props }) =>
       values={current}
       onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))}
       workshops={ticks}
-      onToggleWorkshop={(id, checked) => setTicks((list) => list.map((w) => (w._id === id ? { ...w, checked } : w)))}
+      onSetWorkshops={(ids) => setTicks((list) => list.map((w) => ({ ...w, checked: ids.includes(w._id) })))}
     />
   );
 };

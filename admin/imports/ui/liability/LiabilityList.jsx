@@ -22,6 +22,7 @@ export const LiabilityList = ({ loading, documents }) => (
       Members are asked to approve the version with the latest date. Adding a version asks everyone to approve again.
     </Typography>
     <DataList
+      rowHref={(doc) => `/liability/${doc._id}`}
       rows={documents}
       columns={columns}
       loading={loading}

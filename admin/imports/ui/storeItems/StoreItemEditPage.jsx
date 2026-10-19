@@ -50,9 +50,8 @@ export const StoreItemEditPage = ({ _id }) => {
       workshops={workshops.map((w) => ({
         _id: w._id, name: w.name?.sv || w._id, isArea: w.kind === 'areaOfInterest', checked: linked.includes(w._id),
       }))}
-      onToggleWorkshop={(workshopId, checked) => {
+      onSetWorkshops={(next) => {
         const previous = linked;
-        const next = checked ? [...linked, workshopId] : linked.filter((id) => id !== workshopId);
         setLinked(next);
         // Back to what it was if the server says no; on success the
         // publication brings the item, and the effect above, in line.

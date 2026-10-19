@@ -2,6 +2,7 @@ import React from 'react';
 import TextField from '@mui/material/TextField';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import { QuickFilter, QuickFilterControl, Toolbar } from '@mui/x-data-grid/components';
+import { useNavigate } from '../navigation';
 
 export const PAGE_SIZES = [25, 50, 100];
 
@@ -34,31 +35,51 @@ const SearchToolbar = () => (
  * With `rows` it sorts, searches and pages in the browser, which suits small
  * lists. Large lists will page on the server (plan/migration.md).
  *
+ * With `rowHref` the whole row opens the row's page: a click anywhere, Enter
+ * on a cell, or Ctrl/Cmd-click for a new tab. Most lists should give one;
+ * keep a link column too, for the keyboard and middle-click.
+ *
  * @param {{ rows: object[], columns: object[], loading?: boolean, empty?: string,
- *           defaultSort?: { field: string, sort: 'asc'|'desc' } }} props
+ *           defaultSort?: { field: string, sort: 'asc'|'desc' }, rowHref?: (row) => string }} props
  */
-export const DataList = ({ rows, columns, loading = false, empty = 'Nothing here yet.', defaultSort, initialState, slotProps, ...props }) => (
-  <DataGrid
-    rows={rows}
-    columns={columns}
-    loading={loading}
-    getRowId={(row) => row._id}
-    density="compact"
-    autoHeight
-    showToolbar
-    disableRowSelectionOnClick
-    disableColumnSelector
-    disableDensitySelector
-    pageSizeOptions={PAGE_SIZES}
-    initialState={{
-      pagination: { paginationModel: { pageSize: PAGE_SIZES[0] } },
-      ...(defaultSort ? { sorting: { sortModel: [defaultSort] } } : {}),
-      ...initialState,
-    }}
-    localeText={{ noRowsLabel: empty, noResultsOverlayLabel: 'No matches.' }}
-    slots={{ toolbar: SearchToolbar }}
-    slotProps={slotProps}
-    sx={{ backgroundColor: 'background.paper' }}
-    {...props}
-  />
-);
+export const DataList = ({
+  rows, columns, loading = false, empty = 'Nothing here yet.', defaultSort, rowHref, initialState, slotProps, sx, ...props
+}) => {
+  const navigate = useNavigate();
+  const open = (row, event) => {
+    const href = rowHref(row);
+    if (event.metaKey || event.ctrlKey) window.open(href, '_blank');
+    else navigate(href);
+  };
+  const rowProps = rowHref ? {
+    // A click on a link in the row is the link's own; anything else opens the row.
+    onRowClick: ({ row }, event) => { if (!event.target.closest('a')) open(row, event); },
+    onCellKeyDown: ({ row }, event) => { if (event.key === 'Enter') open(row, event); },
+  } : {};
+  return (
+    <DataGrid
+      rows={rows}
+      columns={columns}
+      loading={loading}
+      getRowId={(row) => row._id}
+      density="compact"
+      autoHeight
+      showToolbar
+      disableRowSelectionOnClick
+      disableColumnSelector
+      disableDensitySelector
+      pageSizeOptions={PAGE_SIZES}
+      initialState={{
+        pagination: { paginationModel: { pageSize: PAGE_SIZES[0] } },
+        ...(defaultSort ? { sorting: { sortModel: [defaultSort] } } : {}),
+        ...initialState,
+      }}
+      localeText={{ noRowsLabel: empty, noResultsOverlayLabel: 'No matches.' }}
+      slots={{ toolbar: SearchToolbar }}
+      slotProps={slotProps}
+      sx={{ backgroundColor: 'background.paper', ...(rowHref ? { '& .MuiDataGrid-row': { cursor: 'pointer' } } : {}), ...sx }}
+      {...rowProps}
+      {...props}
+    />
+  );
+};

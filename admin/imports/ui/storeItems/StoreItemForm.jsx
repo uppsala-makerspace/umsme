@@ -17,6 +17,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ImageField } from '../components/ImageField';
+import { ChipSelect } from '../components/ChipSelect';
 
 const Section = ({ title, children }) => (
   <Box component="section" sx={{ mt: 4 }}>
@@ -42,13 +43,13 @@ const Confirm = ({ open, title, text, confirmLabel, onCancel, onConfirm, busy })
  *
  * @param {{ isNew: boolean, item?: object, values: object, onChange: (field, value) => void,
  *           onSave: () => void, busy?: boolean, error?: string, notice?: string,
- *           workshops?: Array<{ _id, name, isArea, checked }>, onToggleWorkshop?: (id, checked) => void,
+ *           workshops?: Array<{ _id, name, isArea, checked }>, onSetWorkshops?: (ids: string[]) => void,
  *           imageUrl?: string, onUploadImage?: (file) => void, onRemoveImage?: () => void, uploading?: boolean,
  *           sales?: { count: number, total: number }, onDelete?: () => void }} props
  */
 export const StoreItemForm = ({
   isNew, item, values, onChange, onSave, busy = false, error, notice,
-  workshops = [], onToggleWorkshop, imageUrl, onUploadImage, onRemoveImage, uploading = false,
+  workshops = [], onSetWorkshops, imageUrl, onUploadImage, onRemoveImage, uploading = false,
   sales, onDelete,
 }) => {
   const [confirming, setConfirming] = useState(null);
@@ -144,17 +145,14 @@ export const StoreItemForm = ({
 
           <Section title="Workshops / areas of interest">
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              The steering groups of the ones ticked see this item&apos;s sales in the app. An item can belong to several; each then sees all of its sales.
+              The steering groups of the ones chosen see this item&apos;s sales in the app. An item can belong to several; each then sees all of its sales.
             </Typography>
-            <FormGroup>
-              {workshops.map((workshop) => (
-                <FormControlLabel
-                  key={workshop._id}
-                  control={<Checkbox checked={workshop.checked} onChange={(e) => onToggleWorkshop(workshop._id, e.target.checked)} />}
-                  label={workshop.isArea ? `${workshop.name} (area of interest)` : workshop.name}
-                />
-              ))}
-            </FormGroup>
+            <ChipSelect
+              label="Workshops / areas of interest"
+              options={workshops.map((w) => ({ value: w._id, label: w.name, group: w.isArea ? 'Areas of interest' : 'Workshops' }))}
+              value={workshops.filter((w) => w.checked).map((w) => w._id)}
+              onChange={onSetWorkshops}
+            />
           </Section>
 
           <Divider sx={{ mt: 4 }} />

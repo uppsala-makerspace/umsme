@@ -41,6 +41,14 @@ test.describe('Liability documents', () => {
     await expect(documentRows(page).first()).toContainText(OLDER);
   });
 
+  test('opens a version by clicking anywhere on its row', async ({ page }) => {
+    await openAs(page, 'admin', '/liability');
+    const row = documentRows(page).filter({ hasText: OLDER });
+    const date = (await row.textContent())!.match(/\d{4}-\d{2}-\d{2}/)![0];
+    await row.getByText(date, { exact: true }).click();
+    await expect(field(page, 'Title')).toHaveValue(OLDER);
+  });
+
   test('the board sees them too', async ({ page }) => {
     await openAs(page, 'board', '/liability');
     await expect(page.getByText(CURRENT, { exact: true })).toBeVisible();

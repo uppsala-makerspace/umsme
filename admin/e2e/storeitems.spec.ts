@@ -97,12 +97,21 @@ test.describe('Store items', () => {
     await expect(numberField(page, /^Price/)).toHaveValue('30');
   });
 
-  test('links an item to a workshop', async ({ page }) => {
+  test('links an item to a workshop and unlinks it', async ({ page }) => {
+    const picker = page.getByRole('combobox', { name: 'Workshops / areas of interest' });
+    const linked = page.getByRole('button', { name: 'Keramikverkstaden' });
     await openItem(page, CLAY);
-    await page.getByRole('checkbox', { name: 'Keramikverkstaden' }).check();
-    await expect(page.getByRole('checkbox', { name: 'Keramikverkstaden' })).toBeChecked();
+    await picker.fill('keramik');
+    await page.getByRole('option', { name: 'Keramikverkstaden' }).click();
+    await expect(linked).toBeVisible();
+
     await openItem(page, CLAY);
-    await expect(page.getByRole('checkbox', { name: 'Keramikverkstaden' })).toBeChecked();
+    await expect(linked).toBeVisible();
+    await page.getByRole('img', { name: 'Remove Keramikverkstaden' }).click();
+    await expect(linked).not.toBeVisible();
+    await openItem(page, CLAY);
+    await expect(page.getByRole('combobox', { name: 'Workshops / areas of interest' })).toBeVisible();
+    await expect(linked).not.toBeVisible();
   });
 
   test('uploads and removes an image', async ({ page }) => {

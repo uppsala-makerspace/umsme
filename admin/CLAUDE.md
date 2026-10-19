@@ -94,12 +94,21 @@ done and is the pattern to follow:
   stubs (put helpers it needs, like `liability/dates.js`, in Meteor-free
   files). Storybook renders with the MUI theme on top of Bootstrap 3, as
   admin does. Pages are routed with
-  `reactRoute()` from `client/react/reactRoute.js`. Navigate through
-  `imports/ui/navigation.js`, never FlowRouter directly.
+  `reactRoute()` from `client/react/reactRoute.js`.
 - Lists: always `DataList` (`imports/ui/components/DataList.jsx`), MUI X
   DataGrid with search, sorting and paging set up the same everywhere, with
-  columns from the helpers in `columns.jsx` where they fit. Every list's e2e
+  columns from the helpers in `columns.jsx` where they fit. Give it
+  `rowHref` so the whole row opens the row's page (most lists should), and
+  keep a link column for the keyboard and middle-click. Every list's e2e
   tests check search and sorting with `e2e/lists.ts`.
+- Shared pieces in `imports/ui/components/`: `useEditor` (an edit page's
+  values, the version a save is checked against, busy, error, notice),
+  `ImageField` (an image or icon with upload and removal), `ChipSelect`
+  (pick several from many: search, dropdown, removable pills; use it instead
+  of a long list of checkboxes), `BlazeTemplate` (a not yet migrated Blaze
+  piece inside a React page; containers only).
+- Navigation goes through `useNavigate()` from `imports/ui/navigation.js`, a
+  context that reactRoute fills with FlowRouter; never import FlowRouter.
 - MUI: import each component from its own path
   (`import Button from '@mui/material/Button'`), never from `'@mui/material'`:
   Meteor does not tree-shake, and the barrel import pulls in all of MUI.
