@@ -85,8 +85,8 @@ test.describe('Liability documents', () => {
 
   test('deletes a version after confirmation', async ({ page }) => {
     await openDocument(page, 'E2E delete target');
-    page.once('dialog', (dialog) => dialog.accept());
     await action(page, /^delete$/i).click();
+    await page.getByRole('dialog').getByRole('button', { name: /^delete$/i }).click();
 
     await expect(page.getByText(CURRENT, { exact: true })).toBeVisible();
     await expect(page.getByText('E2E delete target', { exact: true })).not.toBeVisible();

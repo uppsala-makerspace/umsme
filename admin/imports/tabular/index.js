@@ -6,7 +6,6 @@ import './messageTemplates';
 import './mails';
 import './payments';
 import './users';
-import './liabilityDocuments';
 import './certificates';
 import './attestations';
 import './announcements';

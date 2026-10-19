@@ -71,7 +71,6 @@ export default () => {
   });
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
   Meteor.publish('initiatedPayments', createAuthFuncFor(initiatedPayments));
-  Meteor.publish('liabilityDocuments', createAuthFuncFor(LiabilityDocuments));
   Meteor.publish('certificates', createAuthFuncFor(Certificates));
   Meteor.publish('attestations', createAuthFuncFor(Attestations));
   Meteor.publish('announcements', createAuthFuncFor(Announcements));

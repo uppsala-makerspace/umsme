@@ -17,8 +17,9 @@ export const useLiabilityList = () => useTracker(() => {
   };
 }, []);
 
-/** One whole version. */
+/** One whole version; none when there is no id (a new version). */
 export const useLiabilityDocument = (docId) => useTracker(() => {
+  if (!docId) return { loading: false, document: null };
   const handle = Meteor.subscribe('admin.liability.document', docId);
   return { loading: !handle.ready(), document: LiabilityDocuments.findOne(docId) };
 }, [docId]);

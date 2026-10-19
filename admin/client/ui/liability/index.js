@@ -1,25 +1,7 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "./LiabilityDocumentList";
-import "./LiabilityDocumentAdd";
-import "./LiabilityDocumentView";
+import { reactRoute } from '../../react/reactRoute';
+import { LiabilityListPage } from '/imports/ui/liability/LiabilityListPage';
+import { LiabilityEditPage } from '/imports/ui/liability/LiabilityEditPage';
 
-FlowRouter.route('/liability', {
-  name: 'liability',
-  action() {
-    this.render('AppBody', {main: 'LiabilityDocumentList'});
-  }
-});
-
-FlowRouter.route('/liability/add', {
-  name: 'addliability',
-  action() {
-    this.render('AppBody', {main: 'LiabilityDocumentAdd'});
-  }
-});
-
-FlowRouter.route('/liability/:_id', {
-  name: 'liabilityview',
-  action() {
-    this.render('AppBody', {main: 'LiabilityDocumentView'});
-  }
-});
+reactRoute('/liability', 'liability', LiabilityListPage);
+reactRoute('/liability/add', 'addliability', LiabilityEditPage);
+reactRoute('/liability/:_id', 'liabilityview', LiabilityEditPage);
