@@ -10,6 +10,7 @@ import { field, action, saveButton, confirmed, deleteConfirmed } from './forms';
 const STEERING = 'Styrgrupp Keramik';
 const PREMISES = 'Lokalgruppen';
 const REQUESTS = 'E2E requests group';
+const LINKS = 'E2E links group';
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
 
 const rows = dataRows;
@@ -70,6 +71,44 @@ test.describe('Groups', () => {
     await openGroup(page, 'E2E edit group');
     await expect(field(page, 'Description (Swedish, markdown)')).toHaveValue('En grupp för test.');
     await expect(field(page, 'Slack channel')).toHaveValue('#e2e-grupp');
+  });
+
+  test('sets the links and the responsible, on save', async ({ page }) => {
+    const pill = (name: string) => page.getByRole('button', { name });
+    await openGroup(page, LINKS);
+    await page.getByRole('combobox', { name: 'Parent group' }).selectOption({ label: STEERING });
+    await page.getByRole('combobox', { name: 'Primary space' }).selectOption({ label: 'Stora rummet (Floor 1)' });
+    await page.getByRole('combobox', { name: 'Related workshops' }).fill('retro');
+    await page.getByRole('listbox').getByRole('option', { name: 'Retrodatorer' }).click();
+    await page.getByRole('combobox', { name: 'Related groups' }).fill('lokal');
+    await page.getByRole('listbox').getByRole('option', { name: PREMISES }).click();
+    await page.getByRole('combobox', { name: 'Responsible' }).fill('Sara Sty');
+    await page.getByRole('listbox').getByRole('option', { name: /Sara Styrgrupp/ }).click();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
+
+    await openGroup(page, LINKS);
+    await expect(page.getByRole('combobox', { name: 'Parent group' }).locator('option:checked')).toHaveText(STEERING);
+    await expect(page.getByRole('combobox', { name: 'Primary space' }).locator('option:checked')).toHaveText('Stora rummet (Floor 1)');
+    await expect(pill('Retrodatorer')).toBeVisible();
+    await expect(pill(PREMISES)).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Responsible' })).toHaveValue(/Sara Styrgrupp/);
+    await expect(memberEntry(page, 'Sara Styrgrupp')).toContainText(/responsible/i);
+
+    await page.getByRole('img', { name: `Remove ${PREMISES}` }).click();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
+    await openGroup(page, LINKS);
+    await expect(pill('Retrodatorer')).toBeVisible();
+    await expect(pill(PREMISES)).not.toBeVisible();
+  });
+
+  test('adds a member', async ({ page }) => {
+    await openGroup(page, 'E2E edit group');
+    await page.getByRole('combobox', { name: 'New member' }).fill('Dagny');
+    await page.getByRole('listbox').getByRole('option', { name: /Dagny Rabatt/ }).click();
+    await action(page, /^add member$/i).click();
+    await expect(memberEntry(page, 'Dagny Rabatt').getByText(/^remove$/i)).toBeVisible();
   });
 
   test('shows the responsible, the members and the requests', async ({ page }) => {

@@ -64,8 +64,8 @@ export const buildE2e = async ({ people, now }) => {
   await space('e2e-delete', 'floor1', 'E2E delete space');
   // Groups and workshops: the ceramics steering group (responsible, two
   // members, the workshop), a function group, a group with join requests to
-  // approve and reject, and one each to edit and delete; an area of interest
-  // and a workshop each to edit and delete.
+  // approve and reject, and one each to edit, link and delete; an area of
+  // interest and a workshop each to edit, link and delete.
   const group = (fields) => Groups.insertAsync({ joinPolicy: 'request-responsible', allowJoinRequests: true, createdAt: now, ...fields });
   const member = (groupId, persona, state = 'active') => GroupMemberships.insertAsync({
     groupId, memberId: members[persona]._id, state, requestedAt: days(-20),
@@ -85,6 +85,7 @@ export const buildE2e = async ({ people, now }) => {
   await member(requestsGroup, 'base', 'pending');
   await member(requestsGroup, 'quarterly', 'pending');
   await group({ name: { sv: 'E2E edit group' }, type: 'function' });
+  await group({ name: { sv: 'E2E links group' }, type: 'function' });
   await group({ name: { sv: 'E2E delete group' }, type: 'function' });
   await Workshops.insertAsync({
     name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established',
@@ -92,6 +93,7 @@ export const buildE2e = async ({ people, now }) => {
   });
   await Workshops.insertAsync({ name: { sv: 'Retrodatorer', en: 'Retro computers' }, kind: 'areaOfInterest', status: 'trial', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E edit verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
+  await Workshops.insertAsync({ name: { sv: 'E2E links verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E delete verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   const clay = await makeStoreItem({
     code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150, bookkeepingAccount: '3010',

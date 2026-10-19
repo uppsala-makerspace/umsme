@@ -243,7 +243,9 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | liability | ✓ | ✓ | ✓ (MUI) | ✓ |
 | messagetemplate | ✓ | ✓ | ✓ | ✓ (dokumentationen är en Blaze-brygga till React-versionen tills mail och announcement migreras) |
 | storeitems | ✓ | ✓ | ✓ | ✓ |
-| spaces | ✓ | ✓ | ✓ | ✓ (EntitySpaces, valet av utrymmen på verkstäder och grupper, är Blaze tills de modulerna migreras) |
+| spaces | ✓ | ✓ | ✓ | ✓ (EntitySpaces borttagen; utrymmen väljs nu i verkstads- och gruppformulären) |
+| workshops | ✓ | ✓ | ✓ | ✓ |
+| groups | ✓ | ✓ | ✓ | ✓ (de breda publiceringarna `groups`, `workshops`, `groupMemberships` finns kvar för utlägg och certifikat) |
 
 ## Beslut (2026-10-19)
 

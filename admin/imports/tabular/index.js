@@ -11,7 +11,5 @@ import './announcements';
 import './doorUnlocks';
 import './expenses';
 import './expenseAccounts';
-import './groups';
-import './workshops';
 
 

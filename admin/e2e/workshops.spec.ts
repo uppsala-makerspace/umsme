@@ -67,6 +67,32 @@ test.describe('Workshops and areas of interest', () => {
     await expect(field(page, 'Slack channel')).toHaveValue('#e2e-verkstad');
   });
 
+  test('sets the steering group and the spaces, on save', async ({ page }) => {
+    const primary = page.getByRole('combobox', { name: 'Primary space' });
+    const secondary = page.getByRole('combobox', { name: 'Secondary spaces' });
+    const ceramicsRoom = page.getByRole('button', { name: 'Keramikrummet (Floor 2)' });
+    await openWorkshop(page, 'E2E links verkstad');
+    await page.getByRole('combobox', { name: 'Steering group' }).selectOption({ label: 'Styrgrupp Keramik' });
+    await primary.selectOption({ label: 'Stora rummet (Floor 1)' });
+    await secondary.fill('keramik');
+    await page.getByRole('listbox').getByRole('option', { name: 'Keramikrummet (Floor 2)' }).click();
+    await expect(ceramicsRoom).toBeVisible();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
+
+    await openWorkshop(page, 'E2E links verkstad');
+    await expect(page.getByRole('link', { name: 'Open Styrgrupp Keramik' })).toBeVisible();
+    await expect(page.getByText(/2 active members/i)).toBeVisible();
+    await expect(primary.locator('option:checked')).toHaveText('Stora rummet (Floor 1)');
+    await expect(ceramicsRoom).toBeVisible();
+    await page.getByRole('img', { name: 'Remove Keramikrummet (Floor 2)' }).click();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
+    await openWorkshop(page, 'E2E links verkstad');
+    await expect(secondary).toBeVisible();
+    await expect(ceramicsRoom).not.toBeVisible();
+  });
+
   test('tells what the guideline still misses', async ({ page }) => {
     await openWorkshop(page, CERAMICS);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/incomplete/i);
