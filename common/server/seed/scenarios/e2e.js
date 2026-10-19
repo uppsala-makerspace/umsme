@@ -28,6 +28,7 @@ import { Attestations } from '/imports/common/collections/attestations';
 import { Announcements } from '/imports/common/collections/announcements';
 import { Mails } from '/imports/common/collections/mails';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
+import { Messages } from '/imports/common/collections/messages';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
@@ -49,7 +50,7 @@ export const buildE2e = async ({ people, now }) => {
   }
   // Message templates: one to look at, and one each for the admin tests that
   // edit and delete. (Admin's startup adds the storage templates.)
-  await makeMessageTemplate({
+  const welcomeTemplate = await makeMessageTemplate({
     name: 'Välkommen', type: 'welcome', membershiptype: 'member', membertype: 'normal',
     subject: 'Välkommen till Uppsala Makerspace', messagetext: 'Hej <%= name %>!\n\nDitt medlemsnummer är <%= mid %>.',
     created: days(-500),
@@ -245,6 +246,14 @@ export const buildE2e = async ({ people, now }) => {
     { amount: 200, date: days(-1), swish: { name: 'Bo Basmedlem', mobile: '46700000106', message: 'E2E bank medlemskap' } },
     { amount: 75, date: days(-1), swish: { name: 'Gäst Gästsson', mobile: '46700000200', message: 'E2E bank kaffe' } },
   ]);
+
+  // Messages sent to Ulla, one to look at and one to delete.
+  for (const subject of ['E2E visa meddelande', 'E2E radera meddelande']) {
+    await Messages.insertAsync({
+      member: members.excluded._id, template: welcomeTemplate, type: 'status', to: members.excluded.email, subject,
+      messagetext: `Hej Ulla!\n\n${subject}.`, senddate: days(-10),
+    });
+  }
 
   // Storage last, so that the storage hooks see the members' final dates.
   const walls = await makeStorageWalls([

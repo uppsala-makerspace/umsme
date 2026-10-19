@@ -43,3 +43,12 @@ Varje punkt: modul, frågan, vad som är gjort i väntan.
   ("Update and go back to member"). Ska den stanna kvar med "Saved." som de
   andra React-sidorna? Gjort i väntan: som Blaze.
 
+## message, mail
+
+- **Utskick i demo och e2e.** `settings_demo.json` har `deliverMails: false`,
+  så `mail`-metoden vägrar och inga meddelanden kan skickas (och sparas) i
+  demo eller e2e; testerna kan bara se att vägran visas. Mottagarna skyddas
+  redan av `private.recipientWhitelist: []` (ingen får något). Ska demo-
+  inställningarna ha `deliverMails: true`, så att flödet går hela vägen och
+  meddelandena sparas? Gjort i väntan: orört.
+
