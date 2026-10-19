@@ -7,8 +7,6 @@ import { Messages } from '/imports/common/collections/messages';
 import { Payments } from '/imports/common/collections/payments';
 import { Mails } from '/imports/common/collections/mails';
 import { Comments } from '/imports/common/collections/comments';
-import { Unlocks } from '/imports/common/collections/unlocks';
-import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Certificates } from '/imports/common/collections/certificates';
@@ -56,8 +54,6 @@ export default () => {
   Meteor.publish('mails', createAuthFuncFor(Mails));
   Meteor.publish('payments', createAuthFuncFor(Payments));
   Meteor.publish('comments', createAuthFuncFor(Comments));
-  Meteor.publish('unlocks', createAuthFuncFor(Unlocks));
-  Meteor.publish('doorunlocks', createAuthFuncFor(DoorUnlocks));
   // Never the whole document: `services` holds password hashes, login tokens
   // and Google access tokens, and `profile` an admin's personal number. The
   // pages need only these; the logged-in user's own profile comes with the

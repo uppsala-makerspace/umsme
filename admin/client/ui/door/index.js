@@ -1,17 +1,6 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './DoorStats';
-import './DoorUnlocksList';
+import { reactRoute } from '../../react/reactRoute';
+import { DoorStatsPage } from '/imports/ui/doors/DoorStatsPage';
+import { DoorUnlockListPage } from '/imports/ui/doors/DoorUnlockListPage';
 
-FlowRouter.route('/door', {
-  name: 'door',
-  action() {
-    this.render('AppBody', {main: 'DoorStats'});
-  }
-});
-
-FlowRouter.route('/doorunlocks', {
-  name: 'doorunlocks',
-  action() {
-    this.render('AppBody', {main: 'DoorUnlocksList'});
-  }
-});
+reactRoute('/door', 'door', DoorStatsPage);
+reactRoute('/doorunlocks', 'doorunlocks', DoorUnlockListPage);
