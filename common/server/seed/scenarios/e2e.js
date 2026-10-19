@@ -23,6 +23,7 @@ import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
 import { Announcements } from '/imports/common/collections/announcements';
 import { Mails } from '/imports/common/collections/mails';
+import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
@@ -172,6 +173,13 @@ export const buildE2e = async ({ people, now }) => {
     { member: members.quarterly, account: false },
     { member: members.family, end: 'forever' },
   ], { now });
+
+  // Door openings: Maja through the app and the lock, and a guest the lock
+  // could not tie to a member.
+  for (const [daysAgo, method] of [[1, 'app'], [3, 'app'], [6, 'danalock']]) {
+    await DoorUnlocks.insertAsync({ timestamp: days(-daysAgo), door: 'outerDoor', memberid: members.member._id, method });
+  }
+  await DoorUnlocks.insertAsync({ timestamp: days(-2), door: 'outerDoor', extid: 'user-guest-gast@example.org', method: 'danalock' });
 
   // Storage last, so that the storage hooks see the members' final dates.
   const walls = await makeStorageWalls([
