@@ -139,10 +139,11 @@ export const statsPerMonth = (memberships, members, from, to) => {
   const rejoinedD = [];
   const disappearedD = [];
   const churn = [];
-  const firstYear = earliest.getFullYear();
-  const firstMonth = earliest.getMonth();
-  const lastYear = latest.getFullYear();
-  const lastMonth = latest.getMonth();
+  // Nothing happened in the period: no months to show.
+  const firstYear = earliest?.getFullYear();
+  const firstMonth = earliest?.getMonth();
+  const lastYear = latest?.getFullYear();
+  const lastMonth = latest?.getMonth();
   const years = [];
   for (let y = firstYear; y <= lastYear; y++) {
     years.push(y);

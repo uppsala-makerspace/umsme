@@ -25,3 +25,4 @@ import './messageTemplates';
 import './memberLookup';
 import './certificates';
 import './announcements';
+import './stats';

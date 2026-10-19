@@ -1,9 +1,4 @@
-import './Revenue';
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { reactRoute } from '../../react/reactRoute';
+import { RevenuePage } from '/imports/ui/stats/RevenuePage';
 
-FlowRouter.route('/revenue', {
-  name: 'revenue',
-  action() {
-    this.render('AppBody', {main: 'Revenue'});
-  }
-});
+reactRoute('/revenue', 'revenue', RevenuePage);
