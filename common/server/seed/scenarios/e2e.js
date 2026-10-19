@@ -12,12 +12,23 @@ import { Accounts } from 'meteor/accounts-base';
 import { StorageUnits, StorageRequests, StorageOffers } from '/imports/common/collections/storage';
 import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
+import { makeLiabilityDocument } from '../documents';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
 export const buildE2e = async ({ people, now }) => {
   const days = (n) => daysFromNow(n, now);
   const liability = await makeLiabilityVersions(days);
+  // Documents of their own for the admin tests that edit and delete one. Dated
+  // long before the real versions, so neither becomes the version in force,
+  // and at midnight UTC, as admin's date field stores a date.
+  for (const purpose of ['edit', 'delete']) {
+    await makeLiabilityDocument({
+      title: `E2E ${purpose} target`, date: new Date(Date.UTC(2020, 0, purpose === 'edit' ? 1 : 2)),
+      sv: `Dokument för testet som ${purpose === 'edit' ? 'ändrar' : 'raderar'}.`,
+      en: `Document for the ${purpose} test.`,
+    });
+  }
   const { members, userIds } = await makePersonas([...PERSONAS, ...E2E_PERSONAS], { people, days, now, liability });
   for (const [key, userId] of Object.entries(userIds)) {
     await Accounts._insertLoginToken(userId, { token: e2eLoginToken(key), when: now });

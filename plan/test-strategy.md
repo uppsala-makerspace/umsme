@@ -155,6 +155,9 @@ Ingen CI tills vidare; allt körs lokalt.
    så att admins och appens sviter kan köras samtidigt, samma mönster som
    appen (`openAs`, parallellt, produktionsläge). `openAs` och testpersonerna
    delas via `common/e2e/personas.ts`. Fyra rökprov i `e2e/access.spec.ts`.
-6. E2e-tester för pilotmodulen `liability` mot Blaze-versionen.
+6. ~~E2e-tester för pilotmodulen `liability` mot Blaze-versionen.~~ Klart:
+   `admin/e2e/liability.spec.ts`, åtta tester (lista, behörighet för admin,
+   board och treasurer, lägga till, kräva titel, ändra, radera, datum).
+   Testerna som ändrar och raderar har egna dokument i e2e-scenariot.
 
 Sedan steg 0 och piloten i `plan/migration.md`.
