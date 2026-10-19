@@ -12,6 +12,13 @@ const OLDER = 'Ansvarsförbindelse 2023';
 /** The data rows of the document list, header row excluded. */
 const documentRows = (page: Page) => page.getByRole('row').filter({ has: page.getByRole('cell') });
 
+/**
+ * A form field by its accessible name, as a screen reader announces it. Not
+ * getByLabel: that reads the label's text, which with MUI includes the
+ * required-field asterisk.
+ */
+const field = (page: Page, name: string) => page.getByRole('textbox', { name, exact: true });
+
 /** A button, or a link styled as one, by its name. */
 const action = (page: Page, name: RegExp) =>
   page.getByRole('button', { name }).or(page.getByRole('link', { name })).or(page.getByText(name)).first();
@@ -19,7 +26,7 @@ const action = (page: Page, name: RegExp) =>
 const openDocument = async (page: Page, title: string) => {
   await openAs(page, 'admin', '/liability');
   await page.getByText(title, { exact: true }).click();
-  await expect(page.getByLabel('Title', { exact: true })).toHaveValue(title);
+  await expect(field(page, 'Title')).toHaveValue(title);
 };
 
 test.describe('Liability documents', () => {
@@ -44,28 +51,28 @@ test.describe('Liability documents', () => {
   test('adds a version in both languages', async ({ page }) => {
     await openAs(page, 'admin', '/liability');
     await action(page, /add liability document/i).click();
-    await page.getByLabel('Title', { exact: true }).fill('E2E added version');
-    await page.getByLabel('Date', { exact: true }).fill('2021-03-15');
-    await page.getByLabel('Document text (Swedish)').fill('# Ny version\n\nVar rädd om dig.');
-    await page.getByLabel('Document text (English)').fill('# New version\n\nTake care.');
+    await field(page, 'Title').fill('E2E added version');
+    await field(page, 'Date').fill('2021-03-15');
+    await field(page, 'Document text (Swedish)').fill('# Ny version\n\nVar rädd om dig.');
+    await field(page, 'Document text (English)').fill('# New version\n\nTake care.');
     await action(page, /^(submit|save|create|add)$/i).click();
 
     await expect(page.getByText('E2E added version', { exact: true })).toBeVisible();
     await page.getByText('E2E added version', { exact: true }).click();
-    await expect(page.getByLabel('Date', { exact: true })).toHaveValue('2021-03-15');
-    await expect(page.getByLabel('Document text (Swedish)')).toHaveValue('# Ny version\n\nVar rädd om dig.');
-    await expect(page.getByLabel('Document text (English)')).toHaveValue('# New version\n\nTake care.');
+    await expect(field(page, 'Date')).toHaveValue('2021-03-15');
+    await expect(field(page, 'Document text (Swedish)')).toHaveValue('# Ny version\n\nVar rädd om dig.');
+    await expect(field(page, 'Document text (English)')).toHaveValue('# New version\n\nTake care.');
   });
 
   test('refuses a version without a title', async ({ page }) => {
     await openAs(page, 'admin', '/liability/add');
-    await page.getByLabel('Date', { exact: true }).fill('2021-04-01');
-    await page.getByLabel('Document text (Swedish)').fill('Utan titel');
+    await field(page, 'Date').fill('2021-04-01');
+    await field(page, 'Document text (Swedish)').fill('Utan titel');
     await action(page, /^(submit|save|create|add)$/i).click();
 
     // However the page says so (today the browser's own required-field
     // bubble), nothing is saved: no version with this date shows up.
-    await expect(page.getByLabel('Title', { exact: true })).toBeVisible();
+    await expect(field(page, 'Title')).toBeVisible();
     await openAs(page, 'admin', '/liability');
     await expect(page.getByText(CURRENT, { exact: true })).toBeVisible();
     await expect(documentRows(page).filter({ hasText: '2021-04-01' })).toHaveCount(0);
@@ -73,14 +80,14 @@ test.describe('Liability documents', () => {
 
   test('edits a version', async ({ page }) => {
     await openDocument(page, 'E2E edit target');
-    await page.getByLabel('Title', { exact: true }).fill('E2E edited');
-    await page.getByLabel('Document text (English)').fill('Edited text.');
+    await field(page, 'Title').fill('E2E edited');
+    await field(page, 'Document text (English)').fill('Edited text.');
     await action(page, /update|save/i).click();
 
     await expect(page.getByText('E2E edited', { exact: true })).toBeVisible();
     await expect(page.getByText('E2E edit target', { exact: true })).not.toBeVisible();
     await page.getByText('E2E edited', { exact: true }).click();
-    await expect(page.getByLabel('Document text (English)')).toHaveValue('Edited text.');
+    await expect(field(page, 'Document text (English)')).toHaveValue('Edited text.');
   });
 
   test('deletes a version after confirmation', async ({ page }) => {
@@ -97,6 +104,6 @@ test.describe('Liability documents', () => {
     await expect(documentRows(page).filter({ hasText: OLDER })).toContainText(/\d{4}-\d{2}-\d{2}/);
     const listed = (await documentRows(page).filter({ hasText: OLDER }).textContent())!.match(/\d{4}-\d{2}-\d{2}/)![0];
     await page.getByText(OLDER, { exact: true }).click();
-    await expect(page.getByLabel('Date', { exact: true })).toHaveValue(listed);
+    await expect(field(page, 'Date')).toHaveValue(listed);
   });
 });
