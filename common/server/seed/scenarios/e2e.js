@@ -16,6 +16,8 @@ import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
+import { Groups } from '/imports/common/collections/groups';
+import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
@@ -60,9 +62,37 @@ export const buildE2e = async ({ people, now }) => {
   await space('bigroom', 'floor1', 'Stora rummet', 'Big room');
   await space('e2e-edit', 'floor1', 'E2E edit space');
   await space('e2e-delete', 'floor1', 'E2E delete space');
-  await Workshops.insertAsync({
-    name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established', primarySpaceId: ceramicsRoom,
+  // Groups and workshops: the ceramics steering group (responsible, two
+  // members, the workshop), a function group, a group with join requests to
+  // approve and reject, and one each to edit and delete; an area of interest
+  // and a workshop each to edit and delete.
+  const group = (fields) => Groups.insertAsync({ joinPolicy: 'request-responsible', allowJoinRequests: true, createdAt: now, ...fields });
+  const member = (groupId, persona, state = 'active') => GroupMemberships.insertAsync({
+    groupId, memberId: members[persona]._id, state, requestedAt: days(-20),
+    ...(state === 'active' ? { approvedAt: days(-19), approvedBy: '__system__' } : {}),
   });
+  const ceramicsGroup = await group({
+    name: { sv: 'Styrgrupp Keramik', en: 'Ceramics steering group' }, type: 'steering',
+    responsibleMemberId: members.groupLeader._id, allowJoinRequests: false,
+  });
+  await member(ceramicsGroup, 'groupLeader');
+  await member(ceramicsGroup, 'steering');
+  const premisesGroup = await group({ name: { sv: 'Lokalgruppen', en: 'Premises group' }, type: 'function', joinPolicy: 'request-any' });
+  await member(premisesGroup, 'board');
+  const requestsGroup = await group({ name: { sv: 'E2E requests group' }, type: 'function', responsibleMemberId: members.groupLeader._id });
+  await member(requestsGroup, 'groupLeader');
+  await member(requestsGroup, 'discounted');
+  await member(requestsGroup, 'base', 'pending');
+  await member(requestsGroup, 'quarterly', 'pending');
+  await group({ name: { sv: 'E2E edit group' }, type: 'function' });
+  await group({ name: { sv: 'E2E delete group' }, type: 'function' });
+  await Workshops.insertAsync({
+    name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established',
+    primarySpaceId: ceramicsRoom, groupId: ceramicsGroup, createdAt: now,
+  });
+  await Workshops.insertAsync({ name: { sv: 'Retrodatorer', en: 'Retro computers' }, kind: 'areaOfInterest', status: 'trial', createdAt: now });
+  await Workshops.insertAsync({ name: { sv: 'E2E edit verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
+  await Workshops.insertAsync({ name: { sv: 'E2E delete verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   const clay = await makeStoreItem({
     code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150, bookkeepingAccount: '3010',
     requiresMembership: true, commentRequired: false,

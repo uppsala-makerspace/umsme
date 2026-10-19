@@ -19,7 +19,10 @@ export const search = (page: Page, text: string) => page.getByRole('searchbox').
 export const sortBy = async (page: Page, column: string, direction: 'ascending' | 'descending' = 'ascending') => {
   const header = page.getByRole('columnheader', { name: new RegExp(`^${column}\\b`) }).first();
   for (let clicks = 0; clicks < 3 && (await header.getAttribute('aria-sort')) !== direction; clicks += 1) {
+    const before = await header.getAttribute('aria-sort');
     await header.click();
+    // Wait for the click to take: DataTables may sort on the server first.
+    await expect.poll(() => header.getAttribute('aria-sort')).not.toBe(before);
   }
   await expect(header).toHaveAttribute('aria-sort', direction);
 };
