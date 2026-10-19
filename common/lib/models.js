@@ -1218,6 +1218,8 @@ export const models = {
         options: getLinkableRoleOptions,
       },
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
     createdAt: {
       label: "Created",
       type: Date,
@@ -1392,6 +1394,8 @@ export const models = {
       autoform: { omit: true },
     },
     "secondarySpaceIds.$": { type: String, autoform: { omit: true } },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
     createdAt: {
       label: "Created",
       type: Date,

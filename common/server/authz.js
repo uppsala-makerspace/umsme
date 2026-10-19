@@ -12,6 +12,9 @@ export const DOMAIN_ROLES = {
   messageTemplates: ['admin', 'board'],
   storeItems: ['admin', 'board'],
   spaces: ['admin', 'board'],
+  groups: ['admin', 'board'],
+  workshops: ['admin', 'board'],
+  memberLookup: ['admin', 'board'],
 };
 
 /** Whether the user holds any of the roles. */

@@ -30,6 +30,7 @@ import "./liability.tests";
 import "./messageTemplates.tests";
 import "./storeItems.tests";
 import "./spaces.tests";
+import "./groups.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

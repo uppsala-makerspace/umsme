@@ -22,3 +22,4 @@ import './storageV2';
 import './members';
 import './liability';
 import './messageTemplates';
+import './memberLookup';

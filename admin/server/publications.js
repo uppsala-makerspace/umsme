@@ -194,6 +194,46 @@ export default () => {
     return Spaces.find(docId);
   });
 
+  Meteor.publish('admin.groups.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.groups))) return this.ready();
+    return Groups.find({}, { fields: { name: 1, type: 1, allowJoinRequests: 1, joinPolicy: 1, responsibleMemberId: 1, slackChannel: 1, description: 1 } });
+  });
+
+  Meteor.publish('admin.groups.group', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.groups))) return this.ready();
+    return Groups.find(docId);
+  });
+
+  // A group's memberships; the pages look the names up with adminMembers.names.
+  Meteor.publish('admin.groups.memberships', async function (groupId) {
+    check(groupId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.groups))) return this.ready();
+    return GroupMemberships.find({ groupId });
+  });
+
+  Meteor.publish('admin.workshops.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.workshops))) return this.ready();
+    return Workshops.find({}, { fields: { name: 1, kind: 1, status: 1, groupId: 1 } });
+  });
+
+  Meteor.publish('admin.workshops.workshop', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.workshops))) return this.ready();
+    return Workshops.find(docId);
+  });
+
+  // What the group and workshop pages link to and choose among: names, and
+  // what decides which choices make sense (a group's type, a workshop's group).
+  Meteor.publish('admin.groupsAndWorkshops.choices', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.groups))) return this.ready();
+    return [
+      Groups.find({}, { fields: { name: 1, type: 1, parentGroupId: 1 } }),
+      Workshops.find({}, { fields: { name: 1, kind: 1, groupId: 1 } }),
+      Spaces.find({}, { fields: { name: 1, floor: 1, spaceId: 1 } }),
+    ];
+  });
+
   Meteor.publish(null, async function () {
     if (this.userId) {
       if ((await Roles.userIsInRoleAsync(this.userId, 'admin'))) return Meteor.roleAssignment.find();
