@@ -7,7 +7,6 @@ import { recordChange } from '/imports/common/server/auditLog';
 import {
   createStoreItem,
   updateStoreItem,
-  setStoreItemWorkshops,
   storeItemSales,
   removeStoreItem,
 } from '/imports/common/server/storeItems/items';
@@ -27,6 +26,7 @@ const ItemFields = {
   bookkeepingAccount: String,
   status: Match.Optional(Match.OneOf('available', 'hidden')),
   sortOrder: Match.Optional(Amount),
+  workshopIds: Match.Optional([String]),
 };
 
 const roles = DOMAIN_ROLES.storeItems;
@@ -53,13 +53,6 @@ Meteor.methods({
     check(expectedUpdatedAt, Match.Maybe(Date));
     await requireRole(this.userId, roles);
     await updateStoreItem(docId, fields, { userId: this.userId, expectedUpdatedAt: expectedUpdatedAt ?? null });
-  },
-
-  async 'storeItems.setWorkshops'(docId, workshopIds) {
-    check(docId, String);
-    check(workshopIds, [String]);
-    await requireRole(this.userId, roles);
-    await setStoreItemWorkshops(docId, workshopIds, { userId: this.userId });
   },
 
   async 'storeItems.sales'(docId) {

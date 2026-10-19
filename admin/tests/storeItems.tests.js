@@ -99,12 +99,14 @@ describe('store items', function () {
     await assert.rejects(call(board, 'storeItems.update', docId, next, updatedAt), /conflict/);
   });
 
-  it('links workshops, and refuses one that does not exist', async function () {
-    const docId = await call(board, 'storeItems.create', fields());
+  it('saves the workshops with the item, and refuses one that does not exist', async function () {
     await Workshops.insertAsync({ _id: `${prefix}w1`, name: { sv: 'Keramik' }, kind: 'workshop', status: 'established' });
-    await call(board, 'storeItems.setWorkshops', docId, [`${prefix}w1`, `${prefix}w1`]);
-    assert.deepStrictEqual((await StoreItems.findOneAsync(docId)).workshopIds, [`${prefix}w1`]);
-    await assert.rejects(call(board, 'storeItems.setWorkshops', docId, [`${prefix}missing`]), /not-found/);
+    const docId = await call(board, 'storeItems.create', fields({ workshopIds: [`${prefix}w1`, `${prefix}w1`] }));
+    const doc = await StoreItems.findOneAsync(docId);
+    assert.deepStrictEqual(doc.workshopIds, [`${prefix}w1`]);
+    await call(board, 'storeItems.update', docId, fields({ code: doc.code, workshopIds: [] }), doc.updatedAt);
+    assert.strictEqual('workshopIds' in (await StoreItems.findOneAsync(docId)), false);
+    await assert.rejects(call(board, 'storeItems.create', fields({ workshopIds: [`${prefix}missing`] })), /not-found/);
   });
 
   it('sums the sales', async function () {

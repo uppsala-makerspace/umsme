@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import { StoreItemForm } from './StoreItemForm';
 
 const clay = {
-  _id: 'i1', code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150,
+  _id: 'i1', code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150, workshopIds: ['w1'],
   requiresMembership: true, commentRequired: false, bookkeepingAccount: '3010', status: 'available',
 };
 const values = (item) => ({
@@ -11,26 +11,18 @@ const values = (item) => ({
   price: item.price ?? '', minPrice: item.minPrice ?? '', maxPrice: item.maxPrice ?? '',
   requiresMembership: !!item.requiresMembership, commentRequired: !!item.commentRequired,
   placeholderSv: '', placeholderEn: '', bookkeepingAccount: item.bookkeepingAccount || '', status: item.status || 'available', sortOrder: '',
+  workshopIds: item.workshopIds || [],
 });
 const workshops = [
-  { _id: 'w1', name: 'Keramikverkstaden', isArea: false, checked: true },
-  { _id: 'w2', name: 'Träverkstaden', isArea: false, checked: false },
-  { _id: 'w3', name: 'Retrodatorer', isArea: true, checked: false },
+  { _id: 'w1', name: 'Keramikverkstaden', isArea: false },
+  { _id: 'w2', name: 'Träverkstaden', isArea: false },
+  { _id: 'w3', name: 'Retrodatorer', isArea: true },
 ];
 
-/** Keeps the values and the workshop ticks, as the page does. */
-const Editable = ({ values: initial, workshops: initialWorkshops, ...props }) => {
+/** Keeps the values, as the page does. */
+const Editable = ({ values: initial, ...props }) => {
   const [current, setCurrent] = useState(initial);
-  const [ticks, setTicks] = useState(initialWorkshops);
-  return (
-    <StoreItemForm
-      {...props}
-      values={current}
-      onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))}
-      workshops={ticks}
-      onSetWorkshops={(ids) => setTicks((list) => list.map((w) => ({ ...w, checked: ids.includes(w._id) })))}
-    />
-  );
+  return <StoreItemForm {...props} values={current} onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))} />;
 };
 
 export default {

@@ -20,8 +20,20 @@ const bilingual = (value) => {
   return sv || en ? { ...(sv ? { sv } : {}), ...(en ? { en } : {}) } : null;
 };
 
-/** The fields the form edits, split into what to set and what to clear. */
-const changesOf = (fields) => {
+/** Workshop ids that exist, without duplicates; refused if any does not. */
+const knownWorkshops = async (ids = []) => {
+  const unique = [...new Set(ids)];
+  const known = await Workshops.find({ _id: { $in: unique } }, { fields: { _id: 1 } }).countAsync();
+  if (known !== unique.length) throw new Meteor.Error('not-found', 'No such workshop');
+  return unique;
+};
+
+/**
+ * The fields the form edits, split into what to set and what to clear.
+ * workshopIds: the workshops and areas of interest whose steering groups see
+ * the item's sales.
+ */
+const changesOf = async (fields) => {
   const $set = {
     code: text(fields.code),
     name: { sv: text(fields.name?.sv), ...(text(fields.name?.en) ? { en: text(fields.name.en) } : {}) },
@@ -31,6 +43,8 @@ const changesOf = (fields) => {
     status: fields.status || 'available',
   };
   const $unset = {};
+  const workshopIds = await knownWorkshops(fields.workshopIds);
+  if (workshopIds.length) $set.workshopIds = workshopIds; else $unset.workshopIds = '';
   for (const field of ['description', 'commentPlaceholder']) {
     const value = bilingual(fields[field]);
     if (value) $set[field] = value; else $unset[field] = '';
@@ -50,7 +64,7 @@ const uniqueCode = async (code, exceptId) => {
 
 /** @returns {Promise<string>} the new item's id */
 export const createStoreItem = async (fields, { userId }) => {
-  const { $set } = changesOf(fields);
+  const { $set } = await changesOf(fields);
   await uniqueCode($set.code);
   const now = new Date();
   const doc = { ...$set, createdAt: now, updatedAt: now };
@@ -72,20 +86,11 @@ const current = async (docId, expectedUpdatedAt) => {
 /** Update an item, refused with 'conflict' if it changed since `expectedUpdatedAt`. */
 export const updateStoreItem = async (docId, fields, { userId, expectedUpdatedAt }) => {
   const before = await current(docId, expectedUpdatedAt);
-  const { $set, $unset } = changesOf(fields);
+  const { $set, $unset } = await changesOf(fields);
   await uniqueCode($set.code, docId);
   $set.updatedAt = new Date();
   await StoreItems.updateAsync(docId, Object.keys($unset).length ? { $set, $unset } : { $set });
   await recordChange({ userId, domain: DOMAIN, action: 'update', docId, before, after: await StoreItems.findOneAsync(docId) });
-};
-
-/** The workshops and areas of interest whose steering groups see the item's sales. */
-export const setStoreItemWorkshops = async (docId, workshopIds, { userId }) => {
-  const before = await current(docId);
-  const known = await Workshops.find({ _id: { $in: workshopIds } }, { fields: { _id: 1 } }).countAsync();
-  if (known !== new Set(workshopIds).size) throw new Meteor.Error('not-found', 'No such workshop');
-  await StoreItems.updateAsync(docId, { $set: { workshopIds: [...new Set(workshopIds)], updatedAt: new Date() } });
-  await recordChange({ userId, domain: DOMAIN, action: 'setWorkshops', docId, before, after: await StoreItems.findOneAsync(docId) });
 };
 
 /** How often the item has been bought, and for how much. */

@@ -97,20 +97,24 @@ test.describe('Store items', () => {
     await expect(numberField(page, /^Price/)).toHaveValue('30');
   });
 
-  test('links an item to a workshop and unlinks it', async ({ page }) => {
+  test('links an item to a workshop and unlinks it, on save', async ({ page }) => {
     const picker = page.getByRole('combobox', { name: 'Workshops / areas of interest' });
     const linked = page.getByRole('button', { name: 'Keramikverkstaden' });
     await openItem(page, CLAY);
     await picker.fill('keramik');
     await page.getByRole('option', { name: 'Keramikverkstaden' }).click();
     await expect(linked).toBeVisible();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
 
     await openItem(page, CLAY);
     await expect(linked).toBeVisible();
     await page.getByRole('img', { name: 'Remove Keramikverkstaden' }).click();
     await expect(linked).not.toBeVisible();
+    await saveButton(page).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
     await openItem(page, CLAY);
-    await expect(page.getByRole('combobox', { name: 'Workshops / areas of interest' })).toBeVisible();
+    await expect(picker).toBeVisible();
     await expect(linked).not.toBeVisible();
   });
 

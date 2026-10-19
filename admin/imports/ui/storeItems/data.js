@@ -43,6 +43,7 @@ export const formValues = (item) => ({
   bookkeepingAccount: item?.bookkeepingAccount || '',
   status: item?.status || 'available',
   sortOrder: item?.sortOrder ?? '',
+  workshopIds: item?.workshopIds || [],
 });
 
 const fieldsFrom = (v) => ({
@@ -58,6 +59,7 @@ const fieldsFrom = (v) => ({
   bookkeepingAccount: v.bookkeepingAccount,
   status: v.status,
   sortOrder: number(v.sortOrder),
+  workshopIds: v.workshopIds,
 });
 
 /** Create an item (resolves to its id), or update one if an item is given. */
@@ -65,7 +67,6 @@ export const saveStoreItem = (values, item) => (item
   ? Meteor.callAsync('storeItems.update', item._id, fieldsFrom(values), item.updatedAt ?? null)
   : Meteor.callAsync('storeItems.create', fieldsFrom(values)));
 
-export const setStoreItemWorkshops = (docId, workshopIds) => Meteor.callAsync('storeItems.setWorkshops', docId, workshopIds);
 export const storeItemSales = (docId) => Meteor.callAsync('storeItems.sales', docId);
 export const removeStoreItem = (docId) => Meteor.callAsync('storeItems.remove', docId);
 export const removeStoreItemImage = (docId) => Meteor.callAsync('adminStoreItems.removeImage', docId);
