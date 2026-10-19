@@ -5,7 +5,10 @@ backup/*
 .DS_Store
 *storybook.log
 storybook-static
-.claude
+# Claude Code: personal settings, commands and plans stay out; the shared
+# project settings (enabled plugins and where to get them) are checked in.
+**/.claude/*
+!/.claude/settings.json
 tutorial/dist/
 tests-data-example/
 inbox

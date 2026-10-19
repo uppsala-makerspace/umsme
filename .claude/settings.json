@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "meteor": {
+      "source": {
+        "source": "github",
+        "repo": "meteor/agent-skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "meteor@meteor": true
+  }
+}
