@@ -285,7 +285,9 @@ if (process.env.SEED_TEST_DATA === 'true') {
           email: userData.email,
           mobile: userData.mobile,
           birthyear: userData.birthyear,
-          family: userData.family
+          family: userData.family,
+          // Accepted by the board; unlocking requires it
+          registered: true
         };
         if (userData.infamilyEmail) memberDoc.infamily = memberIdMap[userData.infamilyEmail];
         if (userData.hasLabAccess) memberDoc.lab = threeMonthsFromNow;

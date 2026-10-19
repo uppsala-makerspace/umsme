@@ -157,7 +157,7 @@ const Unlock = ({
 
         return (
           <React.Fragment key={door.id}>
-            <p className="mb-2.5 font-bold text-center w-full">{t(door.labelKey)}</p>
+            <p className="door-label mb-2.5 font-bold text-center w-full">{t(door.labelKey)}</p>
             <button
               className={`door-button ${isDisabled ? "disabled" : ""} ${opening[door.id] ? "opening" : ""}`}
               onClick={() => !isDisabled && !opening[door.id] && onOpenDoor(door.id)}

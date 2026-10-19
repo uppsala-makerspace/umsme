@@ -10,7 +10,7 @@ test.describe('Authentication', () => {
     await page.goto('/login');
 
     // Verify we're on the login page
-    await expect(page.locator('img[alt="UM Logo"]')).toBeVisible();
+    await expect(page.locator(selectors.homeLogo)).toBeVisible();
     await expect(page.locator(selectors.loginEmailInput)).toBeVisible();
 
     // Fill in credentials

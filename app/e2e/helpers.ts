@@ -127,18 +127,19 @@ export const selectors = {
   loginButton: 'button[type="submit"]',
 
   // Home page
-  homeLogo: 'img[alt="UM Logo"]',
+  homeLogo: 'img[alt="Uppsala Makerspace Logo"]',
   homeGreeting: 'main h3',
   homeLiabilityButton: 'a[href="/liability"] button',
-  homeUnlockLink: 'a[href="/unlock"].wideButton',
-  homeCalendarLink: 'a[href="/calendar"].wideButton',
+  // The bottom navigation; the home page no longer has its own links there
+  homeUnlockLink: 'nav a[href="/unlock"]',
+  homeCalendarLink: 'nav a[href="/calendar"]',
   acceptInviteButton: `button:has-text("${en.acceptInvite}")`,
   declineInviteButton: `button:has-text("${en.declineInvite}")`,
 
   // Unlock page
   doorButton: 'button.door-button',
   doorLabel: '.door-label',
-  liabilityLink: 'a[href="/liability"]',
+  liabilityLink: 'main a[href="/liability"]',
 
   // Liability page
   liabilityTitle: `h1:has-text("${en.liabilityTitle}")`,
@@ -160,8 +161,8 @@ export const selectors = {
   trashIcon: '.fa-trash',
 
   // Email verification page (language-independent selectors)
-  verificationPage: '.login-form h1',
-  sendVerificationButton: `.login-form button:has-text("${en.SendNewVerification}")`,
+  verificationPage: 'main h1',
+  sendVerificationButton: `main button:has-text("${en.SendNewVerification}")`,
 
   // Navigation
   hamburgerMenu: '.hamburger-menu',

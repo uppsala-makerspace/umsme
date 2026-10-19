@@ -13,8 +13,8 @@ test.describe('Unlock Page', () => {
     // Should show liability message
     await expect(page.getByText(en.homeLiabilityNotApproved)).toBeVisible();
 
-    // Should show button to go to liability page (use wideButton class to avoid matching nav link)
-    await expect(page.locator('a[href="/liability"].wideButton')).toBeVisible();
+    // Should show button to go to liability page (scoped to main to avoid matching a nav link)
+    await expect(page.locator(selectors.liabilityLink)).toBeVisible();
     await expect(page.getByText(en.homeLiabilityButton)).toBeVisible();
 
     // Door buttons should NOT be visible
