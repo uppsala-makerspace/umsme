@@ -15,6 +15,7 @@ import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
 import { Workshops } from '/imports/common/collections/workshops';
+import { Spaces } from '/imports/common/collections/spaces';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
@@ -52,7 +53,16 @@ export const buildE2e = async ({ people, now }) => {
   // Web shop: an item that has been bought (so it cannot be deleted), one with
   // a buyer-set price, and one each for the admin tests that edit and delete.
   // A workshop to link items to.
-  await Workshops.insertAsync({ name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established' });
+  // Spaces: one the workshop is in (so it cannot be deleted), one on the upper
+  // floor, and one each for the admin tests that edit and delete.
+  const space = (spaceId, floor, sv, en) => Spaces.insertAsync({ spaceId, floor, name: { sv, ...(en ? { en } : {}) }, createdAt: now });
+  const ceramicsRoom = await space('ceramics_workshop', 'floor2', 'Keramikrummet', 'Ceramics room');
+  await space('bigroom', 'floor1', 'Stora rummet', 'Big room');
+  await space('e2e-edit', 'floor1', 'E2E edit space');
+  await space('e2e-delete', 'floor1', 'E2E delete space');
+  await Workshops.insertAsync({
+    name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established', primarySpaceId: ceramicsRoom,
+  });
   const clay = await makeStoreItem({
     code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150, bookkeepingAccount: '3010',
     requiresMembership: true, commentRequired: false,
