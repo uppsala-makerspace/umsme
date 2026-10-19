@@ -89,6 +89,12 @@ test.describe('Announcements', () => {
     await expect(page).toHaveURL(/\/mail\/send\?announcement=/);
   });
 
+  test('sends only what is saved', async ({ page }) => {
+    await openAnnouncement(page, DRAFT);
+    await field(page, 'Subject (English)').fill('Closed over Christmas and New Year');
+    await expect(page.getByRole('link', { name: /^send$/i }).or(page.getByRole('button', { name: /^send$/i }))).toBeDisabled();
+  });
+
   test('deletes an announcement', async ({ page }) => {
     await openAnnouncement(page, 'E2E delete announcement');
     await deleteConfirmed(page);

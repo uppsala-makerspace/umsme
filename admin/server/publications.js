@@ -234,6 +234,17 @@ export default () => {
     return Certificates.find(docId);
   });
 
+  Meteor.publish('admin.announcements.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.announcements))) return this.ready();
+    return Announcements.find({}, { fields: { type: 1, subjectSv: 1, status: 1, createdAt: 1, sentAt: 1 } });
+  });
+
+  Meteor.publish('admin.announcements.announcement', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.announcements))) return this.ready();
+    return Announcements.find(docId);
+  });
+
   // What the group and workshop pages link to and choose among: names, and
   // what decides which choices make sense (a group's type, a workshop's group).
   Meteor.publish('admin.groupsAndWorkshops.choices', async function () {

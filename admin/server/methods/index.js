@@ -24,3 +24,4 @@ import './liability';
 import './messageTemplates';
 import './memberLookup';
 import './certificates';
+import './announcements';

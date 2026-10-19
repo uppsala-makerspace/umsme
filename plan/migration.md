@@ -247,6 +247,7 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | workshops | ✓ | ✓ | ✓ | ✓ |
 | groups | ✓ | ✓ | ✓ | ✓ (de breda publiceringarna `groups`, `workshops`, `groupMemberships` finns kvar för utlägg och certifikat) |
 | certificates | ✓ | ✓ | ✓ | ✓ (medlemssidans certifikat är React i Blaze-sidan via `ReactSlot`; `certificates` publiceras brett för admin-konsolen tills den migreras; `attestations` borttagen) |
+| announcement | ✓ | ✓ | ✓ | ✓ (själva utskicket och markeringen som skickad är mail-modulens, som fortfarande skriver `Announcements` direkt, så dess `allow` och den breda publiceringen `announcements` ligger kvar till mail) |
 
 ## Beslut (2026-10-19)
 

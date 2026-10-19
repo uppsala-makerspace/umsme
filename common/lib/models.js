@@ -847,6 +847,8 @@ export const models = {
       optional: true,
       autoform: { readonly: true },
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   testAttempt: {
     memberId: { type: String, max: 50 },
