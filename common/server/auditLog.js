@@ -10,15 +10,17 @@ export const ensureAuditLogIndexes = async () => {
 };
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const IGNORED = new Set(['_id', 'updatedAt', 'modified']);
 
 /**
  * The fields that differ between two versions of a document, with their old
- * and new values. Top-level fields only; `_id` and `updatedAt` are left out.
+ * and new values. Top-level fields only; `_id` and the version timestamps
+ * (`updatedAt`, `modified`) are left out.
  */
 export const changedFields = (before = {}, after = {}) => {
   const changes = {};
   for (const field of new Set([...Object.keys(before || {}), ...Object.keys(after || {})])) {
-    if (field === '_id' || field === 'updatedAt') continue;
+    if (IGNORED.has(field)) continue;
     const from = before?.[field];
     const to = after?.[field];
     if (!same(from, to)) changes[field] = { from: from ?? null, to: to ?? null };

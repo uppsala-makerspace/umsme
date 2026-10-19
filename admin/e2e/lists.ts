@@ -12,11 +12,17 @@ export const dataRows = (page: Page) => page.getByRole('row').filter({ hasNot: p
 export const search = (page: Page, text: string) => page.getByRole('searchbox').fill(text);
 
 /**
- * Sort by a column, as clicking its heading does; again for descending. The
- * name is matched at the start: DataTables adds "Title: Activate to sort".
+ * Sort by a column, clicking its heading until it says so (aria-sort), since
+ * a list may already be sorted by it. The name is matched at the start:
+ * DataTables adds ": Activate to sort" to it.
  */
-export const sortBy = (page: Page, column: string) =>
-  page.getByRole('columnheader', { name: new RegExp(`^${column}\\b`) }).first().click();
+export const sortBy = async (page: Page, column: string, direction: 'ascending' | 'descending' = 'ascending') => {
+  const header = page.getByRole('columnheader', { name: new RegExp(`^${column}\\b`) }).first();
+  for (let clicks = 0; clicks < 3 && (await header.getAttribute('aria-sort')) !== direction; clicks += 1) {
+    await header.click();
+  }
+  await expect(header).toHaveAttribute('aria-sort', direction);
+};
 
 /** The search finds `found` and filters out `filtered`. */
 export const expectSearch = async (page: Page, text: string, found: string, filtered: string) => {

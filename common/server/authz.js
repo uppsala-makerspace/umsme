@@ -9,6 +9,7 @@ import { Roles } from 'meteor/roles';
 /** The roles that may read and write each admin domain. */
 export const DOMAIN_ROLES = {
   liability: ['admin', 'board'],
+  messageTemplates: ['admin', 'board'],
 };
 
 /** Whether the user holds any of the roles. */

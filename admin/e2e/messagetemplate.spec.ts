@@ -24,8 +24,9 @@ test.describe('Message templates', () => {
   test('lists the templates, the storage ones included', async ({ page }) => {
     await openAs(page, 'admin', '/templates');
     await expect(page.getByRole('heading', { name: /templates?( list)?$/i }).first()).toBeVisible();
-    await expect(templateRows(page).filter({ hasText: WELCOME })).toContainText('welcome');
-    await expect(page.getByText(STORAGE_WARNING, { exact: true })).toBeVisible();
+    await expect(templateRows(page).filter({ hasText: WELCOME })).toContainText(/welcome/i);
+    // .first(): the React list shows the type by its label, the same text here.
+    await expect(page.getByText(STORAGE_WARNING, { exact: true }).first()).toBeVisible();
   });
 
   test('the board sees them too', async ({ page }) => {
@@ -48,8 +49,7 @@ test.describe('Message templates', () => {
   test('sorts the list by name', async ({ page }) => {
     await openAs(page, 'admin', '/templates');
     await expect(page.getByText(WELCOME, { exact: true })).toBeVisible();
-    await sortBy(page, 'Template name');
-    await sortBy(page, 'Template name');
+    await sortBy(page, 'Template name', 'descending');
     // Descending: "Välkommen" before "Storage: …" and "E2E …".
     await expect(templateRows(page).first()).toContainText(WELCOME);
   });
@@ -66,9 +66,9 @@ test.describe('Message templates', () => {
     await createButton(page).click();
 
     const row = templateRows(page).filter({ hasText: 'E2E added template' });
-    await expect(row).toContainText('status');
-    await expect(row).toContainText('lab');
-    await expect(row).toContainText('family');
+    await expect(row).toContainText(/status/i);
+    await expect(row).toContainText(/lab/i);
+    await expect(row).toContainText(/family/i);
   });
 
   test('renders a template with sample data', async ({ page }) => {

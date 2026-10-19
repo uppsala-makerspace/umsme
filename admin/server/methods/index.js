@@ -21,3 +21,4 @@ import './storeItems';
 import './storageV2';
 import './members';
 import './liability';
+import './messageTemplates';

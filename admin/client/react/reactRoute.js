@@ -4,8 +4,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import { theme } from '/imports/ui/theme';
 import './ReactPage';
 
-/** Every React page gets the MUI theme. */
-const themed = (component) => (props) =>
+/** A component with the MUI theme around it, as every React page gets. */
+export const themed = (component) => (props) =>
   createElement(ThemeProvider, { theme }, createElement(component, props));
 
 /** A route that shows a React page; the route parameters become its props. */

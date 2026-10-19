@@ -2,7 +2,7 @@ import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Announcements } from '/imports/common/collections/announcements';
 import './AnnouncementEdit.html';
-import '../messagetemplate/MessageTemplateDocumentation';
+import '../messagetemplate/MessageTemplateDocumentation.js';
 
 Template.AnnouncementEdit.onCreated(function() {
   Meteor.subscribe('announcements');

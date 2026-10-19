@@ -1,25 +1,8 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "./MessageTempalteList";
-import "./MessageTemplateAdd";
-import "./MessageTemplateView";
+import { reactRoute } from '../../react/reactRoute';
+import { MessageTemplateListPage } from '/imports/ui/messageTemplates/MessageTemplateListPage';
+import { MessageTemplateEditPage } from '/imports/ui/messageTemplates/MessageTemplateEditPage';
+import './MessageTemplateDocumentation';
 
-FlowRouter.route('/templates', {
-  name: 'templates',
-  action() {
-    this.render('AppBody', {main: 'MessageTemplateList'});
-  }
-});
-
-FlowRouter.route('/templates/add', {
-  name: 'addtemplate',
-  action() {
-    this.render('AppBody', {main: 'MessageTemplateAdd'});
-  }
-});
-
-FlowRouter.route('/template/:_id', {
-  name: 'templateview',
-  action() {
-    this.render('AppBody', {main: 'MessageTemplateView'});
-  }
-});
+reactRoute('/templates', 'templates', MessageTemplateListPage);
+reactRoute('/templates/add', 'addtemplate', MessageTemplateEditPage);
+reactRoute('/template/:_id', 'templateview', MessageTemplateEditPage);

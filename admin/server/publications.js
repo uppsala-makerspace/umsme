@@ -151,6 +151,19 @@ export default () => {
     return LiabilityDocuments.find(docId);
   });
 
+  Meteor.publish('admin.messageTemplates.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.messageTemplates))) return this.ready();
+    return MessageTemplates.find({}, {
+      fields: { name: 1, type: 1, membershiptype: 1, membertype: 1, deprecated: 1, auto: 1 },
+    });
+  });
+
+  Meteor.publish('admin.messageTemplates.template', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.messageTemplates))) return this.ready();
+    return MessageTemplates.find(docId);
+  });
+
   Meteor.publish(null, async function () {
     if (this.userId) {
       if ((await Roles.userIsInRoleAsync(this.userId, 'admin'))) return Meteor.roleAssignment.find();
