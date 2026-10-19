@@ -107,6 +107,13 @@ done and is the pattern to follow:
   (pick several from many: search, dropdown, removable pills; use it instead
   of a long list of checkboxes), `BlazeTemplate` (a not yet migrated Blaze
   piece inside a React page; containers only).
+- One Save per edit page: everything that can wait for Save is a field of the
+  form, before the Save button, and is saved with it, including links to
+  other things (an item's workshops, a workshop's or group's spaces, a
+  group's related workshops). Blaze pages often saved such links on their
+  own, at once, because AutoForm could not hold them; do not carry that
+  over. Only what must take effect at once sits after Save, as its own
+  action: uploading an image or icon, actions on other documents.
 - Navigation goes through `useNavigate()` from `imports/ui/navigation.js`, a
   context that reactRoute fills with FlowRouter; never import FlowRouter.
 - MUI: import each component from its own path
