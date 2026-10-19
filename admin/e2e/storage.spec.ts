@@ -72,6 +72,26 @@ test.describe('Storage', () => {
     await expect(page.getByRole('button', { name: /confirm selected/i })).toBeVisible();
   });
 
+  test('exempts an overdue unit, giving the reason', async ({ page }) => {
+    await openStorage(page);
+    await unit(page, '1002').click();
+    await page.getByRole('button', { name: /add exemption/i }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('textbox', { name: /exemption reason/i }).fill('E2E exemption');
+    await dialog.getByRole('button', { name: /add exemption/i }).click();
+    await expect(page.getByText(/exempt: E2E exemption/i)).toBeVisible();
+  });
+
+  test('adds a member to the queue', async ({ page }) => {
+    await openStorage(page);
+    await page.getByRole('button', { name: /^add to queue$/i }).click();
+    await page.getByRole('combobox', { name: 'Member' }).first().fill('Nora');
+    await page.getByRole('listbox').getByRole('option', { name: /Nora Ny/ }).click();
+    await page.getByRole('combobox', { name: /preferred floor/i }).selectOption('floor2');
+    await page.getByRole('button', { name: /add to queue — no automatic notification/i }).click();
+    await expect(page.getByRole('row').filter({ hasText: 'Nora Ny' }).filter({ hasText: 'Floor 2' })).toBeVisible();
+  });
+
   test('shows the event log', async ({ page }) => {
     await openStorage(page);
     await expect(page.getByRole('heading', { name: /^event log$/i })).toBeVisible();
