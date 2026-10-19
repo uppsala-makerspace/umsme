@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
+import { dataRows, expectSearch, sortBy } from './lists';
 
 // The liability agreement versions: list, add, edit, delete, and who sees
 // them. Written against the Blaze pages and meant to pass unchanged against
@@ -9,8 +10,7 @@ import { openAs } from './helpers';
 const CURRENT = 'Ansvarsförbindelse 2025';
 const OLDER = 'Ansvarsförbindelse 2023';
 
-/** The data rows of the document list, header row excluded. */
-const documentRows = (page: Page) => page.getByRole('row').filter({ has: page.getByRole('cell') });
+const documentRows = dataRows;
 
 /**
  * A form field by its accessible name, as a screen reader announces it. Not
@@ -35,6 +35,20 @@ test.describe('Liability documents', () => {
     await expect(page.getByRole('heading', { name: /liability documents/i })).toBeVisible();
     await expect(documentRows(page).first()).toContainText(CURRENT);
     await expect(documentRows(page).nth(1)).toContainText(OLDER);
+  });
+
+  test('searches the list', async ({ page }) => {
+    await openAs(page, 'admin', '/liability');
+    await expect(page.getByText(CURRENT, { exact: true })).toBeVisible();
+    await expectSearch(page, '2023', OLDER, CURRENT);
+  });
+
+  test('sorts the list by title', async ({ page }) => {
+    await openAs(page, 'admin', '/liability');
+    await expect(documentRows(page).first()).toContainText(CURRENT);
+    await sortBy(page, 'Title');
+    // Ascending: "…2023" before "…2025", and both before the "E2E …" versions.
+    await expect(documentRows(page).first()).toContainText(OLDER);
   });
 
   test('the board sees them too', async ({ page }) => {

@@ -29,3 +29,14 @@ export const LongTitle = {
     ],
   },
 };
+
+/** More versions than fit on a page, to show paging, searching and sorting. */
+export const ManyVersions = {
+  args: {
+    documents: Array.from({ length: 40 }, (_, i) => ({
+      _id: `many-${i}`,
+      title: `Ansvarsförbindelse ${1990 + i}`,
+      date: day(`${1990 + i}-01-15`),
+    })),
+  },
+};

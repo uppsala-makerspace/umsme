@@ -1,17 +1,15 @@
 import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Link from '@mui/material/Link';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import { toDateInput } from './dates';
+import { DataList } from '../components/DataList';
+import { dateColumn, linkColumn } from '../components/columns';
+
+const columns = [
+  linkColumn('title', 'Title', (doc) => `/liability/${doc._id}`),
+  dateColumn('date', 'Date'),
+];
 
 /** The liability agreement versions, newest first. The newest is in force. */
 export const LiabilityList = ({ loading, documents }) => (
@@ -23,28 +21,12 @@ export const LiabilityList = ({ loading, documents }) => (
     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
       Members are asked to approve the version with the latest date. Adding a version asks everyone to approve again.
     </Typography>
-    <TableContainer component={Paper} variant="outlined">
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Title</TableCell>
-            <TableCell sx={{ width: 160 }}>Date</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {documents.map((doc) => (
-            <TableRow key={doc._id} hover>
-              <TableCell><Link href={`/liability/${doc._id}`} underline="hover" sx={{ fontWeight: 600 }}>{doc.title}</Link></TableCell>
-              <TableCell>{toDateInput(doc.date)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {(loading || documents.length === 0) && (
-        <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
-          {loading ? 'Loading…' : 'No versions yet.'}
-        </Typography>
-      )}
-    </TableContainer>
+    <DataList
+      rows={documents}
+      columns={columns}
+      loading={loading}
+      empty="No versions yet."
+      defaultSort={{ field: 'date', sort: 'desc' }}
+    />
   </Box>
 );

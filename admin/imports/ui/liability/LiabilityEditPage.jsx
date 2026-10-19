@@ -16,11 +16,14 @@ export const LiabilityEditPage = ({ _id }) => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
+  // Only once the whole document is here: the list's publication leaves a
+  // partial copy (title and date) in the client, which would otherwise fill
+  // the form with empty texts and stay there.
   useEffect(() => {
-    if (!document) return;
+    if (loading || !document) return;
     setLoaded(document);
     setValues(formValues(document));
-  }, [document?._id]);
+  }, [document?._id, loading]);
 
   const run = async (action) => {
     setBusy(true);

@@ -121,9 +121,16 @@ admin (port 6007) med stories för liabilitys två rena komponenter.
   ritar. Data och metodanrop i `data.js` (se `liability/data.js`).
 - Storybook i admin (`npm run storybook`, port 6007), med MUI-temat och
   Bootstrap 3 som i admin. Varje ren komponent har stories bredvid sig.
-- Stora listor (medlemmar, betalningar) använder MUI X DataGrid mot en
-  paginerad publicering eller metod, och ersätter `aldeed:tabular`. Små
-  listor som liabilitys använder MUI:s vanliga `Table`.
+- **Alla listor** använder MUI X DataGrid via den tunna `DataList`
+  (`admin/imports/ui/components/DataList.jsx`): sökruta, sortering på varje
+  kolumn, rader per sida och paginering, likadant överallt. Kolumnerna är
+  listans egna, med hjälpare för det som återkommer (`columns.jsx`:
+  `dateColumn`, `linkColumn`; fler när de behövs). Små listor sorterar och
+  söker i webbläsaren; stora listor (medlemmar, betalningar) får paginering,
+  sortering och sökning på servern, byggt en gång med den första stora
+  listan, och ersätter `aldeed:tabular`.
+- E2e-testerna för varje lista provar sökning och sortering
+  (`admin/e2e/lists.ts`), så att de inte kan försvinna obemärkt.
 
 ## Per modul
 
@@ -250,6 +257,10 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
   tillgänglighet (fokus i dialoger), till priset av +112 KB gzip JavaScript.
   Skillnaden växer i de tunga modulerna: tabeller med paginering på servern,
   autocomplete, datumväljare. Admin och appen får olika formspråk.
+- **Listor: DataGrid för alla** (2026-10-19), via en tunn gemensam
+  komponent. Liabilitys första React-lista tappade sökning, sortering och
+  paginering, som Blaze-sidans DataTables hade, utan att det sades; nu har
+  varje lista dem. DataGrid kostar +204 KB gzip JavaScript utöver MUI.
 - **Storybook:** egen instans i admin, port 6007, med MUI-temat.
 - **Delade komponenter:** inga mellan admin (MUI) och appen (Tailwind).
 - **Cron-jobb, migreringar och publika API:er** ligger kvar i admin.

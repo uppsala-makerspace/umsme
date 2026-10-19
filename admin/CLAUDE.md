@@ -96,6 +96,10 @@ done and is the pattern to follow:
   admin does. Pages are routed with
   `reactRoute()` from `client/react/reactRoute.js`. Navigate through
   `imports/ui/navigation.js`, never FlowRouter directly.
+- Lists: always `DataList` (`imports/ui/components/DataList.jsx`), MUI X
+  DataGrid with search, sorting and paging set up the same everywhere, with
+  columns from the helpers in `columns.jsx` where they fit. Every list's e2e
+  tests check search and sorting with `e2e/lists.ts`.
 - MUI: import each component from its own path
   (`import Button from '@mui/material/Button'`), never from `'@mui/material'`:
   Meteor does not tree-shake, and the barrel import pulls in all of MUI.
