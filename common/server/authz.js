@@ -18,6 +18,7 @@ export const DOMAIN_ROLES = {
   certificates: ['admin', 'board'],
   announcements: ['admin', 'board'],
   stats: ['admin', 'board'],
+  lock: ['admin'],
 };
 
 /** Whether the user holds any of the roles. */

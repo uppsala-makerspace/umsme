@@ -1,9 +1,4 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './Lockusers';
+import { reactRoute } from '../../react/reactRoute';
+import { LockSyncPage } from '/imports/ui/lock/LockSyncPage';
 
-FlowRouter.route('/lock', {
-  name: 'lock',
-  action() {
-    this.render('AppBody', {main: 'Lockusers'});
-  }
-});
+reactRoute('/lock', 'lock', LockSyncPage);

@@ -1,4 +1,8 @@
+import { check } from 'meteor/check';
 import { lockApi } from '../lock';
+import { lockOverview, fixLockEndDate } from '../lock/overview';
+import { requireRole, DOMAIN_ROLES } from '/imports/common/server/authz';
+import { recordChange } from '/imports/common/server/auditLog';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { Members } from '/imports/common/collections/members';
 import { Email } from 'meteor/email';
@@ -31,6 +35,20 @@ export const syncUnlocks = async () => {
 };
 
 Meteor.methods({
+  /** Every lab member against what the lock holds for them. */
+  async 'lock.overview'() {
+    await requireRole(this.userId, DOMAIN_ROLES.lock);
+    return lockOverview();
+  },
+
+  /** Set the lock's end date for a member to their lab end date. */
+  async 'lock.fix'(memberId) {
+    check(memberId, String);
+    await requireRole(this.userId, DOMAIN_ROLES.lock);
+    await fixLockEndDate(memberId);
+    await recordChange({ userId: this.userId, domain: 'lock', action: 'fixEndDate', docId: memberId });
+  },
+
   'syncLockHistory': async () => {
     if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
       return syncUnlocks();
@@ -82,44 +100,5 @@ Meteor.methods({
     }
 
     return visits;
-  },
-  'lockStatus': async () => {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
-    return lockApi().status();
-  },
-  'setCalenderEndDate': async (calendar, endDate, link) => {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
-    await lockApi().setCalendarEndDate(calendar, endDate, link);
-  },
-
-  'createCalendarEndDate': async (userid, endDate) => {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
-    await lockApi().createCalendarEndDate(userid, endDate);
   }
 });
-
-
-/* group_user_links example JSON expression
- {
-   calendar_id: "calendar-7c786e1ec60a"
-   group_id: "group-53bf19ebcddb"
-   id: "group_user-ddbd0292fea2"
-   link_profile: "user"
-   user_id: "user-ea5a1fcc5fe4"
- }
-
-lock_user_links
- {
-   calendar_id: null
-   id: "lock_user-7724313e6f1e"
-   link_profile: "administrator"
-   lock_id: "lock-fde72d8df2e0"
-   user_id: "user-0366ba845fb5"
- }
-*/

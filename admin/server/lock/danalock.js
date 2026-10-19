@@ -103,3 +103,22 @@ export const danalock = {
     logResponse(linkResponse);
   },
 };
+
+/* group_user_links example JSON expression
+ {
+   calendar_id: "calendar-7c786e1ec60a"
+   group_id: "group-53bf19ebcddb"
+   id: "group_user-ddbd0292fea2"
+   link_profile: "user"
+   user_id: "user-ea5a1fcc5fe4"
+ }
+
+lock_user_links
+ {
+   calendar_id: null
+   id: "lock_user-7724313e6f1e"
+   link_profile: "administrator"
+   lock_id: "lock-fde72d8df2e0"
+   user_id: "user-0366ba845fb5"
+ }
+*/
