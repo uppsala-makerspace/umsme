@@ -47,6 +47,7 @@ same data layer and business rules.
 | Document                                          | Contents                                          |
 | ------------------------------------------------- | ------------------------------------------------- |
 | [architecture.md](architecture.md)                | How the three apps work together, shared DB, deployment |
+| [monolithic-design-revisited.md](monolithic-design-revisited.md) | Why new features stay in one system, and when to split one out |
 | [data-model.md](data-model.md)                    | All collections, schemas, and relationships       |
 | [storage-redesign.md](storage-redesign.md)        | Storage inventory, allocation, warnings, and administrator flow |
 | [business-rules.md](business-rules.md)            | Membership types, pricing, renewals, family rules |
