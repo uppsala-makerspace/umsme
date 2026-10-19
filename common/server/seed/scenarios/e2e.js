@@ -24,6 +24,9 @@ import { Attestations } from '/imports/common/collections/attestations';
 import { Announcements } from '/imports/common/collections/announcements';
 import { Mails } from '/imports/common/collections/mails';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
+import { Expenses } from '/imports/common/collections/expenses';
+import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
+import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
 
@@ -180,6 +183,33 @@ export const buildE2e = async ({ people, now }) => {
     await DoorUnlocks.insertAsync({ timestamp: days(-daysAgo), door: 'outerDoor', memberid: members.member._id, method });
   }
   await DoorUnlocks.insertAsync({ timestamp: days(-2), door: 'outerDoor', extid: 'user-guest-gast@example.org', method: 'danalock' });
+
+  // Expense accounts: the ceramics account with its steering group's two
+  // members as approvers and a budget, and one each for the admin tests that
+  // edit, delete, link and budget. Expenses on the ceramics account, one per
+  // test that moves one along, named by their place.
+  const account = (name, fields = {}) => ExpenseAccounts.insertAsync({ name, explanation: 'Konto för testet.', createdAt: days(-100), ...fields });
+  const ceramicsAccount = await account('Keramik', {
+    explanation: 'Lera, glasyr och brännkostnader.', groupIds: [ceramicsGroup],
+    approverMemberIds: [members.groupLeader._id, members.steering._id],
+  });
+  await ExpenseBudgets.insertAsync({ expenseAccountId: ceramicsAccount, year: now.getFullYear(), amount: 5000, setAt: days(-90), setBy: members.treasurer._id, createdAt: days(-90) });
+  for (const purpose of ['edit', 'delete', 'links', 'budget']) await account(`E2E ${purpose} account`, { groupIds: [premisesGroup] });
+  const expense = (place, status, fields = {}) => Expenses.insertAsync({
+    memberId: members.steering._id, type: 'receipt', driveFileId: `e2e/${place}.svg`, mimeType: 'image/svg+xml',
+    status, date: days(-20), createdAt: days(-20), amount: 250, expenseAccountId: ceramicsAccount, place, note: 'Glasyr',
+    ...(status !== 'pending' ? { submittedAt: days(-19) } : {}),
+    ...(['confirmed', 'reimbursed'].includes(status) ? { confirmedAt: days(-18), confirmedBy: members.groupLeader._id } : {}),
+    ...(status === 'reimbursed' ? { reimbursedAt: days(-1), reimbursedBy: members.treasurer._id, reimbursedDate: days(1), bookkeepingAccount: '5010' } : {}),
+    ...fields,
+  });
+  await expense('E2E draft', 'pending');
+  await expense('E2E confirm', 'submitted');
+  await expense('E2E reject', 'submitted');
+  await expense('E2E reimburse', 'confirmed');
+  await expense('E2E invoice', 'confirmed', { type: 'invoice', dueDate: days(10), amount: 1200 });
+  await expense('E2E unreimburse', 'reimbursed');
+  await expense('E2E paid', 'reimbursed', { amount: 480 });
 
   // Storage last, so that the storage hooks see the members' final dates.
   const walls = await makeStorageWalls([
