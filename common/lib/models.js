@@ -1644,6 +1644,8 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   // Member <-> group link with a join/approval workflow, mirroring how
   // attestations link members to certificates.

@@ -16,6 +16,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { ImageField } from '../components/ImageField';
 
 const Section = ({ title, children }) => (
   <Box component="section" sx={{ mt: 4 }}>
@@ -51,7 +52,6 @@ export const StoreItemForm = ({
   sales, onDelete,
 }) => {
   const [confirming, setConfirming] = useState(null);
-  const [file, setFile] = useState(null);
   const text = (name) => ({ value: values[name], onChange: (e) => onChange(name, e.target.value) });
   const amount = (name) => ({ ...text(name), type: 'number', slotProps: { htmlInput: { min: 1 } } });
   const flag = (name) => ({ checked: values[name], onChange: (e) => onChange(name, e.target.checked) });
@@ -136,21 +136,10 @@ export const StoreItemForm = ({
       {!isNew && (
         <>
           <Section title="Image">
-            {imageUrl
-              ? <Box component="img" src={imageUrl} alt={item?.name?.sv} sx={{ display: 'block', maxWidth: 400, maxHeight: 300, mb: 1, borderRadius: 1 }} />
-              : <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>No image uploaded.</Typography>}
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-              <Button component="label" variant="outlined">
-                Choose image
-                {/* style, not hidden: Bootstrap 3 gives file inputs display: block. */}
-                <input type="file" style={{ display: 'none' }} accept="image/jpeg,image/png,image/webp,image/heic" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-              </Button>
-              <Typography variant="body2" color="text.secondary">{file?.name}</Typography>
-              <Button variant="contained" disabled={!file || uploading} onClick={() => { onUploadImage(file); setFile(null); }}>
-                {uploading ? 'Uploading…' : 'Upload image'}
-              </Button>
-              {imageUrl && <Button onClick={() => setConfirming('image')}>Remove image</Button>}
-            </Stack>
+            <ImageField
+              src={imageUrl} alt={item?.name?.sv} accept="image/jpeg,image/png,image/webp,image/heic"
+              onUpload={onUploadImage} onRemove={onRemoveImage} uploading={uploading}
+            />
           </Section>
 
           <Section title="Workshops / areas of interest">
@@ -183,11 +172,6 @@ export const StoreItemForm = ({
         open={confirming === 'delete'} title="Delete this item?" busy={busy} confirmLabel="Delete"
         text={`“${title}” is removed from the web shop for good.`}
         onCancel={() => setConfirming(null)} onConfirm={() => { setConfirming(null); onDelete(); }}
-      />
-      <Confirm
-        open={confirming === 'image'} title="Remove the image?" busy={busy} confirmLabel="Remove image"
-        text="The image is removed from the item and from storage."
-        onCancel={() => setConfirming(null)} onConfirm={() => { setConfirming(null); onRemoveImage(); }}
       />
     </Box>
   );

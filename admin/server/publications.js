@@ -183,6 +183,17 @@ export default () => {
     return Workshops.find({}, { fields: { name: 1, kind: 1 } });
   });
 
+  Meteor.publish('admin.spaces.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.spaces))) return this.ready();
+    return Spaces.find({}, { fields: { spaceId: 1, floor: 1, name: 1, iconSize: 1, iconFileId: 1 } });
+  });
+
+  Meteor.publish('admin.spaces.space', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.spaces))) return this.ready();
+    return Spaces.find(docId);
+  });
+
   Meteor.publish(null, async function () {
     if (this.userId) {
       if ((await Roles.userIsInRoleAsync(this.userId, 'admin'))) return Meteor.roleAssignment.find();

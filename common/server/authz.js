@@ -11,6 +11,7 @@ export const DOMAIN_ROLES = {
   liability: ['admin', 'board'],
   messageTemplates: ['admin', 'board'],
   storeItems: ['admin', 'board'],
+  spaces: ['admin', 'board'],
 };
 
 /** Whether the user holds any of the roles. */

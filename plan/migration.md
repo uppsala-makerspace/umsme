@@ -243,6 +243,7 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | liability | ✓ | ✓ | ✓ (MUI) | ✓ |
 | messagetemplate | ✓ | ✓ | ✓ | ✓ (dokumentationen är en Blaze-brygga till React-versionen tills mail och announcement migreras) |
 | storeitems | ✓ | ✓ | ✓ | ✓ |
+| spaces | ✓ | ✓ | ✓ | ✓ (EntitySpaces, valet av utrymmen på verkstäder och grupper, är Blaze tills de modulerna migreras) |
 
 ## Beslut (2026-10-19)
 

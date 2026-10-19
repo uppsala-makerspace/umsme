@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from '../navigation';
+import { useEditor } from '../components/useEditor';
 import { StoreItemForm } from './StoreItemForm';
 import {
   useStoreItem, formValues, saveStoreItem, setStoreItemWorkshops, storeItemSales, removeStoreItem,
@@ -11,49 +12,17 @@ import {
 export const StoreItemEditPage = ({ _id }) => {
   const navigate = useNavigate();
   const { loading, item, workshops } = useStoreItem(_id);
-  const [values, setValues] = useState(formValues(null));
-  // The version saves are checked against: updatedAt as the form saw it. A
-  // change someone else makes meanwhile is refused at save. Our own writes
-  // (save, image, workshops) move it on; `refresh` says how much to take over
-  // from the next version the publication delivers: everything after a save,
-  // only the version after an image or workshop change, so unsaved edits stay.
-  const [loaded, setLoaded] = useState(null);
-  const refresh = useRef('all');
+  const { values, setField, loaded, run, busy, error, setError, notice, setNotice } = useEditor({ doc: item, loading, toValues: formValues });
   const [sales, setSales] = useState(null);
-  const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(null);
-  const [notice, setNotice] = useState(null);
   // The ticked workshops, changed at once on a click and brought in line with
   // the item whenever the publication delivers it.
   const [linked, setLinked] = useState([]);
   useEffect(() => setLinked(item?.workshopIds || []), [JSON.stringify(item?.workshopIds || [])]);
 
   useEffect(() => {
-    if (loading || !item || !refresh.current) return;
-    if (refresh.current === 'all') setValues(formValues(item));
-    setLoaded(item);
-    refresh.current = null;
-  }, [item?._id, item?.updatedAt?.getTime(), loading]);
-
-  useEffect(() => {
     if (_id) storeItemSales(_id).then(setSales, (e) => setError(e.reason || e.message));
   }, [_id]);
-
-  const run = async (action, { then, keep = 'version' } = {}) => {
-    setBusy(true);
-    setError(null);
-    setNotice(null);
-    try {
-      refresh.current = keep;
-      const result = await action();
-      if (then) then(result);
-    } catch (e) {
-      refresh.current = null;
-      setError(e.reason || e.message);
-    }
-    setBusy(false);
-  };
 
   if (loading) return <Typography color="text.secondary">Loading…</Typography>;
   if (_id && !item) return <Typography color="text.secondary">There is no such store item.</Typography>;
@@ -62,7 +31,7 @@ export const StoreItemEditPage = ({ _id }) => {
     return (
       <StoreItemForm
         isNew values={values} busy={busy} error={error}
-        onChange={(field, value) => setValues((current) => ({ ...current, [field]: value }))}
+        onChange={setField}
         onSave={() => run(() => saveStoreItem(values, null), { then: (id) => navigate(`/storeitem/${id}`) })}
       />
     );
@@ -73,7 +42,7 @@ export const StoreItemEditPage = ({ _id }) => {
       isNew={false}
       item={item}
       values={values}
-      onChange={(field, value) => setValues((current) => ({ ...current, [field]: value }))}
+      onChange={setField}
       onSave={() => run(() => saveStoreItem(values, loaded), { keep: 'all', then: () => setNotice('Saved.') })}
       busy={busy}
       error={error}

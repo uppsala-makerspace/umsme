@@ -1,12 +1,20 @@
 import { Meteor } from 'meteor/meteor';
-import { Roles } from 'meteor/roles';
+import { check, Match } from 'meteor/check';
 import { Spaces } from '/imports/common/collections/spaces';
 import { mapIconStore } from '/imports/common/server/mapIconStore';
+import { requireRole, DOMAIN_ROLES } from '/imports/common/server/authz';
+import { recordChange } from '/imports/common/server/auditLog';
+import { createSpace, updateSpace, removeSpace, spaceLinks } from '/imports/common/server/spaces/spaces';
 
-const requireRole = async (roles) => {
-  if (!Meteor.userId() || !(await Roles.userIsInRoleAsync(Meteor.userId(), roles))) {
-    throw new Meteor.Error('not-authorized', 'Insufficient role');
-  }
+const roles = DOMAIN_ROLES.spaces;
+const Bilingual = Match.Maybe({ sv: Match.Maybe(String), en: Match.Maybe(String) });
+const SpaceFields = {
+  spaceId: String,
+  floor: String,
+  name: { sv: String, en: Match.Maybe(String) },
+  description: Match.Optional(Bilingual),
+  slackChannels: Match.Optional([String]),
+  iconSize: Match.Optional(Match.Maybe(Number)),
 };
 
 const ALLOWED_ICON_TYPES = ['image/svg+xml', 'image/png'];
@@ -22,13 +30,39 @@ const setIcon = async (space, buffer, mimeType) => {
     date: new Date(),
   });
   await Spaces.updateAsync(space._id, {
-    $set: { iconFileId: fileId, iconMimeType: mimeType },
+    $set: { iconFileId: fileId, iconMimeType: mimeType, updatedAt: new Date() },
   });
   if (space.iconFileId) await mapIconStore.deleteImage(space.iconFileId);
   return fileId;
 };
 
 Meteor.methods({
+  async 'spaces.create'(fields) {
+    check(fields, SpaceFields);
+    await requireRole(this.userId, roles);
+    return createSpace(fields, { userId: this.userId });
+  },
+
+  async 'spaces.update'(docId, fields, expectedUpdatedAt) {
+    check(docId, String);
+    check(fields, SpaceFields);
+    check(expectedUpdatedAt, Match.Maybe(Date));
+    await requireRole(this.userId, roles);
+    await updateSpace(docId, fields, { userId: this.userId, expectedUpdatedAt: expectedUpdatedAt ?? null });
+  },
+
+  async 'spaces.links'(docId) {
+    check(docId, String);
+    await requireRole(this.userId, roles);
+    return spaceLinks(docId);
+  },
+
+  async 'spaces.remove'(docId) {
+    check(docId, String);
+    await requireRole(this.userId, roles);
+    await removeSpace(docId, { userId: this.userId });
+  },
+
   /**
    * One-time seed of the Spaces collection from the bundled rooms.json and
    * mapicons/ (copies of the app's legacy map config). Idempotent: spaces
@@ -36,8 +70,8 @@ Meteor.methods({
    * icon get one uploaded from the bundled files.
    * @returns {{imported: number, skipped: number, icons: number}}
    */
-  'adminSpaces.importFromRooms': async () => {
-    await requireRole(['admin', 'board']);
+  async 'adminSpaces.importFromRooms'() {
+    await requireRole(this.userId, roles);
     let rooms;
     try {
       rooms = JSON.parse(await Assets.getTextAsync('rooms.json'));
@@ -93,8 +127,11 @@ Meteor.methods({
    * @param {string} iconBase64  Raw base64 (no data: prefix)
    * @param {string} mimeType  image/svg+xml or image/png
    */
-  'adminSpaces.uploadIcon': async (spaceId, iconBase64, mimeType) => {
-    await requireRole(['admin', 'board']);
+  async 'adminSpaces.uploadIcon'(spaceId, iconBase64, mimeType) {
+    check(spaceId, String);
+    check(iconBase64, String);
+    check(mimeType, String);
+    await requireRole(this.userId, roles);
     const space = await Spaces.findOneAsync(spaceId);
     if (!space) throw new Meteor.Error('not-found', 'Space not found');
     if (!ALLOWED_ICON_TYPES.includes(mimeType)) {
@@ -104,22 +141,27 @@ Meteor.methods({
     if (buffer.length === 0 || buffer.length > MAX_ICON_BYTES) {
       throw new Meteor.Error('bad-size', 'Icon is empty or larger than 5 MB');
     }
-    return setIcon(space, buffer, mimeType);
+    const fileId = await setIcon(space, buffer, mimeType);
+    await recordChange({ userId: this.userId, domain: 'spaces', action: 'uploadIcon', docId: spaceId, before: space, after: await Spaces.findOneAsync(spaceId) });
+    return fileId;
   },
 
   /**
    * Remove a space's icon (admin/board). Required before the space itself
    * can be deleted (see the deny rule on Spaces).
    */
-  'adminSpaces.removeIcon': async (spaceId) => {
-    await requireRole(['admin', 'board']);
+  async 'adminSpaces.removeIcon'(spaceId) {
+    check(spaceId, String);
+    await requireRole(this.userId, roles);
     const space = await Spaces.findOneAsync(spaceId);
     if (!space) throw new Meteor.Error('not-found', 'Space not found');
     if (space.iconFileId) {
       await mapIconStore.deleteImage(space.iconFileId);
       await Spaces.updateAsync(spaceId, {
+        $set: { updatedAt: new Date() },
         $unset: { iconFileId: '', iconMimeType: '' },
       });
+      await recordChange({ userId: this.userId, domain: 'spaces', action: 'removeIcon', docId: spaceId, before: space, after: await Spaces.findOneAsync(spaceId) });
     }
     return true;
   },

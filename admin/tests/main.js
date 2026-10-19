@@ -29,6 +29,7 @@ import "./seed.tests";
 import "./liability.tests";
 import "./messageTemplates.tests";
 import "./storeItems.tests";
+import "./spaces.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {
