@@ -52,3 +52,38 @@ Varje punkt: modul, frågan, vad som är gjort i väntan.
   inställningarna ha `deliverMails: true`, så att flödet går hela vägen och
   meddelandena sparas? Gjort i väntan: orört.
 
+- **Gruppmejl skickas nu från servern** (`mails.send`): mallen renderas och
+  varje mejl skickas på servern, och utskicket sparas först när alla är
+  skickade. Förr gjorde webbläsaren det, ett mejl i taget. Mallar körs med
+  underscore `template`, alltså kod (`<% %>`), nu på servern, som
+  meddelandemallarna redan gjorde. Bara admin får skicka. Okej?
+- **Mottagarlistan redigeras genom att ta bort** personer (chips med kryss),
+  inte i ett fritt textfält. Det gamla fältet kunde ändå bara ta bort: okända
+  adresser föll bort när mejlet skickades. Okej?
+- **Att radera ett mejl** tar nu också bort länken från utskicket som
+  skickades med det (`mailId`), så att "View sent mail" inte leder fel.
+  Utskicket står kvar som skickat.
+
+## admin-konsolen
+
+Flyttat till React (`/admin`): Danalock-synken, sammanslagning av medlemmar
+och det obligatoriska certifikatet till alla. Engångsverktygen står kvar
+under dem, på den gamla Blaze-sidan (`AdminOneOffTools`), tills du bestämt
+vilka som ska vara kvar. För vart och ett: behålla (som servermetod med
+React-knapp) eller ta bort?
+
+- **Migrate legacy unlocks to doorunlocks** (`migrateUnlocksToDoorUnlocks`,
+  servermetod). Behövs inte om `unlocks` redan är tom i produktion.
+- **Update members with correct dates** (`updateMembers`, servermetod).
+  Medlemssidan har redan "Update dates" per medlem.
+- **Detect mobile numbers in payments**: skriver i `Payments` från
+  webbläsaren.
+- **Update member mobile numbers from payments**: skriver i `Members` från
+  webbläsaren.
+- **Accept all current paying members**: skriver i `Members` från
+  webbläsaren.
+- **Lowercase member emails** (`lowercaseMemberEmails`, servermetod).
+
+De tre som skriver från webbläsaren är det sista som håller kvar
+allow-reglerna på `Members` och `Payments`. När de är borta eller flyttade
+till servern kan reglerna tas bort.

@@ -1,36 +1,14 @@
 import { Template } from 'meteor/templating';
 import { Payments } from '/imports/common/collections/payments';
 import { Members } from '/imports/common/collections/members';
-import { Certificates } from '/imports/common/collections/certificates';
 import './Admin.html';
-import './MemberMerge';
 
-Template.AdminConsole.helpers({
-  mandatoryCertificate() {
-    return Certificates.findOne({ mandatory: true });
-  }
-});
-
-Template.AdminConsole.onCreated(function() {
+Template.AdminOneOffTools.onCreated(function() {
   Meteor.subscribe('payments');
   Meteor.subscribe('members');
-  Meteor.subscribe('certificates');
 });
 
-Template.AdminConsole.events({
-  'click .forceSyncDoorUnlocks': function (event) {
-    if (!confirm('Run the Danalock unlock sync now?')) return;
-    const button = event.currentTarget;
-    button.disabled = true;
-    Meteor.call('forceSyncDoorUnlocks', (err, res) => {
-      button.disabled = false;
-      if (err) {
-        alert(`Sync failed: ${err.reason || err.message || err}`);
-      } else {
-        alert(res || 'Sync done.');
-      }
-    });
-  },
+Template.AdminOneOffTools.events({
   'click .migrateUnlocks': function (event) {
     if (!confirm('Migrate the legacy unlocks collection into doorunlocks (and empty it)?')) return;
     const button = event.currentTarget;
@@ -108,18 +86,5 @@ Template.AdminConsole.events({
         alert(`Scanned ${res.scanned}: ${res.updated} updated, ${res.conflicts} skipped due to conflicts (see server log).`);
       }
     });
-  },
-  'click .grantMandatoryToAll': async function () {
-    try {
-      const { name, count } = await Meteor.callAsync('certificates.mandatoryGrantCount');
-      if (count === 0) {
-        alert('All members already have this certificate.');
-        return;
-      }
-      if (!confirm(`Grant "${name}" to ${count} members?`)) return;
-      alert(`Created ${await Meteor.callAsync('certificates.grantMandatoryToAll')} attestations.`);
-    } catch (err) {
-      alert(`Failed: ${err.reason || err.message || err}`);
-    }
   }
 });
