@@ -149,9 +149,17 @@ export const buildE2e = async ({ people, now }) => {
     type: 'information', subjectSv: 'Stängt under jul', subjectEn: 'Closed over Christmas',
     bodySv: 'Lokalen är stängd 23 december till 2 januari.', status: 'draft', createdAt: days(-5),
   });
-  for (const purpose of ['edit', 'delete']) {
+  // Mails of their own, to extract into an announcement and to delete, and
+  // a draft to send.
+  for (const purpose of ['extract', 'delete']) {
+    await Mails.insertAsync({
+      from: 'kansliet@example.org', recipients: 'members', family: false, to: [members.member.email], failed: [],
+      subject: `E2E ${purpose} mail`, senddate: days(-10), template: `Brev för testet som ${purpose === 'extract' ? 'gör ett utskick' : 'raderar'}.`,
+    });
+  }
+  for (const purpose of ['edit', 'delete', 'send']) {
     await Announcements.insertAsync({
-      type: 'information', subjectSv: `E2E ${purpose} announcement`, bodySv: `Utskick för testet som ${purpose === 'edit' ? 'ändrar' : 'raderar'}.`,
+      type: 'information', subjectSv: `E2E ${purpose} announcement`, bodySv: `Utskick för testet som ${{ edit: 'ändrar', delete: 'raderar', send: 'skickar' }[purpose]}.`,
       status: 'draft', createdAt: days(-3),
     });
   }
