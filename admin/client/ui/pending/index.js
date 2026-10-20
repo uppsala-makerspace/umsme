@@ -1,9 +1,4 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './PendingMembers';
+import { reactRoute } from '../../react/reactRoute';
+import { PendingMembersPage } from '/imports/ui/pending/PendingMembersPage';
 
-FlowRouter.route('/pending', {
-  name: 'pending',
-  action() {
-    this.render('AppBody', { main: 'PendingMembers' });
-  },
-});
+reactRoute('/pending', 'pending', PendingMembersPage);

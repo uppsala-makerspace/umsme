@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Members } from '/imports/common/collections/members';
 import { overdueReminderDays, reminderDays } from '/imports/common/lib/rules';
+import { familyCandidateSelector } from './members';
 
 /**
  * Pages of members for the admin lists: the views (all, excluded, the
@@ -22,7 +23,10 @@ export const MEMBER_LIST_SORTS = ['mid', 'name', 'email', 'member', 'lab', 'remi
 export const MEMBER_LIST_VIEWS = {
   all: () => ({}),
   excluded: () => ({ excluded: true }),
-  reminders: (now = new Date()) => {
+  // Who may join a payer's family.
+  familyCandidates: ({ patronId }) => familyCandidateSelector(patronId),
+  reminders: () => {
+    const now = new Date();
     const start = new Date(now.getTime() - overdueReminderDays * DAY_MS);
     const end = new Date(now.getTime() + reminderDays * DAY_MS);
     return {
@@ -62,17 +66,18 @@ const searchSelector = (search) => {
 /**
  * One page of a view.
  *
- * @param {{ view: string, search?: string, sort?: { field: string, direction: 'asc'|'desc' },
+ * @param {{ view: string, patronId?: string, search?: string, sort?: { field: string, direction: 'asc'|'desc' },
  *           page?: number, pageSize?: number }} options
+ *   `patronId` is the payer whose family the familyCandidates view is for.
  * @returns {Promise<{ rows: object[], total: number }>}
  */
-export const memberListPage = async ({ view, search, sort, page = 0, pageSize = 50 }) => {
+export const memberListPage = async ({ view, patronId, search, sort, page = 0, pageSize = 50 }) => {
   const viewSelector = MEMBER_LIST_VIEWS[view];
   if (!viewSelector) throw new Meteor.Error('bad-view', `No member list "${view}"`);
   if (sort && !MEMBER_LIST_SORTS.includes(sort.field)) throw new Meteor.Error('bad-sort', `Cannot sort by "${sort.field}"`);
   const size = Math.min(Math.max(1, pageSize), 200);
   const found = searchSelector(search);
-  const base = viewSelector();
+  const base = viewSelector({ patronId });
   const selector = found ? { $and: [base, found] } : base;
   const order = sort ? { [sort.field]: sort.direction === 'desc' ? -1 : 1, _id: 1 } : { name: 1, _id: 1 };
   const [members, total] = await Promise.all([

@@ -257,6 +257,7 @@ export const buildE2e = async ({ people, now }) => {
   const toDelete = await ownMember('906', 'E2E delete member');
   await Messages.insertAsync({ member: toDelete._id, template: welcomeTemplate, type: 'welcome', to: toDelete.email, subject: 'Välkommen', messagetext: 'Hej!', senddate: days(-59) });
   await ownMember('907', 'E2E register member', 'memberBase', { registered: false });
+  await ownMember('914', 'E2E pending member', 'memberBase', { registered: false });
   await ownMember('908', 'E2E exclude member');
   const drifted = await ownMember('913', 'E2E drifted member');
   await Members.updateAsync(drifted._id, { $set: { member: days(-400) } });

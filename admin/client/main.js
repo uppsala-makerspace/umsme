@@ -4,7 +4,6 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './ui/members';
 import './ui/membership';
 import './ui/message';
-import './ui/family';
 import './ui/storage';
 import './ui/stats';
 import './ui/revenue';

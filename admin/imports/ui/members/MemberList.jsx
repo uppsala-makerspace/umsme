@@ -12,10 +12,11 @@ import { memberColumns } from './memberColumns';
  *
  * @param {{ title: string, note?: string, actions?: React.ReactNode, children?: React.ReactNode,
  *           rows: object[], total: number, loading: boolean, error?: string,
- *           query: object, onQueryChange: (query) => void, empty?: string }} props
- *   `children` comes between the note and the list (a result, say).
+ *           query: object, onQueryChange: (query) => void, empty?: string, onRowClick?: ({ row }) => void }} props
+ *   `children` comes between the note and the list (a result, say). With
+ *   `onRowClick` a row does that instead of opening the member.
  */
-export const MemberList = ({ title, note, actions, children, rows, total, loading, error, query, onQueryChange, empty = 'No members.' }) => (
+export const MemberList = ({ title, note, actions, children, rows, total, loading, error, query, onQueryChange, empty = 'No members.', onRowClick }) => (
   <Box>
     <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: note ? 1 : 2 }}>
       <Typography variant="h4" component="h1">{title}</Typography>
@@ -26,7 +27,8 @@ export const MemberList = ({ title, note, actions, children, rows, total, loadin
     {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
     <ServerDataList
       rows={rows} total={total} loading={loading} columns={memberColumns} empty={empty}
-      query={query} onQueryChange={onQueryChange} rowHref={(m) => `/member/${m._id}`}
+      query={query} onQueryChange={onQueryChange}
+      {...(onRowClick ? { onRowClick, sx: { '& .MuiDataGrid-row': { cursor: 'pointer' } } } : { rowHref: (m) => `/member/${m._id}` })}
     />
   </Box>
 );

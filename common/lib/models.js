@@ -202,6 +202,8 @@ export const models = {
       blackbox: true,
       autoform: { omit: true },
     },
+    // Set when admin changes the member, and compared on its next change there.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   membership: {
     mid: {

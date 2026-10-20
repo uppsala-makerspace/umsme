@@ -3,7 +3,7 @@ import { Members } from '/imports/common/collections/members';
 import { Memberships } from '/imports/common/collections/memberships';
 import { Messages } from '/imports/common/collections/messages';
 import { MessageTemplates } from '/imports/common/collections/templates';
-import { messageData } from '/imports/common/lib/message';
+import { messageData, findBestTemplate } from '/imports/common/lib/message';
 import { memberStatus } from '/imports/common/lib/utils';
 import { reminderDays } from '/imports/common/lib/rules';
 import { pushMessage } from '/imports/common/server/push';
@@ -102,4 +102,32 @@ export const setReminded = async (memberId, reminded, { userId }) => {
   if (!before) throw new Meteor.Error('not-found', 'No such member');
   await Members.updateAsync(memberId, reminded ? { $set: { reminder: new Date() } } : { $unset: { reminder: '' } });
   await recordChange({ userId, domain: 'members', action: reminded ? 'markReminded' : 'markReminderNeeded', docId: memberId, before, after: await Members.findOneAsync(memberId, { fields: { reminder: 1 } }) });
+};
+
+/**
+ * Welcome a member the board has just accepted, if an automatic welcome
+ * template fits them. A mail that cannot go is logged, not thrown: the
+ * acceptance stands either way.
+ *
+ * @returns {Promise<boolean>} whether a welcome went
+ */
+export const sendAutoWelcome = async (memberId, { userId }) => {
+  const member = await Members.findOneAsync(memberId);
+  if (!member) return false;
+  const status = await memberStatus(member);
+  if (status.type === 'none') return false;
+  const template = await findBestTemplate({ auto: true, type: 'welcome', membershiptype: status.type, membertype: memberTypeOf(member) });
+  if (!template) return false;
+  try {
+    const data = await messageData(memberId, template._id);
+    await sendMail({ to: data.to, subject: data.subject, text: data.messagetext });
+    const doc = { template: template._id, member: memberId, type: 'welcome', to: data.to, subject: data.subject, senddate: new Date(), messagetext: data.messagetext };
+    const docId = await Messages.insertAsync(doc);
+    await recordChange({ userId, domain: 'messages', action: 'send', docId, after: doc });
+    pushMessage(docId).catch((err) => console.error('Failed to send welcome push:', err));
+    return true;
+  } catch (err) {
+    console.error('Failed to send welcome message:', err);
+    return false;
+  }
 };

@@ -23,10 +23,11 @@ Meteor.methods({
 });
 
 Meteor.methods({
-  /** A page of one of the member lists (all, excluded, reminders). */
+  /** A page of one of the member lists (all, excluded, reminders, a family's candidates). */
   async 'adminMembers.page'(options) {
     check(options, {
       view: String,
+      patronId: Match.Optional(String),
       search: Match.Optional(String),
       sort: Match.Optional(Match.OneOf(null, { field: String, direction: Match.OneOf('asc', 'desc') })),
       page: Match.Optional(Match.Integer),

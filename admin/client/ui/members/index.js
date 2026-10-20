@@ -1,26 +1,7 @@
-import "./MemberAdd";
-import "./MemberList";
-import "./MemberView";
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { reactRoute } from '../../react/reactRoute';
+import { MembersPage, MemberAddPage, MemberViewPage, FamilyAddPage } from '/imports/ui/members/MemberPages';
 
-
-FlowRouter.route('/members', {
-  name: 'members',
-  action() {
-    this.render('AppBody', {main: 'MemberList'});
-  }
-});
-
-FlowRouter.route('/members/add', {
-  name: 'addmember',
-  action() {
-    this.render('AppBody', {main: 'MemberAdd'});
-  }
-});
-
-FlowRouter.route('/member/:_id', {
-  name: 'memberview',
-  action() {
-    this.render('AppBody', {main: 'MemberView'});
-  }
-});
+reactRoute('/members', 'members', MembersPage);
+reactRoute('/members/add', 'addmember', MemberAddPage);
+reactRoute('/member/:_id', 'memberview', MemberViewPage);
+reactRoute('/member/:_id/add', 'familymemberadd', FamilyAddPage);
