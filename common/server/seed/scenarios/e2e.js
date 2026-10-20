@@ -16,8 +16,10 @@ import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
 import { makeFakeLock } from '../lock';
 import { makeFakeBank } from '../bank';
-import { makeMember, pay } from '../members';
+import { makeMember, pay, joinFamily } from '../members';
+import Invites from '/imports/common/collections/Invites';
 import { Payments } from '/imports/common/collections/payments';
+import { Members } from '/imports/common/collections/members';
 import { uploadImage } from '/imports/common/server/googleDrive';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
@@ -241,6 +243,29 @@ export const buildE2e = async ({ people, now }) => {
     const member = await makeMember({ mid, name: `E2E ${purpose} membership`, email: `e2e-${purpose}-membership@example.org` });
     await pay(member, 'memberBase', { at: days(-100), via: 'bankgiro' });
   }
+  // Members of their own for the member page's tests: to edit, delete,
+  // register, exclude, and one whose stored dates have drifted from its
+  // memberships; a family payer with a dependent to remove, a member to add
+  // and two invites, one to cancel and one, to an existing member, to decline.
+  const ownMember = async (mid, name, payment = 'memberBase', fields = {}) => {
+    const member = await makeMember({ mid, name, email: `e2e-${mid}@example.org`, ...fields });
+    if (payment) await pay(member, payment, { at: days(-60), via: 'bankgiro' });
+    return Members.findOneAsync(member._id);
+  };
+  await ownMember('905', 'E2E edit member');
+  const toDelete = await ownMember('906', 'E2E delete member');
+  await Messages.insertAsync({ member: toDelete._id, template: welcomeTemplate, type: 'welcome', to: toDelete.email, subject: 'Välkommen', messagetext: 'Hej!', senddate: days(-59) });
+  await ownMember('907', 'E2E register member', 'memberBase', { registered: false });
+  await ownMember('908', 'E2E exclude member');
+  const drifted = await ownMember('913', 'E2E drifted member');
+  await Members.updateAsync(drifted._id, { $set: { member: days(-400) } });
+  const payer = await ownMember('909', 'E2E family payer', 'familyBase');
+  await ownMember('910', 'E2E family candidate');
+  await joinFamily(await ownMember('911', 'E2E family dependent', null), payer);
+  await Invites.insertAsync({ email: 'e2e-cancel-invite@example.org', infamily: payer._id });
+  const invited = await ownMember('912', 'E2E invited member');
+  await Invites.insertAsync({ email: invited.email, infamily: payer._id });
+
   // The fake bank: two Swish deposits not yet in Payments.
   await makeFakeBank([
     { amount: 200, date: days(-1), swish: { name: 'Bo Basmedlem', mobile: '46700000106', message: 'E2E bank medlemskap' } },
