@@ -227,10 +227,11 @@ När ingen Blaze-modul finns kvar:
 2. FlowRouter ersätts med React Router i en routetabell; bara
    navigeringsadaptern och routetabellen ändras.
 3. `htmlFontSize: 10` tas bort ur MUI-temat.
-4. Paket bort: `blaze-html-templates`, `blaze-hot`, `aldeed:autoform`,
-   `communitypackages:autoform-bootstrap3`, `aldeed:tabular`,
+4. Paket bort: `blaze-html-templates`, `blaze-hot`,
    `ostrio:flow-router-extra`, `accounts-ui`, `jquery`, `session`, Bootstrap,
-   DataTables, och `common/collections/allow.js`.
+   och `common/collections/allow.js`. (`aldeed:autoform`,
+   `communitypackages:autoform-bootstrap3`, `aldeed:tabular` och DataTables
+   är redan borta, sedan våg 4.)
 5. Uppdatera `admin/CLAUDE.md` och `docs/architecture.md`.
 
 ## Uppföljning
@@ -241,13 +242,13 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 |---|---|---|---|---|
 | (steg 0) | ✓ | ✓ | ✓ | – |
 | liability | ✓ | ✓ | ✓ (MUI) | ✓ |
-| messagetemplate | ✓ | ✓ | ✓ | ✓ (dokumentationen är en Blaze-brygga till React-versionen tills mail och announcement migreras) |
+| messagetemplate | ✓ | ✓ | ✓ | ✓ (Blaze-bryggan för dokumentationen borttagen med mail) |
 | storeitems | ✓ | ✓ | ✓ | ✓ |
 | spaces | ✓ | ✓ | ✓ | ✓ (EntitySpaces borttagen; utrymmen väljs nu i verkstads- och gruppformulären) |
 | workshops | ✓ | ✓ | ✓ | ✓ |
 | groups | ✓ | ✓ | ✓ | ✓ (de breda publiceringarna `groups`, `workshops`, `groupMemberships` finns kvar för utlägg och certifikat) |
-| certificates | ✓ | ✓ | ✓ | ✓ (medlemssidans certifikat är React i Blaze-sidan via `ReactSlot`; `certificates` publiceras brett för admin-konsolen tills den migreras; `attestations` borttagen) |
-| announcement | ✓ | ✓ | ✓ | ✓ (själva utskicket och markeringen som skickad är mail-modulens, som fortfarande skriver `Announcements` direkt, så dess `allow` och den breda publiceringen `announcements` ligger kvar till mail) |
+| certificates | ✓ | ✓ | ✓ | ✓ (breda `certificates` och `attestations` borttagna) |
+| announcement | ✓ | ✓ | ✓ | ✓ (utskicket markeras skickat av `mails.send`; `allow` och breda `announcements` borttagna) |
 | excluded, reminders | ✓ | ✓ | ✓ | ✓ (medlemslistan pagineras på servern: `adminMembers.page`, `ServerDataList`, `useServerList`) |
 | history, stats, revenue | ✓ | ✓ (metoder `stats.*`) | ✓ | ✓ |
 | accounting | ✓ (fanns) | – | ✓ | ✓ |
@@ -256,7 +257,13 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | check | ✓ (fanns) | – | ✓ | ✓ (publika sidor i Clean-layouten: `reactRoute(..., { layout: 'Clean' })`) |
 | storage | ✓ (fanns) | ✓ (fanns) | ✓ | ✓ (`prompt()`/`confirm()` ersatta av en dialog) |
 | expenses | ✓ | ✓ | ✓ | ✓ (listorna pagineras på servern; publiceringarna `expenses`, `expenseAccounts`, `expenseBudgets`, `groups`, `workshops`, `groupMemberships`, `spaces` borttagna) |
-| membership, bank | ✓ | ✓ (metoder `payments.*`, `memberships.*`) | ✓ | ✓ (bankproxyn bakom `bankApi()`, fejk med `"bankproxy": "fake"`; `MembershipList` på medlemssidan är Blaze till våg 4) |
+| membership, bank | ✓ | ✓ (metoder `payments.*`, `memberships.*`) | ✓ | ✓ (bankproxyn bakom `bankApi()`, fejk med `"bankproxy": "fake"`; medlemskapen på medlemssidan är React sedan våg 4) |
+| comment | ✓ | ✓ (`admin.comments.about`) | ✓ | ✓ (`CommentsFor` på alla sidor; `ReactSlot` borttagen när sista Blaze-sidan försvann) |
+| message, pending | ✓ | ✓ (metoder `messages.*`, `members.pending`) | ✓ | ✓ |
+| members, family | ✓ | ✓ (metoder `members.*`, listorna pagineras på servern) | ✓ | ✓ |
+| users | ✓ | ✓ (metoder `users.*`) | ✓ | ✓ (`allow` på `Meteor.users` och publiceringen `users` borttagna) |
+| mail | ✓ | ✓ (metoder `mails.*`) | ✓ | ✓ (utskicket renderas och skickas på servern; Tabular borta med sina sista tabeller) |
+| admin | ✓ (fanns) | – | ✓ (synk, sammanslagning, obligatoriskt certifikat) | Delvis: engångsverktygen står kvar i Blaze (`AdminOneOffTools`) i väntan på beslut, och med dem `allow` på `Members` och `Payments` och de breda publiceringarna `members` och `payments` (plan/open-questions.md) |
 
 ## Beslut (2026-10-19)
 

@@ -27,8 +27,6 @@ ostrio:flow-router-extra
 accounts-password@3.3.1
 accounts-ui@1.5.0
 jquery
-aldeed:autoform@8.0.0
-communitypackages:autoform-bootstrap3
 momentjs:moment
 email@3.2.0
 fetch@0.2.0

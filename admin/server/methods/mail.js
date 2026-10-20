@@ -3,15 +3,8 @@ import { Members } from "/imports/common/collections/members.js";
 import { MessageTemplates } from "/imports/common/collections/templates";
 import { messageData } from "/imports/common/lib/message";
 import { isEmailAllowed } from "/imports/common/server/emailGuard";
-import { sendMail } from "../mail/send";
 
 Meteor.methods({
-  async mail(to, subject, text, from, html) {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
-    return sendMail({ to, subject, text, from, html });
-  },
   async mailAboutMemberShip(email) {
     const mb = await Members.findOneAsync({ email: email });
     const template = await MessageTemplates.findOneAsync({
@@ -48,12 +41,6 @@ Meteor.methods({
     }));
   },
 
-  async sendVerificationEmail() {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
-    return Accounts.sendVerificationEmail(this.userId);
-  },
 });
 
 //ta gärna bort metoden med min mejl som var här om ni inte gjort det, mvh

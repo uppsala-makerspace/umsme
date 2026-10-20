@@ -2,6 +2,7 @@ import assert from 'assert';
 import { Meteor } from 'meteor/meteor';
 import { Roles } from 'meteor/roles';
 import registerPublications from '/server/publications';
+import '/server/methods/user';
 
 const prefix = 'pubtest-';
 
@@ -32,7 +33,7 @@ describe('user publications', function () {
   const other = `${prefix}other`;
 
   before(async function () {
-    if (!Meteor.server.publish_handlers.users) registerPublications();
+    if (!Meteor.server.publish_handlers.storageAdminDashboard) registerPublications();
     await Meteor.roleAssignment.removeAsync({ 'user._id': { $regex: `^${prefix}` } });
     await Meteor.users.removeAsync({ _id: { $regex: `^${prefix}` } });
     for (const role of ['board', 'storage']) await Roles.createRoleAsync(role, { unlessExists: true });
@@ -57,12 +58,11 @@ describe('user publications', function () {
     await Meteor.users.removeAsync({ _id: { $regex: `^${prefix}` } });
   });
 
-  it('gives the board accounts without services or profile', async function () {
-    const doc = (await published('users', board)).find((s) => s.id === other);
-    assert.ok(doc);
-    assert.strictEqual(doc.fields.services, undefined);
-    assert.strictEqual(doc.fields.profile, undefined);
-    assert.strictEqual(doc.fields.emails[0].address, 'other@example.com');
+  it('gives the board an account without services or profile', async function () {
+    const { user } = await Meteor.server.method_handlers['users.detail'].call({ userId: board }, other);
+    assert.strictEqual(user.services, undefined);
+    assert.strictEqual(user.profile, undefined);
+    assert.strictEqual(user.emails[0].address, 'other@example.com');
   });
 
   it('gives storage operators an email and a name, nothing more', async function () {
@@ -75,6 +75,6 @@ describe('user publications', function () {
   it('gives a member without a role nothing', async function () {
     const plain = `${prefix}plain`;
     await Meteor.users.insertAsync({ _id: plain });
-    assert.deepStrictEqual(await published('users', plain), []);
+    assert.deepStrictEqual(await published('storageAdminDashboard', plain), []);
   });
 });

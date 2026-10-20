@@ -31,8 +31,6 @@ import './layouts/AppBody.js';
 import './react/ReactPage';
 import './layouts/Home.html';
 import { Accounts } from 'meteor/accounts-base';
-import { AutoFormThemeBootstrap3 } from 'meteor/communitypackages:autoform-bootstrap3/static';
-AutoFormThemeBootstrap3.load();
 
 Accounts.ui.config({
   passwordSignupFields: "USERNAME_AND_OPTIONAL_EMAIL",

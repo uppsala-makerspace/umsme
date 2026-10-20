@@ -1,16 +1,13 @@
 import { Meteor } from 'meteor/meteor';
 import { check, Match } from 'meteor/check';
 import { Members } from '/imports/common/collections/members';
-import { Memberships } from '/imports/common/collections/memberships';
 import { MessageTemplates } from '/imports/common/collections/templates';
 import { Messages } from '/imports/common/collections/messages';
 import { Payments } from '/imports/common/collections/payments';
-import { Mails } from '/imports/common/collections/mails';
 import { Comments } from '/imports/common/collections/comments';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Announcements } from '/imports/common/collections/announcements';
-import Invites from '/imports/common/collections/Invites';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
@@ -29,7 +26,6 @@ import {
 import { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
 import { hasRole, DOMAIN_ROLES } from '/imports/common/server/authz';
 
-export const PUBLISHED_USER_FIELDS = { username: 1, emails: 1, createdAt: 1 };
 
 const createAuthFuncForRoles = (col, roles) => async function () {
   if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
@@ -47,25 +43,8 @@ export default () => {
   // Treasurer included so a treasurer-only account can see member name + bank
   // details when reimbursing an expense.
   Meteor.publish('members', createAuthFuncForRoles(Members, ['admin', 'board', 'treasurer']));
-  Meteor.publish('memberships', createAuthFuncFor(Memberships));
-  Meteor.publish('templates', createAuthFuncFor(MessageTemplates));
-  Meteor.publish('messages', createAuthFuncFor(Messages));
-  Meteor.publish('mails', createAuthFuncFor(Mails));
   Meteor.publish('payments', createAuthFuncFor(Payments));
-  // Never the whole document: `services` holds password hashes, login tokens
-  // and Google access tokens, and `profile` an admin's personal number. The
-  // pages need only these; the logged-in user's own profile comes with the
-  // default user publication.
-  Meteor.publish('users', async function () {
-    if (this.userId && (await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))) {
-      return Meteor.users.find({}, { fields: PUBLISHED_USER_FIELDS });
-    }
-    this.ready();
-  });
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
-  Meteor.publish('certificates', createAuthFuncFor(Certificates));
-  Meteor.publish('announcements', createAuthFuncFor(Announcements));
-  Meteor.publish('invites', createAuthFuncFor(Invites));
 
   // Storage is deliberately published separately from the broad members
   // publication: treasurer-only users may see members for reimbursements, but
