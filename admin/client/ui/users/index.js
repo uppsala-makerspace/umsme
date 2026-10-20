@@ -1,25 +1,6 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './UserList';
-import './UserView';
-import './UserAdd';
+import { reactRoute } from '../../react/reactRoute';
+import { UsersPage, UserAddPage, UserViewPage } from '/imports/ui/users/UserPages';
 
-FlowRouter.route('/users', {
-  name: 'users',
-  action() {
-    this.render('AppBody', {main: 'UserList'});
-  }
-});
-
-FlowRouter.route('/users/add', {
-  name: 'usersadd',
-  action() {
-    this.render('AppBody', {main: 'UserAdd'});
-  }
-});
-
-FlowRouter.route('/user/:_id', {
-  name: 'userview',
-  action() {
-    this.render('AppBody', {main: 'UserView'});
-  }
-});
+reactRoute('/users', 'users', UsersPage);
+reactRoute('/users/add', 'usersadd', UserAddPage);
+reactRoute('/user/:_id', 'userview', UserViewPage);

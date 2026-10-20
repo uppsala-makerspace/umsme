@@ -22,7 +22,7 @@ test.describe('Users', () => {
     await openAs(page, 'admin', '/users');
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/user/i);
     await search(page, 'member@example.org');
-    await expect(rows(page).filter({ hasText: 'member@example.org' })).toBeVisible();
+    await expect(rows(page).filter({ has: page.getByText('member@example.org', { exact: true }) })).toBeVisible();
   });
 
   test('shows an account’s member and roles', async ({ page }) => {

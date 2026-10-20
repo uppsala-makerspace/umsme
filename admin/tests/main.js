@@ -41,6 +41,7 @@ import "./expenseAccounts.tests";
 import "./payments.tests";
 import "./messages.tests";
 import "./members.tests";
+import "./users.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

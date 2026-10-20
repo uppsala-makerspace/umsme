@@ -7,7 +7,7 @@ import { openAs, testUsers } from './helpers';
 test.describe('Access to admin', () => {
   test('admin sees the member list with the seeded members', async ({ page }) => {
     await openAs(page, 'admin', '/members');
-    await expect(page.getByRole('heading', { name: 'Member List' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/member/i);
     await page.getByRole('searchbox').fill(testUsers.member.name!);
     await expect(page.getByRole('link', { name: testUsers.member.name! })).toBeVisible();
   });

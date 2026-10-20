@@ -73,6 +73,10 @@ describe('client write rules', function () {
   });
 
   describe('staff', function () {
+    it('not even admin can remove a user account from the client', async function () {
+      await assertDenied(clientCall(admin, Meteor.users, 'removeAsync', { _id: plain }));
+    });
+
     it('board can insert a membership', async function () {
       const id = await clientCall(board, Memberships, 'insertAsync', membershipDoc());
       assert.ok(await Memberships.findOneAsync(id));
