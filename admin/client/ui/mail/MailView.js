@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import 'meteor/aldeed:autoform/static';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Mails } from "/imports/common/collections/mails";
 import { Announcements } from '/imports/common/collections/announcements';

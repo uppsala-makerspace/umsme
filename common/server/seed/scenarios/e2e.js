@@ -36,6 +36,7 @@ import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
+import { makeUser } from '../accounts';
 
 export const buildE2e = async ({ people, now }) => {
   const days = (n) => daysFromNow(n, now);
@@ -267,6 +268,11 @@ export const buildE2e = async ({ people, now }) => {
   await Invites.insertAsync({ email: 'e2e-cancel-invite@example.org', infamily: payer._id });
   const invited = await ownMember('912', 'E2E invited member');
   await Invites.insertAsync({ email: invited.email, infamily: payer._id });
+
+  // Logins of their own for the user tests: roles, password, rename, delete.
+  for (const purpose of ['roles', 'password', 'rename', 'delete']) {
+    await makeUser({ email: `e2e-user-${purpose}@example.org`, password: 'password123' });
+  }
 
   // The fake bank: two Swish deposits not yet in Payments.
   await makeFakeBank([

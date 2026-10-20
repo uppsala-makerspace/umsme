@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import 'meteor/aldeed:autoform/static';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Comments } from '/imports/common/collections/comments';

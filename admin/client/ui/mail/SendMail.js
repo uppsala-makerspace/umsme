@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating';
+import 'meteor/aldeed:autoform/static';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Members } from '/imports/common/collections/members';
