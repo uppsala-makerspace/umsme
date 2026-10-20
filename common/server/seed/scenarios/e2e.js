@@ -276,6 +276,9 @@ export const buildE2e = async ({ people, now }) => {
   await Invites.insertAsync({ email: 'e2e-cancel-invite@example.org', infamily: payer._id });
   const invited = await ownMember('912', 'E2E invited member');
   await Invites.insertAsync({ email: invited.email, infamily: payer._id });
+  // Two members for the admin console to merge, one into the other.
+  await ownMember('915', 'E2E merge source');
+  await ownMember('916', 'E2E merge destination', null);
 
   // Logins of their own for the user tests: roles, password, rename, delete.
   for (const purpose of ['roles', 'password', 'rename', 'delete']) {
