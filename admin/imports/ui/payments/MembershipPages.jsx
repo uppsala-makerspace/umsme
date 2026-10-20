@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { CommentsFor } from '../comments/CommentsFor';
 import { useNavigate } from '../navigation';
-import { BlazeTemplate } from '../components/BlazeTemplate';
+import { MessagesFor } from '../messages/MessagesFor';
 import { MembershipForm } from './MembershipForm';
 import { suggestMembership, createMembership, membershipDetail, updateMembership, removeMembership } from './data';
 
@@ -74,9 +74,7 @@ export const MembershipViewPage = ({ _id }) => {
       onDelete={() => run(async () => { await removeMembership(_id); navigate(`/member/${member._id}`); })}
       after={(
         <Box sx={{ mt: 4 }}>
-          <Typography variant="h5" component="h2" sx={{ mb: 1 }}>Messages</Typography>
-          <BlazeTemplate name="InitiateMessage" data={{ member: member._id, membership: _id }} />
-          <BlazeTemplate name="MessageList" data={{ membership: _id }} />
+          <MessagesFor memberId={member._id} membershipId={_id} />
           <CommentsFor about={_id} />
         </Box>
       )}

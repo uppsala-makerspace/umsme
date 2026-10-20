@@ -52,7 +52,6 @@ export default () => {
   Meteor.publish('messages', createAuthFuncFor(Messages));
   Meteor.publish('mails', createAuthFuncFor(Mails));
   Meteor.publish('payments', createAuthFuncFor(Payments));
-  Meteor.publish('comments', createAuthFuncFor(Comments));
   // Never the whole document: `services` holds password hashes, login tokens
   // and Google access tokens, and `profile` an admin's personal number. The
   // pages need only these; the logged-in user's own profile comes with the
@@ -261,6 +260,13 @@ export default () => {
     check(about, String);
     if (!(await hasRole(this.userId, DOMAIN_ROLES.comments))) return this.ready();
     return Comments.find({ about });
+  });
+
+  // The messages sent to a member, or about a membership, without their text.
+  Meteor.publish('admin.messages.of', async function (about) {
+    check(about, Match.OneOf({ member: String }, { membership: String }));
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.messages))) return this.ready();
+    return Messages.find(about, { fields: { member: 1, membership: 1, type: 1, subject: 1, senddate: 1, payment: 1 } });
   });
 
   // What the group and workshop pages link to and choose among: names, and

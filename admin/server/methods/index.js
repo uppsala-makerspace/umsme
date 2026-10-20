@@ -28,4 +28,5 @@ import './announcements';
 import './expenseAccounts';
 import './payments';
 import './comments';
+import './messages';
 import './stats';

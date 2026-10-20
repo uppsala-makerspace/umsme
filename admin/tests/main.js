@@ -39,6 +39,7 @@ import "./lockOverview.tests";
 import "./doorUnlocks.tests";
 import "./expenseAccounts.tests";
 import "./payments.tests";
+import "./messages.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

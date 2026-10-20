@@ -9,12 +9,11 @@ import 'meteor/aldeed:autoform/static'
 import '../comment';
 import './MemberView.html';
 import './MemberStatus';
-import '../message/MessageList';
+import '../message';
 import '../membership/MembershipList';
 import '../family/FamilyList';
 import '../family/FamilyInviteList';
 import '../family/MemberInvitesReceived';
-import '../message/ReminderMessage';
 import '../../react/ReactSlot';
 import { MemberCertificatesSection } from '/imports/ui/certificates/MemberCertificatesSection';
 

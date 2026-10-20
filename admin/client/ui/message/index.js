@@ -1,17 +1,13 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "./SendMessage";
-import "./MessageView";
+import { Template } from 'meteor/templating';
+import { reactRoute } from '../../react/reactRoute';
+import { SendMessagePage, MessageViewPage } from '/imports/ui/messages/MessagePages';
+import { MessagesFor } from '/imports/ui/messages/MessagesFor';
+import '../../react/ReactSlot';
 
-FlowRouter.route('/message/send', {
-  name: 'sendmessage',
-  action() {
-    this.render('AppBody', {main: 'SendMessage'});
-  }
-});
+reactRoute('/message/send', 'sendmessage', SendMessagePage);
+reactRoute('/message/:_id', 'messageview', MessageViewPage);
 
-FlowRouter.route('/message/:_id', {
-  name: 'messageview',
-  action() {
-    this.render('AppBody', {main: 'MessageView'});
-  }
-});
+// The messages section on the member page while it is Blaze:
+//   {{> ReactSlot component=messagesComponent props=(messagesToMember id)}}
+Template.registerHelper('messagesComponent', () => MessagesFor);
+Template.registerHelper('messagesToMember', (memberId) => ({ memberId }));

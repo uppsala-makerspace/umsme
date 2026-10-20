@@ -24,6 +24,9 @@ export const DOMAIN_ROLES = {
   expenseAccounts: ['admin', 'board'],
   payments: ['admin', 'board'],
   comments: ['admin', 'board'],
+  messages: ['admin', 'board'],
+  // Mailing from admin, as the mail method has always required.
+  sendMail: ['admin'],
 };
 
 /** Whether the user holds any of the roles. */
