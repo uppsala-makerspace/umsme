@@ -48,12 +48,12 @@ test.describe('Expenses', () => {
     await openAs(page, 'admin', '/expenses/confirm');
     await expect(page.getByRole('heading', { name: /expenses to confirm/i, level: 1 })).toBeVisible();
     await expect(rows(page).filter({ hasText: 'E2E reject' })).toBeVisible();
-    await expect(rows(page).filter({ hasText: 'E2E reimburse' })).toHaveCount(0);
+    await expect(rows(page).filter({ hasText: 'E2E queued' })).toHaveCount(0);
 
     await openAs(page, 'treasurer', '/expenses/reimburse');
     await expect(page.getByRole('heading', { name: /invoices to pay/i })).toBeVisible();
     await expect(rows(page).filter({ hasText: 'E2E invoice' })).toBeVisible();
-    await expect(rows(page).filter({ hasText: 'E2E reimburse' })).toBeVisible();
+    await expect(rows(page).filter({ hasText: 'E2E queued' })).toBeVisible();
     await page.getByRole('button', { name: /^reimbursed$/i }).click();
     await expect(rows(page).filter({ hasText: 'E2E paid' })).toContainText('480');
   });

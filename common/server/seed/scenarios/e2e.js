@@ -224,6 +224,7 @@ export const buildE2e = async ({ people, now }) => {
   await expense('E2E confirm', 'submitted');
   await expense('E2E reject', 'submitted');
   await expense('E2E reimburse', 'confirmed');
+  await expense('E2E queued', 'confirmed');
   await expense('E2E invoice', 'confirmed', { type: 'invoice', dueDate: days(10), amount: 1200 });
   await expense('E2E unreimburse', 'reimbursed');
   await expense('E2E paid', 'reimbursed', { amount: 480 });
