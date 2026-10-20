@@ -27,6 +27,7 @@ export const DOMAIN_ROLES = {
   messages: ['admin', 'board'],
   members: ['admin', 'board'],
   users: ['admin', 'board'],
+  mails: ['admin', 'board'],
   // Mailing from admin, as the mail method has always required.
   sendMail: ['admin'],
 };

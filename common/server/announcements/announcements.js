@@ -1,6 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { Announcements } from '/imports/common/collections/announcements';
 import { Mails } from '/imports/common/collections/mails';
+import { Members } from '/imports/common/collections/members';
+import { pushAnnouncement } from '/imports/common/server/push';
 import { recordChange } from '/imports/common/server/auditLog';
 import { text, setOrUnset } from '../groups/text';
 
@@ -62,4 +64,39 @@ export const removeAnnouncement = async (docId, { userId }) => {
   if (before.mailId) await Mails.removeAsync(before.mailId);
   await Announcements.removeAsync(docId);
   await recordChange({ userId, domain: DOMAIN, action: 'remove', docId, before });
+};
+
+/** Mark an announcement sent, with the mail it went out as. */
+export const markAnnouncementSent = async (docId, mailId, { userId }) => {
+  const before = await current(docId);
+  await Announcements.updateAsync(docId, { $set: { status: 'sent', sentAt: new Date(), mailId, updatedAt: new Date() } });
+  await recordChange({ userId, domain: DOMAIN, action: 'markSent', docId, before, after: await Announcements.findOneAsync(docId) });
+};
+
+/**
+ * An announcement made from a mail sent without one, so that it shows
+ * among the announcements: sent when the mail was, its text the mail's.
+ *
+ * @returns {Promise<string>} the announcement's id
+ */
+export const announcementFromMail = async (mailId, { userId }) => {
+  const mail = await Mails.findOneAsync(mailId);
+  if (!mail) throw new Meteor.Error('not-found', 'No such mail');
+  const existing = await Announcements.findOneAsync({ mailId }, { fields: { _id: 1 } });
+  if (existing) return existing._id;
+  const doc = {
+    type: 'newsletter', subjectSv: mail.subject, subjectEn: mail.subject, bodySv: mail.template, bodyEn: mail.template,
+    status: 'sent', createdAt: mail.senddate, sentAt: mail.senddate, updatedAt: new Date(), mailId,
+  };
+  const docId = await Announcements.insertAsync(doc);
+  await recordChange({ userId, domain: DOMAIN, action: 'fromMail', docId, after: doc });
+  return docId;
+};
+
+/** Push an announcement to every member not excluded; pushAnnouncement skips those who opted out. */
+export const pushAnnouncementToMembers = async (docId) => {
+  await current(docId);
+  const members = await Members.find({ email: { $exists: true }, excluded: { $ne: true } }).fetchAsync();
+  for (const member of members) await pushAnnouncement(member, docId);
+  console.log(`[Push] Sent announcement push for ${docId}`);
 };

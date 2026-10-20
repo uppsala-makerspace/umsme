@@ -8,7 +8,6 @@ import './api/certificatesRfid';
 import './api/expenseReceipt';
 import './api/workshopImage';
 import './api/publicDirectory';
-import '/imports/tabular/index';
 import adminAvailable from './adminAvailable';
 import publications from './publications';
 import setupAccounts from './accounts';

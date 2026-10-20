@@ -30,3 +30,4 @@ import './payments';
 import './comments';
 import './messages';
 import './stats';
+import './mails';

@@ -1,4 +1,3 @@
-import 'datatables.net-bs/css/dataTables.bootstrap.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './ui/members';
