@@ -284,19 +284,34 @@ export const proposeStorageAllocations = ({
     return primary || secondary || compareText(a.name, b.name);
   })[0];
 
-  // Phase 1: oldest unassigned request with a compatible unit.
+  // Phase 1: moves to floor 2 take priority over new assignments.
+  const floor2Moves = moves.filter((request) =>
+    request.preference.floor === 'floor2' && unitByOwner.get(request.owner).floor !== 'floor2');
+  for (let index = 0; index < floor2Moves.length; index += 1) {
+    const request = floor2Moves[index];
+    const candidates = [...remainingUnits.values()].filter((unit) =>
+      storagePreferenceMatches(unit, request.preference));
+    if (!candidates.length) continue;
+    const unit = chooseUnit(candidates, floor2Moves.slice(index + 1), initial);
+    remainingUnits.delete(unit._id);
+    usedRequests.add(request._id);
+    proposals.push({ request, unit, phase: 1, reason: 'oldest_compatible_move_to_floor2' });
+  }
+  const remainingMoves = moves.filter((request) => !usedRequests.has(request._id));
+
+  // Phase 2: oldest unassigned request with a compatible unit.
   for (let index = 0; index < initial.length; index += 1) {
     const request = initial[index];
     const candidates = [...remainingUnits.values()].filter((unit) =>
       storagePreferenceMatches(unit, request.preference));
     if (!candidates.length) continue;
-    const unit = chooseUnit(candidates, initial.slice(index + 1), moves);
+    const unit = chooseUnit(candidates, initial.slice(index + 1), remainingMoves);
     remainingUnits.delete(unit._id);
     usedRequests.add(request._id);
-    proposals.push({ request, unit, phase: 1, reason: 'oldest_compatible_without_storage' });
+    proposals.push({ request, unit, phase: 2, reason: 'oldest_compatible_without_storage' });
   }
 
-  // Phase 2: preferences are soft, so unmatched unassigned requests get the
+  // Phase 3: preferences are soft, so unmatched unassigned requests get the
   // least-contended remaining unit.
   const unmatchedInitial = initial.filter((request) => !usedRequests.has(request._id));
   for (let index = 0; index < unmatchedInitial.length && remainingUnits.size; index += 1) {
@@ -304,24 +319,24 @@ export const proposeStorageAllocations = ({
     const unit = chooseUnit(
       [...remainingUnits.values()],
       unmatchedInitial.slice(index + 1),
-      moves,
+      remainingMoves,
     );
     remainingUnits.delete(unit._id);
     usedRequests.add(request._id);
-    proposals.push({ request, unit, phase: 2, reason: 'oldest_without_storage_soft_fallback' });
+    proposals.push({ request, unit, phase: 3, reason: 'oldest_without_storage_soft_fallback' });
   }
 
-  // Phase 3: a move is worthwhile only when its destination satisfies a
+  // Phase 4: a move is worthwhile only when its destination satisfies a
   // preference that the current unit does not satisfy.
-  for (let index = 0; index < moves.length; index += 1) {
-    const request = moves[index];
+  for (let index = 0; index < remainingMoves.length; index += 1) {
+    const request = remainingMoves[index];
     const candidates = [...remainingUnits.values()].filter((unit) =>
       storagePreferenceMatches(unit, request.preference));
     if (!candidates.length) continue;
-    const unit = chooseUnit(candidates, moves.slice(index + 1));
+    const unit = chooseUnit(candidates, remainingMoves.slice(index + 1));
     remainingUnits.delete(unit._id);
     usedRequests.add(request._id);
-    proposals.push({ request, unit, phase: 3, reason: 'oldest_compatible_move' });
+    proposals.push({ request, unit, phase: 4, reason: 'oldest_compatible_move' });
   }
 
   const skipped = waiting
