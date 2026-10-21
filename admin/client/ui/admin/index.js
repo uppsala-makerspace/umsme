@@ -1,9 +1,5 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "./Admin";
+import { reactRoute } from '../../react/reactRoute';
+import { AdminConsolePage } from '/imports/ui/console/AdminConsolePage';
+import './Admin';
 
-FlowRouter.route('/admin', {
-  name: 'admin',
-  action() {
-    this.render('AppBody', {main: 'AdminConsole'});
-  }
-});
+reactRoute('/admin', 'admin', AdminConsolePage);

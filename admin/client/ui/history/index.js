@@ -1,9 +1,4 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './History';
+import { reactRoute } from '../../react/reactRoute';
+import { HistoryPage } from '/imports/ui/stats/HistoryPage';
 
-FlowRouter.route('/history', {
-  name: 'history',
-  action() {
-    this.render('AppBody', {main: 'History'});
-  }
-});
+reactRoute('/history', 'history', HistoryPage);

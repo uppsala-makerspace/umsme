@@ -4,6 +4,8 @@
   "noreply": "no-reply@example.org",
   "syncNrOfTransactions": 20,
   "deliverMails": false,
+  "lockApi": "fake",
+  "bankproxy": "fake",
   "reminderCron": {
     "enabled": false
   },

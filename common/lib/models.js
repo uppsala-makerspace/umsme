@@ -202,6 +202,8 @@ export const models = {
       blackbox: true,
       autoform: { omit: true },
     },
+    // Set when admin changes the member, and compared on its next change there.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   membership: {
     mid: {
@@ -244,6 +246,8 @@ export const models = {
     family: { label: "Family", type: Boolean, optional: true },
     memberend: { label: "Membership end", type: Date, optional: true },
     labend: { label: "Lab membership end", type: Date, optional: true },
+    // Set by the domain functions on every admin write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   note: {
     _id: { label: "Id", type: String, max: 10 },
@@ -734,6 +738,9 @@ export const models = {
       type: Number,
       min: 0,
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
+    createdAt: { label: "Created", type: Date, optional: true, autoform: { omit: true } },
   },
   attestation: {
     certificateId: {
@@ -844,6 +851,8 @@ export const models = {
       optional: true,
       autoform: { readonly: true },
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   testAttempt: {
     memberId: { type: String, max: 50 },
@@ -910,6 +919,8 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // Set by the domain functions on every write, and compared on update.
+    updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
   },
   // One revision of an expense account's budget for a calendar year. Revisions
   // are never edited, only added (or removed to fix a mistake): the one with the

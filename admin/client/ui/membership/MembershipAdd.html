@@ -1,6 +1,0 @@
-<template name="MembershipAdd">
-    <h1>Add membership for member <strong>{{memberName}}</strong></h1>
-    {{> MemberStatus member=member}}
-    <br><br>
-    {{> quickForm collection=Memberships doc=membership id="insertMembershipForm" type="normal" validation="keyup" omitFields="family,memberend,labend,discount,type"}}
-</template>

@@ -1,12 +1,11 @@
 import { Meteor } from 'meteor/meteor';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { Email } from 'meteor/email'
-import { authenticate, syncUnlocks } from "../methods/lock";
+import { syncUnlocks } from "../methods/lock";
 import { SyncedCron } from 'meteor/chatra:synced-cron';
 import { isEmailAllowed } from '/imports/common/server/emailGuard';
 
 export const runDoorUnlockSyncAndMail = async () => {
-  await authenticate();
   await syncUnlocks();
   const today = new Date();
   const yesterday = new Date();

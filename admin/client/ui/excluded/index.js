@@ -1,9 +1,4 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './Excluded';
+import { reactRoute } from '../../react/reactRoute';
+import { ExcludedPage } from '/imports/ui/members/ExcludedPage';
 
-FlowRouter.route('/excluded', {
-  name: 'excluded',
-  action() {
-    this.render('AppBody', { main: 'Excluded' });
-  },
-});
+reactRoute('/excluded', 'excluded', ExcludedPage);

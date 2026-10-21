@@ -1,17 +1,6 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "./SendMessage";
-import "./MessageView";
+import { reactRoute } from '../../react/reactRoute';
+import { SendMessagePage, MessageViewPage } from '/imports/ui/messages/MessagePages';
 
-FlowRouter.route('/message/send', {
-  name: 'sendmessage',
-  action() {
-    this.render('AppBody', {main: 'SendMessage'});
-  }
-});
+reactRoute('/message/send', 'sendmessage', SendMessagePage);
+reactRoute('/message/:_id', 'messageview', MessageViewPage);
 
-FlowRouter.route('/message/:_id', {
-  name: 'messageview',
-  action() {
-    this.render('AppBody', {main: 'MessageView'});
-  }
-});

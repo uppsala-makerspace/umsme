@@ -1,9 +1,4 @@
-import './Statistics';
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { reactRoute } from '../../react/reactRoute';
+import { StatisticsPage } from '/imports/ui/stats/StatisticsPage';
 
-FlowRouter.route('/stats', {
-  name: 'statistics',
-  action() {
-    this.render('AppBody', {main: 'Statistics'});
-  }
-});
+reactRoute('/stats', 'statistics', StatisticsPage);

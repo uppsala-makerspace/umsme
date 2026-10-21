@@ -5,38 +5,6 @@ import { messageData } from "/imports/common/lib/message";
 import { isEmailAllowed } from "/imports/common/server/emailGuard";
 
 Meteor.methods({
-  async mail(to, subject, text, from, html) {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
-    if (!Meteor.settings.deliverMails) {
-      const mesg = `Flag deliverMail in settings not set, cannot send mail to ${to}`;
-      throw new Meteor.Error(mesg);
-    }
-    if (!isEmailAllowed(to)) {
-      console.log(`Email to ${to} blocked by whitelist`);
-      return;
-    }
-    let f = Meteor.settings.from;
-    const emailOptions = {
-      to,
-      from: from ? from : Array.isArray(f) ? f[0] : f,
-      subject,
-      text,
-    };
-    if (html) {
-      emailOptions.html = html;
-    }
-    return Email.sendAsync(emailOptions)
-      .then(() => {
-        console.log(`Sent mail to ${to}`);
-      })
-      .catch((err) => {
-        const mesg = "Failed sending mail: " + err;
-        console.log(mesg);
-        throw new Meteor.Error(mesg);
-      });
-  },
   async mailAboutMemberShip(email) {
     const mb = await Members.findOneAsync({ email: email });
     const template = await MessageTemplates.findOneAsync({
@@ -73,12 +41,6 @@ Meteor.methods({
     }));
   },
 
-  async sendVerificationEmail() {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
-    return Accounts.sendVerificationEmail(this.userId);
-  },
 });
 
 //ta gärna bort metoden med min mejl som var här om ni inte gjort det, mvh

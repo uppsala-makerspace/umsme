@@ -33,7 +33,7 @@ const MEMBER_TYPES = new Set(['member', 'labandmember']);
 /**
  * Group memberships per member, each member's list sorted by start date.
  * Shape is `{ [mid]: { memberships: [...] } }` — statsPerMonth enriches those
- * objects further (see ui/stats/utils.js).
+ * objects further (see imports/stats/joiningStats.js).
  *
  * @param {Array<object>} memberships
  * @return {Object<string, {memberships: Array<object>}>}

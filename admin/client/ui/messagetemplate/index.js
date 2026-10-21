@@ -1,7 +1,6 @@
 import { reactRoute } from '../../react/reactRoute';
 import { MessageTemplateListPage } from '/imports/ui/messageTemplates/MessageTemplateListPage';
 import { MessageTemplateEditPage } from '/imports/ui/messageTemplates/MessageTemplateEditPage';
-import './MessageTemplateDocumentation';
 
 reactRoute('/templates', 'templates', MessageTemplateListPage);
 reactRoute('/templates/add', 'addtemplate', MessageTemplateEditPage);

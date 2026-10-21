@@ -1,26 +1,7 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import "./certificates.css";
-import "./CertificateList";
-import "./CertificateAdd";
-import "./CertificateView";
+import { reactRoute } from '../../react/reactRoute';
+import { CertificateListPage } from '/imports/ui/certificates/CertificateListPage';
+import { CertificateEditPage } from '/imports/ui/certificates/CertificateEditPage';
 
-FlowRouter.route('/certificates', {
-  name: 'certificates',
-  action() {
-    this.render('AppBody', {main: 'CertificateList'});
-  }
-});
-
-FlowRouter.route('/certificates/add', {
-  name: 'addcertificate',
-  action() {
-    this.render('AppBody', {main: 'CertificateAdd'});
-  }
-});
-
-FlowRouter.route('/certificate/:_id', {
-  name: 'certificateview',
-  action() {
-    this.render('AppBody', {main: 'CertificateView'});
-  }
-});
+reactRoute('/certificates', 'certificates', CertificateListPage);
+reactRoute('/certificates/add', 'addcertificate', CertificateEditPage);
+reactRoute('/certificate/:_id', 'certificateview', CertificateEditPage);

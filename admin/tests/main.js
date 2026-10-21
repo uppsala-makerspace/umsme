@@ -31,6 +31,18 @@ import "./messageTemplates.tests";
 import "./storeItems.tests";
 import "./spaces.tests";
 import "./groups.tests";
+import "./certificates.tests";
+import "./announcements.tests";
+import "./memberList.tests";
+import "./memberStats.tests";
+import "./lockOverview.tests";
+import "./doorUnlocks.tests";
+import "./expenseAccounts.tests";
+import "./payments.tests";
+import "./messages.tests";
+import "./members.tests";
+import "./users.tests";
+import "./mails.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

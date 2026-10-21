@@ -1,9 +1,4 @@
-import "./Storage";
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { reactRoute } from '../../react/reactRoute';
+import { StoragePage } from '/imports/ui/storage/StoragePage';
 
-FlowRouter.route('/storage', {
-  name: 'storage',
-  action() {
-    this.render('AppBody', {main: 'Storage'});
-  }
-});
+reactRoute('/storage', 'storage', StoragePage);

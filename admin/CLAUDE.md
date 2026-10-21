@@ -33,11 +33,11 @@ meteor reset               # Reset dev database (stops app first)
 ## Architecture
 
 ### Technology Stack
-- **Framework:** Meteor 3.5.3 with Blaze templating
+- **Framework:** Meteor 3.5.3; the pages are React 19 with MUI (see below),
+  inside a Blaze layout (`AppBody`) that goes last
 - **Database:** MongoDB with Collection2 (schema validation)
-- **Routing:** FlowRouter (ostrio:flow-router-extra)
-- **Forms:** AutoForm with Bootstrap 3 theme
-- **Tables:** DataTables via aldeed:tabular (server-side pagination)
+- **Routing:** FlowRouter (ostrio:flow-router-extra), through `reactRoute()`
+- **Lists:** MUI X DataGrid (`DataList`, `ServerDataList` for server paging)
 - **Auth:** Meteor accounts-password with role-based access
 
 ### Project Structure
@@ -46,7 +46,8 @@ admin/
 ├── client/
 │   ├── main.js          # Entry point, routes, imports
 │   ├── layouts/         # Blaze layout templates (AppBody, Home)
-│   └── ui/              # Feature modules (members, payments, mail, etc.)
+│   ├── react/           # reactRoute, the bridge from FlowRouter to React pages
+│   └── ui/              # Per module: the routes (index.js)
 ├── server/
 │   ├── main.js          # Server entry point
 │   ├── publications.js  # Meteor publications (data subscriptions)
@@ -54,7 +55,7 @@ admin/
 │   └── cronjob/         # Scheduled tasks (synced-cron)
 ├── imports/
 │   ├── common -> ../../common  # Symlink to shared code
-│   └── tabular/         # DataTable configurations
+│   └── ui/              # The React pages, per module
 └── tests/               # Mocha tests
 ```
 
@@ -67,21 +68,16 @@ The `imports/common` symlink points to `../../common/` containing:
 
 ### Key Patterns
 
-**Reactive Data Flow:**
-- Server publishes data via `publications.js` (role-restricted)
-- Clients subscribe and use reactive collections
-- Meteor methods handle mutations and external API calls
+**Data Flow:**
+- Narrow, role-restricted publications in `publications.js` for small views;
+  large lists and details through methods
+- Every write goes through a Meteor method; no client writes
 
-**UI Components:**
-- Each feature in `client/ui/` has its own folder with .html (Blaze) and .js files
-- Templates use `Template.dynamic` for dynamic rendering
-- Forms generated from schemas using AutoForm
+## React pages
 
-## React pages (migration in progress)
-
-Admin is moving module by module from Blaze to React with MUI; see
-`plan/migration.md` for the order and the per-module steps. `liability` is
-done and is the pattern to follow:
+Every module is React with MUI (`plan/migration.md` tells how it moved from
+Blaze; only the admin console's one-off tools and the layout are left).
+`liability` is the pattern to follow:
 
 - Server: domain functions in `common/server/<domain>/` (every write records
   to `AuditLog`), methods `<domain>.<action>` with `check()` and
@@ -143,15 +139,6 @@ suites can run at once) before the tests start.
 
 ## Dev gotchas
 
-**AutoForm hook accumulation during hot-code-push (dev only):**
-`AutoForm.hooks({ formId: {...} })` at module scope registers ADDITIVELY — each
-call appends to the hook list, it does not replace. When Meteor's hot-code-push
-re-evaluates a client module after a file save, the form gets an additional set
-of hooks. After N reloads, a single submit fires N `onSubmit` handlers (N mails
-sent, N Messages inserted, etc.). Does not affect production, where the bundle
-loads once. Workaround: refresh the browser before testing form submissions after
-file changes.
-
 **External Integrations:**
 - Swedbank bank API via separate proxy service (umsme-bank)
 - Door lock system API (lock credentials in settings)
@@ -161,10 +148,11 @@ file changes.
 
 Copy `example-settings.json` to `settings.json` and configure:
 - `adminpassword` - Initial admin password
-- `bankproxy` - URL to umsme-bank service
 - `lockUsername/lockPassword` - Door lock API credentials
 - `deliverMails` - Set false to disable email sending
 - `reminderCron.enabled` - Must be explicitly `true` to send membership-expiry reminders (mail + push). Leave unset/false in dev so a copied member DB never triggers reminders.
+- `lockApi` - `"fake"` puts a stand-in for the Danalock API in place (`server/lock/`), its state in the collection `fakeLockApi`, seeded by the demo and e2e scenarios. Leave unset in production.
+- `bankproxy` - The umsme-bank proxy's URL, or `"fake"` for a stand-in (`server/bank/`) whose transactions and sign-in state live in `fakeBankApi`, seeded likewise. `settings_demo.json` sets both to `"fake"`.
 
 Email requires `MAIL_URL` environment variable (see example-start.sh).
 

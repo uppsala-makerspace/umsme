@@ -1,25 +1,6 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './MailList';
-import './SendMail';
-import './MailView';
+import { reactRoute } from '../../react/reactRoute';
+import { MailsPage, MailViewPage, SendMailPage } from '/imports/ui/mail/MailPages';
 
-FlowRouter.route('/mail', {
-  name: 'mails',
-  action() {
-    this.render('AppBody', {main: 'MailList'});
-  }
-});
-
-FlowRouter.route('/mail/send', {
-  name: 'sendmail',
-  action() {
-    this.render('AppBody', {main: 'SendMail'});
-  }
-});
-
-FlowRouter.route('/mail/:_id', {
-  name: 'mailview',
-  action(params) {
-    this.render('AppBody', {main: 'MailView'});
-  }
-});
+reactRoute('/mail', 'mails', MailsPage);
+reactRoute('/mail/send', 'sendmail', SendMailPage);
+reactRoute('/mail/:_id', 'mailview', MailViewPage);

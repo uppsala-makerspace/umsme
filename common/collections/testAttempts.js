@@ -2,11 +2,10 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import 'meteor/aldeed:collection2/static';
 import { schemas } from '/imports/common/lib/schemas';
-import { allow } from './allow';
 
 export const TestAttempts = new Mongo.Collection('testAttempts');
 TestAttempts.attachSchema(schemas.testAttempt);
-allow(TestAttempts);
+// No allow rules: written only through server methods.
 
 if (Meteor.isServer) {
   Meteor.startup(async () => {

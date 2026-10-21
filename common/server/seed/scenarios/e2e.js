@@ -14,12 +14,29 @@ import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
+import { makeFakeLock } from '../lock';
+import { makeFakeBank } from '../bank';
+import { makeMember, pay, joinFamily } from '../members';
+import Invites from '/imports/common/collections/Invites';
+import { Payments } from '/imports/common/collections/payments';
+import { Members } from '/imports/common/collections/members';
+import { uploadImage } from '/imports/common/server/googleDrive';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
+import { Certificates } from '/imports/common/collections/certificates';
+import { Attestations } from '/imports/common/collections/attestations';
+import { Announcements } from '/imports/common/collections/announcements';
+import { Mails } from '/imports/common/collections/mails';
+import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
+import { Messages } from '/imports/common/collections/messages';
+import { Expenses } from '/imports/common/collections/expenses';
+import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
+import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
 import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
 import { makeLiabilityVersions, makePersonas } from './build';
+import { makeUser } from '../accounts';
 
 export const buildE2e = async ({ people, now }) => {
   const days = (n) => daysFromNow(n, now);
@@ -36,7 +53,7 @@ export const buildE2e = async ({ people, now }) => {
   }
   // Message templates: one to look at, and one each for the admin tests that
   // edit and delete. (Admin's startup adds the storage templates.)
-  await makeMessageTemplate({
+  const welcomeTemplate = await makeMessageTemplate({
     name: 'Välkommen', type: 'welcome', membershiptype: 'member', membertype: 'normal',
     subject: 'Välkommen till Uppsala Makerspace', messagetext: 'Hej <%= name %>!\n\nDitt medlemsnummer är <%= mid %>.',
     created: days(-500),
@@ -87,7 +104,7 @@ export const buildE2e = async ({ people, now }) => {
   await group({ name: { sv: 'E2E edit group' }, type: 'function' });
   await group({ name: { sv: 'E2E links group' }, type: 'function' });
   await group({ name: { sv: 'E2E delete group' }, type: 'function' });
-  await Workshops.insertAsync({
+  const ceramics = await Workshops.insertAsync({
     name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established',
     primarySpaceId: ceramicsRoom, groupId: ceramicsGroup, createdAt: now,
   });
@@ -95,6 +112,58 @@ export const buildE2e = async ({ people, now }) => {
   await Workshops.insertAsync({ name: { sv: 'E2E edit verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E links verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E delete verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
+  // Certificates: the kiln under the ceramics workshop (a certifier, a
+  // holder), the wheel that needs it first, and one each for the admin tests
+  // that edit, link, delete, mark mandatory, grant and revoke. None is mandatory to
+  // begin with: a mandatory certificate would keep the app's personas from
+  // the doors.
+  const certificate = (fields) => Certificates.insertAsync(fields);
+  const attest = (certificateId, persona, fields = {}) => Attestations.insertAsync({
+    certificateId, memberId: members[persona]._id, certifierId: members.steering._id,
+    startDate: days(-30), confirmedAt: days(-30), ...fields,
+  });
+  const kiln = await certificate({
+    name: { sv: 'Keramikugn', en: 'Ceramics kiln' }, description: { sv: 'Får bränna i ugnen.' },
+    workshopId: ceramics, certifiers: [members.steering._id], defaultValidityDays: 365,
+  });
+  await attest(kiln, 'member', { endDate: days(335) });
+  await certificate({ name: { sv: 'Drejskiva', en: 'Pottery wheel' }, workshopId: ceramics, prerequisites: [kiln] });
+  for (const purpose of ['edit', 'links', 'delete', 'mandatory', 'grant']) {
+    await certificate({ name: { sv: `E2E ${purpose} certificate` } });
+  }
+  const revoke = await certificate({ name: { sv: 'E2E revoke certificate' } });
+  await attest(revoke, 'base');
+
+  // Announcements: one sent, with its mail, and drafts to look at, edit,
+  // send and delete.
+  const sentAt = days(-60);
+  const newsletterMail = await Mails.insertAsync({
+    from: 'kansliet@example.org', recipients: 'members', family: true, to: [members.member.email],
+    subject: 'Nyhetsbrev oktober', senddate: sentAt, template: '# Nyheter\n\nVälkommen på **städdag**!', formatted: true,
+  });
+  await Announcements.insertAsync({
+    type: 'newsletter', subjectSv: 'Nyhetsbrev oktober', bodySv: '# Nyheter\n\nVälkommen på **städdag**!',
+    status: 'sent', createdAt: days(-61), sentAt, mailId: newsletterMail,
+  });
+  await Announcements.insertAsync({
+    type: 'information', subjectSv: 'Stängt under jul', subjectEn: 'Closed over Christmas',
+    bodySv: 'Lokalen är stängd 23 december till 2 januari.', status: 'draft', createdAt: days(-5),
+  });
+  // Mails of their own, to extract into an announcement and to delete, and
+  // a draft to send.
+  for (const purpose of ['extract', 'delete']) {
+    await Mails.insertAsync({
+      from: 'kansliet@example.org', recipients: 'members', family: false, to: [members.member.email], failed: [],
+      subject: `E2E ${purpose} mail`, senddate: days(-10), template: `Brev för testet som ${purpose === 'extract' ? 'gör ett utskick' : 'raderar'}.`,
+    });
+  }
+  for (const purpose of ['edit', 'delete', 'send']) {
+    await Announcements.insertAsync({
+      type: 'information', subjectSv: `E2E ${purpose} announcement`, bodySv: `Utskick för testet som ${{ edit: 'ändrar', delete: 'raderar', send: 'skickar' }[purpose]}.`,
+      status: 'draft', createdAt: days(-3),
+    });
+  }
+
   const clay = await makeStoreItem({
     code: 'lera', name: { sv: 'Lera, 10 kg', en: 'Clay, 10 kg' }, price: 150, bookkeepingAccount: '3010',
     requiresMembership: true, commentRequired: false,
@@ -109,6 +178,124 @@ export const buildE2e = async ({ people, now }) => {
     await makeStoreItem({
       code: `e2e-${purpose}`, name: { sv: `E2E ${purpose} item` }, price: 25, bookkeepingAccount: '3011',
       requiresMembership: false, commentRequired: false,
+    });
+  }
+
+  // The fake door lock: Maja right, Dagny thirty days short (and Ulla, for
+  // the test that fixes it), Kalle invited but without an account, Fredrik
+  // without an end date; Olle has no lock username at all. Maja has opened
+  // the door a few times.
+  await makeFakeLock([
+    { member: members.member, visits: [1, 2, 5, 10, 40] },
+    { member: members.discounted, end: -30 },
+    { member: members.excluded, end: -30 },
+    { member: members.quarterly, account: false },
+    { member: members.family, end: 'forever' },
+  ], { now });
+
+  // Door openings: Maja through the app and the lock, and a guest the lock
+  // could not tie to a member.
+  for (const [daysAgo, method] of [[1, 'app'], [3, 'app'], [6, 'danalock']]) {
+    await DoorUnlocks.insertAsync({ timestamp: days(-daysAgo), door: 'outerDoor', memberid: members.member._id, method });
+  }
+  await DoorUnlocks.insertAsync({ timestamp: days(-2), door: 'outerDoor', extid: 'user-guest-gast@example.org', method: 'danalock' });
+
+  // Expense accounts: the ceramics account with its steering group's two
+  // members as approvers and a budget, and one each for the admin tests that
+  // edit, delete, link and budget. Expenses on the ceramics account, one per
+  // test that moves one along, named by their place.
+  const account = (name, fields = {}) => ExpenseAccounts.insertAsync({ name, explanation: 'Konto för testet.', createdAt: days(-100), ...fields });
+  const ceramicsAccount = await account('Keramik', {
+    explanation: 'Lera, glasyr och brännkostnader.', groupIds: [ceramicsGroup],
+    approverMemberIds: [members.groupLeader._id, members.steering._id],
+  });
+  await ExpenseBudgets.insertAsync({ expenseAccountId: ceramicsAccount, year: now.getFullYear(), amount: 5000, setAt: days(-90), setBy: members.treasurer._id, createdAt: days(-90) });
+  for (const purpose of ['edit', 'delete', 'links', 'budget']) await account(`E2E ${purpose} account`, { groupIds: [premisesGroup] });
+  // A receipt picture each, where the receipt store keeps them; without one
+  // configured the expense goes without.
+  const receipt = async (place) => {
+    const buffer = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100"><text x="10" y="50">${place}</text></svg>`);
+    try {
+      return await uploadImage({ buffer, baseName: `e2e-${place.replaceAll(' ', '-')}`, mimeType: 'image/svg+xml', date: now });
+    } catch (error) {
+      return `e2e/${place}.svg`;
+    }
+  };
+  const expense = async (place, status, fields = {}) => Expenses.insertAsync({
+    memberId: members.steering._id, type: 'receipt', driveFileId: await receipt(place), mimeType: 'image/svg+xml',
+    status, date: days(-20), createdAt: days(-20), amount: 250, expenseAccountId: ceramicsAccount, place, note: 'Glasyr',
+    ...(status !== 'pending' ? { submittedAt: days(-19) } : {}),
+    ...(['confirmed', 'reimbursed'].includes(status) ? { confirmedAt: days(-18), confirmedBy: members.groupLeader._id } : {}),
+    ...(status === 'reimbursed' ? { reimbursedAt: days(-1), reimbursedBy: members.treasurer._id, reimbursedDate: days(1), bookkeepingAccount: '5010' } : {}),
+    ...fields,
+  });
+  await expense('E2E draft', 'pending');
+  await expense('E2E confirm', 'submitted');
+  await expense('E2E reject', 'submitted');
+  await expense('E2E reimburse', 'confirmed');
+  await expense('E2E queued', 'confirmed');
+  await expense('E2E invoice', 'confirmed', { type: 'invoice', dueDate: days(10), amount: 1200 });
+  await expense('E2E unreimburse', 'reimbursed');
+  await expense('E2E paid', 'reimbursed', { amount: 480 });
+
+  // Payments to file by hand: untreated ones to connect to a member, to mark
+  // as other and to delete, and one connected to a member that needs its
+  // membership. Two members of their own, with a membership each, for the
+  // tests that edit and delete one.
+  const payment = (message, fields = {}) => Payments.insertAsync({
+    hash: `e2e-${message}`, type: 'swish', amount: 200, date: days(-4), message, name: 'Okänd Betalare', mobile: '46700000099', ...fields,
+  });
+  await payment('E2E connect payment');
+  await payment('E2E other payment');
+  await payment('E2E delete payment');
+  await payment('E2E membership payment', { member: members.newcomer._id });
+  for (const [mid, purpose] of [['901', 'edit'], ['902', 'delete']]) {
+    const member = await makeMember({ mid, name: `E2E ${purpose} membership`, email: `e2e-${purpose}-membership@example.org` });
+    await pay(member, 'memberBase', { at: days(-100), via: 'bankgiro' });
+  }
+  // Members of their own for the member page's tests: to edit, delete,
+  // register, exclude, and one whose stored dates have drifted from its
+  // memberships; a family payer with a dependent to remove, a member to add
+  // and two invites, one to cancel and one, to an existing member, to decline.
+  const ownMember = async (mid, name, payment = 'memberBase', fields = {}) => {
+    const member = await makeMember({ mid, name, email: `e2e-${mid}@example.org`, ...fields });
+    if (payment) await pay(member, payment, { at: days(-60), via: 'bankgiro' });
+    return Members.findOneAsync(member._id);
+  };
+  await ownMember('905', 'E2E edit member');
+  const toDelete = await ownMember('906', 'E2E delete member');
+  await Messages.insertAsync({ member: toDelete._id, template: welcomeTemplate, type: 'welcome', to: toDelete.email, subject: 'Välkommen', messagetext: 'Hej!', senddate: days(-59) });
+  await ownMember('907', 'E2E register member', 'memberBase', { registered: false });
+  await ownMember('914', 'E2E pending member', 'memberBase', { registered: false });
+  await ownMember('908', 'E2E exclude member');
+  const drifted = await ownMember('913', 'E2E drifted member');
+  await Members.updateAsync(drifted._id, { $set: { member: days(-400) } });
+  const payer = await ownMember('909', 'E2E family payer', 'familyBase');
+  await ownMember('910', 'E2E family candidate');
+  await joinFamily(await ownMember('911', 'E2E family dependent', null), payer);
+  await Invites.insertAsync({ email: 'e2e-cancel-invite@example.org', infamily: payer._id });
+  const invited = await ownMember('912', 'E2E invited member');
+  await Invites.insertAsync({ email: invited.email, infamily: payer._id });
+  // Two members for the admin console to merge, one into the other.
+  await ownMember('915', 'E2E merge source');
+  await ownMember('916', 'E2E merge destination', null);
+
+  // Logins of their own for the user tests: roles, password, rename, delete.
+  for (const purpose of ['roles', 'password', 'rename', 'delete']) {
+    await makeUser({ email: `e2e-user-${purpose}@example.org`, password: 'password123' });
+  }
+
+  // The fake bank: two Swish deposits not yet in Payments.
+  await makeFakeBank([
+    { amount: 200, date: days(-1), swish: { name: 'Bo Basmedlem', mobile: '46700000106', message: 'E2E bank medlemskap' } },
+    { amount: 75, date: days(-1), swish: { name: 'Gäst Gästsson', mobile: '46700000200', message: 'E2E bank kaffe' } },
+  ]);
+
+  // Messages sent to Ulla, one to look at and one to delete.
+  for (const subject of ['E2E visa meddelande', 'E2E radera meddelande']) {
+    await Messages.insertAsync({
+      member: members.excluded._id, template: welcomeTemplate, type: 'status', to: members.excluded.email, subject,
+      messagetext: `Hej Ulla!\n\n${subject}.`, senddate: days(-10),
     });
   }
 

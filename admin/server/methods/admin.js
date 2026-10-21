@@ -52,45 +52,4 @@ Meteor.methods({
     return { scanned: members.length, updated, conflicts };
   },
 
-
-  'addToAdminGroup': async (id) => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return Roles.addUsersToRolesAsync(id, "admin", null);
-    }
-  },
-  'removeFromAdminGroup': async (id) => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return Roles.removeUsersFromRolesAsync(id, "admin", null);
-    }
-  },
-  'addToBoardGroup': async (id) => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return Roles.addUsersToRolesAsync(id, "board", null);
-    }
-  },
-  'removeFromBoardGroup': async (id) => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return Roles.removeUsersFromRolesAsync(id, "board", null);
-    }
-  },
-  'addToTreasurerGroup': async (id) => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return Roles.addUsersToRolesAsync(id, "treasurer", null);
-    }
-  },
-  'removeFromTreasurerGroup': async (id) => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return Roles.removeUsersFromRolesAsync(id, "treasurer", null);
-    }
-  },
-  'addToStorageGroup': async (id) => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return Roles.addUsersToRolesAsync(id, 'storage', null);
-    }
-  },
-  'removeFromStorageGroup': async (id) => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return Roles.removeUsersFromRolesAsync(id, 'storage', null);
-    }
-  },
 });

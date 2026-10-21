@@ -15,6 +15,21 @@ export const DOMAIN_ROLES = {
   groups: ['admin', 'board'],
   workshops: ['admin', 'board'],
   memberLookup: ['admin', 'board'],
+  certificates: ['admin', 'board'],
+  announcements: ['admin', 'board'],
+  stats: ['admin', 'board'],
+  lock: ['admin'],
+  doors: ['admin', 'board'],
+  expenses: ['admin', 'board', 'treasurer'],
+  expenseAccounts: ['admin', 'board'],
+  payments: ['admin', 'board'],
+  comments: ['admin', 'board'],
+  messages: ['admin', 'board'],
+  members: ['admin', 'board'],
+  users: ['admin', 'board'],
+  mails: ['admin', 'board'],
+  // Mailing from admin, as the mail method has always required.
+  sendMail: ['admin'],
 };
 
 /** Whether the user holds any of the roles. */

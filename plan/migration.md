@@ -227,10 +227,11 @@ När ingen Blaze-modul finns kvar:
 2. FlowRouter ersätts med React Router i en routetabell; bara
    navigeringsadaptern och routetabellen ändras.
 3. `htmlFontSize: 10` tas bort ur MUI-temat.
-4. Paket bort: `blaze-html-templates`, `blaze-hot`, `aldeed:autoform`,
-   `communitypackages:autoform-bootstrap3`, `aldeed:tabular`,
+4. Paket bort: `blaze-html-templates`, `blaze-hot`,
    `ostrio:flow-router-extra`, `accounts-ui`, `jquery`, `session`, Bootstrap,
-   DataTables, och `common/collections/allow.js`.
+   och `common/collections/allow.js`. (`aldeed:autoform`,
+   `communitypackages:autoform-bootstrap3`, `aldeed:tabular` och DataTables
+   är redan borta, sedan våg 4.)
 5. Uppdatera `admin/CLAUDE.md` och `docs/architecture.md`.
 
 ## Uppföljning
@@ -241,11 +242,28 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 |---|---|---|---|---|
 | (steg 0) | ✓ | ✓ | ✓ | – |
 | liability | ✓ | ✓ | ✓ (MUI) | ✓ |
-| messagetemplate | ✓ | ✓ | ✓ | ✓ (dokumentationen är en Blaze-brygga till React-versionen tills mail och announcement migreras) |
+| messagetemplate | ✓ | ✓ | ✓ | ✓ (Blaze-bryggan för dokumentationen borttagen med mail) |
 | storeitems | ✓ | ✓ | ✓ | ✓ |
 | spaces | ✓ | ✓ | ✓ | ✓ (EntitySpaces borttagen; utrymmen väljs nu i verkstads- och gruppformulären) |
 | workshops | ✓ | ✓ | ✓ | ✓ |
 | groups | ✓ | ✓ | ✓ | ✓ (de breda publiceringarna `groups`, `workshops`, `groupMemberships` finns kvar för utlägg och certifikat) |
+| certificates | ✓ | ✓ | ✓ | ✓ (breda `certificates` och `attestations` borttagna) |
+| announcement | ✓ | ✓ | ✓ | ✓ (utskicket markeras skickat av `mails.send`; `allow` och breda `announcements` borttagna) |
+| excluded, reminders | ✓ | ✓ | ✓ | ✓ (medlemslistan pagineras på servern: `adminMembers.page`, `ServerDataList`, `useServerList`) |
+| history, stats, revenue | ✓ | ✓ (metoder `stats.*`) | ✓ | ✓ |
+| accounting | ✓ (fanns) | – | ✓ | ✓ |
+| lock | ✓ | ✓ (metoder `lock.*`) | ✓ | ✓ (lås-API:t bakom `lockApi()`, fejk med `"lockApi": "fake"`) |
+| door | ✓ | ✓ (`doorUnlocks.*`) | ✓ | ✓ (publiceringarna `unlocks`, `doorunlocks` borttagna) |
+| check | ✓ (fanns) | – | ✓ | ✓ (publika sidor i Clean-layouten: `reactRoute(..., { layout: 'Clean' })`) |
+| storage | ✓ (fanns) | ✓ (fanns) | ✓ | ✓ (`prompt()`/`confirm()` ersatta av en dialog) |
+| expenses | ✓ | ✓ | ✓ | ✓ (listorna pagineras på servern; publiceringarna `expenses`, `expenseAccounts`, `expenseBudgets`, `groups`, `workshops`, `groupMemberships`, `spaces` borttagna) |
+| membership, bank | ✓ | ✓ (metoder `payments.*`, `memberships.*`) | ✓ | ✓ (bankproxyn bakom `bankApi()`, fejk med `"bankproxy": "fake"`; medlemskapen på medlemssidan är React sedan våg 4) |
+| comment | ✓ | ✓ (`admin.comments.about`) | ✓ | ✓ (`CommentsFor` på alla sidor; `ReactSlot` borttagen när sista Blaze-sidan försvann) |
+| message, pending | ✓ | ✓ (metoder `messages.*`, `members.pending`) | ✓ | ✓ |
+| members, family | ✓ | ✓ (metoder `members.*`, listorna pagineras på servern) | ✓ | ✓ |
+| users | ✓ | ✓ (metoder `users.*`) | ✓ | ✓ (`allow` på `Meteor.users` och publiceringen `users` borttagna) |
+| mail | ✓ | ✓ (metoder `mails.*`) | ✓ | ✓ (utskicket renderas och skickas på servern; Tabular borta med sina sista tabeller) |
+| admin | ✓ (fanns) | – | ✓ (synk, sammanslagning, obligatoriskt certifikat) | Delvis: engångsverktygen står kvar i Blaze (`AdminOneOffTools`) i väntan på beslut, och med dem `allow` på `Members` och `Payments` och de breda publiceringarna `members` och `payments` (plan/open-questions.md) |
 
 ## Beslut (2026-10-19)
 
@@ -270,3 +288,19 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 - **Delade komponenter:** inga mellan admin (MUI) och appen (Tailwind).
 - **Cron-jobb, migreringar och publika API:er** ligger kvar i admin.
   Domänfunktionerna läggs ändå i `common/server/` så att de kan flyttas senare.
+
+## Beslut (2026-10-19, inför våg 1–4 på grenen `admin-react-waves`)
+
+- **Externa tjänster:** lås-API:t och bankproxyn får ett fejkläge i
+  settings, så att e2e och demo kör hela flödena utan riktiga tjänster.
+- **Stora listor** (medlemmar, betalningar): paginering, sortering och
+  sökning på servern via en metod, inte realtid. Sökning, sortering och
+  sidbyte hämtar på nytt.
+- **Admin-konsolen:** sammanslagning, låssynk och obligatoriskt certifikat
+  porteras; engångsverktygen noteras i `plan/open-questions.md` så att
+  användaren väljer vilka som tas bort.
+- **Certifikat:** porteras med dagens datamodell; Omtag A
+  (`plan/group-ownership-and-certificates.md`) görs senare.
+- Rollerna är dagens; rollöversynen ingår inte. Diagrammen behåller Chart.js.
+  Sista steget (layout, router, paket) ingår inte i den här omgången.
+

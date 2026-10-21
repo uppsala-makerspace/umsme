@@ -1,20 +1,13 @@
 import { Meteor } from 'meteor/meteor';
 import { check, Match } from 'meteor/check';
 import { Members } from '/imports/common/collections/members';
-import { Memberships } from '/imports/common/collections/memberships';
 import { MessageTemplates } from '/imports/common/collections/templates';
 import { Messages } from '/imports/common/collections/messages';
 import { Payments } from '/imports/common/collections/payments';
-import { Mails } from '/imports/common/collections/mails';
 import { Comments } from '/imports/common/collections/comments';
-import { Unlocks } from '/imports/common/collections/unlocks';
-import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
-import { initiatedPayments } from '/imports/common/collections/initiatedPayments';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Certificates } from '/imports/common/collections/certificates';
-import { Attestations } from '/imports/common/collections/attestations';
 import { Announcements } from '/imports/common/collections/announcements';
-import Invites from '/imports/common/collections/Invites';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
@@ -33,7 +26,6 @@ import {
 import { STORAGE_OPERATOR_ROLES } from '/imports/common/lib/storageRules';
 import { hasRole, DOMAIN_ROLES } from '/imports/common/server/authz';
 
-export const PUBLISHED_USER_FIELDS = { username: 1, emails: 1, createdAt: 1 };
 
 const createAuthFuncForRoles = (col, roles) => async function () {
   if (this.userId && (await Roles.userIsInRoleAsync(this.userId, roles))) {
@@ -51,38 +43,8 @@ export default () => {
   // Treasurer included so a treasurer-only account can see member name + bank
   // details when reimbursing an expense.
   Meteor.publish('members', createAuthFuncForRoles(Members, ['admin', 'board', 'treasurer']));
-  Meteor.publish('memberships', createAuthFuncFor(Memberships));
-  Meteor.publish('templates', createAuthFuncFor(MessageTemplates));
-  Meteor.publish('messages', createAuthFuncFor(Messages));
-  Meteor.publish('mails', createAuthFuncFor(Mails));
   Meteor.publish('payments', createAuthFuncFor(Payments));
-  Meteor.publish('comments', createAuthFuncFor(Comments));
-  Meteor.publish('unlocks', createAuthFuncFor(Unlocks));
-  Meteor.publish('doorunlocks', createAuthFuncFor(DoorUnlocks));
-  // Never the whole document: `services` holds password hashes, login tokens
-  // and Google access tokens, and `profile` an admin's personal number. The
-  // pages need only these; the logged-in user's own profile comes with the
-  // default user publication.
-  Meteor.publish('users', async function () {
-    if (this.userId && (await Roles.userIsInRoleAsync(this.userId, ['admin', 'board']))) {
-      return Meteor.users.find({}, { fields: PUBLISHED_USER_FIELDS });
-    }
-    this.ready();
-  });
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
-  Meteor.publish('initiatedPayments', createAuthFuncFor(initiatedPayments));
-  Meteor.publish('certificates', createAuthFuncFor(Certificates));
-  Meteor.publish('attestations', createAuthFuncFor(Attestations));
-  Meteor.publish('announcements', createAuthFuncFor(Announcements));
-  Meteor.publish('invites', createAuthFuncFor(Invites));
-  Meteor.publish('expenses', createAuthFuncForRoles(Expenses, ['admin', 'board', 'treasurer']));
-  Meteor.publish('expenseAccounts', createAuthFuncForRoles(ExpenseAccounts, ['admin', 'board', 'treasurer']));
-  Meteor.publish('expenseBudgets', createAuthFuncForRoles(ExpenseBudgets, ['admin', 'board', 'treasurer']));
-  Meteor.publish('groups', createAuthFuncFor(Groups));
-  Meteor.publish('workshops', createAuthFuncFor(Workshops));
-  Meteor.publish('groupMemberships', createAuthFuncFor(GroupMemberships));
-  Meteor.publish('spaces', createAuthFuncFor(Spaces));
-  Meteor.publish('storeItems', createAuthFuncFor(StoreItems));
 
   // Storage is deliberately published separately from the broad members
   // publication: treasurer-only users may see members for reimbursements, but
@@ -223,10 +185,74 @@ export default () => {
     return Workshops.find(docId);
   });
 
+  // The certificates, with what the list shows and what choosing a
+  // prerequisite needs (each one's own prerequisites, to keep out cycles).
+  Meteor.publish('admin.certificates.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.certificates))) return this.ready();
+    return Certificates.find({}, { fields: { name: 1, workshopId: 1, mandatory: 1, defaultValidityDays: 1, certifierRole: 1, prerequisites: 1, test: 1 } });
+  });
+
+  Meteor.publish('admin.certificates.certificate', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.certificates))) return this.ready();
+    return Certificates.find(docId);
+  });
+
+  Meteor.publish('admin.announcements.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.announcements))) return this.ready();
+    return Announcements.find({}, { fields: { type: 1, subjectSv: 1, status: 1, createdAt: 1, sentAt: 1 } });
+  });
+
+  Meteor.publish('admin.announcements.announcement', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.announcements))) return this.ready();
+    return Announcements.find(docId);
+  });
+
+  // Expense accounts with what the list, the choices and the dimension
+  // suggestions need; one account; its budgets; one expense.
+  Meteor.publish('admin.expenseAccounts.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.expenses))) return this.ready();
+    return ExpenseAccounts.find({}, { fields: { name: 1, explanation: 1, groupIds: 1, approverMemberIds: 1, approverGroupIds: 1, dimensions: 1 } });
+  });
+
+  Meteor.publish('admin.expenseAccounts.account', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.expenses))) return this.ready();
+    return ExpenseAccounts.find(docId);
+  });
+
+  Meteor.publish('admin.expenseBudgets.ofAccount', async function (accountId) {
+    check(accountId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.expenses))) return this.ready();
+    return ExpenseBudgets.find({ expenseAccountId: accountId });
+  });
+
+  Meteor.publish('admin.expenses.expense', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.expenses))) return this.ready();
+    return Expenses.find(docId);
+  });
+
+  // The comments about one thing: a member, a payment, a mail…
+  Meteor.publish('admin.comments.about', async function (about) {
+    check(about, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.comments))) return this.ready();
+    return Comments.find({ about });
+  });
+
+  // The messages sent to a member, or about a membership, without their text.
+  Meteor.publish('admin.messages.of', async function (about) {
+    check(about, Match.OneOf({ member: String }, { membership: String }));
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.messages))) return this.ready();
+    return Messages.find(about, { fields: { member: 1, membership: 1, type: 1, subject: 1, senddate: 1, payment: 1 } });
+  });
+
   // What the group and workshop pages link to and choose among: names, and
   // what decides which choices make sense (a group's type, a workshop's group).
+  // The treasurer sees the names too, on the expense accounts.
   Meteor.publish('admin.groupsAndWorkshops.choices', async function () {
-    if (!(await hasRole(this.userId, DOMAIN_ROLES.groups))) return this.ready();
+    if (!(await hasRole(this.userId, [...new Set([...DOMAIN_ROLES.groups, ...DOMAIN_ROLES.expenses])]))) return this.ready();
     return [
       Groups.find({}, { fields: { name: 1, type: 1, parentGroupId: 1 } }),
       Workshops.find({}, { fields: { name: 1, kind: 1, groupId: 1 } }),

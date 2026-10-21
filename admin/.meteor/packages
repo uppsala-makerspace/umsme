@@ -23,13 +23,10 @@ shell-server@0.7.1            # Server-side component of the `meteor shell` comm
 hot-module-replacement@0.6.0  # Update code in development without reloading the page
 blaze-hot               # Update files using Blaze's API with HMR
 aldeed:collection2@=4.1.5
-aldeed:tabular
 ostrio:flow-router-extra
 accounts-password@3.3.1
 accounts-ui@1.5.0
 jquery
-aldeed:autoform@8.0.0
-communitypackages:autoform-bootstrap3
 momentjs:moment
 email@3.2.0
 fetch@0.2.0

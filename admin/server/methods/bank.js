@@ -1,27 +1,9 @@
-import { fetch, Headers } from 'meteor/fetch';
+import { bankApi } from '../bank';
 import { Payments } from '/imports/common/collections/payments';
 
-const pnr2sessionID = {};
 const getPnr = async () => {
   const user = await Meteor.userAsync();
   return (user.profile || {}).pnr;
-};
-const extractSessionId = async (resultResponse) => {
-  let cookies = (resultResponse.headers.get('set-cookie') || '').split(';').map(s => s.trim());
-  if (cookies.length > 0) {
-    cookies = cookies.filter(cookie => cookie.indexOf('PHPSESSID=') === 0 );
-    if (cookies.length > 0) {
-      const pnr = await getPnr();
-      pnr2sessionID[pnr] = cookies[0].substring(10);
-    }
-  }
-};
-const addCookie = async (headerOptions) => {
-  const sessionID = pnr2sessionID[await getPnr()];
-  if (sessionID) {
-    headerOptions.Cookie = `PHPSESSID=${sessionID}`
-  }
-  return headerOptions;
 };
 
 const excludeTransactions = (transactions) => {
@@ -55,34 +37,23 @@ Meteor.methods({
   },
   'clearSession': async () =>  {
     if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      pnr2sessionID[await getPnr()] = undefined;
+      await bankApi().clear(await getPnr());
     }
   },
   'checkBank': async () => {
-    const base = Meteor.settings.bankproxy;
     if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      const headers = new Headers(await addCookie({}));
-      const checkRequest = await fetch(`${base}check.php`, { headers })
-      extractSessionId(checkRequest);
-      return checkRequest.json();
+      return bankApi().check(await getPnr());
     }
   },
   'initiateBank': async () => {
-    const base = Meteor.settings.bankproxy;
     if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      const pnr = await getPnr();
-      const headers = new Headers(await addCookie({}));
-      const initiateRequest = await fetch(`${base}initiate.php?pnr=${pnr}&base64=true`, { headers })
-      return initiateRequest.text();
+      return bankApi().initiate(await getPnr());
     }
   },
   'synchronize': async () => {
-    const base = Meteor.settings.bankproxy;
     if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      const headers = new Headers(await addCookie({}));
-      const transactionsRequest = await fetch(`${base}transactions.php`, { headers });
-      const result = await transactionsRequest.json();
-      const transactions = extractTransactions(excludeTransactions(result.transactions));
+      const pnr = await getPnr();
+      const transactions = extractTransactions(excludeTransactions(await bankApi().transactions(pnr)));
       let added = 0;
       for (let idx = 0; idx < transactions.length; idx++) {
         const tr = transactions[idx];
@@ -92,8 +63,7 @@ Meteor.methods({
         const payment = await Payments.findOneAsync({ hash: tr.hash });
         if (!payment) {
           if (tr.type === 'swish') {
-            const transactionRequest = await fetch(`${base}transaction.php?id=${tr.id}`, { headers });
-            const result = await transactionRequest.json();
+            const result = await bankApi().transaction(pnr, tr.id);
             tr.message = result.message;
             const swd = result.swishDetails;
             tr.clarification = `Payers name: ${swd.payersName} via ${swd.sendersNumber} at ${swd.transactionTime}`;

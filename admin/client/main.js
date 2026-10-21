@@ -1,10 +1,8 @@
-import 'datatables.net-bs/css/dataTables.bootstrap.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import './ui/members';
 import './ui/membership';
 import './ui/message';
-import './ui/family';
 import './ui/storage';
 import './ui/stats';
 import './ui/revenue';
@@ -33,8 +31,6 @@ import './layouts/AppBody.js';
 import './react/ReactPage';
 import './layouts/Home.html';
 import { Accounts } from 'meteor/accounts-base';
-import { AutoFormThemeBootstrap3 } from 'meteor/communitypackages:autoform-bootstrap3/static';
-AutoFormThemeBootstrap3.load();
 
 Accounts.ui.config({
   passwordSignupFields: "USERNAME_AND_OPTIONAL_EMAIL",

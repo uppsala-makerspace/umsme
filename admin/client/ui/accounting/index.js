@@ -1,9 +1,4 @@
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import './BankExport';
+import { reactRoute } from '../../react/reactRoute';
+import { BankExportPage } from '/imports/ui/accounting/BankExportPage';
 
-FlowRouter.route('/accounting/bankexport', {
-  name: 'bankexport',
-  action() {
-    this.render('AppBody', { main: 'BankExport' });
-  },
-});
+reactRoute('/accounting/bankexport', 'bankexport', BankExportPage);
