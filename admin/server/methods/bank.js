@@ -1,3 +1,4 @@
+import { check } from 'meteor/check';
 import { bankApi } from '../bank';
 import { Payments } from '/imports/common/collections/payments';
 
@@ -31,8 +32,9 @@ const extractTransactions = (transactions) => transactions.map(tr => {
 
 Meteor.methods({
   'setPnr': async (pnr) => {
+    check(pnr, String);
     if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      Meteor.users.updateAsync(Meteor.userId(), { $set: { profile: { pnr } } });
+      await Meteor.users.updateAsync(Meteor.userId(), { $set: { 'profile.pnr': pnr } });
     }
   },
   'clearSession': async () =>  {
