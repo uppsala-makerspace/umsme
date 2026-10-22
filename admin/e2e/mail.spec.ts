@@ -5,8 +5,8 @@ import { field, action, confirmed, deleteConfirmed } from './forms';
 
 // Group mail: the sent mails, a mail's page (its announcement, extracting
 // one, deleting it) and sending one, on its own or from an announcement.
-// The e2e settings deliver no mail, so every recipient ends up as failed;
-// the mail is recorded all the same. Written against the Blaze pages and
+// The e2e settings deliver mail but let it reach nobody (recipientWhitelist
+// is empty). Written against the Blaze pages and
 // meant to pass against their replacement (see liability.spec.ts).
 
 const rows = dataRows;

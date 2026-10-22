@@ -3,7 +3,7 @@
   "from": ["kansliet@example.org", "no-reply@example.org"],
   "noreply": "no-reply@example.org",
   "syncNrOfTransactions": 20,
-  "deliverMails": false,
+  "deliverMails": true,
   "lockApi": "fake",
   "bankproxy": "fake",
   "reminderCron": {

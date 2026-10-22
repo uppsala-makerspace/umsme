@@ -4,8 +4,9 @@ import { dataRows, search } from './lists';
 import { confirmed } from './forms';
 
 // Messages to members: the list on a member's page, one message, deleting
-// one, and starting a welcome message from a membership. Sending is refused
-// in the e2e settings (deliverMails is false), so that is what the test sees.
+// one, and sending a welcome message from a membership. The e2e settings
+// deliver mail but let it reach nobody (recipientWhitelist is empty), so the
+// message is sent and kept.
 // Written against the Blaze pages and meant to pass against their
 // replacement (see liability.spec.ts).
 
@@ -35,9 +36,7 @@ test.describe('Messages', () => {
     await expect(page.getByText('E2E radera meddelande')).toHaveCount(0);
   });
 
-  test('writes a welcome message from a membership, which the e2e settings refuse to send', async ({ page }) => {
-    let said = '';
-    page.on('dialog', (dialog) => { said = dialog.message(); dialog.accept(); });
+  test('sends a welcome message from a membership and keeps it', async ({ page }) => {
     await openAs(page, 'admin', '/payments');
     await search(page, '901');
     await dataRows(page).filter({ hasText: '901' }).first().click();
@@ -45,8 +44,10 @@ test.describe('Messages', () => {
     await page.getByRole('button', { name: /welcome/i }).click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/welcome/i);
     await expect(page.getByRole('textbox', { name: 'Subject' })).toHaveValue(/välkommen/i);
+    const subject = 'E2E skickat välkomstmeddelande';
+    await page.getByRole('textbox', { name: 'Subject' }).fill(subject);
     await page.getByRole('button', { name: /^(submit|send)/i }).click();
-    // The Blaze page says so in an alert, the React page on the page.
-    await expect.poll(async () => said || ((await page.getByText(/deliverMail|could not send/i).count()) ? 'could not send' : '')).toMatch(/deliverMail|could not send/i);
+    await expect(page).toHaveURL(/\/member\//);
+    await expect(page.getByText(subject).first()).toBeVisible();
   });
 });
