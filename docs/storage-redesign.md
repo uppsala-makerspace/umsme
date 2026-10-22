@@ -37,8 +37,8 @@ the storage page and selects **Make assignments**. The system has already:
 - resolved family membership so only the paying family member can own a unit;
 - sorted the requests by age;
 - compared floor and low/high preferences with the available inventory;
-- given priority to people who have no storage;
-- considered compatible move requests only after those people; and
+- given first priority to compatible moves from another floor to Floor 2;
+- then considered people with no storage, followed by other compatible moves; and
 - prepared the email and app message for every proposed assignment.
 
 The administrator sees the proposed member, unit, and reason for each match.
@@ -75,11 +75,12 @@ available only after someone confirms that it is physically clear.
 
 ### 1.4 What a move should feel like
 
-A member who already has storage can request a different unit. This does not
-give the request the same priority as a member with no storage.
+A member who already has storage can request a different unit. Moves from
+another floor to Floor 2 have first priority. Other moves remain behind
+requests from members with no storage.
 
-If a compatible unit remains after requests from people without storage have
-been considered, the system can suggest a move. When an administrator confirms
+If a compatible unit is available when the request is considered, the system
+can suggest a move. When an administrator confirms
 it, the destination becomes reserved for 14 days and the member receives move
 instructions. The old unit remains occupied during this period.
 
@@ -134,11 +135,12 @@ Preferences are soft constraints. A request can prefer Floor 1 or Floor 2 and
 low or high storage. A compatible unit matches every preference component that
 the member selected.
 
-For all available and fully classified units, allocation runs in three phases:
+For all available and fully classified units, allocation runs in four phases:
 
-1. Match the oldest request without storage to a compatible unit.
-2. Match the oldest remaining request without storage to any suitable unit.
-3. Match the oldest request from a member with storage to a compatible unit.
+1. Match the oldest move request from another floor to Floor 2 to a compatible unit.
+2. Match the oldest request without storage to a compatible unit.
+3. Match the oldest remaining request without storage to any suitable unit.
+4. Match the oldest remaining request from a member with storage to a compatible unit.
 
 A member with storage is not moved when no compatible unit exists. There is no
 benefit in moving them to another unit that does not meet their preference.

@@ -104,7 +104,7 @@ describe('storageRules', function () {
   });
 
   describe('allocation', function () {
-    it('runs compatible, soft-fallback, and compatible-move phases in order', function () {
+    it('prioritizes floor 2 moves before compatible and soft-fallback assignments', function () {
       const units = [
         unit('1-low', 'floor1', 'low'),
         unit('1-high', 'floor1', 'high'),
@@ -123,9 +123,9 @@ describe('storageRules', function () {
       };
       const result = proposeStorageAllocations({ units, requests, members, now: NOW });
       assert.deepStrictEqual(result.proposals.map((p) => [p.request._id, p.unit._id, p.phase]), [
-        ['compatible', '1-low', 1],
-        ['fallback', '1-high', 2],
-        ['move', '2-low', 3],
+        ['move', '2-low', 1],
+        ['compatible', '1-low', 2],
+        ['fallback', '1-high', 3],
       ]);
     });
 
@@ -171,14 +171,14 @@ describe('storageRules', function () {
       assert.deepStrictEqual(shape(reversed), shape(forward));
     });
 
-    it('preserves no-storage compatibility before considering move demand', function () {
-      const units = [unit('a', 'floor1', 'low'), unit('b', 'floor2', 'high')];
+    it('preserves no-storage compatibility before considering other move demand', function () {
+      const units = [unit('a', 'floor2', 'low'), unit('b', 'floor1', 'high')];
       const requests = [
         request('oldest', 'oldest', '2026-01-01', undefined),
-        request('next', 'next', '2026-01-02', { floor: 'floor1', height: 'low' }),
-        request('move', 'moving', '2026-01-03', { floor: 'floor2', height: 'high' }, 'move'),
+        request('next', 'next', '2026-01-02', { floor: 'floor2', height: 'low' }),
+        request('move', 'moving', '2026-01-03', { floor: 'floor1', height: 'high' }, 'move'),
       ];
-      const current = unit('current', 'floor1', 'high', {
+      const current = unit('current', 'floor2', 'high', {
         availability_status: 'occupied',
         owner: 'moving',
       });
@@ -196,6 +196,65 @@ describe('storageRules', function () {
       assert.deepStrictEqual(result.proposals.map((proposal) => [proposal.request._id, proposal.unit._id]), [
         ['oldest', 'b'],
         ['next', 'a'],
+      ]);
+    });
+
+    it('gives contested floor 2 units to the oldest eligible floor-changing requests', function () {
+      const requests = [
+        request('new', 'new', '2025-01-01', { floor: 'floor2' }),
+        request('later', 'later', '2026-01-03', { floor: 'floor2' }, 'move'),
+        request('first', 'first', '2026-01-02', { floor: 'floor2' }, 'move'),
+        request('expired', 'expired', '2024-01-01', { floor: 'floor2' }, 'move'),
+      ];
+      const result = proposeStorageAllocations({
+        units: [unit('free', 'floor2', 'low'), ...['later', 'first', 'expired'].map((owner) =>
+          unit(owner, 'floor1', 'low', { availability_status: 'occupied', owner }))],
+        requests,
+        members: { new: member('new'), later: member('later'), first: member('first'), expired: member('expired', null) },
+        now: NOW,
+      });
+      assert.deepStrictEqual(result.proposals.map((p) => [p.request._id, p.unit._id, p.phase]), [
+        ['first', 'free', 1],
+      ]);
+    });
+
+    for (const currentFloor of ['floor1', 'floor2']) {
+      it(`does not prioritize an incompatible or same-floor move from ${currentFloor}`, function () {
+        const result = proposeStorageAllocations({
+          units: [
+            unit('free', 'floor2', currentFloor === 'floor1' ? 'high' : 'low'),
+            unit('current', currentFloor, 'high', { availability_status: 'occupied', owner: 'moving' }),
+          ],
+          requests: [
+            request('move', 'moving', '2025-01-01', { floor: 'floor2', height: 'low' }, 'move'),
+            request('new', 'new', '2026-01-01', { floor: 'floor2' }),
+          ],
+          members: { moving: member('moving'), new: member('new') },
+          now: NOW,
+        });
+        assert.deepStrictEqual(result.proposals.map((p) => [p.request._id, p.unit._id, p.phase]), [
+          ['new', 'free', 2],
+        ]);
+      });
+    }
+
+    it('still offers other compatible moves after new assignments', function () {
+      const result = proposeStorageAllocations({
+        units: [
+          unit('first', 'floor1', 'low'),
+          unit('second', 'floor1', 'low'),
+          unit('current', 'floor2', 'high', { availability_status: 'occupied', owner: 'moving' }),
+        ],
+        requests: [
+          request('move', 'moving', '2025-01-01', { floor: 'floor1' }, 'move'),
+          request('new', 'new', '2026-01-01'),
+        ],
+        members: { moving: member('moving'), new: member('new') },
+        now: NOW,
+      });
+      assert.deepStrictEqual(result.proposals.map((p) => [p.request._id, p.unit._id, p.phase]), [
+        ['new', 'first', 2],
+        ['move', 'second', 4],
       ]);
     });
   });

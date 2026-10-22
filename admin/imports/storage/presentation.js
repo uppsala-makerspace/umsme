@@ -23,6 +23,7 @@ const actionReasonLabels = {
   oldest_compatible_without_storage: 'Oldest compatible request without storage',
   oldest_without_storage_soft_fallback: 'Oldest request without storage; preference unavailable',
   oldest_compatible_move: 'Oldest compatible move request',
+  oldest_compatible_move_to_floor2: 'Priority move to floor 2',
   lab_membership_inactive_unwarned: 'Lab membership expired; no warning sent',
   warning_age_21_days: 'Warning is at least 21 days old',
   warning_deadline_passed: 'The 28-day warning deadline passed',
