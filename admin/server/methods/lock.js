@@ -46,10 +46,4 @@ Meteor.methods({
     await fixLockEndDate(memberId);
     await recordChange({ userId: this.userId, domain: 'lock', action: 'fixEndDate', docId: memberId });
   },
-
-  'syncLockHistory': async () => {
-    if (Meteor.userId() && await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      return syncUnlocks();
-    }
-  },
 });

@@ -7,7 +7,7 @@ UMSME has two door access systems:
 - **Home Assistant** (current) -- used by the member app (`app/`) to let members unlock doors directly from their phone.
 - **Danalock** (legacy) -- managed through the admin app (`admin/`), using cloud-based calendar access control.
 
-Both systems record unlock events in the `Unlocks` collection for auditing. The legacy Danalock system also has a nightly cron job that syncs unlock history and emails a report.
+Both systems record unlock events in the `DoorUnlocks` collection (`doorunlocks`) for auditing; the legacy `Unlocks` collection holds the openings from before, until `migrateUnlocksToDoorUnlocks` moves them over. The legacy Danalock system also has a nightly cron job that syncs unlock history and emails a report.
 
 ---
 
@@ -184,16 +184,17 @@ See [configuration.md](configuration.md#7-danalock-configuration-legacy) for the
 
 ### Methods
 
-All methods require admin role.
+The Danalock API itself sits behind `lockApi()` (`admin/server/lock/`), with a
+stand-in when `lockApi` is `"fake"` in settings. The methods:
 
-| Method | Description |
-|--------|-------------|
-| `syncLockHistory` | Fetches the latest 50 log entries from Danalock and inserts new ones into `Unlocks` |
-| `syncAndMailLockHistory` | Syncs history, then emails the last ~25 hours of unlocks |
-| `lockHistory` | Fetches up to 6 months of lock log entries (paginated, 50 per page) |
-| `lockStatus` | Returns all Danalock users, calendars, and group-user links (2 pages each) |
-| `setCalenderEndDate(calendar, endDate, link)` | Updates a user's calendar end date (creates new calendar, updates link, deletes old calendar) |
-| `createCalendarEndDate(userid, endDate)` | Creates a new calendar with an end date and links it to a user |
+| Method | Roles | Description |
+|--------|-------|-------------|
+| `lock.overview` | admin | Every lab member against what the lock holds for them (`server/lock/overview.js`) |
+| `lock.fix(memberId)` | admin | Sets the lock's end date for a member to their lab end date |
+| `forceSyncDoorUnlocks` | admin | Fetches the latest 50 log entries from Danalock into `doorunlocks` and, if `private.doorunlockMail` is enabled, mails the last day's unlocks; the nightly cron job runs the same (admin console: Sync now) |
+| `migrateUnlocksToDoorUnlocks` | admin | Copies the legacy `unlocks` collection into `doorunlocks` and empties it (admin console) |
+| `doorUnlocks.page(options)` | admin, board | A page of the recorded door unlocks |
+| `doorUnlocks.visits(source)` | admin (lock), admin and board (recorded) | How many opened the door how often in six months |
 
 ### Calendar-Based Access Control
 
@@ -222,9 +223,9 @@ The admin UI tracks lock user status with these values (stored in the `lockusers
 
 ## 6. Unlock Audit Log
 
-**Source:** `common/collections/unlocks.js`, `common/lib/models.js`
+**Source:** `common/collections/doorunlocks.js`, `common/lib/models.js`
 
-The `Unlocks` collection records all door unlock events for auditing purposes. See [data-model.md](data-model.md) for the schema.
+The `DoorUnlocks` collection records all door unlock events for auditing purposes. See [data-model.md](data-model.md) for the schema.
 
 ### Sync from Danalock
 
@@ -245,7 +246,7 @@ Runs daily at **3:00 AM** server time, managed by `chatra:synced-cron`.
 ### What It Does
 
 1. Authenticates with the Danalock API
-2. Calls `syncUnlocks()` to import new unlock events into the `Unlocks` collection
+2. Calls `syncUnlocks()` to import new unlock events into the `DoorUnlocks` collection
 3. Queries all unlocks from the past ~23 hours (`yesterday.setHours(-23)` relative to now)
 4. Sends an email report to two recipients:
    - `pass@ekebyindustrihus.com` (building management)
