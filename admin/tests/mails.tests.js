@@ -5,7 +5,7 @@ import { Memberships } from '/imports/common/collections/memberships';
 import { Mails } from '/imports/common/collections/mails';
 import { Announcements } from '/imports/common/collections/announcements';
 import { Comments } from '/imports/common/collections/comments';
-import { mailRecipients, sendGroupMail, renderMail, removeMail, mailDetail, mailSending, setUpMails } from '/server/mail/mails';
+import { mailRecipients, sendGroupMail, renderMail, removeMail, mailDetail, mailSending, setUpMails, retryMail, acceptMail } from '/server/mail/mails';
 import { announcementFromMail } from '/imports/common/server/announcements/announcements';
 
 const prefix = 'mailtest-';
@@ -37,6 +37,12 @@ const ours = (list) => list.filter((r) => r.email.startsWith(prefix)).map((r) =>
 describe('group mail', function () {
   const deliver = Meteor.settings.deliverMails;
   const from = Meteor.settings.from;
+  const whitelist = Meteor.settings.private?.recipientWhitelist;
+  /** Mail "goes" without leaving the test: delivered, to a whitelist of nobody. */
+  const delivering = () => {
+    Meteor.settings.deliverMails = true;
+    Meteor.settings.private = { ...Meteor.settings.private, recipientWhitelist: [] };
+  };
   before(async function () {
     await cleanup();
     await setUpMails();
@@ -50,6 +56,7 @@ describe('group mail', function () {
   after(async function () {
     Meteor.settings.deliverMails = deliver;
     Meteor.settings.from = from;
+    Meteor.settings.private = { ...Meteor.settings.private, recipientWhitelist: whitelist };
     await cleanup();
   });
 
@@ -70,19 +77,20 @@ describe('group mail', function () {
     assert.match(renderMail({ subject: 's', template: '**Hej**', format: 'markdown' }, data).html, /<strong>Hej<\/strong>/);
   });
 
-  it('sends in the background, recording who failed, and marks the announcement sent at the end', async function () {
-    Meteor.settings.deliverMails = false;
+  const groupMail = (fields = {}) => ({
+    from: 'sender@example.org', recipients: 'labmembers', family: false, subject: `${prefix}subject`, template: 'Hej <%= name %>',
+    format: 'raw', only: [`${prefix}current@example.org`], ...fields,
+  });
+
+  it('sends in the background and, when all got it, marks the mail and its announcement sent', async function () {
+    delivering();
     const announcementId = await Announcements.insertAsync({ type: 'information', subjectSv: `${prefix}a`, bodySv: 'x', status: 'draft', createdAt: now });
-    const { mailId, total, done } = await sendGroupMail({
-      from: 'sender@example.org', recipients: 'labmembers', family: false, subject: `${prefix}subject`, template: 'Hej <%= name %>',
-      format: 'raw', only: [`${prefix}current@example.org`], announcementId,
-    }, user);
+    const { mailId, total, done } = await sendGroupMail(groupMail({ announcementId }), user);
     assert.strictEqual(total, 1);
     await done;
     assert.strictEqual(await mailSending(), undefined);
     const mail = await Mails.findOneAsync(mailId);
-    assert.strictEqual(mail.status, 'sent');
-    assert.deepStrictEqual(mail.failed, [`Mail current <${prefix}current@example.org>`]);
+    assert.deepStrictEqual([mail.status, mail.active, mail.queue, mail.to], ['sent', undefined, undefined, [`Mail current <${prefix}current@example.org>`]]);
     const announcement = await Announcements.findOneAsync(announcementId);
     assert.strictEqual(announcement.status, 'sent');
     assert.strictEqual(announcement.mailId, mailId);
@@ -90,13 +98,57 @@ describe('group mail', function () {
     await assert.rejects(removeMail(mailId, user), /announcement/);
   });
 
+  it('waits for a decision on those it failed for: try again, then OK', async function () {
+    Meteor.settings.deliverMails = false;
+    const announcementId = await Announcements.insertAsync({ type: 'information', subjectSv: `${prefix}b`, bodySv: 'x', status: 'draft', createdAt: now });
+    const { mailId, done } = await sendGroupMail(groupMail({ announcementId }), user);
+    await done;
+    let mail = await Mails.findOneAsync(mailId);
+    assert.deepStrictEqual([mail.status, mail.active, mail.failed.length, mail.retry.length], ['review', true, 1, 1]);
+    assert.strictEqual((await mailSending()).status, 'review');
+    await assert.rejects(sendGroupMail(groupMail(), user), /busy/);
+    assert.strictEqual((await Announcements.findOneAsync(announcementId)).status, 'draft');
+
+    await (await retryMail(mailId, user)).done;
+    mail = await Mails.findOneAsync(mailId);
+    assert.deepStrictEqual([mail.status, mail.failed.length], ['review', 1]);
+
+    await acceptMail(mailId, user);
+    mail = await Mails.findOneAsync(mailId);
+    assert.deepStrictEqual([mail.status, mail.active, mail.failed.length], ['sent', undefined, 1]);
+    assert.strictEqual((await Announcements.findOneAsync(announcementId)).status, 'sent');
+    await assert.rejects(acceptMail(mailId, user), /not-waiting/);
+  });
+
+  it('tries again and, when the rest get it, is sent by itself', async function () {
+    Meteor.settings.deliverMails = false;
+    const { mailId, done } = await sendGroupMail(groupMail(), user);
+    await done;
+    delivering();
+    await (await retryMail(mailId, user)).done;
+    const mail = await Mails.findOneAsync(mailId);
+    assert.deepStrictEqual([mail.status, mail.failed, mail.to.length], ['sent', [], 1]);
+  });
+
+  it('goes on after a restart where it stopped', async function () {
+    delivering();
+    const data = (await mailRecipients({ recipients: 'labmembers', family: false })).find((r) => r.email === `${prefix}current@example.org`);
+    const mailId = await Mails.insertAsync({
+      from: 'sender@example.org', recipients: 'labmembers', family: false, subject: `${prefix}resumed`, senddate: now, template: 'Hej',
+      to: ['Somebody <somebody@example.org>'], failed: [], status: 'sending', active: true, total: 2, source: 'Hej <%= name %>', format: 'raw', queue: [data], retry: [],
+    });
+    await Promise.all(await setUpMails());
+    const mail = await Mails.findOneAsync(mailId);
+    assert.deepStrictEqual([mail.status, mail.to.length], ['sent', 2]);
+  });
+
   it('sends one mail at a time', async function () {
-    const sending = await Mails.insertAsync({ from: 'a@example.org', recipients: 'members', family: false, to: [], failed: [], subject: `${prefix}busy`, senddate: now, template: 'x', status: 'sending', total: 5 });
+    const sending = await Mails.insertAsync({ from: 'a@example.org', recipients: 'members', family: false, to: [], failed: [], subject: `${prefix}busy`, senddate: now, template: 'x', status: 'review', active: true, total: 5 });
     try {
       assert.strictEqual((await mailSending())._id, sending);
       const mail = { from: 'sender@example.org', recipients: 'members', family: false, subject: `${prefix}s2`, template: 'x', format: 'raw' };
       await assert.rejects(sendGroupMail(mail, user), /busy/);
-      await assert.rejects(Mails.insertAsync({ ...mail, to: [], senddate: now, status: 'sending' }), /duplicate key/);
+      await assert.rejects(Mails.insertAsync({ ...mail, to: [], senddate: now, status: 'sending', active: true }), /duplicate key/);
       await assert.rejects(removeMail(sending, user), /sending/);
     } finally {
       await Mails.removeAsync(sending);

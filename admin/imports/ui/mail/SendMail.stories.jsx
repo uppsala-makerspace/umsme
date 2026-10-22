@@ -22,5 +22,6 @@ export default {
 
 export const New = {};
 export const FromAnnouncement = { args: { announcement, initial: { ...mailValues(announcement), from: 'kansliet@example.org', format: 'markdown' } } };
-export const AnotherGoingOut = { args: { initial: { ...mailValues(announcement), from: 'kansliet@example.org' }, job: { _id: 'm9', subject: 'Nyhetsbrev oktober', total: 800, sent: 196, failed: 4 } } };
+export const AnotherGoingOut = { args: { initial: { ...mailValues(announcement), from: 'kansliet@example.org' }, job: { _id: 'm9', subject: 'Nyhetsbrev oktober', status: 'sending', total: 800, sent: 196, failed: 4 } } };
+export const AnotherWaiting = { args: { initial: mailValues(null), job: { _id: 'm9', subject: 'Nyhetsbrev oktober', status: 'review', total: 800, sent: 790, failed: 10 } } };
 export const LoadingRecipients = { args: { recipients: null } };

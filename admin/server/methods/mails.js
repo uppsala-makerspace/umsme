@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { check, Match } from 'meteor/check';
 import { requireRole, DOMAIN_ROLES } from '/imports/common/server/authz';
 import { announcementFromMail } from '/imports/common/server/announcements/announcements';
-import { mailRecipients, sendGroupMail, mailSending, mailList, mailDetail, removeMail } from '../mail/mails';
+import { mailRecipients, sendGroupMail, mailSending, mailList, mailDetail, removeMail, retryMail, acceptMail } from '../mail/mails';
 
 const group = { recipients: String, family: Boolean, since: Match.Optional(Match.OneOf(null, Date)) };
 
@@ -46,7 +46,19 @@ Meteor.methods({
     const { mailId, total } = await sendGroupMail(mail, { userId: this.userId });
     return { mailId, total };
   },
-  /** The mail going out now, if any, and how far it has come. */
+  /** Send again to those a mail failed for; it goes on in the background. */
+  async 'mails.retry'(mailId) {
+    check(mailId, String);
+    await requireRole(this.userId, DOMAIN_ROLES.sendMail);
+    await retryMail(mailId, { userId: this.userId });
+  },
+  /** Settle for a mail some did not get: it is sent, and another can go out. */
+  async 'mails.accept'(mailId) {
+    check(mailId, String);
+    await requireRole(this.userId, DOMAIN_ROLES.sendMail);
+    await acceptMail(mailId, { userId: this.userId });
+  },
+  /** The mail under way, if any, and how far it has come. */
   async 'mails.sending'() {
     await requireRole(this.userId, DOMAIN_ROLES.mails);
     return mailSending();

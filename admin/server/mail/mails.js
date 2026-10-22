@@ -16,9 +16,12 @@ import { sendMail } from './send';
  * Group mail (utskick): a mail written here, rendered for and sent to each
  * member of a group, and the record of it in Mails (who got it, who did
  * not). The mail is recorded at once and goes out in the background, one
- * recipient at a time, its record growing as it does; only one goes out at a
- * time. Sending from an announcement marks the announcement sent and pushes
- * it to the members' phones once every mail is out.
+ * recipient at a time, its record growing as it does; a recipient whose mail
+ * fails is passed by, and a restart goes on where it stopped. When all have
+ * had their turn the mail is sent, or, if some failed, waits for a decision:
+ * try them again, or settle for it (OK). Only one mail is under way (sending
+ * or waiting) at a time. Sending from an announcement marks the announcement
+ * sent, and pushes it to the members' phones, when the mail is sent.
  */
 
 const DOMAIN = 'mails';
@@ -105,61 +108,93 @@ export const renderMail = ({ subject, template: text, format }, data) => {
   };
 };
 
-/** The mail going out now, if any. */
+// The recipients still to go and those to try again, with what their mail
+// is rendered from; kept on the mail while it is under way, not shown.
+const WORK_FIELDS = { queue: 0, retry: 0, source: 0 };
+
+/** The mail under way, if any: going out, or waiting for a decision on those it failed for. */
 export const mailSending = async () => {
-  const mail = await Mails.findOneAsync({ status: 'sending' }, { fields: { subject: 1, total: 1, to: 1, failed: 1, senddate: 1 } });
-  return mail && { _id: mail._id, subject: mail.subject, total: mail.total, sent: mail.to.length, failed: mail.failed.length, senddate: mail.senddate };
+  const mail = await Mails.findOneAsync({ active: true }, { fields: { subject: 1, total: 1, to: 1, failed: 1, senddate: 1, status: 1 } });
+  return mail && { _id: mail._id, subject: mail.subject, status: mail.status, total: mail.total, sent: mail.to.length, failed: mail.failed.length, senddate: mail.senddate };
 };
 
-/** Send the rendered mails, recording each recipient as they go, then finish. */
-const deliver = async (mailId, rendered, { from, announcementId, userId }) => {
-  for (const { data, mail } of rendered) {
-    try {
-      await sendMail({ to: data.email, from, ...mail });
-      await Mails.updateAsync(mailId, { $push: { to: data.to } });
-    } catch (e) {
-      console.log(`Failed sending to "${data.to}" due to: ${e.reason || e.message}`);
-      await Mails.updateAsync(mailId, { $push: { failed: data.to } });
+/** The mail is sent: no longer under way, and its announcement, if any, marked sent and pushed. */
+const finish = async (mailId, { userId }) => {
+  await Mails.updateAsync(mailId, { $set: { status: 'sent' }, $unset: { active: '', queue: '', retry: '', source: '' } });
+  const mail = await Mails.findOneAsync(mailId);
+  await recordChange({ userId, domain: DOMAIN, action: 'sent', docId: mailId, after: { to: mail.to.length, failed: mail.failed.length } });
+  if (mail.announcementId) {
+    await markAnnouncementSent(mail.announcementId, mailId, { userId });
+    pushAnnouncementToMembers(mail.announcementId).catch((e) => console.error('Failed to send announcement push:', e));
+  }
+};
+
+const running = new Map();
+
+/**
+ * Send to the mail's queue, first to last, taking each recipient off it as
+ * their mail goes or fails; then finish, or wait for a decision if some
+ * failed. One loop per mail at a time.
+ *
+ * @returns {Promise<void>} settles when the queue is empty
+ */
+const deliver = (mailId, { userId }) => {
+  if (running.has(mailId)) return running.get(mailId);
+  const loop = (async () => {
+    const mail = await Mails.findOneAsync(mailId);
+    const { from, subject, format } = mail;
+    for (const data of mail.queue || []) {
+      let sent = false;
+      try {
+        await sendMail({ to: data.email, from, ...renderMail({ subject, template: mail.source, format }, data) });
+        sent = true;
+      } catch (e) {
+        console.log(`Failed sending to "${data.to}" due to: ${e.reason || e.message}`);
+      }
+      await Mails.updateAsync(mailId, sent
+        ? { $pop: { queue: -1 }, $push: { to: data.to } }
+        : { $pop: { queue: -1 }, $push: { failed: data.to, retry: data } });
     }
-  }
-  await Mails.updateAsync(mailId, { $set: { status: 'sent' } });
-  const done = await Mails.findOneAsync(mailId);
-  await recordChange({ userId, domain: DOMAIN, action: 'sent', docId: mailId, after: { to: done.to.length, failed: done.failed.length } });
-  if (announcementId) {
-    await markAnnouncementSent(announcementId, mailId, { userId });
-    pushAnnouncementToMembers(announcementId).catch((e) => console.error('Failed to send announcement push:', e));
-  }
+    // Done with the queue: a try again from here on starts a loop of its own.
+    if (running.get(mailId) === loop) running.delete(mailId);
+    const after = await Mails.findOneAsync(mailId, { fields: { failed: 1 } });
+    if (after.failed.length) await Mails.updateAsync(mailId, { $set: { status: 'review' } });
+    else await finish(mailId, { userId });
+  })().catch((e) => console.error(`Group mail ${mailId} stopped; it goes on at the next start:`, e))
+    .finally(() => { if (running.get(mailId) === loop) running.delete(mailId); });
+  running.set(mailId, loop);
+  return loop;
 };
 
 /**
  * Send a mail to a group, or to those of it in `only` (by email): recorded
  * at once, sent in the background (see mailSending). Refused while another
- * mail goes out, and for a template that does not render, before anything
- * is sent.
+ * mail is under way, and for a template that does not render, before
+ * anything is sent.
  *
- * @returns {Promise<{ mailId: string, total: number, done: Promise<void> }>} `done` settles when the last mail is out
+ * @returns {Promise<{ mailId: string, total: number, done: Promise<void> }>} `done` settles when every recipient has had their turn
  */
 export const sendGroupMail = async ({ from, recipients, family, since, subject, template: text, format, only, announcementId }, { userId }) => {
   if (!senders().includes(from)) throw new Meteor.Error('bad-from', `Mail can not be sent from ${from}`);
   if (!FORMATS.includes(format)) throw new Meteor.Error('bad-format', `No format "${format}"`);
   if (!subject.trim() || !text.trim()) throw new Meteor.Error('bad-mail', 'A mail needs a subject and a text');
   if (announcementId && !(await Announcements.findOneAsync(announcementId))) throw new Meteor.Error('not-found', 'No such announcement');
-  if (await mailSending()) throw new Meteor.Error('busy', 'Another mail is being sent; wait until it is done');
+  if (await mailSending()) throw new Meteor.Error('busy', 'Another mail is under way; wait until it is done');
   let list = await mailRecipients({ recipients, family, since });
   if (only) {
     const wanted = new Set(only.map((e) => e.toLowerCase()));
     list = list.filter((r) => wanted.has(r.email.toLowerCase()));
   }
   if (list.length === 0) throw new Meteor.Error('no-recipients', 'There is nobody to send to');
-  let rendered;
   try {
-    rendered = list.map((data) => ({ data, mail: renderMail({ subject, template: text, format }, data) }));
+    for (const data of list) renderMail({ subject, template: text, format }, data);
   } catch (e) {
     throw new Meteor.Error('bad-template', `The mail does not render: ${e.message}`);
   }
   const doc = {
-    from, recipients, family, subject, senddate: new Date(), to: [], failed: [], status: 'sending', total: rendered.length,
+    from, recipients, family, subject, senddate: new Date(), to: [], failed: [], status: 'sending', active: true, total: list.length,
     template: format === 'plaintext' ? removeMd(text, { stripListLeaders: false }) : text,
+    source: text, format, queue: list, retry: [],
     ...(format === 'markdown' ? { formatted: true } : {}),
     ...(announcementId ? { announcementId } : {}),
   };
@@ -167,33 +202,62 @@ export const sendGroupMail = async ({ from, recipients, family, since, subject, 
   try {
     mailId = await Mails.insertAsync(doc);
   } catch (e) {
-    // The unique index on status "sending": another mail started meanwhile.
-    if (e.code === 11000 || /duplicate key/.test(e.message)) throw new Meteor.Error('busy', 'Another mail is being sent; wait until it is done');
+    // The unique index on active: another mail started meanwhile.
+    if (e.code === 11000 || /duplicate key/.test(e.message)) throw new Meteor.Error('busy', 'Another mail is under way; wait until it is done');
     throw e;
   }
-  await recordChange({ userId, domain: DOMAIN, action: 'send', docId: mailId, after: { ...doc, to: undefined, failed: undefined } });
-  const done = deliver(mailId, rendered, { from, announcementId, userId })
-    .catch(async (e) => {
-      console.error(`Group mail ${mailId} stopped:`, e);
-      await Mails.updateAsync(mailId, { $set: { status: 'interrupted' } });
-    });
-  return { mailId, total: rendered.length, done };
+  const { queue, retry, source, ...shown } = doc;
+  await recordChange({ userId, domain: DOMAIN, action: 'send', docId: mailId, after: { ...shown, to: undefined, failed: undefined } });
+  return { mailId, total: list.length, done: deliver(mailId, { userId }) };
 };
 
-/** Only one mail goes out at a time; one the server stopped sending is marked interrupted. */
+const waiting = async (mailId) => {
+  const mail = await Mails.findOneAsync(mailId, { fields: { status: 1 } });
+  if (!mail) throw new Meteor.Error('not-found', 'No such mail');
+  if (mail.status !== 'review') throw new Meteor.Error('not-waiting', 'The mail is not waiting for a decision');
+};
+
+/**
+ * Try those the mail failed for again: they go back on the queue, the rest
+ * stays as it is.
+ *
+ * @returns {Promise<{ done: Promise<void> }>} `done` settles when they have had their turn
+ */
+export const retryMail = async (mailId, { userId }) => {
+  await waiting(mailId);
+  const mail = await Mails.findOneAsync(mailId, { fields: { retry: 1 } });
+  await Mails.updateAsync(mailId, { $set: { status: 'sending', queue: mail.retry, retry: [], failed: [] } });
+  await recordChange({ userId, domain: DOMAIN, action: 'retry', docId: mailId, after: { recipients: mail.retry.length } });
+  return { done: deliver(mailId, { userId }) };
+};
+
+/** Settle for a mail some did not get: it is sent, and those it failed for stay on record. */
+export const acceptMail = async (mailId, { userId }) => {
+  await waiting(mailId);
+  await finish(mailId, { userId });
+};
+
+/**
+ * Only one mail is under way at a time; one a restart cut short goes on
+ * where it stopped.
+ *
+ * @returns {Promise<Promise<void>[]>} the loops that went on, each settling when done
+ */
 export const setUpMails = async () => {
-  await Mails.rawCollection().createIndex({ status: 1 }, { unique: true, partialFilterExpression: { status: 'sending' }, name: 'oneMailSending' });
-  const { modifiedCount } = await Mails.rawCollection().updateMany({ status: 'sending' }, { $set: { status: 'interrupted' } });
-  if (modifiedCount) console.log(`Marked ${modifiedCount} group mail(s) interrupted by a restart`);
+  await Mails.rawCollection().createIndex({ active: 1 }, { unique: true, partialFilterExpression: { active: true }, name: 'oneMailUnderWay' });
+  return (await Mails.find({ status: 'sending' }, { fields: { _id: 1 } }).fetchAsync()).map((mail) => {
+    console.log(`Going on with group mail ${mail._id}`);
+    return deliver(mail._id, { userId: null });
+  });
 };
 
 /** The sent mails, newest first, without their texts. */
-export const mailList = async () => (await Mails.find({}, { fields: { template: 0 }, sort: { senddate: -1 } }).fetchAsync())
+export const mailList = async () => (await Mails.find({}, { fields: { template: 0, ...WORK_FIELDS }, sort: { senddate: -1 } }).fetchAsync())
   .map(({ to, failed, ...mail }) => ({ ...mail, status: mail.status || 'sent', sent: to?.length || 0, failed: failed?.length || 0 }));
 
-/** A sent mail and the announcement it was sent for, if any. */
+/** A mail and the announcement it was sent for, if any. */
 export const mailDetail = async (mailId) => {
-  const mail = await Mails.findOneAsync(mailId);
+  const mail = await Mails.findOneAsync(mailId, { fields: WORK_FIELDS });
   if (!mail) throw new Meteor.Error('not-found', 'No such mail');
   const announcement = await Announcements.findOneAsync(mail.announcementId ? { $or: [{ mailId }, { _id: mail.announcementId }] } : { mailId }, { fields: { subjectSv: 1 } });
   return { mail: { ...mail, status: mail.status || 'sent' }, announcement: announcement || null };
@@ -202,7 +266,7 @@ export const mailDetail = async (mailId) => {
 /** Remove the record of a mail and the comments about it; not while it goes out, nor one an announcement was sent as. */
 export const removeMail = async (mailId, { userId }) => {
   const { mail: before, announcement } = await mailDetail(mailId);
-  if (before.status === 'sending') throw new Meteor.Error('sending', 'The mail is still being sent');
+  if (before.status === 'sending' || before.status === 'review') throw new Meteor.Error('sending', 'The mail is still under way');
   if (announcement) throw new Meteor.Error('announcement', 'The mail is the record of a sent announcement and can not be deleted');
   await Comments.removeAsync({ about: mailId });
   await Mails.removeAsync(mailId);

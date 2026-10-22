@@ -23,15 +23,18 @@ import { groupLabel, sentAt } from './labels';
 /**
  * A group mail: who it was from and to, its text, who did not get it, the
  * announcement it was for (or making one of it), and deleting it. While it
- * goes out, how far it has come; one sent for an announcement stays.
+ * goes out, how far it has come; when it has failed for some, a dialog asks
+ * whether to try them again or settle for it (OK). One sent for an
+ * announcement stays.
  *
  * @param {{ detail: { mail: object, announcement: object|null }, busy?: boolean, error?: string,
- *           on: { toAnnouncement: () => void, remove: () => void }, after?: React.ReactNode }} props
+ *           on: { toAnnouncement, remove, retry, accept }, after?: React.ReactNode }} props
  */
 export const MailView = ({ detail, busy = false, error, on, after }) => {
   const { mail, announcement } = detail;
   const [asking, setAsking] = useState(false);
-  const sending = mail.status === 'sending';
+  const sending = mail.status === 'sending' || mail.status === 'review';
+  const [deciding, setDeciding] = useState(true);
   const facts = [['From', mail.from], ['Recipients', groupLabel(mail.recipients)], ['Family members', mail.family ? 'Included' : 'Not included'], ['Sent', sentAt(mail.senddate)], ['Subject', mail.subject]];
   return (
     <Box sx={{ maxWidth: 1000 }}>
@@ -41,9 +44,11 @@ export const MailView = ({ detail, busy = false, error, on, after }) => {
         {!announcement && !sending && <Button color="error" variant="outlined" disabled={busy} onClick={() => setAsking(true)}>Delete</Button>}
       </Stack>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {sending && <Progress job={{ _id: mail._id, subject: mail.subject, total: mail.total, sent: mail.to?.length || 0, failed: mail.failed?.length || 0 }} />}
-      {mail.status === 'interrupted' && (
-        <Alert severity="warning" sx={{ mb: 2 }}>The server stopped before the mail had gone out to everyone: {(mail.to?.length || 0) + (mail.failed?.length || 0)} of {mail.total} were done. The rest did not get it.</Alert>
+      {mail.status === 'sending' && <Progress job={{ _id: mail._id, subject: mail.subject, total: mail.total, sent: mail.to?.length || 0, failed: mail.failed?.length || 0 }} />}
+      {mail.status === 'review' && (
+        <Alert severity="warning" sx={{ mb: 2 }} action={<Button color="inherit" size="small" onClick={() => setDeciding(true)}>Decide</Button>}>
+          The mail could not be sent to {mail.failed.length} of {mail.total}. Try them again, or settle for it with OK; no other mail can be sent until then.
+        </Alert>
       )}
       <Box sx={{ mb: 2 }}>
         {announcement
@@ -72,6 +77,18 @@ export const MailView = ({ detail, busy = false, error, on, after }) => {
         </>
       )}
       {after && <Box sx={{ mt: 4 }}>{after}</Box>}
+
+      <Dialog open={mail.status === 'review' && deciding} onClose={() => setDeciding(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>The mail could not be sent to {mail.failed?.length}</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 1.5 }}>Try again sends it to them once more. OK settles for it: the mail is sent{announcement ? ', and so is the announcement' : ''}, and they stay on record as failed.</DialogContentText>
+          <Addresses addresses={mail.failed || []} />
+        </DialogContent>
+        <DialogActions>
+          <Button disabled={busy} onClick={() => { setDeciding(false); on.accept(); }}>OK</Button>
+          <Button variant="contained" disabled={busy} onClick={() => { setDeciding(true); on.retry(); }}>Try again</Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={asking} onClose={() => setAsking(false)}>
         <DialogTitle>Delete this mail?</DialogTitle>

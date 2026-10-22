@@ -10,10 +10,10 @@ const mail = {
 export default {
   title: 'Mail/MailView',
   component: MailView,
-  args: { detail: { mail, announcement: { _id: 'a1', subjectSv: 'Nyhetsbrev oktober' } }, on: { toAnnouncement: fn(), remove: fn() } },
+  args: { detail: { mail, announcement: { _id: 'a1', subjectSv: 'Nyhetsbrev oktober' } }, on: { toAnnouncement: fn(), remove: fn(), retry: fn(), accept: fn() } },
 };
 
 export const FromAnnouncement = {};
 export const Raw = { args: { detail: { mail: { ...mail, formatted: false, failed: [], template: 'Hej Maja!\n\nVälkommen på städdag.' }, announcement: null } } };
 export const GoingOut = { args: { detail: { mail: { ...mail, status: 'sending', total: 800, failed: [] }, announcement: null } } };
-export const Interrupted = { args: { detail: { mail: { ...mail, status: 'interrupted', total: 800 }, announcement: null } } };
+export const SomeFailed = { args: { detail: { mail: { ...mail, status: 'review', total: 3 }, announcement: null } } };

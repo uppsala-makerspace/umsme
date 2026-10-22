@@ -7,7 +7,7 @@ import { useAnnouncement } from '../announcements/data';
 import { MailList } from './MailList';
 import { MailView } from './MailView';
 import { SendMail, mailValues } from './SendMail';
-import { mailList, mailDetail, removeMail, mailToAnnouncement, mailSenders, mailRecipients, sendMail, mailSending } from './data';
+import { mailList, mailDetail, removeMail, mailToAnnouncement, mailSenders, mailRecipients, sendMail, mailSending, retryMail, acceptMail } from './data';
 
 const reason = (e) => e.reason || e.message;
 const POLL = 2000;
@@ -37,7 +37,10 @@ export const MailViewPage = ({ _id }) => {
   const [detail, setDetail] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  usePolling(() => mailDetail(_id).then((d) => { setDetail(d); return d; }, (e) => { setError(reason(e)); throw e; }), (d) => d.mail.status === 'sending', [_id]);
+  const [round, setRound] = useState(0);
+  // Asked again while the mail is under way, also while it waits: someone else may decide.
+  usePolling(() => mailDetail(_id).then((d) => { setDetail(d); return d; }, (e) => { setError(reason(e)); throw e; }),
+    (d) => d.mail.status === 'sending' || d.mail.status === 'review', [_id, round]);
   if (!detail) return <Typography color={error ? 'error' : 'text.secondary'}>{error || 'Loading…'}</Typography>;
   const act = async (action) => {
     setBusy(true);
@@ -46,15 +49,18 @@ export const MailViewPage = ({ _id }) => {
       await action();
     } catch (e) {
       setError(reason(e));
-      setBusy(false);
     }
+    setBusy(false);
   };
+  const decide = (action) => act(async () => { await action(_id); setRound((r) => r + 1); });
   return (
     <MailView
       detail={detail} busy={busy} error={error}
       on={{
         toAnnouncement: () => act(async () => navigate(`/announcement/${await mailToAnnouncement(_id)}`)),
         remove: () => act(async () => { await removeMail(_id); navigate('/mail'); }),
+        retry: () => decide(retryMail),
+        accept: () => decide(acceptMail),
       }}
       after={<CommentsFor about={_id} />}
     />

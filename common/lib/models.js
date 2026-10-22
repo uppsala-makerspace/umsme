@@ -369,10 +369,20 @@ export const models = {
     },
     formatted: { label: "Formatted", type: Boolean, optional: true },
     // Group mail goes out in the background: "sending" while it does,
-    // "interrupted" if the server stopped before the end. Older mails have
-    // no status and were sent.
-    status: { label: "Status", type: String, optional: true, allowedValues: ["sending", "sent", "interrupted"] },
+    // "review" when it has been through everyone but failed for some and
+    // waits for a decision (try again, or OK), then "sent". Older mails have
+    // no status and were sent. `active` while sending or waiting: one mail
+    // at a time. `queue` (still to go), `retry` (failed, to try again) and
+    // `source`/`format` (what each mail is rendered from) only while active.
+    status: { label: "Status", type: String, optional: true, allowedValues: ["sending", "review", "sent"] },
+    active: { label: "Under way", type: Boolean, optional: true },
     total: { label: "Recipients", type: Number, optional: true },
+    queue: { label: "Still to go", type: Array, optional: true },
+    "queue.$": { type: Object, blackbox: true },
+    retry: { label: "To try again", type: Array, optional: true },
+    "retry.$": { type: Object, blackbox: true },
+    source: { label: "Template", type: String, optional: true, max: 10000 },
+    format: { label: "Format", type: String, optional: true, allowedValues: ["raw", "markdown", "plaintext"] },
     announcementId: { label: "Announcement", type: String, optional: true },
   },
   template: {

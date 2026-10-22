@@ -112,10 +112,12 @@ till servern kan reglerna tas bort.
 
 ## Nytt efter besluten 2026-10-22
 
-- **Ett avbrutet utskick återupptas inte.** Stannar servern mitt i ett
-  utskick markeras mejlet "Interrupted" vid nästa start, och sidan visar hur
-  många som hann få det. Resten får det inte, och utskicket som det hörde
-  till markeras inte som skickat. Ska det gå att skicka resten (en knapp
-  "Send to the rest")? Gjort i väntan: inget återupptagande.
+- **Avbrutet eller delvis misslyckat utskick** (beslut 2026-10-22): ett
+  misslyckat mejl stoppar inget, utskicket går vidare till nästa, och efter
+  en omstart fortsätter det där det var. När alla har fått sin tur är
+  utskicket skickat om alla lyckades; annars visar mejlets sida en dialog med
+  dem det misslyckades för, "Try again" eller "OK". Först när alla har fått
+  det eller någon tryckt OK markeras det (och dess utskick) som skickat, och
+  först då kan ett annat mejl skickas.
 - **Familjemedlemmar i filtret "first paid on or after"** räknas från när
   familjens betalare först betalade, eftersom de inte har egna medlemskap.

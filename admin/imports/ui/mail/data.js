@@ -17,3 +17,5 @@ export const mailRecipients = (recipients, family, since) => Meteor.callAsync('m
 export const sendMail = ({ since, ...mail }) => Meteor.callAsync('mails.send', { ...mail, since: since ? new Date(`${since}T00:00:00`) : null });
 /** Resolves to the mail going out now ({ _id, subject, total, sent, failed }), or nothing. */
 export const mailSending = () => Meteor.callAsync('mails.sending');
+export const retryMail = (mailId) => Meteor.callAsync('mails.retry', mailId);
+export const acceptMail = (mailId) => Meteor.callAsync('mails.accept', mailId);

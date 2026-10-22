@@ -15,5 +15,5 @@ export const sentAt = (date) => (date ? new Date(date).toLocaleString('sv-SE', {
 export const MAIL_STATUS = {
   sending: { label: 'Sending', color: 'info' },
   sent: { label: 'Sent', color: 'success' },
-  interrupted: { label: 'Interrupted', color: 'warning' },
+  review: { label: 'Some failed', color: 'warning' },
 };
