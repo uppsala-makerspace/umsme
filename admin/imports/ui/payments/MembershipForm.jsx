@@ -25,11 +25,11 @@ const TYPES = fieldOptions('membership', 'type');
  * after which the member's dates follow.
  *
  * @param {{ isNew: boolean, member: { _id, name }, membership?: object, values: object, onChange: (field, value) => void,
- *           onSave: () => void, busy?: boolean, error?: string, dependents?: string[], payment?: object,
+ *           onSave: () => void, busy?: boolean, error?: string, notice?: string, dependents?: string[], payment?: object,
  *           onDelete?: () => void, after?: React.ReactNode }} props
  *   `dependents` lose access if the family box is unticked; `after` holds the messages and comments.
  */
-export const MembershipForm = ({ isNew, member, membership, values, onChange, onSave, busy = false, error, dependents = [], payment, onDelete, after }) => {
+export const MembershipForm = ({ isNew, member, membership, values, onChange, onSave, busy = false, error, notice, dependents = [], payment, onDelete, after }) => {
   const [confirming, setConfirming] = useState(false);
   const text = (name) => ({ value: values[name] ?? '', onChange: (e) => onChange(name, e.target.value) });
   const date = (name, label) => <TextField label={label} type="date" {...text(name)} slotProps={{ inputLabel: { shrink: true } }} />;
@@ -44,6 +44,7 @@ export const MembershipForm = ({ isNew, member, membership, values, onChange, on
       </Stack>
       {isNew && <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>The type, family, discount and end dates follow from the amount and start, by the same rules as a payment in the app.</Typography>}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
       <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
           <TextField label="Amount" type="number" required {...text('amount')} />

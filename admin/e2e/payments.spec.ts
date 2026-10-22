@@ -103,7 +103,7 @@ test.describe('Memberships', () => {
     await openMembership(page, '901', 'E2E edit membership');
     await page.getByRole('spinbutton', { name: 'Amount' }).first().fill('250');
     await saveButton(page).click();
-    await expect(page).toHaveURL(/\/member\//);
+    await expect(page.getByText(/^saved\.$/i)).toBeVisible();
     await openMembership(page, '901', 'E2E edit membership');
     await expect(page.getByRole('spinbutton', { name: 'Amount' }).first()).toHaveValue('250');
   });
