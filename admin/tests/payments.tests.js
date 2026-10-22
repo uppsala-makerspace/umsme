@@ -40,11 +40,11 @@ describe('payments and memberships', function () {
     await Meteor.users.removeAsync({ _id: { $regex: `^${prefix}` } });
   });
 
-  it('files a payment to a member, taking their mobile along', async function () {
+  it('files a payment to a member, leaving their mobile alone', async function () {
     const pid = await newPayment();
     await call(board, 'payments.assignMember', pid, memberId);
     assert.strictEqual((await Payments.findOneAsync(pid)).member, memberId);
-    assert.strictEqual((await Members.findOneAsync(memberId)).mobile, '46700000001');
+    assert.strictEqual((await Members.findOneAsync(memberId)).mobile, undefined);
     await assert.rejects(call(treasurer, 'payments.assignMember', pid, memberId), /not-authorized/);
   });
 

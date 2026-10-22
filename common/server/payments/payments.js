@@ -32,14 +32,13 @@ const refreshMember = async (memberId) => {
 const record = async (userId, collection, action, docId, before, after) =>
   recordChange({ userId, domain: collection, action, docId, before, after });
 
-/** The payment is the member's. Their mobile number comes along if they had none. */
+/** The payment is the member's. Their mobile number does not come along: members set their own (GDPR). */
 export const assignPaymentMember = async (paymentId, memberId, { userId }) => {
   const before = await payment(paymentId);
   if (before.storeItem) throw new Meteor.Error('purchase', 'A webshop purchase already belongs to its buyer');
   const member = await Members.findOneAsync(memberId);
   if (!member) throw new Meteor.Error('not-found', 'No such member');
   await Payments.updateAsync(paymentId, { $set: { member: memberId } });
-  if (before.mobile && !member.mobile) await Members.updateAsync(memberId, { $set: { mobile: before.mobile } });
   await record(userId, 'payments', 'assignMember', paymentId, before, await Payments.findOneAsync(paymentId));
 };
 
