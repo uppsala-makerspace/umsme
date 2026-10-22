@@ -228,8 +228,8 @@ När ingen Blaze-modul finns kvar:
    navigeringsadaptern och routetabellen ändras.
 3. `htmlFontSize: 10` tas bort ur MUI-temat.
 4. Paket bort: `blaze-html-templates`, `blaze-hot`,
-   `ostrio:flow-router-extra`, `accounts-ui`, `jquery`, `session`, Bootstrap,
-   och `common/collections/allow.js`. (`aldeed:autoform`,
+   `ostrio:flow-router-extra`, `accounts-ui`, `jquery`, `session` och
+   Bootstrap. (`common/collections/allow.js` är redan borta.) (`aldeed:autoform`,
    `communitypackages:autoform-bootstrap3`, `aldeed:tabular` och DataTables
    är redan borta, sedan våg 4.)
 5. Uppdatera `admin/CLAUDE.md` och `docs/architecture.md`.
@@ -263,7 +263,7 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | members, family | ✓ | ✓ (metoder `members.*`, listorna pagineras på servern) | ✓ | ✓ |
 | users | ✓ | ✓ (metoder `users.*`) | ✓ | ✓ (`allow` på `Meteor.users` och publiceringen `users` borttagna) |
 | mail | ✓ | ✓ (metoder `mails.*`) | ✓ | ✓ (utskicket renderas och skickas på servern; Tabular borta med sina sista tabeller) |
-| admin | ✓ (fanns) | – | ✓ (synk, sammanslagning, obligatoriskt certifikat) | Delvis: engångsverktygen står kvar i Blaze (`AdminOneOffTools`) i väntan på beslut, och med dem `allow` på `Members` och `Payments` och de breda publiceringarna `members` och `payments` (plan/open-questions.md) |
+| admin | ✓ (fanns) | – | ✓ (synk, sammanslagning, obligatoriskt certifikat, datum, migrering av gamla låsöppningar) | ✓ (övriga engångsverktyg borttagna 2026-10-22; därmed inga `allow`-regler och inga breda publiceringar kvar, `allow.js` borttagen) |
 
 ## Beslut (2026-10-19)
 

@@ -40,13 +40,13 @@ const Action = ({ label, question, confirmLabel, busy, disabled, onRun, result }
 
 /**
  * The admin console: the lock sync, merging members, the mandatory
- * certificate for everyone, and below (`after`) what is still to be decided.
+ * certificate for everyone, and two tools for putting old data right.
  *
  * @param {{ busy?: string|null, results: object, mandatory: { name, count }|null|undefined,
- *           on: { syncLock, grantMandatory }, merge: React.ReactNode, after?: React.ReactNode }} props
+ *           on: { syncLock, grantMandatory, migrateUnlocks, updateDates }, merge: React.ReactNode }} props
  *   `busy` names the action running; `results` holds each action's outcome by name.
  */
-export const AdminConsole = ({ busy = null, results = {}, mandatory, on, merge, after }) => (
+export const AdminConsole = ({ busy = null, results = {}, mandatory, on, merge }) => (
   <Box sx={{ maxWidth: 1000 }}>
     <Typography variant="h4" component="h1">Admin console</Typography>
 
@@ -68,6 +68,12 @@ export const AdminConsole = ({ busy = null, results = {}, mandatory, on, merge, 
       )}
     </Section>
 
-    {after}
+    <Section title="Update members with correct dates" note="Figures every member’s member and lab dates again from their memberships, as Update dates does on a member’s page.">
+      <Action label="Update all members" question="Every member’s dates are figured again from their memberships." confirmLabel="Update" busy={!!busy} onRun={on.updateDates} result={results.updateDates} />
+    </Section>
+
+    <Section title="Migrate legacy unlocks to doorunlocks" note="Copies every row in the legacy unlocks collection into doorunlocks and then empties unlocks. Re-runnable: rows already in doorunlocks are skipped. Usernames that don’t match a member’s email are stored as extid instead of memberid.">
+      <Action label="Migrate now" question="The legacy unlocks are copied into doorunlocks, and the legacy collection is emptied." confirmLabel="Migrate" busy={!!busy} onRun={on.migrateUnlocks} result={results.migrateUnlocks} />
+    </Section>
   </Box>
 );

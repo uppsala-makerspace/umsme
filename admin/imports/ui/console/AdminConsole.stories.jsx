@@ -16,7 +16,7 @@ const mergeOn = { onPreview: fn(), onMerge: fn(), onEdit: fn() };
 export default {
   title: 'Console/AdminConsole',
   component: AdminConsole,
-  args: { mandatory: { name: 'Säkerhetsintroduktion', count: 12 }, on: { syncLock: fn(), grantMandatory: fn() }, merge: <MemberMerge plan={null} done={null} {...mergeOn} /> },
+  args: { mandatory: { name: 'Säkerhetsintroduktion', count: 12 }, on: { syncLock: fn(), grantMandatory: fn(), migrateUnlocks: fn(), updateDates: fn() }, merge: <MemberMerge plan={null} done={null} {...mergeOn} /> },
 };
 
 export const Start = {};

@@ -3,7 +3,6 @@ import { check, Match } from 'meteor/check';
 import { Members } from '/imports/common/collections/members';
 import { MessageTemplates } from '/imports/common/collections/templates';
 import { Messages } from '/imports/common/collections/messages';
-import { Payments } from '/imports/common/collections/payments';
 import { Comments } from '/imports/common/collections/comments';
 import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Certificates } from '/imports/common/collections/certificates';
@@ -40,10 +39,6 @@ const isStorageOperator = async (userId) =>
   !!userId && Roles.userIsInRoleAsync(userId, STORAGE_OPERATOR_ROLES);
 
 export default () => {
-  // Treasurer included so a treasurer-only account can see member name + bank
-  // details when reimbursing an expense.
-  Meteor.publish('members', createAuthFuncForRoles(Members, ['admin', 'board', 'treasurer']));
-  Meteor.publish('payments', createAuthFuncFor(Payments));
   Meteor.publish(null, createAuthFuncFor(Meteor.roles));
 
   // Storage is deliberately published separately from the broad members

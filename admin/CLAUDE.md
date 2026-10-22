@@ -76,7 +76,7 @@ The `imports/common` symlink points to `../../common/` containing:
 ## React pages
 
 Every module is React with MUI (`plan/migration.md` tells how it moved from
-Blaze; only the admin console's one-off tools and the layout are left).
+Blaze; only the layout is left).
 `liability` is the pattern to follow:
 
 - Server: domain functions in `common/server/<domain>/` (every write records
@@ -115,8 +115,8 @@ Blaze; only the admin console's one-off tools and the layout are left).
 - MUI: import each component from its own path
   (`import Button from '@mui/material/Button'`), never from `'@mui/material'`:
   Meteor does not tree-shake, and the barrel import pulls in all of MUI.
-- No client writes: a migrated collection loses its `allow` rules once no
-  Blaze page writes to it.
+- No client writes: no collection has `allow` rules; every write goes
+  through a method.
 
 ## E2e tests
 

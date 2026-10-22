@@ -14,3 +14,7 @@ export const mandatoryGrantCount = () => Meteor.callAsync('certificates.mandator
   .catch((e) => { if (e.error === 'no-mandatory') return null; throw e; });
 /** Resolves to the number of attestations made. */
 export const grantMandatoryToAll = () => Meteor.callAsync('certificates.grantMandatoryToAll');
+/** Resolves to { scanned, withMember, withExtid, skipped }. */
+export const migrateUnlocks = () => Meteor.callAsync('migrateUnlocksToDoorUnlocks');
+/** Resolves to the number of members updated. */
+export const updateMemberDates = () => Meteor.callAsync('updateMembers');

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { BlazeTemplate } from '../components/BlazeTemplate';
 import { AdminConsole } from './AdminConsole';
 import { MemberMerge } from './MemberMerge';
-import { syncLock, mergePreview, mergeMembers, mandatoryGrantCount, grantMandatoryToAll } from './data';
+import { syncLock, mergePreview, mergeMembers, mandatoryGrantCount, grantMandatoryToAll, migrateUnlocks, updateMemberDates } from './data';
 
 const reason = (e) => e.reason || e.message;
 
@@ -42,6 +41,8 @@ export const AdminConsolePage = () => {
       busy={busy} results={results} mandatory={mandatory}
       on={{
         syncLock: () => run('syncLock', syncLock, (message) => message || 'Sync done.'),
+        updateDates: () => run('updateDates', updateMemberDates, (n) => `Updated the dates of ${n} members.`),
+        migrateUnlocks: () => run('migrateUnlocks', migrateUnlocks, (r) => `Scanned ${r.scanned}: ${r.withMember} matched a member, ${r.withExtid} stored as extid, ${r.skipped} already present.`),
         grantMandatory: () => run('grantMandatory', async () => { const n = await grantMandatoryToAll(); await loadMandatory(); return n; }, (n) => `Created ${n} attestations.`),
       }}
       merge={(
@@ -52,7 +53,6 @@ export const AdminConsolePage = () => {
           onMerge={(s, d) => runMerge(() => mergeMembers(s, d), (done) => ({ plan: null, done, error: null }))}
         />
       )}
-      after={<BlazeTemplate name="AdminOneOffTools" />}
     />
   );
 };
