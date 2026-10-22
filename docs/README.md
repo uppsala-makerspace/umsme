@@ -10,7 +10,7 @@ applications sharing a single MongoDB database.
 
 | Directory    | Purpose                                                    |
 | ------------ | ---------------------------------------------------------- |
-| `admin/`     | Admin dashboard (Meteor + Blaze + Bootstrap 3)             |
+| `admin/`     | Admin dashboard (Meteor + React + MUI)                     |
 | `app/`       | Member-facing PWA (Meteor + React 19 + Tailwind CSS)       |
 | `payment/`   | Swish payment callback service (Meteor, server-only)       |
 | `common/`    | Shared collections, schemas, and business logic            |
@@ -26,7 +26,7 @@ same data layer and business rules.
 | Framework       | Meteor 3.x                         |
 | Runtime         | Node.js                            |
 | Database        | MongoDB                            |
-| Admin UI        | Blaze + Bootstrap 3                |
+| Admin UI        | React + MUI                        |
 | Member UI       | React 19 + Tailwind CSS            |
 | Schemas         | SimpleSchema / Collection2         |
 | Scheduled jobs  | synced-cron                        |

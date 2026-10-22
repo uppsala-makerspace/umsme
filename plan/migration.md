@@ -218,21 +218,30 @@ klar kan `allow` för `Members`, `Messages` och `Comments` tas bort.
 | users | 265 | Comments, Meteor.users |
 | admin | 369 | Attestations, Members, Payments |
 
-## Sista steget — Layout, router och städning
+## Sista steget — Layout, router och städning (gjort 2026-10-22)
 
-När ingen Blaze-modul finns kvar:
+1. `AppBody` är React: `imports/ui/shell/AdminShell.jsx` (topbar, meny,
+   kontomeny med byt lösenord och logga ut) och `SignIn.jsx` (användarnamn
+   eller e-post och lösenord, Google när det är uppsatt) i stället för
+   accounts-ui.
+2. FlowRouter är ersatt med React Router 6 (`react-router-dom`, samma som
+   appen; 7 kommer som ESM med `import.meta`, som Meteors klient inte
+   laddar). `reactRoute()` fyller en routetabell som `client/react/App.jsx`
+   ger routern. Vanliga länkar till admins sidor fångas och går genom
+   routern, som FlowRouter gjorde.
+3. `htmlFontSize: 10` är borta ur MUI-temat; `CssBaseline` i stället för
+   Bootstrap.
+4. Paketen `blaze-html-templates`, `blaze-hot`, `ostrio:flow-router-extra`,
+   `accounts-ui`, `jquery`, `session`, `reactive-var` och npm-paketen
+   `bootstrap` och `jquery` är borta; `static-html` läser `main.html`.
+   Tidigare borta: AutoForm, Tabular, DataTables, `allow.js`.
+5. `admin/CLAUDE.md`, `docs/architecture.md` och `docs/README.md` är
+   uppdaterade.
 
-1. `AppBody` (topbar, meny, inloggning) i React. accounts-ui ersätts med ett
-   eget inloggningsformulär.
-2. FlowRouter ersätts med React Router i en routetabell; bara
-   navigeringsadaptern och routetabellen ändras.
-3. `htmlFontSize: 10` tas bort ur MUI-temat.
-4. Paket bort: `blaze-html-templates`, `blaze-hot`,
-   `ostrio:flow-router-extra`, `accounts-ui`, `jquery`, `session` och
-   Bootstrap. (`common/collections/allow.js` är redan borta.) (`aldeed:autoform`,
-   `communitypackages:autoform-bootstrap3`, `aldeed:tabular` och DataTables
-   är redan borta, sedan våg 4.)
-5. Uppdatera `admin/CLAUDE.md` och `docs/architecture.md`.
+Kvar att fundera på: "Glömt lösenord" fanns inte heller i accounts-ui-
+varianten admin hade; ett lösenord sätts om på användarens sida. Den null-
+publicering som ger admin alla rolltilldelningar behövs bara för den egna
+menyn; den kan smalnas av till ens egna.
 
 ## Uppföljning
 

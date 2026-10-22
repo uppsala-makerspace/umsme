@@ -8,7 +8,7 @@ import { useMessages, membershipTemplate, reminderTemplate, setReminded, sendPat
 
 /**
  * The messages section of a member's or a membership's page: what can be
- * sent, and what has been. For React pages, and (through ReactSlot) Blaze.
+ * sent, and what has been.
  */
 export const MessagesFor = ({ memberId, membershipId }) => {
   const navigate = useNavigate();

@@ -1,28 +1,14 @@
-import { createElement } from 'react';
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
-import { ThemeProvider } from '@mui/material/styles';
-import { theme } from '/imports/ui/theme';
-import { NavigationContext } from '/imports/ui/navigation';
-import './ReactPage';
-
-const go = (path) => FlowRouter.go(path);
-
-/** A component with the MUI theme and FlowRouter navigation around it, as every React page gets. */
-export const themed = (component) => (props) =>
-  createElement(NavigationContext.Provider, { value: go },
-    createElement(ThemeProvider, { theme }, createElement(component, props)));
+/**
+ * The route table: each module's client/ui/<module>/index.js adds its pages
+ * here with reactRoute(), and App.jsx hands the table to React Router. The
+ * route parameters (":_id") become the page's props.
+ */
+export const routes = [];
 
 /**
- * A route that shows a React page; the route parameters become its props.
- * The page sits in admin's layout, or in another Blaze layout named by
- * `layout` (the public pages use 'Clean').
+ * A route that shows a React page, inside admin's frame (AdminShell), or
+ * bare with `layout: 'Clean'` (the public pages).
  */
 export const reactRoute = (path, name, component, { layout = 'AppBody' } = {}) => {
-  const page = themed(component);
-  return FlowRouter.route(path, {
-    name,
-    action(params) {
-      this.render(layout, { main: 'ReactPage', component: page, props: { ...params } });
-    },
-  });
+  routes.push({ path, name, component, layout });
 };

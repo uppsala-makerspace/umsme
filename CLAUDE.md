@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 UMSME (Uppsala MakerSpace MEmber administrative system) is a monorepo containing three Meteor applications that share a common codebase:
 
-- **admin/** - Administrator dashboard (Meteor + Blaze + Bootstrap 3)
+- **admin/** - Administrator dashboard (Meteor + React + MUI)
 - **app/** - Member-facing PWA (Meteor + React + Tailwind CSS)
 - **payment/** - Payment callback service (minimal Meteor, server-only)
 - **common/** - Shared collections, schemas, and business logic

@@ -14,7 +14,7 @@ The three apps serve distinct roles:
 
 | App       | Purpose                        | Port | Stack                         |
 |-----------|--------------------------------|------|-------------------------------|
-| admin     | Staff dashboard                | 3000 | Meteor 3.5 + Blaze + Bootstrap 3 |
+| admin     | Staff dashboard                | 3000 | Meteor 3.5 + React + MUI |
 | app       | Member self-service PWA        | 3001 | Meteor + React 19 + Tailwind CSS |
 | payment   | Payment callback receiver      | 3003 | Meteor (server-only, no UI)   |
 
@@ -24,7 +24,7 @@ The three apps serve distinct roles:
 
 ```
 umsme/
-├── admin/          Admin dashboard (Blaze + Bootstrap 3)
+├── admin/          Admin dashboard (React + MUI)
 ├── app/            Member PWA (React 19 + Tailwind CSS)
 ├── payment/        Payment callback service (server-only)
 ├── common/         Shared collections, schemas, business logic
@@ -88,9 +88,9 @@ Any change to files under `common/` affects all three applications. After modify
 
 ### Admin App (port 3000)
 
-Staff-facing dashboard built with Blaze templating, Bootstrap 3, FlowRouter, and AutoForm. Uses DataTables (aldeed:tabular) for server-side paginated tables.
+Staff-facing dashboard built with React 19, MUI and React Router. Every write goes through a Meteor method (no collection takes writes from the client); small views come through narrow publications, large lists page on the server through methods (MUI X DataGrid). See `admin/CLAUDE.md`.
 
-**Features** (each is a module under `admin/client/ui/`):
+**Features** (each is a module: routes in `admin/client/ui/<module>/`, pages in `admin/imports/ui/`):
 
 | Module           | Purpose                                           |
 |------------------|---------------------------------------------------|
@@ -233,7 +233,7 @@ There is no inter-app API. All coordination happens through MongoDB:
 - **App** creates an `InitiatedPayment`, **Payment** finds it when the callback arrives
 - **Payment** creates `Payment` and `Membership` records, **App** sees them reactively
 - **Admin** reads the same data for management and manual operations
-- Reactive updates in Meteor's Blaze (admin) and `useTracker` (app) automatically reflect database changes
+- `useTracker` (admin and app) reflects database changes in what a page has subscribed to; admin's method-backed lists fetch again
 
 ### Membership Types
 

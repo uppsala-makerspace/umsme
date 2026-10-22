@@ -146,36 +146,3 @@ export const wouldCreateCycle = (certId, candidateId, certificatesById) => {
   return false;
 };
 
-export const reminderState = (obj) => {
-  if (obj.infamily) {
-    return new Spacebars.SafeString('');
-  }
-  const now = new Date();
-  const overdueTime = new Date();
-  overdueTime.setDate(overdueTime.getDate()-overdueReminderDays);
-  const reminderTime = new Date();
-  reminderTime.setDate(reminderTime.getDate() + reminderDays);
-  const labReminderNeeded = obj.lab && obj.lab < reminderTime && obj.lab > now;
-  const memberReminderNeeded = obj.member && obj.member < reminderTime && obj.member > now;
-  const labReminderOverdue = obj.lab && obj.lab < now && obj.lab > overdueTime;
-  const memberReminderOverdue = obj.member && obj.member < now && obj.member > overdueTime;
-  const recentReminderRange = new Date();
-  recentReminderRange.setDate(recentReminderRange.getDate() - reminderDays*2);
-  const recentlyReminded = obj.reminder && obj.reminder > recentReminderRange;
-  let state;
-  if (recentlyReminded) {
-    state = 'done';
-  } else if (labReminderNeeded || memberReminderNeeded) {
-    state = 'needed';
-  } else if (labReminderOverdue || memberReminderOverdue) {
-    state = 'overdue';
-  } else {
-    state = obj.reminder ? 'old' : 'none';
-  }
-
-  return {
-    state,
-    date: obj.reminder,
-    formatted: moment(obj.reminder).format("YYYY-MM-DD")
-  };
-};

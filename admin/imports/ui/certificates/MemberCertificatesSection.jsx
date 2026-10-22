@@ -20,7 +20,7 @@ const attemptGroups = (attempts, name) => {
   });
 };
 
-/** The member page's certificates, while the member page itself is Blaze. */
+/** The member page's certificates. */
 export const MemberCertificatesSection = ({ memberId }) => {
   const { certificates } = useCertificateList();
   const [attestations, setAttestations] = useState(null);

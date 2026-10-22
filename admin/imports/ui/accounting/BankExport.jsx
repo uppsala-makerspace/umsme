@@ -35,7 +35,6 @@ export const BankExport = ({ onFile, busy = false, error, result, onDownloadSie,
       <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 2 }}>
         <Button component="label" variant="contained" disabled={busy}>
           Choose bank file
-          {/* style, not hidden: Bootstrap 3 gives file inputs display: block. */}
           <input type="file" aria-label="Bank file (CSV)" accept=".csv,text/csv" style={{ display: 'none' }}
             onChange={(e) => { const file = e.target.files?.[0]; if (file) onFile(file); e.target.value = ''; }} />
         </Button>

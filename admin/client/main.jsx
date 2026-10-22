@@ -1,5 +1,9 @@
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { Meteor } from 'meteor/meteor';
+import { reactRoute } from './react/reactRoute';
+import { App } from './react/App';
+import { Home } from '/imports/ui/shell/Home';
 import './ui/members';
 import './ui/membership';
 import './ui/message';
@@ -27,19 +31,9 @@ import './ui/announcement';
 import './ui/pending';
 import './ui/reminders';
 import './ui/excluded';
-import './layouts/AppBody.js';
-import './react/ReactPage';
-import './layouts/Home.html';
-import { Accounts } from 'meteor/accounts-base';
 
-Accounts.ui.config({
-  passwordSignupFields: "USERNAME_AND_OPTIONAL_EMAIL",
+reactRoute('/', 'home', Home);
+
+Meteor.startup(() => {
+  createRoot(document.getElementById('app')).render(<App />);
 });
-
-FlowRouter.route('/', {
-  name: 'home',
-  action() {
-    this.render('AppBody', {main: 'Home'});
-  }
-});
-

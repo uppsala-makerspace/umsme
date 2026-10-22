@@ -12,10 +12,8 @@ export const SearchToolbar = () => (
     <QuickFilter defaultExpanded>
       <QuickFilterControl
         render={({ ref, ...controlProps }) => (
-          // content-box: Bootstrap 3 gives input[type=search] border-box,
-          // which squeezes MUI's input. Drop with Bootstrap.
           <TextField {...controlProps} inputRef={ref} type="search" size="small" placeholder="Search…" aria-label="Search"
-            sx={{ width: 300, '& input': { boxSizing: 'content-box' } }} />
+            sx={{ width: 300 }} />
         )}
       />
     </QuickFilter>

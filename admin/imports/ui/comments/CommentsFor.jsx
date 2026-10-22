@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CommentsSection } from './Comments';
 import { useComments, addComment, updateComment, removeComment } from './data';
 
-/** The comments about one thing, by its id; for any page, React or (through ReactSlot) Blaze. */
+/** The comments about one thing, by its id, for any page. */
 export const CommentsFor = ({ about }) => {
   const { comments } = useComments(about);
   const [busy, setBusy] = useState(false);

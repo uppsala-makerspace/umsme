@@ -28,7 +28,6 @@ export const ImageField = ({ noun = 'image', src, alt, accept, onUpload, onRemov
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
         <Button component="label" variant="outlined">
           Choose {noun}
-          {/* style, not hidden: Bootstrap 3 gives file inputs display: block. */}
           <input type="file" style={{ display: 'none' }} accept={accept} onChange={(e) => setFile(e.target.files?.[0] || null)} />
         </Button>
         <Typography variant="body2" color="text.secondary">{file?.name}</Typography>

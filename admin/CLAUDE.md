@@ -33,10 +33,10 @@ meteor reset               # Reset dev database (stops app first)
 ## Architecture
 
 ### Technology Stack
-- **Framework:** Meteor 3.5.3; the pages are React 19 with MUI (see below),
-  inside a Blaze layout (`AppBody`) that goes last
+- **Framework:** Meteor 3.5.3 with React 19 and MUI (see below); no Blaze
 - **Database:** MongoDB with Collection2 (schema validation)
-- **Routing:** FlowRouter (ostrio:flow-router-extra), through `reactRoute()`
+- **Routing:** React Router 6 (`react-router-dom`, as in the app), through
+  `reactRoute()`
 - **Lists:** MUI X DataGrid (`DataList`, `ServerDataList` for server paging)
 - **Auth:** Meteor accounts-password with role-based access
 
@@ -44,9 +44,9 @@ meteor reset               # Reset dev database (stops app first)
 ```
 admin/
 ├── client/
-│   ├── main.js          # Entry point, routes, imports
-│   ├── layouts/         # Blaze layout templates (AppBody, Home)
-│   ├── react/           # reactRoute, the bridge from FlowRouter to React pages
+│   ├── main.html        # <head> and the element the app renders into
+│   ├── main.jsx         # Entry point: every module's routes, then App
+│   ├── react/           # reactRoute (the route table) and App (router, frame, sign-in)
 │   └── ui/              # Per module: the routes (index.js)
 ├── server/
 │   ├── main.js          # Server entry point
@@ -75,8 +75,10 @@ The `imports/common` symlink points to `../../common/` containing:
 
 ## React pages
 
-Every module is React with MUI (`plan/migration.md` tells how it moved from
-Blaze; only the layout is left).
+Every page is React with MUI (`plan/migration.md` tells how admin moved from
+Blaze). The frame around them, top bar, menu and signing in, is
+`imports/ui/shell/` (`AdminShell`, `SignIn`, the menu in `menu.js`), put
+together with the router in `client/react/App.jsx`.
 `liability` is the pattern to follow:
 
 - Server: domain functions in `common/server/<domain>/` (every write records
@@ -88,9 +90,10 @@ Blaze; only the layout is left).
   Data and method calls go in `data.js`, which only containers import; a pure
   component imports nothing from Meteor, so Storybook can show it without
   stubs (put helpers it needs, like `liability/dates.js`, in Meteor-free
-  files). Storybook renders with the MUI theme on top of Bootstrap 3, as
-  admin does. Pages are routed with
-  `reactRoute()` from `client/react/reactRoute.js`.
+  files). Storybook renders with the MUI theme and `CssBaseline`, as admin
+  does. Pages are routed with `reactRoute(path, name, Page)` from
+  `client/react/reactRoute.js`; the route's parameters are the page's props,
+  and `{ layout: 'Clean' }` leaves out the frame (the public pages).
 - Lists: always `DataList` (`imports/ui/components/DataList.jsx`), MUI X
   DataGrid with search, sorting and paging set up the same everywhere, with
   columns from the helpers in `columns.jsx` where they fit. Give it
@@ -101,17 +104,18 @@ Blaze; only the layout is left).
   values, the version a save is checked against, busy, error, notice),
   `ImageField` (an image or icon with upload and removal), `ChipSelect`
   (pick several from many: search, dropdown, removable pills; use it instead
-  of a long list of checkboxes), `BlazeTemplate` (a not yet migrated Blaze
-  piece inside a React page; containers only).
+  of a long list of checkboxes).
 - One Save per edit page: everything that can wait for Save is a field of the
   form, before the Save button, and is saved with it, including links to
   other things (an item's workshops, a workshop's or group's spaces, a
-  group's related workshops). Blaze pages often saved such links on their
-  own, at once, because AutoForm could not hold them; do not carry that
-  over. Only what must take effect at once sits after Save, as its own
+  group's related workshops). The old Blaze pages often saved such links on
+  their own, at once; do not bring that back. Only what must take effect at once sits after Save, as its own
   action: uploading an image or icon, actions on other documents.
 - Navigation goes through `useNavigate()` from `imports/ui/navigation.js`, a
-  context that reactRoute fills with FlowRouter; never import FlowRouter.
+  context App fills with React Router; pages never import the router. Plain
+  links (`<a href>`, `Link`, `Button href`) to admin's pages go through the
+  router too: App catches their clicks. Links elsewhere (`/api/...` files,
+  other sites) load as usual.
 - MUI: import each component from its own path
   (`import Button from '@mui/material/Button'`), never from `'@mui/material'`:
   Meteor does not tree-shake, and the barrel import pulls in all of MUI.
@@ -133,9 +137,12 @@ suites can run at once) before the tests start.
   persona or fixtures of its own (`E2E_PERSONAS`, `scenarios/e2e.js`);
   read-only tests may share.
 - Select by what the user sees (`getByRole`, `getByLabel`, visible text),
-  never by CSS classes or DOM structure: the same tests must pass when a
-  module moves from Blaze to React (see `plan/migration.md`).
+  never by CSS classes or DOM structure, so that a test outlives a page
+  being rebuilt (the suite outlived the move from Blaze to React).
 - Wait for what should appear (`expect(...).toBeVisible()`), never a fixed time.
+- Signing out ends the session's login token. A test that signs out signs
+  in with the form first (see `shell.spec.ts`); signing out after
+  `openAs()` would end the persona's seeded token for every other test.
 
 ## Dev gotchas
 

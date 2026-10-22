@@ -243,7 +243,7 @@ Menu group **Expenses** in the admin app:
 
 | Page | Route | Contents |
 | --- | --- | --- |
-| All | `/expenses` | every expense (tabular) |
+| All | `/expenses` | every expense (paged on the server) |
 | Confirm | `/expenses/confirm` | work queue: status `submitted` |
 | Reimburse | `/expenses/reimburse` | work queue: status `confirmed` |
 | Expense accounts | `/expenses/accounts` | manage expense-account categories |
