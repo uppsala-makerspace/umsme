@@ -87,6 +87,13 @@ describe('certificates', function () {
     assert.deepStrictEqual((await Certificates.findOneAsync(second)).prerequisites, []);
   });
 
+  it('refuses to remove a certificate somebody holds', async function () {
+    const docId = await call(board, 'certificates.create', certificate());
+    await call(board, 'certificates.grant', { certificateId: docId, memberId: bob, certifierId: alice, startDate: new Date(), endDate: null, comment: null });
+    await assert.rejects(call(board, 'certificates.remove', docId), /has-holders/);
+    assert.ok(await Certificates.findOneAsync(docId));
+  });
+
   it('grants with the default validity, confirmed, and revokes', async function () {
     const docId = await call(board, 'certificates.create', certificate({ defaultValidityDays: 10 }));
     const startDate = new Date(Date.UTC(2026, 0, 1));

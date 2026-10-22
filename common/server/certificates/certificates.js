@@ -115,6 +115,8 @@ export const markMandatory = async (docId, { userId }) => {
 export const removeCertificate = async (docId, { userId }) => {
   const before = await current(docId);
   if (before.mandatory) throw new Meteor.Error('mandatory', 'The mandatory certificate cannot be deleted');
+  const holders = await Attestations.find({ certificateId: docId }).countAsync();
+  if (holders) throw new Meteor.Error('has-holders', `${holders} members hold this certificate; revoke theirs before deleting it`);
   await Certificates.removeAsync(docId);
   await Certificates.updateAsync({ prerequisites: docId }, { $pull: { prerequisites: docId } }, { multi: true });
   await recordChange({ userId, domain: DOMAIN, action: 'remove', docId, before });

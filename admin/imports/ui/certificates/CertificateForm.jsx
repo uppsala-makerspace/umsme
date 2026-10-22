@@ -59,10 +59,13 @@ export const CertificateForm = ({
           {isNew ? 'Add certificate' : `Certificate: ${title}`}
           {certificate?.mandatory && <Chip size="small" color="primary" label="Mandatory" sx={{ ml: 1, verticalAlign: 'middle' }} />}
         </Typography>
-        {!isNew && !certificate.mandatory && <Button color="error" variant="outlined" onClick={() => setConfirming('delete')}>Delete certificate</Button>}
+        {!isNew && !certificate.mandatory && !holders?.length && <Button color="error" variant="outlined" onClick={() => setConfirming('delete')}>Delete certificate</Button>}
       </Stack>
       {certificate?.mandatory && (
         <Alert severity="info" sx={{ mb: 2 }}>This certificate is mandatory for membership and cannot be deleted or unmarked.</Alert>
+      )}
+      {!isNew && !certificate.mandatory && holders?.length > 0 && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>The certificate can be deleted once nobody holds it.</Typography>
       )}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
@@ -176,7 +179,7 @@ export const CertificateForm = ({
         <DialogTitle>Delete this certificate?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            “{title}” is deleted for good, and no longer needed first by other certificates. Its holders&apos; attestations stay.
+            “{title}” is deleted for good, and no longer needed first by other certificates.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
