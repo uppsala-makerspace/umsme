@@ -183,12 +183,12 @@ export const memberExport = async (kind, now = new Date()) => {
     ...all.map((m) => [m.mid, m.name, m.email, day(m.member), day(m.lab), `${m.family}`, `${!m.infamily}`])];
 };
 
-/** What a new member made from an unfiled payment starts with: name, mobile, and an email in the message. */
+/** What a new member made from an unfiled payment starts with: name, and an email in the message; not the mobile, which members set themselves (GDPR). */
 export const memberDraftFromPayment = async (paymentId) => {
   const payment = await Payments.findOneAsync(paymentId, { fields: { hash: 0 } });
   if (!payment) throw new Meteor.Error('not-found', 'No such payment');
   const email = payment.message?.match(/([\w.]*@[\w.]*)/)?.[1];
-  return { payment, draft: { ...(payment.name ? { name: payment.name } : {}), ...(payment.mobile ? { mobile: payment.mobile } : {}), ...(email ? { email } : {}) } };
+  return { payment, draft: { ...(payment.name ? { name: payment.name } : {}), ...(email ? { email } : {}) } };
 };
 
 /** Members waiting for the board: they have paid, are not accepted, excluded nor in a family. With what they have paid. */
