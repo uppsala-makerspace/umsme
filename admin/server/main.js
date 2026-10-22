@@ -17,6 +17,7 @@ import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
 import { ensureAuditLogIndexes } from '/imports/common/server/auditLog';
 import { ensureStorageMessageTemplates } from '/imports/common/server/storageMessages/defaults';
 import { applyMailUrlFromSettings } from '/imports/common/server/mailUrl';
+import { setUpMails } from './mail/mails';
 
 applyMailUrlFromSettings();
 
@@ -26,6 +27,7 @@ Meteor.startup(async () => {
   await setupAccounts();
   await ensureStorageIndexes();
   await ensureAuditLogIndexes();
+  await setUpMails();
   await ensureStorageMessageTemplates();
   await runMigrations();
   publications();

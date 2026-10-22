@@ -109,3 +109,13 @@ till servern kan reglerna tas bort.
 - Mottagarlistan: ett filter "betalande medlem första gången efter" (datum),
   för att nå bara de nyaste medlemmarna.
 - Ett mejl som hör till ett utskick kan inte raderas.
+
+## Nytt efter besluten 2026-10-22
+
+- **Ett avbrutet utskick återupptas inte.** Stannar servern mitt i ett
+  utskick markeras mejlet "Interrupted" vid nästa start, och sidan visar hur
+  många som hann få det. Resten får det inte, och utskicket som det hörde
+  till markeras inte som skickat. Ska det gå att skicka resten (en knapp
+  "Send to the rest")? Gjort i väntan: inget återupptagande.
+- **Familjemedlemmar i filtret "first paid on or after"** räknas från när
+  familjens betalare först betalade, eftersom de inte har egna medlemskap.

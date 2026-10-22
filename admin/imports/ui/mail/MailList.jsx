@@ -6,13 +6,15 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { DataList } from '../components/DataList';
 import { linkColumn } from '../components/columns';
-import { groupLabel, sentAt } from './labels';
+import Chip from '@mui/material/Chip';
+import { MAIL_STATUS, groupLabel, sentAt } from './labels';
 
 const columns = [
   linkColumn('subject', 'Subject', (m) => `/mail/${m._id}`, { minWidth: 260 }),
   { field: 'from', headerName: 'From', width: 200 },
   { field: 'recipients', headerName: 'Recipients', width: 180, valueGetter: (v) => groupLabel(v) },
   { field: 'family', headerName: 'Family members', type: 'boolean', width: 130 },
+  { field: 'status', headerName: 'Status', width: 120, renderCell: ({ value }) => <Chip size="small" color={MAIL_STATUS[value].color} label={MAIL_STATUS[value].label} /> },
   { field: 'sent', headerName: 'Sent', type: 'number', width: 80 },
   { field: 'failed', headerName: 'Failed', type: 'number', width: 80 },
   { field: 'senddate', headerName: 'Sent date', type: 'dateTime', width: 150, valueGetter: (v) => (v ? new Date(v) : null), valueFormatter: (v) => sentAt(v) },

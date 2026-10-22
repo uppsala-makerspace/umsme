@@ -5,7 +5,7 @@ import { Memberships } from '/imports/common/collections/memberships';
 import { Mails } from '/imports/common/collections/mails';
 import { Announcements } from '/imports/common/collections/announcements';
 import { Comments } from '/imports/common/collections/comments';
-import { mailRecipients, sendGroupMail, renderMail, removeMail, mailDetail } from '/server/mail/mails';
+import { mailRecipients, sendGroupMail, renderMail, removeMail, mailDetail, mailSending, setUpMails } from '/server/mail/mails';
 import { announcementFromMail } from '/imports/common/server/announcements/announcements';
 
 const prefix = 'mailtest-';
@@ -39,6 +39,7 @@ describe('group mail', function () {
   const from = Meteor.settings.from;
   before(async function () {
     await cleanup();
+    await setUpMails();
     Meteor.settings.from = ['sender@example.org'];
     await member('current', { memberDays: 30, labDays: 30 });
     const payer = await member('payer', { memberDays: 30, family: true });
@@ -69,20 +70,54 @@ describe('group mail', function () {
     assert.match(renderMail({ subject: 's', template: '**Hej**', format: 'markdown' }, data).html, /<strong>Hej<\/strong>/);
   });
 
-  it('records who failed when mail is not delivered, and marks the announcement sent', async function () {
+  it('sends in the background, recording who failed, and marks the announcement sent at the end', async function () {
     Meteor.settings.deliverMails = false;
     const announcementId = await Announcements.insertAsync({ type: 'information', subjectSv: `${prefix}a`, bodySv: 'x', status: 'draft', createdAt: now });
-    const { mailId, sent, failed } = await sendGroupMail({
+    const { mailId, total, done } = await sendGroupMail({
       from: 'sender@example.org', recipients: 'labmembers', family: false, subject: `${prefix}subject`, template: 'Hej <%= name %>',
       format: 'raw', only: [`${prefix}current@example.org`], announcementId,
     }, user);
-    assert.deepStrictEqual([sent, failed], [0, 1]);
+    assert.strictEqual(total, 1);
+    await done;
+    assert.strictEqual(await mailSending(), undefined);
     const mail = await Mails.findOneAsync(mailId);
+    assert.strictEqual(mail.status, 'sent');
     assert.deepStrictEqual(mail.failed, [`Mail current <${prefix}current@example.org>`]);
     const announcement = await Announcements.findOneAsync(announcementId);
     assert.strictEqual(announcement.status, 'sent');
     assert.strictEqual(announcement.mailId, mailId);
     assert.strictEqual((await mailDetail(mailId)).announcement._id, announcementId);
+    await assert.rejects(removeMail(mailId, user), /announcement/);
+  });
+
+  it('sends one mail at a time', async function () {
+    const sending = await Mails.insertAsync({ from: 'a@example.org', recipients: 'members', family: false, to: [], failed: [], subject: `${prefix}busy`, senddate: now, template: 'x', status: 'sending', total: 5 });
+    try {
+      assert.strictEqual((await mailSending())._id, sending);
+      const mail = { from: 'sender@example.org', recipients: 'members', family: false, subject: `${prefix}s2`, template: 'x', format: 'raw' };
+      await assert.rejects(sendGroupMail(mail, user), /busy/);
+      await assert.rejects(Mails.insertAsync({ ...mail, to: [], senddate: now, status: 'sending' }), /duplicate key/);
+      await assert.rejects(removeMail(sending, user), /sending/);
+    } finally {
+      await Mails.removeAsync(sending);
+    }
+  });
+
+  it('finds only those who first paid since a day, longest a member first', async function () {
+    const since = new Date(now - 100 * DAY);
+    await Memberships.insertAsync({ mid: `${prefix}current`, start: new Date(now - 10 * DAY), type: 'member', amount: 1, memberend: new Date(now.getTime() + 30 * DAY) });
+    const lateId = await member('late', { memberDays: 30 });
+    await Memberships.updateAsync({ mid: lateId }, { $set: { start: new Date(now - 5 * DAY) } }, { multi: true });
+    try {
+      // Everyone here first paid 300 days ago but "late".
+      assert.deepStrictEqual(ours(await mailRecipients({ recipients: 'members', family: true, since })), ['Mail late']);
+      const all = (await mailRecipients({ recipients: 'members', family: false })).filter((r) => r.email.startsWith(prefix));
+      assert.strictEqual(all.at(-1).name, 'Mail late');
+    } finally {
+      await Members.removeAsync(lateId);
+      await Memberships.removeAsync({ mid: lateId });
+      await Memberships.removeAsync({ mid: `${prefix}current`, start: { $gt: since } });
+    }
   });
 
   it('refuses an unknown sender and a template that does not render, before sending', async function () {
@@ -92,17 +127,16 @@ describe('group mail', function () {
     assert.strictEqual(await Mails.find({ subject: `${prefix}s` }).countAsync(), 0);
   });
 
-  it('makes an announcement of a mail once, and removes a mail leaving the announcement', async function () {
+  it('makes an announcement of a mail once, after which the mail stays', async function () {
     const mailId = await Mails.insertAsync({ from: 'a@example.org', recipients: 'members', family: false, to: [], subject: `${prefix}old`, senddate: now, template: 'Text' });
     const announcementId = await announcementFromMail(mailId, user);
     assert.strictEqual(await announcementFromMail(mailId, user), announcementId);
     await Announcements.updateAsync(announcementId, { $set: { subjectSv: `${prefix}old` } });
+    await assert.rejects(removeMail(mailId, user), /announcement/);
+    await Announcements.removeAsync(announcementId);
     await Comments.insertAsync({ about: mailId, text: 'x', created: now });
     await removeMail(mailId, user);
     assert.strictEqual(await Mails.findOneAsync(mailId), undefined);
     assert.strictEqual(await Comments.find({ about: mailId }).countAsync(), 0);
-    const announcement = await Announcements.findOneAsync(announcementId);
-    assert.strictEqual(announcement.status, 'sent');
-    assert.strictEqual(announcement.mailId, undefined);
   });
 });

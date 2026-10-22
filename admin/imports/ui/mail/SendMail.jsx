@@ -23,13 +23,14 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { Addresses } from './Addresses';
+import { Progress } from './Progress';
 import { RECIPIENT_GROUPS } from './labels';
 
 const FORMATS = [['raw', 'Raw'], ['markdown', 'Markdown'], ['plaintext', 'Plain text']];
 
 /** The form's values for a new mail; from an announcement, its subject and text in both languages. */
 export const mailValues = (announcement) => ({
-  from: '', recipients: 'members', family: false, format: 'raw', removed: [],
+  from: '', recipients: 'members', family: false, since: '', format: 'raw', removed: [],
   subject: announcement ? [announcement.subjectSv, announcement.subjectEn].filter(Boolean).join(' / ') : '',
   template: announcement ? [announcement.bodySv, announcement.bodyEn].filter(Boolean).join('\n---\n\n') : '',
 });
@@ -38,13 +39,17 @@ export const mailValues = (announcement) => ({
  * Writing and sending a group mail: from whom, to which members (any of
  * them taken away), the subject and the text, written raw, as markdown or
  * as markdown sent as plain text. The text is a template, rendered for each
- * recipient (see the documentation below it). Sending asks first.
+ * recipient (see the documentation below it). Sending asks first; the mail
+ * then goes out in the background, and while one does no other can be sent.
  *
  * @param {{ values: object, onChange: (field, value) => void, senders: string[], recipients: object[]|null,
- *           onSend: () => void, sending?: boolean, error?: string, announcement?: object, documentation?: React.ReactNode }} props
- *   `recipients` as mails.recipients returns them, null while they load.
+ *           onSend: (to) => void, starting?: boolean, job?: object|null, error?: string, announcement?: object,
+ *           documentation?: React.ReactNode }} props
+ *   `recipients` as mails.recipients returns them, null while they load;
+ *   `job` the mail going out now, as mails.sending returns it.
  */
-export const SendMail = ({ values, onChange, senders, recipients, onSend, sending = false, error, announcement, documentation }) => {
+export const SendMail = ({ values, onChange, senders, recipients, onSend, starting = false, job, error, announcement, documentation }) => {
+  const sending = starting || !!job;
   const [asking, setAsking] = useState(false);
   const removed = new Set(values.removed);
   const to = (recipients || []).map((r) => r.to).filter((a) => !removed.has(a));
@@ -57,7 +62,7 @@ export const SendMail = ({ values, onChange, senders, recipients, onSend, sendin
       <Typography variant="h4" component="h1" sx={{ mb: 2 }}>Send mail</Typography>
       {announcement && <Alert severity="info" sx={{ mb: 2 }}>Sending the announcement <strong>{announcement.subjectSv}</strong>; once sent it is marked sent and pushed to the members’ phones. <Link href={`/announcement/${announcement._id}`}>Back to the announcement</Link></Alert>}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {sending && <Alert severity="warning" sx={{ mb: 2 }}><strong>Sending {to.length} mails…</strong> Stay on the page until they are all sent.</Alert>}
+      {job && <Progress job={job} link />}
       <Stack spacing={2}>
         <FormControl>
           <FormLabel id="mail-from">From</FormLabel>
@@ -72,9 +77,13 @@ export const SendMail = ({ values, onChange, senders, recipients, onSend, sendin
           </RadioGroup>
           <FormControlLabel control={<Checkbox checked={values.family} onChange={(e) => { onChange('family', e.target.checked); onChange('removed', []); }} />} label="Include family members" />
         </FormControl>
+        <TextField label="First paid on or after" type="date" size="small" value={values.since} sx={{ maxWidth: 260 }}
+          onChange={(e) => { onChange('since', e.target.value); onChange('removed', []); }}
+          slotProps={{ inputLabel: { shrink: true } }}
+          helperText="Only members who became paying members on or after this day; empty for all. A family member counts from the payer." />
         <Box>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.5 }}>
-            <FormLabel>To ({recipients ? to.length : '…'})</FormLabel>
+            <FormLabel>To ({recipients ? to.length : '…'}), longest a member first</FormLabel>
             {values.removed.length > 0 && <Button size="small" onClick={() => onChange('removed', [])}>Put back the {values.removed.length} taken away</Button>}
           </Stack>
           {recipients ? <Addresses addresses={to} onRemove={(a) => onChange('removed', [...values.removed, a])} empty="Nobody in this group." /> : <Typography variant="body2" color="text.secondary">Finding the recipients…</Typography>}

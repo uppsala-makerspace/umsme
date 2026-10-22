@@ -368,6 +368,12 @@ export const models = {
       },
     },
     formatted: { label: "Formatted", type: Boolean, optional: true },
+    // Group mail goes out in the background: "sending" while it does,
+    // "interrupted" if the server stopped before the end. Older mails have
+    // no status and were sent.
+    status: { label: "Status", type: String, optional: true, allowedValues: ["sending", "sent", "interrupted"] },
+    total: { label: "Recipients", type: Number, optional: true },
+    announcementId: { label: "Announcement", type: String, optional: true },
   },
   template: {
     name: { label: "Template name", type: String, max: 50 },

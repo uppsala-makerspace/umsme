@@ -2,9 +2,9 @@ import { Meteor } from 'meteor/meteor';
 import { check, Match } from 'meteor/check';
 import { requireRole, DOMAIN_ROLES } from '/imports/common/server/authz';
 import { announcementFromMail } from '/imports/common/server/announcements/announcements';
-import { mailRecipients, sendGroupMail, mailList, mailDetail, removeMail } from '../mail/mails';
+import { mailRecipients, sendGroupMail, mailSending, mailList, mailDetail, removeMail } from '../mail/mails';
 
-const group = { recipients: String, family: Boolean };
+const group = { recipients: String, family: Boolean, since: Match.Optional(Match.OneOf(null, Date)) };
 
 Meteor.methods({
   async 'mails.list'() {
@@ -35,7 +35,7 @@ Meteor.methods({
   async 'mails.recipients'(options) {
     check(options, group);
     await requireRole(this.userId, DOMAIN_ROLES.sendMail);
-    return mailRecipients(options);
+    return mailRecipients({ ...options, since: options.since || undefined });
   },
   async 'mails.send'(mail) {
     check(mail, {
@@ -43,7 +43,12 @@ Meteor.methods({
       only: Match.Optional([String]), announcementId: Match.Optional(String),
     });
     await requireRole(this.userId, DOMAIN_ROLES.sendMail);
-    this.unblock();
-    return sendGroupMail(mail, { userId: this.userId });
+    const { mailId, total } = await sendGroupMail(mail, { userId: this.userId });
+    return { mailId, total };
+  },
+  /** The mail going out now, if any, and how far it has come. */
+  async 'mails.sending'() {
+    await requireRole(this.userId, DOMAIN_ROLES.mails);
+    return mailSending();
   },
 });

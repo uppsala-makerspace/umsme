@@ -15,3 +15,5 @@ export default {
 
 export const FromAnnouncement = {};
 export const Raw = { args: { detail: { mail: { ...mail, formatted: false, failed: [], template: 'Hej Maja!\n\nVälkommen på städdag.' }, announcement: null } } };
+export const GoingOut = { args: { detail: { mail: { ...mail, status: 'sending', total: 800, failed: [] }, announcement: null } } };
+export const Interrupted = { args: { detail: { mail: { ...mail, status: 'interrupted', total: 800 }, announcement: null } } };
