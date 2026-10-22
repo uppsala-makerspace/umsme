@@ -87,3 +87,25 @@ React-knapp) eller ta bort?
 De tre som skriver från webbläsaren är det sista som håller kvar
 allow-reglerna på `Members` och `Payments`. När de är borta eller flyttade
 till servern kan reglerna tas bort.
+
+## Beslut (2026-10-22)
+
+- Engångsverktyg: **Migrate legacy unlocks** och **Update members with
+  correct dates** behålls (React-knappar mot servermetoderna). Detect mobile
+  numbers, Update member mobile numbers, Accept all paying members och
+  Lowercase member emails tas bort. Därmed går allow-reglerna på `Members`
+  och `Payments` och de breda publiceringarna `members` och `payments`.
+- Gruppmejl på servern: behålls, men utskicket körs i bakgrunden med
+  förlopp ("200 av 800 skickade") som sidan hämtar tills det är klart. Bara
+  ett utskick åt gången i hela systemet; under tiden kan inget annat skickas.
+- Certifikat med innehavare: radering nekas.
+- `tests.*`: admin och board, som resten av certifikaten.
+- `syncAndMailLockHistory`: tas bort. Ingen synkknapp på dörrsidan.
+- Mobilnummer kopieras **inte** från en betalning till medlemmen: medlemmar
+  sätter sina nummer själva (GDPR).
+- `setPnr`: sätter bara `profile.pnr`.
+- Medlemskapssidan stannar kvar med "Saved." när man sparar.
+- Demo och e2e: `deliverMails: true` (whitelisten `[]` stoppar ändå allt).
+- Mottagarlistan: ett filter "betalande medlem första gången efter" (datum),
+  för att nå bara de nyaste medlemmarna.
+- Ett mejl som hör till ett utskick kan inte raderas.
