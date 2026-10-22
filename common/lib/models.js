@@ -1,16 +1,3 @@
-let fromOptions;
-export const getFromOptions = (callback) => {
-  if (!fromOptions) {
-    return Meteor.call("fromOptions", (err, res) => {
-      fromOptions = res;
-      callback && callback();
-    });
-  } else {
-    callback && callback();
-  }
-  return fromOptions || [];
-};
-
 export const getRoleOptions = () => {
   if (typeof Meteor !== 'undefined' && Meteor.roles) {
     return Meteor.roles.find().map(role => ({
@@ -323,10 +310,6 @@ export const models = {
       label: "From",
       type: String,
       max: 50,
-      autoform: {
-        type: "select-radio-inline",
-        options: getFromOptions,
-      },
     },
     recipients: {
       label: "Recipient type",

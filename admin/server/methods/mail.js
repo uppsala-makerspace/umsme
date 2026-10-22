@@ -33,13 +33,6 @@ Meteor.methods({
       console.log(`No member discovered for email ${email}`);
     }
   },
-  fromOptions() {
-    const f = Meteor.settings.from;
-    return (Array.isArray(f) ? f : [f]).map((email) => ({
-      label: email,
-      value: email,
-    }));
-  },
 
 });
 

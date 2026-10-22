@@ -22,7 +22,7 @@ Meteor.methods({
    * Return the non-sensitive accounting config the admin UI needs: the allowed
    * dimensions (for tagging expense accounts) and the selectable bookkeeping
    * accounts (for reimbursing expenses). Settings aren't published to clients,
-   * so this is a role-gated method mirroring the `fromOptions` pattern.
+   * so this is a role-gated method (as `mails.senders` is for the senders).
    */
   'accounting.config': async () => {
     if (
