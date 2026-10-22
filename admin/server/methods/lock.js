@@ -5,8 +5,6 @@ import { requireRole, DOMAIN_ROLES } from '/imports/common/server/authz';
 import { recordChange } from '/imports/common/server/auditLog';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { Members } from '/imports/common/collections/members';
-import { Email } from 'meteor/email';
-import { isEmailAllowed } from '/imports/common/server/emailGuard';
 
 /** Copy the door's latest openings from the lock into DoorUnlocks. */
 export const syncUnlocks = async () => {
@@ -54,27 +52,4 @@ Meteor.methods({
       return syncUnlocks();
     }
   },
-  'syncAndMailLockHistory': async () => {
-    if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
-      throw new Meteor.Error('Not authorized');
-    }
-    await syncUnlocks();
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setHours(-25);
-    const unlocks = await DoorUnlocks.find({
-      'timestamp': {
-        $gte: yesterday,
-        $lt: today
-      }
-    }).fetchAsync();
-
-    const log = unlocks.map(t => `${t.timestamp.toISOString()} ${t.door} ${t.memberid}`).join("\n");
-    const message = `${unlocks.length} låsöppningar av ytterdörren från ${yesterday.toISOString()} till ${today.toISOString()}\n\n${log}`;
-    if (!isEmailAllowed('mpalmer@gmail.com')) {
-      console.log('Lock history email blocked by whitelist');
-      return message;
-    }
-    return Email.sendAsync({to: 'mpalmer@gmail.com', from: 'ums@uppsalamakerspace.se', subject: 'Låsöppningar UMS', text: message })
-  }
 });
