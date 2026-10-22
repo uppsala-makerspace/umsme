@@ -4,15 +4,12 @@ import { TestAttempts } from '/imports/common/collections/testAttempts';
 import { Attestations } from '/imports/common/collections/attestations';
 import { Certificates } from '/imports/common/collections/certificates';
 import { getTestIndex } from '/imports/common/server/tests/loader';
+import { requireRole, DOMAIN_ROLES } from '/imports/common/server/authz';
 
 const SYSTEM_CERTIFIER_ID = '__system__';
 
-const requireAdmin = async () => {
-  const userId = Meteor.userId();
-  if (!userId || !(await Roles.userIsInRoleAsync(userId, 'admin'))) {
-    throw new Meteor.Error('not-authorized', 'Admin role required');
-  }
-};
+// The same roles as the rest of the certificates.
+const requireAdmin = () => requireRole(Meteor.userId(), DOMAIN_ROLES.certificates);
 
 Meteor.methods({
   'tests.getIndex': async () => {
