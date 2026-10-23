@@ -15,7 +15,7 @@ import { MemberView } from './MemberView';
 import { MemberForm, memberValues, memberFields } from './MemberForm';
 import {
   memberPage, familyCandidatePage, getMember, memberDetail, createMember, updateMember, setRegistered, setExcluded,
-  refreshDates, removeMember, addToFamily, removeFromFamily, cancelInvite, memberDraftFromPayment, downloadMembers, publicMemberPage,
+  refreshDates, removeMember, addToFamily, removeFromFamily, cancelInvite, memberDraftFromPayment, downloadMembers,
 } from './data';
 
 /** /members */
@@ -115,7 +115,6 @@ export const MemberViewPage = ({ _id }) => {
   return (
     <MemberView
       member={member} detail={detail} values={values} onChange={setField} busy={busy} error={error} notice={notice}
-      publicPage={publicMemberPage(_id)}
       onSave={() => run(async () => { await updateMember(_id, memberFields(values), loaded?.updatedAt); await load(); }, { keep: 'all', then: () => setNotice('Saved.') })}
       on={{
         refresh: () => act(() => refreshDates(_id)),

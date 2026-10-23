@@ -5,10 +5,7 @@
  */
 export const routes = [];
 
-/**
- * A route that shows a React page, inside admin's frame (AdminShell), or
- * bare with `layout: 'Clean'` (the public pages).
- */
-export const reactRoute = (path, name, component, { layout = 'AppBody' } = {}) => {
-  routes.push({ path, name, component, layout });
+/** A route that shows a React page, inside admin's frame (AdminShell). */
+export const reactRoute = (path, name, component) => {
+  routes.push({ path, name, component });
 };

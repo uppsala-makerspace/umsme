@@ -42,5 +42,3 @@ export const downloadMembers = async (kind) => {
   URL.revokeObjectURL(url);
 };
 
-/** Where a member's public status page is. */
-export const publicMemberPage = (memberId) => `${Meteor.settings.public?.checkPath || '../check/'}${memberId}`;

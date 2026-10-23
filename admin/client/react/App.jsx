@@ -89,9 +89,8 @@ const Pages = () => {
   return (
     <NavigationContext.Provider value={navigate}>
       <Routes>
-        {routes.filter((r) => r.layout === 'Clean').map(page)}
         <Route element={<Shell />}>
-          {routes.filter((r) => r.layout !== 'Clean').map(page)}
+          {routes.map(page)}
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

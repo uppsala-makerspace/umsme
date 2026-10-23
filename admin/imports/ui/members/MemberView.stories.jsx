@@ -28,7 +28,7 @@ export default {
   title: 'Members/MemberView',
   component: MemberView,
   render: (args) => <Editable {...args} />,
-  args: { member: payer, detail, now, publicPage: '/check/m1', on, onSave: fn() },
+  args: { member: payer, detail, now, on, onSave: fn() },
 };
 
 export const FamilyPayer = {};

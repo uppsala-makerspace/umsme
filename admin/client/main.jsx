@@ -17,7 +17,6 @@ import './ui/history';
 import './ui/admin';
 import './ui/bank';
 import './ui/door';
-import './ui/check';
 import './ui/users';
 import './ui/liability';
 import './ui/certificates';

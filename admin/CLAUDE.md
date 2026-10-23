@@ -92,8 +92,7 @@ together with the router in `client/react/App.jsx`.
   stubs (put helpers it needs, like `liability/dates.js`, in Meteor-free
   files). Storybook renders with the MUI theme and `CssBaseline`, as admin
   does. Pages are routed with `reactRoute(path, name, Page)` from
-  `client/react/reactRoute.js`; the route's parameters are the page's props,
-  and `{ layout: 'Clean' }` leaves out the frame (the public pages).
+  `client/react/reactRoute.js`; the route's parameters are the page's props.
 - Lists: always `DataList` (`imports/ui/components/DataList.jsx`), MUI X
   DataGrid with search, sorting and paging set up the same everywhere, with
   columns from the helpers in `columns.jsx` where they fit. Give it

@@ -263,7 +263,7 @@ Modulstatus hålls här. Uppdatera när en modul är klar.
 | accounting | ✓ (fanns) | – | ✓ | ✓ |
 | lock | ✓ | ✓ (metoder `lock.*`) | ✓ | ✓ (lås-API:t bakom `lockApi()`, fejk med `"lockApi": "fake"`) |
 | door | ✓ | ✓ (`doorUnlocks.*`) | ✓ | ✓ (publiceringarna `unlocks`, `doorunlocks` borttagna) |
-| check | ✓ (fanns) | – | ✓ | ✓ (publika sidor i Clean-layouten: `reactRoute(..., { layout: 'Clean' })`) |
+| check | – | – | – | Borttagen 2026-10-23: den publika statussidan (`/check`) och dess metoder behövs inte längre |
 | storage | ✓ (fanns) | ✓ (fanns) | ✓ | ✓ (`prompt()`/`confirm()` ersatta av en dialog) |
 | expenses | ✓ | ✓ | ✓ | ✓ (listorna pagineras på servern; publiceringarna `expenses`, `expenseAccounts`, `expenseBudgets`, `groups`, `workshops`, `groupMemberships`, `spaces` borttagna) |
 | membership, bank | ✓ | ✓ (metoder `payments.*`, `memberships.*`) | ✓ | ✓ (bankproxyn bakom `bankApi()`, fejk med `"bankproxy": "fake"`; medlemskapen på medlemssidan är React sedan våg 4) |

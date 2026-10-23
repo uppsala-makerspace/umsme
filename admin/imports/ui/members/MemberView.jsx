@@ -45,12 +45,12 @@ const familyColumns = [
  * effect at once.
  *
  * @param {{ member: object, detail: object, values: object, onChange: (field, value) => void, onSave: () => void,
- *           busy?: boolean, error?: string, notice?: string, now?: Date, publicPage: string,
+ *           busy?: boolean, error?: string, notice?: string, now?: Date,
  *           on: { refresh, register, exclude, remove, removeFromFamily, cancelInvite, declineInvite },
  *           after?: React.ReactNode }} props
  *   `detail` as members.detail returns it; `member` carries its reminderState.
  */
-export const MemberView = ({ member, detail, values, onChange, onSave, busy = false, error, notice, now = new Date(), publicPage, on, after }) => {
+export const MemberView = ({ member, detail, values, onChange, onSave, busy = false, error, notice, now = new Date(), on, after }) => {
   const [asking, setAsking] = useState(null);
   const ask = (title, text, confirmLabel, then) => setAsking({ title, text, confirmLabel, then });
   const patron = member.family && !member.infamily;
@@ -79,10 +79,11 @@ export const MemberView = ({ member, detail, values, onChange, onSave, busy = fa
             : <Button size="small" color="error" disabled={busy} onClick={() => ask('Exclude this member?', 'They lose door access and payment ability, and are skipped by reminders, mails and notifications.', 'Exclude member', () => on.exclude(true))}>Exclude</Button>}
         </Stack>
       )}
-      <Typography variant="body2" sx={{ mb: 2 }}>
-        <Link href={publicPage}>Public member page for {member.name}</Link>
-        {detail.user && <> | <Link href={`/user/${detail.user._id}`}>User account: {detail.user.username}</Link></>}
-      </Typography>
+      {detail.user && (
+        <Typography variant="body2" sx={{ mb: 2 }}>
+          <Link href={`/user/${detail.user._id}`}>User account: {detail.user.username}</Link>
+        </Typography>
+      )}
 
       <MemberForm values={values} onChange={onChange} onSave={onSave} member={member} busy={busy} />
 
