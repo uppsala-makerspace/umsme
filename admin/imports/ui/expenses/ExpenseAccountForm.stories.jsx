@@ -12,9 +12,10 @@ const budget = {
   ],
 };
 
-const Editable = ({ values: initial, ...props }) => {
+const Editable = ({ values: initial, initialTab = 'details', ...props }) => {
+  const [tab, setTab] = useState(initialTab);
   const [current, setCurrent] = useState(initial);
-  return <ExpenseAccountForm {...props} values={current} onChange={(f, v) => setCurrent((c) => ({ ...c, [f]: v }))} />;
+  return <ExpenseAccountForm {...props} tab={tab} onTab={setTab} values={current} onChange={(f, v) => setCurrent((c) => ({ ...c, [f]: v }))} />;
 };
 
 export default {
@@ -29,6 +30,7 @@ export default {
 };
 
 export const InUse = {};
+export const BudgetTab = { args: { initialTab: 'budget' } };
 export const NewAccount = { args: { isNew: true, account: null, values: values({}), use: null, budget: null, choices: { candidates: [], activeCounts: {}, approverGroupMembers: [] } } };
 export const ForTheTreasurer = { args: { canEdit: false } };
 export const LosingAnApprover = { args: { values: { ...values(storyAccount), approverMemberIds: ['m1', 'm4'] }, memberName: (id) => (id === 'm4' ? 'Olle Utanför' : null) } };

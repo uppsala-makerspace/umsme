@@ -22,8 +22,11 @@ import { Section } from '../components/Section';
 import { kr } from './labels';
 import { DateField } from '../components/DateField';
 import { groupPath } from '../groups/paths';
+import { PageTabs, TabPanel } from '../components/PageTabs';
+import { expenseAccountPath } from './paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
+const TABS = [['details', 'Details'], ['budget', 'Budget']];
 
 const Links = ({ label, items }) => (items.length > 0 && (
   <Typography variant="body2" sx={{ mt: 0.5 }}>
@@ -40,7 +43,7 @@ const Budget = ({ year, years, onYear, revisions, busy, onAdd, onRemove, today, 
   const [removing, setRemoving] = useState(null);
   const current = revisions[0];
   return (
-    <Section title="Budget" note="The budget for a calendar year. An expense counts towards the year of its receipt date. Revising adds a new entry; earlier ones are kept as history. Admin, board and treasurer may set it.">
+    <Section sx={{ mt: 0 }} title="Budget" note="The budget for a calendar year. An expense counts towards the year of its receipt date. Revising adds a new entry; earlier ones are kept as history. Admin, board and treasurer may set it.">
       <TextField label="Year" select slotProps={native} value={year} onChange={(e) => onYear(Number(e.target.value))} sx={{ mb: 2, minWidth: 140 }}>
         {years.map((y) => <option key={y} value={y}>{y}</option>)}
       </TextField>
@@ -85,21 +88,23 @@ const Budget = ({ year, years, onYear, revisions, busy, onAdd, onRemove, today, 
 };
 
 /**
- * Add an expense account, or show and edit one: name, explanation, object
- * codes, groups, approver groups and approvers, saved with Save; then its
- * budget, which takes effect at once.
+ * Add an expense account, or show and edit one in tabs: its details (name,
+ * explanation, object codes, groups, approver groups and approvers, saved
+ * with Save) and its budget, which takes effect at once.
  *
  * @param {{ isNew: boolean, account?: object, values: object, onChange: (field, value) => void, onSave: () => void,
  *           busy?: boolean, error?: string, notice?: string, canEdit: boolean,
  *           groups: Array<{ _id, name }>, dimensions: Array<{ nr, name, suggestions: string[] }>,
  *           choices?: { candidates: object[], activeCounts: object, approverGroupMembers: string[] },
  *           use?: { expenses: number, budgets: number }, onDelete?: () => void, budget?: object,
- *           memberName?: (memberId) => string }} props
+ *           memberName?: (memberId) => string, tab?: string, onTab?: (tab) => void }} props
  *   `choices` answers for the groups in `values`; `budget` holds Budget's props.
  */
 export const ExpenseAccountForm = ({
   isNew, account, values, onChange, onSave, busy = false, error, notice, canEdit, groups, dimensions, choices, use, onDelete, budget, memberName = () => null,
+  tab = 'details', onTab,
 }) => {
+  const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
   const [confirming, setConfirming] = useState(false);
   const text = (name) => ({ value: values[name], onChange: (e) => onChange(name, e.target.value) });
   const groupOptions = groups.map((g) => ({ value: g._id, label: g.name?.sv || g._id }));
@@ -111,6 +116,68 @@ export const ExpenseAccountForm = ({
   const nameOf = (id) => candidates.find((c) => c._id === id)?.name || memberName(id) || id;
   const approverPeople = new Set([...values.approverMemberIds.filter((id) => eligible.has(id) || !choices), ...(choices?.approverGroupMembers || [])]);
   const used = use && (use.expenses > 0 || use.budgets > 0);
+  const form = (
+    <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Name" required disabled={!canEdit} {...text('name')} />
+        <TextField label="Explanation" required multiline minRows={3} disabled={!canEdit} {...text('explanation')} />
+      </Stack>
+      {dimensions.length > 0 && (
+        <>
+          <Typography variant="subtitle1" component="h2" sx={{ mb: 0.5 }}>Dimensions</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Optional object code per dimension (used to tag bookkeeping entries).</Typography>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2 }}>
+            {dimensions.map((d) => (
+              <Autocomplete key={d.nr} freeSolo options={d.suggestions} disabled={!canEdit} sx={{ flex: 1 }}
+                value={values.dimensions[d.nr] || ''} inputValue={values.dimensions[d.nr] || ''}
+                onInputChange={(e, v) => onChange('dimensions', { ...values.dimensions, [d.nr]: v })}
+                renderInput={(params) => <TextField {...params} label={`${d.name} (dim ${d.nr})`} placeholder="Object (optional)" />} />
+            ))}
+          </Stack>
+        </>
+      )}
+      <Typography variant="subtitle1" component="h2" sx={{ mb: 1 }}>Groups</Typography>
+      <Box sx={{ mb: 2 }}>
+        <ChipSelect label="Groups" options={groupOptions} value={values.groupIds} disabled={!canEdit} onChange={(ids) => onChange('groupIds', ids)}
+          helperText="The groups this account belongs to; their members may make expenses on it, and approvers are picked from them." />
+        <Links label="Open" items={values.groupIds.map((id) => ({ href: groupPath(id, 'references'), label: groupName(id) }))} />
+        {values.groupIds.length === 0 && <Alert severity="warning" sx={{ mt: 1 }}>No group selected: the guideline requires every account to belong to at least one group.</Alert>}
+      </Box>
+      <Typography variant="subtitle1" component="h2" sx={{ mb: 0.5 }}>Expense approvers</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+        Who may approve expenses on this account in the app (the guideline requires at least two): members picked among the active members of the
+        account&apos;s groups, or whole groups, whose active members may all approve. Admin, board and treasurer may always approve.
+      </Typography>
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <Box>
+          <ChipSelect label="Approver groups" options={groupOptions} value={values.approverGroupIds} disabled={!canEdit} onChange={(ids) => onChange('approverGroupIds', ids)}
+            helperText={values.approverGroupIds.length ? values.approverGroupIds.map((id) => `${groupName(id)}: ${choices?.activeCounts?.[id] ?? '…'} active`).join(' · ') : 'Any group, not only the account’s own.'} />
+        </Box>
+        <Box>
+          <ChipSelect label="Approvers" disabled={!canEdit}
+            options={candidates.map((c) => ({ value: c._id, label: c.name, group: c.groups.join(', ') }))
+              .concat(values.approverMemberIds.filter((id) => !eligible.has(id)).map((id) => ({ value: id, label: nameOf(id) })))}
+            value={values.approverMemberIds} onChange={(ids) => onChange('approverMemberIds', ids)}
+            helperText={values.groupIds.length ? 'Active members of the account’s groups.' : 'Add a group above before adding approvers.'} />
+          <Links label="Open" items={values.approverMemberIds.map((id) => ({ href: `/member/${id}`, label: nameOf(id) }))} />
+          {lost.length > 0 && (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              Not active members of the account&apos;s groups, so saving removes {lost.length === 1 ? 'this approver' : 'these approvers'}: <strong>{lost.map(nameOf).join(', ')}</strong>.
+            </Alert>
+          )}
+          {choices && approverPeople.size < 2 && (
+            <Alert severity="warning" sx={{ mt: 1 }}>Fewer than two people can approve on this account, counting both individual approvers and the active members of approver groups. The guideline requires at least two.</Alert>
+          )}
+        </Box>
+      </Stack>
+      {canEdit && (
+        <Stack direction="row" spacing={1}>
+          <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add expense account' : 'Save'}</Button>
+          <Button href="/expenses/accounts">{isNew ? 'Cancel' : 'Back'}</Button>
+        </Stack>
+      )}
+    </Box>
+  );
   return (
     <Box sx={{ maxWidth: 1000 }}>
       <Link href="/expenses/accounts" underline="hover" variant="body2">← Expense accounts</Link>
@@ -127,68 +194,13 @@ export const ExpenseAccountForm = ({
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
 
-      <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
-        <Stack spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Name" required disabled={!canEdit} {...text('name')} />
-          <TextField label="Explanation" required multiline minRows={3} disabled={!canEdit} {...text('explanation')} />
-        </Stack>
-        {dimensions.length > 0 && (
-          <>
-            <Typography variant="subtitle1" component="h2" sx={{ mb: 0.5 }}>Dimensions</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Optional object code per dimension (used to tag bookkeeping entries).</Typography>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2 }}>
-              {dimensions.map((d) => (
-                <Autocomplete key={d.nr} freeSolo options={d.suggestions} disabled={!canEdit} sx={{ flex: 1 }}
-                  value={values.dimensions[d.nr] || ''} inputValue={values.dimensions[d.nr] || ''}
-                  onInputChange={(e, v) => onChange('dimensions', { ...values.dimensions, [d.nr]: v })}
-                  renderInput={(params) => <TextField {...params} label={`${d.name} (dim ${d.nr})`} placeholder="Object (optional)" />} />
-              ))}
-            </Stack>
-          </>
-        )}
-        <Typography variant="subtitle1" component="h2" sx={{ mb: 1 }}>Groups</Typography>
-        <Box sx={{ mb: 2 }}>
-          <ChipSelect label="Groups" options={groupOptions} value={values.groupIds} disabled={!canEdit} onChange={(ids) => onChange('groupIds', ids)}
-            helperText="The groups this account belongs to; their members may make expenses on it, and approvers are picked from them." />
-          <Links label="Open" items={values.groupIds.map((id) => ({ href: groupPath(id, 'references'), label: groupName(id) }))} />
-          {values.groupIds.length === 0 && <Alert severity="warning" sx={{ mt: 1 }}>No group selected: the guideline requires every account to belong to at least one group.</Alert>}
-        </Box>
-        <Typography variant="subtitle1" component="h2" sx={{ mb: 0.5 }}>Expense approvers</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Who may approve expenses on this account in the app (the guideline requires at least two): members picked among the active members of the
-          account&apos;s groups, or whole groups, whose active members may all approve. Admin, board and treasurer may always approve.
-        </Typography>
-        <Stack spacing={2} sx={{ mb: 2 }}>
-          <Box>
-            <ChipSelect label="Approver groups" options={groupOptions} value={values.approverGroupIds} disabled={!canEdit} onChange={(ids) => onChange('approverGroupIds', ids)}
-              helperText={values.approverGroupIds.length ? values.approverGroupIds.map((id) => `${groupName(id)}: ${choices?.activeCounts?.[id] ?? '…'} active`).join(' · ') : 'Any group, not only the account’s own.'} />
-          </Box>
-          <Box>
-            <ChipSelect label="Approvers" disabled={!canEdit}
-              options={candidates.map((c) => ({ value: c._id, label: c.name, group: c.groups.join(', ') }))
-                .concat(values.approverMemberIds.filter((id) => !eligible.has(id)).map((id) => ({ value: id, label: nameOf(id) })))}
-              value={values.approverMemberIds} onChange={(ids) => onChange('approverMemberIds', ids)}
-              helperText={values.groupIds.length ? 'Active members of the account’s groups.' : 'Add a group above before adding approvers.'} />
-            <Links label="Open" items={values.approverMemberIds.map((id) => ({ href: `/member/${id}`, label: nameOf(id) }))} />
-            {lost.length > 0 && (
-              <Alert severity="warning" sx={{ mt: 1 }}>
-                Not active members of the account&apos;s groups, so saving removes {lost.length === 1 ? 'this approver' : 'these approvers'}: <strong>{lost.map(nameOf).join(', ')}</strong>.
-              </Alert>
-            )}
-            {choices && approverPeople.size < 2 && (
-              <Alert severity="warning" sx={{ mt: 1 }}>Fewer than two people can approve on this account, counting both individual approvers and the active members of approver groups. The guideline requires at least two.</Alert>
-            )}
-          </Box>
-        </Stack>
-        {canEdit && (
-          <Stack direction="row" spacing={1}>
-            <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add expense account' : 'Save'}</Button>
-            <Button href="/expenses/accounts">{isNew ? 'Cancel' : 'Back'}</Button>
-          </Stack>
-        )}
-      </Box>
-
-      {!isNew && budget && <Budget {...budget} busy={busy} />}
+      {isNew ? form : (
+        <>
+          <PageTabs tabs={TABS.map(([value, label]) => ({ value, label }))} value={shown} onChange={onTab} href={(t) => expenseAccountPath(account._id, t)} />
+          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
+          <TabPanel value="budget" shown={shown} label="Budget">{budget && <Budget {...budget} busy={busy} />}</TabPanel>
+        </>
+      )}
 
       <Dialog open={confirming} onClose={() => setConfirming(false)}>
         <DialogTitle>Delete this expense account?</DialogTitle>

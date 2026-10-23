@@ -5,7 +5,7 @@ import { Meteor } from 'meteor/meteor';
 import { Roles } from 'meteor/roles';
 import { sortRevisions } from '/imports/common/lib/expenseBudget';
 import { todayIso } from '/imports/expenses/expenseFilters';
-import { useNavigate } from '../navigation';
+import { useNavigate, useQueryParam } from '../navigation';
 import { useEditor } from '../components/useEditor';
 import { useChoices, memberNames } from '../groups/choices';
 import { ExpenseAccountList } from './ExpenseAccountList';
@@ -28,6 +28,7 @@ const isoDate = (d) => new Date(d).toLocaleDateString('sv-SE');
 
 /** /expenses/accounts/add without an id, /expenseaccount/:_id with one. */
 export const ExpenseAccountEditPage = ({ _id }) => {
+  const [tab, setTab] = useQueryParam('tab');
   const navigate = useNavigate();
   const canEdit = useCanEdit();
   const { loading, account, budgets, accounts } = useExpenseAccount(_id);
@@ -81,6 +82,7 @@ export const ExpenseAccountEditPage = ({ _id }) => {
       isNew={false} {...common} account={account} notice={notice} use={use}
       onSave={() => run(() => saveExpenseAccount(toSave(), loaded), { keep: 'all', then: () => setNotice('Saved.') })}
       onDelete={() => run(() => removeExpenseAccount(_id), { then: () => navigate('/expenses/accounts') })}
+      tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)}
       budget={{
         year, years, onYear: setYear, revisions, today: todayIso(), canEdit: true,
         onAdd: (b, done) => run(() => addBudget({ accountId: _id, year, ...b }), { ...asIs, then: done }),

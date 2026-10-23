@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows } from './lists';
-import { field, action, saveButton, confirmed, deleteConfirmed } from './forms';
+import { field, action, saveButton, confirmed, deleteConfirmed, openTab } from './forms';
 
 // Expenses and expense accounts: the lists and work queues, confirming,
 // rejecting, reimbursing and undoing it, and the accounts with their budget,
@@ -96,10 +96,12 @@ test.describe('Expense accounts', () => {
 
   test('shows the budget, groups and approvers, and keeps an account in use', async ({ page }) => {
     await openAccount(page, 'Keramik');
-    await expect(page.getByText(/5\s000 kr/).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Styrgrupp Keramik' }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Gustav Gruppledare' }).first()).toBeVisible();
     await expect(page.getByText(/can no longer be deleted/i)).toBeVisible();
+    await openTab(page, /^budget$/i);
+    await expect(page).toHaveURL(/\?tab=budget$/);
+    await expect(page.getByText(/5\s000 kr/).first()).toBeVisible();
   });
 
   test('adds an account', async ({ page }) => {
@@ -122,6 +124,7 @@ test.describe('Expense accounts', () => {
 
   test('sets a budget', async ({ page }) => {
     await openAccount(page, 'E2E budget account');
+    await openTab(page, /^budget$/i);
     await page.getByRole('spinbutton', { name: /budget \(kr\)/i }).fill('1500');
     await action(page, /^set( budget)?$/i).click();
     await expect(page.getByText(/1\s500 kr/).first()).toBeVisible();
