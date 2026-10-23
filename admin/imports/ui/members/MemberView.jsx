@@ -12,10 +12,9 @@ import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import { DataList } from '../components/DataList';
+import { PageTabs, TabPanel } from '../components/PageTabs';
 import { MemberForm } from './MemberForm';
 import { MemberStatusChips } from './MemberStatusChips';
 import { memberPath } from './paths';
@@ -46,10 +45,7 @@ export const tabsFor = (member) => (member.infamily
   ? ['details', 'family', 'comments', 'certificates']
   : ['details', 'family', 'memberships', 'messages', 'comments', 'certificates']);
 
-/** A tab's content: kept while another tab shows, hidden, so its state stays. */
-const Panel = ({ tab, shown, children }) => (
-  <Box role="tabpanel" hidden={tab !== shown} aria-label={LABELS[tab]}>{children}</Box>
-);
+const Panel = ({ tab, shown, children }) => <TabPanel value={tab} shown={shown} label={LABELS[tab]}>{children}</TabPanel>;
 
 const LABELS = { details: 'Details', family: 'Family members', memberships: 'Memberships', messages: 'Messages', comments: 'Comments', certificates: 'Certificates' };
 
@@ -112,9 +108,7 @@ export const MemberView = ({ member, detail, values, onChange, onSave, busy = fa
         </Typography>
       )}
 
-      <Tabs value={shown} onChange={(e, next) => onTab(next)} variant="scrollable" allowScrollButtonsMobile sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-        {tabs.map((t) => <Tab key={t} value={t} label={count(t) === undefined ? LABELS[t] : `${LABELS[t]} (${count(t)})`} href={memberPath(member._id, t)} onClick={(e) => e.preventDefault()} />)}
-      </Tabs>
+      <PageTabs tabs={tabs.map((t) => ({ value: t, label: LABELS[t], count: count(t) }))} value={shown} onChange={onTab} href={(t) => memberPath(member._id, t)} />
 
       <Panel tab="details" shown={shown}>
         <MemberForm values={values} onChange={onChange} onSave={onSave} member={member} busy={busy} />

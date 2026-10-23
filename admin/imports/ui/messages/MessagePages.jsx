@@ -4,7 +4,7 @@ import { useNavigate } from '../navigation';
 import { SendMessage } from './SendMessage';
 import { MessageView } from './MessageView';
 import { composeMessage, sendMessage, messageDetail, removeMessage } from './data';
-import { memberPath } from '../members/paths';
+import { memberPath, membershipPath } from '../members/paths';
 
 /** /message/send?member=…&template=…&membership=… */
 export const SendMessagePage = () => {
@@ -24,16 +24,18 @@ export const SendMessagePage = () => {
     }, (e) => setError(e.reason || e.message));
   }, [memberId, templateId, membershipId]);
   if (!draft) return <Typography color={error ? 'error' : 'text.secondary'}>{error || 'Writing the message…'}</Typography>;
+  // Back to the messages of where it was started from: the membership's, or the member's.
+  const back = membershipId ? membershipPath(membershipId, 'messages') : memberPath(memberId, 'messages');
   return (
     <SendMessage
-      memberId={memberId} draft={draft} values={values} busy={busy} error={error}
+      memberId={memberId} draft={draft} values={values} busy={busy} error={error} back={back}
       onChange={(field, value) => setValues((v) => ({ ...v, [field]: value }))}
       onSend={async () => {
         setBusy(true);
         setError(null);
         try {
           await sendMessage({ memberId, templateId, membershipId: membershipId || null, ...values });
-          navigate(memberPath(memberId, 'messages'));
+          navigate(back);
         } catch (e) {
           setError(e.reason || e.message);
         } finally {
@@ -57,7 +59,7 @@ export const MessageViewPage = ({ _id }) => {
       onDelete={async () => {
         try {
           await removeMessage(_id);
-          navigate(memberPath(detail.message.member, 'messages'));
+          navigate(detail.message.membership ? membershipPath(detail.message.membership, 'messages') : memberPath(detail.message.member, 'messages'));
         } catch (e) {
           setError(e.reason || e.message);
         }

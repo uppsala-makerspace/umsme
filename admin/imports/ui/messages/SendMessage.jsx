@@ -13,9 +13,10 @@ import { memberPath } from '../members/paths';
  * sent as a mail.
  *
  * @param {{ memberId: string, draft: { memberName, templateType }, values: { to, subject, messagetext },
- *           onChange: (field, value) => void, onSend: () => void, busy?: boolean, error?: string }} props
+ *           onChange: (field, value) => void, onSend: () => void, busy?: boolean, error?: string, back?: string }} props
+ *   `back` is where Cancel goes: the member's messages unless given.
  */
-export const SendMessage = ({ memberId, draft, values, onChange, onSend, busy = false, error }) => {
+export const SendMessage = ({ memberId, draft, values, onChange, onSend, busy = false, error, back = memberPath(memberId, 'messages') }) => {
   const text = (name) => ({ value: values[name] || '', onChange: (e) => onChange(name, e.target.value) });
   return (
     <Box sx={{ maxWidth: 900 }}>
@@ -31,7 +32,7 @@ export const SendMessage = ({ memberId, draft, values, onChange, onSend, busy = 
         </Stack>
         <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" disabled={busy}>Send message</Button>
-          <Button href={memberPath(memberId, 'messages')}>Cancel</Button>
+          <Button href={back}>Cancel</Button>
         </Stack>
       </Box>
     </Box>

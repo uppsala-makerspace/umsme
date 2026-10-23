@@ -42,13 +42,15 @@ test.describe('Messages', () => {
     await search(page, '901');
     await dataRows(page).filter({ hasText: '901' }).first().click();
     await page.getByRole('link', { name: /connected membership/i }).click();
+    await openTab(page, /^messages/i);
     await page.getByRole('button', { name: /welcome/i }).click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/welcome/i);
     await expect(page.getByRole('textbox', { name: 'Subject' })).toHaveValue(/välkommen/i);
     const subject = 'E2E skickat välkomstmeddelande';
     await page.getByRole('textbox', { name: 'Subject' }).fill(subject);
     await page.getByRole('button', { name: /^(submit|send)/i }).click();
-    await expect(page).toHaveURL(/\/member\//);
+    // Back where it was started: the membership's messages.
+    await expect(page).toHaveURL(/\/membership\/\w+\?tab=messages$/);
     await expect(page.getByText(subject).first()).toBeVisible();
   });
 });

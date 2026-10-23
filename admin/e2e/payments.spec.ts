@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, search } from './lists';
-import { field, action, createButton, saveButton, confirmed, deleteConfirmed } from './forms';
+import { field, action, createButton, saveButton, confirmed, deleteConfirmed, openTab as openPageTab } from './forms';
 
 // Payments and memberships: the payment lists, synchronizing the bank
 // against the fake bank ("bankproxy": "fake"), filing a payment by hand,
@@ -114,5 +114,20 @@ test.describe('Memberships', () => {
     await expect(page).toHaveURL(/\/member\//);
     await openPayment(page, '902');
     await expect(page.getByRole('link', { name: /connected membership/i })).not.toBeVisible();
+  });
+});
+
+test.describe('Membership tabs', () => {
+  test('shows the bank payment above tabs kept in the URL', async ({ page }) => {
+    await openMembership(page, '901', 'E2E edit membership');
+    await expect(page.getByText(/^bank payment:/i)).toBeVisible();
+    await expect(page.getByRole('tab', { name: /^details$/i, selected: true })).toBeVisible();
+    await openPageTab(page, /^messages \(\d+\)$/i);
+    await expect(page).toHaveURL(/\?tab=messages$/);
+    await openPageTab(page, /^comments \(\d+\)$/i);
+    await expect(page).toHaveURL(/\?tab=comments$/);
+    await page.goBack();
+    await expect(page.getByRole('tab', { name: /^messages/i, selected: true })).toBeVisible();
+    await expect(page.getByText(/^bank payment:/i)).toBeVisible();
   });
 });

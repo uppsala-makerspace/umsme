@@ -3,3 +3,6 @@ export const MEMBER_TABS = ['details', 'family', 'memberships', 'messages', 'com
 
 /** A member's page, at a tab. */
 export const memberPath = (memberId, tab) => `/member/${memberId}${tab && tab !== 'details' ? `?tab=${tab}` : ''}`;
+
+/** A membership's page, at a tab (details, messages, comments). */
+export const membershipPath = (membershipId, tab) => `/membership/${membershipId}${tab && tab !== 'details' ? `?tab=${tab}` : ''}`;

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { CommentsFor } from '../comments/CommentsFor';
-import { useNavigate } from '../navigation';
+import { useNavigate, useQueryParam } from '../navigation';
 import { MessagesFor } from '../messages/MessagesFor';
 import { MembershipForm } from './MembershipForm';
 import { suggestMembership, createMembership, membershipDetail, updateMembership, removeMembership } from './data';
@@ -60,12 +59,16 @@ export const MembershipViewPage = ({ _id }) => {
   const [detail, setDetail] = useState(null);
   const [values, setValues] = useState(null);
   const { busy, error, notice, setNotice, run } = useAction();
+  const [tab, setTab] = useQueryParam('tab');
+  const [counts, setCounts] = useState({});
+  const counted = (name) => (n) => setCounts((c) => (c[name] === n ? c : { ...c, [name]: n }));
   useEffect(() => { membershipDetail(_id).then((d) => { setDetail(d); setValues(valuesOf(d.membership)); }); }, [_id]);
   if (!detail || !values) return <Typography color="text.secondary">Loading…</Typography>;
   const { membership, member, payment, dependents } = detail;
   return (
     <MembershipForm
       isNew={false} member={member} membership={membership} values={values} busy={busy} error={error} notice={notice} dependents={dependents} payment={payment}
+      tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)} counts={counts}
       onChange={(field, value) => setValues((v) => ({ ...v, [field]: value }))}
       onSave={() => run(async () => {
         await updateMembership(_id, {
@@ -77,12 +80,8 @@ export const MembershipViewPage = ({ _id }) => {
         setNotice('Saved.');
       })}
       onDelete={() => run(async () => { await removeMembership(_id); navigate(memberPath(member._id, 'memberships')); })}
-      after={(
-        <Box sx={{ mt: 4 }}>
-          <MessagesFor memberId={member._id} membershipId={_id} />
-          <CommentsFor about={_id} />
-        </Box>
-      )}
+      messages={<MessagesFor memberId={member._id} membershipId={_id} onCount={counted('messages')} />}
+      comments={<CommentsFor about={_id} onCount={counted('comments')} />}
     />
   );
 };
