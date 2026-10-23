@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import { Memberships } from '/imports/common/collections/memberships';
 import { template } from 'underscore';
 import { marked } from 'marked';
 import removeMd from 'remove-markdown';
@@ -7,7 +6,7 @@ import { Members } from '/imports/common/collections/members';
 import { Mails } from '/imports/common/collections/mails';
 import { Comments } from '/imports/common/collections/comments';
 import { Announcements } from '/imports/common/collections/announcements';
-import { statusFromMemberships } from '/imports/common/lib/utils';
+import { statusFromMemberships, membershipsByMember } from '/imports/common/lib/utils';
 import { recordChange } from '/imports/common/server/auditLog';
 import { markAnnouncementSent, pushAnnouncementToMembers } from '/imports/common/server/announcements/announcements';
 import { sendMail } from './send';
@@ -48,15 +47,6 @@ const inGroup = (status, group, now) => {
     case 'recentmembers': return status.memberEnd > lastYear;
     default: throw new Meteor.Error('bad-recipients', `No recipient group "${group}"`);
   }
-};
-
-/** Every membership, by the member it is for, in the database's order. */
-const membershipsByMember = async () => {
-  const byMember = {};
-  for (const ms of await Memberships.find({}, { fields: { mid: 1, type: 1, start: 1, memberend: 1, labend: 1, discount: 1, family: 1 } }).fetchAsync()) {
-    (byMember[ms.mid] ||= []).push(ms);
-  }
-  return byMember;
 };
 
 /** When a member first paid: their earliest membership's start. */

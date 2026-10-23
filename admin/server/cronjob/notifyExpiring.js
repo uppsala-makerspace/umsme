@@ -1,15 +1,14 @@
 import { Meteor } from "meteor/meteor";
-import { Accounts } from "meteor/accounts-base";
 import { SyncedCron } from "meteor/chatra:synced-cron";
 import { Members } from "/imports/common/collections/members";
 import { PushSubs } from "/imports/common/collections/pushSubs";
-import { memberStatus } from "/imports/common/lib/utils";
+import { statusFromMemberships, membershipsByMember } from "/imports/common/lib/utils";
 import { daysBetween } from "/imports/common/lib/dateUtils";
 import { NotificationCategory } from "/imports/common/lib/notificationCategories";
 import { sendPushToSubscriptions } from "/imports/common/server/push";
 import { loadJson } from "/imports/common/server/configLoader";
 
-const notifyExpiringMemberships = async () => {
+export const notifyExpiringMemberships = async () => {
   console.log("Checking for expiring memberships");
   const today = new Date();
 
@@ -21,16 +20,27 @@ const notifyExpiringMemberships = async () => {
   }).fetchAsync();
   members = members.filter((m) => m.email);
 
+  // What the loop needs, fetched once rather than per member: the accounts
+  // by email (any case, as Accounts.findUserByEmail matches), the payers of
+  // family members, and every membership.
+  const userByEmail = new Map();
+  for (const user of await Meteor.users.find({ "emails.address": { $exists: true } }, { fields: { emails: 1 } }).fetchAsync()) {
+    for (const { address } of user.emails || []) {
+      if (address && !userByEmail.has(address.toLowerCase())) userByEmail.set(address.toLowerCase(), user);
+    }
+  }
+  const payerIds = [...new Set(members.map((m) => m.infamily).filter(Boolean))];
+  const payers = new Map((await Members.find({ _id: { $in: payerIds } }).fetchAsync()).map((p) => [p._id, p]));
+  const memberships = await membershipsByMember();
+
   for (const member of members) {
-    const user = await Accounts.findUserByEmail(member.email);
+    const user = userByEmail.get(member.email.toLowerCase());
     if (!user) continue;
 
-    const paying = member.infamily
-      ? await Members.findOneAsync(member.infamily)
-      : member;
+    const paying = member.infamily ? payers.get(member.infamily) : member;
     if (!paying) continue;
 
-    const status = await memberStatus(paying);
+    const status = statusFromMemberships(memberships[paying._id] || []);
     if (!status.memberEnd) continue;
 
     const memberEnd = new Date(status.memberEnd);

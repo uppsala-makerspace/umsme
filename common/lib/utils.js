@@ -33,6 +33,19 @@ export const memberStatus = async (mb) => {
 };
 
 /**
+ * Every membership, by the member it is for (`mid`), in the database's
+ * order: for looking at many members at once with statusFromMemberships,
+ * in one query instead of one per member.
+ *
+ * @return {Promise<Object<string, object[]>>}
+ */
+export const membershipsByMember = async () => {
+  const byMember = {};
+  for (const ms of await Memberships.find({}).fetchAsync()) (byMember[ms.mid] ||= []).push(ms);
+  return byMember;
+};
+
+/**
  * memberStatus from the memberships themselves (the member's, or the
  * payer's for a family member), in the order the database gives them; for
  * when many members are looked at at once and their memberships are
@@ -119,10 +132,19 @@ export const statusFromMemberships = (own, now = new Date()) => {
  * where the instances of the memberships collection are considered the truth.
  *
  * @param {member} mb an instance of the member collection
- * @return {Promise<void>}
+ * @param {object[]} [memberships] the member's (or payer's) memberships, if
+ *   already fetched (see membershipsByMember); fetched otherwise
+ * @param {{ skipUnchanged?: boolean }} [options] with skipUnchanged, a member
+ *   whose stored dates already agree is not written to; only for a `mb`
+ *   just read, as its stored dates are what is compared
+ * @return {Promise<boolean>} whether the member was written to
  */
-export const updateMember = async (mb) => {
-  const { memberEnd, labEnd, family } = await memberStatus(mb);
+export const updateMember = async (mb, memberships, { skipUnchanged = false } = {}) => {
+  const { memberEnd, labEnd, family } = memberships
+    ? statusFromMemberships(memberships)
+    : await memberStatus(mb);
+  const same = (a, b) => (a ? a.getTime() : null) === (b ? new Date(b).getTime() : null);
+  if (skipUnchanged && mb.family === family && same(memberEnd, mb.member) && same(labEnd, mb.lab)) return false;
   const $set = { family };
   const $unset = {};
   if (memberEnd) {
@@ -136,6 +158,7 @@ export const updateMember = async (mb) => {
     $unset.lab = "";
   }
   await Members.updateAsync(mb._id, {$set, $unset});
+  return true;
 };
 
 /**

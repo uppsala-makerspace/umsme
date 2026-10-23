@@ -41,7 +41,7 @@ export const AdminConsolePage = () => {
       busy={busy} results={results} mandatory={mandatory}
       on={{
         syncLock: () => run('syncLock', syncLock, (message) => message || 'Sync done.'),
-        updateDates: () => run('updateDates', updateMemberDates, (n) => `Updated the dates of ${n} members.`),
+        updateDates: () => run('updateDates', updateMemberDates, ({ total, changed }) => `Went through ${total} members; ${changed ? `the dates of ${changed} were out of step and are put right` : 'all were in step'}.`),
         migrateUnlocks: () => run('migrateUnlocks', migrateUnlocks, (r) => `Scanned ${r.scanned}: ${r.withMember} matched a member, ${r.withExtid} stored as extid, ${r.skipped} already present.`),
         grantMandatory: () => run('grantMandatory', async () => { const n = await grantMandatoryToAll(); await loadMandatory(); return n; }, (n) => `Created ${n} attestations.`),
       }}
