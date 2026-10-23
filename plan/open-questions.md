@@ -130,6 +130,6 @@ till servern kan reglerna tas bort.
   mottagare (grupp, familj, datumfilter, ta bort enskilda); servern nekar
   ett urval. Mejlet och push-notisen går till samma personer. Att välja
   mottagare går bara för vanliga mejl.
-- Öppet: appen visar skickade utskick för varje inloggad medlem, även den
-  vars medlemskap gått ut. Ska det också gälla bara aktiva medlemmar och
-  deras familjer? Gjort i väntan: orört.
+- Appen visar skickade utskick för varje inloggad medlem, även den vars
+  medlemskap gått ut: de får läsa dem om de vill, men får inga notiser
+  (beslut 2026-10-23). Oförändrat i appen.
