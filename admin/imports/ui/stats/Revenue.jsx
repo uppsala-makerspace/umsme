@@ -12,6 +12,7 @@ import {
   kr, signedKr, percentText, direction, categories, summary, yearlyRows, yearOverYearRows,
   forecastRows, excludedItems, revenueCharts,
 } from './revenuePresentation';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 const CHANGE = { up: 'success.dark', down: 'error.main', '': 'inherit' };
 const Num = ({ children, change, bold, title }) => (
@@ -21,7 +22,7 @@ const Num = ({ children, change, bold, title }) => (
   </TableCell>
 );
 const Small = ({ children }) => <Typography component="span" variant="caption" color="text.secondary" sx={{ fontStyle: 'normal' }}> {children}</Typography>;
-const Caption = ({ children }) => <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 900, mb: 1.5 }}>{children}</Typography>;
+const Caption = ({ children }) => <Typography variant="body2" color="text.secondary" sx={{ maxWidth: FORM_WIDTH, mb: 1.5 }}>{children}</Typography>;
 const Heading = ({ children }) => <Typography variant="h5" component="h2" sx={{ mt: 4, mb: 1 }}>{children}</Typography>;
 
 const Figure = ({ label, value, note }) => (
@@ -51,7 +52,7 @@ export const Revenue = ({ model }) => {
   const s = summary(model);
   const currentYear = new Date(model.today).getFullYear();
   return (
-    <Box sx={{ maxWidth: 1100 }}>
+    <Box>
       <Typography variant="h4" component="h1" sx={{ mb: 1 }}>Revenue</Typography>
       <Caption>
         Membership payments only: every payment linked to a membership, counted in the month the money arrived and at
@@ -169,7 +170,7 @@ export const Revenue = ({ model }) => {
         Read the two rows ahead as a floor rather than a best guess.
       </Caption>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 4, maxWidth: 900 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 4, maxWidth: FORM_WIDTH }}>
         Not in the figures above:{' '}
         {excludedItems(model).map((e) => <Box component="span" key={e.label} sx={{ mr: 1.5 }}>{e.label} {e.count} ({kr(e.sum)})</Box>)}
         Unclassified payments are the ones waiting for a treasurer to connect them to a membership under Payments → Manual.

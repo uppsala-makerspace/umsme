@@ -26,7 +26,7 @@ export const DoorStats = ({ visits, source, onCheck, busy = false, error }) => {
     options: { responsive: true, scales: { y: { beginAtZero: true } } },
   }), [visits]);
   return (
-    <Box sx={{ maxWidth: 1000 }}>
+    <Box>
       <Typography variant="h4" component="h1" sx={{ mb: 1 }}>Door statistics</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>How many people opened the outer door how often in the last six months.</Typography>
       <Stack direction="row" spacing={1} sx={{ mb: 2 }}>

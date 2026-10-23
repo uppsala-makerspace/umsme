@@ -128,7 +128,9 @@ together with the router in `client/react/App.jsx`.
   `components/PageTabs.jsx`). On a tabbed page the heading, status and
   tabs are full width and each `TabPanel` says which it holds (`form`).
   Pages without tabs that are a form or one thing's view wrap themselves
-  in `FORM_WIDTH`; never a width of their own.
+  in `FORM_WIDTH`; never a width of their own. Overview pages (statistics,
+  revenue, door statistics, storage) take the full width; `ChartCanvas`
+  keeps a fixed height so a wide chart does not grow as tall.
 - Inside a tab the tab's name is the heading: never repeat it. A tab opens
   with its `TabToolbar`: what it is about as a grey note on the left, its
   actions ("Add membership") on the right, above what they act on. A tab of

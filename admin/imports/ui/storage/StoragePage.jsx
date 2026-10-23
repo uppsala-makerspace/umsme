@@ -263,7 +263,7 @@ export const StoragePage = () => {
   const shownReadiness = storageReadinessPresentation(readiness);
 
   return (
-    <Box sx={{ maxWidth: 1400 }}>
+    <Box>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <Box>
           <Typography variant="h4" component="h1">Storage</Typography>
