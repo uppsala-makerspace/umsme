@@ -13,10 +13,10 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
 import { GrantForm } from './GrantForm';
 import { HolderList } from './HolderList';
 import { certificatePath } from './paths';
+import { TabPart } from '../components/PageTabs';
 
 /**
  * A member's certificates on their page: what they hold or asked for, a form
@@ -34,16 +34,14 @@ export const MemberCertificates = ({
 }) => {
   const [resetting, setResetting] = useState(null);
   return (
-    <Box component="section" sx={{ mt: 2 }}>
-      <Typography variant="h5" component="h2" sx={{ mb: 1 }}>Certificates</Typography>
+    <Box component="section">
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Box sx={{ mb: 2 }}>
         <GrantForm choose="certificate" certificates={certificates} search={search} defaultCertifier={defaultCertifier} onGrant={onGrant} busy={busy} />
       </Box>
       <HolderList show="certificate" rows={attestations} onRevoke={onRevoke} busy={busy} />
       {attempts?.length > 0 && (
-        <>
-          <Typography variant="h6" component="h3" sx={{ mt: 3, mb: 1 }}>Test attempts</Typography>
+        <TabPart title="Test attempts" count={attempts.length} sx={{ mt: 3 }}>
           <Table size="small">
             <TableHead>
               <TableRow><TableCell>Certificate</TableCell><TableCell>Test id</TableCell><TableCell>Attempts</TableCell><TableCell>Last state</TableCell><TableCell /></TableRow>
@@ -60,7 +58,7 @@ export const MemberCertificates = ({
               ))}
             </TableBody>
           </Table>
-        </>
+        </TabPart>
       )}
       <Dialog open={!!resetting} onClose={() => setResetting(null)}>
         <DialogTitle>Reset the test attempts?</DialogTitle>

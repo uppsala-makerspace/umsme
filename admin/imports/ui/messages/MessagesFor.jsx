@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import { useNavigate } from '../navigation';
 import { MessageActions } from './MessageActions';
 import { MessageList } from './MessageList';
 import { useMessages, membershipTemplate, reminderTemplate, setReminded, sendPath } from './data';
 
 /**
- * The messages section of a member's or a membership's page: what can be
- * sent, and what has been. `onCount` hears how many have been sent.
+ * The Messages tab of a member's or a membership's page: what can be sent
+ * (its toolbar) and what has been. `onCount` hears how many have been sent.
  */
 export const MessagesFor = ({ memberId, membershipId, onCount }) => {
   const navigate = useNavigate();
@@ -24,8 +23,7 @@ export const MessagesFor = ({ memberId, membershipId, onCount }) => {
     try { await action(); } catch (e) { setError(e.reason || e.message); } finally { setBusy(false); }
   };
   return (
-    <Box component="section" aria-label="Messages" sx={{ mt: 4 }}>
-      <Typography variant="h5" component="h2" sx={{ mb: 1 }}>Messages</Typography>
+    <Box component="section" aria-label="Messages">
       <MessageActions
         kind={membershipId ? 'membership' : 'member'} busy={busy} error={error} notice={notice}
         onSend={(type) => act(async () => {

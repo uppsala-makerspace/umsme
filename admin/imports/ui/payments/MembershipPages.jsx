@@ -81,7 +81,7 @@ export const MembershipViewPage = ({ _id }) => {
       })}
       onDelete={() => run(async () => { await removeMembership(_id); navigate(memberPath(member._id, 'memberships')); })}
       messages={<MessagesFor memberId={member._id} membershipId={_id} onCount={counted('messages')} />}
-      comments={<CommentsFor about={_id} onCount={counted('comments')} />}
+      comments={<CommentsFor about={_id} onCount={counted('comments')} inTab />}
     />
   );
 };

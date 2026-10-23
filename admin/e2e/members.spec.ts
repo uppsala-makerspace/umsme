@@ -113,9 +113,9 @@ test.describe('Family', () => {
   test('removes a member from the family', async ({ page }) => {
     await openMember(page, '911');
     await openTab(page, /^family members/i);
-    await expect(page.getByRole('heading', { name: /part of family/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /paying family member/i })).toBeVisible();
     await confirmed(page, /^remove from family$/i, /^remove/i);
-    await expect(page.getByRole('heading', { name: /part of family/i })).not.toBeVisible();
+    await expect(page.getByRole('heading', { name: /paying family member/i })).not.toBeVisible();
   });
 
   test('cancels an invite', async ({ page }) => {
@@ -143,7 +143,7 @@ test.describe('Member tabs', () => {
     await expect(page.getByRole('tab', { name: /^details$/i, selected: true })).toBeVisible();
     await openTab(page, /^memberships \(\d+\)$/i);
     await expect(page).toHaveURL(/\?tab=memberships$/);
-    await expect(page.getByRole('heading', { name: 'Memberships' })).toBeVisible();
+    await expect(action(page, /^add membership$/i)).toBeVisible();
     await openTab(page, /^family members/i);
     await expect(page).toHaveURL(/\?tab=family$/);
     await page.goBack();

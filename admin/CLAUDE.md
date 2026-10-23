@@ -115,6 +115,19 @@ together with the router in `client/react/App.jsx`.
   group's related workshops). The old Blaze pages often saved such links on
   their own, at once; do not bring that back. Only what must take effect at once sits after Save, as its own
   action: uploading an image or icon, actions on other documents.
+- Pages for one thing (a member, a workshop, a group…) put what is below
+  the heading and the status in tabs (`PageTabs`, `TabPanel` in
+  `components/PageTabs.jsx`): Details first, with the form and its Save;
+  the tab in the URL (`?tab=…`, from `useQueryParam('tab')`; details has
+  none), each change a step in the history; a count after a tab's name
+  where there is one; every tab kept mounted while hidden, so unsaved
+  details survive. Links to such a page from what it lists open that tab
+  (the `…Path(id, tab)` helpers next to each module).
+- Inside a tab the tab's name is the heading: never repeat it. A tab opens
+  with its `TabToolbar`: what it is about as a grey note on the left, its
+  actions ("Add membership") on the right, above what they act on. A tab of
+  several parts gives each part, the first too, a `TabPart` heading (small,
+  bold, with a count and the part's actions on the right).
 - Navigation goes through `useNavigate()` from `imports/ui/navigation.js`, a
   context App fills with React Router; pages never import the router. Plain
   links (`<a href>`, `Link`, `Button href`) to admin's pages go through the

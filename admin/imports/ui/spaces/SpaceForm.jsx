@@ -13,18 +13,12 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ImageField } from '../components/ImageField';
-import { PageTabs, TabPanel } from '../components/PageTabs';
+import { PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { ReferenceKind } from '../components/ReferenceKind';
 import { workshopPath } from '../workshops/paths';
 import { groupPath } from '../groups/paths';
 import { spacePath } from './paths';
 
-const Section = ({ title, children }) => (
-  <Box component="section">
-    <Typography variant="h6" component="h2" sx={{ mb: 1 }}>{title}</Typography>
-    {children}
-  </Box>
-);
 
 const TABS = [['details', 'Details'], ['icon', 'Icon'], ['references', 'References']];
 
@@ -106,26 +100,24 @@ export const SpaceForm = ({
             value={shown} onChange={onTab} href={(t) => spacePath(space._id, t)} />
           <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
           <TabPanel value="icon" shown={shown} label="Icon">
-            <Section title="Icon">
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Shown on the map, centred on the space&apos;s marker. SVG or PNG.</Typography>
+            <>
+              <TabToolbar note="Shown on the map, centred on the space’s marker. SVG or PNG." />
               <ImageField
                 noun="icon" src={iconUrl} alt={space?.name?.sv} accept="image/svg+xml,image/png" maxSize={120}
                 onUpload={onUploadIcon} onRemove={onRemoveIcon} uploading={uploading}
               />
-            </Section>
+            </>
           </TabPanel>
           <TabPanel value="references" shown={shown} label="References">
-            <Section title="Refers to this space">
-              {!links ? <Typography variant="body2">Looking…</Typography> : !linked
-                ? <Typography variant="body2" color="text.secondary">No workshops or groups have this space.</Typography>
-                : <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>While anything here refers to it, the space can not be deleted.</Typography>}
+            <>
+              <TabToolbar note={!links ? 'Looking…' : linked ? 'While anything here refers to it, the space can not be deleted.' : 'No workshops or groups have this space.'} />
               {links && (
                 <>
                   <ReferenceKind title="Workshops and areas of interest" items={links.workshops} render={(w) => <><Link href={workshopPath(w._id)}>{w.name?.sv || w._id}</Link>{primary(w)}</>} />
                   <ReferenceKind title="Groups" items={links.groups} render={(g) => <><Link href={groupPath(g._id)}>{g.name?.sv || g._id}</Link>{primary(g)}</>} />
                 </>
               )}
-            </Section>
+            </>
           </TabPanel>
         </>
       )}

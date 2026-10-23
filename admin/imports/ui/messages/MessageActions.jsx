@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
  */
 export const MessageActions = ({ kind, onSend, onMarkReminded, busy = false, error, notice }) => (
   <>
-    <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center', mb: 1.5 }}>
+    <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', mb: 1.5 }}>
       <Typography variant="body2" sx={{ fontWeight: 700 }}>Send:</Typography>
       {kind === 'membership' ? (
         <>

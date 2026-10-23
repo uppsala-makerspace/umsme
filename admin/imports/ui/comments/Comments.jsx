@@ -6,6 +6,7 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { TabToolbar } from '../components/PageTabs';
 
 const day = (date) => (date ? new Date(date).toLocaleDateString('sv-SE') : '');
 
@@ -28,17 +29,23 @@ const Editor = ({ initial = '', label, onSave, onCancel, busy }) => {
  * and a new one. Each change takes effect at once.
  *
  * @param {{ comments: object[], onAdd: (text) => Promise<boolean>, onUpdate: (id, text) => Promise<boolean>,
- *           onRemove: (id) => void, busy?: boolean, error?: string }} props
+ *           onRemove: (id) => void, busy?: boolean, error?: string, inTab?: boolean }} props
+ *   `inTab`: the section is a tab of its own, so the tab's name heads it and
+ *   Add comment sits on the right of its toolbar.
  */
-export const CommentsSection = ({ comments, onAdd, onUpdate, onRemove, busy = false, error }) => {
+export const CommentsSection = ({ comments, onAdd, onUpdate, onRemove, busy = false, error, inTab = false }) => {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   return (
-    <Box component="section" aria-label="Comments" sx={{ mt: 4 }}>
-      <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
-        <Typography variant="h5" component="h2">Comments</Typography>
-        {!adding && <Button size="small" variant="outlined" onClick={() => setAdding(true)}>Add comment</Button>}
-      </Stack>
+    <Box component="section" aria-label="Comments" sx={{ mt: inTab ? 0 : 4 }}>
+      {inTab
+        ? <TabToolbar>{!adding && <Button size="small" variant="outlined" onClick={() => setAdding(true)}>Add comment</Button>}</TabToolbar>
+        : (
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
+            <Typography variant="h5" component="h2">Comments</Typography>
+            {!adding && <Button size="small" variant="outlined" onClick={() => setAdding(true)}>Add comment</Button>}
+          </Stack>
+        )}
       {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
       {adding && (
         <Paper variant="outlined" sx={{ p: 1.5, mb: 1.5 }}>

@@ -1,5 +1,7 @@
 import React from 'react';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 
@@ -23,4 +25,39 @@ export const PageTabs = ({ tabs, value, onChange, href }) => (
 /** A tab's content: kept while another tab shows, hidden, so its state stays. */
 export const TabPanel = ({ value, shown, label, children }) => (
   <Box role="tabpanel" hidden={value !== shown} aria-label={label}>{children}</Box>
+);
+
+/*
+ * Inside a tab the tab's name is the heading; nothing repeats it. A tab
+ * opens with its TabToolbar: what it is about (a grey note) on the left,
+ * its actions ("Add membership") on the right, above what they act on. A
+ * tab of several parts gives each part, the first too, a TabPart heading.
+ */
+
+/**
+ * The top of a tab: a note on the left, actions on the right.
+ *
+ * @param {{ note?: React.ReactNode, children?: React.ReactNode }} props `children` are the actions
+ */
+export const TabToolbar = ({ note, children }) => (!note && !children ? null : (
+  <Stack direction="row" spacing={2} useFlexGap sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', mb: 2 }}>
+    <Typography variant="body2" color="text.secondary" sx={{ flex: 1, minWidth: 240 }}>{note}</Typography>
+    {children && <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center' }}>{children}</Stack>}
+  </Stack>
+));
+
+/**
+ * One part of a tab of several: a small bold heading, with a count after it
+ * where there is one and its actions on the right, then the part.
+ *
+ * @param {{ title: React.ReactNode, count?: number, actions?: React.ReactNode, children: React.ReactNode, sx?: object }} props
+ */
+export const TabPart = ({ title, count, actions, children, sx }) => (
+  <Box component="section" sx={{ mb: 3, ...sx }}>
+    <Stack direction="row" spacing={2} useFlexGap sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', mb: 0.5 }}>
+      <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600 }}>{title}{count === undefined ? '' : ` (${count})`}</Typography>
+      {actions && <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>{actions}</Stack>}
+    </Stack>
+    {children}
+  </Box>
 );

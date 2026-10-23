@@ -19,11 +19,10 @@ import Typography from '@mui/material/Typography';
 import { groupCompleteness } from '/imports/common/lib/groupRules';
 import { ChipSelect } from '../components/ChipSelect';
 import { ImageField } from '../components/ImageField';
-import { PageTabs, TabPanel } from '../components/PageTabs';
+import { PageTabs, TabPanel, TabPart, TabToolbar } from '../components/PageTabs';
 import { GroupReferences, referenceCount } from './GroupReferences';
 import { groupPath } from './paths';
 import { MemberSelect } from '../components/MemberSelect';
-import { Section } from '../components/Section';
 import { MISSING } from '../workshops/labels';
 import { TYPES, JOIN_POLICIES } from './labels';
 
@@ -209,15 +208,16 @@ export const GroupForm = ({
             value={shown} onChange={onTab} href={(t) => groupPath(group._id, t)} />
           <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
           <TabPanel value="image" shown={shown} label="Image">
-            <Section sx={{ mt: 0 }} title="Image">
+            <>
               <ImageField
                 src={imageUrl} alt={group?.name?.sv} accept="image/jpeg,image/png,image/webp,image/heic"
                 onUpload={onUploadImage} onRemove={onRemoveImage} uploading={uploading}
               />
-            </Section>
+            </>
           </TabPanel>
           <TabPanel value="members" shown={shown} label="Members">
-            <Section sx={{ mt: 0 }} title="Members" note="Adding, approving and removing take effect at once. The responsible stays a member until another is chosen.">
+            <>
+              <TabToolbar note="Adding, approving and removing take effect at once. The responsible stays a member until another is chosen." />
               <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start', mb: 2 }}>
                 <Box sx={{ flex: 1 }}>
                   <MemberSelect label="New member" value={adding} onChange={setAdding} search={searchMembers} />
@@ -228,9 +228,8 @@ export const GroupForm = ({
               {!members ? <Typography variant="body2">Looking…</Typography> : (
                 <>
                   {members.pending.length > 0 && (
-                    <>
-                      <Typography variant="subtitle2">Requests to join</Typography>
-                      <List dense disablePadding sx={{ mb: 2 }}>
+                    <TabPart title="Requests to join" count={members.pending.length}>
+                      <List dense disablePadding>
                         {members.pending.map((m) => (
                           <MemberItem key={m.memberId} member={m}>
                             <Button size="small" variant="contained" disabled={busy} onClick={() => onApprove(m.memberId)}>Approve</Button>
@@ -238,22 +237,24 @@ export const GroupForm = ({
                           </MemberItem>
                         ))}
                       </List>
-                    </>
+                    </TabPart>
                   )}
-                  {members.active.length === 0
-                    ? <Typography variant="body2" color="text.secondary">No members yet.</Typography>
-                    : (
-                      <List dense disablePadding>
-                        {members.active.map((m) => (
-                          <MemberItem key={m.memberId} member={m}>
-                            {!m.isResponsible && <Button size="small" color="error" disabled={busy} onClick={() => setRemoving(m)}>Remove</Button>}
-                          </MemberItem>
-                        ))}
-                      </List>
-                    )}
+                  <TabPart title="Active members" count={members.active.length}>
+                    {members.active.length === 0
+                      ? <Typography variant="body2" color="text.secondary">No members yet.</Typography>
+                      : (
+                        <List dense disablePadding>
+                          {members.active.map((m) => (
+                            <MemberItem key={m.memberId} member={m}>
+                              {!m.isResponsible && <Button size="small" color="error" disabled={busy} onClick={() => setRemoving(m)}>Remove</Button>}
+                            </MemberItem>
+                          ))}
+                        </List>
+                      )}
+                  </TabPart>
                 </>
               )}
-            </Section>
+            </>
           </TabPanel>
           <TabPanel value="references" shown={shown} label="References">
             <GroupReferences references={references} />

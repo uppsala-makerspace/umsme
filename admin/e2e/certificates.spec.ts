@@ -147,7 +147,7 @@ test.describe('Certificates', () => {
     await openCertificate(page, KILN);
     await openTab(page, /^holders/i);
     await page.getByRole('link', { name: 'Maja Medlem' }).first().click();
-    await expect(page.getByRole('heading', { name: /^certificates$/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /^certificates/i, selected: true })).toBeVisible();
     await expect(page.getByRole('link', { name: KILN }).first()).toBeVisible();
   });
 });

@@ -17,17 +17,11 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ImageField } from '../components/ImageField';
 import { ChipSelect } from '../components/ChipSelect';
-import { PageTabs, TabPanel } from '../components/PageTabs';
+import { PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { storeItemPath } from './paths';
 
 const TABS = [['details', 'Details'], ['image', 'Image'], ['purchases', 'Purchases']];
 
-const Section = ({ title, children }) => (
-  <Box component="section">
-    <Typography variant="h6" component="h2" sx={{ mb: 1 }}>{title}</Typography>
-    {children}
-  </Box>
-);
 
 const Confirm = ({ open, title, text, confirmLabel, onCancel, onConfirm, busy }) => (
   <Dialog open={open} onClose={onCancel}>
@@ -158,22 +152,20 @@ export const StoreItemForm = ({
             value={shown} onChange={onTab} href={(t) => storeItemPath(item._id, t)} />
           <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
           <TabPanel value="image" shown={shown} label="Image">
-            <Section title="Image">
+            <>
               <ImageField
                 src={imageUrl} alt={item?.name?.sv} accept="image/jpeg,image/png,image/webp,image/heic"
                 onUpload={onUploadImage} onRemove={onRemoveImage} uploading={uploading}
               />
-            </Section>
+            </>
           </TabPanel>
           <TabPanel value="purchases" shown={shown} label="Purchases">
-            <Section title="Purchases">
-              <Typography variant="body2">
-                {!sales ? 'Counting…' : bought
-                  ? <>{sales.count} purchase(s), {sales.total} kr in total. Also under <Link href={`/payments?tab=store&item=${item._id}`}>Payments</Link>.</>
-                  : 'Not bought yet.'}
-              </Typography>
-              {bought && <Box sx={{ mt: 2 }}>{purchases}</Box>}
-            </Section>
+            <>
+              <TabToolbar note={!sales ? 'Counting…' : bought
+                ? <>{sales.count} purchase(s), {sales.total} kr in total. Also under <Link href={`/payments?tab=store&item=${item._id}`}>Payments</Link>.</>
+                : 'Not bought yet.'} />
+              {bought && purchases}
+            </>
           </TabPanel>
         </>
       )}

@@ -131,7 +131,7 @@ export const MemberViewPage = ({ _id }) => {
         declineInvite: (inviteId) => act(() => cancelInvite(inviteId)),
       }}
       messages={!member.infamily && <MessagesFor memberId={_id} onCount={counted('messages')} />}
-      comments={<CommentsFor about={_id} onCount={counted('comments')} />}
+      comments={<CommentsFor about={_id} onCount={counted('comments')} inTab />}
       certificates={<MemberCertificatesSection memberId={_id} onCount={counted('certificates')} />}
     />
   );

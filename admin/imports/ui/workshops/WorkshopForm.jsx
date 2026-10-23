@@ -15,8 +15,7 @@ import Typography from '@mui/material/Typography';
 import { workshopCompleteness, isAreaOfInterest } from '/imports/common/lib/groupRules';
 import { ChipSelect } from '../components/ChipSelect';
 import { ImageField } from '../components/ImageField';
-import { Section } from '../components/Section';
-import { PageTabs, TabPanel } from '../components/PageTabs';
+import { PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { workshopPath } from './paths';
 import { WorkshopReferences, referenceCount, directReferenceCount } from './WorkshopReferences';
 import { KINDS, STATUSES, MISSING } from './labels';
@@ -164,12 +163,13 @@ export const WorkshopForm = ({
             value={shown} onChange={onTab} href={(t) => workshopPath(workshop._id, t)} />
           <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
           <TabPanel value="image" shown={shown} label="Image">
-            <Section sx={{ mt: 0 }} title="Image" note="A representative image is required by the guideline.">
+            <>
+              <TabToolbar note="A representative image is required by the guideline." />
               <ImageField
                 src={imageUrl} alt={workshop?.name?.sv} accept="image/jpeg,image/png,image/webp,image/heic"
                 onUpload={onUploadImage} onRemove={onRemoveImage} uploading={uploading}
               />
-            </Section>
+            </>
           </TabPanel>
           <TabPanel value="references" shown={shown} label="References">
             <WorkshopReferences details={details} noun={noun} />

@@ -18,11 +18,10 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ChipSelect } from '../components/ChipSelect';
-import { Section } from '../components/Section';
 import { kr } from './labels';
 import { DateField } from '../components/DateField';
 import { groupPath } from '../groups/paths';
-import { PageTabs, TabPanel } from '../components/PageTabs';
+import { PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { expenseAccountPath } from './paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
@@ -43,7 +42,8 @@ const Budget = ({ year, years, onYear, revisions, busy, onAdd, onRemove, today, 
   const [removing, setRemoving] = useState(null);
   const current = revisions[0];
   return (
-    <Section sx={{ mt: 0 }} title="Budget" note="The budget for a calendar year. An expense counts towards the year of its receipt date. Revising adds a new entry; earlier ones are kept as history. Admin, board and treasurer may set it.">
+    <Box>
+      <TabToolbar note="The budget for a calendar year. An expense counts towards the year of its receipt date. Revising adds a new entry; earlier ones are kept as history. Admin, board and treasurer may set it." />
       <TextField label="Year" select slotProps={native} value={year} onChange={(e) => onYear(Number(e.target.value))} sx={{ mb: 2, minWidth: 140 }}>
         {years.map((y) => <option key={y} value={y}>{y}</option>)}
       </TextField>
@@ -83,7 +83,7 @@ const Budget = ({ year, years, onYear, revisions, busy, onAdd, onRemove, today, 
           <Button color="error" variant="contained" onClick={() => { onRemove(removing._id); setRemoving(null); }}>Remove</Button>
         </DialogActions>
       </Dialog>
-    </Section>
+    </Box>
   );
 };
 

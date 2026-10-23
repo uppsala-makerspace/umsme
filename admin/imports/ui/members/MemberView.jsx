@@ -14,7 +14,7 @@ import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { DataList } from '../components/DataList';
-import { PageTabs, TabPanel } from '../components/PageTabs';
+import { PageTabs, TabPanel, TabPart, TabToolbar } from '../components/PageTabs';
 import { MemberForm } from './MemberForm';
 import { MemberStatusChips } from './MemberStatusChips';
 import { memberPath } from './paths';
@@ -116,34 +116,32 @@ export const MemberView = ({ member, detail, values, onChange, onSave, busy = fa
 
       <Panel tab="family" shown={shown}>
         {detail.payer && (
-          <Typography variant="h5" component="h2">
-            Part of family, paying family member is <strong><Link href={memberPath(detail.payer._id, 'family')}>{detail.payer.name}</Link></strong>
-            <Button size="small" sx={{ ml: 1 }} disabled={busy} onClick={() => ask('Remove from the family?', 'The member remains as an independent member that has to pay for itself.', 'Remove', on.removeFromFamily)}>Remove from family</Button>
-          </Typography>
+          <TabPart title="Paying family member"
+            actions={<Button size="small" disabled={busy} onClick={() => ask('Remove from the family?', 'The member remains as an independent member that has to pay for itself.', 'Remove', on.removeFromFamily)}>Remove from family</Button>}>
+            <Link href={memberPath(detail.payer._id, 'family')}>{detail.payer.name}</Link> pays for the family.
+          </TabPart>
         )}
         {patron && (
           <>
-            <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
-              <Typography variant="h5" component="h2">Family members</Typography>
-              <Button size="small" variant="outlined" href={`/member/${member._id}/add`}>Add existing</Button>
-              <Button size="small" variant="outlined" href={`/members/add?infamily=${member._id}`}>Add new</Button>
-            </Stack>
-            <DataList rows={detail.familyMembers} columns={familyColumns} empty="No family members yet." rowHref={(m) => `/member/${m._id}`} />
-            <Typography variant="h5" component="h2" sx={{ mt: 3, mb: 1 }}>Pending invites</Typography>
-            {detail.invites.length === 0 ? <Typography variant="body2" color="text.secondary">No outstanding invites.</Typography> : (
-              <List dense disablePadding>
-                {detail.invites.map((invite) => (
-                  <ListItem key={invite._id} divider secondaryAction={<Button size="small" color="error" disabled={busy} onClick={() => ask('Cancel the invite?', `The pending invite to ${invite.email} is cancelled.`, 'Cancel invite', () => on.cancelInvite(invite._id))}>Cancel invite</Button>}>
-                    {invite.invitee ? <><Link href={`/member/${invite.invitee._id}`}>{invite.invitee.name}</Link>&nbsp;{invite.email}</> : invite.email}
-                  </ListItem>
-                ))}
-              </List>
-            )}
+            <TabPart title="Family members" count={detail.familyMembers.length}
+              actions={<><Button size="small" variant="outlined" href={`/member/${member._id}/add`}>Add existing</Button><Button size="small" variant="outlined" href={`/members/add?infamily=${member._id}`}>Add new</Button></>}>
+              <DataList rows={detail.familyMembers} columns={familyColumns} empty="No family members yet." rowHref={(m) => `/member/${m._id}`} />
+            </TabPart>
+            <TabPart title="Pending invites" count={detail.invites.length}>
+              {detail.invites.length === 0 ? <Typography variant="body2" color="text.secondary">No outstanding invites.</Typography> : (
+                <List dense disablePadding>
+                  {detail.invites.map((invite) => (
+                    <ListItem key={invite._id} divider secondaryAction={<Button size="small" color="error" disabled={busy} onClick={() => ask('Cancel the invite?', `The pending invite to ${invite.email} is cancelled.`, 'Cancel invite', () => on.cancelInvite(invite._id))}>Cancel invite</Button>}>
+                      {invite.invitee ? <><Link href={`/member/${invite.invitee._id}`}>{invite.invitee.name}</Link>&nbsp;{invite.email}</> : invite.email}
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </TabPart>
           </>
         )}
         {detail.invitesReceived.length > 0 && (
-          <>
-            <Typography variant="h5" component="h2" sx={{ mt: 3, mb: 1 }}>Invitations to other families</Typography>
+          <TabPart title="Invitations to other families" count={detail.invitesReceived.length}>
             <List dense disablePadding>
               {detail.invitesReceived.map((invite) => (
                 <ListItem key={invite._id} divider secondaryAction={<Button size="small" color="error" disabled={busy} onClick={() => ask('Decline the invitation?', `The invitation from ${invite.inviterName} is declined.`, 'Decline', () => on.declineInvite(invite._id))}>Decline</Button>}>
@@ -151,17 +149,14 @@ export const MemberView = ({ member, detail, values, onChange, onSave, busy = fa
                 </ListItem>
               ))}
             </List>
-          </>
+          </TabPart>
         )}
-        {!detail.payer && !patron && detail.invitesReceived.length === 0 && <Typography color="text.secondary">Not part of a family.</Typography>}
+        {!detail.payer && !patron && detail.invitesReceived.length === 0 && <TabToolbar note="Not part of a family." />}
       </Panel>
 
       {!member.infamily && (
         <Panel tab="memberships" shown={shown}>
-          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
-            <Typography variant="h5" component="h2">Memberships</Typography>
-            <Button size="small" variant="outlined" href={`/memberships/add?member=${member._id}`}>Add membership</Button>
-          </Stack>
+          <TabToolbar><Button size="small" variant="outlined" href={`/memberships/add?member=${member._id}`}>Add membership</Button></TabToolbar>
           <DataList rows={detail.memberships} columns={membershipColumns} empty="No memberships." defaultSort={{ field: 'start', sort: 'desc' }} rowHref={(ms) => `/membership/${ms._id}`} />
         </Panel>
       )}

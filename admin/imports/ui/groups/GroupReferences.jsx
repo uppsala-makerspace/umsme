@@ -3,7 +3,7 @@ import Chip from '@mui/material/Chip';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import { isAreaOfInterest } from '/imports/common/lib/groupRules';
-import { Section } from '../components/Section';
+import { TabToolbar } from '../components/PageTabs';
 import { ReferenceKind } from '../components/ReferenceKind';
 import { workshopPath } from '../workshops/paths';
 
@@ -29,8 +29,8 @@ export const GroupReferences = ({ references }) => {
   if (!references) return <Typography variant="body2">Looking…</Typography>;
   const { workshop } = references;
   return (
-    <Section sx={{ mt: 0 }} title="Refers to this group" note={referenceCount(references) ? 'While anything here, or a member, refers to it, the group can not be deleted.' : undefined}>
-      {referenceCount(references) === 0 && <Typography variant="body2" color="text.secondary">Nothing refers to this group.</Typography>}
+    <>
+      <TabToolbar note={referenceCount(references) ? 'While anything here, or a member, refers to it, the group can not be deleted.' : 'Nothing refers to this group.'} />
       <ReferenceKind title={workshop && isAreaOfInterest(workshop) ? 'Steers the area of interest' : 'Steers the workshop'} items={workshop ? [workshop] : []}
         render={(w) => <Link href={workshopPath(w._id, 'references')}>{w.name?.sv}</Link>} />
       <ReferenceKind title="Responsibility groups" items={references.childGroups} render={groupLink} />
@@ -42,6 +42,6 @@ export const GroupReferences = ({ references }) => {
           {a.approver && <Chip size="small" label="Approves" />}
         </>
       )} />
-    </Section>
+    </>
   );
 };

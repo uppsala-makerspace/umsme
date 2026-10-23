@@ -14,11 +14,10 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ChipSelect } from '../components/ChipSelect';
 import { MemberChips } from '../components/MemberChips';
-import { Section } from '../components/Section';
 import { GrantForm } from './GrantForm';
 import { HolderList } from './HolderList';
 import { workshopPath } from '../workshops/paths';
-import { PageTabs, TabPanel } from '../components/PageTabs';
+import { PageTabs, TabPanel, TabPart, TabToolbar } from '../components/PageTabs';
 import { certificatePath } from './paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
@@ -165,28 +164,31 @@ export const CertificateForm = ({
             value={shown} onChange={onTab} href={(t) => certificatePath(certificate._id, t)} />
           <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
           <TabPanel value="holders" shown={shown} label="Holders">
-            <Section sx={{ mt: 0 }} title="Holders" note="Granting and revoking take effect at once.">
+            <>
+              <TabToolbar note="Granting and revoking take effect at once." />
               <Box sx={{ mb: 2 }}>
                 <GrantForm choose="member" validityDays={certificate.defaultValidityDays} search={searchMembers}
                   defaultCertifier={defaultCertifier} onGrant={onGrant} busy={busy} />
               </Box>
               <HolderList show="member" rows={holders} onRevoke={onRevoke} busy={busy} />
-            </Section>
+            </>
           </TabPanel>
           <TabPanel value="other" shown={shown} label="Other">
-            <Section sx={{ mt: 0 }} title="Mandatory for membership" note="Every member must hold a mandatory certificate to open the doors. Only one certificate can be mandatory, and it stays so.">
+            <TabPart title="Mandatory for membership">
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Every member must hold a mandatory certificate to open the doors. Only one certificate can be mandatory, and it stays so.</Typography>
               {certificate.mandatory
                 ? <Typography variant="body2">This certificate is mandatory for membership.</Typography>
                 : canMarkMandatory
                   ? <Button color="warning" variant="outlined" onClick={() => setConfirming('mandatory')}>Mark as mandatory for membership</Button>
                   : <Typography variant="body2" color="text.secondary">Another certificate is already mandatory.</Typography>}
-            </Section>
-            <Section title="RFID export" note="JSON list of RFID tags for members with a valid attestation; access is restricted by an IP allowlist in nginx.">
+            </TabPart>
+            <TabPart title="RFID export">
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>JSON list of RFID tags for members with a valid attestation; access is restricted by an IP allowlist in nginx.</Typography>
               <Stack direction="row" spacing={2}>
                 <Link href={rfid} target="_blank" rel="noopener noreferrer">Open RFID JSON</Link>
                 <Link href={`${rfid}?includeNames`} target="_blank" rel="noopener noreferrer">Open RFID JSON with names</Link>
               </Stack>
-            </Section>
+            </TabPart>
           </TabPanel>
         </>
       )}
