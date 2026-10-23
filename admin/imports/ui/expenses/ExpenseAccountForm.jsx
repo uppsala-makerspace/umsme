@@ -21,6 +21,7 @@ import { ChipSelect } from '../components/ChipSelect';
 import { Section } from '../components/Section';
 import { kr } from './labels';
 import { DateField } from '../components/DateField';
+import { groupPath } from '../groups/paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -149,7 +150,7 @@ export const ExpenseAccountForm = ({
         <Box sx={{ mb: 2 }}>
           <ChipSelect label="Groups" options={groupOptions} value={values.groupIds} disabled={!canEdit} onChange={(ids) => onChange('groupIds', ids)}
             helperText="The groups this account belongs to; their members may make expenses on it, and approvers are picked from them." />
-          <Links label="Open" items={values.groupIds.map((id) => ({ href: `/group/${id}`, label: groupName(id) }))} />
+          <Links label="Open" items={values.groupIds.map((id) => ({ href: groupPath(id, 'references'), label: groupName(id) }))} />
           {values.groupIds.length === 0 && <Alert severity="warning" sx={{ mt: 1 }}>No group selected: the guideline requires every account to belong to at least one group.</Alert>}
         </Box>
         <Typography variant="subtitle1" component="h2" sx={{ mb: 0.5 }}>Expense approvers</Typography>

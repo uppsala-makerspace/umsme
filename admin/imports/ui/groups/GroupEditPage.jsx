@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
-import { useNavigate } from '../navigation';
+import { useNavigate, useQueryParam } from '../navigation';
 import { useEditor } from '../components/useEditor';
 import { useChoices, memberNames, searchMembers } from './choices';
 import { GroupForm } from './GroupForm';
@@ -21,6 +21,7 @@ export const GroupEditPage = ({ _id }) => {
   const [names, setNames] = useState({});
   const [references, setReferences] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [tab, setTab] = useQueryParam('tab');
 
   // Who the stored ids are: the members and the responsible.
   const ids = [...new Set([...memberships.map((m) => m.memberId), values.responsibleMemberId].filter(Boolean))].sort();
@@ -86,6 +87,7 @@ export const GroupEditPage = ({ _id }) => {
       onUploadImage={(file) => { setUploading(true); run(() => uploadGroupImage(_id, file)).finally(() => setUploading(false)); }}
       onRemoveImage={() => run(() => removeGroupImage(_id))}
       onDelete={() => run(() => removeGroup(_id), { then: () => navigate('/groups') })}
+      tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)}
     />
   );
 };

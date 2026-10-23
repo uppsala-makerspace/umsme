@@ -32,14 +32,21 @@ const members = {
   active: [{ memberId: 'm1', name: 'Gustav Gruppledare', mid: '1001', isResponsible: true }, { memberId: 'm2', name: 'Sara Styrgrupp', mid: '1002' }],
   pending: [{ memberId: 'm3', name: 'Bo Basmedlem', mid: '1003' }],
 };
-const inUse = { workshop: { _id: 'w1', name: { sv: 'Keramikverkstaden' }, kind: 'workshop' }, childGroups: [{ _id: 'g3', name: { sv: 'Glasyrgruppen' } }], expenseAccounts: [{ _id: 'e1', name: 'Keramik' }], memberships: 3 };
+const inUse = {
+  workshop: { _id: 'w1', name: { sv: 'Keramikverkstaden' }, kind: 'workshop' },
+  childGroups: [{ _id: 'g3', type: 'responsibility', name: { sv: 'Glasyrgruppen' } }],
+  relatedGroups: [{ _id: 'g4', type: 'function', name: { sv: 'Kursgruppen' } }],
+  expenseAccounts: [{ _id: 'e1', name: 'Keramik', member: true, approver: true }],
+  memberships: 3,
+};
 
 /** Keeps the values and the picked responsible, as the page does. */
-const Editable = ({ values: initial, responsible: picked, ...props }) => {
+const Editable = ({ values: initial, responsible: picked, initialTab = 'details', ...props }) => {
   const [current, setCurrent] = useState(initial);
+  const [tab, setTab] = useState(initialTab);
   const [responsible, setResponsible] = useState(picked);
   return (
-    <GroupForm {...props} values={current} responsible={responsible}
+    <GroupForm {...props} tab={tab} onTab={setTab} values={current} responsible={responsible}
       onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))}
       onResponsibleChange={(m) => { setResponsible(m); setCurrent((v) => ({ ...v, responsibleMemberId: m?._id || '' })); }} />
   );
@@ -61,6 +68,8 @@ export const NewGroup = { args: { isNew: true, group: null, values: values({}), 
 
 /** A steering group with a workshop, members and a request: it can not be deleted. */
 export const InUse = {};
+export const MembersTab = { args: { initialTab: 'members' } };
+export const ReferencesTab = { args: { initialTab: 'references' } };
 
 /** A function group picks its spaces; nothing refers to it, so it can be deleted. */
 export const FunctionGroup = {
@@ -68,7 +77,7 @@ export const FunctionGroup = {
     const group = { _id: 'g2', name: { sv: 'Lokalgruppen' }, type: 'function', primarySpaceId: 's2' };
     return {
       group, values: { ...values(group), primarySpaceId: 's2', relatedWorkshopIds: ['w1'] }, responsible: null,
-      members: { active: [], pending: [] }, references: { workshop: null, childGroups: [], expenseAccounts: [], memberships: 0 },
+      members: { active: [], pending: [] }, references: { workshop: null, childGroups: [], relatedGroups: [], expenseAccounts: [], memberships: 0 },
     };
   })(),
 };

@@ -137,23 +137,32 @@ export const updateGroup = async (docId, fields, { userId, expectedUpdatedAt }) 
 };
 
 /** What refers to a group: its workshop, responsibility groups, expense accounts, members. */
+/**
+ * What refers to a group: the workshop it steers, the responsibility groups
+ * under it, the groups that name it as related, the expense accounts it
+ * belongs to or approves on, and how many memberships it has.
+ */
 export const groupReferences = async (docId) => {
-  const workshop = await Workshops.findOneAsync({ groupId: docId }, { fields: { name: 1, kind: 1 } });
-  const childGroups = await Groups.find({ parentGroupId: docId }, { fields: { name: 1 } }).fetchAsync();
-  const expenseAccounts = await ExpenseAccounts.find(
-    { $or: [{ groupIds: docId }, { approverGroupIds: docId }] }, { fields: { name: 1 } },
-  ).fetchAsync();
-  const memberships = await GroupMemberships.find({ groupId: docId }).countAsync();
-  return { workshop: workshop || null, childGroups, expenseAccounts, memberships };
+  const [workshop, childGroups, relatedGroups, accounts, memberships] = await Promise.all([
+    Workshops.findOneAsync({ groupId: docId }, { fields: { name: 1, kind: 1 } }),
+    Groups.find({ parentGroupId: docId }, { fields: { name: 1, type: 1 }, sort: { 'name.sv': 1 } }).fetchAsync(),
+    Groups.find({ relatedGroupIds: docId }, { fields: { name: 1, type: 1 }, sort: { 'name.sv': 1 } }).fetchAsync(),
+    ExpenseAccounts.find({ $or: [{ groupIds: docId }, { approverGroupIds: docId }] }, { fields: { name: 1, groupIds: 1, approverGroupIds: 1 }, sort: { name: 1 } }).fetchAsync(),
+    GroupMemberships.find({ groupId: docId }).countAsync(),
+  ]);
+  const expenseAccounts = accounts.map((a) => ({
+    _id: a._id, name: a.name, member: (a.groupIds || []).includes(docId), approver: (a.approverGroupIds || []).includes(docId),
+  }));
+  return { workshop: workshop || null, childGroups, relatedGroups, expenseAccounts, memberships };
 };
 
 /** Remove a group; refused while anything refers to it or it has an image. */
 export const removeGroup = async (docId, { userId }) => {
   const before = await current(docId);
   if (before.imageFileId) throw new Meteor.Error('has-image', 'Remove the image before the group can be deleted');
-  const { workshop, childGroups, expenseAccounts, memberships } = await groupReferences(docId);
-  if (workshop || childGroups.length || expenseAccounts.length || memberships) {
-    throw new Meteor.Error('in-use', 'A workshop, responsibility group, expense account or member refers to this group');
+  const { workshop, childGroups, relatedGroups, expenseAccounts, memberships } = await groupReferences(docId);
+  if (workshop || childGroups.length || relatedGroups.length || expenseAccounts.length || memberships) {
+    throw new Meteor.Error('in-use', 'A workshop, group, expense account or member refers to this group');
   }
   await Groups.removeAsync(docId);
   await recordChange({ userId, domain: DOMAIN, action: 'remove', docId, before });

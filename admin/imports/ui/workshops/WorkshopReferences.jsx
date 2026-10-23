@@ -1,11 +1,10 @@
 import React from 'react';
-import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Link from '@mui/material/Link';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import { Section } from '../components/Section';
+import { ReferenceKind } from '../components/ReferenceKind';
+import { groupPath } from '../groups/paths';
 
 const GROUP_TYPES = { steering: 'Steering group', function: 'Function group', responsibility: 'Responsibility group' };
 
@@ -18,14 +17,7 @@ export const referenceCount = (details) => (details
 /** What refers to the workshop directly: these keep it from being deleted. */
 export const directReferenceCount = (details) => (details ? details.certificates.length + details.storeItems.length + details.relatedGroups.length : 0);
 
-const Kind = ({ title, items, render }) => (items.length === 0 ? null : (
-  <Box sx={{ mb: 2 }}>
-    <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600 }}>{title} ({items.length})</Typography>
-    <List dense disablePadding>
-      {items.map((item) => <ListItem key={item._id} disableGutters sx={{ gap: 1 }}>{render(item)}</ListItem>)}
-    </List>
-  </Box>
-));
+const Kind = ReferenceKind;
 
 const groupLink = (g) => <><Link href={`/group/${g._id}`}>{g.name?.sv || g._id}</Link>{GROUP_TYPES[g.type] && <Typography variant="body2" color="text.secondary">{GROUP_TYPES[g.type]}</Typography>}</>;
 
@@ -52,7 +44,7 @@ export const WorkshopReferences = ({ details, noun }) => {
         <Kind title="Related groups" items={details.relatedGroups} render={groupLink} />
       </Section>
       {via && (
-        <Section title={<>Through the steering group <Link href={`/group/${via.group._id}`}>{via.group.name?.sv}</Link></>}>
+        <Section title={<>Through the steering group <Link href={groupPath(via.group._id, 'references')}>{via.group.name?.sv}</Link></>}>
           {throughGroup === 0 && <Typography variant="body2" color="text.secondary">Nothing refers to the steering group.</Typography>}
           <Kind title="Responsibility groups" items={via.responsibilityGroups} render={groupLink} />
           <Kind title="Groups related to it" items={via.relatedGroups} render={groupLink} />

@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, expectSearch, sortBy } from './lists';
-import { field, action, saveButton, confirmed, deleteConfirmed } from './forms';
+import { field, action, saveButton, confirmed, deleteConfirmed, openTab } from './forms';
 
 // Groups: list, add, edit, responsible, members and their requests, image,
 // delete, and who sees them. Written against the Blaze pages and meant to
@@ -93,7 +93,9 @@ test.describe('Groups', () => {
     await expect(pill('Retrodatorer')).toBeVisible();
     await expect(pill(PREMISES)).toBeVisible();
     await expect(page.getByRole('combobox', { name: 'Responsible' })).toHaveValue(/Sara Styrgrupp/);
+    await openTab(page, /^members/i);
     await expect(memberEntry(page, 'Sara Styrgrupp')).toContainText(/responsible/i);
+    await openTab(page, /^details$/i);
 
     await page.getByRole('img', { name: `Remove ${PREMISES}` }).click();
     await saveButton(page).click();
@@ -105,6 +107,7 @@ test.describe('Groups', () => {
 
   test('adds a member', async ({ page }) => {
     await openGroup(page, 'E2E edit group');
+    await openTab(page, /^members/i);
     await page.getByRole('combobox', { name: 'New member' }).fill('Dagny');
     await page.getByRole('listbox').getByRole('option', { name: /Dagny Rabatt/ }).click();
     await action(page, /^add member$/i).click();
@@ -113,12 +116,14 @@ test.describe('Groups', () => {
 
   test('shows the responsible, the members and the requests', async ({ page }) => {
     await openGroup(page, STEERING);
+    await openTab(page, /^members/i);
     await expect(page.getByRole('link', { name: 'Gustav Gruppledare' }).first()).toBeVisible();
     await expect(memberEntry(page, 'Sara Styrgrupp')).toBeVisible();
   });
 
   test('approves a request to join', async ({ page }) => {
     await openGroup(page, REQUESTS);
+    await openTab(page, /^members/i);
     await memberEntry(page, 'Bo Basmedlem').getByText(/^approve$/i).click();
     await expect(memberEntry(page, 'Bo Basmedlem').getByText(/^approve$/i)).not.toBeVisible();
     await expect(memberEntry(page, 'Bo Basmedlem').getByText(/^remove$/i)).toBeVisible();
@@ -126,12 +131,14 @@ test.describe('Groups', () => {
 
   test('rejects a request to join', async ({ page }) => {
     await openGroup(page, REQUESTS);
+    await openTab(page, /^members/i);
     await memberEntry(page, 'Kalle Kvartal').getByText(/^reject$/i).click();
     await expect(memberEntry(page, 'Kalle Kvartal')).not.toBeVisible();
   });
 
   test('removes a member', async ({ page }) => {
     await openGroup(page, REQUESTS);
+    await openTab(page, /^members/i);
     page.once('dialog', (dialog) => dialog.accept());
     await memberEntry(page, 'Dagny Rabatt').getByText(/^remove$/i).click();
     await page.getByRole('dialog').getByRole('button', { name: /^remove$/i }).click({ timeout: 3000 }).catch(() => {});
@@ -140,12 +147,15 @@ test.describe('Groups', () => {
 
   test('keeps a group that is in use', async ({ page }) => {
     await openGroup(page, STEERING);
-    await expect(page.getByText(/can ?not be deleted/i)).toBeVisible();
+    await expect(page.getByText(/can ?not be deleted/i).first()).toBeVisible();
+    await openTab(page, /^references \(\d+\)$/i);
+    await expect(page.getByRole('heading', { name: /^steers the workshop/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /^delete/i })).not.toBeVisible();
   });
 
   test('uploads and removes an image', async ({ page }) => {
     await openGroup(page, PREMISES);
+    await openTab(page, /^image$/i);
     await page.locator('input[type="file"]').setInputFiles({ name: 'grupp.png', mimeType: 'image/png', buffer: PNG });
     await action(page, /^upload image$/i).click();
     await expect(page.getByRole('img', { name: PREMISES })).toBeVisible();

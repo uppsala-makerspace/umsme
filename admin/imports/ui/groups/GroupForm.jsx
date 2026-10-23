@@ -16,9 +16,12 @@ import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { groupCompleteness, isAreaOfInterest } from '/imports/common/lib/groupRules';
+import { groupCompleteness } from '/imports/common/lib/groupRules';
 import { ChipSelect } from '../components/ChipSelect';
 import { ImageField } from '../components/ImageField';
+import { PageTabs, TabPanel } from '../components/PageTabs';
+import { GroupReferences, referenceCount } from './GroupReferences';
+import { groupPath } from './paths';
 import { MemberSelect } from '../components/MemberSelect';
 import { Section } from '../components/Section';
 import { MISSING } from '../workshops/labels';
@@ -51,15 +54,18 @@ const MemberItem = ({ member, children }) => (
  *           onReject?: (memberId) => void, onRemoveMember?: (memberId) => void,
  *           references?: { workshop, childGroups: object[], expenseAccounts: object[], memberships: number },
  *           imageUrl?: string, onUploadImage?: (file) => void, onRemoveImage?: () => void,
- *           uploading?: boolean, onDelete?: () => void }} props
+ *           uploading?: boolean, onDelete?: () => void, tab?: string, onTab?: (tab) => void }} props
  *   `members` entries are { memberId, name, mid, isResponsible }.
  */
+const TABS = [['details', 'Details'], ['image', 'Image'], ['members', 'Members'], ['references', 'References']];
+
 export const GroupForm = ({
   isNew, group, values, onChange, onSave, busy = false, error, notice,
   groups, workshopOptions, spaceOptions, roleOptions, responsible, onResponsibleChange, searchMembers,
   members, onAddMember, onApprove, onReject, onRemoveMember, references,
-  imageUrl, onUploadImage, onRemoveImage, uploading = false, onDelete,
+  imageUrl, onUploadImage, onRemoveImage, uploading = false, onDelete, tab = 'details', onTab,
 }) => {
+  const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
   const [confirming, setConfirming] = useState(false);
   const [removing, setRemoving] = useState(null);
   const [adding, setAdding] = useState(null);
@@ -69,9 +75,100 @@ export const GroupForm = ({
   const others = groups.filter((g) => g._id !== group?._id);
   const steering = others.filter((g) => g.type === 'steering');
   const parent = groups.find((g) => g._id === values.parentGroupId);
-  const referred = references && (references.workshop || references.childGroups.length
-    || references.expenseAccounts.length || references.memberships > 0);
+  const referred = references && (referenceCount(references) > 0 || references.memberships > 0);
   const blocked = group?.imageFileId || referred;
+  const form = (
+    <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Type" select required fullWidth slotProps={native} {...text('type')}>
+          <option value="">(Select a type)</option>
+          {TYPES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </TextField>
+        {values.type && values.type !== 'steering' && (
+          <Box sx={{ width: '100%' }}>
+            <TextField label="Parent group" select fullWidth slotProps={native} {...text('parentGroupId')}
+              required={values.type === 'responsibility'}
+              helperText="A steering group; required for a responsibility group (ansvarsgrupp).">
+              <option value="">(No parent group)</option>
+              {steering.map((g) => <option key={g._id} value={g._id}>{g.name?.sv || g._id}</option>)}
+            </TextField>
+            {parent && <Link href={`/group/${parent._id}`} variant="body2">Open {parent.name?.sv}</Link>}
+          </Box>
+        )}
+      </Stack>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Name (Swedish)" required fullWidth {...text('nameSv')} />
+        <TextField label="Name (English)" fullWidth {...text('nameEn')} />
+      </Stack>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Tag (Swedish)" fullWidth helperText="Short label on the public website" {...text('tagSv')} />
+        <TextField label="Tag (English)" fullWidth {...text('tagEn')} />
+      </Stack>
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Description (Swedish, markdown)" multiline minRows={4} fullWidth {...text('descriptionSv')} />
+        <TextField label="Description (English, markdown)" multiline minRows={4} fullWidth {...text('descriptionEn')} />
+        <TextField label="Rules (Swedish, markdown)" multiline minRows={3} fullWidth {...text('rulesSv')} />
+        <TextField label="Rules (English, markdown)" multiline minRows={3} fullWidth {...text('rulesEn')} />
+      </Stack>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Slack channel" fullWidth {...text('slackChannel')} />
+        <TextField label="Guides URL" fullWidth {...text('guidesUrl')} />
+      </Stack>
+      <Box sx={{ mb: 2 }}>
+        <MemberSelect
+          label="Responsible" value={responsible} onChange={onResponsibleChange} search={searchMembers}
+          helperText="The group responsible (gruppansvarig); saving makes them an active member."
+        />
+      </Box>
+      <FormControlLabel
+        sx={{ mb: 1 }}
+        control={<Checkbox checked={values.allowJoinRequests} onChange={(e) => onChange('allowJoinRequests', e.target.checked)} />}
+        label="Members may ask to join"
+      />
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Join policy" select fullWidth slotProps={native} {...text('joinPolicy')}
+          helperText="Who approves requests to join.">
+          {JOIN_POLICIES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </TextField>
+        <TextField label="Linked role" select fullWidth slotProps={native} {...text('linkedRole')}
+          helperText="Kept in step with the active members; not with an open join policy.">
+          <option value="">(No linked role)</option>
+          {roleOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </TextField>
+      </Stack>
+      {values.type === 'function' && (
+        <Stack spacing={2} sx={{ mb: 2 }}>
+          <TextField label="Primary space" select fullWidth slotProps={native} {...text('primarySpaceId')}
+            helperText="Steering and responsibility groups get their spaces from their workshop.">
+            <option value="">(No primary space)</option>
+            {spaceOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </TextField>
+          <ChipSelect
+            label="Secondary spaces"
+            options={spaceOptions.filter((o) => o.value !== values.primarySpaceId)}
+            value={values.secondarySpaceIds.filter((id) => id !== values.primarySpaceId)}
+            onChange={(ids) => onChange('secondarySpaceIds', ids)}
+          />
+        </Stack>
+      )}
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <ChipSelect
+          label="Related workshops" options={workshopOptions} value={values.relatedWorkshopIds}
+          onChange={(ids) => onChange('relatedWorkshopIds', ids)}
+          helperText="Workshops and areas of interest the group works with; listed on their pages in the app."
+        />
+        <ChipSelect
+          label="Related groups" options={others.map((g) => ({ value: g._id, label: g.name?.sv || g._id }))}
+          value={values.relatedGroupIds} onChange={(ids) => onChange('relatedGroupIds', ids)}
+          helperText="The relation is mutual: each group is shown on the other's page."
+        />
+      </Stack>
+      <Stack direction="row" spacing={1}>
+        <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add group' : 'Save'}</Button>
+        <Button href="/groups">{isNew ? 'Cancel' : 'Back'}</Button>
+      </Stack>
+    </Box>
+  );
 
   return (
     <Box sx={{ maxWidth: 900 }}>
@@ -99,185 +196,68 @@ export const GroupForm = ({
       )}
       {!isNew && references && blocked && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          This group can not be deleted while {[referred && 'something refers to it (a workshop, members, expense accounts or a responsibility group)', group.imageFileId && 'it has an image'].filter(Boolean).join(' and ')}.
-          Remove {[referred && 'those', group.imageFileId && 'the image'].filter(Boolean).join(' and ')} first.
+          This group can not be deleted while {[referred && 'something refers to it (see Members and References)', group.imageFileId && 'it has an image'].filter(Boolean).join(' and ')}.
         </Alert>
       )}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
 
-      <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Type" select required fullWidth slotProps={native} {...text('type')}>
-            <option value="">(Select a type)</option>
-            {TYPES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </TextField>
-          {values.type && values.type !== 'steering' && (
-            <Box sx={{ width: '100%' }}>
-              <TextField label="Parent group" select fullWidth slotProps={native} {...text('parentGroupId')}
-                required={values.type === 'responsibility'}
-                helperText="A steering group; required for a responsibility group (ansvarsgrupp).">
-                <option value="">(No parent group)</option>
-                {steering.map((g) => <option key={g._id} value={g._id}>{g.name?.sv || g._id}</option>)}
-              </TextField>
-              {parent && <Link href={`/group/${parent._id}`} variant="body2">Open {parent.name?.sv}</Link>}
-            </Box>
-          )}
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Name (Swedish)" required fullWidth {...text('nameSv')} />
-          <TextField label="Name (English)" fullWidth {...text('nameEn')} />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Tag (Swedish)" fullWidth helperText="Short label on the public website" {...text('tagSv')} />
-          <TextField label="Tag (English)" fullWidth {...text('tagEn')} />
-        </Stack>
-        <Stack spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Description (Swedish, markdown)" multiline minRows={4} fullWidth {...text('descriptionSv')} />
-          <TextField label="Description (English, markdown)" multiline minRows={4} fullWidth {...text('descriptionEn')} />
-          <TextField label="Rules (Swedish, markdown)" multiline minRows={3} fullWidth {...text('rulesSv')} />
-          <TextField label="Rules (English, markdown)" multiline minRows={3} fullWidth {...text('rulesEn')} />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Slack channel" fullWidth {...text('slackChannel')} />
-          <TextField label="Guides URL" fullWidth {...text('guidesUrl')} />
-        </Stack>
-        <Box sx={{ mb: 2 }}>
-          <MemberSelect
-            label="Responsible" value={responsible} onChange={onResponsibleChange} search={searchMembers}
-            helperText="The group responsible (gruppansvarig); saving makes them an active member."
-          />
-        </Box>
-        <FormControlLabel
-          sx={{ mb: 1 }}
-          control={<Checkbox checked={values.allowJoinRequests} onChange={(e) => onChange('allowJoinRequests', e.target.checked)} />}
-          label="Members may ask to join"
-        />
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Join policy" select fullWidth slotProps={native} {...text('joinPolicy')}
-            helperText="Who approves requests to join.">
-            {JOIN_POLICIES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </TextField>
-          <TextField label="Linked role" select fullWidth slotProps={native} {...text('linkedRole')}
-            helperText="Kept in step with the active members; not with an open join policy.">
-            <option value="">(No linked role)</option>
-            {roleOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </TextField>
-        </Stack>
-        {values.type === 'function' && (
-          <Stack spacing={2} sx={{ mb: 2 }}>
-            <TextField label="Primary space" select fullWidth slotProps={native} {...text('primarySpaceId')}
-              helperText="Steering and responsibility groups get their spaces from their workshop.">
-              <option value="">(No primary space)</option>
-              {spaceOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </TextField>
-            <ChipSelect
-              label="Secondary spaces"
-              options={spaceOptions.filter((o) => o.value !== values.primarySpaceId)}
-              value={values.secondarySpaceIds.filter((id) => id !== values.primarySpaceId)}
-              onChange={(ids) => onChange('secondarySpaceIds', ids)}
-            />
-          </Stack>
-        )}
-        <Stack spacing={2} sx={{ mb: 2 }}>
-          <ChipSelect
-            label="Related workshops" options={workshopOptions} value={values.relatedWorkshopIds}
-            onChange={(ids) => onChange('relatedWorkshopIds', ids)}
-            helperText="Workshops and areas of interest the group works with; listed on their pages in the app."
-          />
-          <ChipSelect
-            label="Related groups" options={others.map((g) => ({ value: g._id, label: g.name?.sv || g._id }))}
-            value={values.relatedGroupIds} onChange={(ids) => onChange('relatedGroupIds', ids)}
-            helperText="The relation is mutual: each group is shown on the other's page."
-          />
-        </Stack>
-        <Stack direction="row" spacing={1}>
-          <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add group' : 'Save'}</Button>
-          <Button href="/groups">{isNew ? 'Cancel' : 'Back'}</Button>
-        </Stack>
-      </Box>
-
-      {!isNew && (
+      {isNew ? form : (
         <>
-          <Section title="Image">
-            <ImageField
-              src={imageUrl} alt={group?.name?.sv} accept="image/jpeg,image/png,image/webp,image/heic"
-              onUpload={onUploadImage} onRemove={onRemoveImage} uploading={uploading}
-            />
-          </Section>
-
-          <Section title="Members" note="Adding, approving and removing take effect at once. The responsible stays a member until another is chosen.">
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start', mb: 2 }}>
-              <Box sx={{ flex: 1 }}>
-                <MemberSelect label="New member" value={adding} onChange={setAdding} search={searchMembers} />
-              </Box>
-              <Button variant="outlined" sx={{ mt: 1 }} disabled={!adding || busy}
-                onClick={() => { onAddMember(adding._id); setAdding(null); }}>Add member</Button>
-            </Stack>
-            {!members ? <Typography variant="body2">Looking…</Typography> : (
-              <>
-                {members.pending.length > 0 && (
-                  <>
-                    <Typography variant="subtitle2">Requests to join</Typography>
-                    <List dense disablePadding sx={{ mb: 2 }}>
-                      {members.pending.map((m) => (
-                        <MemberItem key={m.memberId} member={m}>
-                          <Button size="small" variant="contained" disabled={busy} onClick={() => onApprove(m.memberId)}>Approve</Button>
-                          <Button size="small" color="error" disabled={busy} onClick={() => onReject(m.memberId)}>Reject</Button>
-                        </MemberItem>
-                      ))}
-                    </List>
-                  </>
-                )}
-                {members.active.length === 0
-                  ? <Typography variant="body2" color="text.secondary">No members yet.</Typography>
-                  : (
-                    <List dense disablePadding>
-                      {members.active.map((m) => (
-                        <MemberItem key={m.memberId} member={m}>
-                          {!m.isResponsible && <Button size="small" color="error" disabled={busy} onClick={() => setRemoving(m)}>Remove</Button>}
-                        </MemberItem>
-                      ))}
-                    </List>
-                  )}
-              </>
-            )}
-          </Section>
-
-          <Section title="Related">
-            {!references ? <Typography variant="body2">Looking…</Typography> : (
-              <Stack spacing={1}>
-                {references.workshop && (
-                  <Typography variant="body2">
-                    Steers the {isAreaOfInterest(references.workshop) ? 'area of interest' : 'workshop'}{' '}
-                    <Link href={`/workshop/${references.workshop._id}`}>{references.workshop.name?.sv}</Link>.
-                  </Typography>
-                )}
-                {references.childGroups.length > 0 && (
-                  <Typography variant="body2" component="div">
-                    Responsibility groups:{' '}
-                    {references.childGroups.map((g, i) => (
-                      <React.Fragment key={g._id}>{i > 0 && ', '}<Link href={`/group/${g._id}`}>{g.name?.sv}</Link></React.Fragment>
-                    ))}
-                  </Typography>
-                )}
-                {references.expenseAccounts.length > 0
-                  ? (
-                    <Typography variant="body2" component="div">
-                      Expense accounts:{' '}
-                      {references.expenseAccounts.map((a, i) => (
-                        <React.Fragment key={a._id}>{i > 0 && ', '}<Link href={`/expenseaccount/${a._id}`}>{a.name}</Link></React.Fragment>
-                      ))}
-                    </Typography>
-                  )
-                  : (
-                    <Typography variant="body2" color="text.secondary">
-                      No expense accounts are linked to this group. <Link href="/expenses/accounts">Manage expense accounts</Link>
-                    </Typography>
-                  )}
+          <PageTabs
+            tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'members' ? members?.active.length : value === 'references' ? referenceCount(references) : undefined }))}
+            value={shown} onChange={onTab} href={(t) => groupPath(group._id, t)} />
+          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
+          <TabPanel value="image" shown={shown} label="Image">
+            <Section sx={{ mt: 0 }} title="Image">
+              <ImageField
+                src={imageUrl} alt={group?.name?.sv} accept="image/jpeg,image/png,image/webp,image/heic"
+                onUpload={onUploadImage} onRemove={onRemoveImage} uploading={uploading}
+              />
+            </Section>
+          </TabPanel>
+          <TabPanel value="members" shown={shown} label="Members">
+            <Section sx={{ mt: 0 }} title="Members" note="Adding, approving and removing take effect at once. The responsible stays a member until another is chosen.">
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start', mb: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                  <MemberSelect label="New member" value={adding} onChange={setAdding} search={searchMembers} />
+                </Box>
+                <Button variant="outlined" sx={{ mt: 1 }} disabled={!adding || busy}
+                  onClick={() => { onAddMember(adding._id); setAdding(null); }}>Add member</Button>
               </Stack>
-            )}
-          </Section>
+              {!members ? <Typography variant="body2">Looking…</Typography> : (
+                <>
+                  {members.pending.length > 0 && (
+                    <>
+                      <Typography variant="subtitle2">Requests to join</Typography>
+                      <List dense disablePadding sx={{ mb: 2 }}>
+                        {members.pending.map((m) => (
+                          <MemberItem key={m.memberId} member={m}>
+                            <Button size="small" variant="contained" disabled={busy} onClick={() => onApprove(m.memberId)}>Approve</Button>
+                            <Button size="small" color="error" disabled={busy} onClick={() => onReject(m.memberId)}>Reject</Button>
+                          </MemberItem>
+                        ))}
+                      </List>
+                    </>
+                  )}
+                  {members.active.length === 0
+                    ? <Typography variant="body2" color="text.secondary">No members yet.</Typography>
+                    : (
+                      <List dense disablePadding>
+                        {members.active.map((m) => (
+                          <MemberItem key={m.memberId} member={m}>
+                            {!m.isResponsible && <Button size="small" color="error" disabled={busy} onClick={() => setRemoving(m)}>Remove</Button>}
+                          </MemberItem>
+                        ))}
+                      </List>
+                    )}
+                </>
+              )}
+            </Section>
+          </TabPanel>
+          <TabPanel value="references" shown={shown} label="References">
+            <GroupReferences references={references} />
+          </TabPanel>
         </>
       )}
 

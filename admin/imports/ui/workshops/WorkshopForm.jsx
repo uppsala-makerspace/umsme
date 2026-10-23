@@ -20,6 +20,7 @@ import { PageTabs, TabPanel } from '../components/PageTabs';
 import { workshopPath } from './paths';
 import { WorkshopReferences, referenceCount, directReferenceCount } from './WorkshopReferences';
 import { KINDS, STATUSES, MISSING } from './labels';
+import { groupPath } from '../groups/paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 const TABS = [['details', 'Details'], ['image', 'Image'], ['references', 'References']];
@@ -93,7 +94,7 @@ export const WorkshopForm = ({
         </TextField>
         {selectedGroup && (
           <Typography variant="body2" sx={{ mt: 0.5 }}>
-            <Link href={`/group/${selectedGroup._id}`}>Open {selectedGroup.name?.sv}</Link>
+            <Link href={groupPath(selectedGroup._id, 'references')}>Open {selectedGroup.name?.sv}</Link>
             {details && selectedGroup._id === workshop?.groupId && ` (${details.activeMemberCount} active members)`}
           </Typography>
         )}

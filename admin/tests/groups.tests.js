@@ -142,6 +142,14 @@ describe('groups and workshops', function () {
       const used = await call(board, 'groups.create', group({ responsibleMemberId: alice }));
       await assert.rejects(call(board, 'groups.remove', used), /in-use/);
     });
+
+    it('lists the groups that name a group as related, which keep it', async function () {
+      const named = await call(board, 'groups.create', group());
+      const naming = await call(board, 'groups.create', group({ name: { sv: `${prefix}Nämner` }, relatedGroupIds: [named] }));
+      const references = await call(board, 'groups.references', named);
+      assert.deepStrictEqual(references.relatedGroups.map((g) => g._id), [naming]);
+      await assert.rejects(call(board, 'groups.remove', named), /in-use/);
+    });
   });
 
   describe('workshops', function () {
