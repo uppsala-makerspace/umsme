@@ -29,12 +29,24 @@ export const memberStatus = async (mb) => {
   if (!mb) {
     return {};
   }
-  const mid = mb.infamily || mb._id;
+  return statusFromMemberships(await Memberships.find({ mid: mb.infamily || mb._id }).fetchAsync());
+};
+
+/**
+ * memberStatus from the memberships themselves (the member's, or the
+ * payer's for a family member), in the order the database gives them; for
+ * when many members are looked at at once and their memberships are
+ * fetched together.
+ *
+ * @param {object[]} own the memberships
+ * @param {Date} [now]
+ * @return the same as memberStatus
+ */
+export const statusFromMemberships = (own, now = new Date()) => {
   let member;
   let memberStart;
   let lab;
   let labStart;
-  const now = new Date();
   let discounted = false;
   const updateMemberDate = (ms) => {
     if (!member || ms.memberend > member) {
@@ -56,11 +68,9 @@ export const memberStatus = async (mb) => {
       }
     }
   };
-  // Collected rather than streamed: the family flag is decided across all of
-  // the member's memberships at once, not per document (see familyFromMemberships).
-  const own = [];
-  await Memberships.find({mid}).forEachAsync((ms) => {
-    own.push(ms);
+  // The family flag is decided across all of the member's memberships at
+  // once, not per document (see familyFromMemberships).
+  own.forEach((ms) => {
     switch (ms.type) {
       case 'member':
         updateMemberDate(ms);

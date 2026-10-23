@@ -7,7 +7,7 @@ import { Members } from '/imports/common/collections/members';
 import { Mails } from '/imports/common/collections/mails';
 import { Comments } from '/imports/common/collections/comments';
 import { Announcements } from '/imports/common/collections/announcements';
-import { memberStatus } from '/imports/common/lib/utils';
+import { statusFromMemberships } from '/imports/common/lib/utils';
 import { recordChange } from '/imports/common/server/auditLog';
 import { markAnnouncementSent, pushAnnouncementToMembers } from '/imports/common/server/announcements/announcements';
 import { sendMail } from './send';
@@ -50,11 +50,17 @@ const inGroup = (status, group, now) => {
   }
 };
 
-/** When each member first paid, by member id: their earliest membership's start. */
-const firstPaid = async () => {
-  const rows = await Memberships.rawCollection().aggregate([{ $group: { _id: '$mid', first: { $min: '$start' } } }]).toArray();
-  return Object.fromEntries(rows.map((r) => [r._id, r.first]));
+/** Every membership, by the member it is for, in the database's order. */
+const membershipsByMember = async () => {
+  const byMember = {};
+  for (const ms of await Memberships.find({}, { fields: { mid: 1, type: 1, start: 1, memberend: 1, labend: 1, discount: 1, family: 1 } }).fetchAsync()) {
+    (byMember[ms.mid] ||= []).push(ms);
+  }
+  return byMember;
 };
+
+/** When a member first paid: their earliest membership's start. */
+const firstPaid = (memberships) => memberships.reduce((first, ms) => (ms.start && (!first || ms.start < first) ? ms.start : first), null);
 
 /**
  * The members of a group with an email, not excluded, and what a template
@@ -66,16 +72,17 @@ const firstPaid = async () => {
  */
 export const mailRecipients = async ({ recipients, family, since }, now = new Date()) => {
   if (!RECIPIENT_GROUPS.includes(recipients)) throw new Meteor.Error('bad-recipients', `No recipient group "${recipients}"`);
-  const members = await Members.find({ excluded: { $ne: true } }).fetchAsync();
-  const first = await firstPaid();
+  // All memberships at once: one query, not one per member.
+  const [members, memberships] = await Promise.all([Members.find({ excluded: { $ne: true } }).fetchAsync(), membershipsByMember()]);
   const familyNames = {};
   for (const m of members) if (m.infamily) (familyNames[m.infamily] ||= []).push(m.name);
   const result = [];
   for (const member of members) {
     if (!member.email || (!family && member.infamily)) continue;
-    const status = await memberStatus(member);
+    const own = memberships[member.infamily || member._id] || [];
+    const status = statusFromMemberships(own, now);
     if (!inGroup(status, recipients, now)) continue;
-    const joined = first[member.infamily || member._id] || null;
+    const joined = firstPaid(own);
     if (since && !(joined && joined >= since)) continue;
     result.push({
       memberId: member._id,
