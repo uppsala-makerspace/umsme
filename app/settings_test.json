@@ -1,6 +1,5 @@
 {
   "public": {
-    "checkPath": "http://example.com#",
     "googleCalendar": {
       "apiKey": "test-calendar-api-key",
       "calendarId": "test@group.calendar.google.com"

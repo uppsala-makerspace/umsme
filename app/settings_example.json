@@ -1,6 +1,5 @@
 {
   "public": {
-    "checkPath": "http://example.com#",
     "adminUrl": "https://umsme.uppsalamakerspace.se",
     "swish": {
       "disabled": false,
