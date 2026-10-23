@@ -20,9 +20,10 @@ const workshops = [
 ];
 
 /** Keeps the values, as the page does. */
-const Editable = ({ values: initial, ...props }) => {
+const Editable = ({ values: initial, initialTab = 'details', ...props }) => {
+  const [tab, setTab] = useState(initialTab);
   const [current, setCurrent] = useState(initial);
-  return <StoreItemForm {...props} values={current} onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))} />;
+  return <StoreItemForm {...props} tab={tab} onTab={setTab} values={current} onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))} />;
 };
 
 export default {
@@ -42,6 +43,7 @@ export const NotBought = {};
 
 /** Bought: hide it instead; the sales are shown. */
 export const Bought = { args: { sales: { count: 12, total: 1800 } } };
+export const PurchasesTab = { args: { sales: { count: 12, total: 1800 }, initialTab: 'purchases', purchases: <p style={{ color: '#777' }}>The item’s purchases (ItemPurchases).</p> } };
 
 export const BuyerSetsPrice = {
   args: {

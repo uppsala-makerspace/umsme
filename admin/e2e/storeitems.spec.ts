@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, expectSearch, sortBy } from './lists';
-import { field, numberField, action, saveButton, confirmed, deleteConfirmed } from './forms';
+import { field, numberField, action, saveButton, confirmed, deleteConfirmed, openTab } from './forms';
 
 // Web shop items: list, add, edit, workshops, image, delete, and who sees
 // them. Written against the Blaze pages and meant to pass unchanged against
@@ -120,6 +120,7 @@ test.describe('Store items', () => {
 
   test('uploads and removes an image', async ({ page }) => {
     await openItem(page, DONATION);
+    await openTab(page, /^image$/i);
     await page.locator('input[type="file"]').setInputFiles({ name: 'gava.png', mimeType: 'image/png', buffer: PNG });
     await action(page, /^upload image$/i).click();
     await expect(page.getByRole('img', { name: DONATION })).toBeVisible();
@@ -140,6 +141,9 @@ test.describe('Store items', () => {
     await openItem(page, CLAY);
     await expect(page.getByText(/has been bought/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /^delete/i })).not.toBeVisible();
+    await openTab(page, /^purchases \(2\)$/i);
+    await expect(page).toHaveURL(/\?tab=purchases$/);
     await expect(page.getByText(/2 purchase/i)).toContainText('300 kr');
+    await expect(itemRows(page)).toHaveCount(2);
   });
 });

@@ -20,6 +20,7 @@ import Typography from '@mui/material/Typography';
 import { MemberSelect } from '../components/MemberSelect';
 import { STATUS, day } from './labels';
 import { dateTime } from '../dates';
+import { storeItemPath } from '../storeItems/paths';
 
 const Facts = ({ rows }) => (
   <Table size="small" sx={{ maxWidth: 700, mb: 2 }}>
@@ -79,7 +80,7 @@ export const PaymentView = ({ detail, busy = false, error, search, on, comments 
 
       {purchase ? (
         <>
-          <Typography variant="h5" component="h2">Webshop purchase{storeItem && <>: <strong><Link href={`/storeitem/${storeItem._id}`}>{storeItem.name?.sv || storeItem.code}</Link></strong></>}</Typography>
+          <Typography variant="h5" component="h2">Webshop purchase{storeItem && <>: <strong><Link href={storeItemPath(storeItem._id, 'purchases')}>{storeItem.name?.sv || storeItem.code}</Link></strong></>}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Classified by the item it paid for, so there is nothing to file by hand here: no membership to connect, and the buyer is already known.
           </Typography>

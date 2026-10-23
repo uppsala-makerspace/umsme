@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
-import { useNavigate } from '../navigation';
+import { useNavigate, useQueryParam } from '../navigation';
+import { ItemPurchases } from './ItemPurchases';
 import { useEditor } from '../components/useEditor';
 import { StoreItemForm } from './StoreItemForm';
 import {
@@ -10,6 +11,7 @@ import {
 
 /** /storeitems/add without an id, /storeitem/:_id with one. */
 export const StoreItemEditPage = ({ _id }) => {
+  const [tab, setTab] = useQueryParam('tab');
   const navigate = useNavigate();
   const { loading, item, workshops } = useStoreItem(_id);
   const { values, setField, loaded, run, busy, error, setError, notice, setNotice } = useEditor({ doc: item, loading, toValues: formValues });
@@ -51,6 +53,8 @@ export const StoreItemEditPage = ({ _id }) => {
       onRemoveImage={() => run(() => removeStoreItemImage(_id))}
       sales={sales}
       onDelete={() => run(() => removeStoreItem(_id), { then: () => navigate('/storeitems') })}
+      purchases={<ItemPurchases itemId={_id} />}
+      tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)}
     />
   );
 };
