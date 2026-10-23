@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ServerDataList } from '../components/ServerDataList';
 import { EXPENSE_STATUSES, STATUS_COLOR, statusText, kr, isoDay } from './labels';
+import { DateField } from '../components/DateField';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -63,8 +64,8 @@ export const ExpenseList = ({ title, list, filters, onFilter, onClearFilters }) 
           <option value="">All</option>
           {EXPENSE_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </TextField>
-        <TextField label="From" type="date" value={filters.from} onChange={(e) => onFilter('from', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
-        <TextField label="To" type="date" value={filters.to} onChange={(e) => onFilter('to', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+        <DateField label="From" value={filters.from} onChange={(v) => onFilter('from', v)} />
+        <DateField label="To" value={filters.to} onChange={(v) => onFilter('to', v)} />
         {(filters.status || filters.from || filters.to) && <Button onClick={onClearFilters}>Clear filters</Button>}
       </Stack>
     )}

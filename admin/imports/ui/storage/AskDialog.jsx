@@ -9,6 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import { DateField } from '../components/DateField';
 
 /**
  * Ask for what an action needs before it runs: a reason, a date, a yes or
@@ -29,16 +30,24 @@ export const AskDialog = ({ ask, onClose }) => {
       <DialogContent>
         {ask.text && <DialogContentText sx={{ mb: 2 }}>{ask.text}</DialogContentText>}
         <Stack spacing={2} sx={{ pt: 1 }}>
-          {ask.fields.map((f) => (f.type === 'checkbox'
-            ? (
-              <FormControlLabel key={f.name} label={f.label}
-                control={<Checkbox checked={!!values[f.name]} onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.checked }))} />} />
-            )
-            : (
-              <TextField key={f.name} label={f.label} type={f.type === 'date' ? 'date' : 'text'} required={f.required} autoFocus={f === ask.fields[0]}
-                value={values[f.name] || ''} onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
-                slotProps={f.type === 'date' ? { inputLabel: { shrink: true } } : undefined} multiline={f.type !== 'date'} />
-            )))}
+          {ask.fields.map((f) => {
+            if (f.type === 'checkbox') {
+              return (
+                <FormControlLabel key={f.name} label={f.label}
+                  control={<Checkbox checked={!!values[f.name]} onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.checked }))} />} />
+              );
+            }
+            if (f.type === 'date') {
+              return (
+                <DateField key={f.name} label={f.label} required={f.required} autoFocus={f === ask.fields[0]}
+                  value={values[f.name] || ''} onChange={(day) => setValues((v) => ({ ...v, [f.name]: day }))} />
+              );
+            }
+            return (
+              <TextField key={f.name} label={f.label} required={f.required} autoFocus={f === ask.fields[0]} multiline
+                value={values[f.name] || ''} onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))} />
+            );
+          })}
         </Stack>
       </DialogContent>
       <DialogActions>

@@ -20,6 +20,7 @@ import Typography from '@mui/material/Typography';
 import { ChipSelect } from '../components/ChipSelect';
 import { Section } from '../components/Section';
 import { kr } from './labels';
+import { DateField } from '../components/DateField';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -49,7 +50,7 @@ const Budget = ({ year, years, onYear, revisions, busy, onAdd, onRemove, today, 
         <Stack component="form" direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ my: 2, alignItems: { md: 'flex-start' } }}
           onSubmit={(e) => { e.preventDefault(); onAdd({ amount, day, comment }, () => { setAmount(''); setComment(''); }); }}>
           <TextField label="Budget (kr)" type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} slotProps={{ htmlInput: { min: 0, step: 0.01 } }} />
-          <TextField label="Date" type="date" required value={day} onChange={(e) => setDay(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+          <DateField label="Date" required value={day} onChange={setDay} />
           <TextField label={current ? 'Comment (required)' : 'Comment'} required={!!current} multiline value={comment} onChange={(e) => setComment(e.target.value)} sx={{ flex: 1 }} />
           <Button type="submit" variant="contained" disabled={busy}>{current ? 'Revise' : 'Set'}</Button>
         </Stack>

@@ -104,7 +104,12 @@ together with the router in `client/react/App.jsx`.
   values, the version a save is checked against, busy, error, notice),
   `ImageField` (an image or icon with upload and removal), `ChipSelect`
   (pick several from many: search, dropdown, removable pills; use it instead
-  of a long list of checkboxes).
+  of a long list of checkboxes), `DateField` (a day, always YYYY-MM-DD, with
+  a calendar button; never `<TextField type="date">`, which writes the day
+  in the browser's language, MM/DD/YYYY in English).
+- Dates are shown the Swedish way, 2026-10-23 and 2026-10-23 14:05, with
+  `day()` and `dateTime()` from `imports/ui/dates.js`, never
+  `toLocaleString()` without a locale.
 - One Save per edit page: everything that can wait for Save is a field of the
   form, before the Save button, and is saved with it, including links to
   other things (an item's workshops, a workshop's or group's spaces, a

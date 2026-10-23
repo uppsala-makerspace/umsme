@@ -15,6 +15,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { fieldOptions } from '/imports/common/lib/modelOptions';
 import { day } from './labels';
+import { DateField } from '../components/DateField';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 const TYPES = fieldOptions('membership', 'type');
@@ -32,7 +33,7 @@ const TYPES = fieldOptions('membership', 'type');
 export const MembershipForm = ({ isNew, member, membership, values, onChange, onSave, busy = false, error, notice, dependents = [], payment, onDelete, after }) => {
   const [confirming, setConfirming] = useState(false);
   const text = (name) => ({ value: values[name] ?? '', onChange: (e) => onChange(name, e.target.value) });
-  const date = (name, label) => <TextField label={label} type="date" {...text(name)} slotProps={{ inputLabel: { shrink: true } }} />;
+  const date = (name, label) => <DateField label={label} value={values[name] ?? ''} onChange={(v) => onChange(name, v)} />;
   const losing = !isNew && membership?.family && !values.family && dependents.length > 0;
   return (
     <Box sx={{ maxWidth: 900 }}>

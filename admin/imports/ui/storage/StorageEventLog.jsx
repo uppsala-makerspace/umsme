@@ -13,6 +13,7 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { StorageMemberPicker } from './StorageMemberPicker';
+import { dateTime } from '../dates';
 
 /**
  * The storage event log, newest first, up to 500 events, filtered by member
@@ -44,7 +45,7 @@ export const StorageEventLog = ({ rows, members, units, filters, onFilter, onCle
           <TableBody>
             {rows.map((row) => (
               <TableRow key={row._id}>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}><time>{new Date(row.occurred_at).toLocaleString()}</time></TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}><time>{dateTime(row.occurred_at)}</time></TableCell>
                 <TableCell sx={{ minWidth: 190 }}><strong>{row.eventLabel}</strong><br /><small>{row.entityLabel}</small></TableCell>
                 <TableCell>{row.ownerIds.length === 1 ? <Link href={`/member/${row.ownerIds[0]}`}>{row.memberLabel}</Link> : row.memberLabel}</TableCell>
                 <TableCell>{row.unitLabel}</TableCell>

@@ -16,8 +16,9 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { STORAGE_ACTIONS, storageActionReasonLabel, storageResultSummary } from '/imports/storage/presentation';
+import { dateTime } from '../dates';
 
-const moment = (value) => (value ? new Date(value).toLocaleString() : '—');
+const moment = (value) => dateTime(value) || '—';
 const RESULT_COLOR = { applied: 'success.main', already_applied: 'success.main', stale: 'warning.dark', conflict: 'warning.dark', failed: 'error.main' };
 
 const channels = (row) => (['allocate', 'warn', 'remind', 'reclaim', 'release'].includes(row.action)

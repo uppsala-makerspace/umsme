@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { MemberSelect } from '../components/MemberSelect';
 import { today, daysAfter } from './format';
+import { DateField } from '../components/DateField';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -62,10 +63,8 @@ export const GrantForm = ({ choose, certificates = [], validityDays, search, def
         </Box>
       </Stack>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-        <TextField label="Start date" type="date" required value={startDay} onChange={(e) => setStartDay(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }} sx={{ minWidth: 180 }} />
-        <TextField label="End date" type="date" value={endDay} onChange={(e) => setEndDay(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }} sx={{ minWidth: 180 }}
+        <DateField label="Start date" required value={startDay} onChange={setStartDay} sx={{ minWidth: 180 }} />
+        <DateField label="End date" value={endDay} onChange={setEndDay} sx={{ minWidth: 180 }}
           helperText={days ? `Empty: ${daysAfter(startDay || today(), days)} (${days} days)` : 'Empty: no expiry'} />
         <TextField label="Comment" fullWidth value={comment} onChange={(e) => setComment(e.target.value)} />
       </Stack>

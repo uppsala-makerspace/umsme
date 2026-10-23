@@ -21,7 +21,6 @@ shell-server@0.7.1            # Server-side component of the `meteor shell` comm
 hot-module-replacement@0.6.0  # Update code in development without reloading the page
 aldeed:collection2@=4.1.5
 accounts-password@3.3.1
-momentjs:moment
 email@3.2.0
 fetch@0.2.0
 chatra:synced-cron

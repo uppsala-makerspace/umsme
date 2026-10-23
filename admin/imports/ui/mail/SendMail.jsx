@@ -25,6 +25,7 @@ import Typography from '@mui/material/Typography';
 import { Addresses } from './Addresses';
 import { Progress } from './Progress';
 import { RECIPIENT_GROUPS } from './labels';
+import { DateField } from '../components/DateField';
 
 const FORMATS = [['raw', 'Raw'], ['markdown', 'Markdown'], ['plaintext', 'Plain text']];
 
@@ -88,9 +89,8 @@ export const SendMail = ({ values, onChange, senders, recipients, onSend, starti
               </RadioGroup>
               <FormControlLabel control={<Checkbox checked={values.family} onChange={(e) => { onChange('family', e.target.checked); onChange('removed', []); }} />} label="Include family members" />
             </FormControl>
-            <TextField label="First paid on or after" type="date" size="small" value={values.since} sx={{ maxWidth: 260 }}
-              onChange={(e) => { onChange('since', e.target.value); onChange('removed', []); }}
-              slotProps={{ inputLabel: { shrink: true } }}
+            <DateField label="First paid on or after" size="small" value={values.since} sx={{ maxWidth: 260 }}
+              onChange={(v) => { onChange('since', v); onChange('removed', []); }}
               helperText="Only members who became paying members on or after this day; empty for all. A family member counts from the payer." />
           </>
         )}

@@ -8,12 +8,12 @@ import TableCell from '@mui/material/TableCell';
 import TableFooter from '@mui/material/TableFooter';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { ExpenseTable } from './ExpenseList';
 import { kr, isoDay } from './labels';
+import { DateField } from '../components/DateField';
 
 /**
  * What the treasurer pays: invoices to the supplier, soonest due first, and
@@ -44,8 +44,8 @@ export const ReimburseQueue = ({ view, onViewChange, invoices, receipts, range, 
       <>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Expenses reimbursed or set up for payment, by payment date. Leave To empty to include everything ahead.</Typography>
         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-          <TextField label="From" type="date" value={range.from} onChange={(e) => onRangeChange('from', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
-          <TextField label="To" type="date" value={range.to} onChange={(e) => onRangeChange('to', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+          <DateField label="From" value={range.from} onChange={(v) => onRangeChange('from', v)} />
+          <DateField label="To" value={range.to} onChange={(v) => onRangeChange('to', v)} />
         </Stack>
         {!reimbursed ? <Typography color="text.secondary">Looking…</Typography> : reimbursed.rows.length === 0
           ? <Typography>No reimbursed expenses in this period.</Typography>

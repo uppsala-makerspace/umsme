@@ -19,6 +19,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { isPdf } from '/imports/common/lib/expenseType';
 import { STATUS_COLOR, statusText, kr, isoDay } from './labels';
+import { DateField } from '../components/DateField';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 const Row = ({ label, children }) => (
@@ -133,7 +134,7 @@ export const ExpenseView = ({
                   <option value="">— select account —</option>
                   {accountOptions.map((o) => <option key={o.account} value={o.account}>{o.account} — {o.name}</option>)}
                 </TextField>
-                <TextField label={invoice ? 'Payment date' : 'Reimbursement date'} type="date" value={day} onChange={(e) => setDay(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+                <DateField label={invoice ? 'Payment date' : 'Reimbursement date'} value={day} onChange={setDay} />
                 <Box>
                   <Button variant="contained" color="success" disabled={busy || !account || !day}
                     onClick={() => ask(invoice ? 'Mark this invoice as paid?' : 'Mark this expense as reimbursed?', `Booked on ${accountLabel(account)}, ${day}.`, `Mark as ${invoice ? 'paid' : 'reimbursed'}`, () => onReimburse(account, day))}>

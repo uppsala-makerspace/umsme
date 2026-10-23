@@ -44,6 +44,7 @@ import "./members.tests";
 import "./users.tests";
 import "./mails.tests";
 import "./memberBatches.tests";
+import "./dates.tests";
 
 describe("umsme", function () {
   it("package.json has correct name", async function () {

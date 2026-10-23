@@ -12,9 +12,11 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { StorageMemberPicker } from './StorageMemberPicker';
+import { day, dateTime } from '../dates';
+import { DateField } from '../components/DateField';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
-const day = (value) => (value ? new Date(value).toLocaleDateString() : '—');
+const shownDay = (value) => day(value) || '—';
 
 /**
  * Add a member to the queue, ask for a different unit, or edit a request:
@@ -60,13 +62,13 @@ const RequestEditor = ({ editor, members, busy, onSave, onClose }) => {
       </Stack>
       {request && (
         <Typography variant="body2" sx={{ mb: 1 }}>
-          Current waiting date: <strong title={new Date(request.requested_at).toLocaleString()}>{day(request.requested_at)}</strong>. Saving preferences alone preserves it.
+          Current waiting date: <strong title={dateTime(request.requested_at)}>{shownDay(request.requested_at)}</strong>. Saving preferences alone preserves it.
         </Typography>
       )}
       <Box component="details" sx={{ mb: 2, p: 1.5, border: 1, borderColor: 'divider', bgcolor: 'background.paper', '& summary': { cursor: 'pointer', fontWeight: 700 } }}>
         <summary>Advanced: correct waiting date</summary>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mt: 1.5 }}>
-          <TextField label="Corrected waiting date" type="date" value={values.requestedAt || ''} onChange={set('requestedAt')} slotProps={{ inputLabel: { shrink: true } }} />
+          <DateField label="Corrected waiting date" value={values.requestedAt || ''} onChange={(v) => set('requestedAt')({ target: { value: v } })} />
           <TextField label="Reason" fullWidth required={!!values.requestedAt} value={values.reason || ''} onChange={set('reason')}
             placeholder="Why is the waiting date being corrected?" slotProps={{ htmlInput: { maxLength: 5000 } }}
             error={!!reasonMissing} helperText={reasonMissing ? 'A reason is required when correcting the waiting date.' : ''} />
@@ -114,7 +116,7 @@ export const StorageQueue = ({
             {rows.map((row) => (
               <TableRow key={row._id}>
                 <TableCell><strong>{row.memberName}</strong>{row.memberNumber && <><br /><small>{row.memberNumber}</small></>}</TableCell>
-                <TableCell title={new Date(row.requested_at).toLocaleString()}>{day(row.requested_at)}</TableCell>
+                <TableCell title={dateTime(row.requested_at)}>{shownDay(row.requested_at)}</TableCell>
                 <TableCell>{row.requestLabel}</TableCell>
                 <TableCell>{row.currentUnit}</TableCell>
                 <TableCell>{row.preferenceLabel}</TableCell>

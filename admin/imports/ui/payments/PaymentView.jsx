@@ -19,6 +19,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { MemberSelect } from '../components/MemberSelect';
 import { STATUS, day } from './labels';
+import { dateTime } from '../dates';
 
 const Facts = ({ rows }) => (
   <Table size="small" sx={{ maxWidth: 700, mb: 2 }}>
@@ -72,7 +73,7 @@ export const PaymentView = ({ detail, busy = false, error, search, on, comments 
       {initiatedPayment && (
         <>
           <Typography variant="h5" component="h2">Initiated payment</Typography>
-          <Facts rows={Object.entries(initiatedPayment).filter(([k]) => !['_id', 'member'].includes(k)).map(([k, v]) => [k, v instanceof Date ? v.toLocaleString() : String(v)])} />
+          <Facts rows={Object.entries(initiatedPayment).filter(([k]) => !['_id', 'member'].includes(k)).map(([k, v]) => [k, v instanceof Date ? dateTime(v) : String(v)])} />
         </>
       )}
 

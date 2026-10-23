@@ -10,9 +10,10 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { storageStatusLabel } from '/imports/storage/presentation';
 import { StorageMemberPicker } from './StorageMemberPicker';
+import { dateTime } from '../dates';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
-const moment = (value) => (value ? new Date(value).toLocaleString() : '—');
+const moment = (value) => dateTime(value) || '—';
 const Sub = ({ title, children }) => (
   <Box sx={{ mt: 2, p: 2, border: 1, borderColor: 'divider', bgcolor: '#fafafa' }}>
     <Typography variant="h6" component="h3" sx={{ mb: 1 }}>{title}</Typography>

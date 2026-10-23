@@ -11,6 +11,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { DateField } from '../components/DateField';
 
 /**
  * Add or edit a version of the liability agreement.
@@ -33,7 +34,7 @@ export const LiabilityForm = ({ isNew, values, onChange, onSave, onDelete, busy 
       <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
           <TextField label="Title" required fullWidth {...field('title')} />
-          <TextField label="Date" type="date" required sx={{ minWidth: 200 }} slotProps={{ inputLabel: { shrink: true } }} {...field('date')} />
+          <DateField label="Date" required sx={{ minWidth: 200 }} value={values.date || ''} onChange={(v) => onChange('date', v)} />
         </Stack>
         <Stack spacing={2} sx={{ mb: 2 }}>
           <TextField label="Document text (Swedish)" {...text} {...field('sv')} />

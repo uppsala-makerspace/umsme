@@ -5,6 +5,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import { DateField } from '../components/DateField';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -63,7 +64,7 @@ export const MemberForm = ({ values, onChange, onSave, member, busy = false, sub
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
           {check('youth', 'Youth')}
           {check('liability', 'Liability')}
-          <TextField label="Liability version approved" type="date" {...text('liabilityDate')} slotProps={{ inputLabel: { shrink: true } }} />
+          <DateField label="Liability version approved" value={values.liabilityDate ?? ''} onChange={(v) => onChange('liabilityDate', v)} />
           {member && <FormControlLabel label="Family" control={<Checkbox checked={!!member.family} disabled />} />}
         </Stack>
         {member?.paymentError && <TextField label="Payment Error" value={member.paymentError} slotProps={{ input: { readOnly: true } }} />}

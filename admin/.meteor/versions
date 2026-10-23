@@ -54,7 +54,6 @@ modern-browsers@0.2.3
 modules@0.20.3
 modules-runtime@0.13.2
 modules-runtime-hot@0.14.3
-momentjs:moment@2.30.1
 mongo@2.5.1
 mongo-decimal@0.2.0
 mongo-dev-server@1.1.1
