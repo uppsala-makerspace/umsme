@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
-import { useNavigate } from '../navigation';
+import { useNavigate, useQueryParam } from '../navigation';
 import { useEditor } from '../components/useEditor';
 import { SpaceForm } from './SpaceForm';
 import { useSpace, formValues, saveSpace, spaceLinks, removeSpace, uploadSpaceIcon, removeSpaceIcon, iconUrl } from './data';
@@ -11,6 +11,7 @@ export const SpaceEditPage = ({ _id }) => {
   const { loading, space } = useSpace(_id);
   const { values, setField, loaded, run, busy, error, setError, notice, setNotice } = useEditor({ doc: space, loading, toValues: formValues });
   const [links, setLinks] = useState(null);
+  const [tab, setTab] = useQueryParam('tab');
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export const SpaceEditPage = ({ _id }) => {
       onRemoveIcon={() => run(() => removeSpaceIcon(_id))}
       links={links}
       onDelete={() => run(() => removeSpace(_id), { then: () => navigate('/spaces') })}
+      tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)}
     />
   );
 };

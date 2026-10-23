@@ -10,9 +10,10 @@ const values = (space) => ({
 const noLinks = { workshops: [], groups: [] };
 
 /** Keeps the values, as the page does. */
-const Editable = ({ values: initial, ...props }) => {
+const Editable = ({ values: initial, initialTab = 'details', ...props }) => {
   const [current, setCurrent] = useState(initial);
-  return <SpaceForm {...props} values={current} onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))} />;
+  const [tab, setTab] = useState(initialTab);
+  return <SpaceForm {...props} tab={tab} onTab={setTab} values={current} onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))} />;
 };
 
 export default {
@@ -36,4 +37,5 @@ export const Linked = {
   },
 };
 
+export const ReferencesTab = { args: { ...Linked.args, initialTab: 'references' } };
 export const SaveRefused = { args: { error: 'Someone else changed this space; reload it and try again' } };

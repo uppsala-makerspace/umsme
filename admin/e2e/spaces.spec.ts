@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, expectSearch, sortBy } from './lists';
-import { field, numberField, action, saveButton, confirmed, deleteConfirmed } from './forms';
+import { field, numberField, action, saveButton, confirmed, deleteConfirmed, openTab } from './forms';
 
 // Spaces on the map: list, add, edit, icon, delete, what links to them, and
 // who sees them. Written against the Blaze pages and meant to pass unchanged
@@ -84,13 +84,15 @@ test.describe('Spaces', () => {
 
   test('shows what links to a space, and keeps it', async ({ page }) => {
     await openSpace(page, CERAMICS);
+    await expect(page.getByText(/can ?not be deleted/i).first()).toBeVisible();
+    await openTab(page, /^references \(\d+\)$/i);
     await expect(page.getByRole('link', { name: 'Keramikverkstaden' })).toBeVisible();
-    await expect(page.getByText(/can ?not be deleted/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /^delete/i })).not.toBeVisible();
   });
 
   test('uploads and removes an icon', async ({ page }) => {
     await openSpace(page, BIG_ROOM);
+    await openTab(page, /^icon$/i);
     await page.locator('input[type="file"]').setInputFiles({ name: 'room.svg', mimeType: 'image/svg+xml', buffer: SVG });
     await action(page, /^upload icon$/i).click();
     await expect(page.getByRole('img', { name: BIG_ROOM })).toBeVisible();
