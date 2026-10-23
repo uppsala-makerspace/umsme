@@ -5,7 +5,7 @@ import { Memberships } from '/imports/common/collections/memberships';
 import { Mails } from '/imports/common/collections/mails';
 import { Announcements } from '/imports/common/collections/announcements';
 import { Comments } from '/imports/common/collections/comments';
-import { mailRecipients, sendGroupMail, renderMail, removeMail, mailDetail, mailSending, setUpMails, retryMail, acceptMail } from '/server/mail/mails';
+import { ANNOUNCEMENT_RECIPIENTS, mailRecipients, sendGroupMail, renderMail, removeMail, mailDetail, mailSending, setUpMails, retryMail, acceptMail } from '/server/mail/mails';
 import { announcementFromMail } from '/imports/common/server/announcements/announcements';
 
 const prefix = 'mailtest-';
@@ -82,15 +82,34 @@ describe('group mail', function () {
     format: 'raw', only: [`${prefix}current@example.org`], ...fields,
   });
 
+  // An announcement's mail goes to every current member, family too, with no choosing.
+  const announcementMail = (announcementId) => ({
+    from: 'sender@example.org', recipients: 'members', family: true, subject: `${prefix}subject`, template: 'Hej <%= name %>', format: 'raw', announcementId,
+  });
+
+  it('sends an announcement, mail and push, to the active members and their families only', async function () {
+    const everyone = await mailRecipients(ANNOUNCEMENT_RECIPIENTS);
+    assert.deepStrictEqual(ours(everyone), ['Mail current', 'Mail dependent', 'Mail payer']);
+    assert.ok(everyone.every((r) => r.memberId));
+  });
+
+  it('refuses to narrow down the recipients of an announcement', async function () {
+    const announcementId = await Announcements.insertAsync({ type: 'information', subjectSv: `${prefix}n`, bodySv: 'x', status: 'draft', createdAt: now });
+    await assert.rejects(sendGroupMail(groupMail({ announcementId }), user), /announcement-recipients/);
+    await assert.rejects(sendGroupMail({ ...announcementMail(announcementId), since: new Date() }, user), /announcement-recipients/);
+    await assert.rejects(sendGroupMail({ ...announcementMail(announcementId), family: false }, user), /announcement-recipients/);
+  });
+
   it('sends in the background and, when all got it, marks the mail and its announcement sent', async function () {
     delivering();
     const announcementId = await Announcements.insertAsync({ type: 'information', subjectSv: `${prefix}a`, bodySv: 'x', status: 'draft', createdAt: now });
-    const { mailId, total, done } = await sendGroupMail(groupMail({ announcementId }), user);
-    assert.strictEqual(total, 1);
+    const { mailId, total, done } = await sendGroupMail(announcementMail(announcementId), user);
+    assert.ok(total >= 3);
     await done;
     assert.strictEqual(await mailSending(), undefined);
     const mail = await Mails.findOneAsync(mailId);
-    assert.deepStrictEqual([mail.status, mail.active, mail.queue, mail.to], ['sent', undefined, undefined, [`Mail current <${prefix}current@example.org>`]]);
+    assert.deepStrictEqual([mail.status, mail.active, mail.queue, mail.to.length], ['sent', undefined, undefined, total]);
+    assert.ok(mail.to.includes(`Mail dependent <${prefix}dependent@example.org>`));
     const announcement = await Announcements.findOneAsync(announcementId);
     assert.strictEqual(announcement.status, 'sent');
     assert.strictEqual(announcement.mailId, mailId);
@@ -101,21 +120,23 @@ describe('group mail', function () {
   it('waits for a decision on those it failed for: try again, then OK', async function () {
     Meteor.settings.deliverMails = false;
     const announcementId = await Announcements.insertAsync({ type: 'information', subjectSv: `${prefix}b`, bodySv: 'x', status: 'draft', createdAt: now });
-    const { mailId, done } = await sendGroupMail(groupMail({ announcementId }), user);
+    const { mailId, done } = await sendGroupMail(announcementMail(announcementId), user);
     await done;
     let mail = await Mails.findOneAsync(mailId);
-    assert.deepStrictEqual([mail.status, mail.active, mail.failed.length, mail.retry.length], ['review', true, 1, 1]);
+    const failed = mail.failed.length;
+    assert.ok(failed >= 3);
+    assert.deepStrictEqual([mail.status, mail.active, mail.retry.length], ['review', true, failed]);
     assert.strictEqual((await mailSending()).status, 'review');
     await assert.rejects(sendGroupMail(groupMail(), user), /busy/);
     assert.strictEqual((await Announcements.findOneAsync(announcementId)).status, 'draft');
 
     await (await retryMail(mailId, user)).done;
     mail = await Mails.findOneAsync(mailId);
-    assert.deepStrictEqual([mail.status, mail.failed.length], ['review', 1]);
+    assert.deepStrictEqual([mail.status, mail.failed.length], ['review', failed]);
 
     await acceptMail(mailId, user);
     mail = await Mails.findOneAsync(mailId);
-    assert.deepStrictEqual([mail.status, mail.active, mail.failed.length], ['sent', undefined, 1]);
+    assert.deepStrictEqual([mail.status, mail.active, mail.failed.length], ['sent', undefined, failed]);
     assert.strictEqual((await Announcements.findOneAsync(announcementId)).status, 'sent');
     await assert.rejects(acceptMail(mailId, user), /not-waiting/);
   });

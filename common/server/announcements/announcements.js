@@ -93,10 +93,15 @@ export const announcementFromMail = async (mailId, { userId }) => {
   return docId;
 };
 
-/** Push an announcement to every member not excluded; pushAnnouncement skips those who opted out. */
-export const pushAnnouncementToMembers = async (docId) => {
+/**
+ * Push an announcement to these members (admin's mail module picks them:
+ * the active members and their families). pushAnnouncement skips the
+ * excluded, those who opted out or have no subscription, and (in
+ * development) those not on the recipient whitelist.
+ */
+export const pushAnnouncementToMembers = async (docId, memberIds) => {
   await current(docId);
-  const members = await Members.find({ email: { $exists: true }, excluded: { $ne: true } }).fetchAsync();
+  const members = await Members.find({ _id: { $in: memberIds } }).fetchAsync();
   for (const member of members) await pushAnnouncement(member, docId);
-  console.log(`[Push] Sent announcement push for ${docId}`);
+  console.log(`[Push] Announcement ${docId} pushed to whoever of ${members.length} members takes it`);
 };

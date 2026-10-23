@@ -96,6 +96,10 @@ test.describe.serial('Sending mail', () => {
     await action(page, /^send$/i).click();
     await expect(page).toHaveURL(/\/mail\/send\?announcement=/);
     await expect(field(page, 'Subject')).toHaveValue('E2E send announcement');
+    // An announcement is for everyone: no choosing of recipients.
+    await expect(page.getByText(/every current member/i).first()).toBeVisible();
+    await expect(page.getByRole('radiogroup', { name: 'Recipients' })).toHaveCount(0);
+    await expect(page.getByLabel(/first paid on or after/i)).toHaveCount(0);
     await send(page);
     await expect(page).toHaveURL(/\/mail\/\w+$/);
     await page.getByRole('link', { name: /view announcement/i }).click();

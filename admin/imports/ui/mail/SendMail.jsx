@@ -28,16 +28,20 @@ import { RECIPIENT_GROUPS } from './labels';
 
 const FORMATS = [['raw', 'Raw'], ['markdown', 'Markdown'], ['plaintext', 'Plain text']];
 
-/** The form's values for a new mail; from an announcement, its subject and text in both languages. */
+/**
+ * The form's values for a new mail; from an announcement, its subject and
+ * text in both languages, to every current member, family members too (the
+ * server holds an announcement's mail to that).
+ */
 export const mailValues = (announcement) => ({
-  from: '', recipients: 'members', family: false, since: '', format: 'raw', removed: [],
+  from: '', recipients: 'members', family: !!announcement, since: '', format: 'raw', removed: [],
   subject: announcement ? [announcement.subjectSv, announcement.subjectEn].filter(Boolean).join(' / ') : '',
   template: announcement ? [announcement.bodySv, announcement.bodyEn].filter(Boolean).join('\n---\n\n') : '',
 });
 
 /**
  * Writing and sending a group mail: from whom, to which members (any of
- * them taken away), the subject and the text, written raw, as markdown or
+ * them taken away; not for an announcement, which goes to everyone), the subject and the text, written raw, as markdown or
  * as markdown sent as plain text. The text is a template, rendered for each
  * recipient (see the documentation below it). Sending asks first; the mail
  * then goes out in the background, and while one does no other can be sent.
@@ -60,7 +64,12 @@ export const SendMail = ({ values, onChange, senders, recipients, onSend, starti
   return (
     <Box sx={{ maxWidth: 1200 }}>
       <Typography variant="h4" component="h1" sx={{ mb: 2 }}>Send mail</Typography>
-      {announcement && <Alert severity="info" sx={{ mb: 2 }}>Sending the announcement <strong>{announcement.subjectSv}</strong>; once sent it is marked sent and pushed to the members’ phones. <Link href={`/announcement/${announcement._id}`}>Back to the announcement</Link></Alert>}
+      {announcement && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Sending the announcement <strong>{announcement.subjectSv}</strong>. An announcement is for everyone: it is mailed to every current member,
+          family members too, and once sent it shows in the app and is pushed to the members’ phones. <Link href={`/announcement/${announcement._id}`}>Back to the announcement</Link>
+        </Alert>
+      )}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {job && <Progress job={job} link />}
       <Stack spacing={2}>
@@ -70,23 +79,27 @@ export const SendMail = ({ values, onChange, senders, recipients, onSend, starti
             {senders.map((s) => <FormControlLabel key={s} value={s} control={<Radio />} label={s} />)}
           </RadioGroup>
         </FormControl>
-        <FormControl>
-          <FormLabel id="mail-recipients">Recipients</FormLabel>
-          <RadioGroup row aria-labelledby="mail-recipients" value={values.recipients} onChange={(e) => { onChange('recipients', e.target.value); onChange('removed', []); }}>
-            {RECIPIENT_GROUPS.map(([value, label]) => <FormControlLabel key={value} value={value} control={<Radio />} label={label} />)}
-          </RadioGroup>
-          <FormControlLabel control={<Checkbox checked={values.family} onChange={(e) => { onChange('family', e.target.checked); onChange('removed', []); }} />} label="Include family members" />
-        </FormControl>
-        <TextField label="First paid on or after" type="date" size="small" value={values.since} sx={{ maxWidth: 260 }}
-          onChange={(e) => { onChange('since', e.target.value); onChange('removed', []); }}
-          slotProps={{ inputLabel: { shrink: true } }}
-          helperText="Only members who became paying members on or after this day; empty for all. A family member counts from the payer." />
+        {!announcement && (
+          <>
+            <FormControl>
+              <FormLabel id="mail-recipients">Recipients</FormLabel>
+              <RadioGroup row aria-labelledby="mail-recipients" value={values.recipients} onChange={(e) => { onChange('recipients', e.target.value); onChange('removed', []); }}>
+                {RECIPIENT_GROUPS.map(([value, label]) => <FormControlLabel key={value} value={value} control={<Radio />} label={label} />)}
+              </RadioGroup>
+              <FormControlLabel control={<Checkbox checked={values.family} onChange={(e) => { onChange('family', e.target.checked); onChange('removed', []); }} />} label="Include family members" />
+            </FormControl>
+            <TextField label="First paid on or after" type="date" size="small" value={values.since} sx={{ maxWidth: 260 }}
+              onChange={(e) => { onChange('since', e.target.value); onChange('removed', []); }}
+              slotProps={{ inputLabel: { shrink: true } }}
+              helperText="Only members who became paying members on or after this day; empty for all. A family member counts from the payer." />
+          </>
+        )}
         <Box>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.5 }}>
-            <FormLabel>To ({recipients ? to.length : '…'}), longest a member first</FormLabel>
+            <FormLabel>To ({recipients ? to.length : '…'}){announcement ? ', every current member' : ', longest a member first'}</FormLabel>
             {values.removed.length > 0 && <Button size="small" onClick={() => onChange('removed', [])}>Put back the {values.removed.length} taken away</Button>}
           </Stack>
-          {recipients ? <Addresses addresses={to} onRemove={(a) => onChange('removed', [...values.removed, a])} empty="Nobody in this group." /> : <Typography variant="body2" color="text.secondary">Finding the recipients…</Typography>}
+          {recipients ? <Addresses addresses={to} onRemove={announcement ? undefined : (a) => onChange('removed', [...values.removed, a])} empty="Nobody in this group." /> : <Typography variant="body2" color="text.secondary">Finding the recipients…</Typography>}
         </Box>
         <TextField label="Subject" value={values.subject} onChange={(e) => onChange('subject', e.target.value)} fullWidth />
         <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>

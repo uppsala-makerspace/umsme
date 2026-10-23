@@ -121,3 +121,15 @@ till servern kan reglerna tas bort.
   först då kan ett annat mejl skickas.
 - **Familjemedlemmar i filtret "first paid on or after"** räknas från när
   familjens betalare först betalade, eftersom de inte har egna medlemskap.
+
+## Utskick är till alla (beslut 2026-10-23)
+
+- Ett utskick (announcement) är till alla, vilket betyder alla aktiva
+  medlemmar och deras familjemedlemmar, inte de vars medlemskap gått ut och
+  inte de uteslutna. Skickar man från ett utskick finns inga val av
+  mottagare (grupp, familj, datumfilter, ta bort enskilda); servern nekar
+  ett urval. Mejlet och push-notisen går till samma personer. Att välja
+  mottagare går bara för vanliga mejl.
+- Öppet: appen visar skickade utskick för varje inloggad medlem, även den
+  vars medlemskap gått ut. Ska det också gälla bara aktiva medlemmar och
+  deras familjer? Gjort i väntan: orört.

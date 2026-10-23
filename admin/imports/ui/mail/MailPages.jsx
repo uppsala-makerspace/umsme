@@ -94,9 +94,11 @@ export const SendMailPage = () => {
     setStarting(true);
     setError(null);
     try {
-      const only = recipients.filter((r) => to.includes(r.to)).map((r) => r.email);
       const { from, recipients: group, family, since, subject, template, format } = values;
-      const { mailId } = await sendMail({ from, recipients: group, family, since, subject, template, format, only, ...(announcement ? { announcementId: announcement._id } : {}) });
+      // An announcement's mail goes to everyone; only a mail of its own is narrowed down.
+      const { mailId } = await sendMail(announcement
+        ? { from, recipients: group, family, subject, template, format, announcementId: announcement._id }
+        : { from, recipients: group, family, since, subject, template, format, only: recipients.filter((r) => to.includes(r.to)).map((r) => r.email) });
       navigate(`/mail/${mailId}`);
     } catch (e) {
       setError(reason(e));

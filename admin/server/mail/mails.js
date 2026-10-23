@@ -27,6 +27,12 @@ import { sendMail } from './send';
 const DOMAIN = 'mails';
 export const RECIPIENT_GROUPS = ['members', 'labmembers', 'yearmembers', 'recentmembers'];
 export const FORMATS = ['raw', 'markdown', 'plaintext'];
+/**
+ * An announcement is for everyone, which means every active member and
+ * their family members, not those whose membership has run out nor the
+ * excluded: its mail goes to them, and so does its push.
+ */
+export const ANNOUNCEMENT_RECIPIENTS = { recipients: 'members', family: true };
 
 const day = (date) => (date ? new Date(date).toISOString().slice(0, 10) : '');
 
@@ -72,6 +78,7 @@ export const mailRecipients = async ({ recipients, family, since }, now = new Da
     const joined = first[member.infamily || member._id] || null;
     if (since && !(joined && joined >= since)) continue;
     result.push({
+      memberId: member._id,
       memberSince: day(joined),
       to: `${member.name} <${member.email}>`,
       name: member.name,
@@ -125,7 +132,10 @@ const finish = async (mailId, { userId }) => {
   await recordChange({ userId, domain: DOMAIN, action: 'sent', docId: mailId, after: { to: mail.to.length, failed: mail.failed.length } });
   if (mail.announcementId) {
     await markAnnouncementSent(mail.announcementId, mailId, { userId });
-    pushAnnouncementToMembers(mail.announcementId).catch((e) => console.error('Failed to send announcement push:', e));
+    // To everyone an announcement is for as things stand now, as the mail was.
+    mailRecipients(ANNOUNCEMENT_RECIPIENTS)
+      .then((everyone) => pushAnnouncementToMembers(mail.announcementId, everyone.map((r) => r.memberId)))
+      .catch((e) => console.error('Failed to send announcement push:', e));
   }
 };
 
@@ -168,7 +178,9 @@ const deliver = (mailId, { userId }) => {
 
 /**
  * Send a mail to a group, or to those of it in `only` (by email): recorded
- * at once, sent in the background (see mailSending). Refused while another
+ * at once, sent in the background (see mailSending). The mail of an
+ * announcement takes no choice of recipients: it goes to
+ * ANNOUNCEMENT_RECIPIENTS. Refused while another
  * mail is under way, and for a template that does not render, before
  * anything is sent.
  *
@@ -178,7 +190,12 @@ export const sendGroupMail = async ({ from, recipients, family, since, subject, 
   if (!senders().includes(from)) throw new Meteor.Error('bad-from', `Mail can not be sent from ${from}`);
   if (!FORMATS.includes(format)) throw new Meteor.Error('bad-format', `No format "${format}"`);
   if (!subject.trim() || !text.trim()) throw new Meteor.Error('bad-mail', 'A mail needs a subject and a text');
-  if (announcementId && !(await Announcements.findOneAsync(announcementId))) throw new Meteor.Error('not-found', 'No such announcement');
+  if (announcementId) {
+    if (!(await Announcements.findOneAsync(announcementId))) throw new Meteor.Error('not-found', 'No such announcement');
+    if (recipients !== ANNOUNCEMENT_RECIPIENTS.recipients || family !== ANNOUNCEMENT_RECIPIENTS.family || since || only) {
+      throw new Meteor.Error('announcement-recipients', 'An announcement goes to every current member; its recipients can not be chosen');
+    }
+  }
   if (await mailSending()) throw new Meteor.Error('busy', 'Another mail is under way; wait until it is done');
   let list = await mailRecipients({ recipients, family, since });
   if (only) {
