@@ -15,8 +15,11 @@ const rows = dataRows;
 const openMail = async (page: Page, subject: string) => {
   await openAs(page, 'admin', '/mail');
   await search(page, subject);
-  await rows(page).filter({ hasText: subject }).getByText(subject).click();
-  await expect(page).toHaveURL(/\/mail\/\w+$/);
+  // A click on a row the list is about to draw again is lost; click again until it takes.
+  await expect(async () => {
+    await rows(page).filter({ hasText: subject }).getByText(subject).click();
+    await expect(page).toHaveURL(/\/mail\/\w+$/, { timeout: 1000 });
+  }).toPass();
 };
 
 /** Write and send a mail on /mail/send: from the first sender, to the current members. */
