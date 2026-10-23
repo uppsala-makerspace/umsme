@@ -16,6 +16,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { GrantForm } from './GrantForm';
 import { HolderList } from './HolderList';
+import { certificatePath } from './paths';
 
 /**
  * A member's certificates on their page: what they hold or asked for, a form
@@ -50,7 +51,7 @@ export const MemberCertificates = ({
             <TableBody>
               {attempts.map((a) => (
                 <TableRow key={a.certificateId}>
-                  <TableCell><Link href={`/certificate/${a.certificateId}`}>{a.certificateName}</Link></TableCell>
+                  <TableCell><Link href={certificatePath(a.certificateId, 'holders')}>{a.certificateName}</Link></TableCell>
                   <TableCell><code>{a.testId}</code></TableCell>
                   <TableCell>{a.count}</TableCell>
                   <TableCell>{a.lastState}</TableCell>

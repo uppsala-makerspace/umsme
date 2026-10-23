@@ -9,6 +9,7 @@ import Link from '@mui/material/Link';
 import { DataList } from '../components/DataList';
 import { day } from './format';
 import { memberPath } from '../members/paths';
+import { certificatePath } from './paths';
 
 /**
  * Attestations as a list: who holds a certificate (`show` 'member') or what
@@ -27,7 +28,7 @@ export const HolderList = ({ show, rows, onRevoke, busy = false }) => {
       }
       : {
         field: 'certificateName', headerName: 'Certificate', flex: 1, minWidth: 200,
-        renderCell: ({ row }) => <Link href={`/certificate/${row.certificateId}`} underline="hover" sx={{ fontWeight: 600 }}>{row.certificateName}</Link>,
+        renderCell: ({ row }) => <Link href={certificatePath(row.certificateId, 'holders')} underline="hover" sx={{ fontWeight: 600 }}>{row.certificateName}</Link>,
       },
     ...(show === 'member' ? [{ field: 'memberMid', headerName: 'Member number', width: 130 }] : []),
     { field: 'startDate', headerName: 'Start', width: 120, type: 'date', valueGetter: (v) => (v ? new Date(v) : null), valueFormatter: (v) => day(v) },

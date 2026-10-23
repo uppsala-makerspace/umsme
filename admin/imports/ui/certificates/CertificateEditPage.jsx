@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import { wouldCreateCycle } from '/imports/common/lib/rules';
-import { useNavigate } from '../navigation';
+import { useNavigate, useQueryParam } from '../navigation';
 import { useEditor } from '../components/useEditor';
 import { useChoices, memberNames, searchMembers } from '../groups/choices';
 import { CertificateForm } from './CertificateForm';
@@ -12,6 +12,7 @@ import {
 
 /** /certificates/add without an id, /certificate/:_id with one. */
 export const CertificateEditPage = ({ _id }) => {
+  const [tab, setTab] = useQueryParam('tab');
   const navigate = useNavigate();
   const { loading, certificate, certificates } = useCertificate(_id);
   const { workshops, loading: choicesLoading } = useChoices();
@@ -89,6 +90,7 @@ export const CertificateEditPage = ({ _id }) => {
       onGrant={(grant) => granted(() => grantAttestation({ ...grant, certificateId: _id }))}
       onRevoke={(attestationId) => run(() => revokeAttestation(attestationId), asIs)}
       onDelete={() => run(() => removeCertificate(_id), { then: () => navigate('/certificates') })}
+      tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)}
     />
   );
 };

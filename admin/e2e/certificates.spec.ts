@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, expectSearch, sortBy } from './lists';
-import { field, action, createButton, saveButton, confirmed, deleteConfirmed } from './forms';
+import { field, action, createButton, saveButton, confirmed, deleteConfirmed, openTab } from './forms';
 
 // Certificates: list, add, edit, what a certificate links to, its holders,
 // revoking, marking one mandatory, delete, a member's certificates, and who
@@ -70,6 +70,7 @@ test.describe('Certificates', () => {
     await openCertificate(page, KILN);
     await expect(page.getByRole('link', { name: /Keramikverkstaden/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Sara Styrgrupp' }).first()).toBeVisible();
+    await openTab(page, /^holders \(\d+\)$/i);
     await expect(page.getByText('Maja Medlem').first()).toBeVisible();
 
     await openCertificate(page, WHEEL);
@@ -99,6 +100,7 @@ test.describe('Certificates', () => {
 
   test('grants a certificate to a member', async ({ page }) => {
     await openCertificate(page, 'E2E grant certificate');
+    await openTab(page, /^holders/i);
     await page.getByRole('combobox', { name: 'Member', exact: true }).fill('Nora');
     await page.getByRole('listbox').getByRole('option', { name: /Nora Ny/ }).click();
     await expect(page.getByRole('combobox', { name: 'Certified by' })).toHaveValue(/Astrid Admin/);
@@ -108,6 +110,7 @@ test.describe('Certificates', () => {
 
   test('grants a certificate on the member\'s page', async ({ page }) => {
     await openCertificate(page, KILN);
+    await openTab(page, /^holders/i);
     await page.getByRole('link', { name: 'Maja Medlem' }).first().click();
     await page.getByRole('combobox', { name: 'Certificate', exact: true }).selectOption({ label: WHEEL });
     await action(page, /^grant certificate$/i).click();
@@ -116,6 +119,7 @@ test.describe('Certificates', () => {
 
   test('revokes a holder\'s certificate', async ({ page }) => {
     await openCertificate(page, 'E2E revoke certificate');
+    await openTab(page, /^holders/i);
     const holder = rows(page).filter({ hasText: 'Bo Basmedlem' });
     await expect(holder).toBeVisible();
     page.once('dialog', (dialog) => dialog.accept());
@@ -126,6 +130,7 @@ test.describe('Certificates', () => {
 
   test('marks a certificate mandatory, which keeps it', async ({ page }) => {
     await openCertificate(page, 'E2E mandatory certificate');
+    await openTab(page, /^other$/i);
     await confirmed(page, /mark as mandatory/i, /^(mark as mandatory|mark|ok|confirm)/i);
     await expect(page.getByText(/mandatory for membership and cannot be deleted/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /^delete/i })).not.toBeVisible();
@@ -140,6 +145,7 @@ test.describe('Certificates', () => {
 
   test('shows a member\'s certificates on their page', async ({ page }) => {
     await openCertificate(page, KILN);
+    await openTab(page, /^holders/i);
     await page.getByRole('link', { name: 'Maja Medlem' }).first().click();
     await expect(page.getByRole('heading', { name: /^certificates$/i })).toBeVisible();
     await expect(page.getByRole('link', { name: KILN }).first()).toBeVisible();

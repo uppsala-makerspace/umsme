@@ -21,11 +21,12 @@ const holders = [
 ];
 
 /** Keeps the values and the certifiers, as the page does. */
-const Editable = ({ values: initial, certifiers: picked, ...props }) => {
+const Editable = ({ values: initial, certifiers: picked, initialTab = 'details', ...props }) => {
   const [current, setCurrent] = useState(initial);
+  const [tab, setTab] = useState(initialTab);
   const [certifiers, setCertifiers] = useState(picked);
   return (
-    <CertificateForm {...props} values={current} certifiers={certifiers}
+    <CertificateForm {...props} tab={tab} onTab={setTab} values={current} certifiers={certifiers}
       onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))}
       onAddCertifier={(m) => { setCertifiers((list) => [...list, m]); setCurrent((v) => ({ ...v, certifiers: [...v.certifiers, m._id] })); }}
       onRemoveCertifier={(id) => { setCertifiers((list) => list.filter((m) => m._id !== id)); setCurrent((v) => ({ ...v, certifiers: v.certifiers.filter((c) => c !== id) })); }} />
@@ -49,6 +50,8 @@ export const NewCertificate = { args: { isNew: true, certificate: null, values: 
 
 /** Certifiers, a prerequisite, holders and a pending request. */
 export const Kiln = {};
+export const HoldersTab = { args: { initialTab: 'holders' } };
+export const OtherTab = { args: { initialTab: 'other' } };
 
 export const Mandatory = {
   args: (() => {
