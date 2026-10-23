@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, search } from './lists';
-import { confirmed } from './forms';
+import { confirmed, openTab } from './forms';
 
 // Messages to members: the list on a member's page, one message, deleting
 // one, and sending a welcome message from a membership. The e2e settings
@@ -18,6 +18,7 @@ const openUlla = async (page: Page) => {
 
 const openMessage = async (page: Page, subject: string) => {
   await openUlla(page);
+  await openTab(page, /^messages/i);
   await page.getByText(subject, { exact: true }).click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText(/message sent to/i);
 };

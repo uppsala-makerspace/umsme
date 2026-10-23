@@ -16,6 +16,7 @@ import Typography from '@mui/material/Typography';
 import { fieldOptions } from '/imports/common/lib/modelOptions';
 import { day } from './labels';
 import { DateField } from '../components/DateField';
+import { memberPath } from '../members/paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 const TYPES = fieldOptions('membership', 'type');
@@ -39,7 +40,7 @@ export const MembershipForm = ({ isNew, member, membership, values, onChange, on
     <Box sx={{ maxWidth: 900 }}>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" component="h1">
-          {isNew ? 'Add membership for member ' : 'Membership for '}<Link href={`/member/${member._id}`}>{member.name}</Link>
+          {isNew ? 'Add membership for member ' : 'Membership for '}<Link href={memberPath(member._id, 'memberships')}>{member.name}</Link>
         </Typography>
         {!isNew && <Button color="error" variant="outlined" disabled={busy} onClick={() => setConfirming(true)}>Delete membership</Button>}
       </Stack>
@@ -69,7 +70,7 @@ export const MembershipForm = ({ isNew, member, membership, values, onChange, on
         )}
         <Stack direction="row" spacing={1}>
           <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add membership' : 'Save'}</Button>
-          <Button href={`/member/${member._id}`}>Cancel</Button>
+          <Button href={memberPath(member._id, 'memberships')}>Cancel</Button>
         </Stack>
       </Box>
       {payment && (

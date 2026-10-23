@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from '../navigation';
@@ -8,11 +8,12 @@ import { useMessages, membershipTemplate, reminderTemplate, setReminded, sendPat
 
 /**
  * The messages section of a member's or a membership's page: what can be
- * sent, and what has been.
+ * sent, and what has been. `onCount` hears how many have been sent.
  */
-export const MessagesFor = ({ memberId, membershipId }) => {
+export const MessagesFor = ({ memberId, membershipId, onCount }) => {
   const navigate = useNavigate();
   const list = useMessages(membershipId ? { membership: membershipId } : { member: memberId });
+  useEffect(() => { if (onCount && !list.loading) onCount(list.messages.length); }, [list.loading, list.messages.length]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);

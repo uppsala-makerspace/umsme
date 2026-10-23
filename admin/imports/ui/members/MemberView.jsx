@@ -12,10 +12,13 @@ import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import { DataList } from '../components/DataList';
 import { MemberForm } from './MemberForm';
 import { MemberStatusChips } from './MemberStatusChips';
+import { memberPath } from './paths';
 
 const day = (date) => (date ? new Date(date).toLocaleDateString('sv-SE') : '');
 
@@ -38,22 +41,46 @@ const familyColumns = [
   { field: 'lab', headerName: 'Lab date', width: 120, valueFormatter: (v) => day(v) },
 ];
 
+/** The tabs a member has: a family member has no memberships or messages of their own. */
+export const tabsFor = (member) => (member.infamily
+  ? ['details', 'family', 'comments', 'certificates']
+  : ['details', 'family', 'memberships', 'messages', 'comments', 'certificates']);
+
+/** A tab's content: kept while another tab shows, hidden, so its state stays. */
+const Panel = ({ tab, shown, children }) => (
+  <Box role="tabpanel" hidden={tab !== shown} aria-label={LABELS[tab]}>{children}</Box>
+);
+
+const LABELS = { details: 'Details', family: 'Family members', memberships: 'Memberships', messages: 'Messages', comments: 'Comments', certificates: 'Certificates' };
+
 /**
- * A member's page: their status, registration and exclusion, details
- * (saved with Save), family, memberships and, below, what the container adds
- * (messages, comments, certificates). Every action other than Save takes
- * effect at once.
+ * A member's page: their status, registration and exclusion above, and tabs
+ * below: details (saved with Save), family, memberships, and what the
+ * container adds (messages, comments, certificates). Every action other than
+ * Save takes effect at once. Every tab stays put while another shows, so
+ * unsaved details survive a look at the memberships.
  *
  * @param {{ member: object, detail: object, values: object, onChange: (field, value) => void, onSave: () => void,
  *           busy?: boolean, error?: string, notice?: string, now?: Date,
+ *           tab: string, onTab: (tab) => void, counts?: { messages?, comments?, certificates? },
  *           on: { refresh, register, exclude, remove, removeFromFamily, cancelInvite, declineInvite },
- *           after?: React.ReactNode }} props
+ *           messages?: React.ReactNode, comments?: React.ReactNode, certificates?: React.ReactNode }} props
  *   `detail` as members.detail returns it; `member` carries its reminderState.
+ *   `tab` one of tabsFor(member); another shows the details.
  */
-export const MemberView = ({ member, detail, values, onChange, onSave, busy = false, error, notice, now = new Date(), on, after }) => {
+export const MemberView = ({ member, detail, values, onChange, onSave, busy = false, error, notice, now = new Date(), tab, onTab, counts = {}, on, messages, comments, certificates }) => {
   const [asking, setAsking] = useState(null);
   const ask = (title, text, confirmLabel, then) => setAsking({ title, text, confirmLabel, then });
   const patron = member.family && !member.infamily;
+  const tabs = tabsFor(member);
+  const shown = tabs.includes(tab) ? tab : 'details';
+  const count = (t) => ({
+    family: patron ? detail.familyMembers.length : undefined,
+    memberships: detail.memberships.length,
+    messages: counts.messages,
+    comments: counts.comments,
+    certificates: counts.certificates,
+  })[t];
   return (
     <Box sx={{ maxWidth: 1100 }}>
       <Link href="/members" underline="hover" variant="body2">← Members</Link>
@@ -85,56 +112,68 @@ export const MemberView = ({ member, detail, values, onChange, onSave, busy = fa
         </Typography>
       )}
 
-      <MemberForm values={values} onChange={onChange} onSave={onSave} member={member} busy={busy} />
+      <Tabs value={shown} onChange={(e, next) => onTab(next)} variant="scrollable" allowScrollButtonsMobile sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        {tabs.map((t) => <Tab key={t} value={t} label={count(t) === undefined ? LABELS[t] : `${LABELS[t]} (${count(t)})`} href={memberPath(member._id, t)} onClick={(e) => e.preventDefault()} />)}
+      </Tabs>
 
-      {detail.payer && (
-        <Typography variant="h5" component="h2" sx={{ mt: 4 }}>
-          Part of family, paying family member is <strong><Link href={`/member/${detail.payer._id}`}>{detail.payer.name}</Link></strong>
-          <Button size="small" sx={{ ml: 1 }} disabled={busy} onClick={() => ask('Remove from the family?', 'The member remains as an independent member that has to pay for itself.', 'Remove', on.removeFromFamily)}>Remove from family</Button>
-        </Typography>
-      )}
-      {patron && (
-        <>
-          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mt: 4, mb: 1 }}>
-            <Typography variant="h5" component="h2">Family members</Typography>
-            <Button size="small" variant="outlined" href={`/member/${member._id}/add`}>Add existing</Button>
-            <Button size="small" variant="outlined" href={`/members/add?infamily=${member._id}`}>Add new</Button>
-          </Stack>
-          <DataList rows={detail.familyMembers} columns={familyColumns} empty="No family members yet." rowHref={(m) => `/member/${m._id}`} />
-          <Typography variant="h5" component="h2" sx={{ mt: 3, mb: 1 }}>Pending invites</Typography>
-          {detail.invites.length === 0 ? <Typography variant="body2" color="text.secondary">No outstanding invites.</Typography> : (
+      <Panel tab="details" shown={shown}>
+        <MemberForm values={values} onChange={onChange} onSave={onSave} member={member} busy={busy} />
+      </Panel>
+
+      <Panel tab="family" shown={shown}>
+        {detail.payer && (
+          <Typography variant="h5" component="h2">
+            Part of family, paying family member is <strong><Link href={memberPath(detail.payer._id, 'family')}>{detail.payer.name}</Link></strong>
+            <Button size="small" sx={{ ml: 1 }} disabled={busy} onClick={() => ask('Remove from the family?', 'The member remains as an independent member that has to pay for itself.', 'Remove', on.removeFromFamily)}>Remove from family</Button>
+          </Typography>
+        )}
+        {patron && (
+          <>
+            <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
+              <Typography variant="h5" component="h2">Family members</Typography>
+              <Button size="small" variant="outlined" href={`/member/${member._id}/add`}>Add existing</Button>
+              <Button size="small" variant="outlined" href={`/members/add?infamily=${member._id}`}>Add new</Button>
+            </Stack>
+            <DataList rows={detail.familyMembers} columns={familyColumns} empty="No family members yet." rowHref={(m) => `/member/${m._id}`} />
+            <Typography variant="h5" component="h2" sx={{ mt: 3, mb: 1 }}>Pending invites</Typography>
+            {detail.invites.length === 0 ? <Typography variant="body2" color="text.secondary">No outstanding invites.</Typography> : (
+              <List dense disablePadding>
+                {detail.invites.map((invite) => (
+                  <ListItem key={invite._id} divider secondaryAction={<Button size="small" color="error" disabled={busy} onClick={() => ask('Cancel the invite?', `The pending invite to ${invite.email} is cancelled.`, 'Cancel invite', () => on.cancelInvite(invite._id))}>Cancel invite</Button>}>
+                    {invite.invitee ? <><Link href={`/member/${invite.invitee._id}`}>{invite.invitee.name}</Link>&nbsp;{invite.email}</> : invite.email}
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </>
+        )}
+        {detail.invitesReceived.length > 0 && (
+          <>
+            <Typography variant="h5" component="h2" sx={{ mt: 3, mb: 1 }}>Invitations to other families</Typography>
             <List dense disablePadding>
-              {detail.invites.map((invite) => (
-                <ListItem key={invite._id} divider secondaryAction={<Button size="small" color="error" disabled={busy} onClick={() => ask('Cancel the invite?', `The pending invite to ${invite.email} is cancelled.`, 'Cancel invite', () => on.cancelInvite(invite._id))}>Cancel invite</Button>}>
-                  {invite.invitee ? <><Link href={`/member/${invite.invitee._id}`}>{invite.invitee.name}</Link>&nbsp;{invite.email}</> : invite.email}
+              {detail.invitesReceived.map((invite) => (
+                <ListItem key={invite._id} divider secondaryAction={<Button size="small" color="error" disabled={busy} onClick={() => ask('Decline the invitation?', `The invitation from ${invite.inviterName} is declined.`, 'Decline', () => on.declineInvite(invite._id))}>Decline</Button>}>
+                  From&nbsp;<Link href={`/member/${invite.infamily}`}>{invite.inviterName}</Link>
                 </ListItem>
               ))}
             </List>
-          )}
-        </>
-      )}
-      {detail.invitesReceived.length > 0 && (
-        <>
-          <Typography variant="h5" component="h2" sx={{ mt: 4, mb: 1 }}>Invitations to other families</Typography>
-          <List dense disablePadding>
-            {detail.invitesReceived.map((invite) => (
-              <ListItem key={invite._id} divider secondaryAction={<Button size="small" color="error" disabled={busy} onClick={() => ask('Decline the invitation?', `The invitation from ${invite.inviterName} is declined.`, 'Decline', () => on.declineInvite(invite._id))}>Decline</Button>}>
-                From&nbsp;<Link href={`/member/${invite.infamily}`}>{invite.inviterName}</Link>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
+          </>
+        )}
+        {!detail.payer && !patron && detail.invitesReceived.length === 0 && <Typography color="text.secondary">Not part of a family.</Typography>}
+      </Panel>
+
       {!member.infamily && (
-        <>
-          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mt: 4, mb: 1 }}>
+        <Panel tab="memberships" shown={shown}>
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
             <Typography variant="h5" component="h2">Memberships</Typography>
             <Button size="small" variant="outlined" href={`/memberships/add?member=${member._id}`}>Add membership</Button>
           </Stack>
           <DataList rows={detail.memberships} columns={membershipColumns} empty="No memberships." defaultSort={{ field: 'start', sort: 'desc' }} rowHref={(ms) => `/membership/${ms._id}`} />
-        </>
+        </Panel>
       )}
-      {after}
+      {!member.infamily && <Panel tab="messages" shown={shown}>{messages}</Panel>}
+      <Panel tab="comments" shown={shown}>{comments}</Panel>
+      <Panel tab="certificates" shown={shown}>{certificates}</Panel>
 
       <Dialog open={!!asking} onClose={() => setAsking(null)}>
         <DialogTitle>{asking?.title}</DialogTitle>

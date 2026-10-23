@@ -8,6 +8,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Link from '@mui/material/Link';
 import { DataList } from '../components/DataList';
 import { day } from './format';
+import { memberPath } from '../members/paths';
 
 /**
  * Attestations as a list: who holds a certificate (`show` 'member') or what
@@ -22,7 +23,7 @@ export const HolderList = ({ show, rows, onRevoke, busy = false }) => {
     show === 'member'
       ? {
         field: 'memberName', headerName: 'Member', flex: 1, minWidth: 200,
-        renderCell: ({ row }) => <Link href={`/member/${row.memberId}`} underline="hover" sx={{ fontWeight: 600 }}>{row.memberName}</Link>,
+        renderCell: ({ row }) => <Link href={memberPath(row.memberId, 'certificates')} underline="hover" sx={{ fontWeight: 600 }}>{row.memberName}</Link>,
       }
       : {
         field: 'certificateName', headerName: 'Certificate', flex: 1, minWidth: 200,

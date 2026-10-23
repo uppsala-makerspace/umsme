@@ -1,4 +1,4 @@
-import { type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 /**
  * Forms in admin, whatever draws them (AutoForm on Blaze, MUI on React).
@@ -43,3 +43,9 @@ export const confirmed = async (page: Page, name: RegExp, confirm: RegExp = name
 
 /** Delete, confirming: "Delete", or "Delete store item" and the like. */
 export const deleteConfirmed = (page: Page) => confirmed(page, /^delete\b/i);
+
+/** Open a tab of the page, by the start of its name ("Messages (3)" by /^messages/i). */
+export const openTab = async (page: Page, name: RegExp) => {
+  await page.getByRole('tab', { name }).click();
+  await expect(page.getByRole('tab', { name, selected: true })).toBeVisible();
+};

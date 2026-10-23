@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, search, sortBy } from './lists';
-import { field, action, createButton, saveButton, confirmed } from './forms';
+import { field, action, createButton, saveButton, confirmed, openTab } from './forms';
 
 // Members: the list, a member's page (status, details, registration,
 // exclusion, deletion, dates out of step) and the family (members, adding
@@ -90,6 +90,7 @@ test.describe('Members', () => {
 test.describe('Family', () => {
   test('shows the family members and the pending invites', async ({ page }) => {
     await openMember(page, '909');
+    await openTab(page, /^family members/i);
     await expect(page.getByRole('heading', { name: /family members/i })).toBeVisible();
     await expect(page.getByText('E2E family dependent').first()).toBeVisible();
     await expect(page.getByRole('heading', { name: /pending invites/i })).toBeVisible();
@@ -97,6 +98,7 @@ test.describe('Family', () => {
 
   test('adds an existing member to the family', async ({ page }) => {
     await openMember(page, '909');
+    await openTab(page, /^family members/i);
     await action(page, /^add existing( member)?$/i).click();
     await search(page, '910');
     await rows(page).filter({ hasText: 'E2E family candidate' }).getByText('e2e-910@example.org').click();
@@ -106,6 +108,7 @@ test.describe('Family', () => {
 
   test('removes a member from the family', async ({ page }) => {
     await openMember(page, '911');
+    await openTab(page, /^family members/i);
     await expect(page.getByRole('heading', { name: /part of family/i })).toBeVisible();
     await confirmed(page, /^remove from family$/i, /^remove/i);
     await expect(page.getByRole('heading', { name: /part of family/i })).not.toBeVisible();
@@ -113,6 +116,7 @@ test.describe('Family', () => {
 
   test('cancels an invite', async ({ page }) => {
     await openMember(page, '909');
+    await openTab(page, /^family members/i);
     await expect(page.getByText('e2e-cancel-invite@example.org')).toBeVisible();
     page.once('dialog', (dialog) => dialog.accept());
     await page.getByRole('listitem').filter({ hasText: 'e2e-cancel-invite@example.org' }).getByText(/^cancel( invite)?$/i).click();
@@ -122,8 +126,47 @@ test.describe('Family', () => {
 
   test('declines an invite to another family', async ({ page }) => {
     await openMember(page, '912');
+    await openTab(page, /^family members/i);
     await expect(page.getByRole('heading', { name: /invitations to other families/i })).toBeVisible();
     await confirmed(page, /^decline$/i, /^decline/i);
     await expect(page.getByRole('heading', { name: /invitations to other families/i })).not.toBeVisible();
+  });
+});
+
+test.describe('Member tabs', () => {
+  test('keeps the tab in the URL, and Back goes to the tab before', async ({ page }) => {
+    await openMember(page, '909');
+    await expect(page.getByRole('tab', { name: /^details$/i, selected: true })).toBeVisible();
+    await openTab(page, /^memberships \(\d+\)$/i);
+    await expect(page).toHaveURL(/\?tab=memberships$/);
+    await expect(page.getByRole('heading', { name: 'Memberships' })).toBeVisible();
+    await openTab(page, /^family members/i);
+    await expect(page).toHaveURL(/\?tab=family$/);
+    await page.goBack();
+    await expect(page.getByRole('tab', { name: /^memberships/i, selected: true })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('tab', { name: /^memberships/i, selected: true })).toBeVisible();
+  });
+
+  test('opens a tab from a link, and keeps unsaved details across tabs', async ({ page }) => {
+    await openMember(page, '905');
+    const url = page.url();
+    await field(page, 'Mobile').fill('0709999905');
+    await openTab(page, /^comments/i);
+    await openTab(page, /^details$/i);
+    await expect(field(page, 'Mobile')).toHaveValue('0709999905');
+    await page.goto(`${url}?tab=messages`);
+    await expect(page.getByRole('tab', { name: /^messages/i, selected: true })).toBeVisible();
+  });
+
+  test('has no memberships or messages for a family member', async ({ page }) => {
+    // Frida Familj, whom no test takes out of her family.
+    await openAs(page, 'admin', '/members');
+    await search(page, 'family-member@example.org');
+    await rows(page).filter({ hasText: 'family-member@example.org' }).getByText('family-member@example.org').click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Frida Familj');
+    await expect(page.getByRole('tab', { name: /^family members/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /^memberships/i })).toHaveCount(0);
+    await expect(page.getByRole('tab', { name: /^messages/i })).toHaveCount(0);
   });
 });

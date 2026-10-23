@@ -9,7 +9,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { theme } from '/imports/ui/theme';
-import { NavigationContext } from '/imports/ui/navigation';
+import { NavigationContext, SearchContext } from '/imports/ui/navigation';
 import { AdminShell } from '/imports/ui/shell/AdminShell';
 import { SignIn } from '/imports/ui/shell/SignIn';
 import { routes } from './reactRoute';
@@ -81,19 +81,21 @@ const NotFound = () => <Typography variant="h4" component="h1">There is no such 
 
 const Pages = () => {
   const routerNavigate = useRouterNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const [navigate] = useState(() => (path) => routerNavigate(path));
   useLinkClicks(navigate);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   const page = ({ path, component }) => <Route key={path} path={path} element={<Page component={component} />} />;
   return (
     <NavigationContext.Provider value={navigate}>
-      <Routes>
-        <Route element={<Shell />}>
-          {routes.map(page)}
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
+      <SearchContext.Provider value={search}>
+        <Routes>
+          <Route element={<Shell />}>
+            {routes.map(page)}
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </SearchContext.Provider>
     </NavigationContext.Provider>
   );
 };

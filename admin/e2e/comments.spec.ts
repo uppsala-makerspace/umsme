@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
+import { openTab } from './forms';
 import { dataRows, search } from './lists';
 
 // Comments, on a member's page and a payment's: adding, editing and
@@ -12,6 +13,7 @@ const openUlla = async (page: Page) => {
   await openAs(page, 'admin', '/excluded');
   await dataRows(page).filter({ hasText: 'Ulla Utesluten' }).getByText(/excluded@/).click();
   await expect(page).toHaveURL(/\/member\//);
+  await openTab(page, /^comments/i);
 };
 
 const add = async (page: Page, text: string) => {

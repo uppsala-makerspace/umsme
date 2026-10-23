@@ -20,8 +20,8 @@ const attemptGroups = (attempts, name) => {
   });
 };
 
-/** The member page's certificates. */
-export const MemberCertificatesSection = ({ memberId }) => {
+/** The member page's certificates; `onCount` hears how many the member holds. */
+export const MemberCertificatesSection = ({ memberId, onCount }) => {
   const { certificates } = useCertificateList();
   const [attestations, setAttestations] = useState(null);
   const [attempts, setAttempts] = useState([]);
@@ -35,6 +35,7 @@ export const MemberCertificatesSection = ({ memberId }) => {
   ]).catch((e) => setError(e.reason || e.message));
   useEffect(() => { refresh(); }, [memberId]);
   useEffect(() => { defaultCertifier().then(setCertifier, () => {}); }, []);
+  useEffect(() => { if (onCount && attestations) onCount(attestations.length); }, [attestations?.length]);
 
   const act = async (action) => {
     setBusy(true);

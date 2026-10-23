@@ -131,7 +131,9 @@ together with the router in `client/react/App.jsx`.
 Playwright tests live in `e2e/`. `npm run test:e2e` starts admin in
 production mode on port 3200 with `SEED=e2e`, which empties and seeds the
 database `umsme-admin-e2e` (separate from the app's `umsme-e2e`, so both
-suites can run at once) before the tests start.
+suites can run at once) before the tests start. It builds in
+`.meteor/local-e2e` (`METEOR_LOCAL_DIR`), not `.meteor/local`, so it can run
+while a dev server (`npm run sigma`) is up.
 
 - Start a test with `openAs(page, '<persona key>', '/path')` from
   `e2e/helpers.ts`: every persona has a seeded login token, so the page opens

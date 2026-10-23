@@ -6,6 +6,7 @@ import { useNavigate } from '../navigation';
 import { MessagesFor } from '../messages/MessagesFor';
 import { MembershipForm } from './MembershipForm';
 import { suggestMembership, createMembership, membershipDetail, updateMembership, removeMembership } from './data';
+import { memberPath } from '../members/paths';
 
 const dayOf = (date) => (date ? new Date(date).toLocaleDateString('sv-SE') : '');
 const dateOf = (dayValue) => (dayValue ? new Date(`${dayValue}T00:00:00`) : null);
@@ -42,7 +43,7 @@ export const MembershipAddPage = () => {
       onChange={(field, value) => setValues((v) => ({ ...v, [field]: value }))}
       onSave={() => run(async () => {
         await createMembership({ memberId, paymentId, startDay: values.start, amount: values.amount });
-        navigate(paymentId ? `/payment/${paymentId}` : `/member/${memberId}`);
+        navigate(paymentId ? `/payment/${paymentId}` : memberPath(memberId, 'memberships'));
       })}
     />
   );
@@ -75,7 +76,7 @@ export const MembershipViewPage = ({ _id }) => {
         setDetail(await membershipDetail(_id));
         setNotice('Saved.');
       })}
-      onDelete={() => run(async () => { await removeMembership(_id); navigate(`/member/${member._id}`); })}
+      onDelete={() => run(async () => { await removeMembership(_id); navigate(memberPath(member._id, 'memberships')); })}
       after={(
         <Box sx={{ mt: 4 }}>
           <MessagesFor memberId={member._id} membershipId={_id} />

@@ -4,6 +4,7 @@ import { useNavigate } from '../navigation';
 import { SendMessage } from './SendMessage';
 import { MessageView } from './MessageView';
 import { composeMessage, sendMessage, messageDetail, removeMessage } from './data';
+import { memberPath } from '../members/paths';
 
 /** /message/send?member=…&template=…&membership=… */
 export const SendMessagePage = () => {
@@ -32,7 +33,7 @@ export const SendMessagePage = () => {
         setError(null);
         try {
           await sendMessage({ memberId, templateId, membershipId: membershipId || null, ...values });
-          navigate(`/member/${memberId}`);
+          navigate(memberPath(memberId, 'messages'));
         } catch (e) {
           setError(e.reason || e.message);
         } finally {
@@ -56,7 +57,7 @@ export const MessageViewPage = ({ _id }) => {
       onDelete={async () => {
         try {
           await removeMessage(_id);
-          navigate(`/member/${detail.message.member}`);
+          navigate(memberPath(detail.message.member, 'messages'));
         } catch (e) {
           setError(e.reason || e.message);
         }

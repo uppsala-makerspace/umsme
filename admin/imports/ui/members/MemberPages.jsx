@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useNavigate } from '../navigation';
+import { useNavigate, useQueryParam } from '../navigation';
 import { useEditor } from '../components/useEditor';
 import { useServerList } from '../components/useServerList';
 import { CommentsFor } from '../comments/CommentsFor';
@@ -13,6 +13,7 @@ import { MemberCertificatesSection } from '../certificates/MemberCertificatesSec
 import { MemberList } from './MemberList';
 import { MemberView } from './MemberView';
 import { MemberForm, memberValues, memberFields } from './MemberForm';
+import { memberPath } from './paths';
 import {
   memberPage, familyCandidatePage, getMember, memberDetail, createMember, updateMember, setRegistered, setExcluded,
   refreshDates, removeMember, addToFamily, removeFromFamily, cancelInvite, memberDraftFromPayment, downloadMembers,
@@ -51,7 +52,7 @@ export const MemberAddPage = () => {
     setError(null);
     try {
       const id = await createMember(memberFields(values), { infamily, paymentId });
-      navigate(infamily ? `/member/${infamily}` : paymentId ? `/payment/${paymentId}` : `/member/${id}`);
+      navigate(infamily ? memberPath(infamily, 'family') : paymentId ? `/payment/${paymentId}` : `/member/${id}`);
     } catch (e) {
       setError(e.reason || e.message);
     } finally {
@@ -86,7 +87,7 @@ export const FamilyAddPage = ({ _id }) => {
       onRowClick={async ({ row }) => {
         try {
           await addToFamily(_id, row._id);
-          navigate(`/member/${_id}`);
+          navigate(memberPath(_id, 'family'));
         } catch (e) {
           setError(e.reason || e.message);
         }
@@ -101,6 +102,9 @@ export const MemberViewPage = ({ _id }) => {
   const [member, setMember] = useState(null);
   const [detail, setDetail] = useState(null);
   const [missing, setMissing] = useState(false);
+  const [tab, setTab] = useQueryParam('tab');
+  const [counts, setCounts] = useState({});
+  const counted = (name) => (n) => setCounts((c) => (c[name] === n ? c : { ...c, [name]: n }));
   const { values, setField, loaded, run, busy, error, setError, notice, setNotice } = useEditor({ doc: member, loading: !member, toValues: memberValues });
   const load = async () => {
     const [m, d] = await Promise.all([getMember(_id), memberDetail(_id).catch(() => null)]);
@@ -115,6 +119,7 @@ export const MemberViewPage = ({ _id }) => {
   return (
     <MemberView
       member={member} detail={detail} values={values} onChange={setField} busy={busy} error={error} notice={notice}
+      tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)} counts={counts}
       onSave={() => run(async () => { await updateMember(_id, memberFields(values), loaded?.updatedAt); await load(); }, { keep: 'all', then: () => setNotice('Saved.') })}
       on={{
         refresh: () => act(() => refreshDates(_id)),
@@ -125,13 +130,9 @@ export const MemberViewPage = ({ _id }) => {
         cancelInvite: (inviteId) => act(() => cancelInvite(inviteId)),
         declineInvite: (inviteId) => act(() => cancelInvite(inviteId)),
       }}
-      after={(
-        <>
-          {!member.infamily && <MessagesFor memberId={_id} />}
-          <CommentsFor about={_id} />
-          <MemberCertificatesSection memberId={_id} />
-        </>
-      )}
+      messages={!member.infamily && <MessagesFor memberId={_id} onCount={counted('messages')} />}
+      comments={<CommentsFor about={_id} onCount={counted('comments')} />}
+      certificates={<MemberCertificatesSection memberId={_id} onCount={counted('certificates')} />}
     />
   );
 };

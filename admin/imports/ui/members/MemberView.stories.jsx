@@ -19,25 +19,36 @@ const detail = {
 };
 const on = Object.fromEntries(['refresh', 'register', 'exclude', 'remove', 'removeFromFamily', 'cancelInvite', 'declineInvite'].map((k) => [k, fn()]));
 
-const Editable = (props) => {
+const Editable = ({ initialTab = 'details', ...props }) => {
   const [values, setValues] = useState(memberValues(props.member));
-  return <MemberView {...props} values={values} onChange={(f, v) => setValues((c) => ({ ...c, [f]: v }))} />;
+  const [tab, setTab] = useState(initialTab);
+  return <MemberView {...props} values={values} onChange={(f, v) => setValues((c) => ({ ...c, [f]: v }))} tab={tab} onTab={setTab} />;
 };
+
+const Placeholder = ({ children }) => <p style={{ color: '#777' }}>{children}</p>;
 
 export default {
   title: 'Members/MemberView',
   component: MemberView,
   render: (args) => <Editable {...args} />,
-  args: { member: payer, detail, now, on, onSave: fn() },
+  args: {
+    member: payer, detail, now, on, onSave: fn(), counts: { messages: 3, comments: 1, certificates: 2 },
+    messages: <Placeholder>The member’s messages (MessagesFor).</Placeholder>,
+    comments: <Placeholder>The comments (CommentsFor).</Placeholder>,
+    certificates: <Placeholder>The certificates (MemberCertificatesSection).</Placeholder>,
+  },
 };
 
 export const FamilyPayer = {};
+export const FamilyTab = { args: { initialTab: 'family' } };
+export const MembershipsTab = { args: { initialTab: 'memberships' } };
 export const Dependent = {
   args: {
     member: { ...payer, _id: 'm2', name: 'Frida Familj', infamily: 'm1' },
     detail: { ...detail, payer: { _id: 'm1', name: 'Fredrik Familj' }, familyMembers: [], invites: [], memberships: [] },
+    initialTab: 'family',
   },
 };
 export const Pending = { args: { member: { ...payer, family: false, registered: false, reminderState: 'needed', member: new Date(now.getTime() + 5 * DAY), lab: null }, detail: { ...detail, familyMembers: [], invites: [] } } };
 export const DatesOutOfStep = { args: { detail: { ...detail, status: { inconsistent: true } } } };
-export const InvitedElsewhere = { args: { member: { ...payer, family: false }, detail: { ...detail, familyMembers: [], invites: [], invitesReceived: [{ _id: 'i3', infamily: 'm9', inviterName: 'Ivar Inbjudare' }] } } };
+export const InvitedElsewhere = { args: { member: { ...payer, family: false }, detail: { ...detail, familyMembers: [], invites: [], invitesReceived: [{ _id: 'i3', infamily: 'm9', inviterName: 'Ivar Inbjudare' }] }, initialTab: 'family' } };

@@ -6,6 +6,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { memberPath } from '../members/paths';
 
 /**
  * A message written from a template, to look over and change before it is
@@ -19,7 +20,7 @@ export const SendMessage = ({ memberId, draft, values, onChange, onSend, busy = 
   return (
     <Box sx={{ maxWidth: 900 }}>
       <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
-        Send <strong>{draft.templateType}</strong> message to member <Link href={`/member/${memberId}`}><strong>{draft.memberName}</strong></Link>
+        Send <strong>{draft.templateType}</strong> message to member <Link href={memberPath(memberId, 'messages')}><strong>{draft.memberName}</strong></Link>
       </Typography>
       {error && <Alert severity="error" sx={{ mb: 2 }}>Could not send the message: {error}</Alert>}
       <Box component="form" onSubmit={(e) => { e.preventDefault(); onSend(); }}>
@@ -30,7 +31,7 @@ export const SendMessage = ({ memberId, draft, values, onChange, onSend, busy = 
         </Stack>
         <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" disabled={busy}>Send message</Button>
-          <Button href={`/member/${memberId}`}>Cancel</Button>
+          <Button href={memberPath(memberId, 'messages')}>Cancel</Button>
         </Stack>
       </Box>
     </Box>

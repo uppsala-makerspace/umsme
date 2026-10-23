@@ -11,6 +11,7 @@ import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { memberPath } from '../members/paths';
 
 /**
  * A message as it was sent, and deleting it.
@@ -22,7 +23,7 @@ export const MessageView = ({ message, memberName, onDelete, busy = false, error
   return (
     <Box sx={{ maxWidth: 900 }}>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" component="h1">Message sent to <Link href={`/member/${message.member}`}><strong>{memberName}</strong></Link></Typography>
+        <Typography variant="h4" component="h1">Message sent to <Link href={memberPath(message.member, 'messages')}><strong>{memberName}</strong></Link></Typography>
         <Button color="error" variant="outlined" disabled={busy} onClick={() => setConfirming(true)}>Delete message</Button>
       </Stack>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
