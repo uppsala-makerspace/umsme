@@ -15,7 +15,11 @@ const rows = dataRows;
 /** A member's page, through the members list: search for the member number and open the row. */
 const openMember = async (page: Page, mid: string) => {
   await openAs(page, 'admin', '/members');
-  await search(page, mid);
+  // By the email, which only this member has: the list fetches again a moment
+  // after the typing stops, and a click on a row it is about to replace is
+  // lost, so wait for the one row the search leaves.
+  await search(page, `e2e-${mid}@example.org`);
+  await expect(rows(page)).toHaveCount(1);
   await rows(page).filter({ hasText: `e2e-${mid}@example.org` }).getByText(`e2e-${mid}@example.org`).click();
   await expect(page).toHaveURL(/\/member\//);
   await expect(page.getByRole('heading', { level: 1 })).toContainText(/member/i);
@@ -163,6 +167,7 @@ test.describe('Member tabs', () => {
     // Frida Familj, whom no test takes out of her family.
     await openAs(page, 'admin', '/members');
     await search(page, 'family-member@example.org');
+    await expect(rows(page)).toHaveCount(1);
     await rows(page).filter({ hasText: 'family-member@example.org' }).getByText('family-member@example.org').click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Frida Familj');
     await expect(page.getByRole('tab', { name: /^family members/i })).toBeVisible();
