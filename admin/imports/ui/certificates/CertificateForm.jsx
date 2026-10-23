@@ -17,7 +17,7 @@ import { MemberChips } from '../components/MemberChips';
 import { GrantForm } from './GrantForm';
 import { HolderList } from './HolderList';
 import { workshopPath } from '../workshops/paths';
-import { PageTabs, TabPanel, TabPart, TabToolbar } from '../components/PageTabs';
+import { FORM_WIDTH, PageTabs, TabPanel, TabPart, TabToolbar } from '../components/PageTabs';
 import { certificatePath } from './paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
@@ -139,7 +139,7 @@ export const CertificateForm = ({
   );
 
   return (
-    <Box sx={{ maxWidth: 1000 }}>
+    <Box>
       <Link href="/certificates" underline="hover" variant="body2">← Certificates</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 2 }}>
         <Typography variant="h4" component="h1">
@@ -157,12 +157,12 @@ export const CertificateForm = ({
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
 
-      {isNew ? form : (
+      {isNew ? <Box sx={{ maxWidth: FORM_WIDTH }}>{form}</Box> : (
         <>
           <PageTabs
             tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'holders' ? holders?.length : undefined }))}
             value={shown} onChange={onTab} href={(t) => certificatePath(certificate._id, t)} />
-          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
+          <TabPanel value="details" shown={shown} label="Details" form>{form}</TabPanel>
           <TabPanel value="holders" shown={shown} label="Holders">
             <>
               <TabToolbar note="Granting and revoking take effect at once." />
@@ -173,7 +173,7 @@ export const CertificateForm = ({
               <HolderList show="member" rows={holders} onRevoke={onRevoke} busy={busy} />
             </>
           </TabPanel>
-          <TabPanel value="other" shown={shown} label="Other">
+          <TabPanel value="other" shown={shown} label="Other" form>
             <TabPart title="Mandatory for membership">
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Every member must hold a mandatory certificate to open the doors. Only one certificate can be mandatory, and it stays so.</Typography>
               {certificate.mandatory

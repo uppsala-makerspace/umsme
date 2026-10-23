@@ -45,7 +45,9 @@ export const tabsFor = (member) => (member.infamily
   ? ['details', 'family', 'comments', 'certificates']
   : ['details', 'family', 'memberships', 'messages', 'comments', 'certificates']);
 
-const Panel = ({ tab, shown, children }) => <TabPanel value={tab} shown={shown} label={LABELS[tab]}>{children}</TabPanel>;
+// Forms and text to read are at most FORM_WIDTH wide; lists take the full width.
+const FORM_TABS = ['details', 'comments'];
+const Panel = ({ tab, shown, children }) => <TabPanel value={tab} shown={shown} label={LABELS[tab]} form={FORM_TABS.includes(tab)}>{children}</TabPanel>;
 
 const LABELS = { details: 'Details', family: 'Family members', memberships: 'Memberships', messages: 'Messages', comments: 'Comments', certificates: 'Certificates' };
 
@@ -78,7 +80,7 @@ export const MemberView = ({ member, detail, values, onChange, onSave, busy = fa
     certificates: counts.certificates,
   })[t];
   return (
-    <Box sx={{ maxWidth: 1100 }}>
+    <Box>
       <Link href="/members" underline="hover" variant="body2">← Members</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 1 }}>
         <Typography variant="h4" component="h1">Member <strong>{member.name}</strong></Typography>

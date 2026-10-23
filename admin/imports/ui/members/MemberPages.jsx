@@ -14,6 +14,7 @@ import { MemberList } from './MemberList';
 import { MemberView } from './MemberView';
 import { MemberForm, memberValues, memberFields } from './MemberForm';
 import { memberPath } from './paths';
+import { FORM_WIDTH } from '../components/PageTabs';
 import {
   memberPage, familyCandidatePage, getMember, memberDetail, createMember, updateMember, setRegistered, setExcluded,
   refreshDates, removeMember, addToFamily, removeFromFamily, cancelInvite, memberDraftFromPayment, downloadMembers,
@@ -60,7 +61,7 @@ export const MemberAddPage = () => {
     }
   };
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Typography variant="h4" component="h1" sx={{ mb: 2 }}>Add new member</Typography>
       {infamily && <Alert severity="info" sx={{ mb: 2 }}>The new member joins the family of the member you came from.</Alert>}
       {payment && (

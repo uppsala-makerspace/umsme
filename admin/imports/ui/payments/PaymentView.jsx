@@ -21,6 +21,7 @@ import { MemberSelect } from '../components/MemberSelect';
 import { STATUS, day } from './labels';
 import { dateTime } from '../dates';
 import { storeItemPath } from '../storeItems/paths';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 const Facts = ({ rows }) => (
   <Table size="small" sx={{ maxWidth: 700, mb: 2 }}>
@@ -53,7 +54,7 @@ export const PaymentView = ({ detail, busy = false, error, search, on, comments 
   const ask = (title, text, confirmLabel, then) => setAsking({ title, text, confirmLabel, then });
   const purchase = payment.kind === 'purchase';
   return (
-    <Box sx={{ maxWidth: 1000 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Link href="/payments" underline="hover" variant="body2">← Payments</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 2 }}>
         <Typography variant="h4" component="h1">

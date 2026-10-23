@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography';
 import { workshopCompleteness, isAreaOfInterest } from '/imports/common/lib/groupRules';
 import { ChipSelect } from '../components/ChipSelect';
 import { ImageField } from '../components/ImageField';
-import { PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
+import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { workshopPath } from './paths';
 import { WorkshopReferences, referenceCount, directReferenceCount } from './WorkshopReferences';
 import { KINDS, STATUSES, MISSING } from './labels';
@@ -118,7 +118,7 @@ export const WorkshopForm = ({
   );
 
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box>
       <Link href="/workshops" underline="hover" variant="body2">← Workshops &amp; areas of interest</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 2 }}>
         <Typography variant="h4" component="h1">
@@ -156,13 +156,13 @@ export const WorkshopForm = ({
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
 
-      {isNew ? form : (
+      {isNew ? <Box sx={{ maxWidth: FORM_WIDTH }}>{form}</Box> : (
         <>
           <PageTabs
             tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'references' ? referenceCount(details) : undefined }))}
             value={shown} onChange={onTab} href={(t) => workshopPath(workshop._id, t)} />
-          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
-          <TabPanel value="image" shown={shown} label="Image">
+          <TabPanel value="details" shown={shown} label="Details" form>{form}</TabPanel>
+          <TabPanel value="image" shown={shown} label="Image" form>
             <>
               <TabToolbar note="A representative image is required by the guideline." />
               <ImageField

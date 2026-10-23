@@ -119,7 +119,7 @@ export const AdminShell = ({ user, roles, loggingIn = false, path, signIn, onSig
       {narrow
         ? <Drawer open={open} onClose={() => setOpen(false)} slotProps={{ paper: { sx: paper } }}>{drawer}</Drawer>
         : <Drawer variant="permanent" slotProps={{ paper: { sx: paper } }}>{drawer}</Drawer>}
-      <Box component="main" sx={{ pt: `${BAR + 12}px`, pb: 4, px: { xs: 2, md: 2.5 }, ml: { md: `${DRAWER}px` }, maxWidth: { md: 1200 + DRAWER } }}>
+      <Box component="main" sx={{ pt: `${BAR + 12}px`, pb: 4, px: { xs: 2, md: 2.5 }, ml: { md: `${DRAWER}px` } }}>
         {main}
       </Box>
     </Box>

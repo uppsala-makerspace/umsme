@@ -37,7 +37,7 @@ export const MemberForm = ({ values, onChange, onSave, member, busy = false, sub
   const text = (name) => ({ value: values[name] ?? '', onChange: (e) => onChange(name, e.target.value) });
   const check = (name, label) => <FormControlLabel label={label} control={<Checkbox checked={!!values[name]} onChange={(e) => onChange(name, e.target.checked)} />} />;
   return (
-    <Box component="form" sx={{ maxWidth: 900 }} onSubmit={(e) => { e.preventDefault(); onSave(); }}>
+    <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
       <Stack spacing={2}>
         {member && <TextField label="Id" value={member.mid || ''} slotProps={{ input: { readOnly: true } }} />}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>

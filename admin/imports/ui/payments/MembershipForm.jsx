@@ -17,7 +17,7 @@ import { fieldOptions } from '/imports/common/lib/modelOptions';
 import { day } from './labels';
 import { DateField } from '../components/DateField';
 import { memberPath, membershipPath } from '../members/paths';
-import { PageTabs, TabPanel } from '../components/PageTabs';
+import { FORM_WIDTH, PageTabs, TabPanel } from '../components/PageTabs';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 const TYPES = fieldOptions('membership', 'type');
@@ -71,7 +71,7 @@ export const MembershipForm = ({ isNew, member, membership, values, onChange, on
     </Box>
   );
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" component="h1">
           {isNew ? 'Add membership for member ' : 'Membership for '}<Link href={memberPath(member._id, 'memberships')}>{member.name}</Link>
@@ -81,7 +81,7 @@ export const MembershipForm = ({ isNew, member, membership, values, onChange, on
       {isNew && <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>The type, family, discount and end dates follow from the amount and start, by the same rules as a payment in the app.</Typography>}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
-      {isNew ? form : (
+      {isNew ? <Box sx={{ maxWidth: FORM_WIDTH }}>{form}</Box> : (
         <>
           <Typography variant="body2" sx={{ mb: 2 }}>
             {payment
@@ -89,9 +89,9 @@ export const MembershipForm = ({ isNew, member, membership, values, onChange, on
               : <Typography component="span" variant="body2" color="text.secondary">No bank payment</Typography>}
           </Typography>
           <PageTabs tabs={TABS.map(([value, label]) => ({ value, label, count: counts[value] }))} value={shown} onChange={onTab} href={(t) => membershipPath(membership._id, t)} />
-          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
+          <TabPanel value="details" shown={shown} label="Details" form>{form}</TabPanel>
           <TabPanel value="messages" shown={shown} label="Messages">{messages}</TabPanel>
-          <TabPanel value="comments" shown={shown} label="Comments">{comments}</TabPanel>
+          <TabPanel value="comments" shown={shown} label="Comments" form>{comments}</TabPanel>
         </>
       )}
       <Dialog open={confirming} onClose={() => setConfirming(false)}>

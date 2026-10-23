@@ -19,6 +19,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { TEMPLATE_TYPES, MEMBERSHIP_TYPES, MEMBER_TYPES } from '/imports/common/lib/messageTemplates';
 import { TemplateDocumentation } from './TemplateDocumentation';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 const Choice = ({ label, options, value, onChange }) => {
   const id = useId();
@@ -49,7 +50,7 @@ export const MessageTemplateForm = ({
   const text = (name) => ({ value: values[name], onChange: (e) => onChange(name, e.target.value) });
   const flag = (name) => ({ checked: values[name], onChange: (e) => onChange(name, e.target.checked) });
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Link href="/templates" underline="hover" variant="body2">← Message templates</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 3 }}>
         <Typography variant="h4" component="h1">{isNew ? 'Add template' : 'Message template'}</Typography>

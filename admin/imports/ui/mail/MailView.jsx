@@ -19,6 +19,7 @@ import Typography from '@mui/material/Typography';
 import { Addresses } from './Addresses';
 import { Progress } from './Progress';
 import { groupLabel, sentAt } from './labels';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 /**
  * A group mail: who it was from and to, its text, who did not get it, the
@@ -37,7 +38,7 @@ export const MailView = ({ detail, busy = false, error, on, after }) => {
   const [deciding, setDeciding] = useState(true);
   const facts = [['From', mail.from], ['Recipients', groupLabel(mail.recipients)], ['Family members', mail.family ? 'Included' : 'Not included'], ['Sent', sentAt(mail.senddate)], ['Subject', mail.subject]];
   return (
-    <Box sx={{ maxWidth: 1000 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Link href="/mail" underline="hover" variant="body2">← Sent mails</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 1 }}>
         <Typography variant="h4" component="h1">Sent mail <strong>{mail.subject}</strong></Typography>

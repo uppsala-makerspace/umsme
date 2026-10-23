@@ -17,7 +17,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ImageField } from '../components/ImageField';
 import { ChipSelect } from '../components/ChipSelect';
-import { PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
+import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { storeItemPath } from './paths';
 
 const TABS = [['details', 'Details'], ['image', 'Image'], ['purchases', 'Purchases']];
@@ -116,7 +116,7 @@ export const StoreItemForm = ({
   );
 
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box>
       <Link href="/storeitems" underline="hover" variant="body2">← Store items</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 2 }}>
         <Typography variant="h4" component="h1">
@@ -145,13 +145,13 @@ export const StoreItemForm = ({
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
 
-      {isNew ? form : (
+      {isNew ? <Box sx={{ maxWidth: FORM_WIDTH }}>{form}</Box> : (
         <>
           <PageTabs
             tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'purchases' ? sales?.count : undefined }))}
             value={shown} onChange={onTab} href={(t) => storeItemPath(item._id, t)} />
-          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
-          <TabPanel value="image" shown={shown} label="Image">
+          <TabPanel value="details" shown={shown} label="Details" form>{form}</TabPanel>
+          <TabPanel value="image" shown={shown} label="Image" form>
             <>
               <ImageField
                 src={imageUrl} alt={item?.name?.sv} accept="image/jpeg,image/png,image/webp,image/heic"

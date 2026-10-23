@@ -11,6 +11,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 const ROLES = [['admin', 'admin'], ['board', 'board'], ['treasurer', 'treasurer'], ['storage', 'storage']];
 
@@ -39,7 +40,7 @@ export const UserView = ({ detail, values, onChange, onSave, busy = false, error
     }
   };
   return (
-    <Box sx={{ maxWidth: 800 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Link href="/users" underline="hover" variant="body2">← Users</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 1 }}>
         <Typography variant="h4" component="h1">User <strong>{user.username || user.emails?.[0]?.address}</strong></Typography>

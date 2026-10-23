@@ -19,7 +19,7 @@ import Typography from '@mui/material/Typography';
 import { groupCompleteness } from '/imports/common/lib/groupRules';
 import { ChipSelect } from '../components/ChipSelect';
 import { ImageField } from '../components/ImageField';
-import { PageTabs, TabPanel, TabPart, TabToolbar } from '../components/PageTabs';
+import { FORM_WIDTH, PageTabs, TabPanel, TabPart, TabToolbar } from '../components/PageTabs';
 import { GroupReferences, referenceCount } from './GroupReferences';
 import { groupPath } from './paths';
 import { MemberSelect } from '../components/MemberSelect';
@@ -170,7 +170,7 @@ export const GroupForm = ({
   );
 
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box>
       <Link href="/groups" underline="hover" variant="body2">← Groups</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 2 }}>
         <Typography variant="h4" component="h1">
@@ -201,13 +201,13 @@ export const GroupForm = ({
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
 
-      {isNew ? form : (
+      {isNew ? <Box sx={{ maxWidth: FORM_WIDTH }}>{form}</Box> : (
         <>
           <PageTabs
             tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'members' ? members?.active.length : value === 'references' ? referenceCount(references) : undefined }))}
             value={shown} onChange={onTab} href={(t) => groupPath(group._id, t)} />
-          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
-          <TabPanel value="image" shown={shown} label="Image">
+          <TabPanel value="details" shown={shown} label="Details" form>{form}</TabPanel>
+          <TabPanel value="image" shown={shown} label="Image" form>
             <>
               <ImageField
                 src={imageUrl} alt={group?.name?.sv} accept="image/jpeg,image/png,image/webp,image/heic"

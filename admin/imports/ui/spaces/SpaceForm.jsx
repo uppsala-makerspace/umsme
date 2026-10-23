@@ -13,7 +13,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ImageField } from '../components/ImageField';
-import { PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
+import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { ReferenceKind } from '../components/ReferenceKind';
 import { workshopPath } from '../workshops/paths';
 import { groupPath } from '../groups/paths';
@@ -73,7 +73,7 @@ export const SpaceForm = ({
     </Box>
   );
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box>
       <Link href="/spaces" underline="hover" variant="body2">← Spaces</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 2 }}>
         <Typography variant="h4" component="h1">{isNew ? 'Add space' : `Space: ${title}`}</Typography>
@@ -93,13 +93,13 @@ export const SpaceForm = ({
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
 
-      {isNew ? form : (
+      {isNew ? <Box sx={{ maxWidth: FORM_WIDTH }}>{form}</Box> : (
         <>
           <PageTabs
             tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'references' && links ? links.workshops.length + links.groups.length : undefined }))}
             value={shown} onChange={onTab} href={(t) => spacePath(space._id, t)} />
-          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
-          <TabPanel value="icon" shown={shown} label="Icon">
+          <TabPanel value="details" shown={shown} label="Details" form>{form}</TabPanel>
+          <TabPanel value="icon" shown={shown} label="Icon" form>
             <>
               <TabToolbar note="Shown on the map, centred on the space’s marker. SVG or PNG." />
               <ImageField

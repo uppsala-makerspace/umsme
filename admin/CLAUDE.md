@@ -123,6 +123,12 @@ together with the router in `client/react/App.jsx`.
   where there is one; every tab kept mounted while hidden, so unsaved
   details survive. Links to such a page from what it lists open that tab
   (the `…Path(id, tab)` helpers next to each module).
+- Widths: the frame and lists take the full width; forms, images and text
+  to read (comments, a mail) are at most `FORM_WIDTH` (1100, from
+  `components/PageTabs.jsx`). On a tabbed page the heading, status and
+  tabs are full width and each `TabPanel` says which it holds (`form`).
+  Pages without tabs that are a form or one thing's view wrap themselves
+  in `FORM_WIDTH`; never a width of their own.
 - Inside a tab the tab's name is the heading: never repeat it. A tab opens
   with its `TabToolbar`: what it is about as a grey note on the left, its
   actions ("Add membership") on the right, above what they act on. A tab of

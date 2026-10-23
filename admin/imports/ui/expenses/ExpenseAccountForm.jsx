@@ -21,7 +21,7 @@ import { ChipSelect } from '../components/ChipSelect';
 import { kr } from './labels';
 import { DateField } from '../components/DateField';
 import { groupPath } from '../groups/paths';
-import { PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
+import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { expenseAccountPath } from './paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
@@ -179,7 +179,7 @@ export const ExpenseAccountForm = ({
     </Box>
   );
   return (
-    <Box sx={{ maxWidth: 1000 }}>
+    <Box>
       <Link href="/expenses/accounts" underline="hover" variant="body2">← Expense accounts</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 2 }}>
         <Typography variant="h4" component="h1">{isNew ? 'Add expense account' : `Expense account: ${account.name}`}</Typography>
@@ -194,11 +194,11 @@ export const ExpenseAccountForm = ({
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
 
-      {isNew ? form : (
+      {isNew ? <Box sx={{ maxWidth: FORM_WIDTH }}>{form}</Box> : (
         <>
           <PageTabs tabs={TABS.map(([value, label]) => ({ value, label }))} value={shown} onChange={onTab} href={(t) => expenseAccountPath(account._id, t)} />
-          <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
-          <TabPanel value="budget" shown={shown} label="Budget">{budget && <Budget {...budget} busy={busy} />}</TabPanel>
+          <TabPanel value="details" shown={shown} label="Details" form>{form}</TabPanel>
+          <TabPanel value="budget" shown={shown} label="Budget" form>{budget && <Budget {...budget} busy={busy} />}</TabPanel>
         </>
       )}
 

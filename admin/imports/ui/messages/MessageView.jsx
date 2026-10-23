@@ -12,6 +12,7 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { memberPath } from '../members/paths';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 /**
  * A message as it was sent, and deleting it.
@@ -21,7 +22,7 @@ import { memberPath } from '../members/paths';
 export const MessageView = ({ message, memberName, onDelete, busy = false, error }) => {
   const [confirming, setConfirming] = useState(false);
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" component="h1">Message sent to <Link href={memberPath(message.member, 'messages')}><strong>{memberName}</strong></Link></Typography>
         <Button color="error" variant="outlined" disabled={busy} onClick={() => setConfirming(true)}>Delete message</Button>

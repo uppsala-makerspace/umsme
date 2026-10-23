@@ -12,6 +12,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { DateField } from '../components/DateField';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 /**
  * Add or edit a version of the liability agreement.
@@ -24,7 +25,7 @@ export const LiabilityForm = ({ isNew, values, onChange, onSave, onDelete, busy 
   const field = (name) => ({ value: values[name], onChange: (e) => onChange(name, e.target.value) });
   const text = { multiline: true, minRows: 8, fullWidth: true, helperText: 'Markdown', slotProps: { htmlInput: { style: { fontFamily: 'monospace' } } } };
   return (
-    <Box sx={{ maxWidth: 800 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Link href="/liability" underline="hover" variant="body2">← Liability documents</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 3 }}>
         <Typography variant="h4" component="h1">{isNew ? 'Add liability document' : 'Liability document'}</Typography>

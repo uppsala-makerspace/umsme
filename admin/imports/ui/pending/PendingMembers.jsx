@@ -16,7 +16,7 @@ import { MemberStatusChips } from '../members/MemberStatusChips';
  * @param {{ members: object[]|null, onAccept: (memberId) => void, busy?: boolean, error?: string, notice?: string }} props
  */
 export const PendingMembers = ({ members, onAccept, busy = false, error, notice }) => (
-  <Box sx={{ maxWidth: 900 }}>
+  <Box>
     <Typography variant="h4" component="h1" sx={{ mb: 2 }}>Pending members</Typography>
     {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
     {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}

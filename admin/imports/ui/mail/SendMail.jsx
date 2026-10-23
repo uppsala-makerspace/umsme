@@ -26,6 +26,7 @@ import { Addresses } from './Addresses';
 import { Progress } from './Progress';
 import { RECIPIENT_GROUPS } from './labels';
 import { DateField } from '../components/DateField';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 const FORMATS = [['raw', 'Raw'], ['markdown', 'Markdown'], ['plaintext', 'Plain text']];
 
@@ -63,7 +64,7 @@ export const SendMail = ({ values, onChange, senders, recipients, onSend, starti
     ? <Box className="markdown" dangerouslySetInnerHTML={{ __html: marked.parse(values.template, { breaks: true }) }} />
     : <Box sx={{ whiteSpace: 'pre-wrap' }}>{removeMd(values.template, { stripListLeaders: false })}</Box>;
   return (
-    <Box sx={{ maxWidth: 1200 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Typography variant="h4" component="h1" sx={{ mb: 2 }}>Send mail</Typography>
       {announcement && (
         <Alert severity="info" sx={{ mb: 2 }}>

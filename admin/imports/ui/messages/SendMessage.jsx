@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { memberPath } from '../members/paths';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 /**
  * A message written from a template, to look over and change before it is
@@ -19,7 +20,7 @@ import { memberPath } from '../members/paths';
 export const SendMessage = ({ memberId, draft, values, onChange, onSend, busy = false, error, back = memberPath(memberId, 'messages') }) => {
   const text = (name) => ({ value: values[name] || '', onChange: (e) => onChange(name, e.target.value) });
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
         Send <strong>{draft.templateType}</strong> message to member <Link href={memberPath(memberId, 'messages')}><strong>{draft.memberName}</strong></Link>
       </Typography>

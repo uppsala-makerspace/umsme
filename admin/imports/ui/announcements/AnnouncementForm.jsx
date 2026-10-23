@@ -17,6 +17,7 @@ import Typography from '@mui/material/Typography';
 import { Section } from '../components/Section';
 import { TemplateDocumentation } from '../messageTemplates/TemplateDocumentation';
 import { TYPES, moment } from './labels';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -46,7 +47,7 @@ export const AnnouncementForm = ({ isNew, announcement, values, onChange, onSave
   const text = (name) => ({ value: values[name], onChange: (e) => onChange(name, e.target.value) });
   const sent = announcement?.status === 'sent';
   return (
-    <Box sx={{ maxWidth: 1100 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Link href="/announcements" underline="hover" variant="body2">← Announcements</Link>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mt: 0.5, mb: 1 }}>
         <Typography variant="h4" component="h1">

@@ -22,9 +22,20 @@ export const PageTabs = ({ tabs, value, onChange, href }) => (
   </Tabs>
 );
 
-/** A tab's content: kept while another tab shows, hidden, so its state stays. */
-export const TabPanel = ({ value, shown, label, children }) => (
-  <Box role="tabpanel" hidden={value !== shown} aria-label={label}>{children}</Box>
+/**
+ * How wide a form, or text to read, is at most: wider, fields are hard to
+ * match with their labels and lines hard to follow. Lists and tables take
+ * the full width.
+ */
+export const FORM_WIDTH = 1100;
+
+/**
+ * A tab's content: kept while another tab shows, hidden, so its state stays.
+ * With `form` (forms, images, text to read) it is at most FORM_WIDTH wide;
+ * without (lists, tables) it takes the page's full width.
+ */
+export const TabPanel = ({ value, shown, label, form = false, children }) => (
+  <Box role="tabpanel" hidden={value !== shown} aria-label={label} sx={form ? { maxWidth: FORM_WIDTH } : undefined}>{children}</Box>
 );
 
 /*

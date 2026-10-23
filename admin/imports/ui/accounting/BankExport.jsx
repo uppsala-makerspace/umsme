@@ -10,6 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 const R = (props) => <TableCell align="right" {...props} />;
 
@@ -24,7 +25,7 @@ const R = (props) => <TableCell align="right" {...props} />;
 export const BankExport = ({ onFile, busy = false, error, result, onDownloadSie, onDownloadRemaining }) => {
   const s = result?.summary;
   return (
-    <Box sx={{ maxWidth: 1000 }}>
+    <Box sx={{ maxWidth: FORM_WIDTH }}>
       <Typography variant="h4" component="h1" sx={{ mb: 1 }}>Bank export</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 800 }}>
         Upload a bank transaction report (CSV from Swedbank). Recognized transactions (expense reimbursements, member

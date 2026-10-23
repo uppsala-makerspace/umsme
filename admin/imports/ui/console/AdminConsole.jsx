@@ -9,6 +9,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
 import { Section } from '../components/Section';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 /**
  * A console action: a button that asks first, then shows what came of it.
@@ -47,7 +48,7 @@ const Action = ({ label, question, confirmLabel, busy, disabled, onRun, result }
  *   `busy` names the action running; `results` holds each action's outcome by name.
  */
 export const AdminConsole = ({ busy = null, results = {}, mandatory, on, merge }) => (
-  <Box sx={{ maxWidth: 1000 }}>
+  <Box sx={{ maxWidth: FORM_WIDTH }}>
     <Typography variant="h4" component="h1">Admin console</Typography>
 
     <Section title="Force Danalock unlock sync" note="Runs the same sync as the cron job: pulls recent Danalock unlocks into doorunlocks and (if enabled in settings) sends the daily summary email.">
