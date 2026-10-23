@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
-import { useNavigate } from '../navigation';
+import { useNavigate, useQueryParam } from '../navigation';
 import { useEditor } from '../components/useEditor';
 import { useChoices } from '../groups/choices';
 import { WorkshopForm } from './WorkshopForm';
@@ -17,6 +17,7 @@ export const WorkshopEditPage = ({ _id }) => {
   const { values, setField, loaded, run, busy, error, setError, notice, setNotice } = useEditor({ doc: workshop, loading, toValues: formValues });
   const [details, setDetails] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [tab, setTab] = useQueryParam('tab');
 
   // The steering group's members and the certificates follow what is saved.
   const savedVersion = workshop?.updatedAt?.getTime();
@@ -56,6 +57,7 @@ export const WorkshopEditPage = ({ _id }) => {
       onUploadImage={(file) => { setUploading(true); run(() => uploadWorkshopImage(_id, file)).finally(() => setUploading(false)); }}
       onRemoveImage={() => run(() => removeWorkshopImage(_id))}
       onDelete={() => run(() => removeWorkshop(_id), { then: () => navigate('/workshops') })}
+      tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)}
     />
   );
 };

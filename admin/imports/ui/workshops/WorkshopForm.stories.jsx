@@ -21,9 +21,10 @@ const values = (w) => ({
 const details = { activeMemberCount: 2, certificates: [] };
 
 /** Keeps the values, as the page does. */
-const Editable = ({ values: initial, ...props }) => {
+const Editable = ({ values: initial, initialTab = 'details', ...props }) => {
   const [current, setCurrent] = useState(initial);
-  return <WorkshopForm {...props} values={current} onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))} />;
+  const [tab, setTab] = useState(initialTab);
+  return <WorkshopForm {...props} values={current} onChange={(field, value) => setCurrent((v) => ({ ...v, [field]: value }))} tab={tab} onTab={setTab} />;
 };
 
 export default {
@@ -42,11 +43,11 @@ export const NewWorkshop = { args: { isNew: true, workshop: null, values: values
 export const Incomplete = {};
 
 export const Complete = {
-  args: { workshop: { ...ceramics, imageFileId: 'f1' }, imageUrl: 'https://placehold.co/400x300?text=Keramik' },
+  args: { workshop: { ...ceramics, imageFileId: 'f1' }, imageUrl: 'https://placehold.co/400x300?text=Keramik', initialTab: 'image' },
 };
 
 export const WithCertificates = {
-  args: { details: { activeMemberCount: 1, certificates: [{ _id: 'c1', name: { sv: 'Drejskivan' } }, { _id: 'c2', name: { sv: 'Brännugnen' } }] } },
+  args: { details: { activeMemberCount: 1, certificates: [{ _id: 'c1', name: { sv: 'Drejskivan' } }, { _id: 'c2', name: { sv: 'Brännugnen' } }] }, initialTab: 'references' },
 };
 
 export const AreaOfInterest = {

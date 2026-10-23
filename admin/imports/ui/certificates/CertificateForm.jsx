@@ -17,6 +17,7 @@ import { MemberChips } from '../components/MemberChips';
 import { Section } from '../components/Section';
 import { GrantForm } from './GrantForm';
 import { HolderList } from './HolderList';
+import { workshopPath } from '../workshops/paths';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -90,7 +91,7 @@ export const CertificateForm = ({
                 <option key={w._id} value={w._id}>{w.name?.sv}{w.kind === 'areaOfInterest' ? ' (area of interest)' : ''}</option>
               ))}
             </TextField>
-            {workshop && <Link href={`/workshop/${workshop._id}`} variant="body2">Open {workshop.name?.sv}</Link>}
+            {workshop && <Link href={workshopPath(workshop._id, 'references')} variant="body2">Open {workshop.name?.sv}</Link>}
           </Box>
         </Stack>
 

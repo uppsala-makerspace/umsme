@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openAs } from './helpers';
 import { dataRows, expectSearch, sortBy } from './lists';
-import { field, action, saveButton, confirmed, deleteConfirmed } from './forms';
+import { field, action, saveButton, confirmed, deleteConfirmed, openTab } from './forms';
 
 // Workshops and areas of interest: list, add, edit, completeness, steering
 // group, image, delete, and who sees them. Written against the Blaze pages
@@ -107,6 +107,7 @@ test.describe('Workshops and areas of interest', () => {
 
   test('uploads and removes an image', async ({ page }) => {
     await openWorkshop(page, RETRO);
+    await openTab(page, /^image$/i);
     await page.locator('input[type="file"]').setInputFiles({ name: 'retro.png', mimeType: 'image/png', buffer: PNG });
     await action(page, /^upload image$/i).click();
     await expect(page.getByRole('img', { name: RETRO })).toBeVisible();
@@ -119,5 +120,18 @@ test.describe('Workshops and areas of interest', () => {
     await deleteConfirmed(page);
     await expect(page.getByText(CERAMICS, { exact: true })).toBeVisible();
     await expect(page.getByText('E2E delete verkstad', { exact: true })).not.toBeVisible();
+  });
+});
+
+test.describe('Workshop tabs', () => {
+  test('lists what refers to a workshop, the tab in the URL', async ({ page }) => {
+    await openWorkshop(page, CERAMICS);
+    await expect(page.getByRole('tab', { name: /^details$/i, selected: true })).toBeVisible();
+    await openTab(page, /^references \(\d+\)$/i);
+    await expect(page).toHaveURL(/\?tab=references$/);
+    await expect(page.getByRole('link', { name: 'Drejskiva' })).toBeVisible();
+    await openTab(page, /^image$/i);
+    await page.goBack();
+    await expect(page.getByRole('tab', { name: /^references/i, selected: true })).toBeVisible();
   });
 });
