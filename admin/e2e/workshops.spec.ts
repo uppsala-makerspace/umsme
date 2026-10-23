@@ -130,6 +130,8 @@ test.describe('Workshop tabs', () => {
     await openTab(page, /^references \(\d+\)$/i);
     await expect(page).toHaveURL(/\?tab=references$/);
     await expect(page.getByRole('link', { name: 'Drejskiva' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /through the steering group/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^expense accounts \(\d+\)$/i })).toBeVisible();
     await openTab(page, /^image$/i);
     await page.goBack();
     await expect(page.getByRole('tab', { name: /^references/i, selected: true })).toBeVisible();

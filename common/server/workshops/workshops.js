@@ -4,6 +4,8 @@ import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Certificates } from '/imports/common/collections/certificates';
+import { StoreItems } from '/imports/common/collections/storeItems';
+import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { WORKSHOP_KINDS, WORKSHOP_STATUSES } from '/imports/common/lib/groupRules';
 import { recordChange } from '/imports/common/server/auditLog';
 import { text, bilingual, setOrUnset } from '../groups/text';
@@ -77,23 +79,54 @@ export const updateWorkshop = async (docId, fields, { userId, expectedUpdatedAt 
   await recordChange({ userId, domain: DOMAIN, action: 'update', docId, before, after: await Workshops.findOneAsync(docId) });
 };
 
-/** The steering group's active members and the certificates that belong to the workshop. */
-export const workshopDetails = async (docId) => {
-  const workshop = await current(docId);
-  const activeMemberCount = workshop.groupId
-    ? await GroupMemberships.find({ groupId: workshop.groupId, state: 'active' }).countAsync()
-    : 0;
-  const certificates = await Certificates.find({ workshopId: docId }, { fields: { name: 1 }, sort: { 'name.sv': 1 } }).fetchAsync();
-  return { activeMemberCount, certificates };
+/** What refers to the workshop directly: what keeps it from being deleted, the image apart. */
+const directReferences = async (docId) => {
+  const [certificates, storeItems, relatedGroups] = await Promise.all([
+    Certificates.find({ workshopId: docId }, { fields: { name: 1 }, sort: { 'name.sv': 1 } }).fetchAsync(),
+    StoreItems.find({ workshopIds: docId }, { fields: { name: 1, code: 1 }, sort: { code: 1 } }).fetchAsync(),
+    Groups.find({ relatedWorkshopIds: docId }, { fields: { name: 1, type: 1 }, sort: { 'name.sv': 1 } }).fetchAsync(),
+  ]);
+  return { certificates, storeItems, relatedGroups };
 };
 
-/** Remove a workshop; refused while it has an image or certificates belong to it. */
+/**
+ * The saved workshop's steering group's active member count, and what refers
+ * to the workshop: directly (certificates, store items sold for it, groups
+ * related to it) and through its steering group (the responsibility groups
+ * under it, groups related to it, and the expense accounts it belongs to or
+ * approves on).
+ */
+export const workshopDetails = async (docId) => {
+  const workshop = await current(docId);
+  const groupId = workshop.groupId;
+  const [activeMemberCount, direct, group, responsibilityGroups, groupRelated, accounts] = await Promise.all([
+    groupId ? GroupMemberships.find({ groupId, state: 'active' }).countAsync() : 0,
+    directReferences(docId),
+    groupId ? Groups.findOneAsync(groupId, { fields: { name: 1 } }) : null,
+    groupId ? Groups.find({ parentGroupId: groupId }, { fields: { name: 1, type: 1 }, sort: { 'name.sv': 1 } }).fetchAsync() : [],
+    groupId ? Groups.find({ relatedGroupIds: groupId }, { fields: { name: 1, type: 1 }, sort: { 'name.sv': 1 } }).fetchAsync() : [],
+    groupId ? ExpenseAccounts.find({ $or: [{ groupIds: groupId }, { approverGroupIds: groupId }] }, { fields: { name: 1, groupIds: 1, approverGroupIds: 1 }, sort: { name: 1 } }).fetchAsync() : [],
+  ]);
+  const expenseAccounts = accounts.map((a) => ({
+    _id: a._id, name: a.name, member: (a.groupIds || []).includes(groupId), approver: (a.approverGroupIds || []).includes(groupId),
+  }));
+  return {
+    activeMemberCount,
+    ...direct,
+    viaGroup: group ? { group, responsibilityGroups, relatedGroups: groupRelated, expenseAccounts } : null,
+  };
+};
+
+/**
+ * Remove a workshop; refused while it has an image, or while anything refers
+ * to it directly: certificates, store items sold for it, groups related to it.
+ */
 export const removeWorkshop = async (docId, { userId }) => {
   const before = await current(docId);
   if (before.imageFileId) throw new Meteor.Error('has-image', 'Remove the image before the workshop can be deleted');
-  if (await Certificates.findOneAsync({ workshopId: docId })) {
-    throw new Meteor.Error('in-use', 'Certificates belong to this workshop; move them first');
-  }
+  const { certificates, storeItems, relatedGroups } = await directReferences(docId);
+  const users = [certificates.length && 'certificates belong to it', storeItems.length && 'store items are sold for it', relatedGroups.length && 'groups are related to it'].filter(Boolean);
+  if (users.length) throw new Meteor.Error('in-use', `The workshop can not be deleted while ${users.join(' and ')}`);
   await Workshops.removeAsync(docId);
   await recordChange({ userId, domain: DOMAIN, action: 'remove', docId, before });
 };

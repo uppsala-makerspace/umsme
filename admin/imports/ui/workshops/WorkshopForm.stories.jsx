@@ -18,7 +18,8 @@ const values = (w) => ({
   slackChannel: w.slackChannel || '', guidesUrl: '', groupId: w.groupId || '', primarySpaceId: w.primarySpaceId || '',
   secondarySpaceIds: w.secondarySpaceIds || [],
 });
-const details = { activeMemberCount: 2, certificates: [] };
+const none = { certificates: [], storeItems: [], relatedGroups: [], viaGroup: null };
+const details = { activeMemberCount: 2, ...none };
 
 /** Keeps the values, as the page does. */
 const Editable = ({ values: initial, initialTab = 'details', ...props }) => {
@@ -47,13 +48,27 @@ export const Complete = {
 };
 
 export const WithCertificates = {
-  args: { details: { activeMemberCount: 1, certificates: [{ _id: 'c1', name: { sv: 'Drejskivan' } }, { _id: 'c2', name: { sv: 'Brännugnen' } }] }, initialTab: 'references' },
+  args: {
+    initialTab: 'references',
+    details: {
+      activeMemberCount: 1,
+      certificates: [{ _id: 'c1', name: { sv: 'Drejskivan' } }, { _id: 'c2', name: { sv: 'Brännugnen' } }],
+      storeItems: [{ _id: 's1', code: 'lera', name: { sv: 'Lera, 10 kg' } }],
+      relatedGroups: [{ _id: 'g9', type: 'function', name: { sv: 'Kursgruppen' } }],
+      viaGroup: {
+        group: { _id: 'g1', name: { sv: 'Styrgrupp Keramik' } },
+        responsibilityGroups: [{ _id: 'g2', type: 'responsibility', name: { sv: 'Glasyransvariga' } }],
+        relatedGroups: [],
+        expenseAccounts: [{ _id: 'a1', name: 'Keramik', member: true, approver: false }, { _id: 'a2', name: 'Material', member: false, approver: true }],
+      },
+    },
+  },
 };
 
 export const AreaOfInterest = {
   args: (() => {
     const retro = { _id: 'w2', kind: 'areaOfInterest', status: 'trial', name: { sv: 'Retrodatorer' } };
-    return { workshop: retro, values: values(retro), details: { activeMemberCount: 0, certificates: [] } };
+    return { workshop: retro, values: values(retro), details: { activeMemberCount: 0, ...none } };
   })(),
 };
 

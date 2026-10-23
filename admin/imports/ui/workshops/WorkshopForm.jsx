@@ -9,8 +9,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Link from '@mui/material/Link';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -20,6 +18,7 @@ import { ImageField } from '../components/ImageField';
 import { Section } from '../components/Section';
 import { PageTabs, TabPanel } from '../components/PageTabs';
 import { workshopPath } from './paths';
+import { WorkshopReferences, referenceCount, directReferenceCount } from './WorkshopReferences';
 import { KINDS, STATUSES, MISSING } from './labels';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
@@ -28,16 +27,16 @@ const TABS = [['details', 'Details'], ['image', 'Image'], ['references', 'Refere
 /**
  * Add a workshop or area of interest, or show and edit one in tabs: its
  * details (fields, steering group and spaces, saved with Save), its image,
- * and what refers to it (the certificates that belong to it). Every tab
+ * and what refers to it, directly or through its steering group. Every tab
  * stays put while another shows, so unsaved details survive.
  *
  * @param {{ isNew: boolean, workshop?: object, values: object, onChange: (field, value) => void,
  *           onSave: () => void, busy?: boolean, error?: string, notice?: string,
  *           groups: Array<{ _id, name }>, spaceOptions: Array<{ value, label, group }>,
- *           details?: { activeMemberCount: number, certificates: object[] },
+ *           details?: object,
  *           imageUrl?: string, onUploadImage?: (file) => void, onRemoveImage?: () => void,
  *           uploading?: boolean, onDelete?: () => void, tab?: string, onTab?: (tab) => void }} props
- *   `groups` are the steering groups; `details` is about the saved workshop.
+ *   `groups` are the steering groups; `details` is about the saved workshop, as workshops.details returns it.
  */
 export const WorkshopForm = ({
   isNew, workshop, values, onChange, onSave, busy = false, error, notice, groups, spaceOptions,
@@ -54,7 +53,8 @@ export const WorkshopForm = ({
     ? workshopCompleteness(workshop, savedGroup, details.activeMemberCount)
     : null;
   const selectedGroup = groups.find((g) => g._id === values.groupId);
-  const blocked = workshop?.imageFileId || details?.certificates.length > 0;
+  const referring = directReferenceCount(details);
+  const blocked = workshop?.imageFileId || referring > 0;
   const form = (
     <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
@@ -150,8 +150,7 @@ export const WorkshopForm = ({
       )}
       {!isNew && details && blocked && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          This {noun} can not be deleted while {[workshop.imageFileId && 'it has an image', details.certificates.length > 0 && 'certificates belong to it'].filter(Boolean).join(' and ')}.
-          Remove {[workshop.imageFileId && 'the image', details.certificates.length > 0 && 'the certificates'].filter(Boolean).join(' and ')} first.
+          This {noun} can not be deleted while {[workshop.imageFileId && 'it has an image', referring > 0 && 'something refers to it (see References)'].filter(Boolean).join(' and ')}.
         </Alert>
       )}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -160,7 +159,7 @@ export const WorkshopForm = ({
       {isNew ? form : (
         <>
           <PageTabs
-            tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'references' && details ? details.certificates.length : undefined }))}
+            tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'references' ? referenceCount(details) : undefined }))}
             value={shown} onChange={onTab} href={(t) => workshopPath(workshop._id, t)} />
           <TabPanel value="details" shown={shown} label="Details">{form}</TabPanel>
           <TabPanel value="image" shown={shown} label="Image">
@@ -172,22 +171,7 @@ export const WorkshopForm = ({
             </Section>
           </TabPanel>
           <TabPanel value="references" shown={shown} label="References">
-            <Section sx={{ mt: 0 }} title="Certificates" note="The certificates that belong to it; each is linked from the certificate’s own page.">
-              {!details ? <Typography variant="body2">Looking…</Typography> : details.certificates.length === 0
-                ? (
-                  <Typography variant="body2" color="text.secondary">
-                    No certificates belong to this {noun}. Link them from each certificate&apos;s page
-                    under <Link href="/certificates">Certificates</Link>.
-                  </Typography>
-                )
-                : (
-                  <List dense disablePadding>
-                    {details.certificates.map((c) => (
-                      <ListItem key={c._id} disableGutters><Link href={`/certificate/${c._id}`}>{c.name?.sv || c._id}</Link></ListItem>
-                    ))}
-                  </List>
-                )}
-            </Section>
+            <WorkshopReferences details={details} noun={noun} />
           </TabPanel>
         </>
       )}

@@ -6,6 +6,8 @@ import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Members } from '/imports/common/collections/members';
 import { Certificates } from '/imports/common/collections/certificates';
+import { StoreItems } from '/imports/common/collections/storeItems';
+import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { AuditLog } from '/imports/common/collections/auditLog';
 import '/server/methods/groups';
 import '/server/methods/workshops';
@@ -30,6 +32,8 @@ const cleanup = async () => {
   await GroupMemberships.removeAsync({ groupId: { $in: groupIds } });
   await Workshops.removeAsync({ 'name.sv': { $regex: `^${prefix}` } });
   await Certificates.removeAsync({ 'name.sv': { $regex: `^${prefix}` } });
+  await StoreItems.rawCollection().deleteMany({ code: { $regex: `^${prefix}` } });
+  await ExpenseAccounts.rawCollection().deleteMany({ name: { $regex: `^${prefix}` } });
   await Groups.removeAsync({ _id: { $in: groupIds } });
   await AuditLog.removeAsync({ userId: { $regex: `^${prefix}` } });
   await Meteor.roleAssignment.removeAsync({ 'role._id': roleName });
@@ -160,6 +164,22 @@ describe('groups and workshops', function () {
       assert.strictEqual(details.activeMemberCount, 1);
       assert.deepStrictEqual(details.certificates.map((c) => c.name.sv), [`${prefix}Cert`]);
       await assert.rejects(call(board, 'workshops.remove', docId), /in-use/);
+    });
+
+    it('lists what refers to a workshop, directly and through its steering group, and keeps it while anything does directly', async function () {
+      const steering = await call(board, 'groups.create', group({ type: 'steering', responsibleMemberId: alice }));
+      const docId = await call(board, 'workshops.create', workshop({ groupId: steering }));
+      await StoreItems.rawCollection().insertOne({ _id: `${prefix}item`, code: `${prefix}lera`, name: { sv: 'Lera' }, workshopIds: [docId] });
+      const related = await call(board, 'groups.create', group({ relatedWorkshopIds: [docId] }));
+      const child = await call(board, 'groups.create', group({ name: { sv: `${prefix}Ansvar` }, type: 'responsibility', parentGroupId: steering, responsibleMemberId: alice }));
+      await ExpenseAccounts.rawCollection().insertOne({ _id: `${prefix}acct`, name: `${prefix}Konto`, groupIds: [], approverGroupIds: [steering] });
+      const details = await call(board, 'workshops.details', docId);
+      assert.deepStrictEqual(details.storeItems.map((i) => i._id), [`${prefix}item`]);
+      assert.deepStrictEqual(details.relatedGroups.map((g) => g._id), [related]);
+      assert.strictEqual(details.viaGroup.group._id, steering);
+      assert.deepStrictEqual(details.viaGroup.responsibilityGroups.map((g) => g._id), [child]);
+      assert.deepStrictEqual(details.viaGroup.expenseAccounts, [{ _id: `${prefix}acct`, name: `${prefix}Konto`, member: false, approver: true }]);
+      await assert.rejects(call(board, 'workshops.remove', docId), /store items are sold for it and groups are related to it/);
     });
   });
 
