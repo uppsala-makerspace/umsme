@@ -26,7 +26,8 @@ test.describe('Membership statistics', () => {
     await expect(page.getByRole('heading', { name: /^memberships$/i, level: 1 })).toBeVisible();
     await expect(page.getByText(/all members:\s*\d+/i)).toBeVisible();
     await expect(page.locator('canvas').first()).toBeVisible();
-    await page.getByLabel(/last year/i).check();
+    await expect(page.getByRole('img', { name: 'Churn over the last year' })).toBeVisible();
+    await page.getByRole('radio', { name: /last year/i }).check();
     await expect(page.getByText(/all members:\s*\d+/i)).toBeVisible();
   });
 });

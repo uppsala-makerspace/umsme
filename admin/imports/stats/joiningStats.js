@@ -68,12 +68,11 @@ const detectJoiningInfo = (index) => {
  *
  * @param {Array<object>} memberships  All Membership documents (a plain array,
  *   so this stays testable without a database)
- * @param members
  * @param from
  * @param to
- * @return {{memberAgeLeft: *[], memberAge: *[], joined: *[], renewLabels: *[], churn: *[], index: {memberships: []}, memberAgeLabels: *[], labels: *[], renewed: *[], renewTime: *[], left: *[], rejoined: *[], disappeared: *[]}}
+ * @return {{memberAgeLeft: *[], memberAge: *[], joined: *[], renewLabels: *[], index: {memberships: []}, memberAgeLabels: *[], labels: *[], renewed: *[], renewTime: *[], left: *[], rejoined: *[], disappeared: *[]}}
  */
-export const statsPerMonth = (memberships, members, from, to) => {
+export const statsPerMonth = (memberships, from, to) => {
   const index = groupByMember(memberships);
   detectJoiningInfo(index);
   const joined = {};
@@ -138,7 +137,6 @@ export const statsPerMonth = (memberships, members, from, to) => {
   const renewedD = [];
   const rejoinedD = [];
   const disappearedD = [];
-  const churn = [];
   // Nothing happened in the period: no months to show.
   const firstYear = earliest?.getFullYear();
   const firstMonth = earliest?.getMonth();
@@ -157,10 +155,6 @@ export const statsPerMonth = (memberships, members, from, to) => {
       leftD.push(-leftThisMonth);
       rejoinedD.push((rejoined[year] || {})[month] || 0);
       disappearedD.push(-(disappeared[year] || {})[month] || 0);
-      const middleOfMonth = new Date(`${year}-${month+1}-15`);
-      const totalMember = members.find(member => member.x > middleOfMonth);
-      const total = totalMember ? totalMember.y : members[members.length-1].y;
-      churn.push(Math.round(12*100*leftThisMonth/(total === 0 ? 1 : total)));
     }
     years.forEach((y) => {
       const mstart = y === firstYear ? firstMonth : 0;
@@ -177,7 +171,6 @@ export const statsPerMonth = (memberships, members, from, to) => {
     renewed: renewedD,
     rejoined: rejoinedD,
     left: leftD,
-    churn,
     renewTime,
     renewLabels,
     memberAge,

@@ -44,6 +44,7 @@ import "./members.tests";
 import "./users.tests";
 import "./mails.tests";
 import "./memberBatches.tests";
+import "./churn.tests";
 import "./dates.tests";
 
 describe("umsme", function () {

@@ -1,3 +1,5 @@
+import { CHURN_GRACE_MONTHS } from '/imports/stats/churn';
+
 /**
  * The membership statistics as Chart.js configurations, as the Blaze page
  * drew them, from what stats.memberships returns.
@@ -13,7 +15,62 @@ const stackedBar = (labels, datasets) => ({
   options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, ticks: { beginAtZero: true } } } },
 });
 
-export const membershipCharts = ({ series, monthly }) => [
+const CHURN = 'rgb(255, 99, 132)';
+const YEAR = 'rgb(150, 0, 30)';
+
+/** Writes the year and its churn above each calendar year's point. */
+const yearLabels = (churn) => ({
+  id: 'churnYearLabels',
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    const points = chart.getDatasetMeta(0).data;
+    ctx.save();
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillStyle = YEAR;
+    ctx.textAlign = 'center';
+    churn.year.forEach((year, i) => {
+      if (year && points[i]) ctx.fillText(`${year}: ${churn.percent[i]} %`, points[i].x, points[i].y - 14);
+    });
+    ctx.restore();
+  },
+});
+
+/**
+ * Churn over the last year, month by month, as a line; the tooltip tells
+ * how many of how many. The Decembers' points, a whole calendar year each,
+ * stand out and carry the year.
+ */
+const churnChart = (churn) => ({
+  type: 'line',
+  data: {
+    labels: churn.labels,
+    datasets: [{
+      label: 'Members a year ago who have not renewed since (%)', data: churn.percent,
+      borderWidth: 2, borderColor: CHURN, backgroundColor: 'rgba(255, 99, 132, 0.2)', fill: true, tension: 0.3,
+      pointRadius: churn.year.map((y) => (y ? 7 : 2)),
+      pointHoverRadius: churn.year.map((y) => (y ? 9 : 4)),
+      pointStyle: churn.year.map((y) => (y ? 'rectRot' : 'circle')),
+      pointBackgroundColor: churn.year.map((y) => (y ? YEAR : CHURN)),
+      pointBorderColor: churn.year.map((y) => (y ? YEAR : CHURN)),
+    }],
+  },
+  plugins: [yearLabels(churn)],
+  options: {
+    responsive: true,
+    layout: { padding: { top: 24 } },
+    scales: { y: { beginAtZero: true, grace: '10%', ticks: { callback: (v) => `${v} %` } } },
+    plugins: {
+      tooltip: {
+        callbacks: {
+          title: ([{ dataIndex }]) => (churn.year[dataIndex] ? `The year ${churn.year[dataIndex]}` : churn.labels[dataIndex]),
+          label: ({ dataIndex }) => `${churn.percent[dataIndex]} %: ${churn.lost[dataIndex]} of ${churn.base[dataIndex]} members`,
+        },
+      },
+    },
+  },
+});
+
+export const membershipCharts = ({ series, monthly, churn }) => [
   {
     label: 'Members per day',
     config: {
@@ -47,8 +104,9 @@ export const membershipCharts = ({ series, monthly }) => [
     ]),
   },
   {
-    label: 'Churn',
-    config: stackedBar(monthly.labels, [area('Percentage of lost members (churn)', monthly.churn, 'rgba(255, 99, 132)', 'rgba(255, 99, 132, 0.2)')]),
+    label: 'Churn over the last year',
+    note: `For each month: of the paying members a year earlier (a family counts once), the share who have not renewed since. The marked points, each December's, are whole calendar years. Renewing up to ${CHURN_GRACE_MONTHS} months late is not leaving, so the last ${CHURN_GRACE_MONTHS} months, whose late renewals are not known yet, are not shown.`,
+    config: churnChart(churn),
   },
   {
     label: 'Time to renew',

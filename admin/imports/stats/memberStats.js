@@ -1,5 +1,6 @@
 import { buildSeries, sortAndAccumulate } from './membershipSeries';
 import { statsPerMonth } from './joiningStats';
+import { yearlyChurn } from '/imports/stats/churn';
 
 /**
  * The membership statistics and the member history, worked out on the
@@ -21,7 +22,8 @@ const last = (series) => (series.length ? series[series.length - 1].y : null);
 
 /**
  * The member counts over time by kind, and per month what joined, renewed,
- * paused, came back and left, with churn, time to renew and years active.
+ * paused, came back and left, time to renew and years active, and the
+ * churn over the last year month by month (yearlyChurn).
  */
 export const membershipStatistics = (memberships, interval = 'all', now = new Date()) => {
   const from = periodStart(interval, now);
@@ -34,8 +36,8 @@ export const membershipStatistics = (memberships, interval = 'all', now = new Da
     familyLab: sortAndAccumulate(familyLabEvents, from, now),
   };
   const counts = Object.fromEntries(Object.entries(series).map(([kind, s]) => [kind, last(s)]));
-  const { index, ...monthly } = statsPerMonth(memberships, series.members, from, now);
-  return { counts, series, monthly };
+  const { index, ...monthly } = statsPerMonth(memberships, from, now);
+  return { counts, series, monthly, churn: yearlyChurn(memberships, from, now) };
 };
 
 /**
@@ -43,8 +45,7 @@ export const membershipStatistics = (memberships, interval = 'all', now = new Da
  * members are left out, their payer counts. With the current counts by kind.
  */
 export const memberHistory = (memberships, members, now = new Date()) => {
-  const accumulated = sortAndAccumulate(buildSeries(memberships).memberEvents, null, now);
-  const { index } = statsPerMonth(memberships, accumulated, null, now);
+  const { index } = statsPerMonth(memberships, null, now);
   const stats = { historic: 0, active: 0, infamily: 0, paying: 0, member: 0, family: 0, lab: 0, labfamily: 0 };
   const byId = {};
   for (const m of members) {

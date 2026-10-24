@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { ChartCanvas } from '../components/ChartCanvas';
 import { membershipCharts } from './membershipCharts';
+import { FORM_WIDTH } from '../components/PageTabs';
 
 const INTERVALS = [
   { value: 'all', label: 'All time' },
@@ -43,7 +44,12 @@ export const Statistics = ({ statistics, interval, onIntervalChange }) => {
         </Box>
       </Stack>
       {!statistics && <Typography color="text.secondary">Counting…</Typography>}
-      {charts.map((c) => <Box key={c.label} sx={{ mb: 4 }}><ChartCanvas config={c.config} label={c.label} /></Box>)}
+      {charts.map((c) => (
+        <Box key={c.label} sx={{ mb: 4 }}>
+          {c.note && <Typography variant="body2" color="text.secondary" sx={{ mb: 1, maxWidth: FORM_WIDTH }}>{c.note}</Typography>}
+          <ChartCanvas config={c.config} label={c.label} />
+        </Box>
+      ))}
     </Box>
   );
 };
