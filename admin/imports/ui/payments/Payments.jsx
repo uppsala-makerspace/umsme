@@ -1,9 +1,8 @@
 import React from 'react';
 import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { PageTabs } from '../components/PageTabs';
 
 const TABS = [['manual', 'Manual'], ['automatic', 'Automatic'], ['memberships', 'Memberships'], ['store', 'Purchases']];
 const native = { select: { native: true }, inputLabel: { shrink: true } };
@@ -18,9 +17,8 @@ const native = { select: { native: true }, inputLabel: { shrink: true } };
 export const Payments = ({ tab, onTab, bank, list, storeItems = [], storeItem = '', onStoreItem }) => (
   <Box>
     <Typography variant="h4" component="h1" sx={{ mb: 1 }}>Payments</Typography>
-    <Tabs value={tab} onChange={(e, next) => onTab(next)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-      {TABS.map(([value, label]) => <Tab key={value} value={value} label={label} />)}
-    </Tabs>
+    <PageTabs tabs={TABS.map(([value, label]) => ({ value, label }))} value={tab} onChange={onTab}
+      href={(t) => (t === 'manual' ? '/payments' : `/payments?tab=${t}`)} />
     {tab === 'manual' && bank}
     <Typography variant="h5" component="h2" sx={{ mb: 1 }}>{{ manual: 'Manual payments', automatic: 'Automatic payments', memberships: 'Membership payments', store: 'Webshop purchases' }[tab]}</Typography>
     {tab === 'memberships' && (
