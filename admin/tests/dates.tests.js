@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { day, dateTime, parseDay } from '/imports/ui/dates';
+import { day, dateTime, parseDay, expiryTone } from '/imports/ui/dates';
 
 describe('dates as admin writes them', function () {
   it('writes a day and a moment the Swedish way, in local time', function () {
@@ -17,5 +17,14 @@ describe('dates as admin writes them', function () {
     assert.strictEqual(parseDay('2026-02-30'), null);
     assert.strictEqual(parseDay('10/23/2026'), null);
     assert.strictEqual(parseDay('2026-10'), null);
+  });
+
+  it('tells how an end date stands: passed, within a month, or later', function () {
+    const now = new Date(2026, 9, 24, 15, 0);
+    assert.strictEqual(expiryTone(new Date(2026, 9, 23), now), 'past');
+    assert.strictEqual(expiryTone(new Date(2026, 9, 24), now), 'soon');
+    assert.strictEqual(expiryTone(new Date(2026, 10, 24), now), 'soon');
+    assert.strictEqual(expiryTone(new Date(2026, 10, 25), now), 'later');
+    assert.strictEqual(expiryTone(null, now), null);
   });
 });

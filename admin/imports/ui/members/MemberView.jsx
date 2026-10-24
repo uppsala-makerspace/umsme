@@ -18,6 +18,7 @@ import { PageTabs, TabPanel, TabPart, TabToolbar } from '../components/PageTabs'
 import { MemberForm } from './MemberForm';
 import { MemberStatusChips } from './MemberStatusChips';
 import { memberPath } from './paths';
+import { expiryColumn } from '../components/columns';
 
 const day = (date) => (date ? new Date(date).toLocaleDateString('sv-SE') : '');
 
@@ -27,8 +28,8 @@ const membershipColumns = [
   { field: 'amount', headerName: 'Amount', type: 'number', width: 100 },
   { field: 'discount', headerName: 'Discount', type: 'boolean', width: 95 },
   { field: 'family', headerName: 'Family', type: 'boolean', width: 85 },
-  { field: 'memberend', headerName: 'Membership end', width: 140, valueFormatter: (v) => day(v) },
-  { field: 'labend', headerName: 'Lab membership end', width: 160, valueFormatter: (v) => day(v) },
+  expiryColumn('memberend', 'Membership end', { width: 140 }),
+  expiryColumn('labend', 'Lab membership end', { width: 160 }),
   { field: 'pid', headerName: 'Payment', width: 95, sortable: false, renderCell: ({ value }) => (value ? <Chip size="small" color="success" label="Bank" /> : '') },
 ];
 
@@ -36,8 +37,8 @@ const familyColumns = [
   { field: 'mid', headerName: 'Id', width: 80 },
   { field: 'name', headerName: 'Name', flex: 1, minWidth: 180, renderCell: ({ row, value }) => <Link href={`/member/${row._id}`} underline="hover">{value}</Link> },
   { field: 'email', headerName: 'Email', flex: 1, minWidth: 200 },
-  { field: 'member', headerName: 'Member date', width: 120, valueFormatter: (v) => day(v) },
-  { field: 'lab', headerName: 'Lab date', width: 120, valueFormatter: (v) => day(v) },
+  expiryColumn('member', 'Member date'),
+  expiryColumn('lab', 'Lab date'),
 ];
 
 /** The tabs a member has: a family member has no memberships or messages of their own. */

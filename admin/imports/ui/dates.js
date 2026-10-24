@@ -34,3 +34,20 @@ export const parseDay = (text) => {
   const date = new Date(y, mo - 1, d);
   return date.getFullYear() === y && date.getMonth() === mo - 1 && date.getDate() === d ? `${m[1]}-${m[2]}-${m[3]}` : null;
 };
+
+/**
+ * How an end date (when something runs out) stands today: 'past' once the
+ * day has gone, 'soon' when it comes within a month, 'later' after that;
+ * null for none.
+ */
+export const expiryTone = (value, now = new Date()) => {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const inAMonth = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  const thatDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  if (thatDay < today) return 'past';
+  if (thatDay <= inAMonth) return 'soon';
+  return 'later';
+};

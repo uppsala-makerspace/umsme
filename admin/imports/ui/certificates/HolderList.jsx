@@ -10,6 +10,7 @@ import { DataList } from '../components/DataList';
 import { day } from './format';
 import { memberPath } from '../members/paths';
 import { certificatePath } from './paths';
+import { expiryColumn } from '../components/columns';
 
 /**
  * Attestations as a list: who holds a certificate (`show` 'member') or what
@@ -32,10 +33,7 @@ export const HolderList = ({ show, rows, onRevoke, busy = false }) => {
       },
     ...(show === 'member' ? [{ field: 'memberMid', headerName: 'Member number', width: 130 }] : []),
     { field: 'startDate', headerName: 'Start', width: 120, type: 'date', valueGetter: (v) => (v ? new Date(v) : null), valueFormatter: (v) => day(v) },
-    {
-      field: 'endDate', headerName: 'End', width: 120, type: 'date',
-      valueGetter: (v) => (v ? new Date(v) : null), valueFormatter: (v) => (v ? day(v) : 'No expiry'),
-    },
+    expiryColumn('endDate', 'End', { empty: 'No expiry' }),
     {
       field: 'certifierName', headerName: 'Certified by', width: 200,
       valueGetter: (v, row) => (row.pending ? 'Requested, not yet confirmed' : v),

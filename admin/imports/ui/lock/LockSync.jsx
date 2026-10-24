@@ -10,6 +10,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { DataList } from '../components/DataList';
+import { expiryColumn } from '../components/columns';
 
 /** The statuses, in the order of the filters, with what they mean on the door. */
 export const STATUSES = [
@@ -41,8 +42,8 @@ export const LockSync = ({ rows, shown, onShownChange, onSynchronize, onFix, bus
     },
     { field: 'email', headerName: 'Email', flex: 1, minWidth: 200 },
     { field: 'lockId', headerName: 'Lock user id', width: 170 },
-    { field: 'labEnd', headerName: 'Lab end date', width: 120 },
-    { field: 'lockEnd', headerName: 'Lock end date', width: 120 },
+    expiryColumn('labEnd', 'Lab end date'),
+    expiryColumn('lockEnd', 'Lock end date'),
     {
       field: 'status', headerName: 'Status', width: 150, valueGetter: (v) => byValue[v]?.label || v,
       renderCell: ({ row, value }) => <Chip size="small" label={value} color={byValue[row.status]?.color || 'default'} />,

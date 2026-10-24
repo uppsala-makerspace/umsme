@@ -99,6 +99,10 @@ together with the router in `client/react/App.jsx`.
   `rowHref` so the whole row opens the row's page (most lists should), and
   keep a link column for the keyboard and middle-click. Every list's e2e
   tests check search and sorting with `e2e/lists.ts`.
+- End dates in lists (when something runs out: member and lab dates,
+  membership ends, a certificate's end) use `expiryColumn` from
+  `columns.jsx`: faint red once passed, faint orange within a month, green
+  after that. Dates of what happened (a payment, a start) stay plain.
 - Shared pieces in `imports/ui/components/`: `useEditor` (an edit page's
   values, the version a save is checked against, busy, error, notice),
   `ImageField` (an image or icon with upload and removal), `ChipSelect`
