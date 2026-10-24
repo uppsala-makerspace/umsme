@@ -36,6 +36,17 @@ test.describe('Members', () => {
     await expect(rows(page).filter({ hasText: 'Maja Medlem' })).toHaveCount(0);
   });
 
+  test('pages through the members, the page staying put', async ({ page }) => {
+    await openAs(page, 'admin', '/members');
+    await expect(page.getByText(/^1–25 of \d+$/)).toBeVisible();
+    const first = await rows(page).first().textContent();
+    await page.getByRole('button', { name: /next page/i }).click();
+    await expect(page.getByText(/^26–\d+ of \d+$/)).toBeVisible();
+    await expect(rows(page).first()).not.toHaveText(first!);
+    await page.getByRole('button', { name: /previous page/i }).click();
+    await expect(page.getByText(/^1–25 of \d+$/)).toBeVisible();
+  });
+
   test('shows a member’s status', async ({ page }) => {
     await openMember(page, '905');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('E2E edit member');
