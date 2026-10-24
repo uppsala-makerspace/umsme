@@ -31,6 +31,10 @@ test.describe('Members', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/member/i);
     await expect(rows(page).first()).toBeVisible();
     await sortBy(page, 'Name', 'ascending');
+    // Sorting is a click on the heading; there is no column menu, not even on hover.
+    const heading = page.getByRole('columnheader', { name: /^Name/ }).first();
+    await heading.hover();
+    await expect(heading.getByRole('button', { name: /menu/i })).toHaveCount(0);
     await search(page, '905');
     await expect(rows(page).filter({ hasText: 'e2e-905@example.org' })).toBeVisible();
     await expect(rows(page).filter({ hasText: 'Maja Medlem' })).toHaveCount(0);

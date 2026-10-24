@@ -65,6 +65,10 @@ export const DataList = ({
       showToolbar
       disableRowSelectionOnClick
       disableColumnSelector
+      // No column menu: sorting is a click on the heading, and the menu, shown
+      // on hover, stays visible on a phone.
+      disableColumnMenu
+      disableColumnFilter
       disableDensitySelector
       pageSizeOptions={PAGE_SIZES}
       initialState={{

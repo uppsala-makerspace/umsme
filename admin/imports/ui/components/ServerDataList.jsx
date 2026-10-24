@@ -45,6 +45,9 @@ export const ServerDataList = ({ rows, total, columns, loading = false, empty = 
       showToolbar
       disableRowSelectionOnClick
       disableColumnSelector
+      // No column menu: sorting is a click on the heading, and the menu, shown
+      // on hover, stays visible on a phone.
+      disableColumnMenu
       disableDensitySelector
       disableColumnFilter
       paginationMode="server"
