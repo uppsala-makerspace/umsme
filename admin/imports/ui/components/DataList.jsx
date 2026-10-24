@@ -6,6 +6,16 @@ import { useNavigate } from '../navigation';
 
 export const PAGE_SIZES = [25, 50, 100];
 
+/**
+ * How every list looks: a faint line between the cells, darker on the row
+ * under the pointer (grey, not the heading's red, which means resizing).
+ */
+export const GRID_SX = {
+  backgroundColor: 'background.paper',
+  '& .MuiDataGrid-cell': { borderRight: '1px solid', borderRightColor: 'rgba(0, 0, 0, 0.06)' },
+  '& .MuiDataGrid-row:hover .MuiDataGrid-cell': { borderRightColor: 'rgba(0, 0, 0, 0.22)' },
+};
+
 /** The toolbar: a search box over all columns, always open. */
 export const SearchToolbar = () => (
   <Toolbar style={{ justifyContent: 'flex-start' }}>
@@ -79,7 +89,7 @@ export const DataList = ({
       localeText={{ noRowsLabel: empty, noResultsOverlayLabel: 'No matches.' }}
       slots={{ toolbar: SearchToolbar }}
       slotProps={slotProps}
-      sx={{ backgroundColor: 'background.paper', ...(rowHref ? { '& .MuiDataGrid-row': { cursor: 'pointer' } } : {}), ...sx }}
+      sx={{ ...GRID_SX, ...(rowHref ? { '& .MuiDataGrid-row': { cursor: 'pointer' } } : {}), ...sx }}
       {...rowProps}
       {...props}
     />

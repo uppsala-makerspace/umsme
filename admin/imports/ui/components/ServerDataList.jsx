@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import { useNavigate } from '../navigation';
-import { PAGE_SIZES, SearchToolbar } from './DataList';
+import { GRID_SX, PAGE_SIZES, SearchToolbar } from './DataList';
 
 /**
  * A list too large for the browser: DataList's search box, sorting and
@@ -68,7 +68,7 @@ export const ServerDataList = ({ rows, total, columns, loading = false, empty = 
       }}
       localeText={{ noRowsLabel: empty, noResultsOverlayLabel: 'No matches.' }}
       slots={{ toolbar: SearchToolbar }}
-      sx={{ backgroundColor: 'background.paper', ...(rowHref ? { '& .MuiDataGrid-row': { cursor: 'pointer' } } : {}), ...sx }}
+      sx={{ ...GRID_SX, ...(rowHref ? { '& .MuiDataGrid-row': { cursor: 'pointer' } } : {}), ...sx }}
       {...rowProps}
       {...props}
     />
