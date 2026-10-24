@@ -23,7 +23,7 @@
     "axios": "^1.20.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
-    "dompurify": "^3.4.16",
+    "dompurify": "^3.4.17",
     "google-auth-library": "^9.15.0",
     "i18next": "^24.2.3",
     "marked": "^17.0.1",
