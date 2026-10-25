@@ -303,6 +303,12 @@ som har en väntande begäran.
    appsidor under `/activities`, fria events, hemsidans `kind: "activity"`. Ger
    det aktuella aktivitetsregistret på hemsidan direkt. Anmälningsfälten kommer
    med i etapp 2, så formulären inte visar inställningar som inte gör något än.
+   *Byggd på grenen `activities` (oktober 2026).* Avvikelser och rester: ett
+   event tas bort med sin bild (en aktivitet kräver att bilden tas bort först);
+   ett events bild faller tillbaka på aktivitetens, också i `/api/events`; i
+   appen laddas bilder ännu inte upp (admin gör det), och appens formulär har
+   ingen slutdag (ett event över flera dagar behåller den som finns). Ett
+   publicerat event till en opublicerad aktivitet visas inte på hemsidan.
 2. **Anmälan, kö och erbjudanden.** Registreringar, intresseanmälan, platser,
    malltyper, push, den atomära accepteringen, och kravet på intyg vid anmälan.
 3. **Incheckning, närvaro och påminnelser.** Fönster, deadline-jobb,
