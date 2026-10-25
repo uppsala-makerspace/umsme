@@ -32,26 +32,19 @@ const Activities = ({
 
   const eventsTab = (
     <>
-      <div className="flex mb-3 rounded-lg border border-gray-300 overflow-hidden text-sm" role="group">
-        {WHENS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => onWhen(option)}
-            aria-pressed={when === option}
-            className={`flex-1 px-3 py-2 border-none cursor-pointer font-semibold ${
-              when === option ? "bg-brand-green text-white" : "bg-white text-gray-600"
-            }`}
-          >
-            {t(option === "upcoming" ? "upcomingEvents" : "pastEvents")}
-          </button>
-        ))}
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <select
+          aria-label={t("eventsWhen")}
+          value={when}
+          onChange={(e) => onWhen(e.target.value)}
+          className="bg-white border border-gray-300 rounded py-2 px-3 text-sm font-semibold text-gray-700 cursor-pointer"
+        >
+          {WHENS.map((option) => (
+            <option key={option} value={option}>{t(option === "upcoming" ? "upcomingEvents" : "pastEvents")}</option>
+          ))}
+        </select>
+        {canCreateEvent && when === "upcoming" && <AddLink to="/events/new">+ {t("eventNew")}</AddLink>}
       </div>
-      {canCreateEvent && (
-        <div className="flex justify-end mb-3">
-          <AddLink to="/events/new">+ {t("eventNew")}</AddLink>
-        </div>
-      )}
       {eventsLoading ? (
         <Loader />
       ) : events.length === 0 ? (

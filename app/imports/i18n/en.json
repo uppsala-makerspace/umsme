@@ -743,5 +743,6 @@
   "activitiesTabActivities": "Activities",
   "activitiesNoPast": "No past events.",
   "eventsLoadMore": "Load more events",
-  "navActivities": "Activities"
+  "navGoogleCalendar": "Google calendar",
+  "eventsWhen": "Which events"
 }

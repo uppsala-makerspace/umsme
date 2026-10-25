@@ -146,9 +146,9 @@ const PAGE_TITLES = {
   "/messages": "messages",
   "/unlock": "navDoors",
   "/map": "navMap",
-  "/calendar": "navCalendar",
+  "/calendar": "navGoogleCalendar",
   "/workshops": "workshops",
-  "/activities": "activities",
+  "/activities": "navCalendar",
 };
 
 // Drill-down pages get a back arrow in the top bar (top-level pages never

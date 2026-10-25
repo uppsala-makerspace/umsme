@@ -106,9 +106,12 @@ test.describe('Activities', () => {
   });
 
   test('lists past events, latest first, ten at a time', async ({ page }) => {
-    await openAs(page, 'member', '/activities');
-    await page.getByRole('button', { name: en.pastEvents }).click();
+    // Someone who may add events: the button is there for those to come only.
+    await openAs(page, 'steering', '/activities');
+    await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toBeVisible();
+    await page.getByRole('combobox', { name: en.eventsWhen }).selectOption('past');
     await expect(page).toHaveURL(/\?when=past$/);
+    await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toHaveCount(0);
     const rows = page.getByRole('main').getByRole('listitem');
     await expect(rows).toHaveCount(10);
     // The wheel introduction ten days ago comes before the weekly ones from two weeks back.

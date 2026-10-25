@@ -742,5 +742,6 @@
   "activitiesTabActivities": "Aktiviteter",
   "activitiesNoPast": "Inga tidigare tillfällen.",
   "eventsLoadMore": "Ladda fler tillfällen",
-  "navActivities": "Aktiviteter"
+  "navGoogleCalendar": "Google-kalender",
+  "eventsWhen": "Vilka tillfällen"
 }

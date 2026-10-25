@@ -18,13 +18,13 @@ import {
 
 // Certificates moved to the hamburger menu when Workshops took its tab slot
 // (certificates are also reachable from each workshop's page), and the
-// Google calendar when Activities took its slot.
+// Google calendar when the activities' events took its slot and its name.
 const navItems = [
   { path: "/", labelKey: "navHome", OutlineIcon: HomeOutline, SolidIcon: HomeSolid, exact: true },
   { path: "/unlock", labelKey: "navDoors", OutlineIcon: LockOutline, SolidIcon: LockSolid },
   { path: "/workshops", labelKey: "navWorkshops", OutlineIcon: WrenchOutline, SolidIcon: WrenchSolid },
   { path: "/map", labelKey: "navMap", OutlineIcon: MapOutline, SolidIcon: MapSolid },
-  { path: "/activities", labelKey: "navActivities", OutlineIcon: ActivitiesOutline, SolidIcon: ActivitiesSolid },
+  { path: "/activities", labelKey: "navCalendar", OutlineIcon: ActivitiesOutline, SolidIcon: ActivitiesSolid },
 ];
 
 export default () => {
