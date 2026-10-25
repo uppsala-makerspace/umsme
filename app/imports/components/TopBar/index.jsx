@@ -148,6 +148,7 @@ const PAGE_TITLES = {
   "/map": "navMap",
   "/calendar": "navCalendar",
   "/workshops": "workshops",
+  "/activities": "activities",
 };
 
 // Drill-down pages get a back arrow in the top bar (top-level pages never
@@ -166,6 +167,12 @@ const DETAIL_PAGES = [
   { pattern: "/groups/:groupId/edit", fallback: "/groups" },
   { pattern: "/groups/:groupId/rules", fallback: "/groups" },
   { pattern: "/groups/:groupId", fallback: "/groups" },
+  { pattern: "/activities/new", fallback: "/activities" },
+  { pattern: "/activities/:activityId/edit", fallback: "/activities" },
+  { pattern: "/activities/:activityId", fallback: "/activities" },
+  { pattern: "/events/new", fallback: "/activities" },
+  { pattern: "/events/:eventId/edit", fallback: "/activities" },
+  { pattern: "/events/:eventId", fallback: "/activities" },
   { pattern: "/certificates/:certificateId", fallback: "/certificates" },
   { pattern: "/certificates/:certificateId/test", fallback: "/certificates" },
   // Deep-linked (e.g. from a notification), so there is nothing to go back to:

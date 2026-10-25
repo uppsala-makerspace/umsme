@@ -3,7 +3,7 @@ import Chip from '@mui/material/Chip';
 import { linkColumn } from '../components/columns';
 import { dateTime } from '../dates';
 import { eventPath } from './paths';
-import { eventName } from './values';
+import { eventName } from '/imports/common/lib/activityValues';
 
 /** A cancelled event's mark; nothing for a confirmed one. */
 export const StatusChip = ({ status }) => (status === 'cancelled'

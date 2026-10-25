@@ -15,7 +15,7 @@ import {
   saveCategory, removeCategory,
 } from './data';
 import { activityPath, eventPath } from './paths';
-import { activityValues, eventValues, parseClock } from './values';
+import { activityValues, eventValues, parseClock } from '/imports/common/lib/activityValues';
 
 const Loading = () => <Typography color="text.secondary">Loading…</Typography>;
 

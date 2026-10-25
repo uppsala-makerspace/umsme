@@ -20,7 +20,7 @@ import { dateTime } from '../dates';
 import { SharedFields, native } from './SharedFields';
 import { StatusChip } from './eventColumns';
 import { activityPath, eventPath } from './paths';
-import { eventName, parseClock } from './values';
+import { eventName, parseClock } from '/imports/common/lib/activityValues';
 
 const TABS = [['details', 'Details'], ['image', 'Image']];
 

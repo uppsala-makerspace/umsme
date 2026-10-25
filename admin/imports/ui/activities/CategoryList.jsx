@@ -10,7 +10,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { DataList } from '../components/DataList';
-import { categoryValues } from './values';
+import { categoryValues } from '/imports/common/lib/activityValues';
 
 /**
  * The categories of activities, the website's filter: a short list, each

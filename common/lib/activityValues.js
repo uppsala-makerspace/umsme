@@ -1,11 +1,13 @@
-import { day } from '../dates';
-
 /**
  * An activity's or event's form values, and the fields a save sends, from
- * and to them. Meteor-free, so that the stories use them too.
+ * and to them: the same in admin and the app. Pure, so that the stories use
+ * them too.
  */
 
 const pad = (n) => String(n).padStart(2, '0');
+
+/** The day, YYYY-MM-DD, local time; '' for none. */
+export const day = (date) => (date ? `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` : '');
 
 /** HH:MM, local time; '' for none. */
 export const clock = (date) => (date ? `${pad(date.getHours())}:${pad(date.getMinutes())}` : '');

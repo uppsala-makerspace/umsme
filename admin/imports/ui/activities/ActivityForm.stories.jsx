@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { fn } from 'storybook/test';
 import { ActivityForm } from './ActivityForm';
-import { activityValues } from './values';
+import { activityValues } from '/imports/common/lib/activityValues';
 import { groups, groupName, categories, workshopOptions, spaceOptions, intro, events } from './fixtures';
 
 /** Keeps the values, as the page does. */

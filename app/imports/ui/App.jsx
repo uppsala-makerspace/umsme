@@ -58,6 +58,11 @@ const Groups = lazyWithRetry(() => import('/imports/pages/groups'));
 const GroupDetail = lazyWithRetry(() => import('/imports/pages/groups/detail'));
 const GroupEdit = lazyWithRetry(() => import('/imports/pages/groups/edit'));
 const GroupRules = lazyWithRetry(() => import('/imports/pages/groups/rules'));
+const Activities = lazyWithRetry(() => import('/imports/pages/activities'));
+const ActivityDetail = lazyWithRetry(() => import('/imports/pages/activities/detail'));
+const ActivityEdit = lazyWithRetry(() => import('/imports/pages/activities/edit'));
+const EventDetail = lazyWithRetry(() => import('/imports/pages/activities/event'));
+const EventEdit = lazyWithRetry(() => import('/imports/pages/activities/eventEdit'));
 
 export const App = () => {
   useAutoReconnect();
@@ -121,6 +126,13 @@ export const App = () => {
             <Route path="/groups/:groupId" element={<GroupDetail />} />
             <Route path="/groups/:groupId/edit" element={<GroupEdit />} />
             <Route path="/groups/:groupId/rules" element={<GroupRules />} />
+            <Route path="/activities" element={<Activities />} />
+            <Route path="/activities/new" element={<ActivityEdit />} />
+            <Route path="/activities/:activityId" element={<ActivityDetail />} />
+            <Route path="/activities/:activityId/edit" element={<ActivityEdit />} />
+            <Route path="/events/new" element={<EventEdit />} />
+            <Route path="/events/:eventId" element={<EventDetail />} />
+            <Route path="/events/:eventId/edit" element={<EventEdit />} />
           </Routes>
         </Suspense>
         </ChunkErrorBoundary>

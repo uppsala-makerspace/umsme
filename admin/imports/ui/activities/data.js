@@ -4,7 +4,7 @@ import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
 import { ActivityCategories } from '/imports/common/collections/activityCategories';
 import { uploadImage } from '../groups/choices';
-import { activityFields, eventFields, categoryFields } from './values';
+import { activityFields, eventFields, categoryFields } from '/imports/common/lib/activityValues';
 
 /**
  * Data for the activity, event and category pages: the narrow publications
