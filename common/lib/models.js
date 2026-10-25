@@ -14,6 +14,47 @@ export const getRoleOptions = () => {
 export const getLinkableRoleOptions = () =>
   getRoleOptions().filter((o) => o.value !== "admin");
 
+
+// A text in Swedish and English, as the workshop's name: an object and its two parts.
+const bilingual = (key, label, max, { optional = true, textarea = false } = {}) => {
+  const autoform = textarea ? { autoform: { type: "textarea", rows: 8 } } : {};
+  return {
+    [key]: { label, type: Object, blackbox: true, optional },
+    [`${key}.sv`]: { label: `${label} (Swedish)`, type: String, max, optional, ...autoform },
+    [`${key}.en`]: { label: `${label} (English)`, type: String, max, optional: true, ...autoform },
+  };
+};
+
+/**
+ * What an activity is described by, and an event too: on an event of an
+ * activity each field overrides the activity's (empty is as the activity),
+ * on a free-standing event they are its own (resolveEvent in activityRules.js).
+ * On an event everything is optional; a free one must still have a name,
+ * which the domain functions ask for.
+ */
+const activityFields = ({ required }) => ({
+  ...bilingual("name", "Name", 100, { optional: !required }),
+  ...bilingual("description", "Description", 5000, { textarea: true }),
+  categoryId: { label: "Category", type: String, max: 50, optional: true },
+  imageFileId: { label: "Image file", type: String, optional: true, autoform: { omit: true } },
+  imageMimeType: { label: "Image type", type: String, optional: true, autoform: { omit: true } },
+  // Who owns it (may edit); empty is the association's, board and admin only.
+  groupId: { label: "Owning group", type: String, max: 50, optional: true },
+  // Where it is shown: a workshop or an area of interest. Empty means
+  // something of the whole association, so it is never filled in from groupId.
+  workshopId: { label: "Shown at workshop", type: String, max: 50, optional: true },
+  spaceId: { label: "Space", type: String, max: 50, optional: true },
+  slackChannel: { label: "Slack channel", type: String, max: 80, optional: true },
+  contactEmail: { label: "Contact email", type: String, max: 200, optional: true },
+  durationMinutes: { label: "Duration (minutes)", type: Number, min: 1, optional: true },
+  cost: { label: "Cost (kr)", type: Number, min: 0, optional: true },
+  membersOnly: { label: "For members only", type: Boolean, optional: true },
+  published: { label: "Shown on the website", type: Boolean, optional: true },
+  createdBy: { label: "Created by", type: String, optional: true, autoform: { omit: true } },
+  createdAt: { label: "Created", type: Date, optional: true, autoform: { omit: true } },
+  updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
+});
+
 export const models = {
   initiatedPayments: {
     externalId: {
@@ -1810,5 +1851,23 @@ export const models = {
     occurred_at: { label: "Occurred", type: Date },
     reason: { label: "Reason", type: String, max: 5000, optional: true },
     details: { label: "Details", type: Object, blackbox: true, optional: true },
+  },
+  // Something we usually do (plan/activities.md).
+  activity: activityFields({ required: true }),
+  // One time it happens: of an activity, or free-standing.
+  event: {
+    ...activityFields({ required: false }),
+    activityId: { label: "Activity", type: String, max: 50, optional: true },
+    start: { label: "Start", type: Date },
+    end: { label: "End", type: Date },
+    hostMemberIds: { label: "Hosts", type: Array, optional: true },
+    "hostMemberIds.$": { type: String, max: 50 },
+    status: { label: "Status", type: String, allowedValues: ["confirmed", "cancelled"], defaultValue: "confirmed" },
+  },
+  // The website's filter for activities, a list board and admin keep.
+  activityCategory: {
+    ...bilingual("name", "Name", 60, { optional: false }),
+    sortOrder: { label: "Sort order", type: Number, optional: true },
+    updatedAt: { label: "Updated", type: Date, optional: true },
   },
 };

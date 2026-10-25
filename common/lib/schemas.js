@@ -38,4 +38,7 @@ export const schemas = {
   storageRequest: new SimpleSchema(models.storageRequest),
   storageOffer: new SimpleSchema(models.storageOffer),
   storageEvent: new SimpleSchema(models.storageEvent),
+  activity: new SimpleSchema(models.activity),
+  event: new SimpleSchema(models.event),
+  activityCategory: new SimpleSchema(models.activityCategory),
 };
