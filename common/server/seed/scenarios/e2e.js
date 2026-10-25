@@ -155,6 +155,12 @@ export const buildE2e = async ({ people, now }) => {
   for (let week = 1; week <= 12; week += 1) await makeEvent({ activity: history, start: at(-7 * week, 17) });
   await makeEvent({ name: { sv: 'Årsmöte' }, start: at(30, 19), durationMinutes: 120, published: true, membersOnly: true });
   await makeEvent({ name: { sv: 'E2E delete event' }, start: at(40, 19), durationMinutes: 60 });
+  // An activity with two free-standing events of its name to take in, and a
+  // free-standing event to make an activity of.
+  await makeActivity({ name: { sv: 'E2E match aktivitet' }, groupId: ceramicsGroup, durationMinutes: 60 });
+  await makeEvent({ name: { sv: 'E2E match aktivitet' }, start: at(-20, 18), durationMinutes: 60 });
+  await makeEvent({ name: { sv: 'e2e MATCH aktivitet' }, start: at(25, 18), durationMinutes: 60 });
+  await makeEvent({ name: { sv: 'E2E gör aktivitet' }, start: at(26, 18), durationMinutes: 90 });
   // Registrations, one event per test: to sign up for and withdraw from;
   // full, with a seat held, to queue for; started, for its host to record who
   // came; and one for admin to add a participant to.

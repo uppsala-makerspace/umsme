@@ -119,7 +119,8 @@ test.describe('Activities', () => {
     // The wheel introduction ten days ago comes before the weekly ones from two weeks back.
     await expect(rows.nth(1)).toContainText(WHEEL);
     await page.getByRole('button', { name: en.eventsLoadMore }).click();
-    await expect(rows).toHaveCount(13);
+    // Twelve weekly ones, the wheel introduction and a free-standing one to take in (admin's test).
+    await expect(rows).toHaveCount(14);
     await expect(page.getByRole('button', { name: en.eventsLoadMore })).toHaveCount(0);
   });
 

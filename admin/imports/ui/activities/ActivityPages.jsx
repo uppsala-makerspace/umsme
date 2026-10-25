@@ -10,12 +10,14 @@ import { EventList } from './EventList';
 import { EventForm } from './EventForm';
 import { CategoryList } from './CategoryList';
 import { Participants } from './Participants';
+import { CalendarImport } from './CalendarImport';
 import { resolveEvent, takesRegistrations } from '/imports/common/lib/activityRules';
 import {
   useActivityList, useActivity, useEventList, useEvent, useActivityChoices, useCategories,
   saveActivity, removeActivity, uploadActivityImage, removeActivityImage, activityImageUrl,
   saveEvent, removeEvent, uploadEventImage, removeEventImage, eventImageUrl,
   saveCategory, removeCategory,
+  createActivityFromEvent, matchingEvents, linkEvents, calendarConfigured, calendarPreview, importCalendar,
   interestCount, eventRegistrations, addRegistration, withdrawRegistration, giveSeat, markAttended, closeAttendance,
 } from './data';
 import { activityPath, eventPath } from './paths';
@@ -44,10 +46,11 @@ export const ActivityEditPage = ({ _id }) => {
   const choices = useChoices();
   const { loading: loadingCategories, categories } = useCategories();
   const { certificates } = useCertificateList();
-  const { values, setField, loaded, run, busy, error, notice, setNotice } = useEditor({ doc: activity, loading, toValues: activityValues });
+  const { values, setField, loaded, run, busy, error, setError, notice, setNotice } = useEditor({ doc: activity, loading, toValues: activityValues });
   const [uploading, setUploading] = useState(false);
   const [tab, setTab] = useQueryParam('tab');
   const [interested, setInterested] = useState(0);
+  const [matching, setMatching] = useState(null);
   useEffect(() => { if (_id) interestCount(_id).then(setInterested, () => {}); }, [_id]);
 
   if (loading || choices.loading || loadingCategories) return <Loading />;
@@ -63,6 +66,10 @@ export const ActivityEditPage = ({ _id }) => {
   return (
     <ActivityForm
       isNew={false} activity={activity} events={events} {...common} interestCount={interested}
+      matching={matching}
+      onFindMatching={() => { setMatching('loading'); matchingEvents(_id).then(setMatching, (e) => { setMatching(null); setError(e.reason || e.message); }); }}
+      onLinkMatching={(ids) => run(() => linkEvents(_id, ids), { then: (n) => { setMatching(null); setNotice(`${n} ${n === 1 ? 'event is' : 'events are'} now the activity’s.`); } })}
+      onCloseMatching={() => setMatching(null)}
       onSave={() => run(() => saveActivity(values, loaded), { keep: 'all', then: () => setNotice('Saved.') })}
       imageUrl={activityImageUrl(activity)}
       uploading={uploading}
@@ -150,6 +157,7 @@ export const EventEditPage = ({ _id }) => {
       onRemoveImage={() => run(() => removeEventImage(_id))}
       onDelete={() => run(() => removeEvent(_id), { then: () => navigate(event.activityId ? activityPath(event.activityId, 'events') : '/events') })}
       tab={tab || 'details'} onTab={(next) => setTab(next === 'details' ? '' : next)}
+      onMakeActivity={() => run(() => createActivityFromEvent(_id), { then: (id) => navigate(activityPath(id, 'events')) })}
       participantCount={registrations?.filter((r) => ['approved', 'checkedIn', 'attended', 'queued'].includes(r.state)).length}
       participants={(() => {
         const resolved = resolveEvent(event, event.activityId ? activity : null);
@@ -199,3 +207,52 @@ export const CategoryListPage = () => {
     />
   );
 };
+
+const isoDay = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+const dayAt = (text, end = false) => {
+  const [y, m, d] = text.split('-').map(Number);
+  return end ? new Date(y, m - 1, d + 1) : new Date(y, m - 1, d);
+};
+
+/** /events/import */
+export const CalendarImportPage = () => {
+  const today = new Date();
+  const [from, setFrom] = useState(isoDay(new Date(today.getFullYear(), today.getMonth() - 3, today.getDate())));
+  const [to, setTo] = useState(isoDay(new Date(today.getFullYear(), today.getMonth() + 6, today.getDate())));
+  const [configured, setConfigured] = useState(null);
+  const [items, setItems] = useState(null);
+  const [chosen, setChosen] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+  useEffect(() => { calendarConfigured().then(setConfigured, () => setConfigured(false)); }, []);
+
+  const attempt = async (action) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await action();
+    } catch (e) {
+      setError(e.reason || e.message);
+    }
+    setBusy(false);
+  };
+  const fetchItems = async () => {
+    const found = await calendarPreview(dayAt(from), dayAt(to, true));
+    setItems(found);
+    setChosen(found.filter((i) => !i.eventId).map((i) => i.googleEventId));
+  };
+  return (
+    <CalendarImport
+      configured={configured} from={from} to={to} onFrom={setFrom} onTo={setTo}
+      items={items} chosen={chosen} onChoose={setChosen} busy={busy} error={error} notice={notice}
+      onFetch={() => { setNotice(null); attempt(fetchItems); }}
+      onImport={() => attempt(async () => {
+        const { created, skipped } = await importCalendar(dayAt(from), dayAt(to, true), chosen);
+        await fetchItems();
+        setNotice(`${created} imported${skipped ? `, ${skipped} skipped` : ''}.`);
+      })}
+    />
+  );
+};
+

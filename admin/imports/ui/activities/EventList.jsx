@@ -30,7 +30,10 @@ export const EventList = ({ loading, events, activities, groupName, now, tab = '
     <Box>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" component="h1">Events</Typography>
-        <Button variant="contained" href={addEventPath()}>Add free-standing event</Button>
+        <Stack direction="row" spacing={1}>
+          <Button variant="outlined" href="/events/import">Import from calendar</Button>
+          <Button variant="contained" href={addEventPath()}>Add free-standing event</Button>
+        </Stack>
       </Stack>
       <PageTabs
         tabs={[{ value: 'upcoming', label: 'Upcoming', count: upcoming.length }, { value: 'past', label: 'Past', count: past.length }]}

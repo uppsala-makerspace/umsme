@@ -12,6 +12,8 @@ import {
   register, withdraw, takeSeat, markAttended, closeAttendance,
 } from '/imports/common/server/activities/registrations';
 import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
+import { createActivityFromEvent, matchingEvents, linkEvents } from '/imports/common/server/activities/linking';
+import { calendarConfigured, calendarPreview, importCalendarEvents } from '/imports/common/server/activities/calendarImport';
 import { ActivityInterests } from '/imports/common/collections/activityInterests';
 import { Members } from '/imports/common/collections/members';
 
@@ -194,6 +196,49 @@ Meteor.methods({
     check(activityId, String);
     await requireRole(this.userId, roles);
     return ActivityInterests.find({ activityId }).countAsync();
+  },
+
+  /** Make an activity of a free-standing event, which becomes its first. */
+  async 'activities.createFromEvent'(eventId) {
+    check(eventId, String);
+    await requireRole(this.userId, roles);
+    return createActivityFromEvent(eventId, { userId: this.userId });
+  },
+
+  /** The free-standing events with an activity's name. */
+  async 'activities.matchingEvents'(activityId) {
+    check(activityId, String);
+    await requireRole(this.userId, roles);
+    return (await matchingEvents(activityId)).map((e) => ({ _id: e._id, name: e.name, start: e.start, end: e.end, status: e.status }));
+  },
+
+  async 'activities.linkEvents'(activityId, eventIds) {
+    check(activityId, String);
+    check(eventIds, [String]);
+    await requireRole(this.userId, roles);
+    return linkEvents(activityId, eventIds, { userId: this.userId });
+  },
+
+  /** Whether a calendar is configured to import from. */
+  async 'calendar.configured'() {
+    await requireRole(this.userId, roles);
+    return calendarConfigured();
+  },
+
+  /** The calendar's events between two days, and what each would become. */
+  async 'calendar.preview'(from, to) {
+    check(from, Date);
+    check(to, Date);
+    await requireRole(this.userId, roles);
+    return calendarPreview({ from, to });
+  },
+
+  async 'calendar.import'(from, to, googleEventIds) {
+    check(from, Date);
+    check(to, Date);
+    check(googleEventIds, [String]);
+    await requireRole(this.userId, roles);
+    return importCalendarEvents({ from, to, googleEventIds }, { userId: this.userId });
   },
 });
 

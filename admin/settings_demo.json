@@ -37,6 +37,7 @@
     "vapidPublicKey": "BNI6pdhR7C8akwjNwFS3pRFjlukg1Jrz249svg6hyA8hCOAr88mDj8y0aAn5kJ55HBPaNLlJAV1prwewSgZxHNE"
   },
   "private": {
+    "googleCalendar": "fake",
     "recipientWhitelist": [],
     "vapidPrivateKey": "DUAGJzj65SNU-OYXle2rRbCNAXENLkV2H24NHjjVQac",
     "notifyExpiringTime": "at 09:00 am",

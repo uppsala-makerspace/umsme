@@ -90,3 +90,9 @@ export const giveSeat = (eventId, memberId) => Meteor.callAsync('eventRegistrati
 export const markAttended = (eventId, memberId, attended) => Meteor.callAsync('eventRegistrations.markAttended', eventId, memberId, attended);
 export const closeAttendance = (eventId) => Meteor.callAsync('eventRegistrations.closeAttendance', eventId);
 export const interestCount = (activityId) => Meteor.callAsync('activities.interestCount', activityId);
+export const createActivityFromEvent = (eventId) => Meteor.callAsync('activities.createFromEvent', eventId);
+export const matchingEvents = (activityId) => Meteor.callAsync('activities.matchingEvents', activityId);
+export const linkEvents = (activityId, eventIds) => Meteor.callAsync('activities.linkEvents', activityId, eventIds);
+export const calendarConfigured = () => Meteor.callAsync('calendar.configured');
+export const calendarPreview = (from, to) => Meteor.callAsync('calendar.preview', from, to);
+export const importCalendar = (from, to, ids) => Meteor.callAsync('calendar.import', from, to, ids);

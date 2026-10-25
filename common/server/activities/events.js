@@ -79,14 +79,18 @@ const changesOf = async (fields, { isAdminish, before = null }) => {
 
 export const currentEvent = currentOf(Events, 'event');
 
-/** @returns {Promise<string>} the new event's id */
-export const createEvent = async (fields, { userId, isAdminish }) => {
+/**
+ * @param {{ userId: string, isAdminish: boolean, announce?: boolean }} options
+ *   Without `announce` those interested in its activity are not told (an import).
+ * @returns {Promise<string>} the new event's id
+ */
+export const createEvent = async (fields, { userId, isAdminish, announce = true }) => {
   const { $set } = await changesOf(fields, { isAdminish });
   const now = new Date();
   const doc = { ...$set, createdBy: userId, createdAt: now, updatedAt: now };
   const docId = await Events.insertAsync(doc);
   await recordChange({ userId, domain: DOMAIN, action: 'create', docId, after: doc });
-  await announceNewEvent(docId);
+  if (announce) await announceNewEvent(docId);
   return docId;
 };
 

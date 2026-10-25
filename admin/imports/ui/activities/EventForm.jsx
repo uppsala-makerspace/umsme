@@ -49,7 +49,7 @@ const ClockField = ({ label, value, onChange, helperText, ...props }) => {
  *           searchMembers: (query) => Promise<object[]>,
  *           imageUrl?: string, ownImage?: boolean, onUploadImage?: (file) => void, onRemoveImage?: () => void,
  *           uploading?: boolean, onDelete?: () => void, tab?: string, onTab?: (tab) => void,
- *           participants?: React.ReactNode, participantCount?: number }} props
+ *           participants?: React.ReactNode, participantCount?: number, onMakeActivity?: () => void }} props
  *   `participants` is the Participants tab's content (Participants, from the page).
  *   `imageUrl` is the image shown, the event's or its activity's; `ownImage` whether it is the event's.
  */
@@ -57,7 +57,7 @@ export const EventForm = ({
   isNew, event, activity = null, values, onChange, onSave, busy = false, error, notice, activities, groups, categories, certificates = [],
   workshopOptions, spaceOptions, groupName, hosts, onAddHost, onRemoveHost, searchMembers,
   imageUrl, ownImage = false, onUploadImage, onRemoveImage, uploading = false, onDelete, tab = 'details', onTab,
-  participants = null, participantCount,
+  participants = null, participantCount, onMakeActivity,
 }) => {
   const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
   const [confirming, setConfirming] = useState(false);
@@ -137,7 +137,14 @@ export const EventForm = ({
           {isNew ? 'Add event' : `Event: ${name}, ${dateTime(event.start)}`}
           {event && <Box component="span" sx={{ ml: 1, verticalAlign: 'middle' }}><StatusChip status={event.status} /></Box>}
         </Typography>
-        {!isNew && <Button color="error" variant="outlined" onClick={() => setConfirming(true)}>Delete event</Button>}
+        {!isNew && (
+          <Stack direction="row" spacing={1}>
+            {onMakeActivity && !event.activityId && (
+              <Button variant="outlined" disabled={busy} onClick={onMakeActivity}>Make an activity of it</Button>
+            )}
+            <Button color="error" variant="outlined" onClick={() => setConfirming(true)}>Delete event</Button>
+          </Stack>
+        )}
       </Stack>
       {isNew && values.activityId && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

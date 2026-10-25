@@ -17,6 +17,7 @@ import { ImageField } from '../components/ImageField';
 import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { SharedFields, native } from './SharedFields';
 import { RegistrationFields } from './RegistrationFields';
+import { MatchingEvents } from './MatchingEvents';
 import { eventColumns } from './eventColumns';
 import { activityPath, addEventPath, eventPath } from './paths';
 
@@ -33,12 +34,15 @@ const TABS = [['details', 'Details'], ['image', 'Image'], ['events', 'Events']];
  *           workshopOptions: Array<{ value, label }>, spaceOptions: Array<{ value, label }>,
  *           groupName: (id) => string, imageUrl?: string, onUploadImage?: (file) => void,
  *           onRemoveImage?: () => void, uploading?: boolean, onDelete?: () => void,
- *           tab?: string, onTab?: (tab) => void }} props
+ *           tab?: string, onTab?: (tab) => void, interestCount?: number,
+ *           matching?: null|'loading'|object[], onFindMatching?: () => void, onLinkMatching?: (ids) => void,
+ *           onCloseMatching?: () => void }} props
+ *   `matching` are the free-standing events with its name: null when not looked for.
  */
 export const ActivityForm = ({
   isNew, activity, events = [], values, onChange, onSave, busy = false, error, notice, groups, categories, certificates = [],
   workshopOptions, spaceOptions, groupName, imageUrl, onUploadImage, onRemoveImage, uploading = false, onDelete,
-  tab = 'details', onTab, interestCount,
+  tab = 'details', onTab, interestCount, matching = null, onFindMatching, onLinkMatching, onCloseMatching,
 }) => {
   const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
   const [confirming, setConfirming] = useState(false);
@@ -111,6 +115,7 @@ export const ActivityForm = ({
           <TabPanel value="events" shown={shown} label="Events">
             <>
               <TabToolbar note={`The times the activity happens. An event takes what it leaves empty from the activity.${interestCount ? ` ${interestCount} ${interestCount === 1 ? 'member is' : 'members are'} interested and told of each new one.` : ''}`}>
+                {onFindMatching && <Button variant="outlined" onClick={onFindMatching}>Find events by name</Button>}
                 <Button variant="contained" href={addEventPath(activity._id)}>Add event</Button>
               </TabToolbar>
               <DataList
@@ -125,6 +130,10 @@ export const ActivityForm = ({
         </>
       )}
 
+      {onFindMatching && (
+        <MatchingEvents open={matching !== null} name={activity?.name?.sv} events={matching === 'loading' ? null : matching}
+          onLink={onLinkMatching} onClose={onCloseMatching} busy={busy} />
+      )}
       <Dialog open={confirming} onClose={() => setConfirming(false)}>
         <DialogTitle>Delete this activity?</DialogTitle>
         <DialogContent><DialogContentText>“{title}” is deleted for good.</DialogContentText></DialogContent>
