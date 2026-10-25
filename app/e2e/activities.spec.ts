@@ -141,4 +141,22 @@ test.describe('Activities', () => {
     await expect(page.getByRole('heading', { name: en.activities })).toBeVisible();
     await expect(page.getByRole('link', { name: `+ ${en.activityNew}` })).toHaveCount(0);
   });
+
+  test('an activity may keep its events to those who may change it', async ({ page }) => {
+    await openAs(page, 'discounted', '/activities?tab=activities');
+    await page.getByRole('link', { name: /E2E open activity/ }).click();
+    await expect(page.getByRole('link', { name: `+ ${en.eventAdd}` })).toBeVisible();
+    await page.goBack();
+    await page.getByRole('link', { name: /E2E kept activity/ }).click();
+    await expect(page.getByRole('heading', { name: 'E2E kept activity' })).toBeVisible();
+    await expect(page.getByRole('link', { name: `+ ${en.eventAdd}` })).toHaveCount(0);
+  });
+
+  test('the responsible books the events of an activity kept to its editors', async ({ page }) => {
+    await openAs(page, 'groupLeader', '/activities?tab=activities');
+    await page.getByRole('link', { name: /E2E kept activity/ }).click();
+    await expect(page.getByRole('link', { name: `+ ${en.eventAdd}` })).toBeVisible();
+    await page.getByRole('link', { name: en.edit }).click();
+    await expect(page.getByLabel(en.activityFieldEventBookers).locator('option:checked')).toHaveText(en.activityEventBookersActivityEditors);
+  });
 });

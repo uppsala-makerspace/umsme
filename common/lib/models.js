@@ -1853,7 +1853,12 @@ export const models = {
     details: { label: "Details", type: Object, blackbox: true, optional: true },
   },
   // Something we usually do (plan/activities.md).
-  activity: activityFields({ required: true }),
+  activity: {
+    ...activityFields({ required: true }),
+    // Who may create and change its events: every active member of its group
+    // (empty is so), or only those who may change the activity itself.
+    eventBookers: { label: "Who books events", type: String, allowedValues: ["groupMembers", "activityEditors"], optional: true },
+  },
   // One time it happens: of an activity, or free-standing.
   event: {
     ...activityFields({ required: false }),

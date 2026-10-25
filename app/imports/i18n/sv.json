@@ -745,5 +745,8 @@
   "navGoogleCalendar": "Google-kalender",
   "eventsWhen": "Vilka tillfällen",
   "activityPlannedEvents_one": "{{count}} planerat tillfälle",
-  "activityPlannedEvents_other": "{{count}} planerade tillfällen"
+  "activityPlannedEvents_other": "{{count}} planerade tillfällen",
+  "activityFieldEventBookers": "Vem får skapa och ändra tillfällen",
+  "activityEventBookersGroupMembers": "Alla medlemmar i gruppen",
+  "activityEventBookersActivityEditors": "Samma som får ändra aktiviteten"
 }

@@ -321,6 +321,8 @@ export const buildDemo = async ({ random, people, now }) => {
     },
     groupId: steeringGroups.wood, workshopId: workshops.wood, spaceId: spaces.wood, categoryId: courses,
     durationMinutes: 120, membersOnly: true, published: true, slackChannel: '#traverkstaden',
+    // Held by those who run the workshop, not by every member of the group.
+    eventBookers: 'activityEditors',
   };
   woodIntro._id = await makeActivity({ ...woodIntro, createdAt: days(-200) });
   for (const n of [-42, -28, -14, 0, 14, 28, 42]) {

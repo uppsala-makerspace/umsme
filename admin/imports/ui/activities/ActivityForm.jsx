@@ -51,6 +51,11 @@ export const ActivityForm = ({
         <option value="">(The association: board and admin only)</option>
         {groups.map((g) => <option key={g._id} value={g._id}>{g.name?.sv || g._id}</option>)}
       </TextField>
+      <TextField label="Who creates and changes its events" select fullWidth slotProps={native} sx={{ mb: 2 }}
+        value={values.eventBookers} onChange={(e) => onChange('eventBookers', e.target.value)}>
+        <option value="groupMembers">Every active member of the group</option>
+        <option value="activityEditors">Those who may change the activity</option>
+      </TextField>
       <SharedFields values={values} onChange={onChange} categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} />
       <Stack direction="row" spacing={1}>
         <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add' : 'Save'}</Button>

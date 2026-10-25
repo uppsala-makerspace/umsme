@@ -15,6 +15,7 @@ import {
   eventGroupId,
   mayEditActivity,
   mayBookEvent,
+  mayBookEventOf,
 } from "/imports/common/lib/activityRules";
 import { createActivity, updateActivity, removeActivity } from "/imports/common/server/activities/activities";
 import { createEvent, updateEvent, removeEvent } from "/imports/common/server/activities/events";
@@ -61,21 +62,21 @@ const stateIn = async (groupId, memberId) =>
   (groupId ? (await GroupMemberships.findOneAsync({ groupId, memberId }))?.state : null) || null;
 
 /**
- * What a member may do with a group's activities and events. Only an active
- * member of the association may, besides board and admin.
+ * What a member may do with a group's activities and events; with `activity`,
+ * with that activity's events, which it may keep to those who may change it.
+ * Only an active member of the association may, besides board and admin.
  */
-const accessTo = async (member, groupId, { adminish, active }) => {
+const accessTo = async (member, groupId, { adminish, active }, activity = null) => {
   if (adminish) return { edit: true, book: true };
   if (!active) return { edit: false, book: false };
   const group = groupId ? await Groups.findOneAsync(groupId) : null;
   const membershipState = await stateIn(groupId, member._id);
   const parentMembershipState = await stateIn(group?.parentGroupId, member._id);
-  return {
-    edit: mayEditActivity({
-      isAdminish: false, group, isResponsible: group?.responsibleMemberId === member._id, membershipState, parentMembershipState,
-    }),
-    book: mayBookEvent({ isAdminish: false, groupId: group?._id || null, membershipState }),
-  };
+  const edit = mayEditActivity({
+    isAdminish: false, group, isResponsible: group?.responsibleMemberId === member._id, membershipState, parentMembershipState,
+  });
+  const book = mayBookEvent({ isAdminish: false, groupId: group?._id || null, membershipState });
+  return { edit, book: mayBookEventOf({ activity, mayEdit: edit, mayBook: book }) };
 };
 
 /** Who asks, once per call: the member, and whether board/admin or active. */
@@ -208,7 +209,7 @@ const SharedFields = {
   membersOnly: Flag,
   published: Flag,
 };
-const ActivityFields = { ...SharedFields, groupId: Text };
+const ActivityFields = { ...SharedFields, groupId: Text, eventBookers: Text };
 const EventFields = {
   ...SharedFields,
   activityId: Text,
@@ -220,11 +221,15 @@ const EventFields = {
 };
 
 /** The group an event's fields put it in: its activity's, or its own. */
-const groupOfFields = async (fields) => {
+/** What may be done with an event of these fields: in its group, of its activity. */
+const accessToFields = async (who, fields) => {
   const activity = fields.activityId ? await Activities.findOneAsync(fields.activityId) : null;
   if (fields.activityId && !activity) throw new Meteor.Error("not-found", "Activity not found");
-  return eventGroupId(fields, activity);
+  return accessTo(who.member, eventGroupId(fields, activity), who, activity);
 };
+
+/** What may be done with a stored event. */
+const accessToEvent = async (who, event) => accessToFields(who, { ...event, groupId: event.activityId ? null : event.groupId });
 
 Meteor.methods({
   /** The activities, and whether the caller may add an activity or an event. */
@@ -265,7 +270,7 @@ Meteor.methods({
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const events = await Events.find({ activityId, end: { $gte: today } }, { sort: { start: 1 } }).fetchAsync();
-    const access = await accessTo(who.member, activity.groupId, who);
+    const access = await accessTo(who.member, activity.groupId, who, activity);
     return {
       activity: activityView(activity, await lookups([activity])),
       events: await eventViews(events),
@@ -287,7 +292,7 @@ Meteor.methods({
     const hosts = view.hostMemberIds.length
       ? await Members.find({ _id: { $in: view.hostMemberIds } }, { fields: { name: 1 } }).fetchAsync()
       : [];
-    const access = await accessTo(who.member, eventGroupId(event, activity), who);
+    const access = await accessTo(who.member, eventGroupId(event, activity), who, activity);
     return {
       event: view,
       hosts: hosts.map((m) => ({ _id: m._id, name: m.name })),
@@ -307,11 +312,15 @@ Meteor.methods({
   "activities.choices": async () => {
     const who = await caller();
     const groups = await myGroups(who);
-    const bookable = groups.filter((g) => g.book).map((g) => g._id);
-    const activities = await Activities.find(
-      who.adminish ? {} : { groupId: { $in: bookable } },
-      { fields: { name: 1, groupId: 1, durationMinutes: 1 }, sort: { "name.sv": 1 } },
-    ).fetchAsync();
+    // The activities whose events the caller may book: in a group where they
+    // may, and of one that keeps them to its editors, where they may edit.
+    const access = new Map(groups.map((g) => [g._id, g]));
+    const activities = (await Activities.find(
+      who.adminish ? {} : { groupId: { $in: groups.map((g) => g._id) } },
+      { fields: { name: 1, groupId: 1, durationMinutes: 1, eventBookers: 1 }, sort: { "name.sv": 1 } },
+    ).fetchAsync()).filter((a) => who.adminish || mayBookEventOf({
+      activity: a, mayEdit: access.get(a.groupId)?.edit, mayBook: access.get(a.groupId)?.book,
+    }));
     const categories = await ActivityCategories.find({}, { sort: { sortOrder: 1, "name.sv": 1 } }).fetchAsync();
     const workshops = await Workshops.find({}, { fields: { name: 1, kind: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
     const spaces = await Spaces.find({}, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
@@ -370,7 +379,7 @@ Meteor.methods({
   "events.create": async (fields) => {
     check(fields, EventFields);
     const who = await caller();
-    if (!(await accessTo(who.member, await groupOfFields(fields), who)).book) refuse();
+    if (!(await accessToFields(who, fields)).book) refuse();
     return createEvent(fields, { userId: Meteor.userId(), isAdminish: who.adminish });
   },
 
@@ -380,8 +389,8 @@ Meteor.methods({
     check(expectedUpdatedAt, Match.Maybe(Date));
     const who = await caller();
     const before = await getEvent(eventId);
-    if (!(await accessTo(who.member, before.groupId || null, who)).book) refuse();
-    if (!(await accessTo(who.member, await groupOfFields(fields), who)).book) refuse();
+    if (!(await accessToEvent(who, before)).book) refuse();
+    if (!(await accessToFields(who, fields)).book) refuse();
     await updateEvent(eventId, fields, { userId: Meteor.userId(), isAdminish: who.adminish, expectedUpdatedAt: expectedUpdatedAt ?? null });
   },
 
@@ -389,7 +398,7 @@ Meteor.methods({
     check(eventId, String);
     const who = await caller();
     const before = await getEvent(eventId);
-    if (!(await accessTo(who.member, before.groupId || null, who)).book) refuse();
+    if (!(await accessToEvent(who, before)).book) refuse();
     await removeEvent(eventId, { userId: Meteor.userId() });
   },
 });

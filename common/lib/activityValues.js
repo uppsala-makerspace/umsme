@@ -64,6 +64,7 @@ export const activityValues = (activity, { groupId = '' } = {}) => ({
   groupId: activity ? activity.groupId || '' : groupId,
   membersOnly: activity ? !!activity.membersOnly : true,
   published: !!activity?.published,
+  eventBookers: activity?.eventBookers || 'groupMembers',
 });
 
 export const activityFields = (v) => ({
@@ -71,6 +72,7 @@ export const activityFields = (v) => ({
   groupId: v.groupId || null,
   membersOnly: !!v.membersOnly,
   published: !!v.published,
+  eventBookers: v.eventBookers,
 });
 
 /** The form's values for an event, or empty ones for a new one (of `activityId`). */

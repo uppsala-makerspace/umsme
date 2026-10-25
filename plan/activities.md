@@ -165,7 +165,7 @@ styrgrupp, funktionsgrupp och ansvarsgrupp.
 | Skapa/redigera aktivitet med tillhörighet G | aktiv medlem i styrgruppen G, eller ansvarig för G av annan typ; för en aktivitetsgrupp (ansvarsgrupp) även aktiv medlem i styrgruppen ovanför | `mayEditActivity` i `common/lib/activityRules.js`, byggd på `mayEditGroup` |
 | Skapa/redigera aktivitet utan tillhörighet | board/admin | `isAdminish` |
 | Ändra en aktivitets tillhörighet | board/admin | |
-| Skapa/ändra/ställa in event av en aktivitet | **alla aktiva medlemmar** i aktivitetens grupp, oavsett grupptyp; tom tillhörighet → board/admin | aktivt `GroupMemberships` |
+| Skapa/ändra/ställa in event av en aktivitet | **alla aktiva medlemmar** i aktivitetens grupp, oavsett grupptyp — eller, när aktiviteten säger så (`eventBookers: "activityEditors"`), bara de som får ändra aktiviteten; tom tillhörighet → board/admin | `mayBookEventOf` i `common/lib/activityRules.js` |
 | Skapa/ändra/ställa in fritt event med tillhörighet G | alla aktiva medlemmar i G | som ovan |
 | Skapa/ändra/ställa in fritt event utan tillhörighet | board/admin | |
 | Sätta hosts | skaparen: sig själv och medlemmar i samma grupp (listan finns redan via `canSeeMembers`); board/admin: vilken medlem som helst, via medlemsnummer (`groups.lookupMemberNumber`-mönstret) | |

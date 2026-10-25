@@ -140,6 +140,10 @@ export const buildE2e = async ({ people, now }) => {
   await makeEvent({ activity: wheelIntro, start: at(20, 18), status: 'cancelled' });
   await makeActivity({ name: { sv: 'E2E edit aktivitet' }, groupId: ceramicsGroup, durationMinutes: 60 });
   await makeActivity({ name: { sv: 'E2E delete aktivitet' } });
+  // Of a function group, its events kept to those who may change it: the
+  // responsible (groupLeader), not every member (discounted).
+  await makeActivity({ name: { sv: 'E2E styrd aktivitet', en: 'E2E kept activity' }, groupId: requestsGroup, eventBookers: 'activityEditors' });
+  await makeActivity({ name: { sv: 'E2E öppen aktivitet', en: 'E2E open activity' }, groupId: requestsGroup });
   await makeActivity({ name: { sv: 'E2E image aktivitet' } });
   const toCancel = { name: { sv: 'E2E cancel aktivitet' }, groupId: ceramicsGroup, durationMinutes: 60 };
   toCancel._id = await makeActivity(toCancel);

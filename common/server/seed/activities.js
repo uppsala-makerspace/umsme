@@ -8,7 +8,7 @@ export const makeCategory = (sv, en, sortOrder) =>
 
 /** An activity. @returns {Promise<string>} its id */
 export const makeActivity = ({ createdAt = new Date(), ...fields }) =>
-  Activities.insertAsync({ membersOnly: true, published: false, createdAt, updatedAt: createdAt, ...fields });
+  Activities.insertAsync({ membersOnly: true, published: false, eventBookers: 'groupMembers', createdAt, updatedAt: createdAt, ...fields });
 
 /**
  * An event, of `activity` (a document with _id, groupId and durationMinutes)

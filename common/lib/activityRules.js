@@ -9,6 +9,10 @@ import { mayEditGroup } from "./groupRules";
 
 export const EVENT_STATUSES = ["confirmed", "cancelled"];
 
+// Who may create and change an activity's events: every active member of
+// its group, or only those who may change the activity (mayEditActivity).
+export const EVENT_BOOKERS = ["groupMembers", "activityEditors"];
+
 // The fields an event shares with an activity: on an event of an activity
 // they override the activity's, on a free-standing one they are its own.
 // groupId is not among them: an event of an activity is always the activity's group's.
@@ -91,6 +95,17 @@ export const mayEditActivity = ({ isAdminish, group, isResponsible = false, memb
  */
 export const mayBookEvent = ({ isAdminish, groupId, membershipState = null }) =>
   !!isAdminish || (!!groupId && membershipState === "active");
+
+/**
+ * Whether someone may create or change an event of an activity: as for any
+ * event of its group (mayBookEvent), unless the activity keeps its events to
+ * those who may change it.
+ *
+ * @param {{activity: object, mayEdit: boolean, mayBook: boolean}} args
+ *   `mayEdit` and `mayBook` are the person's, from mayEditActivity and mayBookEvent.
+ */
+export const mayBookEventOf = ({ activity, mayEdit, mayBook }) =>
+  (activity?.eventBookers === "activityEditors" ? mayEdit : mayBook);
 
 /**
  * The hosts that may not host: everyone not an active member of the event's

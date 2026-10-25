@@ -2,13 +2,15 @@ import { Meteor } from 'meteor/meteor';
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
 import { recordChange } from '/imports/common/server/auditLog';
+import { EVENT_BOOKERS } from '/imports/common/lib/activityRules';
 import { sharedChanges, ownerGroupId, currentOf, imageActions } from './shared';
 
 /**
  * Activities: something we usually do, owned by a group or, without one, by
  * the association (plan/activities.md). Its events are the times it happens.
  * Who may write is the caller's to check (mayEditActivity in
- * common/lib/activityRules.js); these functions keep the data whole.
+ * common/lib/activityRules.js, and mayBookEventOf for its events, which
+ * `eventBookers` decides); these functions keep the data whole.
  */
 
 const DOMAIN = 'activities';
@@ -16,6 +18,9 @@ const DOMAIN = 'activities';
 const changesOf = async (fields) => {
   const changes = await sharedChanges(fields, { inherit: false });
   if (!changes.$set.name?.sv) throw new Meteor.Error('bad-name', 'An activity needs a Swedish name');
+  const eventBookers = fields.eventBookers || 'groupMembers';
+  if (!EVENT_BOOKERS.includes(eventBookers)) throw new Meteor.Error('bad-value', `Unknown event bookers "${eventBookers}"`);
+  changes.$set.eventBookers = eventBookers;
   const groupId = await ownerGroupId(fields.groupId);
   if (groupId) changes.$set.groupId = groupId; else changes.$unset.groupId = '';
   return changes;

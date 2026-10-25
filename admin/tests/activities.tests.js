@@ -60,6 +60,14 @@ describe('activities and events', function () {
       assert.strictEqual(await AuditLog.find({ docId: id }).countAsync(), 2);
     });
 
+    it('lets every group member book its events unless it says otherwise', async function () {
+      const open = await createActivity({ name: { sv: 'Öppen' } }, { userId });
+      assert.strictEqual((await Activities.findOneAsync(open)).eventBookers, 'groupMembers');
+      const kept = await createActivity({ name: { sv: 'Styrd' }, eventBookers: 'activityEditors' }, { userId });
+      assert.strictEqual((await Activities.findOneAsync(kept)).eventBookers, 'activityEditors');
+      await rejects(createActivity({ name: { sv: 'Fel' }, eventBookers: 'anyone' }, { userId }), 'bad-value');
+    });
+
     it('needs a Swedish name, and refuses what does not exist', async function () {
       await rejects(createActivity({ name: { en: 'Intro' } }, { userId }), 'bad-name');
       await rejects(createActivity({ name: { sv: 'Intro' }, groupId: 'nope' }, { userId }), 'not-found');

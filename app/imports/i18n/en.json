@@ -746,5 +746,8 @@
   "navGoogleCalendar": "Google calendar",
   "eventsWhen": "Which events",
   "activityPlannedEvents_one": "{{count}} planned event",
-  "activityPlannedEvents_other": "{{count}} planned events"
+  "activityPlannedEvents_other": "{{count}} planned events",
+  "activityFieldEventBookers": "Who creates and changes events",
+  "activityEventBookersGroupMembers": "Every member of the group",
+  "activityEventBookersActivityEditors": "Those who may change the activity"
 }

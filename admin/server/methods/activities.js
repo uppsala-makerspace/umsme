@@ -29,7 +29,7 @@ const SharedFields = {
   membersOnly: Flag,
   published: Flag,
 };
-const ActivityFields = { ...SharedFields, groupId: Text };
+const ActivityFields = { ...SharedFields, groupId: Text, eventBookers: Text };
 const EventFields = {
   ...SharedFields,
   activityId: Text,

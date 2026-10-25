@@ -22,6 +22,12 @@ const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, has
       <SelectField id="activity-groupId" label={t("activityFieldGroup")} value={values.groupId} onChange={(v) => onChange("groupId", v)}
         empty={choices.adminish ? t("activityFieldGroupNone") : undefined}
         options={groups.map((g) => ({ value: g._id, label: localized(g.name, lang) }))} />
+      <SelectField id="activity-eventBookers" label={t("activityFieldEventBookers")} value={values.eventBookers}
+        onChange={(v) => onChange("eventBookers", v)}
+        options={[
+          { value: "groupMembers", label: t("activityEventBookersGroupMembers") },
+          { value: "activityEditors", label: t("activityEventBookersActivityEditors") },
+        ]} />
       <SharedFields values={values} onChange={onChange} choices={choices} />
       <div className="flex gap-3 mt-2">
         <Button type="submit" disabled={saving}>{saving ? t("saving") : t("save")}</Button>

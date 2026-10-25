@@ -5,6 +5,7 @@ import {
   eventGroupId,
   mayEditActivity,
   mayBookEvent,
+  mayBookEventOf,
   disallowedHosts,
   eventEnd,
 } from '/imports/common/lib/activityRules';
@@ -111,6 +112,20 @@ describe('Activity rules', function () {
     it('keeps the association’s events to board and admin', function () {
       assert.strictEqual(mayBookEvent({ isAdminish: false, groupId: null, membershipState: 'active' }), false);
       assert.strictEqual(mayBookEvent({ isAdminish: true, groupId: null }), true);
+    });
+  });
+
+  describe('mayBookEventOf', function () {
+    it('follows the group for an activity open to its members', function () {
+      assert.strictEqual(mayBookEventOf({ activity: { eventBookers: 'groupMembers' }, mayEdit: false, mayBook: true }), true);
+      assert.strictEqual(mayBookEventOf({ activity: {}, mayEdit: false, mayBook: true }), true);
+      assert.strictEqual(mayBookEventOf({ activity: null, mayEdit: false, mayBook: true }), true);
+    });
+
+    it('keeps the events of an activity to its editors when it says so', function () {
+      const kept = { eventBookers: 'activityEditors' };
+      assert.strictEqual(mayBookEventOf({ activity: kept, mayEdit: false, mayBook: true }), false);
+      assert.strictEqual(mayBookEventOf({ activity: kept, mayEdit: true, mayBook: false }), true);
     });
   });
 
