@@ -313,6 +313,22 @@ som har en väntande begäran.
    malltyper, push, den atomära accepteringen, och kravet på intyg vid anmälan.
 3. **Incheckning, närvaro och påminnelser.** Fönster, deadline-jobb,
    `missedCheckIn`; hosts närvaroregistrering och `noShow`.
+   *Etapp 2 och 3 byggda på grenen `activities` (oktober 2026)*, med:
+   - Platser räknas på eventet (`seatsTaken`) och tas med en villkorad
+     ökning, så den sista platsen aldrig ges bort två gånger.
+   - En ny anmälan hamnar i kön när någon redan köar, även om en plats är
+     ledig: kön har den först. Den köande ser "Ta platsen" i appen.
+   - `awaiting` → `confirmed` är enkelriktat.
+   - Ett event med anmälda kan inte tas bort, bara ställas in.
+   - Incheckningen öppnar 24 h före start om inget annat sägs, och stänger vid
+     start om eventet saknar deadline.
+   - Åtta nya malltyper (`activity…`), en egen notiskategori som medlemmen kan
+     stänga av, standardtexter som läggs in när admin och appen startar.
+   - Cronjobbet (var tionde minut) körs bara med `activityCron.enabled: true`.
+   - Utöver planen: import från Google-kalendern i admin
+     (`private.googleCalendar`; "fake" i demo och e2e), "gör en aktivitet av
+     eventet" och "hitta event med aktivitetens namn" i admin, och "Mina
+     anmälningar" i appens kalender.
 4. **Kalendersynk.** Servicekonto, `googleEventId`, återförsök.
 5. **Mål-certifikat.** Visning på aktivitets- och eventsidor, hosts väntande
    begäranden, och `onAttendance` med kontrollen vid host-tilldelning.
