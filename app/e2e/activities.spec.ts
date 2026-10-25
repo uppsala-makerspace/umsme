@@ -122,4 +122,23 @@ test.describe('Activities', () => {
     await expect(rows).toHaveCount(13);
     await expect(page.getByRole('button', { name: en.eventsLoadMore })).toHaveCount(0);
   });
+
+  test('a member of the steering group creates an activity from an activity group below it', async ({ page }) => {
+    await openAs(page, 'steering', '/groups');
+    await page.getByRole('link', { name: /Glazing group/ }).first().click();
+    await expect(page.getByRole('heading', { name: en.activities })).toBeVisible();
+    await page.getByRole('link', { name: `+ ${en.activityNew}` }).click();
+    await expect(page.getByLabel(en.activityFieldGroup).locator('option:checked')).toHaveText('Glazing group');
+    await page.getByLabel(en.activityFieldNameSv).fill('E2E glasyrkurs');
+    await page.getByRole('button', { name: en.save }).click();
+    await expect(page.getByRole('heading', { name: 'E2E glasyrkurs' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Glazing group', exact: true })).toBeVisible();
+  });
+
+  test('a member of an activity group does not create its activities', async ({ page }) => {
+    await openAs(page, 'discounted', '/groups');
+    await page.getByRole('link', { name: /Glazing group/ }).first().click();
+    await expect(page.getByRole('heading', { name: en.activities })).toBeVisible();
+    await expect(page.getByRole('link', { name: `+ ${en.activityNew}` })).toHaveCount(0);
+  });
 });

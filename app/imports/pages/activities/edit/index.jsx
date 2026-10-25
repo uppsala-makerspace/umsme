@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect } from "react";
-import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Navigate, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import { useSignedIn } from "../components/useSignedIn";
 import MainContent from "/imports/components/MainContent";
@@ -8,9 +8,10 @@ import Loader from "/imports/components/Loader";
 import { activityValues, activityFields } from "/imports/common/lib/activityValues";
 import ActivityEditForm from "./ActivityEditForm.jsx";
 
-/** /activities/new and /activities/:activityId/edit, for those who may. */
+/** /activities/new[?group=…] and /activities/:activityId/edit, for those who may. */
 export default () => {
   const { activityId } = useParams();
+  const [params] = useSearchParams();
   const navigate = useNavigate();
   const { user, userId, loggingIn } = useSignedIn();
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,9 @@ export default () => {
           setHasEvents(result.events.length > 0);
           setValues(activityValues(result.own));
         } else {
-          setValues(activityValues(null, { groupId: loaded.adminish ? "" : loaded.groups.find((g) => g.edit)?._id || "" }));
+          // Started from a group's page: that group owns it, if one may.
+          const from = loaded.groups.find((g) => g.edit && g._id === params.get("group"));
+          setValues(activityValues(null, { groupId: from?._id || (loaded.adminish ? "" : loaded.groups.find((g) => g.edit)?._id || "") }));
         }
       } catch (err) {
         setError(err.reason || err.message);

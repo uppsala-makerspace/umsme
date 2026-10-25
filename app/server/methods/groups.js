@@ -4,7 +4,7 @@ import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Workshops } from "/imports/common/collections/workshops";
 import { Members } from "/imports/common/collections/members";
-import { activityLinks } from "./activities";
+import { activityLinks, mayCreateActivityFor } from "./activities";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { groupImageUrlFor } from "/imports/common/server/workshopImage";
@@ -267,6 +267,7 @@ Meteor.methods({
       expenseAccounts,
       // The activities the group holds, to link to.
       activities: await activityLinks({ groupId }),
+      canCreateActivity: await mayCreateActivityFor(groupId),
       mapView,
     };
   },

@@ -162,7 +162,7 @@ styrgrupp, funktionsgrupp och ansvarsgrupp.
 
 | Handling | Vem | Regel att återanvända |
 |---|---|---|
-| Skapa/redigera aktivitet med tillhörighet G | aktiv medlem i styrgruppen G, eller ansvarig för G av annan typ | `mayEditGroup` i `common/lib/groupRules.js` |
+| Skapa/redigera aktivitet med tillhörighet G | aktiv medlem i styrgruppen G, eller ansvarig för G av annan typ; för en aktivitetsgrupp (ansvarsgrupp) även aktiv medlem i styrgruppen ovanför | `mayEditActivity` i `common/lib/activityRules.js`, byggd på `mayEditGroup` |
 | Skapa/redigera aktivitet utan tillhörighet | board/admin | `isAdminish` |
 | Ändra en aktivitets tillhörighet | board/admin | |
 | Skapa/ändra/ställa in event av en aktivitet | **alla aktiva medlemmar** i aktivitetens grupp, oavsett grupptyp; tom tillhörighet → board/admin | aktivt `GroupMemberships` |
@@ -177,7 +177,7 @@ styrgrupp, funktionsgrupp och ansvarsgrupp.
 | Sköta kategorier | board/admin | |
 
 Notera asymmetrin, som är avsiktlig: i en funktions- eller ansvarsgrupp får bara
-den ansvarige definiera *aktiviteten*, men varje medlem får boka ett *event* av
+den ansvarige (och för en ansvarsgrupp styrgruppen ovanför) definiera *aktiviteten*, men varje medlem får boka ett *event* av
 den. Aktiviteten är produkten, eventet är driften.
 
 ## Flöden

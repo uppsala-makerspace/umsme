@@ -90,6 +90,15 @@ describe('Activity rules', function () {
       assert.strictEqual(mayEditActivity({ isAdminish: false, group: fn, membershipState: 'active' }), false);
       assert.strictEqual(mayEditActivity({ isAdminish: false, group: fn, isResponsible: true }), true);
     });
+
+    it('lets the members of the steering group above an activity group edit its activities', function () {
+      const below = { _id: 'g3', type: 'responsibility', parentGroupId: 'g1' };
+      assert.strictEqual(mayEditActivity({ isAdminish: false, group: below, parentMembershipState: 'active' }), true);
+      assert.strictEqual(mayEditActivity({ isAdminish: false, group: below, parentMembershipState: 'pending' }), false);
+      assert.strictEqual(mayEditActivity({ isAdminish: false, group: below, membershipState: 'active' }), false);
+      // Only an activity group: a function group's parent, were it to have one, decides nothing.
+      assert.strictEqual(mayEditActivity({ isAdminish: false, group: { ...fn, parentGroupId: 'g1' }, parentMembershipState: 'active' }), false);
+    });
   });
 
   describe('mayBookEvent', function () {

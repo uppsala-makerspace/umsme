@@ -6,15 +6,25 @@ import { localized } from "/imports/common/lib/groupRules";
 
 /**
  * The activities of a workshop or a group, as a section of its page, each
- * with the number of its planned events; nothing when there are none.
+ * with the number of its planned events. Nothing when there are none, unless
+ * `always` (a group's page, which owns them) or there is `addTo`: a link to
+ * create one owned by that group.
  */
-const ActivityLinks = ({ activities }) => {
+const ActivityLinks = ({ activities, always, addTo }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
-  if (!activities?.length) return null;
+  if (!activities?.length && !always && !addTo) return null;
   return (
     <section className="mb-6">
-      <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">{t("activities")}</h3>
+      <div className="flex items-center border-b border-gray-200 pb-2 mb-2">
+        <h3 className="text-lg m-0 text-gray-700">{t("activities")}</h3>
+        {addTo && (
+          <Link to={`/activities/new?group=${addTo}`} className="ml-auto text-sm font-semibold text-brand-green no-underline hover:underline">
+            + {t("activityNew")}
+          </Link>
+        )}
+      </div>
+      {!activities?.length && <p className="text-gray-500 m-0">{t("activitiesNone")}</p>}
       <ul className="list-none p-0 m-0">
         {activities.map((activity) => (
           <li key={activity._id} className="mb-2">
@@ -44,6 +54,8 @@ const ActivityLinks = ({ activities }) => {
 };
 
 ActivityLinks.propTypes = {
+  always: PropTypes.bool,
+  addTo: PropTypes.string,
   activities: PropTypes.arrayOf(PropTypes.shape({ _id: PropTypes.string, name: PropTypes.object, plannedEvents: PropTypes.number })),
 };
 

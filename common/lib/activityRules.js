@@ -65,15 +65,23 @@ export const eventGroupId = (event, activity) =>
   (activity ? activity.groupId : event?.groupId) || null;
 
 /**
- * Whether someone may create, edit or remove an activity of a group. One of the
- * association's (no group) is for board and admin only.
+ * Whether someone may create, edit or remove an activity of a group: as for
+ * editing the group (its responsible, or any member of a steering group),
+ * and for an activity group (a responsibility group) also any member of the
+ * steering group above it. One of the association's (no group) is for board
+ * and admin only.
  *
- * @param {{isAdminish: boolean, group: object|null, isResponsible?: boolean, membershipState?: string|null}} args
- *   `group` is the owning group, `membershipState` the person's in it.
+ * @param {{isAdminish: boolean, group: object|null, isResponsible?: boolean, membershipState?: string|null,
+ *          parentMembershipState?: string|null}} args
+ *   `group` is the owning group, `membershipState` the person's in it and
+ *   `parentMembershipState` the person's in the group's parent.
  */
-export const mayEditActivity = ({ isAdminish, group, isResponsible = false, membershipState = null }) =>
+export const mayEditActivity = ({ isAdminish, group, isResponsible = false, membershipState = null, parentMembershipState = null }) =>
   !!isAdminish ||
-  (!!group && mayEditGroup({ isResponsible, groupType: group.type, membershipState }));
+  (!!group && (
+    mayEditGroup({ isResponsible, groupType: group.type, membershipState })
+    || (group.type === "responsibility" && !!group.parentGroupId && parentMembershipState === "active")
+  ));
 
 /**
  * Whether someone may book, edit or cancel an event of a group: every active

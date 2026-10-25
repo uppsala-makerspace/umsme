@@ -88,6 +88,7 @@ const GroupDetail = ({
     pendingRequests,
     expenseAccounts = [],
     activities = [],
+    canCreateActivity = false,
     mapView,
   } = data;
 
@@ -534,7 +535,7 @@ const GroupDetail = ({
         </section>
       )}
 
-      <ActivityLinks activities={activities} />
+      <ActivityLinks activities={activities} always addTo={canCreateActivity ? group._id : undefined} />
 
       {/* The group's expense accounts (members only) — each links to an
           overview of everything booked on that account. */}

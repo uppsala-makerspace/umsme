@@ -69,8 +69,11 @@ const accessTo = async (member, groupId, { adminish, active }) => {
   if (!active) return { edit: false, book: false };
   const group = groupId ? await Groups.findOneAsync(groupId) : null;
   const membershipState = await stateIn(groupId, member._id);
+  const parentMembershipState = await stateIn(group?.parentGroupId, member._id);
   return {
-    edit: mayEditActivity({ isAdminish: false, group, isResponsible: group?.responsibleMemberId === member._id, membershipState }),
+    edit: mayEditActivity({
+      isAdminish: false, group, isResponsible: group?.responsibleMemberId === member._id, membershipState, parentMembershipState,
+    }),
     book: mayBookEvent({ isAdminish: false, groupId: group?._id || null, membershipState }),
   };
 };
@@ -80,6 +83,12 @@ const caller = async () => {
   const member = await requireMember();
   const adminish = await isAdminish();
   return { member, adminish, active: adminish || (await isActiveMember(member)) };
+};
+
+/** Whether the caller may create activities owned by the group (see mayEditActivity). */
+export const mayCreateActivityFor = async (groupId) => {
+  const who = await caller();
+  return (await accessTo(who.member, groupId, who)).edit;
 };
 
 /**
@@ -95,7 +104,9 @@ const myGroups = async (who) => {
   if (!who.active) return [];
   const memberships = await GroupMemberships.find({ memberId: who.member._id, state: "active" }, { fields: { groupId: 1 } }).fetchAsync();
   const responsible = await Groups.find({ responsibleMemberId: who.member._id }, { fields: { _id: 1 } }).fetchAsync();
-  const ids = [...new Set([...memberships.map((m) => m.groupId), ...responsible.map((g) => g._id)])];
+  // The activity groups under the steering groups one is in.
+  const below = await Groups.find({ parentGroupId: { $in: memberships.map((m) => m.groupId) } }, { fields: { _id: 1 } }).fetchAsync();
+  const ids = [...new Set([...memberships.map((m) => m.groupId), ...responsible.map((g) => g._id), ...below.map((g) => g._id)])];
   const groups = [];
   for (const group of await Groups.find({ _id: { $in: ids } }, { sort: { "name.sv": 1 } }).fetchAsync()) {
     groups.push({ _id: group._id, name: group.name, ...(await accessTo(who.member, group._id, who)) });
