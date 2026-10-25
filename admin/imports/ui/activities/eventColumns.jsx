@@ -6,9 +6,11 @@ import { eventPath } from './paths';
 import { eventName } from '/imports/common/lib/activityValues';
 
 /** A cancelled event's mark; nothing for a confirmed one. */
-export const StatusChip = ({ status }) => (status === 'cancelled'
-  ? <Chip size="small" color="error" variant="outlined" label="Cancelled" />
-  : null);
+export const StatusChip = ({ status }) => {
+  if (status === 'cancelled') return <Chip size="small" color="error" variant="outlined" label="Cancelled" />;
+  if (status === 'awaiting') return <Chip size="small" color="warning" variant="outlined" label="Awaiting participants" />;
+  return null;
+};
 
 /**
  * The columns of a list of events.
@@ -28,9 +30,10 @@ export const eventColumns = ({ activityOf, groupName, withActivity = false }) =>
   }] : []),
   { field: 'groupId', headerName: 'Group', width: 200, valueGetter: (value) => (value ? groupName(value) || '' : 'The association') },
   { field: 'hostMemberIds', headerName: 'Hosts', width: 90, type: 'number', valueGetter: (value) => value?.length || 0 },
+  { field: 'seatsTaken', headerName: 'Registered', width: 110, type: 'number', valueGetter: (value) => value || 0 },
   {
     field: 'status', headerName: 'Status', width: 120,
-    valueGetter: (value) => (value === 'cancelled' ? 'Cancelled' : 'Confirmed'),
-    renderCell: ({ row, value }) => (row.status === 'cancelled' ? <StatusChip status="cancelled" /> : value),
+    valueGetter: (value) => ({ cancelled: 'Cancelled', awaiting: 'Awaiting' }[value] || 'Confirmed'),
+    renderCell: ({ row, value }) => (row.status === 'confirmed' || !row.status ? value : <StatusChip status={row.status} />),
   },
 ];

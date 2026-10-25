@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../../../components/Button";
 import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
+import RegistrationFields from "../components/RegistrationFields";
 import { SelectField } from "../components/fields";
 
 /**
@@ -29,6 +30,7 @@ const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, has
           { value: "activityEditors", label: t("activityEventBookersActivityEditors") },
         ]} />
       <SharedFields values={values} onChange={onChange} choices={choices} />
+      <RegistrationFields values={values} onChange={onChange} choices={choices} />
       <div className="flex gap-3 mt-2">
         <Button type="submit" disabled={saving}>{saving ? t("saving") : t("save")}</Button>
         <Button type="button" variant="secondary" onClick={onCancel}>{t("cancel")}</Button>

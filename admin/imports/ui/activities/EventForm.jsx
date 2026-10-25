@@ -18,11 +18,12 @@ import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTa
 import { memberPath } from '../members/paths';
 import { dateTime } from '../dates';
 import { SharedFields, native } from './SharedFields';
+import { RegistrationFields, checkInShown } from './RegistrationFields';
 import { StatusChip } from './eventColumns';
 import { activityPath, eventPath } from './paths';
 import { eventName, parseClock } from '/imports/common/lib/activityValues';
 
-const TABS = [['details', 'Details'], ['image', 'Image']];
+const TABS = [['details', 'Details'], ['participants', 'Participants'], ['image', 'Image']];
 
 /** A time of day, HH:MM, typed by hand. */
 const ClockField = ({ label, value, onChange, helperText, ...props }) => {
@@ -47,13 +48,16 @@ const ClockField = ({ label, value, onChange, helperText, ...props }) => {
  *           hosts: Array<{ _id, name, mid }>, onAddHost: (member) => void, onRemoveHost: (memberId) => void,
  *           searchMembers: (query) => Promise<object[]>,
  *           imageUrl?: string, ownImage?: boolean, onUploadImage?: (file) => void, onRemoveImage?: () => void,
- *           uploading?: boolean, onDelete?: () => void, tab?: string, onTab?: (tab) => void }} props
+ *           uploading?: boolean, onDelete?: () => void, tab?: string, onTab?: (tab) => void,
+ *           participants?: React.ReactNode, participantCount?: number }} props
+ *   `participants` is the Participants tab's content (Participants, from the page).
  *   `imageUrl` is the image shown, the event's or its activity's; `ownImage` whether it is the event's.
  */
 export const EventForm = ({
-  isNew, event, activity = null, values, onChange, onSave, busy = false, error, notice, activities, groups, categories,
+  isNew, event, activity = null, values, onChange, onSave, busy = false, error, notice, activities, groups, categories, certificates = [],
   workshopOptions, spaceOptions, groupName, hosts, onAddHost, onRemoveHost, searchMembers,
   imageUrl, ownImage = false, onUploadImage, onRemoveImage, uploading = false, onDelete, tab = 'details', onTab,
+  participants = null, participantCount,
 }) => {
   const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
   const [confirming, setConfirming] = useState(false);
@@ -92,6 +96,8 @@ export const EventForm = ({
       </Stack>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
         <TextField label="Status" select slotProps={native} sx={{ minWidth: 220 }} value={values.status} onChange={(e) => onChange('status', e.target.value)}>
+          {/* Awaiting or confirmed follows from the registrations; only calling off is a choice. */}
+          {values.status === 'awaiting' && <option value="awaiting">Awaiting participants</option>}
           <option value="confirmed">Confirmed</option>
           <option value="cancelled">Cancelled</option>
         </TextField>
@@ -107,6 +113,15 @@ export const EventForm = ({
         event values={values} onChange={onChange} inherited={values.activityId ? activity : null}
         categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions}
       />
+      <RegistrationFields event values={values} onChange={onChange} inherited={values.activityId ? activity : null} certificates={certificates} />
+      {checkInShown(values, values.activityId ? activity : null) && (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+          <DateField label="Check-in deadline, day" value={values.checkInDeadlineDay} onChange={(v) => onChange('checkInDeadlineDay', v)}
+            helperText="Empty: the event's day" />
+          <ClockField label="Check-in deadline, time" value={values.checkInDeadlineTime} onChange={(v) => onChange('checkInDeadlineTime', v)}
+            helperText="Empty: check-in closes at the start" />
+        </Stack>
+      )}
       <Stack direction="row" spacing={1}>
         <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add' : 'Save'}</Button>
         <Button href={back.href}>{isNew ? 'Cancel' : 'Back'}</Button>
@@ -134,8 +149,11 @@ export const EventForm = ({
 
       {isNew ? <Box sx={{ maxWidth: FORM_WIDTH }}>{form}</Box> : (
         <>
-          <PageTabs tabs={TABS.map(([value, label]) => ({ value, label }))} value={shown} onChange={onTab} href={(t) => eventPath(event._id, t)} />
+          <PageTabs
+            tabs={TABS.map(([value, label]) => ({ value, label, count: value === 'participants' ? participantCount : undefined }))}
+            value={shown} onChange={onTab} href={(t) => eventPath(event._id, t)} />
           <TabPanel value="details" shown={shown} label="Details" form>{form}</TabPanel>
+          <TabPanel value="participants" shown={shown} label="Participants">{participants}</TabPanel>
           <TabPanel value="image" shown={shown} label="Image" form>
             <>
               <TabToolbar note={ownImage || !imageUrl ? 'An event of an activity shows the activity’s image unless it has one of its own.' : 'This is the activity’s image; upload one to give the event its own.'} />

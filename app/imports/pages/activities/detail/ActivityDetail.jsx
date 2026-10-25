@@ -10,7 +10,7 @@ import EventRow from "../components/EventRow";
 import Facts from "../components/Facts";
 
 /** One activity: what it is, and the times it happens next. */
-const ActivityDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
+const ActivityDetail = ({ loading, error, data, slackTeam, slackChannelIds, busy, onInterest }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
 
@@ -47,6 +47,18 @@ const ActivityDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
         <Markdown className="text-gray-700 mb-4" startLevel={3}>{localized(activity.description, lang)}</Markdown>
       )}
       <Facts item={activity} slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
+      {onInterest && (
+        <div className="flex items-center gap-3 mb-6 p-3 rounded-lg bg-white border border-gray-200">
+          <p className="m-0 flex-1 text-sm">
+            {data.interested ? t("activityInterested") : t("activityInterestQuestion")}
+            {data.interestCount > 0 && <span className="block text-xs text-gray-500">{t("activityInterestCount", { count: data.interestCount })}</span>}
+          </p>
+          <button type="button" disabled={busy} aria-pressed={!!data.interested} onClick={() => onInterest(!data.interested)}
+            className={`text-sm rounded-full py-1 px-3 border cursor-pointer ${data.interested ? "bg-brand-green text-white border-brand-green" : "bg-white text-gray-700 border-gray-300"}`}>
+            {t(data.interested ? "activityNotInterested" : "activityInterest")}
+          </button>
+        </div>
+      )}
 
       <section className="mb-6">
         <div className="flex items-center border-b border-gray-200 pb-2 mb-2">
@@ -70,6 +82,8 @@ const ActivityDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
 };
 
 ActivityDetail.propTypes = {
+  busy: PropTypes.bool,
+  onInterest: PropTypes.func,
   loading: PropTypes.bool,
   error: PropTypes.string,
   data: PropTypes.object,

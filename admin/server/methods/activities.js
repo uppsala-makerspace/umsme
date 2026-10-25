@@ -8,6 +8,12 @@ import {
   createEvent, updateEvent, removeEvent, setEventImage, removeEventImage,
 } from '/imports/common/server/activities/events';
 import { createCategory, updateCategory, removeCategory } from '/imports/common/server/activities/categories';
+import {
+  register, withdraw, takeSeat, markAttended, closeAttendance,
+} from '/imports/common/server/activities/registrations';
+import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
+import { ActivityInterests } from '/imports/common/collections/activityInterests';
+import { Members } from '/imports/common/collections/members';
 
 // Board and admin: activities, events and categories alike. They may choose
 // anyone as a host, so every call here is `isAdminish`.
@@ -135,4 +141,59 @@ Meteor.methods({
     await requireRole(this.userId, roles);
     await removeCategory(docId, { userId: this.userId });
   },
+
+  /** An event's registrations, with the members' names, oldest first. */
+  async 'eventRegistrations.list'(eventId) {
+    check(eventId, String);
+    await requireRole(this.userId, roles);
+    const registrations = await EventRegistrations.find({ eventId }, { sort: { registeredAt: 1 } }).fetchAsync();
+    const members = await Members.find({ _id: { $in: registrations.map((r) => r.memberId) } }, { fields: { name: 1, mid: 1 } }).fetchAsync();
+    const byId = new Map(members.map((m) => [m._id, m]));
+    return registrations.map((r) => ({ ...r, memberName: byId.get(r.memberId)?.name || r.memberId, mid: byId.get(r.memberId)?.mid }));
+  },
+
+  /** Board or admin adds a member: neither the certificate nor the information is asked for. */
+  async 'eventRegistrations.add'(eventId, memberId) {
+    check(eventId, String);
+    check(memberId, String);
+    await requireRole(this.userId, roles);
+    return register(eventId, memberId, { userId: this.userId, override: true });
+  },
+
+  async 'eventRegistrations.withdraw'(eventId, memberId) {
+    check(eventId, String);
+    check(memberId, String);
+    await requireRole(this.userId, roles);
+    await withdraw(eventId, memberId, { userId: this.userId, override: true });
+  },
+
+  /** Give a queued member a free seat. */
+  async 'eventRegistrations.takeSeat'(eventId, memberId) {
+    check(eventId, String);
+    check(memberId, String);
+    await requireRole(this.userId, roles);
+    return takeSeat(eventId, memberId, { userId: this.userId });
+  },
+
+  async 'eventRegistrations.markAttended'(eventId, memberId, attended) {
+    check(eventId, String);
+    check(memberId, String);
+    check(attended, Boolean);
+    await requireRole(this.userId, roles);
+    await markAttended(eventId, memberId, attended, { userId: this.userId });
+  },
+
+  async 'eventRegistrations.closeAttendance'(eventId) {
+    check(eventId, String);
+    await requireRole(this.userId, roles);
+    return closeAttendance(eventId, { userId: this.userId });
+  },
+
+  /** How many have shown interest in an activity. */
+  async 'activities.interestCount'(activityId) {
+    check(activityId, String);
+    await requireRole(this.userId, roles);
+    return ActivityInterests.find({ activityId }).countAsync();
+  },
 });
+

@@ -7,7 +7,7 @@
  */
 import { mayEditGroup } from "./groupRules";
 
-export const EVENT_STATUSES = ["confirmed", "cancelled"];
+export const EVENT_STATUSES = ["awaiting", "confirmed", "cancelled"];
 
 // Who may create and change an activity's events: every active member of
 // its group, or only those who may change the activity (mayEditActivity).

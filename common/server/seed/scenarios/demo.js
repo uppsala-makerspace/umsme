@@ -33,7 +33,7 @@ import { makeFakeLock } from '../lock';
 import { makeFakeBank } from '../bank';
 import { makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
-import { makeCategory, makeActivity, makeEvent } from '../activities';
+import { makeCategory, makeActivity, makeEvent, makeRegistration, makeInterest } from '../activities';
 import { PERSONAS, PASSWORD, FIRST_FREE_MID } from './personas';
 import { makeLiabilityVersions, liabilityFields, makePersonas } from './build';
 
@@ -323,18 +323,41 @@ export const buildDemo = async ({ random, people, now }) => {
     durationMinutes: 120, membersOnly: true, published: true, slackChannel: '#traverkstaden',
     // Held by those who run the workshop, not by every member of the group.
     eventBookers: 'activityEditors',
+    // Six seats, a queue, and checking in the day before.
+    registration: 'required', maxSeats: 6, queueAllowed: true, checkInEnabled: true, checkInOpensHoursBefore: 48,
   };
   woodIntro._id = await makeActivity({ ...woodIntro, createdAt: days(-200) });
+  // Past ones attended (attendance closed), the next one full with a queue,
+  // the one after with a couple signed up.
+  const participants = (count, exclude = []) => pickMembers(labMembers, count, [personas.member._id, personas.base._id, ...exclude]);
   for (const n of [-42, -28, -14, 0, 14, 28, 42]) {
-    await makeEvent({
-      activity: woodIntro, start: at(n + 3, 18), hostMemberIds: [personas.groupLeader._id, ...(n % 28 === 0 ? [personas.steering._id] : [])],
+    const start = at(n + 3, 18);
+    const eventId = await makeEvent({
+      activity: woodIntro, start, hostMemberIds: [personas.groupLeader._id, ...(n % 28 === 0 ? [personas.steering._id] : [])],
+      checkInDeadline: new Date(start.getTime() - 24 * 3600000),
       ...(n === 28 ? { status: 'cancelled' } : {}), createdAt: days(n - 20),
+      ...(n < 0 ? { attendanceClosedAt: new Date(start.getTime() + 3 * 3600000) } : {}),
     });
+    const signedUp = (offset) => days(n - offset);
+    if (n < 0) {
+      for (const [i, member] of participants(6).entries()) {
+        await makeRegistration(eventId, member._id, { state: i < 5 ? 'attended' : 'noShow', at: signedUp(10 + i) });
+      }
+    } else if (n === 0) {
+      await makeRegistration(eventId, personas.member._id, { at: signedUp(12) });
+      for (const [i, member] of participants(5).entries()) await makeRegistration(eventId, member._id, { at: signedUp(11 - i) });
+      await makeRegistration(eventId, personas.base._id, { state: 'queued', at: signedUp(4) });
+      for (const member of participants(1)) await makeRegistration(eventId, member._id, { state: 'queued', at: signedUp(3) });
+    } else if (n === 14) {
+      for (const member of participants(2)) await makeRegistration(eventId, member._id, { at: signedUp(2) });
+    }
   }
   const fika = {
     name: { sv: 'Pysselfika', en: 'Craft fika' },
     description: { sv: 'Ta med ett projekt och fika med andra medlemmar.', en: 'Bring a project and have fika with other members.' },
     groupId: premisesGroup, spaceId: spaces.big, categoryId: social, durationMinutes: 180, membersOnly: false, published: true,
+    // Signing up is possible, so that the hosts know roughly how many come.
+    registration: 'optional',
   };
   fika._id = await makeActivity({ ...fika, createdAt: days(-90) });
   for (const n of [-21, 7, 35]) {
@@ -350,10 +373,13 @@ export const buildDemo = async ({ random, people, now }) => {
   openEvening._id = await makeActivity({ ...openEvening, createdAt: days(-300) });
   await makeEvent({ activity: openEvening, start: at(-60, 18), hostMemberIds: [personas.board._id], createdAt: days(-80) });
   await makeEvent({ activity: openEvening, start: at(18, 18), hostMemberIds: [personas.board._id], createdAt: days(-5) });
-  await makeActivity({
+  const weldingCourse = await makeActivity({
     name: { sv: 'Svetskurs', en: 'Welding course' }, groupId: steeringGroups.metal, workshopId: workshops.metal,
     categoryId: courses, durationMinutes: 240, published: false, createdAt: days(-10),
   });
+  // Not planned yet, but wanted: those interested are told of its first event.
+  await makeInterest(weldingCourse, personas.member._id, days(-5));
+  for (const member of pickMembers(active, 6, [personas.member._id])) await makeInterest(weldingCourse, member._id, days(-random.int(1, 9)));
   await makeEvent({
     name: { sv: 'Städdag', en: 'Cleaning day' }, groupId: premisesGroup, spaceId: spaces.big,
     description: { sv: 'Vi städar lokalen tillsammans. Fika bjuds på.' }, membersOnly: false, published: true,

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../../../components/Button";
 import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
+import RegistrationFields from "../components/RegistrationFields";
 import { Field, SelectField, DayField, ClockField, Row } from "../components/fields";
 
 /**
@@ -40,7 +41,11 @@ const EventEditForm = ({
         <ClockField id="event-endTime" label={t("eventFieldEnds")} hint={t("eventFieldEndsHint")} value={values.endTime} onChange={(v) => onChange("endTime", v)} />
       </Row>
       <SelectField id="event-status" label={t("eventFieldStatus")} value={values.status} onChange={(v) => onChange("status", v)}
-        options={[{ value: "confirmed", label: t("eventConfirmed") }, { value: "cancelled", label: t("eventCancelled") }]} />
+        options={[
+          ...(values.status === "awaiting" ? [{ value: "awaiting", label: t("eventAwaiting") }] : []),
+          { value: "confirmed", label: t("eventConfirmed") },
+          { value: "cancelled", label: t("eventCancelled") },
+        ]} />
       <Field id="event-hosts" label={t("eventFieldHosts")} hint={t("eventFieldHostsHint")}>
         <div id="event-hosts" className="flex flex-wrap gap-2">
           {hostChoices.map((m) => {
@@ -56,6 +61,7 @@ const EventEditForm = ({
       </Field>
       {values.activityId && <p className="text-sm text-gray-500 mb-4">{t("activityFieldInheritHint")}</p>}
       <SharedFields event values={values} onChange={onChange} choices={choices} inherited={values.activityId ? activity : null} />
+      <RegistrationFields event values={values} onChange={onChange} choices={choices} inherited={values.activityId ? activity : null} />
       <div className="flex gap-3 mt-2">
         <Button type="submit" disabled={saving}>{saving ? t("saving") : t("save")}</Button>
         <Button type="button" variant="secondary" onClick={onCancel}>{t("cancel")}</Button>

@@ -1,6 +1,8 @@
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
 import { ActivityCategories } from '/imports/common/collections/activityCategories';
+import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
+import { ActivityInterests } from '/imports/common/collections/activityInterests';
 
 /** A category of activities. @returns {Promise<string>} its id */
 export const makeCategory = (sv, en, sortOrder) =>
@@ -31,3 +33,24 @@ export const makeEvent = ({ activity = null, start, end, durationMinutes, create
     ...fields,
   });
 };
+
+const HOLDING = ['approved', 'checkedIn', 'attended'];
+
+/**
+ * A member's registration to an event, in a state; one that holds a seat
+ * counts on the event's `seatsTaken`, as the domain functions keep it.
+ *
+ * @returns {Promise<string>} its id
+ */
+export const makeRegistration = async (eventId, memberId, { state = 'approved', at = new Date(), info } = {}) => {
+  const id = await EventRegistrations.insertAsync({
+    eventId, memberId, state, registeredAt: at, stateChangedAt: at, ...(info ? { info } : {}),
+  });
+  if (HOLDING.includes(state)) await Events.updateAsync(eventId, { $inc: { seatsTaken: 1 } });
+  return id;
+};
+
+/** A member's interest in an activity. */
+export const makeInterest = (activityId, memberId, createdAt = new Date()) =>
+  ActivityInterests.insertAsync({ activityId, memberId, createdAt });
+

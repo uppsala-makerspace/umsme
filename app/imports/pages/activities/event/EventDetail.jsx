@@ -7,10 +7,15 @@ import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import { localized } from "/imports/common/lib/groupRules";
 import Facts from "../components/Facts";
+import RegistrationBox from "../components/RegistrationBox";
+import ParticipantList from "../components/ParticipantList";
 import { eventWhen } from "../components/format";
 
 /** One event: when, what, who hosts it, and the activity it is of. */
-const EventDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
+const EventDetail = ({
+  loading, error, data, slackTeam, slackChannelIds,
+  busy, actionError, onRegister, onWithdraw, onTakeSeat, onCheckIn, onAttended, onCloseAttendance,
+}) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
 
@@ -50,6 +55,12 @@ const EventDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
           <span className="ml-2 text-xs font-semibold rounded-full py-0.5 px-2 bg-red-100 text-red-800">{t("eventCancelled")}</span>
         )}
       </p>
+      {!cancelled && (
+        <RegistrationBox
+          registration={data.registration} busy={busy} error={actionError}
+          onRegister={onRegister} onWithdraw={onWithdraw} onTakeSeat={onTakeSeat} onCheckIn={onCheckIn}
+        />
+      )}
       {localized(event.description, lang) && (
         <Markdown className="text-gray-700 mb-4" startLevel={3}>{localized(event.description, lang)}</Markdown>
       )}
@@ -60,6 +71,10 @@ const EventDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
           ? <p className="text-gray-500">{t("eventNoHosts")}</p>
           : <p className="m-0">{hosts.map((h) => h.name).join(", ")}</p>}
       </section>
+      <ParticipantList
+        participants={data.participants} attendance={data.attendance} busy={busy}
+        onAttended={onAttended} onClose={onCloseAttendance}
+      />
       {event.activityId && activityName && (
         <Link
           to={`/activities/${event.activityId}`}
@@ -77,6 +92,14 @@ const EventDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
 };
 
 EventDetail.propTypes = {
+  busy: PropTypes.bool,
+  actionError: PropTypes.string,
+  onRegister: PropTypes.func,
+  onWithdraw: PropTypes.func,
+  onTakeSeat: PropTypes.func,
+  onCheckIn: PropTypes.func,
+  onAttended: PropTypes.func,
+  onCloseAttendance: PropTypes.func,
   loading: PropTypes.bool,
   error: PropTypes.string,
   data: PropTypes.object,

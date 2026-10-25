@@ -11,6 +11,9 @@
     "hour": 9,
     "minute": 0
   },
+  "activityCron": {
+    "enabled": false
+  },
   "accounting": {
     "company": { "orgNo": "000000-0000", "name": "Föreningen" },
     "bankAccount": "1930",

@@ -10,7 +10,7 @@ import { localized } from "/imports/common/lib/groupRules";
 import EventRow from "../components/EventRow";
 
 export const TABS = ["events", "activities"];
-export const WHENS = ["upcoming", "past"];
+export const WHENS = ["upcoming", "past", "mine"];
 
 const AddLink = ({ to, children }) => (
   <Link to={to} className="text-sm font-semibold text-brand-green no-underline hover:underline">
@@ -43,7 +43,7 @@ const Activities = ({
             className="appearance-none bg-white border border-gray-300 rounded py-2 pl-3 pr-10 text-sm font-semibold text-gray-700 cursor-pointer"
           >
             {WHENS.map((option) => (
-              <option key={option} value={option}>{t(option === "upcoming" ? "upcomingEvents" : "pastEvents")}</option>
+              <option key={option} value={option}>{t({ upcoming: "upcomingEvents", past: "pastEvents", mine: "eventsMine" }[option])}</option>
             ))}
           </select>
           <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" aria-hidden="true" />
@@ -53,7 +53,7 @@ const Activities = ({
       {eventsLoading ? (
         <Loader />
       ) : events.length === 0 ? (
-        <p className="text-gray-500 text-center p-6">{t(when === "past" ? "activitiesNoPast" : "activitiesNoUpcoming")}</p>
+        <p className="text-gray-500 text-center p-6">{t({ past: "activitiesNoPast", mine: "eventsMineNone" }[when] || "activitiesNoUpcoming")}</p>
       ) : (
         <>
           <ul className="list-none p-0 m-0">

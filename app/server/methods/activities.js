@@ -9,6 +9,9 @@ import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Workshops } from "/imports/common/collections/workshops";
 import { Spaces } from "/imports/common/collections/spaces";
 import { Members } from "/imports/common/collections/members";
+import { Certificates } from "/imports/common/collections/certificates";
+import { EventRegistrations } from "/imports/common/collections/eventRegistrations";
+import { ActivityInterests } from "/imports/common/collections/activityInterests";
 import { activityImageUrlFor, eventImageUrlFor } from "/imports/common/server/workshopImage";
 import {
   resolveEvent,
@@ -16,7 +19,21 @@ import {
   mayEditActivity,
   mayBookEvent,
   mayBookEventOf,
+  takesRegistrations,
+  registrationOpen,
+  seatsLeft,
+  mayWithdraw,
+  mayTakeSeat,
+  mayCheckIn,
+  checkInApplies,
+  checkInWindow,
+  attendanceOpen,
+  PENDING,
 } from "/imports/common/lib/activityRules";
+import {
+  register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance,
+} from "/imports/common/server/activities/registrations";
+import { hasValidCertificate } from "/imports/common/server/activities/certificates";
 import { createActivity, updateActivity, removeActivity } from "/imports/common/server/activities/activities";
 import { createEvent, updateEvent, removeEvent } from "/imports/common/server/activities/events";
 import { findMemberForUser, isActiveMember } from "./utils";
@@ -159,6 +176,11 @@ const eventView = (event, activity, lookup) => {
     status: event.status,
     hostMemberIds: event.hostMemberIds || [],
     imageUrl: eventImageUrlFor(resolved),
+    registration: resolved.registration || "none",
+    maxSeats: resolved.maxSeats ?? null,
+    seatsTaken: event.seatsTaken || 0,
+    // null: no limit.
+    seatsLeft: resolved.maxSeats ? seatsLeft(resolved, event.seatsTaken || 0) : null,
   };
 };
 
@@ -168,12 +190,73 @@ const activitiesById = async (events) => {
   return new Map(docs.map((a) => [a._id, a]));
 };
 
-/** Events as members see them, with what each refers to named. */
-const eventViews = async (events) => {
+/**
+ * Events as members see them, with what each refers to named; with
+ * `memberId`, that member's registration state on each (`myState`).
+ */
+const eventViews = async (events, memberId = null) => {
   const activities = await activitiesById(events);
   const resolved = events.map((e) => resolveEvent(e, activities.get(e.activityId)));
   const lookup = await lookups(resolved);
-  return events.map((e) => eventView(e, activities.get(e.activityId), lookup));
+  const mine = memberId
+    ? new Map((await EventRegistrations.find({ memberId, eventId: { $in: events.map((e) => e._id) } }, { fields: { eventId: 1, state: 1 } }).fetchAsync())
+      .map((r) => [r.eventId, r.state]))
+    : new Map();
+  return events.map((e) => ({ ...eventView(e, activities.get(e.activityId), lookup), myState: mine.get(e._id) || null }));
+};
+
+/**
+ * What the event's page says about signing up, for this member: seats, the
+ * queue, their own registration and what they may do with it, what it asks
+ * for. Null for an event that takes no registrations.
+ */
+const registrationView = async (event, activity, member, now = new Date()) => {
+  const resolved = resolveEvent(event, activity);
+  if (!takesRegistrations(resolved)) return null;
+  const mine = await EventRegistrations.findOneAsync({ eventId: event._id, memberId: member._id });
+  const queued = await EventRegistrations.find({ eventId: event._id, state: "queued" }).countAsync();
+  const seatsTaken = event.seatsTaken || 0;
+  const certificate = resolved.requiredCertificateId
+    ? await Certificates.findOneAsync(resolved.requiredCertificateId, { fields: { name: 1 } })
+    : null;
+  const window = checkInApplies(resolved) ? checkInWindow(resolved) : null;
+  return {
+    required: resolved.registration === "required",
+    open: registrationOpen(resolved, now),
+    seats: resolved.maxSeats ?? null,
+    seatsLeft: resolved.maxSeats ? seatsLeft(resolved, seatsTaken) : null,
+    queued,
+    queueAllowed: !!resolved.queueAllowed,
+    infoRequired: !!resolved.infoRequired,
+    infoPlaceholder: resolved.infoPlaceholder || "",
+    certificate: certificate
+      ? { _id: certificate._id, name: certificate.name, held: await hasValidCertificate(member._id, certificate._id, now) }
+      : null,
+    checkIn: window ? { opens: window.opens, closes: window.closes } : null,
+    mine: mine ? { state: mine.state, info: mine.info || "" } : null,
+    canWithdraw: !!mine && mayWithdraw(mine, resolved, now),
+    canTakeSeat: !!mine && mayTakeSeat({ registration: mine, event: resolved, seatsTaken, now }),
+    canCheckIn: !!mine && mayCheckIn(mine, resolved, now),
+  };
+};
+
+/** Whether the member hosts the event, or may record its attendance as board/admin. */
+const mayRecordAttendance = (event, who) => who.adminish || (event.hostMemberIds || []).includes(who.member._id);
+
+/** The event's participants for its hosts: names and states, those who withdrew left out. */
+const participantsView = async (event) => {
+  const registrations = await EventRegistrations.find(
+    { eventId: event._id, state: { $nin: ["withdrawn", "cancelled"] } },
+    { sort: { registeredAt: 1 } },
+  ).fetchAsync();
+  const members = await Members.find({ _id: { $in: registrations.map((r) => r.memberId) } }, { fields: { name: 1 } }).fetchAsync();
+  const names = new Map(members.map((m) => [m._id, m.name]));
+  return registrations.map((r) => ({ memberId: r.memberId, name: names.get(r.memberId) || "", state: r.state, info: r.info || "" }));
+};
+
+/** Only a member of the association signs up; board and admin always may. */
+const requireActive = (who) => {
+  if (!who.active) throw new Meteor.Error("not-authorized", "Only members of the association may sign up");
 };
 
 const getActivity = async (activityId) => {
@@ -261,16 +344,23 @@ Meteor.methods({
    * first, or those over, latest first. `more` tells whether there are others.
    */
   "events.list": async (when, skip) => {
-    check(when, Match.OneOf("upcoming", "past"));
+    check(when, Match.OneOf("upcoming", "past", "mine"));
     check(skip, Match.Integer);
-    await requireMember();
+    const member = await requireMember();
     const now = new Date();
-    const upcoming = when === "upcoming";
+    const upcoming = when !== "past";
+    let selector = upcoming ? { end: { $gte: now } } : { end: { $lt: now } };
+    // Mine: those to come I have a seat at or queue for.
+    if (when === "mine") {
+      const ids = (await EventRegistrations.find({ memberId: member._id, state: { $in: PENDING } }, { fields: { eventId: 1 } }).fetchAsync())
+        .map((r) => r.eventId);
+      selector = { ...selector, _id: { $in: ids } };
+    }
     const found = await Events.find(
-      upcoming ? { end: { $gte: now } } : { end: { $lt: now } },
+      selector,
       { sort: { start: upcoming ? 1 : -1 }, skip: Math.max(0, skip), limit: EVENTS_PAGE + 1 },
     ).fetchAsync();
-    return { events: await eventViews(found.slice(0, EVENTS_PAGE)), more: found.length > EVENTS_PAGE };
+    return { events: await eventViews(found.slice(0, EVENTS_PAGE), member._id), more: found.length > EVENTS_PAGE };
   },
 
   /** One activity, its events from today on, and what the caller may do with it. */
@@ -284,7 +374,9 @@ Meteor.methods({
     const access = await accessTo(who.member, activity.groupId, who, activity);
     return {
       activity: activityView(activity, await lookups([activity])),
-      events: await eventViews(events),
+      events: await eventViews(events, who.member._id),
+      interested: !!(await ActivityInterests.findOneAsync({ activityId, memberId: who.member._id })),
+      interestCount: await ActivityInterests.find({ activityId }).countAsync(),
       canEdit: access.edit,
       canBook: access.book,
       // The activity as stored: for its edit form, and for what a new
@@ -304,9 +396,16 @@ Meteor.methods({
       ? await Members.find({ _id: { $in: view.hostMemberIds } }, { fields: { name: 1 } }).fetchAsync()
       : [];
     const access = await accessTo(who.member, eventGroupId(event, activity), who, activity);
+    const hostsCanSee = mayRecordAttendance(event, who) || access.book;
     return {
       event: view,
       hosts: hosts.map((m) => ({ _id: m._id, name: m.name })),
+      registration: await registrationView(event, activity, who.member),
+      // The participants, for the event's hosts and those who may change it.
+      participants: hostsCanSee ? await participantsView(event) : null,
+      attendance: mayRecordAttendance(event, who)
+        ? { open: attendanceOpen(resolveEvent(event, activity)), closed: !!event.attendanceClosedAt }
+        : null,
       activityName: activity?.name || null,
       canEdit: access.book,
       // The event as stored and its activity, for its edit form.
@@ -335,6 +434,7 @@ Meteor.methods({
     const categories = await ActivityCategories.find({}, { sort: { sortOrder: 1, "name.sv": 1 } }).fetchAsync();
     const workshops = await Workshops.find({}, { fields: { name: 1, kind: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
     const spaces = await Spaces.find({}, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
+    const certificates = await Certificates.find({}, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
     return {
       adminish: who.adminish,
       groups,
@@ -342,6 +442,7 @@ Meteor.methods({
       categories: categories.map((c) => ({ _id: c._id, name: c.name })),
       workshops,
       spaces,
+      certificates,
     };
   },
 
@@ -411,5 +512,59 @@ Meteor.methods({
     const before = await getEvent(eventId);
     if (!(await accessToEvent(who, before)).book) refuse();
     await removeEvent(eventId, { userId: Meteor.userId() });
+  },
+
+  /** Sign up: a seat, or the queue (see register in common/server/activities/registrations.js). */
+  "events.register": async (eventId, info) => {
+    check(eventId, String);
+    check(info, Match.Maybe(String));
+    const who = await caller();
+    requireActive(who);
+    return register(eventId, who.member._id, { info: info || "", userId: Meteor.userId() });
+  },
+
+  "events.withdraw": async (eventId) => {
+    check(eventId, String);
+    const who = await caller();
+    await withdraw(eventId, who.member._id, { userId: Meteor.userId() });
+  },
+
+  /** Take a seat that has become free, from the queue: the first to do so has it. */
+  "events.takeSeat": async (eventId) => {
+    check(eventId, String);
+    const who = await caller();
+    return takeSeat(eventId, who.member._id, { userId: Meteor.userId() });
+  },
+
+  "events.checkIn": async (eventId) => {
+    check(eventId, String);
+    const who = await caller();
+    await checkIn(eventId, who.member._id, { userId: Meteor.userId() });
+  },
+
+  /** A host marks who came, or takes it back. */
+  "events.markAttended": async (eventId, memberId, attended) => {
+    check(eventId, String);
+    check(memberId, String);
+    check(attended, Boolean);
+    const who = await caller();
+    if (!mayRecordAttendance(await getEvent(eventId), who)) refuse();
+    await markAttended(eventId, memberId, attended, { userId: Meteor.userId() });
+  },
+
+  /** A host closes the attendance: the rest did not come. */
+  "events.closeAttendance": async (eventId) => {
+    check(eventId, String);
+    const who = await caller();
+    if (!mayRecordAttendance(await getEvent(eventId), who)) refuse();
+    return closeAttendance(eventId, { userId: Meteor.userId() });
+  },
+
+  /** Show interest in an activity, or stop. */
+  "activities.setInterest": async (activityId, interested) => {
+    check(activityId, String);
+    check(interested, Boolean);
+    const who = await caller();
+    return setInterest(activityId, who.member._id, interested);
   },
 });

@@ -82,3 +82,11 @@ export const eventImageUrl = (event, activity) => {
   const fileId = event?.imageFileId || activity?.imageFileId;
   return fileId ? `/api/events/${event._id}/image?v=${encodeURIComponent(fileId)}` : null;
 };
+
+export const eventRegistrations = (eventId) => Meteor.callAsync('eventRegistrations.list', eventId);
+export const addRegistration = (eventId, memberId) => Meteor.callAsync('eventRegistrations.add', eventId, memberId);
+export const withdrawRegistration = (eventId, memberId) => Meteor.callAsync('eventRegistrations.withdraw', eventId, memberId);
+export const giveSeat = (eventId, memberId) => Meteor.callAsync('eventRegistrations.takeSeat', eventId, memberId);
+export const markAttended = (eventId, memberId, attended) => Meteor.callAsync('eventRegistrations.markAttended', eventId, memberId, attended);
+export const closeAttendance = (eventId) => Meteor.callAsync('eventRegistrations.closeAttendance', eventId);
+export const interestCount = (activityId) => Meteor.callAsync('activities.interestCount', activityId);

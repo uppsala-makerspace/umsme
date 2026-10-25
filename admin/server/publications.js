@@ -184,7 +184,7 @@ export default () => {
   });
 
   const ACTIVITY_LIST_FIELDS = { name: 1, groupId: 1, categoryId: 1, workshopId: 1, published: 1, updatedAt: 1 };
-  const EVENT_LIST_FIELDS = { name: 1, activityId: 1, categoryId: 1, groupId: 1, start: 1, end: 1, status: 1, hostMemberIds: 1 };
+  const EVENT_LIST_FIELDS = { seatsTaken: 1, name: 1, activityId: 1, categoryId: 1, groupId: 1, start: 1, end: 1, status: 1, hostMemberIds: 1 };
 
   Meteor.publish('admin.activities.list', async function () {
     if (!(await hasRole(this.userId, DOMAIN_ROLES.activities))) return this.ready();

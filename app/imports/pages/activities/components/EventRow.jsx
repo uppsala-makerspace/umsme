@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
 import { eventWhen } from "./format";
+import { StatePill } from "./RegistrationBox";
 
 /** One event in a list: when, what, where; cancelled ones struck through. */
 const EventRow = ({ event }) => {
@@ -27,6 +28,17 @@ const EventRow = ({ event }) => {
             </span>
           )}
         </div>
+        {!cancelled && event.myState && <span className="flex-shrink-0 ml-2"><StatePill state={event.myState} /></span>}
+        {!cancelled && !event.myState && event.registration !== "none" && event.seatsLeft !== null && event.seatsLeft !== undefined && (
+          <span className={`flex-shrink-0 ml-2 text-xs font-semibold ${event.seatsLeft === 0 ? "text-red-700" : "text-gray-500"}`}>
+            {event.seatsLeft === 0 ? t("registrationFullShort") : t("registrationSeatsLeftShort", { count: event.seatsLeft })}
+          </span>
+        )}
+        {event.status === "awaiting" && !cancelled && (
+          <span className="flex-shrink-0 text-xs font-semibold rounded-full py-0.5 px-2 bg-amber-100 text-amber-800 ml-2">
+            {t("eventAwaiting")}
+          </span>
+        )}
         {cancelled && (
           <span className="flex-shrink-0 text-xs font-semibold rounded-full py-0.5 px-2 bg-red-100 text-red-800 ml-2">
             {t("eventCancelled")}

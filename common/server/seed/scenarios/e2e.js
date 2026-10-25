@@ -14,7 +14,7 @@ import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
-import { makeCategory, makeActivity, makeEvent } from '../activities';
+import { makeCategory, makeActivity, makeEvent, makeRegistration } from '../activities';
 import { makeFakeLock } from '../lock';
 import { makeFakeBank } from '../bank';
 import { makeMember, pay, joinFamily } from '../members';
@@ -155,6 +155,19 @@ export const buildE2e = async ({ people, now }) => {
   for (let week = 1; week <= 12; week += 1) await makeEvent({ activity: history, start: at(-7 * week, 17) });
   await makeEvent({ name: { sv: 'Årsmöte' }, start: at(30, 19), durationMinutes: 120, published: true, membersOnly: true });
   await makeEvent({ name: { sv: 'E2E delete event' }, start: at(40, 19), durationMinutes: 60 });
+  // Registrations, one event per test: to sign up for and withdraw from;
+  // full, with a seat held, to queue for; started, for its host to record who
+  // came; and one for admin to add a participant to.
+  const registered = { groupId: ceramicsGroup, registration: 'required', durationMinutes: 120, hostMemberIds: [members.groupLeader._id] };
+  await makeEvent({ ...registered, name: { sv: 'E2E anmälan', en: 'E2E sign-up' }, start: at(12, 18), maxSeats: 3, infoRequired: true, infoPlaceholder: 'Allergier' });
+  const full = await makeEvent({ ...registered, name: { sv: 'E2E fullt', en: 'E2E full' }, start: at(13, 18), maxSeats: 1, queueAllowed: true });
+  await makeRegistration(full, members.base._id, { at: days(-2) });
+  const started = new Date(now.getTime() - 3600000);
+  const attendance = await makeEvent({ ...registered, name: { sv: 'E2E närvaro', en: 'E2E attendance' }, start: started, end: new Date(now.getTime() + 3600000) });
+  await makeRegistration(attendance, members.discounted._id, { at: days(-3) });
+  await makeRegistration(attendance, members.quarterly._id, { at: days(-3) });
+  const adding = await makeEvent({ ...registered, name: { sv: 'E2E deltagare', en: 'E2E participants' }, start: at(14, 18), maxSeats: 5 });
+  await makeRegistration(adding, members.base._id, { at: days(-1) });
 
   // Certificates: the kiln under the ceramics workshop (a certifier, a
   // holder), the wheel that needs it first, and one each for the admin tests

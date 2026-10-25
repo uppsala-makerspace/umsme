@@ -14,13 +14,25 @@ export default () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
+  const [busy, setBusy] = useState(false);
+  const load = () => Meteor.callAsync("activities.get", activityId)
+    .then((result) => { setData(result); setError(null); }, (err) => setError(err.reason || err.message));
+
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    Meteor.callAsync("activities.get", activityId)
-      .then((result) => { setData(result); setError(null); }, (err) => setError(err.reason || err.message))
-      .finally(() => setLoading(false));
+    load().finally(() => setLoading(false));
   }, [user?._id, activityId]);
+
+  const setInterest = async (interested) => {
+    setBusy(true);
+    try {
+      await Meteor.callAsync("activities.setInterest", activityId, interested);
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  };
 
   if (!userId && !loggingIn) {
     return <Navigate to="/login" />;
@@ -29,7 +41,8 @@ export default () => {
   return (
     <Layout>
       <ActivityDetail loading={loading} error={error} data={data}
-        slackTeam={Meteor.settings?.public?.slack?.team} slackChannelIds={slackChannels} />
+        slackTeam={Meteor.settings?.public?.slack?.team} slackChannelIds={slackChannels}
+        busy={busy} onInterest={setInterest} />
     </Layout>
   );
 };

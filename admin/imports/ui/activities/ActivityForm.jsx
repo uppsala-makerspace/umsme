@@ -16,6 +16,7 @@ import { DataList } from '../components/DataList';
 import { ImageField } from '../components/ImageField';
 import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { SharedFields, native } from './SharedFields';
+import { RegistrationFields } from './RegistrationFields';
 import { eventColumns } from './eventColumns';
 import { activityPath, addEventPath, eventPath } from './paths';
 
@@ -28,16 +29,16 @@ const TABS = [['details', 'Details'], ['image', 'Image'], ['events', 'Events']];
  *
  * @param {{ isNew: boolean, activity?: object, events?: object[], values: object,
  *           onChange: (field, value) => void, onSave: () => void, busy?: boolean, error?: string, notice?: string,
- *           groups: Array<{ _id, name }>, categories: Array<{ _id, name }>,
+ *           groups: Array<{ _id, name }>, categories: Array<{ _id, name }>, certificates?: Array<{ _id, name }>,
  *           workshopOptions: Array<{ value, label }>, spaceOptions: Array<{ value, label }>,
  *           groupName: (id) => string, imageUrl?: string, onUploadImage?: (file) => void,
  *           onRemoveImage?: () => void, uploading?: boolean, onDelete?: () => void,
  *           tab?: string, onTab?: (tab) => void }} props
  */
 export const ActivityForm = ({
-  isNew, activity, events = [], values, onChange, onSave, busy = false, error, notice, groups, categories,
+  isNew, activity, events = [], values, onChange, onSave, busy = false, error, notice, groups, categories, certificates = [],
   workshopOptions, spaceOptions, groupName, imageUrl, onUploadImage, onRemoveImage, uploading = false, onDelete,
-  tab = 'details', onTab,
+  tab = 'details', onTab, interestCount,
 }) => {
   const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
   const [confirming, setConfirming] = useState(false);
@@ -57,6 +58,7 @@ export const ActivityForm = ({
         <option value="activityEditors">Those who may change the activity</option>
       </TextField>
       <SharedFields values={values} onChange={onChange} categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} />
+      <RegistrationFields values={values} onChange={onChange} certificates={certificates} />
       <Stack direction="row" spacing={1}>
         <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add' : 'Save'}</Button>
         <Button href="/activities">{isNew ? 'Cancel' : 'Back'}</Button>
@@ -108,7 +110,7 @@ export const ActivityForm = ({
           </TabPanel>
           <TabPanel value="events" shown={shown} label="Events">
             <>
-              <TabToolbar note="The times the activity happens. An event takes what it leaves empty from the activity.">
+              <TabToolbar note={`The times the activity happens. An event takes what it leaves empty from the activity.${interestCount ? ` ${interestCount} ${interestCount === 1 ? 'member is' : 'members are'} interested and told of each new one.` : ''}`}>
                 <Button variant="contained" href={addEventPath(activity._id)}>Add event</Button>
               </TabToolbar>
               <DataList
