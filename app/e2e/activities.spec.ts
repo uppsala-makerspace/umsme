@@ -21,7 +21,7 @@ test.describe('Activities', () => {
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toHaveCount(0);
 
-    await page.getByRole('button', { name: en.activitiesAll }).click();
+    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await expect(page.getByRole('link', { name: CERAMICS, exact: true })).toBeVisible();
@@ -36,7 +36,7 @@ test.describe('Activities', () => {
 
   test('a member of the steering group adds an event, its hosts among the group', async ({ page }) => {
     await openAs(page, 'steering', '/activities');
-    await page.getByRole('button', { name: en.activitiesAll }).click();
+    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
     await page.getByRole('link', { name: `+ ${en.eventAdd}` }).click();
     await expect(page.getByRole('heading', { name: en.eventNew })).toBeVisible();
@@ -68,7 +68,7 @@ test.describe('Activities', () => {
 
   test('a member of the steering group changes the activity', async ({ page }) => {
     await openAs(page, 'steering', '/activities');
-    await page.getByRole('button', { name: en.activitiesAll }).click();
+    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
     await page.getByRole('link', { name: /E2E edit aktivitet/ }).click();
     await page.getByRole('link', { name: en.edit }).click();
     await page.getByLabel(en.activityFieldDescriptionSv).fill('Ändrad i appen.');
@@ -78,7 +78,7 @@ test.describe('Activities', () => {
 
   test('a member outside the group is sent back from the edit page', async ({ page }) => {
     await openAs(page, 'member', '/activities');
-    await page.getByRole('button', { name: en.activitiesAll }).click();
+    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
     const url = page.url();
     await page.goto(`${url}/edit`);
@@ -93,5 +93,28 @@ test.describe('Activities', () => {
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await page.getByRole('link', { name: CERAMICS, exact: true }).click();
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
+  });
+
+  test('going back from an activity lands on the activities tab', async ({ page }) => {
+    await openAs(page, 'member', '/activities');
+    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
+    await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
+    await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
+    await page.goBack();
+    await expect(page).toHaveURL(/\?tab=activities$/);
+    await expect(page.getByRole('link', { name: /E2E historik/ })).toBeVisible();
+  });
+
+  test('lists past events, latest first, ten at a time', async ({ page }) => {
+    await openAs(page, 'member', '/activities');
+    await page.getByRole('button', { name: en.pastEvents }).click();
+    await expect(page).toHaveURL(/\?when=past$/);
+    const rows = page.getByRole('main').getByRole('listitem');
+    await expect(rows).toHaveCount(10);
+    // The wheel introduction ten days ago comes before the weekly ones from two weeks back.
+    await expect(rows.nth(1)).toContainText(WHEEL);
+    await page.getByRole('button', { name: en.eventsLoadMore }).click();
+    await expect(rows).toHaveCount(13);
+    await expect(page.getByRole('button', { name: en.eventsLoadMore })).toHaveCount(0);
   });
 });

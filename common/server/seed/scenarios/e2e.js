@@ -141,6 +141,10 @@ export const buildE2e = async ({ people, now }) => {
   toCancel._id = await makeActivity(toCancel);
   await makeEvent({ activity: toCancel, start: at(15, 18) });
   await makeActivity({ name: { sv: 'E2E events aktivitet' }, groupId: ceramicsGroup, durationMinutes: 90 });
+  // A weekly activity with twelve past events: more than a page of them.
+  const history = { name: { sv: 'E2E historik' }, groupId: ceramicsGroup, durationMinutes: 60 };
+  history._id = await makeActivity(history);
+  for (let week = 1; week <= 12; week += 1) await makeEvent({ activity: history, start: at(-7 * week, 17) });
   await makeEvent({ name: { sv: 'Årsmöte' }, start: at(30, 19), durationMinutes: 120, published: true, membersOnly: true });
   await makeEvent({ name: { sv: 'E2E delete event' }, start: at(40, 19), durationMinutes: 60 });
 

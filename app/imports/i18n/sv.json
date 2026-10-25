@@ -670,8 +670,6 @@
   "removeImage": "Ta bort bild",
 
   "activities": "Aktiviteter",
-  "activitiesUpcoming": "Kommande",
-  "activitiesAll": "Alla aktiviteter",
   "activitiesNoUpcoming": "Inga kommande tillfällen.",
   "activitiesNone": "Inga aktiviteter ännu.",
   "activityNew": "Ny aktivitet",
@@ -739,5 +737,10 @@
   "dateFieldOpenCalendar": "Öppna kalendern",
   "timeFieldPlaceholder": "TT:MM",
   "timeFieldWrong": "Skriv tiden som TT:MM, till exempel 18:00",
-  "timeFieldOpenClock": "Välj tid"
+  "timeFieldOpenClock": "Välj tid",
+  "activitiesTabEvents": "Tillfällen",
+  "activitiesTabActivities": "Aktiviteter",
+  "activitiesNoPast": "Inga tidigare tillfällen.",
+  "eventsLoadMore": "Ladda fler tillfällen",
+  "navActivities": "Aktiviteter"
 }

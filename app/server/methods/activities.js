@@ -28,6 +28,9 @@ import { findMemberForUser, isActiveMember } from "./utils";
  * the domain functions in common/server/activities/, as admin's do.
  */
 
+// How many events a list shows at a time.
+const EVENTS_PAGE = 10;
+
 const requireMember = async () => {
   const member = await findMemberForUser();
   if (!member) throw new Meteor.Error("not-found", "Member not found");
@@ -196,24 +199,34 @@ const groupOfFields = async (fields) => {
 };
 
 Meteor.methods({
-  /**
-   * The activities, and the events from today on (cancelled ones too, marked),
-   * soonest first; and whether the caller may add either.
-   */
+  /** The activities, and whether the caller may add an activity or an event. */
   "activities.list": async () => {
     const who = await caller();
     const groups = await myGroups(who);
     const activities = await Activities.find({}, { sort: { "name.sv": 1 } }).fetchAsync();
     const lookup = await lookups(activities);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const events = await Events.find({ end: { $gte: today } }, { sort: { start: 1 } }).fetchAsync();
     return {
       activities: activities.map((a) => activityView(a, lookup)),
-      events: await eventViews(events),
       canCreateActivity: groups.some((g) => g.edit),
       canCreateEvent: groups.some((g) => g.book),
     };
+  },
+
+  /**
+   * A page of events (cancelled ones too, marked): those not yet over, soonest
+   * first, or those over, latest first. `more` tells whether there are others.
+   */
+  "events.list": async (when, skip) => {
+    check(when, Match.OneOf("upcoming", "past"));
+    check(skip, Match.Integer);
+    await requireMember();
+    const now = new Date();
+    const upcoming = when === "upcoming";
+    const found = await Events.find(
+      upcoming ? { end: { $gte: now } } : { end: { $lt: now } },
+      { sort: { start: upcoming ? 1 : -1 }, skip: Math.max(0, skip), limit: EVENTS_PAGE + 1 },
+    ).fetchAsync();
+    return { events: await eventViews(found.slice(0, EVENTS_PAGE)), more: found.length > EVENTS_PAGE };
   },
 
   /** One activity, its events from today on, and what the caller may do with it. */

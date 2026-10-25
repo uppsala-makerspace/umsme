@@ -5,25 +5,26 @@ import {
   HomeIcon as HomeOutline,
   LockOpenIcon as LockOutline,
   MapIcon as MapOutline,
-  CalendarIcon as CalendarOutline,
+  CalendarDaysIcon as ActivitiesOutline,
   WrenchScrewdriverIcon as WrenchOutline,
 } from "@heroicons/react/24/outline";
 import {
   HomeIcon as HomeSolid,
   LockOpenIcon as LockSolid,
   MapIcon as MapSolid,
-  CalendarIcon as CalendarSolid,
+  CalendarDaysIcon as ActivitiesSolid,
   WrenchScrewdriverIcon as WrenchSolid,
 } from "@heroicons/react/24/solid";
 
 // Certificates moved to the hamburger menu when Workshops took its tab slot
-// (certificates are also reachable from each workshop's page).
+// (certificates are also reachable from each workshop's page), and the
+// Google calendar when Activities took its slot.
 const navItems = [
   { path: "/", labelKey: "navHome", OutlineIcon: HomeOutline, SolidIcon: HomeSolid, exact: true },
   { path: "/unlock", labelKey: "navDoors", OutlineIcon: LockOutline, SolidIcon: LockSolid },
   { path: "/workshops", labelKey: "navWorkshops", OutlineIcon: WrenchOutline, SolidIcon: WrenchSolid },
   { path: "/map", labelKey: "navMap", OutlineIcon: MapOutline, SolidIcon: MapSolid },
-  { path: "/calendar", labelKey: "navCalendar", OutlineIcon: CalendarOutline, SolidIcon: CalendarSolid },
+  { path: "/activities", labelKey: "navActivities", OutlineIcon: ActivitiesOutline, SolidIcon: ActivitiesSolid },
 ];
 
 export default () => {

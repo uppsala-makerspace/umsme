@@ -53,7 +53,8 @@ export const selectors = {
   homeLiabilityButton: 'a[href="/liability"] button',
   // The bottom navigation; the home page no longer has its own links there
   homeUnlockLink: 'nav a[href="/unlock"]',
-  homeCalendarLink: 'nav a[href="/calendar"]',
+  // The bottom navigation's; the hamburger menu, closed, has one too.
+  homeActivitiesLink: 'nav a[href="/activities"]:visible',
   acceptInviteButton: `button:has-text("${en.acceptInvite}")`,
   declineInviteButton: `button:has-text("${en.declineInvite}")`,
 

@@ -13,9 +13,9 @@ test.describe('Membership Status', () => {
     // Verify user greeting with first name
     await expect(page.locator(selectors.homeGreeting)).toContainText(firstName(testUsers.member));
 
-    // Since member has approved liability, they should see unlock and calendar buttons
+    // Since member has approved liability, they should see unlock and activities buttons
     await expect(page.locator(selectors.homeUnlockLink)).toBeVisible();
-    await expect(page.locator(selectors.homeCalendarLink)).toBeVisible();
+    await expect(page.locator(selectors.homeActivitiesLink)).toBeVisible();
   });
 
   test('should display membership details on account page', async ({ page }) => {

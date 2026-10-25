@@ -1,15 +1,20 @@
 const KEY = "default-page";
-const ALLOWED = ["home", "unlock", "workshops", "map", "calendar"];
+const ALLOWED = ["home", "unlock", "workshops", "map", "activities"];
 const PATHS = {
   home: "/",
   unlock: "/unlock",
   workshops: "/workshops",
   map: "/map",
-  calendar: "/calendar",
+  activities: "/activities",
 };
 
+// Activities took the calendar's place in the bottom navigation, and as a
+// start page too.
+const RENAMED = { calendar: "activities" };
+
 export const getDefaultPage = () => {
-  const v = typeof localStorage !== "undefined" ? localStorage.getItem(KEY) : null;
+  const stored = typeof localStorage !== "undefined" ? localStorage.getItem(KEY) : null;
+  const v = RENAMED[stored] || stored;
   return ALLOWED.includes(v) ? v : "home";
 };
 

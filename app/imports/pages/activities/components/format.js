@@ -1,8 +1,14 @@
 // How an event's time reads: "tis 5 nov 18:00–20:00", in the reader's language.
 const locale = (lang) => (lang === "en" ? "en-GB" : "sv-SE");
 
-export const eventDay = (date, lang) =>
-  new Date(date).toLocaleDateString(locale(lang), { weekday: "short", day: "numeric", month: "short" });
+// The year only when it is not this one.
+export const eventDay = (date, lang) => {
+  const d = new Date(date);
+  return d.toLocaleDateString(locale(lang), {
+    weekday: "short", day: "numeric", month: "short",
+    ...(d.getFullYear() !== new Date().getFullYear() ? { year: "numeric" } : {}),
+  });
+};
 
 const clock = (date, lang) =>
   new Date(date).toLocaleTimeString(locale(lang), { hour: "2-digit", minute: "2-digit" });

@@ -10,7 +10,7 @@ const PAGE_OPTIONS = [
   { value: "unlock", labelKey: "navDoors" },
   { value: "workshops", labelKey: "navWorkshops" },
   { value: "map", labelKey: "navMap" },
-  { value: "calendar", labelKey: "navCalendar" },
+  { value: "activities", labelKey: "navActivities" },
 ];
 
 export default ({ defaultPage, onChangeDefaultPage }) => {
