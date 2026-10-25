@@ -737,5 +737,8 @@
   "activityFactWorkshop": "Workshop",
   "dateFieldPlaceholder": "YYYY-MM-DD",
   "dateFieldWrong": "Write the day as YYYY-MM-DD",
-  "dateFieldOpenCalendar": "Open the calendar"
+  "dateFieldOpenCalendar": "Open the calendar",
+  "timeFieldPlaceholder": "HH:MM",
+  "timeFieldWrong": "Write the time as HH:MM, for example 18:00",
+  "timeFieldOpenClock": "Choose a time"
 }

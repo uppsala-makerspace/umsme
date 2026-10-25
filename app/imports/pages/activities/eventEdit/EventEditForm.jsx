@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../../../components/Button";
 import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
-import { Field, SelectField, TextField, DayField, Row } from "../components/fields";
+import { Field, SelectField, DayField, ClockField, Row } from "../components/fields";
 
 /**
  * Add or change an event: of an activity (whose values show greyed where the
@@ -36,8 +36,8 @@ const EventEditForm = ({
       </Row>
       <Row>
         <DayField id="event-startDay" required label={t("eventFieldDay")} value={values.startDay} onChange={(v) => onChange("startDay", v)} />
-        <TextField id="event-startTime" type="time" required label={t("eventFieldStarts")} value={values.startTime} onChange={(v) => onChange("startTime", v)} />
-        <TextField id="event-endTime" type="time" label={t("eventFieldEnds")} hint={t("eventFieldEndsHint")} value={values.endTime} onChange={(v) => onChange("endTime", v)} />
+        <ClockField id="event-startTime" required label={t("eventFieldStarts")} value={values.startTime} onChange={(v) => onChange("startTime", v)} />
+        <ClockField id="event-endTime" label={t("eventFieldEnds")} hint={t("eventFieldEndsHint")} value={values.endTime} onChange={(v) => onChange("endTime", v)} />
       </Row>
       <SelectField id="event-status" label={t("eventFieldStatus")} value={values.status} onChange={(v) => onChange("status", v)}
         options={[{ value: "confirmed", label: t("eventConfirmed") }, { value: "cancelled", label: t("eventCancelled") }]} />

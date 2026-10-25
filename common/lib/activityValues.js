@@ -4,6 +4,10 @@
  * them too.
  */
 
+import { parseClock } from './days';
+
+export { parseClock };
+
 const pad = (n) => String(n).padStart(2, '0');
 
 /** The day, YYYY-MM-DD, local time; '' for none. */
@@ -11,19 +15,6 @@ export const day = (date) => (date ? `${date.getFullYear()}-${pad(date.getMonth(
 
 /** HH:MM, local time; '' for none. */
 export const clock = (date) => (date ? `${pad(date.getHours())}:${pad(date.getMinutes())}` : '');
-
-/**
- * A time typed by hand, 18:00, 18.00, 1800 or 18: written HH:MM; '' for
- * nothing; null for something that is no time.
- */
-export const parseClock = (text) => {
-  const value = (text || '').trim();
-  if (!value) return '';
-  const m = value.match(/^(\d{1,2})(?:[:.]?(\d{2}))?$/);
-  if (!m) return null;
-  const [h, min] = [Number(m[1]), Number(m[2] || 0)];
-  return h < 24 && min < 60 ? `${pad(h)}:${pad(min)}` : null;
-};
 
 /** The moment of a day (YYYY-MM-DD) and a time (HH:MM), local time; null unless both are whole. */
 export const moment = (dayText, clockText) => {

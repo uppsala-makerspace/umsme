@@ -1,5 +1,6 @@
 import React from "react";
 import DateField from "../../../components/DateField";
+import TimeField from "../../../components/TimeField";
 
 /**
  * The form fields of the activity and event forms, labelled, in the app's
@@ -28,6 +29,13 @@ export const TextField = ({ id, label, hint, value, onChange, multiline = false,
 export const DayField = ({ id, label, hint, value, onChange, ...props }) => (
   <Field id={id} label={label} hint={hint}>
     <DateField id={id} className={control} value={value} onChange={onChange} {...props} />
+  </Field>
+);
+
+/** A time of day, always HH:MM (see TimeField). */
+export const ClockField = ({ id, label, hint, value, onChange, ...props }) => (
+  <Field id={id} label={label} hint={hint}>
+    <TimeField id={id} className={control} value={value} onChange={onChange} {...props} />
   </Field>
 );
 

@@ -736,5 +736,8 @@
   "activityFactWorkshop": "Verkstad",
   "dateFieldPlaceholder": "ÅÅÅÅ-MM-DD",
   "dateFieldWrong": "Skriv dagen som ÅÅÅÅ-MM-DD",
-  "dateFieldOpenCalendar": "Öppna kalendern"
+  "dateFieldOpenCalendar": "Öppna kalendern",
+  "timeFieldPlaceholder": "TT:MM",
+  "timeFieldWrong": "Skriv tiden som TT:MM, till exempel 18:00",
+  "timeFieldOpenClock": "Välj tid"
 }
