@@ -1,17 +1,27 @@
 import { Workshops } from "/imports/common/collections/workshops";
 import { Groups } from "/imports/common/collections/groups";
 import { Spaces } from "/imports/common/collections/spaces";
+import { Activities } from "/imports/common/collections/activities";
+import { Events } from "/imports/common/collections/events";
+import { ActivityCategories } from "/imports/common/collections/activityCategories";
 import { adminBaseUrl } from "/imports/common/lib/links";
 import { buildDirectory } from "/imports/common/lib/publicDirectory";
-import { workshopImageUrlFor, groupImageUrlFor, spaceIconUrlFor } from "./workshopImage";
+import {
+  workshopImageUrlFor,
+  groupImageUrlFor,
+  spaceIconUrlFor,
+  activityImageUrlFor,
+  eventImageUrlFor,
+} from "./workshopImage";
 
 /**
  * WebApp.handlers callback serving what the public website builds from: the
- * workshops, areas of interest and open groups, the map's spaces, and the link between them.
+ * workshops, areas of interest and open groups, the map's spaces, and the link between them;
+ * the published activities and events to come, and the categories of activities.
  * Mounted at /api/public (see the mounting app's server/api/).
  *
  * URL shape:
- *   /api/public/entries   -> { entries, spaces, palette }
+ *   /api/public/entries   -> { entries, spaces, palette, events, categories }
  *
  * The floor plan SVGs are NOT part of this: they are static assets of the member
  * app (/images/floor1.svg, /images/floor2.svg), reachable without login, and the
@@ -46,6 +56,9 @@ const absolute = (path) => {
   return base ? `${base}${path}` : path;
 };
 
+// Workshops and areas of interest share the workshop route.
+const IMAGE_URLS = { group: groupImageUrlFor, activity: activityImageUrlFor, event: eventImageUrlFor };
+
 export const makePublicDirectoryHandler = () => async (req, res) => {
   const [path] = req.url.split("?");
   if (!/^\/entries\/?$/.test(path)) {
@@ -63,14 +76,22 @@ export const makePublicDirectoryHandler = () => async (req, res) => {
   const groups = await Groups.find({}).fetchAsync();
   const spaces = await Spaces.find({}).fetchAsync();
   const spaceById = new Map(spaces.map((s) => [s._id, s]));
+  const now = new Date();
+  const activities = await Activities.find({ published: true }).fetchAsync();
+  // Events of activities take `published` from them, so all to come are read.
+  const events = await Events.find({ end: { $gte: now } }).fetchAsync();
+  const categories = await ActivityCategories.find({}).fetchAsync();
 
   const directory = buildDirectory({
     workshops,
     groups,
     spaces,
     iconUrlFor: (spaceDocId) => absolute(spaceIconUrlFor(spaceById.get(spaceDocId))),
-    imageUrlFor: ({ doc, kind }) =>
-      absolute(kind === "group" ? groupImageUrlFor(doc) : workshopImageUrlFor(doc)),
+    imageUrlFor: ({ doc, kind }) => absolute((IMAGE_URLS[kind] || workshopImageUrlFor)(doc)),
+    activities,
+    events,
+    categories,
+    now,
   });
 
   const payload = JSON.stringify(directory);

@@ -1,6 +1,8 @@
 /**
  * Shapes the listing published for the public website: the workshops, areas
- * of interest and open groups, the map's spaces, and the link between them.
+ * of interest and open groups, the map's spaces, and the link between them;
+ * the published activities with their events to come, the published
+ * free-standing events, and the categories of activities.
  *
  * Pure: takes documents already read from the database plus URL builders, so
  * the selection rules and the JSON shape can be unit tested without Meteor.
@@ -8,6 +10,7 @@
  */
 import { withUniqueSlugs } from "./slug";
 import { SPACE_COLORS, spaceColorName } from "./spaceColors";
+import { resolveEvent } from "./activityRules";
 
 /**
  * Only workshops and areas of interest that exist for members to use. A forming
@@ -76,7 +79,13 @@ const spaceLinksFor = (doc, spaceById) => {
  * @param {Array<object>} args.spaces     all spaces; all are published
  * @param {(spaceDocId: string) => string|null} args.iconUrlFor
  * @param {(entry: {doc: object, kind: string}) => string|null} args.imageUrlFor
- * @return {{entries: Array<object>, spaces: Array<object>, palette: object}}
+ *   kind is also "activity", and "event" for an event resolved against its activity
+ * @param {Array<object>} args.activities  all activities; the published ones are entries
+ * @param {Array<object>} args.events      all events; those to come are published
+ * @param {Array<object>} args.categories  all categories of activities
+ * @param {Date} args.now                  what "to come" is counted from
+ * @return {{entries: Array<object>, spaces: Array<object>, palette: object,
+ *           events: Array<object>, categories: Array<object>}}
  */
 export const buildDirectory = ({
   workshops = [],
@@ -84,6 +93,10 @@ export const buildDirectory = ({
   spaces = [],
   iconUrlFor,
   imageUrlFor,
+  activities = [],
+  events = [],
+  categories = [],
+  now = new Date(),
 }) => {
   const published = [
     ...workshops
@@ -92,9 +105,12 @@ export const buildDirectory = ({
     ...groups
       .filter((g) => PUBLIC_GROUP_TYPES.includes(g.type))
       .map((g) => ({ doc: g, kind: "group" })),
+    ...activities
+      .filter((a) => a.published)
+      .map((a) => ({ doc: a, kind: "activity" })),
   ];
 
-  // Workshops, areas of interest and groups share one list, so the slugs must be
+  // Workshops, areas of interest, groups and activities share one list, so the slugs must be
   // unique across all of them — hence one pass over the combined set rather
   // than one per kind.
   const slugById = new Map(
@@ -103,7 +119,59 @@ export const buildDirectory = ({
   );
   const spaceById = new Map(spaces.map((s) => [s._id, s]));
 
+  const categorySlugs = new Map(
+    withUniqueSlugs(categories.map((c) => ({ _id: c._id, source: c.name?.sv })))
+      .map(({ _id, slug }) => [_id, slug])
+  );
+  // An event, or an activity, refers to a workshop or group by its entry id,
+  // and only to one that is published.
+  const entryId = (docId) => (docId ? slugById.get(docId) || null : null);
+  const spaceOf = (spaceDocId) => {
+    const space = spaceById.get(spaceDocId);
+    return space ? { spaceId: space.spaceId, floor: space.floor } : null;
+  };
+  const toCome = events
+    .filter((e) => e.end >= now)
+    .sort((a, b) => a.start - b.start);
+  const activityById = new Map(activities.map((a) => [a._id, a]));
+  const eventTimes = (event) => ({
+    start: event.start.toISOString(),
+    end: event.end.toISOString(),
+    status: event.status,
+  });
+
+  // An activity's events: when, and where or what differs from the activity.
+  const eventsOf = (activity) => toCome
+    .filter((e) => e.activityId === activity._id)
+    .map((e) => resolveEvent(e, activity))
+    .filter((e) => e.published)
+    .map((e) => withoutEmpty({
+      ...eventTimes(e),
+      name: e.name !== activity.name ? bilingual(e.name) : null,
+      space: spaceOf(e.spaceId),
+    }));
+
+  const activityEntry = (doc, id) => {
+    const upcoming = eventsOf(doc);
+    return withoutEmpty({
+      id,
+      kind: "activity",
+      name: bilingual(doc.name),
+      image: imageUrlFor({ doc, kind: "activity" }),
+      text: bilingual(doc.description),
+      category: categorySlugs.get(doc.categoryId) || null,
+      workshop: entryId(doc.workshopId),
+      group: entryId(doc.groupId),
+      space: spaceOf(doc.spaceId),
+      durationMinutes: doc.durationMinutes ?? null,
+      cost: doc.cost ?? null,
+      membersOnly: !!doc.membersOnly,
+      events: upcoming.length > 0 ? upcoming : null,
+    });
+  };
+
   const entries = published.map(({ doc, kind }) => {
+    if (kind === "activity") return activityEntry(doc, slugById.get(doc._id));
     const links = spaceLinksFor(doc, spaceById);
     return withoutEmpty({
       id: slugById.get(doc._id),
@@ -129,6 +197,7 @@ export const buildDirectory = ({
   // that is nowhere to be found in `entries`.
   const occupants = new Map();
   for (const { doc, kind } of published) {
+    if (kind === "activity") continue;
     const id = slugById.get(doc._id);
     for (const spaceDocId of [doc.primarySpaceId, ...(doc.secondarySpaceIds || [])]) {
       if (!spaceById.has(spaceDocId)) continue;
@@ -158,7 +227,38 @@ export const buildDirectory = ({
     });
   });
 
+  // Free-standing events stand on their own: what an activity would say, they
+  // say themselves. Their ids are made from the name and the day.
+  const free = toCome.filter((e) => !e.activityId && e.published);
+  const freeSlugs = new Map(
+    withUniqueSlugs(free.map((e) => ({ _id: e._id, source: `${e.name?.sv || ""} ${e.start.toISOString().slice(0, 10)}` })))
+      .map(({ _id, slug }) => [_id, slug])
+  );
+  const freeEvents = free.map((e) => withoutEmpty({
+    id: freeSlugs.get(e._id),
+    ...eventTimes(e),
+    name: bilingual(e.name),
+    image: imageUrlFor({ doc: resolveEvent(e, activityById.get(e.activityId)), kind: "event" }),
+    text: bilingual(e.description),
+    category: categorySlugs.get(e.categoryId) || null,
+    workshop: entryId(e.workshopId),
+    group: entryId(e.groupId),
+    space: spaceOf(e.spaceId),
+    cost: e.cost ?? null,
+    membersOnly: !!e.membersOnly,
+  }));
+
+  const exportedCategories = [...categories]
+    .sort((a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity))
+    .map((c) => withoutEmpty({ id: categorySlugs.get(c._id), name: bilingual(c.name) }));
+
   // Shipped so the website does not hardcode hex values that could drift from
   // the app's.
-  return { entries, spaces: exportedSpaces, palette: SPACE_COLORS };
+  return {
+    entries,
+    spaces: exportedSpaces,
+    palette: SPACE_COLORS,
+    events: freeEvents,
+    categories: exportedCategories,
+  };
 };

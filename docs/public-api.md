@@ -3,7 +3,8 @@
 ## 1. Overview
 
 UMSME publishes the makerspace's workshops, areas of interest and function
-groups, together with the rooms on the floor plans, as a single JSON document.
+groups, together with the rooms on the floor plans, and the activities and
+events, as a single JSON document.
 It is what the public website at uppsalamakerspace.se is built from, and any
 other service may read it the same way.
 
@@ -40,10 +41,12 @@ In a development setup the admin app serves it at
 
 ```jsonc
 {
-  "entries": [ /* workshops, areas of interest and function groups */ ],
+  "entries": [ /* workshops, areas of interest, function groups and activities */ ],
   "spaces":  [ /* every room on the two floor plans */ ],
   "palette": { "green": "#5fc86f", "blue": "#5fa8c8", "amber": "#e0b64f",
-               "purple": "#b18fd0", "coral": "#e08a6f" }
+               "purple": "#b18fd0", "coral": "#e08a6f" },
+  "events":     [ /* free-standing events to come */ ],
+  "categories": [ /* the categories of activities */ ]
 }
 ```
 
@@ -83,7 +86,7 @@ Content type is `application/json; charset=utf-8`.
 | Field    | Type      | Description |
 | -------- | --------- | ----------- |
 | `id`     | string    | Identifier derived from the Swedish name, unique across all entries. See [Identifiers](#identifiers). |
-| `kind`   | string    | `workshop`, `areaOfInterest` or `group`. |
+| `kind`   | string    | `workshop`, `areaOfInterest`, `group` or `activity` (see [Activities](#activities)). |
 | `status` | string    | Workshops and areas of interest only: `established` or `trial`. |
 | `type`   | string    | Groups only: always `function`. |
 | `name`   | bilingual | Display name. |
@@ -106,6 +109,69 @@ A **workshop** has rooms of its own. An **area of interest** (intresseområde) i
 organised around an interest rather than a room, so its spaces are usually
 rooms that belong to workshops. A **function group** is a group anyone can join
 that does a task for the makerspace as a whole.
+
+### Activities
+
+An activity is something the makerspace does again and again, such as an
+introduction or a craft evening; its events are the times it happens. An
+entry of kind `activity` has fields of its own instead of `status`, `tag`,
+`icon` and the `spaces` array:
+
+```jsonc
+{
+  "id": "introduktion-traverkstaden",
+  "kind": "activity",
+  "name":  { "sv": "Introduktion träverkstaden", "en": "Wood workshop introduction" },
+  "text":  { "sv": "…" },
+  "image": "https://umsme.uppsalamakerspace.se/api/activities/<docId>/image?v=…",
+  "category": "kurs-och-introduktion",
+  "workshop": "traverkstaden",
+  "group": "trivselgruppen",
+  "space": { "spaceId": "woodworkshop", "floor": "floor1" },
+  "durationMinutes": 120,
+  "cost": 50,
+  "membersOnly": true,
+  "events": [
+    { "start": "2026-11-05T17:00:00.000Z", "end": "2026-11-05T19:00:00.000Z", "status": "confirmed" },
+    { "start": "2026-11-19T17:00:00.000Z", "end": "2026-11-19T19:00:00.000Z", "status": "cancelled",
+      "name": { "sv": "Extra introduktion" }, "space": { "spaceId": "bigroom", "floor": "floor1" } }
+  ]
+}
+```
+
+| Field             | Type      | Description |
+| ----------------- | --------- | ----------- |
+| `category`        | string    | `id` of one of the `categories`. |
+| `workshop`        | string    | `id` of the workshop or area of interest it is shown at. Absent for something of the whole association, and when that workshop is not published. |
+| `group`           | string    | `id` of the function group that holds it, when that group is published. |
+| `space`           | object    | The room, as `(spaceId, floor)`. |
+| `durationMinutes` | number    | How long an event usually lasts. |
+| `cost`            | number    | What taking part costs, in kronor. Absent when free. |
+| `membersOnly`     | boolean   | Whether only members may take part. |
+| `events`          | array     | Its events from now on, soonest first. Absent when none is planned. |
+
+Each item in `events` has `start` and `end` (ISO 8601, UTC) and `status`,
+`confirmed` or `cancelled`: a cancelled event stays in the list, so that
+whoever planned to come can see it is off. An event has a `name` or a `space`
+only when they differ from the activity's.
+
+### `events`
+
+Events that belong to no activity, such as a cleaning day or the annual
+meeting, from now on and soonest first. They describe themselves with the
+fields an activity has (`name`, `text`, `image`, `category`, `workshop`,
+`group`, `space`, `cost`, `membersOnly`), plus `start`, `end` and `status`.
+Their `id` is made from the Swedish name and the day, e.g.
+`staddag-2026-11-29`, unique among the events.
+
+### `categories`
+
+```jsonc
+{ "id": "kurs-och-introduktion", "name": { "sv": "Kurs och introduktion", "en": "Course and introduction" } }
+```
+
+The categories of activities, in the order the makerspace wants them shown,
+for filtering. Their `id`s follow the same rules as entry `id`s.
 
 ### `spaces`
 
@@ -162,9 +228,11 @@ same values the member app uses, so a consumer need not hardcode them.
 | Workshops and areas of interest with status *established* or *trial* | Those that are *forming* or *decommissioned* |
 | Function groups | Steering and responsibility groups, which show only through what they run |
 | All rooms on both floors | |
+| Activities marked to be shown on the website, and their events to come that are too | Activities and events not marked so, events that are over |
+| Free-standing events to come that are marked to be shown | |
 
-No member data is published: no names of members, group membership or
-contact details. See [groups-and-workshops.md](groups-and-workshops.md) for
+No member data is published: no names of members, group membership, the
+hosts of an event or contact details. See [groups-and-workshops.md](groups-and-workshops.md) for
 what the statuses and group types mean.
 
 ---

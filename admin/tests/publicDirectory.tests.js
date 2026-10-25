@@ -337,4 +337,86 @@ describe('publicDirectory', function () {
       assert.deepStrictEqual(entries.map((e) => e.id).sort(), ['textil', 'textil-2']);
     });
   });
+
+  describe('activities and events', function () {
+    const now = new Date('2026-11-10T12:00:00Z');
+    const at = (iso) => new Date(iso);
+    const CATEGORIES = [
+      { _id: 'c2', name: { sv: 'Socialt', en: 'Social' }, sortOrder: 2 },
+      { _id: 'c1', name: { sv: 'Kurs' }, sortOrder: 1 },
+    ];
+    const ACTIVITIES = [
+      {
+        _id: 'a1', name: { sv: 'Textilintro', en: 'Textile intro' }, description: { sv: 'Symaskinen.' },
+        published: true, categoryId: 'c1', workshopId: 'w1', groupId: 'g2', spaceId: 's1', durationMinutes: 120, membersOnly: true,
+        imageFileId: 'img-a1',
+      },
+      { _id: 'a2', name: { sv: 'Hemlig kurs' }, published: false },
+      // Its workshop is forming, so it is not referred to.
+      { _id: 'a3', name: { sv: 'Glasintro' }, published: true, workshopId: 'w3' },
+    ];
+    const EVENTS = [
+      { _id: 'e1', activityId: 'a1', start: at('2026-11-01T17:00:00Z'), end: at('2026-11-01T19:00:00Z'), status: 'confirmed' },
+      { _id: 'e2', activityId: 'a1', start: at('2026-11-20T17:00:00Z'), end: at('2026-11-20T19:00:00Z'), status: 'confirmed', spaceId: 's2' },
+      { _id: 'e3', activityId: 'a1', start: at('2026-11-15T17:00:00Z'), end: at('2026-11-15T19:00:00Z'), status: 'cancelled', name: { sv: 'Extra intro' } },
+      { _id: 'e4', activityId: 'a1', start: at('2026-11-16T17:00:00Z'), end: at('2026-11-16T19:00:00Z'), status: 'confirmed', published: false },
+      { _id: 'e5', activityId: 'a2', start: at('2026-11-16T17:00:00Z'), end: at('2026-11-16T19:00:00Z'), status: 'confirmed', published: true },
+      {
+        _id: 'e6', name: { sv: 'Städdag' }, description: { sv: 'Vi städar.' }, groupId: 'g2', spaceId: 's4',
+        start: at('2026-11-29T09:00:00Z'), end: at('2026-11-29T14:00:00Z'), status: 'confirmed', published: true, imageFileId: 'img-e6',
+      },
+      { _id: 'e7', name: { sv: 'Internt möte' }, start: at('2026-11-29T09:00:00Z'), end: at('2026-11-29T10:00:00Z'), status: 'confirmed' },
+    ];
+    const imageUrlFor = ({ doc, kind }) => (doc.imageFileId ? `https://umsme.example/api/${kind}/${doc._id}/image` : null);
+    const directory = () => buildAll({ activities: ACTIVITIES, events: EVENTS, categories: CATEGORIES, now, imageUrlFor });
+
+    it('publishes the published activities as entries of their own kind', function () {
+      const ids = directory().entries.filter((e) => e.kind === 'activity').map((e) => e.id);
+      assert.deepStrictEqual(ids, ['textilintro', 'glasintro']);
+    });
+
+    it('describes an activity and refers to what it is shown at by entry id', function () {
+      const intro = byId(directory().entries, 'textilintro');
+      assert.deepStrictEqual(intro.name, { sv: 'Textilintro', en: 'Textile intro' });
+      assert.strictEqual(intro.category, 'kurs');
+      assert.strictEqual(intro.workshop, 'textilverkstad');
+      assert.strictEqual(intro.group, 'it-gruppen');
+      assert.deepStrictEqual(intro.space, { spaceId: 'textile_workshop', floor: 'floor2' });
+      assert.strictEqual(intro.image, 'https://umsme.example/api/activity/a1/image');
+      assert.strictEqual(intro.membersOnly, true);
+      assert.strictEqual(byId(directory().entries, 'glasintro').workshop, undefined);
+    });
+
+    it('lists an activity’s published events to come, soonest first, cancelled ones marked', function () {
+      const { events } = byId(directory().entries, 'textilintro');
+      assert.deepStrictEqual(events.map((e) => [e.start, e.status]), [
+        ['2026-11-15T17:00:00.000Z', 'cancelled'],
+        ['2026-11-20T17:00:00.000Z', 'confirmed'],
+      ]);
+      assert.deepStrictEqual(events[0].name, { sv: 'Extra intro' });
+      assert.strictEqual(events[1].name, undefined);
+      assert.deepStrictEqual(events[1].space, { spaceId: 'kitchen', floor: 'floor1' });
+      assert.strictEqual(events[0].space.spaceId, 'textile_workshop');
+    });
+
+    it('publishes free-standing events that are published, apart', function () {
+      const { events } = directory();
+      assert.deepStrictEqual(events.map((e) => e.id), ['staddag-2026-11-29']);
+      assert.strictEqual(events[0].group, 'it-gruppen');
+      assert.strictEqual(events[0].image, 'https://umsme.example/api/event/e6/image');
+      assert.deepStrictEqual(events[0].text, { sv: 'Vi städar.' });
+    });
+
+    it('lists the categories in their order', function () {
+      assert.deepStrictEqual(directory().categories, [
+        { id: 'kurs', name: { sv: 'Kurs' } },
+        { id: 'socialt', name: { sv: 'Socialt', en: 'Social' } },
+      ]);
+    });
+
+    it('has empty lists when there is nothing', function () {
+      const { events, categories } = buildAll();
+      assert.deepStrictEqual([events, categories], [[], []]);
+    });
+  });
 });
