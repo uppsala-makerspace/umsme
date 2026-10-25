@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
@@ -19,7 +20,6 @@ const CalendarIcon = createSvgIcon(<path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 
  */
 export const DateField = ({ label, value, onChange, helperText, slotProps, ...props }) => {
   const [text, setText] = useState(value || '');
-  const picker = useRef(null);
   // Follow the value when it changes from outside (a form loaded, a reset).
   useEffect(() => { if (parseDay(text) !== (value || '')) setText(value || ''); }, [value]);
   const wrong = parseDay(text) === null;
@@ -43,13 +43,20 @@ export const DateField = ({ label, value, onChange, helperText, slotProps, ...pr
         input: {
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton size="small" edge="end" aria-label="Open calendar" disabled={props.disabled}
-                onClick={() => { try { picker.current.showPicker(); } catch (e) { picker.current.focus(); } }}>
-                <CalendarIcon fontSize="small" />
-              </IconButton>
-              <input ref={picker} type="date" tabIndex={-1} aria-hidden value={parseDay(text) || ''}
-                onChange={(e) => take(e.target.value)}
-                style={{ position: 'absolute', right: 0, bottom: 0, width: 1, height: 1, opacity: 0, border: 0, padding: 0 }} />
+              {/* The browser's own date field lies unseen over the calendar
+                  icon, so a tap lands on it: a phone (iOS) opens its date
+                  picker only for a tap on the field itself, never for
+                  showPicker() on a hidden one. A computer opens it on the
+                  click through showPicker(). */}
+              <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                <IconButton size="small" edge="end" tabIndex={-1} aria-hidden disabled={props.disabled}>
+                  <CalendarIcon fontSize="small" />
+                </IconButton>
+                <input type="date" aria-label="Open calendar" disabled={props.disabled} value={parseDay(text) || ''}
+                  onChange={(e) => take(e.target.value)}
+                  onClick={(e) => { try { e.currentTarget.showPicker(); } catch (err) { /* opens by itself */ } }}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, border: 0, padding: 0, margin: 0, cursor: 'pointer', fontSize: 16 }} />
+              </Box>
             </InputAdornment>
           ),
           ...slotProps?.input,
