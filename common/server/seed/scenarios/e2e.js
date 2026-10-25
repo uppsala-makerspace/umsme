@@ -14,6 +14,7 @@ import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
+import { makeCategory, makeActivity, makeEvent } from '../activities';
 import { makeFakeLock } from '../lock';
 import { makeFakeBank } from '../bank';
 import { makeMember, pay, joinFamily } from '../members';
@@ -112,6 +113,37 @@ export const buildE2e = async ({ people, now }) => {
   await Workshops.insertAsync({ name: { sv: 'E2E edit verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E links verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E delete verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
+  // Activities: categories (one in use, one to edit, one to delete); the
+  // ceramics introduction with an event behind and two ahead; an activity
+  // each for the admin tests that edit, delete, add events, upload an image
+  // and cancel an event; a free-standing event of the association, and one
+  // to delete.
+  const at = (n, hour) => {
+    const d = days(n);
+    d.setHours(hour, 0, 0, 0);
+    return d;
+  };
+  const courses = await makeCategory('Kurs', 'Course', 1);
+  await makeCategory('E2E edit category', null, 5);
+  await makeCategory('E2E delete category', null, 6);
+  const wheelIntro = {
+    name: { sv: 'Drejintroduktion', en: 'Wheel introduction' }, description: { sv: 'Grunderna i drejning.' },
+    groupId: ceramicsGroup, workshopId: ceramics, categoryId: courses, durationMinutes: 120, published: true,
+  };
+  wheelIntro._id = await makeActivity(wheelIntro);
+  await makeEvent({ activity: wheelIntro, start: at(-10, 18), hostMemberIds: [members.groupLeader._id] });
+  await makeEvent({ activity: wheelIntro, start: at(10, 18), hostMemberIds: [members.groupLeader._id, members.steering._id] });
+  await makeEvent({ activity: wheelIntro, start: at(20, 18), status: 'cancelled' });
+  await makeActivity({ name: { sv: 'E2E edit aktivitet' }, groupId: ceramicsGroup, durationMinutes: 60 });
+  await makeActivity({ name: { sv: 'E2E delete aktivitet' } });
+  await makeActivity({ name: { sv: 'E2E image aktivitet' } });
+  const toCancel = { name: { sv: 'E2E cancel aktivitet' }, groupId: ceramicsGroup, durationMinutes: 60 };
+  toCancel._id = await makeActivity(toCancel);
+  await makeEvent({ activity: toCancel, start: at(15, 18) });
+  await makeActivity({ name: { sv: 'E2E events aktivitet' }, groupId: ceramicsGroup, durationMinutes: 90 });
+  await makeEvent({ name: { sv: 'Årsmöte' }, start: at(30, 19), durationMinutes: 120, published: true, membersOnly: true });
+  await makeEvent({ name: { sv: 'E2E delete event' }, start: at(40, 19), durationMinutes: 60 });
+
   // Certificates: the kiln under the ceramics workshop (a certifier, a
   // holder), the wheel that needs it first, and one each for the admin tests
   // that edit, link, delete, mark mandatory, grant and revoke. None is mandatory to

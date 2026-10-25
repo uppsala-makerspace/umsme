@@ -33,6 +33,7 @@ import { makeFakeLock } from '../lock';
 import { makeFakeBank } from '../bank';
 import { makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
+import { makeCategory, makeActivity, makeEvent } from '../activities';
 import { PERSONAS, PASSWORD, FIRST_FREE_MID } from './personas';
 import { makeLiabilityVersions, liabilityFields, makePersonas } from './build';
 
@@ -255,7 +256,7 @@ export const buildDemo = async ({ random, people, now }) => {
     name: { sv: 'Ekonomigruppen', en: 'Finance group' }, type: 'function',
     responsibleMemberId: personas.treasurer._id, joinPolicy: 'request-responsible', allowJoinRequests: false,
   }, { members: [personas.treasurer, personas.board] });
-  await groupWithMembers({
+  const premisesGroup = await groupWithMembers({
     name: { sv: 'Lokalgruppen', en: 'Premises group' }, type: 'function',
     joinPolicy: 'request-any', allowJoinRequests: true,
   }, { members: pickMembers(active, 5), pending: pickMembers(active, 1) });
@@ -298,6 +299,65 @@ export const buildDemo = async ({ random, people, now }) => {
   for (const member of pickMembers(introduced, 10)) await attest(welding, member, { end: days(random.int(30, 600)) });
   for (const member of pickMembers(introduced, 6)) await attest(kiln, member);
   await attest(laser, personas.base, { start: days(-1), certifierId: personas.steering._id, pending: true });
+
+  // --- Activities and events ----------------------------------------------
+  // The wood workshop's introduction every other week, with events behind and
+  // ahead, one of them cancelled; a craft fika of the premises group; the
+  // association's open evening; and a free-standing cleaning day.
+  const at = (n, hour, minute = 0) => {
+    const d = days(n);
+    d.setHours(hour, minute, 0, 0);
+    return d;
+  };
+  const courses = await makeCategory('Kurs och introduktion', 'Course and introduction', 1);
+  const social = await makeCategory('Socialt', 'Social', 2);
+  await makeCategory('Öppet hus', 'Open house', 3);
+  const premisesMembers = (await GroupMemberships.find({ groupId: premisesGroup, state: 'active' }).fetchAsync()).map((m) => m.memberId);
+  const woodIntro = {
+    name: { sv: 'Introduktion träverkstaden', en: 'Wood workshop introduction' },
+    description: {
+      sv: 'Säkerhet, maskiner och rutiner i träverkstaden. Efter introduktionen får du använda verkstadens handmaskiner.',
+      en: 'Safety, machines and routines in the wood workshop. After it you may use the workshop’s hand tools.',
+    },
+    groupId: steeringGroups.wood, workshopId: workshops.wood, spaceId: spaces.wood, categoryId: courses,
+    durationMinutes: 120, membersOnly: true, published: true, slackChannel: '#traverkstaden',
+  };
+  woodIntro._id = await makeActivity({ ...woodIntro, createdAt: days(-200) });
+  for (const n of [-42, -28, -14, 0, 14, 28, 42]) {
+    await makeEvent({
+      activity: woodIntro, start: at(n + 3, 18), hostMemberIds: [personas.groupLeader._id, ...(n % 28 === 0 ? [personas.steering._id] : [])],
+      ...(n === 28 ? { status: 'cancelled' } : {}), createdAt: days(n - 20),
+    });
+  }
+  const fika = {
+    name: { sv: 'Pysselfika', en: 'Craft fika' },
+    description: { sv: 'Ta med ett projekt och fika med andra medlemmar.', en: 'Bring a project and have fika with other members.' },
+    groupId: premisesGroup, spaceId: spaces.big, categoryId: social, durationMinutes: 180, membersOnly: false, published: true,
+  };
+  fika._id = await makeActivity({ ...fika, createdAt: days(-90) });
+  for (const n of [-21, 7, 35]) {
+    await makeEvent({ activity: fika, start: at(n + 5, 14), hostMemberIds: premisesMembers.slice(0, 1), createdAt: days(n - 14) });
+  }
+  // A one-off fika with its own name and a longer time.
+  await makeEvent({ activity: fika, name: { sv: 'Julpyssel', en: 'Christmas crafts' }, start: at(50, 13), durationMinutes: 240, createdAt: days(-3) });
+  const openEvening = {
+    name: { sv: 'Öppet hus', en: 'Open house' },
+    description: { sv: 'Kom och se lokalen och träffa medlemmar.', en: 'Come and see the premises and meet members.' },
+    spaceId: spaces.big, durationMinutes: 150, membersOnly: false, published: true,
+  };
+  openEvening._id = await makeActivity({ ...openEvening, createdAt: days(-300) });
+  await makeEvent({ activity: openEvening, start: at(-60, 18), hostMemberIds: [personas.board._id], createdAt: days(-80) });
+  await makeEvent({ activity: openEvening, start: at(18, 18), hostMemberIds: [personas.board._id], createdAt: days(-5) });
+  await makeActivity({
+    name: { sv: 'Svetskurs', en: 'Welding course' }, groupId: steeringGroups.metal, workshopId: workshops.metal,
+    categoryId: courses, durationMinutes: 240, published: false, createdAt: days(-10),
+  });
+  await makeEvent({
+    name: { sv: 'Städdag', en: 'Cleaning day' }, groupId: premisesGroup, spaceId: spaces.big,
+    description: { sv: 'Vi städar lokalen tillsammans. Fika bjuds på.' }, membersOnly: false, published: true,
+    start: at(24, 10), durationMinutes: 300, hostMemberIds: premisesMembers.slice(0, 2), createdAt: days(-7),
+  });
+  log('4 activities and their events');
 
   // --- Web shop and purchases ---------------------------------------------
   const storeItem = (fields) => makeStoreItem({ createdAt: days(-400), ...fields });
