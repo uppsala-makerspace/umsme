@@ -4,6 +4,7 @@ import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Workshops } from "/imports/common/collections/workshops";
 import { Members } from "/imports/common/collections/members";
+import { Activities } from "/imports/common/collections/activities";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { groupImageUrlFor } from "/imports/common/server/workshopImage";
@@ -264,6 +265,8 @@ Meteor.methods({
       canRemoveMembers: await canRemoveMembers(group, member),
       pendingRequests,
       expenseAccounts,
+      // The activities the group holds, to link to.
+      activities: await Activities.find({ groupId }, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync(),
       mapView,
     };
   },

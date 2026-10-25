@@ -85,4 +85,13 @@ test.describe('Activities', () => {
     await expect(page).toHaveURL(url);
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
   });
+
+  test('the workshop and the group link to their activities', async ({ page }) => {
+    await openAs(page, 'member', '/workshops');
+    await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
+    await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
+    await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
+    await page.getByRole('link', { name: CERAMICS, exact: true }).click();
+    await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
+  });
 });

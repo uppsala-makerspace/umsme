@@ -16,6 +16,7 @@ import GroupTypeTag from "../../../components/GroupTypeTag";
 import SpaceMapSection from "../../../components/SpaceMapSection";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
+import ActivityLinks from "../../activities/components/ActivityLinks";
 
 const GroupDetail = ({
   loading,
@@ -86,6 +87,7 @@ const GroupDetail = ({
     canApprove,
     pendingRequests,
     expenseAccounts = [],
+    activities = [],
     mapView,
   } = data;
 
@@ -531,6 +533,8 @@ const GroupDetail = ({
           </ul>
         </section>
       )}
+
+      <ActivityLinks activities={activities} />
 
       {/* The group's expense accounts (members only) — each links to an
           overview of everything booked on that account. */}
