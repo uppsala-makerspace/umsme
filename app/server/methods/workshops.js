@@ -5,7 +5,7 @@ import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Spaces } from "/imports/common/collections/spaces";
 import { StoreItems } from "/imports/common/collections/storeItems";
-import { Activities } from "/imports/common/collections/activities";
+import { activityLinks } from "./activities";
 import { workshopImageUrlFor, spaceIconUrlFor } from "/imports/common/server/workshopImage";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
 import {
@@ -123,7 +123,7 @@ Meteor.methods({
       relatedGroups,
       certificates,
       // The activities shown at it, to link to.
-      activities: await Activities.find({ workshopId }, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync(),
+      activities: await activityLinks({ workshopId }),
       mapView: await spacesMapView(workshop),
       canEdit: await canEditWorkshop(member, workshop),
       // Only offered when the web shop sells something for the workshop.

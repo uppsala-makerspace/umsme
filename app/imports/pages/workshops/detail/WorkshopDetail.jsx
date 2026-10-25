@@ -163,6 +163,8 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
         )}
       </SpaceMapSection>
 
+      <ActivityLinks activities={activities} />
+
       {certificates.length > 0 && (
         <section className="mb-6">
           <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">
@@ -183,8 +185,6 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
           </ul>
         </section>
       )}
-
-      <ActivityLinks activities={activities} />
 
       {group && (
         <section className="mb-6">

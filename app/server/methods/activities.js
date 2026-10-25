@@ -31,6 +31,23 @@ import { findMemberForUser, isActiveMember } from "./utils";
 // How many events a list shows at a time.
 const EVENTS_PAGE = 10;
 
+/**
+ * Activities to link to from a workshop's or a group's page, by name, each
+ * with how many events are planned: to come and not cancelled.
+ */
+export const activityLinks = async (selector) => {
+  const activities = await Activities.find(selector, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
+  const now = new Date();
+  const links = [];
+  for (const activity of activities) {
+    links.push({
+      ...activity,
+      plannedEvents: await Events.find({ activityId: activity._id, end: { $gte: now }, status: { $ne: "cancelled" } }).countAsync(),
+    });
+  }
+  return links;
+};
+
 const requireMember = async () => {
   const member = await findMemberForUser();
   if (!member) throw new Meteor.Error("not-found", "Member not found");

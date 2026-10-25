@@ -89,6 +89,8 @@ test.describe('Activities', () => {
   test('the workshop and the group link to their activities', async ({ page }) => {
     await openAs(page, 'member', '/workshops');
     await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
+    // With the number of its planned events: other tests may add some.
+    await expect(page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) })).toBeVisible();
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await page.getByRole('link', { name: CERAMICS, exact: true }).click();

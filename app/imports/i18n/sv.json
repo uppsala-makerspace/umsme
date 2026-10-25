@@ -743,5 +743,7 @@
   "activitiesNoPast": "Inga tidigare tillfällen.",
   "eventsLoadMore": "Ladda fler tillfällen",
   "navGoogleCalendar": "Google-kalender",
-  "eventsWhen": "Vilka tillfällen"
+  "eventsWhen": "Vilka tillfällen",
+  "activityPlannedEvents_one": "{{count}} planerat tillfälle",
+  "activityPlannedEvents_other": "{{count}} planerade tillfällen"
 }

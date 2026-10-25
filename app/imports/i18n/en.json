@@ -744,5 +744,7 @@
   "activitiesNoPast": "No past events.",
   "eventsLoadMore": "Load more events",
   "navGoogleCalendar": "Google calendar",
-  "eventsWhen": "Which events"
+  "eventsWhen": "Which events",
+  "activityPlannedEvents_one": "{{count}} planned event",
+  "activityPlannedEvents_other": "{{count}} planned events"
 }
