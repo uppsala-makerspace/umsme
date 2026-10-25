@@ -51,7 +51,7 @@ test.describe('Activities', () => {
 
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await expect(page.getByText(/17:00–19:00/)).toBeVisible();
-    await expect(page.getByText(en.eventOf.replace('{{name}}', WHEEL))).toBeVisible();
+    await expect(page.getByRole('link', { name: `${en.eventOf} ${WHEEL}` })).toBeVisible();
   });
 
   test('a member of the steering group adds a free-standing event of the group', async ({ page }) => {

@@ -718,7 +718,7 @@
   "eventDeleteConfirm": "Delete the event for good? To call it off, set its status to cancelled.",
   "eventCancelled": "Cancelled",
   "eventConfirmed": "Confirmed",
-  "eventOf": "An event of {{name}}",
+  "eventOf": "An event of:",
   "eventHosts": "Hosts",
   "eventNoHosts": "No hosts yet.",
   "eventFieldActivity": "Activity",

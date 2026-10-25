@@ -44,19 +44,12 @@ const EventDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
           </Link>
         )}
       </div>
-      <p className="m-0 mb-1 font-semibold">
+      <p className="m-0 mb-3 font-semibold">
         {eventWhen(event, lang)}
         {cancelled && (
           <span className="ml-2 text-xs font-semibold rounded-full py-0.5 px-2 bg-red-100 text-red-800">{t("eventCancelled")}</span>
         )}
       </p>
-      {event.activityId && activityName && (
-        <p className="m-0 mb-3 text-sm text-gray-500">
-          <Link to={`/activities/${event.activityId}`} className="text-brand-green no-underline hover:underline">
-            {t("eventOf", { name: localized(activityName, lang) })}
-          </Link>
-        </p>
-      )}
       {localized(event.description, lang) && (
         <Markdown className="text-gray-700 mb-4" startLevel={3}>{localized(event.description, lang)}</Markdown>
       )}
@@ -67,6 +60,18 @@ const EventDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
           ? <p className="text-gray-500">{t("eventNoHosts")}</p>
           : <p className="m-0">{hosts.map((h) => h.name).join(", ")}</p>}
       </section>
+      {event.activityId && activityName && (
+        <Link
+          to={`/activities/${event.activityId}`}
+          className="flex justify-between items-center p-3 mb-6 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
+        >
+          <div className="flex-1 min-w-0">
+            <span className="block text-xs text-gray-500">{t("eventOf")}</span>
+            <span className="block font-semibold leading-snug">{localized(activityName, lang)}</span>
+          </div>
+          <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+        </Link>
+      )}
     </MainContent>
   );
 };
