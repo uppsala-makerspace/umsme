@@ -734,5 +734,8 @@
   "activityFactDuration": "Duration",
   "activityFactCost": "Cost",
   "activityFactWho": "Who",
-  "activityFactWorkshop": "Workshop"
+  "activityFactWorkshop": "Workshop",
+  "dateFieldPlaceholder": "YYYY-MM-DD",
+  "dateFieldWrong": "Write the day as YYYY-MM-DD",
+  "dateFieldOpenCalendar": "Open the calendar"
 }

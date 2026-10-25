@@ -1,4 +1,5 @@
 import React from "react";
+import DateField from "../../../components/DateField";
 
 /**
  * The form fields of the activity and event forms, labelled, in the app's
@@ -20,6 +21,13 @@ export const TextField = ({ id, label, hint, value, onChange, multiline = false,
     {multiline
       ? <textarea id={id} rows={5} className={control} value={value} onChange={(e) => onChange(e.target.value)} {...props} />
       : <input id={id} className={control} value={value} onChange={(e) => onChange(e.target.value)} {...props} />}
+  </Field>
+);
+
+/** A day, always YYYY-MM-DD (see DateField). */
+export const DayField = ({ id, label, hint, value, onChange, ...props }) => (
+  <Field id={id} label={label} hint={hint}>
+    <DateField id={id} className={control} value={value} onChange={onChange} {...props} />
   </Field>
 );
 

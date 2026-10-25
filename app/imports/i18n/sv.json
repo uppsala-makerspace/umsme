@@ -733,5 +733,8 @@
   "activityFactDuration": "Längd",
   "activityFactCost": "Kostnad",
   "activityFactWho": "Deltagare",
-  "activityFactWorkshop": "Verkstad"
+  "activityFactWorkshop": "Verkstad",
+  "dateFieldPlaceholder": "ÅÅÅÅ-MM-DD",
+  "dateFieldWrong": "Skriv dagen som ÅÅÅÅ-MM-DD",
+  "dateFieldOpenCalendar": "Öppna kalendern"
 }

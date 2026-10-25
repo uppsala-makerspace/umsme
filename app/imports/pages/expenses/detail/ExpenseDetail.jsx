@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PaperAirplaneIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
+import DateField from "../../../components/DateField";
 import Loader from "../../../components/Loader";
 import Button from "../../../components/Button";
 import ReceiptCapture from "../components/ReceiptCapture";
@@ -219,23 +220,13 @@ const ExpenseDetail = ({
 
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">{t(invoice ? "expenseInvoiceDate" : "expenseDate")}</span>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="border border-gray-300 rounded p-3"
-            />
+            <DateField value={date} onChange={setDate} className="border border-gray-300 rounded p-3" />
           </label>
 
           {invoice && (
             <label className="flex flex-col gap-1">
               <span className="text-sm font-medium">{t("expenseDueDate")}</span>
-              <input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="border border-gray-300 rounded p-3"
-              />
+              <DateField value={dueDate} onChange={setDueDate} className="border border-gray-300 rounded p-3" />
             </label>
           )}
 
