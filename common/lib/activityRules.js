@@ -30,6 +30,15 @@ export const SHARED_FIELDS = [
   "cost",
   "membersOnly",
   "published",
+  "registration",
+  "minSeats",
+  "maxSeats",
+  "queueAllowed",
+  "infoRequired",
+  "infoPlaceholder",
+  "requiredCertificateId",
+  "checkInEnabled",
+  "checkInOpensHoursBefore",
 ];
 
 // Whether an event has a value of its own for a field. An empty text, and a
@@ -121,3 +130,92 @@ export const disallowedHosts = ({ hostMemberIds = [], groupMemberIds = [], isAdm
 /** When an event of this length ends, or null when it has no length. */
 export const eventEnd = (start, durationMinutes) =>
   start && durationMinutes > 0 ? new Date(start.getTime() + durationMinutes * 60000) : null;
+
+// --- Registration (stage 2) and check-in and attendance (stage 3) ---------
+
+export const REGISTRATIONS = ["none", "optional", "required"];
+export const REGISTRATION_STATES = [
+  "approved", "queued", "checkedIn", "attended", "missedCheckIn", "noShow", "withdrawn", "cancelled",
+];
+/** The states that hold a seat: what `seatsTaken` on the event counts. */
+export const HOLDING = ["approved", "checkedIn", "attended"];
+/** The states still in play before the event: a seat, or a place in the queue. */
+export const PENDING = ["approved", "checkedIn", "queued"];
+
+/** Whether one signs up for an event (resolved against its activity). */
+export const takesRegistrations = (event) => (event?.registration || "none") !== "none";
+
+/** Free seats; Infinity when the event has no limit. */
+export const seatsLeft = (event, seatsTaken = 0) =>
+  (event?.maxSeats ? Math.max(0, event.maxSeats - seatsTaken) : Infinity);
+
+/** Whether one may sign up now: it takes registrations, is not called off and has not started. */
+export const registrationOpen = (event, now = new Date()) =>
+  takesRegistrations(event) && event.status !== "cancelled" && event.start > now;
+
+/**
+ * What a new registration becomes: a seat when one is free and nobody queues
+ * for it (a free seat is the queue's to take first), else a place in the
+ * queue when the event has one, else nothing.
+ *
+ * @returns {"approved"|"queued"|"full"}
+ */
+export const registrationOutcome = ({ event, seatsTaken = 0, queued = 0 }) => {
+  if (seatsLeft(event, seatsTaken) > 0 && queued === 0) return "approved";
+  return event?.queueAllowed ? "queued" : "full";
+};
+
+/**
+ * An event's status from its registrations: called off stays so; one waiting
+ * for its fewest participants is `awaiting` until enough hold a seat, and then
+ * `confirmed` for good (people plan by it, so it does not go back).
+ */
+export const statusFor = ({ event, seatsTaken = 0, current = "confirmed" }) => {
+  if (current === "cancelled") return "cancelled";
+  if (!takesRegistrations(event) || !(event.minSeats > 0) || current === "confirmed") return "confirmed";
+  return seatsTaken >= event.minSeats ? "confirmed" : "awaiting";
+};
+
+/** The status a new event starts in, before anyone has signed up. */
+export const initialStatus = (event) =>
+  (takesRegistrations(event) && event.minSeats > 0 ? "awaiting" : "confirmed");
+
+/** Whether an event asks those with a seat to check in beforehand. */
+export const checkInApplies = (event) => takesRegistrations(event) && !!event?.checkInEnabled;
+
+/**
+ * When checking in opens and closes: `checkInOpensHoursBefore` before the
+ * start (a day when not set), and the event's deadline (its start when not set).
+ */
+export const checkInWindow = (event) => {
+  const hours = event.checkInOpensHoursBefore ?? 24;
+  return {
+    opens: new Date(event.start.getTime() - hours * 3600000),
+    closes: event.checkInDeadline || event.start,
+  };
+};
+
+/** Whether a registration may check in now. */
+export const mayCheckIn = (registration, event, now = new Date()) => {
+  if (registration?.state !== "approved" || !checkInApplies(event) || event.status === "cancelled") return false;
+  const { opens, closes } = checkInWindow(event);
+  return now >= opens && now < closes;
+};
+
+/** Whether the check-in deadline has passed: a seat taken now is checked in at once. */
+export const checkInClosed = (event, now = new Date()) =>
+  checkInApplies(event) && now >= checkInWindow(event).closes;
+
+/** Whether a member may withdraw: before the start, from a seat or the queue. */
+export const mayWithdraw = (registration, event, now = new Date()) =>
+  PENDING.includes(registration?.state) && event.start > now;
+
+/** Whether a queued member may take a free seat now. */
+export const mayTakeSeat = ({ registration, event, seatsTaken = 0, now = new Date() }) =>
+  registration?.state === "queued" && event.status !== "cancelled" && event.start > now
+  && seatsLeft(event, seatsTaken) > 0;
+
+/** Whether attendance can be recorded: from the start on, until it is closed. */
+export const attendanceOpen = (event, now = new Date()) =>
+  event.status !== "cancelled" && takesRegistrations(event) && now >= event.start && !event.attendanceClosedAt;
+

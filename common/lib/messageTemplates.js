@@ -71,6 +71,21 @@ export const TEMPLATE_VARIABLE_GROUPS = [
       { name: 'deadline', type: 'date', sample: '2026-06-08', description: 'When a move must be done or a warned member must act; empty when there is none.' },
     ],
   },
+  {
+    title: 'Activity templates',
+    note: 'Sent automatically about an event: a registration, a place in the queue, a free seat, a new '
+      + 'event of an activity one is interested in, an event called off or happening, and check-in. '
+      + 'One non-deprecated template per type is expected. Write the Swedish text first and the English second.',
+    variables: [
+      { name: 'eventName', type: 'string', sample: 'Introduktion träverkstaden', description: 'The event’s name, in Swedish.' },
+      { name: 'eventNameEn', type: 'string', sample: 'Wood workshop introduction', description: 'The event’s name in English, or the Swedish one.' },
+      { name: 'eventDate', type: 'string', sample: '2026-11-19 18:00', description: 'When the event starts.' },
+      { name: 'eventPlace', type: 'string', sample: 'Träverkstaden', description: 'The space it is in; empty when none.' },
+      { name: 'eventLink', type: 'string', sample: 'https://app.uppsalamakerspace.se/events/abc', description: 'The event’s page in the app.' },
+      { name: 'freeSeats', type: 'number', sample: 2, description: 'How many seats have become free (a free seat).' },
+      { name: 'checkInDeadline', type: 'string', sample: '2026-11-18 18:00', description: 'When check-in closes; empty when none.' },
+    ],
+  },
 ];
 
 /** Every variable with its sample value. */

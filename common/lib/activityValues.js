@@ -44,6 +44,11 @@ const sharedValues = (doc) => ({
   contactEmail: doc?.contactEmail || '',
   durationMinutes: numberText(doc?.durationMinutes),
   cost: numberText(doc?.cost),
+  minSeats: numberText(doc?.minSeats),
+  maxSeats: numberText(doc?.maxSeats),
+  infoPlaceholder: doc?.infoPlaceholder || '',
+  requiredCertificateId: doc?.requiredCertificateId || '',
+  checkInOpensHoursBefore: numberText(doc?.checkInOpensHoursBefore),
 });
 
 const sharedFields = (v) => ({
@@ -56,6 +61,11 @@ const sharedFields = (v) => ({
   contactEmail: v.contactEmail,
   durationMinutes: number(v.durationMinutes),
   cost: number(v.cost),
+  minSeats: number(v.minSeats),
+  maxSeats: number(v.maxSeats),
+  infoPlaceholder: v.infoPlaceholder,
+  requiredCertificateId: v.requiredCertificateId || null,
+  checkInOpensHoursBefore: number(v.checkInOpensHoursBefore),
 });
 
 /** The form's values for an activity, or empty ones for a new one (of `groupId`). */
@@ -64,6 +74,10 @@ export const activityValues = (activity, { groupId = '' } = {}) => ({
   groupId: activity ? activity.groupId || '' : groupId,
   membersOnly: activity ? !!activity.membersOnly : true,
   published: !!activity?.published,
+  registration: activity?.registration || 'none',
+  queueAllowed: !!activity?.queueAllowed,
+  infoRequired: !!activity?.infoRequired,
+  checkInEnabled: !!activity?.checkInEnabled,
   eventBookers: activity?.eventBookers || 'groupMembers',
 });
 
@@ -72,6 +86,10 @@ export const activityFields = (v) => ({
   groupId: v.groupId || null,
   membersOnly: !!v.membersOnly,
   published: !!v.published,
+  registration: v.registration,
+  queueAllowed: !!v.queueAllowed,
+  infoRequired: !!v.infoRequired,
+  checkInEnabled: !!v.checkInEnabled,
   eventBookers: v.eventBookers,
 });
 
@@ -88,6 +106,13 @@ export const eventValues = (event, { activityId = '' } = {}) => ({
   status: event?.status || 'confirmed',
   membersOnly: flagText(event?.membersOnly),
   published: flagText(event?.published),
+  registration: event?.registration || '',
+  queueAllowed: flagText(event?.queueAllowed),
+  infoRequired: flagText(event?.infoRequired),
+  checkInEnabled: flagText(event?.checkInEnabled),
+  checkInDeadlineDay: day(event?.checkInDeadline),
+  checkInDeadlineTime: clock(event?.checkInDeadline),
+  googleEventId: event?.googleEventId || '',
 });
 
 /**
@@ -104,6 +129,12 @@ export const eventFields = (v) => ({
   status: v.status,
   membersOnly: flagFrom(v.membersOnly),
   published: flagFrom(v.published),
+  registration: v.registration || null,
+  queueAllowed: flagFrom(v.queueAllowed),
+  infoRequired: flagFrom(v.infoRequired),
+  checkInEnabled: flagFrom(v.checkInEnabled),
+  checkInDeadline: moment(v.checkInDeadlineDay || v.startDay, v.checkInDeadlineTime),
+  googleEventId: v.googleEventId || null,
 });
 
 /** The form's values for a category. */

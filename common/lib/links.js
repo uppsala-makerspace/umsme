@@ -21,3 +21,16 @@ export const adminLink = (path = '') => {
   if (!base) return '';
   return `${base}/${String(path).replace(/^\/+/, '')}`;
 };
+
+/**
+ * Absolute links into the member app, from `Meteor.settings.public.appUrl`
+ * (e.g. "https://app.uppsalamakerspace.se"), set in every app whose messages
+ * link to it. '' when it is not set, so a message just leaves the link out.
+ */
+export const appBaseUrl = () => (Meteor.settings?.public?.appUrl || '').replace(/\/+$/, '');
+
+export const appLink = (path = '') => {
+  const base = appBaseUrl();
+  if (!base) return '';
+  return `${base}/${String(path).replace(/^\/+/, '')}`;
+};

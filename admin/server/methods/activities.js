@@ -28,6 +28,15 @@ const SharedFields = {
   cost: Num,
   membersOnly: Flag,
   published: Flag,
+  registration: Text,
+  minSeats: Num,
+  maxSeats: Num,
+  queueAllowed: Flag,
+  infoRequired: Flag,
+  infoPlaceholder: Text,
+  requiredCertificateId: Text,
+  checkInEnabled: Flag,
+  checkInOpensHoursBefore: Num,
 };
 const ActivityFields = { ...SharedFields, groupId: Text, eventBookers: Text };
 const EventFields = {
@@ -38,6 +47,8 @@ const EventFields = {
   end: Match.Optional(Match.Maybe(Date)),
   hostMemberIds: Match.Optional([String]),
   status: Text,
+  checkInDeadline: Match.Optional(Match.Maybe(Date)),
+  googleEventId: Text,
 };
 const CategoryFields = { name: Bilingual, sortOrder: Num };
 

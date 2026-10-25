@@ -12,6 +12,7 @@ export const NOTIFICATION_CATEGORIES = [
   { key: "membershipReminders", defaultValue: true, labelKey: "notifMembershipReminders" },
   { key: "accountAndPayments",  defaultValue: true, labelKey: "notifAccountAndPayments" },
   { key: "announcements",       defaultValue: true, labelKey: "notifAnnouncements" },
+  { key: "activities",          defaultValue: true, labelKey: "notifActivities" },
   { key: "testNotification",    defaultValue: false, labelKey: "notifTestNotification", adminOnly: true },
 ];
 
@@ -21,8 +22,11 @@ export const NOTIFICATION_CATEGORIES = [
  * not which subsystem inserted it. Unknown types fall back to
  * accountAndPayments — the safer default for transactional intent.
  */
-export const messageTypeToCategory = (type) =>
-  type === "reminder" ? "membershipReminders" : "accountAndPayments";
+export const messageTypeToCategory = (type) => {
+  if (type === "reminder") return "membershipReminders";
+  if (type === "activity") return "activities";
+  return "accountAndPayments";
+};
 
 /**
  * String constants for push notification categories.

@@ -3,6 +3,8 @@ import { Groups } from '/imports/common/collections/groups';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { ActivityCategories } from '/imports/common/collections/activityCategories';
+import { Certificates } from '/imports/common/collections/certificates';
+import { REGISTRATIONS } from '/imports/common/lib/activityRules';
 import { setEntityImage, clearEntityImage } from '/imports/common/server/entityImage';
 import { recordChange } from '/imports/common/server/auditLog';
 import { text, bilingual, setOrUnset } from '../groups/text';
@@ -49,8 +51,38 @@ export const sharedChanges = async (fields, { inherit }) => {
     cost: positive(fields.cost, 'The cost'),
     membersOnly: flag(fields.membersOnly),
     published: flag(fields.published),
+    ...(await registrationChanges(fields, { inherit, flag })),
   });
   return changes;
+};
+
+/**
+ * The registration fields: whether one signs up, the seats, the queue, what
+ * one must tell and hold, and the check-in. On an activity no registration is
+ * stored as 'none'; on an event an empty one is the activity's.
+ */
+const registrationChanges = async (fields, { inherit, flag }) => {
+  const registration = text(fields.registration) || (inherit ? null : 'none');
+  if (registration && !REGISTRATIONS.includes(registration)) {
+    throw new Meteor.Error('bad-value', `Unknown registration "${registration}"`);
+  }
+  const minSeats = positive(fields.minSeats, 'The fewest participants', { integer: true });
+  const maxSeats = positive(fields.maxSeats, 'The seats', { integer: true });
+  if (maxSeats === 0) throw new Meteor.Error('bad-value', 'An event with seats has at least one');
+  if (minSeats !== null && maxSeats !== null && minSeats > maxSeats) {
+    throw new Meteor.Error('bad-value', 'The fewest participants can not be more than the seats');
+  }
+  return {
+    registration,
+    minSeats,
+    maxSeats,
+    queueAllowed: flag(fields.queueAllowed),
+    infoRequired: flag(fields.infoRequired),
+    infoPlaceholder: text(fields.infoPlaceholder),
+    requiredCertificateId: await exists(Certificates, text(fields.requiredCertificateId), 'certificate'),
+    checkInEnabled: flag(fields.checkInEnabled),
+    checkInOpensHoursBefore: positive(fields.checkInOpensHoursBefore, 'When check-in opens'),
+  };
 };
 
 /** The owning group's id, checked to exist; '' for the association's. */

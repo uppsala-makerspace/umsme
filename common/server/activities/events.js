@@ -5,7 +5,11 @@ import { Members } from '/imports/common/collections/members';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { recordChange } from '/imports/common/server/auditLog';
 import { clearEntityImage } from '/imports/common/server/entityImage';
-import { EVENT_STATUSES, disallowedHosts, eventEnd } from '/imports/common/lib/activityRules';
+import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
+import {
+  EVENT_STATUSES, PENDING, disallowedHosts, eventEnd, resolveEvent, statusFor, initialStatus,
+} from '/imports/common/lib/activityRules';
+import { cancelRegistrations, announceNewEvent } from './registrations';
 import { text } from '../groups/text';
 import { sharedChanges, ownerGroupId, currentOf, imageActions } from './shared';
 
@@ -28,7 +32,7 @@ const activeMemberIds = async (groupId) => (groupId
   ? (await GroupMemberships.find({ groupId, state: 'active' }, { fields: { memberId: 1 } }).fetchAsync()).map((m) => m.memberId)
   : []);
 
-const changesOf = async (fields, { isAdminish }) => {
+const changesOf = async (fields, { isAdminish, before = null }) => {
   const changes = await sharedChanges(fields, { inherit: true });
   const activityId = text(fields.activityId);
   const activity = activityId ? await Activities.findOneAsync(activityId) : null;
@@ -43,8 +47,20 @@ const changesOf = async (fields, { isAdminish }) => {
   if (!end) throw new Meteor.Error('bad-end', 'An event needs an end, or a duration to count it from');
   if (end <= fields.start) throw new Meteor.Error('bad-end', 'An event must end after it starts');
 
-  const status = fields.status || 'confirmed';
-  if (!EVENT_STATUSES.includes(status)) throw new Meteor.Error('bad-status', `Unknown status "${status}"`);
+  const asked = fields.status || 'confirmed';
+  if (!EVENT_STATUSES.includes(asked)) throw new Meteor.Error('bad-status', `Unknown status "${asked}"`);
+  const checkInDeadline = isDate(fields.checkInDeadline) ? fields.checkInDeadline : null;
+  if (checkInDeadline && checkInDeadline > fields.start) {
+    throw new Meteor.Error('bad-deadline', 'The check-in deadline must be before the start');
+  }
+  // Called off, or waiting for its fewest participants, or happening: only
+  // calling it off is asked for; the rest follows from its registrations.
+  const resolved = resolveEvent({ ...changes.$set, start: fields.start }, activity);
+  const status = asked === 'cancelled' ? 'cancelled' : statusFor({
+    event: resolved,
+    seatsTaken: before?.seatsTaken || 0,
+    current: before && before.status !== 'cancelled' ? before.status : initialStatus(resolved),
+  });
 
   const hostMemberIds = [...new Set((fields.hostMemberIds || []).map(text).filter(Boolean))];
   if (hostMemberIds.length && (await Members.find({ _id: { $in: hostMemberIds } }).countAsync()) !== hostMemberIds.length) {
@@ -54,7 +70,8 @@ const changesOf = async (fields, { isAdminish }) => {
   if (outside.length) throw new Meteor.Error('bad-host', 'Hosts must be active members of the group');
 
   Object.assign(changes.$set, { start: fields.start, end, status });
-  for (const [field, value] of Object.entries({ activityId, groupId, hostMemberIds })) {
+  const googleEventId = text(fields.googleEventId);
+  for (const [field, value] of Object.entries({ activityId, groupId, hostMemberIds, checkInDeadline, googleEventId })) {
     if (value && value.length !== 0) changes.$set[field] = value; else changes.$unset[field] = '';
   }
   return changes;
@@ -69,21 +86,31 @@ export const createEvent = async (fields, { userId, isAdminish }) => {
   const doc = { ...$set, createdBy: userId, createdAt: now, updatedAt: now };
   const docId = await Events.insertAsync(doc);
   await recordChange({ userId, domain: DOMAIN, action: 'create', docId, after: doc });
+  await announceNewEvent(docId);
   return docId;
 };
 
 /** Update an event, refused with 'conflict' if it changed since `expectedUpdatedAt`. */
 export const updateEvent = async (docId, fields, { userId, isAdminish, expectedUpdatedAt }) => {
   const before = await currentEvent(docId, expectedUpdatedAt);
-  const { $set, $unset } = await changesOf(fields, { isAdminish });
+  const { $set, $unset } = await changesOf(fields, { isAdminish, before });
   $set.updatedAt = new Date();
   await Events.updateAsync(docId, Object.keys($unset).length ? { $set, $unset } : { $set });
   await recordChange({ userId, domain: DOMAIN, action: 'update', docId, before, after: await Events.findOneAsync(docId) });
+  if ($set.status === 'cancelled' && before.status !== 'cancelled') await cancelRegistrations(docId);
 };
 
-/** Remove an event, and its image with it: an event is soon past, unlike an activity. */
+/**
+ * Remove an event, and its image and registrations with it: an event is soon
+ * past, unlike an activity. Refused while someone holds a seat or queues: call
+ * it off instead, so that they are told.
+ */
 export const removeEvent = async (docId, { userId }) => {
   const before = await currentEvent(docId);
+  if (await EventRegistrations.find({ eventId: docId, state: { $in: PENDING } }).countAsync()) {
+    throw new Meteor.Error('in-use', 'Someone is registered: call the event off instead');
+  }
+  await EventRegistrations.removeAsync({ eventId: docId });
   await clearEntityImage(Events, before);
   await Events.removeAsync(docId);
   await recordChange({ userId, domain: DOMAIN, action: 'remove', docId, before });

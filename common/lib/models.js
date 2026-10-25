@@ -50,6 +50,19 @@ const activityFields = ({ required }) => ({
   cost: { label: "Cost (kr)", type: Number, min: 0, optional: true },
   membersOnly: { label: "For members only", type: Boolean, optional: true },
   published: { label: "Shown on the website", type: Boolean, optional: true },
+  // Registration (plan/activities.md, stage 2): whether one signs up, how
+  // many may, how few make it happen, a queue when full, what one must hold.
+  registration: { label: "Registration", type: String, allowedValues: ["none", "optional", "required"], optional: true },
+  minSeats: { label: "Fewest participants", type: Number, min: 0, optional: true },
+  maxSeats: { label: "Seats", type: Number, min: 1, optional: true },
+  queueAllowed: { label: "Queue when full", type: Boolean, optional: true },
+  infoRequired: { label: "Asks for information", type: Boolean, optional: true },
+  infoPlaceholder: { label: "What to tell", type: String, max: 200, optional: true },
+  requiredCertificateId: { label: "Required certificate", type: String, max: 50, optional: true },
+  // Check-in (stage 3): confirming beforehand that one comes, in a window
+  // opening this many hours before the start and closing at the event's deadline.
+  checkInEnabled: { label: "Check-in", type: Boolean, optional: true },
+  checkInOpensHoursBefore: { label: "Check-in opens (hours before)", type: Number, min: 0, optional: true },
   createdBy: { label: "Created by", type: String, optional: true, autoform: { omit: true } },
   createdAt: { label: "Created", type: Date, optional: true, autoform: { omit: true } },
   updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
@@ -327,6 +340,7 @@ export const models = {
           status: "Status",
           invite: "Invite",
           storage: "Storage",
+          activity: "Activity",
         },
       },
     },
@@ -434,6 +448,16 @@ export const models = {
           storageReminder: "Storage: reminder",
           storageReclamation: "Storage: reclamation",
           storageRelease: "Storage: voluntary release",
+          // Automatic activity messages: registrations, the queue, check-in.
+          // See common/server/activities/notify.js.
+          activityRegistered: "Activity: registered",
+          activityQueued: "Activity: in the queue",
+          activitySeatFree: "Activity: a seat is free",
+          activityCancelled: "Activity: event called off",
+          activityConfirmed: "Activity: event happens",
+          activityNewEvent: "Activity: new event",
+          activityCheckInOpen: "Activity: check in",
+          activityMissedCheckIn: "Activity: missed check-in",
         },
       },
     },
@@ -1867,7 +1891,36 @@ export const models = {
     end: { label: "End", type: Date },
     hostMemberIds: { label: "Hosts", type: Array, optional: true },
     "hostMemberIds.$": { type: String, max: 50 },
-    status: { label: "Status", type: String, allowedValues: ["confirmed", "cancelled"], defaultValue: "confirmed" },
+    // awaiting: fewer registered than its fewest participants, so far.
+    status: { label: "Status", type: String, allowedValues: ["awaiting", "confirmed", "cancelled"], defaultValue: "confirmed" },
+    checkInDeadline: { label: "Check-in deadline", type: Date, optional: true },
+    // Registrations holding a seat (approved, checked in, attended), kept by
+    // the registration functions: the count a seat is taken against, atomically.
+    seatsTaken: { label: "Seats taken", type: Number, min: 0, optional: true, autoform: { omit: true } },
+    // What the scheduled jobs have done, so that each is done once.
+    checkInReminderSentAt: { type: Date, optional: true, autoform: { omit: true } },
+    checkInDeadlinePassedAt: { type: Date, optional: true, autoform: { omit: true } },
+    attendanceClosedAt: { type: Date, optional: true, autoform: { omit: true } },
+    // The Google calendar event it was imported from, or is mirrored to.
+    googleEventId: { label: "Google calendar event", type: String, max: 200, optional: true },
+  },
+  // One member's registration to an event (plan/activities.md).
+  eventRegistration: {
+    eventId: { type: String, max: 50 },
+    memberId: { type: String, max: 50 },
+    registeredAt: { type: Date },
+    info: { type: String, max: 1000, optional: true },
+    state: {
+      type: String,
+      allowedValues: ["approved", "queued", "checkedIn", "attended", "missedCheckIn", "noShow", "withdrawn", "cancelled"],
+    },
+    stateChangedAt: { type: Date },
+  },
+  // A member who would like an activity to happen, before it has an event.
+  activityInterest: {
+    activityId: { type: String, max: 50 },
+    memberId: { type: String, max: 50 },
+    createdAt: { type: Date },
   },
   // The website's filter for activities, a list board and admin keep.
   activityCategory: {

@@ -16,6 +16,7 @@ import { runSeedFromEnv } from '/imports/common/server/seed/runFromEnv';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
 import { ensureAuditLogIndexes } from '/imports/common/server/auditLog';
 import { ensureStorageMessageTemplates } from '/imports/common/server/storageMessages/defaults';
+import { ensureActivityMessageTemplates } from '/imports/common/server/activities/defaultTemplates';
 import { applyMailUrlFromSettings } from '/imports/common/server/mailUrl';
 import { setUpMails } from './mail/mails';
 
@@ -29,6 +30,7 @@ Meteor.startup(async () => {
   await ensureAuditLogIndexes();
   await setUpMails();
   await ensureStorageMessageTemplates();
+  await ensureActivityMessageTemplates();
   await runMigrations();
   publications();
   if (seedSummary) console.log(seedSummary().map((line) => `[seed] ${line}`).join('\n'));

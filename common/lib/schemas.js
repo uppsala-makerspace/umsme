@@ -41,4 +41,6 @@ export const schemas = {
   activity: new SimpleSchema(models.activity),
   event: new SimpleSchema(models.event),
   activityCategory: new SimpleSchema(models.activityCategory),
+  eventRegistration: new SimpleSchema(models.eventRegistration),
+  activityInterest: new SimpleSchema(models.activityInterest),
 };

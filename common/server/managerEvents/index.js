@@ -33,6 +33,8 @@ export const ManagerEventType = {
   EXPENSE_UNREIMBURSED: "expenseUnreimbursed",
   GROUP_JOIN_REQUESTED: "groupJoinRequested",
   GROUP_JOIN_APPROVED: "groupJoinApproved",
+  // An event waiting for its fewest participants got them and happens.
+  ACTIVITY_EVENT_CONFIRMED: "activityEventConfirmed",
 };
 
 const CHANNEL_ADAPTERS = {
