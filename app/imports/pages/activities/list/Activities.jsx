@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Tabs from "../../../components/Tabs";
@@ -33,16 +34,20 @@ const Activities = ({
   const eventsTab = (
     <>
       <div className="flex items-center justify-between gap-3 mb-3">
-        <select
-          aria-label={t("eventsWhen")}
-          value={when}
-          onChange={(e) => onWhen(e.target.value)}
-          className="bg-white border border-gray-300 rounded py-2 px-3 text-sm font-semibold text-gray-700 cursor-pointer"
-        >
-          {WHENS.map((option) => (
-            <option key={option} value={option}>{t(option === "upcoming" ? "upcomingEvents" : "pastEvents")}</option>
-          ))}
-        </select>
+        {/* Its own chevron, not the browser's, which sits close to the edge. */}
+        <div className="relative">
+          <select
+            aria-label={t("eventsWhen")}
+            value={when}
+            onChange={(e) => onWhen(e.target.value)}
+            className="appearance-none bg-white border border-gray-300 rounded py-2 pl-3 pr-10 text-sm font-semibold text-gray-700 cursor-pointer"
+          >
+            {WHENS.map((option) => (
+              <option key={option} value={option}>{t(option === "upcoming" ? "upcomingEvents" : "pastEvents")}</option>
+            ))}
+          </select>
+          <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" aria-hidden="true" />
+        </div>
         {canCreateEvent && when === "upcoming" && <AddLink to="/events/new">+ {t("eventNew")}</AddLink>}
       </div>
       {eventsLoading ? (
