@@ -15,7 +15,8 @@ import Typography from '@mui/material/Typography';
  * "Upload image", "Remove icon".
  *
  * @param {{ noun?: string, src?: string, alt: string, accept: string, onUpload: (file) => void,
- *           onRemove: () => void, uploading?: boolean, maxSize?: number }} props
+ *           onRemove?: () => void, uploading?: boolean, maxSize?: number }} props
+ *   Without `onRemove` the image shown can not be removed here (it is another's, say).
  */
 export const ImageField = ({ noun = 'image', src, alt, accept, onUpload, onRemove, uploading = false, maxSize = 400 }) => {
   const [file, setFile] = useState(null);
@@ -34,7 +35,7 @@ export const ImageField = ({ noun = 'image', src, alt, accept, onUpload, onRemov
         <Button variant="contained" disabled={!file || uploading} onClick={() => { onUpload(file); setFile(null); }}>
           {uploading ? 'Uploading…' : `Upload ${noun}`}
         </Button>
-        {src && <Button onClick={() => setConfirming(true)}>Remove {noun}</Button>}
+        {src && onRemove && <Button onClick={() => setConfirming(true)}>Remove {noun}</Button>}
       </Stack>
       <Dialog open={confirming} onClose={() => setConfirming(false)}>
         <DialogTitle>Remove the {noun}?</DialogTitle>

@@ -12,6 +12,9 @@ import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
 import { Groups } from '/imports/common/collections/groups';
 import { Workshops } from '/imports/common/collections/workshops';
+import { Activities } from '/imports/common/collections/activities';
+import { Events } from '/imports/common/collections/events';
+import { ActivityCategories } from '/imports/common/collections/activityCategories';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Spaces } from '/imports/common/collections/spaces';
 import { StoreItems } from '/imports/common/collections/storeItems';
@@ -178,6 +181,40 @@ export default () => {
     check(docId, String);
     if (!(await hasRole(this.userId, DOMAIN_ROLES.workshops))) return this.ready();
     return Workshops.find(docId);
+  });
+
+  const ACTIVITY_LIST_FIELDS = { name: 1, groupId: 1, categoryId: 1, workshopId: 1, published: 1, updatedAt: 1 };
+  const EVENT_LIST_FIELDS = { name: 1, activityId: 1, categoryId: 1, groupId: 1, start: 1, end: 1, status: 1, hostMemberIds: 1 };
+
+  Meteor.publish('admin.activities.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.activities))) return this.ready();
+    return Activities.find({}, { fields: ACTIVITY_LIST_FIELDS });
+  });
+
+  // An activity, whole, and its events as a list shows them.
+  Meteor.publish('admin.activities.activity', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.activities))) return this.ready();
+    return [Activities.find(docId), Events.find({ activityId: docId }, { fields: EVENT_LIST_FIELDS })];
+  });
+
+  // The events, and the names of their activities, which most of them go by.
+  Meteor.publish('admin.events.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.activities))) return this.ready();
+    return [Events.find({}, { fields: EVENT_LIST_FIELDS }), Activities.find({}, { fields: { name: 1, groupId: 1 } })];
+  });
+
+  // An event, whole, and its activity, whose values it inherits.
+  Meteor.publish('admin.events.event', async function (docId) {
+    check(docId, String);
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.activities))) return this.ready();
+    const event = await Events.findOneAsync(docId, { fields: { activityId: 1 } });
+    return event?.activityId ? [Events.find(docId), Activities.find(event.activityId)] : Events.find(docId);
+  });
+
+  Meteor.publish('admin.activityCategories.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.activities))) return this.ready();
+    return ActivityCategories.find();
   });
 
   // The certificates, with what the list shows and what choosing a

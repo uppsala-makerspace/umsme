@@ -14,6 +14,7 @@ import './expenseBudgets';
 import './accounting';
 import './groups';
 import './workshops';
+import './activities';
 import './spaces';
 import './storeItems';
 import './storageV2';

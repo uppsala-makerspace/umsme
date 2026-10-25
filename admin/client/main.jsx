@@ -23,6 +23,7 @@ import './ui/certificates';
 import './ui/expenses';
 import './ui/groups';
 import './ui/workshops';
+import './ui/activities';
 import './ui/spaces';
 import './ui/storeitems';
 import './ui/accounting';
