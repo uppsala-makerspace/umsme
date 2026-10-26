@@ -40,10 +40,8 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
   return (
     <>
       <Card title={t("formCardDescription")}>
-        <Row>
-          <TextField label={t("activityFieldNameSv")} required={!inherited} {...text("nameSv", "name", "sv")} />
-          <TextField label={t("activityFieldNameEn")} {...text("nameEn", "name", "en")} />
-        </Row>
+        <TextField label={t("activityFieldNameSv")} required={!inherited} {...text("nameSv", "name", "sv")} />
+        <TextField label={t("activityFieldNameEn")} {...text("nameEn", "name", "en")} />
         <TextField multiline label={t("activityFieldDescriptionSv")} {...text("descriptionSv", "description", "sv")} />
         <TextField multiline label={t("activityFieldDescriptionEn")} {...text("descriptionEn", "description", "en")} />
         <Row>
