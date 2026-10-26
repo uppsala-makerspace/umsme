@@ -1424,10 +1424,6 @@ video {
   overflow-wrap: break-word;
 }
 
-.break-all {
-  word-break: break-all;
-}
-
 .rounded {
   border-radius: 0.25rem;
 }
@@ -2723,18 +2719,4 @@ body {
   .sm\:pr-4 {
     padding-right: 1rem;
   }
-}
-
-.\[\&_a\]\:text-blue-600 a {
-  --tw-text-opacity: 1;
-  color: rgb(37 99 235 / var(--tw-text-opacity, 1));
-}
-
-.\[\&_a\]\:underline a {
-  text-decoration-line: underline;
-}
-
-.\[\&_a\]\:hover\:text-blue-800:hover a {
-  --tw-text-opacity: 1;
-  color: rgb(30 64 175 / var(--tw-text-opacity, 1));
 }

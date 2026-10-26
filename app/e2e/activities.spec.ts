@@ -28,6 +28,22 @@ test.describe('Activities', () => {
     await expect(page.getByRole('link', { name: `+ ${en.eventAdd}` })).toHaveCount(0);
   });
 
+  test('an event to come may be added to one\'s own calendar', async ({ page }) => {
+    await openAs(page, 'member', '/activities');
+    await page.getByRole('link', { name: new RegExp(WHEEL) }).first().click();
+    await expect(page.getByRole('heading', { name: WHEEL, level: 2 })).toBeVisible();
+    const add = page.getByRole('link', { name: en.addToCalendar });
+    await expect(add).toHaveAttribute('download', `${WHEEL}.ics`);
+    const href = decodeURIComponent((await add.getAttribute('href')) || '');
+    expect(href).toContain('BEGIN:VEVENT');
+    expect(href).toContain(`SUMMARY:${WHEEL}`);
+  });
+
+  test('the old Google calendar page leads to the calendar', async ({ page }) => {
+    await openAs(page, 'member', '/calendar');
+    await expect(page).toHaveURL(/\/activities$/);
+  });
+
   test('a cancelled event is marked', async ({ page }) => {
     await openAs(page, 'member', '/activities');
     await expect(page.getByRole('link', { name: new RegExp(`${WHEEL}.*${en.eventCancelled}`) })).toBeVisible();

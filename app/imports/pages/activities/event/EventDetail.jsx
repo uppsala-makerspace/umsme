@@ -11,6 +11,19 @@ import Card from "../components/Card";
 import RegistrationBox from "../components/RegistrationBox";
 import ParticipantList from "../components/ParticipantList";
 import { eventWhen } from "../components/format";
+import { icsDataUrl } from "../components/ics";
+
+const CalendarPlusIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"
+    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+    <line x1="12" y1="14" x2="12" y2="18" />
+    <line x1="10" y1="16" x2="14" y2="16" />
+  </svg>
+);
 
 /** One event: when, what, who hosts it, and the activity it is of. */
 const EventDetail = ({
@@ -37,25 +50,39 @@ const EventDetail = ({
 
   const { event, hosts, activityName, canEdit } = data;
   const cancelled = event.status === "cancelled";
+  const ahead = new Date(event.end || event.start) > new Date();
+  const name = localized(event.name, lang);
   return (
     <MainContent>
       {event.imageUrl && (
-        <img src={event.imageUrl} alt={localized(event.name, lang)} className="w-full max-h-64 object-cover rounded-lg mb-4" />
+        <img src={event.imageUrl} alt={name} className="w-full max-h-64 object-cover rounded-lg mb-4" />
       )}
       <div className="flex items-center gap-3 mb-1">
-        <h2 className={`text-2xl m-0 ${cancelled ? "line-through text-gray-500" : ""}`}>{localized(event.name, lang)}</h2>
+        <h2 className={`text-2xl m-0 ${cancelled ? "line-through text-gray-500" : ""}`}>{name}</h2>
         {canEdit && (
           <Link to={`/events/${event._id}/edit`} className="flex-shrink-0 ml-auto text-sm font-semibold text-brand-green no-underline hover:underline">
             {t("edit")}
           </Link>
         )}
       </div>
-      <p className="m-0 mb-3 font-semibold">
-        {eventWhen(event, lang)}
-        {cancelled && (
-          <span className="ml-2 text-xs font-semibold rounded-full py-0.5 px-2 bg-red-100 text-red-800">{t("eventCancelled")}</span>
+      <div className="flex items-center gap-3 mb-3">
+        <p className="m-0 font-semibold">
+          {eventWhen(event, lang)}
+          {cancelled && (
+            <span className="ml-2 text-xs font-semibold rounded-full py-0.5 px-2 bg-red-100 text-red-800">{t("eventCancelled")}</span>
+          )}
+        </p>
+        {!cancelled && ahead && (
+          <a
+            href={icsDataUrl(event, lang, { url: `${window.location.origin}/events/${event._id}` })}
+            download={`${name || "event"}.ics`}
+            className="flex-shrink-0 ml-auto flex items-center gap-1 text-sm text-gray-500 no-underline hover:text-brand-green"
+          >
+            <CalendarPlusIcon />
+            {t("addToCalendar")}
+          </a>
         )}
-      </p>
+      </div>
       {!cancelled && (
         <RegistrationBox
           registration={data.registration} busy={busy} error={actionError}

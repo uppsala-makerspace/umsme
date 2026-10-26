@@ -69,7 +69,6 @@ export const HamburgerMenu = () => {
             { to: "/messages", label: "messages" },
             { to: "/certificates", label: "certificates" },
             { to: "/groups", label: "groups" },
-            { to: "/calendar", label: "navGoogleCalendar" },
             { to: "/tool", label: "viewTools" },
             { to: "/storage", label: "myBox" },
             { to: "/store", label: "store" },

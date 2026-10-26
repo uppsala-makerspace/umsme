@@ -30,6 +30,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `reminderCron.minute`| Minute the reminder cron runs (default: `0`)  |
 | `syncNrOfTransactions`| Number of bank transactions to sync          |
 | `public.adminUrl`    | Public base URL of the admin app (e.g. `https://umsme.uppsalamakerspace.se`; `http://localhost:3000` in dev). Used to build absolute links into admin — set explicitly because `Meteor.absoluteUrl()` is unreliable behind the reverse proxy. |
+| `public.appUrl`      | Public base URL of the member app (`https://app.uppsalamakerspace.se`), for links to events in activity mail. Without it the mail has no link. |
 | `public.checkPath`   | Base URL for member QR check                 |
 | `public.vapidPublicKey` | VAPID key for push notifications          |
 | `private.notificationsPath` | Path to notification types JSON (default: bundled `private/notifications.json`) |
@@ -62,7 +63,7 @@ storage event publications reactive without polling-driver limitations.
 | `public.swish.disabled`           | Kill switch for Swish payments             |
 | `public.adminUrl`                 | Public base URL of the admin app, used to build links into admin (e.g. expense manager events). Same value as admin's own `public.adminUrl`. |
 | `public.vapidPublicKey`           | VAPID public key for push                  |
-| `public.googleCalendar`           | Google Calendar API integration            |
+| `public.appUrl`                   | Public base URL of the member app (`https://app.uppsalamakerspace.se`), for links to events in activity mail. Without it the mail has no link. |
 | `public.slack.team`               | Slack team ID                              |
 | `public.oauth`                    | Enabled OAuth providers                    |
 | `private.vapidPrivateKey`         | VAPID private key for push                 |

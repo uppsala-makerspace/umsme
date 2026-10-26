@@ -21,7 +21,6 @@ const Account = lazyWithRetry(() => import('/imports/pages/account'));
 const Verification = lazyWithRetry(() => import('/imports/pages/emailVerification'));
 const ForgotPassword = lazyWithRetry(() => import('/imports/pages/forgotPassword'));
 const ResetPassword = lazyWithRetry(() => import('/imports/pages/resetPassword'));
-const Calendar = lazyWithRetry(() => import('/imports/pages/calendar'));
 const Map = lazyWithRetry(() => import('/imports/pages/map'));
 const Contact = lazyWithRetry(() => import('/imports/pages/contact'));
 const Certificates = lazyWithRetry(() => import('/imports/pages/certificates'));
@@ -89,7 +88,7 @@ export const App = () => {
             <Route path="/storage" element={<Storage />} />
             <Route path="/liability" element={<Liability />} />
             <Route path="/account" element={<Account />} />
-            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/calendar" element={<Navigate to="/activities" replace />} />
             <Route path="/map" element={<Map />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/certificates" element={<Certificates />} />

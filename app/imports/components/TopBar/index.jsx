@@ -146,7 +146,6 @@ const PAGE_TITLES = {
   "/messages": "messages",
   "/unlock": "navDoors",
   "/map": "navMap",
-  "/calendar": "navGoogleCalendar",
   "/workshops": "workshops",
   "/activities": "navCalendar",
 };

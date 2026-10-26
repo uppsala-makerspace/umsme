@@ -10,10 +10,6 @@
     },
     "otherPaymentOptionsUrl": "https://www.uppsalamakerspace.se/bli-medlem/",
     "vapidPublicKey": "BNI6pdhR7C8akwjNwFS3pRFjlukg1Jrz249svg6hyA8hCOAr88mDj8y0aAn5kJ55HBPaNLlJAV1prwewSgZxHNE",
-    "googleCalendar": {
-      "apiKey": "demo",
-      "calendarId": "demo@group.calendar.google.com"
-    },
     "slack": {
       "team": "DEMO",
       "channels": []

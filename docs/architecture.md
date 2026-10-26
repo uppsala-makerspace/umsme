@@ -147,7 +147,7 @@ Member-facing Progressive Web App built with React 19, react-router-dom, and Tai
 | `/certifier-requests/:attestationId` | CertifierRequestDetail | Certifier attestation review   |
 | `/liability`                       | Liability              | Liability document approval      |
 | `/storage`                         | Storage                | Storage unit management          |
-| `/calendar`                        | Calendar               | Google Calendar integration      |
+| `/calendar`                        | (redirect)             | To `/activities`; the Google Calendar page is gone |
 | `/map`                             | Map                    | Facility map                     |
 | `/contact`                         | Contact                | Contact information              |
 | `/install`                         | Install                | PWA installation instructions    |
@@ -309,7 +309,7 @@ All apps use `chatra:synced-cron` for scheduled tasks. SyncedCron uses a shared 
 | Google OAuth         | app       | Member authentication (optional, configured in settings). |
 | Facebook OAuth       | app       | Member authentication (optional, configured in settings). |
 | SMTP server          | admin, app | Email delivery. Configured via `MAIL_URL` environment variable (admin) or `private.mailUrl` setting (app). |
-| Google Calendar      | app       | Calendar event display in the member app.           |
+| Google Calendar      | admin     | Import of the calendar's events as activity events (`private.googleCalendar`). |
 | Slack                | app       | Slack channel listing and bot integration.          |
 
 ---
