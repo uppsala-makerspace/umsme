@@ -45,7 +45,7 @@ export default () => {
           const activityId = params.get("activity") || "";
           setValues({
             ...eventValues(null, { activityId }),
-            groupId: (activityId || loaded.adminish) ? "" : loaded.groups.find((g) => g.book)?._id || "",
+            groupId: (activityId || loaded.adminish) ? "" : loaded.groups.find((g) => g.edit)?._id || "",
           });
         }
       } catch (err) {

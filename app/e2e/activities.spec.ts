@@ -160,4 +160,21 @@ test.describe('Activities', () => {
     await page.getByRole('link', { name: en.edit }).click();
     await expect(page.getByLabel(en.activityFieldEventBookers).locator('option:checked')).toHaveText(en.activityEventBookersActivityEditors);
   });
+
+  test('only those who may create activities see New event on the calendar', async ({ page }) => {
+    // A member of a function group and an activity group, responsible for neither.
+    await openAs(page, 'discounted', '/activities');
+    await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toHaveCount(0);
+  });
+
+  test('a steering group member moves an activity only to their group or an activity group below it', async ({ page }) => {
+    await openAs(page, 'steering', '/activities?tab=activities');
+    await page.getByRole('link', { name: /E2E edit aktivitet/ }).click();
+    await page.getByRole('link', { name: en.edit }).click();
+    const owner = page.getByLabel(en.activityFieldGroup);
+    await expect(owner.locator('option')).toHaveCount(2);
+    expect((await owner.locator('option').allTextContents()).sort()).toEqual([CERAMICS, 'Glazing group'].sort());
+  });
 });
+

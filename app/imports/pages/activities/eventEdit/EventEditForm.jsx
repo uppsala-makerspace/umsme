@@ -18,7 +18,8 @@ const EventEditForm = ({
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const [confirming, setConfirming] = useState(false);
-  const groups = choices.groups.filter((g) => g.book || g._id === values.groupId);
+  // A free-standing event belongs to a group one may create activities for.
+  const groups = choices.groups.filter((g) => g.edit || g._id === values.groupId);
   const toggleHost = (id) => onChange("hostMemberIds", values.hostMemberIds.includes(id)
     ? values.hostMemberIds.filter((h) => h !== id)
     : [...values.hostMemberIds, id]);

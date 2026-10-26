@@ -326,11 +326,16 @@ const EventFields = {
 };
 
 /** The group an event's fields put it in: its activity's, or its own. */
-/** What may be done with an event of these fields: in its group, of its activity. */
+/**
+ * What may be done with an event of these fields: in its group, of its
+ * activity. A free-standing event is like an activity of its own, so only
+ * those who may create activities in its group create and change it.
+ */
 const accessToFields = async (who, fields) => {
   const activity = fields.activityId ? await Activities.findOneAsync(fields.activityId) : null;
   if (fields.activityId && !activity) throw new Meteor.Error("not-found", "Activity not found");
-  return accessTo(who.member, eventGroupId(fields, activity), who, activity);
+  const access = await accessTo(who.member, eventGroupId(fields, activity), who, activity);
+  return activity ? access : { ...access, book: access.edit };
 };
 
 /** What may be done with a stored event. */
@@ -346,7 +351,8 @@ Meteor.methods({
     return {
       activities: activities.map((a) => activityView(a, lookup)),
       canCreateActivity: groups.some((g) => g.edit),
-      canCreateEvent: groups.some((g) => g.book),
+      // A free-standing event, the calendar's New event, as an activity: see accessToFields.
+      canCreateEvent: groups.some((g) => g.edit),
     };
   },
 
@@ -406,7 +412,7 @@ Meteor.methods({
     const hosts = view.hostMemberIds.length
       ? await Members.find({ _id: { $in: view.hostMemberIds } }, { fields: { name: 1 } }).fetchAsync()
       : [];
-    const access = await accessTo(who.member, eventGroupId(event, activity), who, activity);
+    const access = await accessToEvent(who, event);
     const hostsCanSee = mayRecordAttendance(event, who) || access.book;
     return {
       event: view,
