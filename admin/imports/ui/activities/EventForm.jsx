@@ -133,6 +133,16 @@ export const EventForm = ({
           </Stack>
         )}
       </Stack>
+      {event?.calendarError && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          The Google calendar could not be updated; it is tried again every five minutes. {event.calendarError}
+        </Alert>
+      )}
+      {event && !event.calendarError && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {event.googleEventId ? 'In the Google calendar.' : 'Not in the Google calendar: events shown on the website go there within five minutes.'}
+        </Typography>
+      )}
       {isNew && values.activityId && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           What you leave empty is the activity’s, as shown greyed. The image is uploaded on the page once the event exists.

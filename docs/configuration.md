@@ -43,6 +43,8 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `serviceConfigurations` | OAuth credentials (Google, Facebook)      |
 | `tests.path`         | Absolute path to the test-questions root (see [certificates.md](certificates.md#7b-test-based-certificates) for layout). Same setting in app's `settings.json`. |
 | `private.googleDrive` | Receipt storage for expenses; same block as the app (see section 12). Admin uses it to download receipts for review. |
+| `activityCron.enabled` | **Must be explicitly `true`** for the events' scheduled jobs: check-in reminders and deadlines, and the Google calendar sync. Keep unset in dev, like `reminderCron`. |
+| `private.googleCalendar` | The association's Google calendar: import of its events, and events mirrored to it (see section 13). `"fake"` for a stand-in (demo, e2e). |
 | `private.receiptTokenSecret` | Secret for signing receipt-image URLs (see section 12). If unset, a random per-process secret is used. |
 
 Storage walls and units live in the database and are managed on the admin
@@ -417,7 +419,56 @@ The "Open in admin" links in the expense manager events are built from `public.a
 
 ---
 
-## 13. Development Setup
+## 13. Google Calendar (activities)
+
+Admin reads the association's Google calendar to import its events
+(`common/server/activities/calendarImport.js`, with the API key) and mirrors
+events to it (`common/server/activities/calendarSync.js`, with a service
+account). The mirror is a job every five minutes that writes what differs
+from what it last wrote, so a failed write is tried again by itself. Only
+events shown on the website (`published`, inherited from the activity) go to
+the calendar; a called-off event stays with "INSTÄLLT: " before its name.
+UMSME touches only the calendar events of its own events, created or
+imported; an imported event is UMSME's from then on, and changes made to it
+in Google are written over.
+
+```json
+"activityCron": { "enabled": true },
+"public": { "appUrl": "https://app.uppsalamakerspace.se" },
+"private": {
+  "googleCalendar": {
+    "apiKey": "…",
+    "calendarId": "…@group.calendar.google.com",
+    "serviceAccount": { "keyFile": "config/calendar-service-account.json" },
+    "location": "Uppsala Makerspace, <street>, Uppsala"
+  }
+}
+```
+
+| Key | Purpose |
+|-----|---------|
+| `apiKey` | Reading the calendar, for the import |
+| `calendarId` | The calendar to read and write |
+| `serviceAccount` | The account that writes: `{ "keyFile": "path relative to PWD" }` or `{ "credentials": { "client_email", "private_key" } }`, as for `googleDrive`. Without it nothing is written. |
+| `location` | The calendar event's place, after the workshop's name when the event has one |
+
+Setting up the service account (it may be the same as Google Drive's):
+
+1. In Google Cloud, turn on the Google Calendar API for the project, and
+   create a service account with a JSON key.
+2. In Google Calendar, share the calendar with the service account's email,
+   with "Make changes to events".
+3. Put the key where `keyFile` points (it is a secret, like the Swish
+   certificates), and turn on `activityCron.enabled`.
+
+The job runs only with `activityCron.enabled: true` and a `serviceAccount`
+(or `"fake"`), so a development copy of the database never writes to the
+real calendar. An event whose write failed shows the error on its page in
+admin.
+
+---
+
+## 14. Development Setup
 
 ### Prerequisites
 
@@ -474,7 +525,7 @@ npm run storybook
 
 ---
 
-## 14. Deployment
+## 15. Deployment
 
 ### Building
 

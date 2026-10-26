@@ -8,7 +8,7 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 - All kod ligger på grenen **`activities`** (48 commits från `master`), inte
   pushad, inte ihopslagen med `master`.
 - Etapp 1, 2 och 3 är byggda, plus några tillägg (nedan). Etapp 4
-  (kalendersynk) och 5 (mål-certifikat) återstår.
+  (kalendersynk) är byggd; 5 (mål-certifikat) återstår.
 - Tester gröna vid senaste körningen: admin `npm test` (551), admin e2e (221),
   app e2e (46). Storybook bygger i båda.
 
@@ -81,6 +81,11 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 
 ## Inställningar som behövs i produktion
 
+- `private.googleCalendar.serviceAccount` och `.location` i admin, för att
+  spegla tillfällen till kalendern (jobbet var femte minut, kräver också
+  `activityCron.enabled`). Kalendern delas med servicekontots e-post med
+  "Göra ändringar i händelser".
+
 - `activityCron.enabled: true` i admin: påminnelser om incheckning och
   deadline-jobbet. Det är avstängt utan inställningen.
 - `private.googleCalendar: { apiKey, calendarId }` i admin, för importen. I
@@ -145,7 +150,7 @@ Inga just nu.
 
 ## Nästa steg att välja mellan
 
-- Svara på frågorna ovan, och slå sedan ihop `activities` med `master` och pusha.
-- **Etapp 4:** spegla tillfällen till Google-kalendern (`googleEventId` finns
-  redan, och importen åt andra hållet är byggd).
+- Slå ihop `activities` med `master` och pusha. Före kalendersynken i
+  produktion: servicekonto och `location` i admins
+  `private.googleCalendar` (`docs/configuration.md`, avsnitt 13).
 - **Etapp 5:** mål-certifikat som delas ut vid närvaro.

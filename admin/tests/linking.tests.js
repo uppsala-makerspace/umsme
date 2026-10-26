@@ -94,8 +94,11 @@ describe('importing the calendar', function () {
     const evening = await Events.findOneAsync({ googleEventId: evenings[0].googleEventId });
     assert.strictEqual(evening.activityId, activityId);
     assert.strictEqual(evening.name, undefined);
+    // Shown on the website, as they were in the open calendar, so that the calendar sync keeps them.
+    assert.strictEqual(evening.published, true);
     const cleaning = await Events.findOneAsync({ googleEventId: 'fake-staddag' });
     assert.deepStrictEqual(cleaning.name, { sv: 'Städdag i lokalen' });
+    assert.strictEqual(cleaning.published, true);
     await Activities.removeAsync(activityId);
   });
 });

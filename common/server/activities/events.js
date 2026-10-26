@@ -6,6 +6,7 @@ import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { recordChange } from '/imports/common/server/auditLog';
 import { clearEntityImage } from '/imports/common/server/entityImage';
 import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
+import { CalendarRemovals } from '/imports/common/collections/calendarRemovals';
 import {
   EVENT_STATUSES, PENDING, disallowedHosts, eventEnd, resolveEvent, statusFor, initialStatus,
 } from '/imports/common/lib/activityRules';
@@ -101,9 +102,9 @@ export const updateEvent = async (docId, fields, { userId, isAdminish, expectedU
 };
 
 /**
- * Remove an event, and its image and registrations with it: an event is soon
- * past, unlike an activity. Refused while someone holds a seat or queues: call
- * it off instead, so that they are told.
+ * Remove an event, and its image, registrations and calendar event with it:
+ * an event is soon past, unlike an activity. Refused while someone holds a
+ * seat or queues: call it off instead, so that they are told.
  */
 export const removeEvent = async (docId, { userId }) => {
   const before = await currentEvent(docId);
@@ -113,6 +114,8 @@ export const removeEvent = async (docId, { userId }) => {
   await EventRegistrations.removeAsync({ eventId: docId });
   await clearEntityImage(Events, before);
   await Events.removeAsync(docId);
+  // The calendar sync takes it out of the calendar too.
+  if (before.googleEventId) await CalendarRemovals.insertAsync({ googleEventId: before.googleEventId, removedAt: new Date() });
   await recordChange({ userId, domain: DOMAIN, action: 'remove', docId, before });
 };
 

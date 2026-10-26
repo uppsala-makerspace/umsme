@@ -1920,6 +1920,10 @@ export const models = {
     attendanceClosedAt: { type: Date, optional: true, autoform: { omit: true } },
     // The Google calendar event it was imported from, or is mirrored to.
     googleEventId: { label: "Google calendar event", type: String, max: 200, optional: true },
+    // What was last written to the calendar (a hash of it), and why the last
+    // write failed: kept by common/server/activities/calendarSync.js.
+    calendarHash: { type: String, max: 100, optional: true, autoform: { omit: true } },
+    calendarError: { type: String, max: 1000, optional: true, autoform: { omit: true } },
   },
   // One member's registration to an event (plan/activities.md).
   eventRegistration: {
@@ -1934,6 +1938,11 @@ export const models = {
     stateChangedAt: { type: Date },
     // When the member last gave up a seat: they may not sign up again at once (registerAgainAt).
     seatReleasedAt: { type: Date, optional: true },
+  },
+  // A calendar event of a removed event, to be removed from the calendar too.
+  calendarRemoval: {
+    googleEventId: { type: String, max: 200 },
+    removedAt: { type: Date },
   },
   // A member who would like an activity to happen, before it has an event.
   activityInterest: {

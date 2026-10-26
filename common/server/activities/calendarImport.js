@@ -123,6 +123,7 @@ export const calendarPreview = async ({ from, to }) => {
  */
 export const importCalendarEvents = async ({ from, to, googleEventIds }, { userId }) => {
   const chosen = new Set(googleEventIds);
+  const published = new Set((await Activities.find({ published: true }, { fields: { _id: 1 } }).fetchAsync()).map((a) => a._id));
   let created = 0;
   let skipped = 0;
   for (const item of await calendarPreview({ from, to })) {
@@ -138,6 +139,8 @@ export const importCalendarEvents = async ({ from, to, googleEventIds }, { userI
         ...(item.description ? { description: { sv: item.description } } : {}),
       }),
       ...(item.spaceId ? { spaceId: item.spaceId } : {}),
+      // It was in the open calendar: shown, so that the calendar sync keeps it there.
+      ...(item.activityId && published.has(item.activityId) ? {} : { published: true }),
       start: item.start,
       end: item.end,
       googleEventId: item.googleEventId,

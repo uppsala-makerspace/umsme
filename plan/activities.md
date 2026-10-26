@@ -256,13 +256,24 @@ till en aktivitet:
 
 - skapa event → skapa händelse, spara `googleEventId`
 - ändra → uppdatera samma händelse
-- ställa in → radera händelsen (eller märk titeln "INSTÄLLT" — avgörs i etapp 4)
-- UMSME rör **bara** händelser den själv skapat; allt annat i kalendern lämnas.
+- ställa in → titeln märks "INSTÄLLT: ", händelsen ligger kvar
+- UMSME rör **bara** händelser till sina egna tillfällen, skapade eller
+  importerade; allt annat i kalendern lämnas. Ett importerat tillfälle är
+  UMSME:s från importen, och ändringar av det i Google skrivs över.
 
-Skrivningen sker på serversidan efter att databasen uppdaterats, med försök igen
-vid fel; en misslyckad kalenderskrivning får inte hindra bokningen. Servicekontots
-nyckel läggs i `app/settings.json` under `private`, och appens befintliga
-kalendersida fortsätter fungera oförändrad.
+*Byggd i etapp 4:* ett jobb i admin var femte minut
+(`common/server/activities/calendarSync.js`) stämmer av i stället för att
+fånga varje ändring: det räknar fram vad varje tillfälle ska säga i kalendern
+(`common/lib/calendarEntry.js`), jämför med en hash av det som senast skrevs
+(`calendarHash`) och skriver bara det som skiljer. Det fångar ändringar som
+kommer via aktiviteten, och ett misslyckat försök görs om nästa körning
+(felet syns som `calendarError` på tillfällets sida i admin). Borttagna
+tillfällen lämnar sitt kalender-id i `calendarRemovals`. Bara tillfällen som
+visas på hemsidan (`published`) kommer med; importerade sätts som visade.
+Innehåll: svensk titel, beskrivning på svenska och engelska, länk till
+tillfället i appen, och som plats verkstaden och föreningens adress
+(`private.googleCalendar.location`). Servicekontot ligger i admins
+`private.googleCalendar.serviceAccount`; appen behöver inget.
 
 ## Hemsidan
 
@@ -340,6 +351,7 @@ som har en väntande begäran.
      eventet" och "hitta event med aktivitetens namn" i admin, och "Mina
      anmälningar" i appens kalender.
 4. **Kalendersynk.** Servicekonto, `googleEventId`, återförsök.
+   *Byggd på grenen `activities` (oktober 2026), se Kalendern ovan.*
 5. **Mål-certifikat.** Visning på aktivitets- och eventsidor, hosts väntande
    begäranden, och `onAttendance` med kontrollen vid host-tilldelning.
 
