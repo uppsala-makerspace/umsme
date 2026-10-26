@@ -232,6 +232,21 @@ export const checkInClosed = (event, now = new Date()) =>
   checkInApplies(event) && now >= checkInWindow(event).closes;
 
 /** Whether a member may withdraw: before the start, from a seat or the queue. */
+/** How long one who gave up a seat waits before signing up again. */
+export const REGISTER_AGAIN_AFTER_MINUTES = 60;
+
+/**
+ * When one who gave up their seat may sign up again, if it is still to
+ * come: not at once, or those told of the free seat would find it taken
+ * back. Null when they may now. Leaving the queue frees no seat, so it
+ * does not count.
+ */
+export const registerAgainAt = (registration, now = new Date()) => {
+  if (registration?.state !== "withdrawn" || !registration.seatReleasedAt) return null;
+  const at = new Date(registration.seatReleasedAt.getTime() + REGISTER_AGAIN_AFTER_MINUTES * 60000);
+  return at > now ? at : null;
+};
+
 export const mayWithdraw = (registration, event, now = new Date()) =>
   PENDING.includes(registration?.state) && event.start > now;
 

@@ -102,6 +102,24 @@ describe('event registrations', function () {
     assert.strictEqual((await eventOf(id)).seatsTaken, 1);
   });
 
+  it('lets one who gave up a seat sign up again only after an hour; leaving the queue does not count', async function () {
+    const id = await makeEvent({ maxSeats: 1, queueAllowed: true });
+    const now = new Date();
+    const later = (minutes) => new Date(now.getTime() + minutes * 60000);
+    await register(id, a, { userId, now });
+    await register(id, b, { userId, now });
+    await withdraw(id, a, { userId, now });
+    await rejects(register(id, a, { userId, now: later(59) }), 'too-soon');
+    assert.strictEqual(await takeSeat(id, b, { userId, now: later(60) }), 'approved');
+    assert.strictEqual(await register(id, a, { userId, now: later(61) }), 'queued');
+    assert.strictEqual((await EventRegistrations.findOneAsync({ eventId: id, memberId: a })).seatReleasedAt, undefined);
+    await withdraw(id, a, { userId, now: later(62) });
+    assert.strictEqual(await register(id, a, { userId, now: later(63) }), 'queued');
+    // Board or admin adding someone is not held back.
+    await withdraw(id, b, { userId, now: later(64) });
+    assert.strictEqual(await register(id, b, { userId, now: later(65), override: true }), 'approved');
+  });
+
   it('gives a free seat to a new registration too, the queue having no precedence', async function () {
     const id = await makeEvent({ maxSeats: 1, queueAllowed: true });
     await register(id, a, { userId });

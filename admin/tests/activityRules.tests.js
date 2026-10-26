@@ -11,6 +11,7 @@ import {
   checkInWindow,
   checkInApplies,
   lastCallDue,
+  registerAgainAt,
 } from '/imports/common/lib/activityRules';
 import { zonedDate, zonedParts, zonedDay, zonedClock, zonedDayAt } from '/imports/common/lib/days';
 
@@ -155,6 +156,18 @@ describe('Activity rules', function () {
       assert.strictEqual(zonedDay(zonedDate(2026, 10, 0, 3, 0)), '2026-10-31');
       assert.strictEqual(zonedDate(2026, 9, 25, 3, 0).toISOString(), '2026-10-25T02:00:00.000Z');
       assert.strictEqual(zonedDate(2026, 2, 29, 3, 0).toISOString(), '2026-03-29T01:00:00.000Z');
+    });
+  });
+
+  describe('registerAgainAt', function () {
+    it('is an hour after giving up a seat, and null once passed or for anything else', function () {
+      const released = new Date('2026-11-01T12:00:00Z');
+      const withdrawn = { state: 'withdrawn', seatReleasedAt: released };
+      assert.strictEqual(registerAgainAt(withdrawn, new Date('2026-11-01T12:30:00Z')).toISOString(), '2026-11-01T13:00:00.000Z');
+      assert.strictEqual(registerAgainAt(withdrawn, new Date('2026-11-01T13:00:00Z')), null);
+      assert.strictEqual(registerAgainAt({ state: 'withdrawn' }, released), null);
+      assert.strictEqual(registerAgainAt({ state: 'approved', seatReleasedAt: released }, released), null);
+      assert.strictEqual(registerAgainAt(null), null);
     });
   });
 

@@ -191,7 +191,11 @@ den. Aktiviteten är produkten, eventet är driften.
    via push + mail (nya malltyper).
 2. När antalet `approved` når `minSeats` går eventet från `awaiting` till
    `confirmed`; hosts och gruppens Slack-kanal får besked via `publishManagerEvent`.
-3. Medlem meddelar förhinder → `withdrawn`, platsen släpps.
+3. Medlem meddelar förhinder → `withdrawn`, platsen släpps. Den som lämnat
+   en plats kan inte anmäla sig igen förrän efter en timme
+   (`registerAgainAt`), annars hinner den ta tillbaka platsen innan kön som
+   fått besked om den. Att lämna kön räknas inte; board/admin som lägger
+   till någon påverkas inte.
 
 ### Ledig plats
 

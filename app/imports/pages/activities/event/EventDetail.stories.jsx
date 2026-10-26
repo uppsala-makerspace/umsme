@@ -36,6 +36,7 @@ export const NeedsCertificate = {
     },
   },
 };
+export const GaveUpSeat = withRegistration({ mine: { state: "withdrawn", info: "" }, registerAgainAt: later(0.75) });
 export const NoMembership = withRegistration({ member: false, notMemberReason: "noMembership" });
 export const AsHost = withRegistration({ mine: null }, {
   participants: [

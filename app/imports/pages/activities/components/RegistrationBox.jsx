@@ -41,7 +41,7 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
   const pending = mine && ["approved", "checkedIn", "queued"].includes(mine.state);
   const full = seatsLeft === 0;
   const certificateMissing = !!registration.certificate && !registration.certificate.held;
-  const blocked = certificateMissing || registration.member === false;
+  const blocked = certificateMissing || registration.member === false || !!registration.registerAgainAt;
   return (
     <Card
       title={t(registration.required ? "registrationRequired" : "registrationOptional")} kind="event"
@@ -86,6 +86,9 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
                   {localized(registration.certificate.name, lang)}
                 </Link>
               </p>
+            )}
+            {registration.registerAgainAt && (
+              <p className="m-0 mb-3 text-sm">{t("registrationAgainLater", { at: at(registration.registerAgainAt, lang) })}</p>
             )}
             {!registration.member && (
               <p className="m-0 mb-3 text-sm">{t(`registrationNotMember_${registration.notMemberReason}`)}</p>

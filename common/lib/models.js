@@ -1924,6 +1924,8 @@ export const models = {
       allowedValues: ["approved", "queued", "checkedIn", "attended", "missedCheckIn", "noShow", "withdrawn", "cancelled"],
     },
     stateChangedAt: { type: Date },
+    // When the member last gave up a seat: they may not sign up again at once (registerAgainAt).
+    seatReleasedAt: { type: Date, optional: true },
   },
   // A member who would like an activity to happen, before it has an event.
   activityInterest: {

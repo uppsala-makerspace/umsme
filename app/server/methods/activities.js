@@ -25,6 +25,7 @@ import {
   mayWithdraw,
   mayTakeSeat,
   mayCheckIn,
+  registerAgainAt,
   checkInApplies,
   checkInWindow,
   attendanceOpen,
@@ -269,6 +270,8 @@ const registrationView = async (event, activity, who, now = new Date()) => {
     canWithdraw: !!mine && mayWithdraw(mine, resolved, now),
     canTakeSeat: !!mine && mayTakeSeat({ registration: mine, event: resolved, seatsTaken, now }),
     canCheckIn: !!mine && mayCheckIn(mine, resolved, now),
+    // Gave up a seat a moment ago: may sign up again from then.
+    registerAgainAt: registerAgainAt(mine, now),
   };
 };
 

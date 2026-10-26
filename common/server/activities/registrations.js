@@ -6,7 +6,7 @@ import { ActivityInterests } from '/imports/common/collections/activityInterests
 import { recordChange } from '/imports/common/server/auditLog';
 import {
   HOLDING, PENDING, resolveEvent, registrationOpen, statusFor, seatsLeft,
-  mayWithdraw, mayTakeSeat, mayCheckIn, checkInApplies, checkInWindow, checkInClosed, lastCallDue, takesRegistrations,
+  mayWithdraw, mayTakeSeat, mayCheckIn, checkInApplies, checkInWindow, checkInClosed, lastCallDue, takesRegistrations, registerAgainAt,
 } from '/imports/common/lib/activityRules';
 import { hasValidCertificate } from './certificates';
 import * as notify from './notify';
@@ -99,6 +99,9 @@ export const register = async (eventId, memberId, { info = '', userId, override 
   if (existing && [...PENDING, 'attended'].includes(existing.state)) {
     throw new Meteor.Error('registered', 'Already registered');
   }
+  if (!override && registerAgainAt(existing, now)) {
+    throw new Meteor.Error('too-soon', 'You gave up your seat a moment ago; sign up again later');
+  }
 
   // A free seat goes to whoever comes first; the queue has no precedence, it is told when seats free up.
   let state = (await takeSeatOf(resolved)) ? 'approved' : (resolved.queueAllowed ? 'queued' : 'full');
@@ -110,7 +113,7 @@ export const register = async (eventId, memberId, { info = '', userId, override 
   let registrationId;
   if (existing) {
     registrationId = existing._id;
-    await EventRegistrations.updateAsync(existing._id, { $set: fields, ...(text ? {} : { $unset: { info: '' } }) });
+    await EventRegistrations.updateAsync(existing._id, { $set: fields, $unset: { seatReleasedAt: '', ...(text ? {} : { info: '' }) } });
   } else {
     registrationId = await EventRegistrations.insertAsync({ eventId, memberId, ...fields });
   }
@@ -126,15 +129,19 @@ const registrationOf = async (eventId, memberId) => {
   return registration;
 };
 
-/** Withdraw: the seat goes to the queue, which is told; a place in the queue just ends. */
+/**
+ * Withdraw: the seat goes to the queue, which is told, and the member may not
+ * sign up again for a while (registerAgainAt); a place in the queue just ends.
+ */
 export const withdraw = async (eventId, memberId, { userId, now = new Date(), override = false }) => {
   const { resolved } = await resolvedEvent(eventId);
   const registration = await registrationOf(eventId, memberId);
   if (!mayWithdraw(registration, resolved, now) && !(override && PENDING.includes(registration.state))) {
     throw new Meteor.Error('closed', 'It is too late to withdraw');
   }
-  await setState(registration, 'withdrawn', { userId, now });
-  if (HOLDING.includes(registration.state)) {
+  const heldSeat = HOLDING.includes(registration.state);
+  await setState(registration, 'withdrawn', { userId, now, extra: heldSeat ? { seatReleasedAt: now } : {} });
+  if (heldSeat) {
     await releaseSeats(eventId);
     await offerFreedSeats(eventId, 1);
   }

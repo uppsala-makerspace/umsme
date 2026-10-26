@@ -762,6 +762,7 @@
   "registrationInfo": "Information for the hosts",
   "registrationJoinQueue": "Join the queue",
   "registrationSignUp": "Sign up",
+  "registrationAgainLater": "You gave up your seat a moment ago, so that someone else may take it. You can sign up again from {{at}}.",
   "registrationClosed": "Registration is closed.",
   "registrationLeaveQueue": "Leave the queue",
   "registrationWithdraw": "Withdraw",

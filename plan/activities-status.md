@@ -108,6 +108,9 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   incheckningen stänger (`checkInLastCall`, `sendCheckInLastCalls`, malltypen
   `activityCheckInLastCall`), aldrig inom en timme från den första. Byggt.
 
+- **Ångra sig:** den som lämnat en plats kan inte anmäla sig igen förrän
+  efter en timme (`seatReleasedAt`, `registerAgainAt`); appen säger från
+  när. Att lämna kön räknas inte. Byggt.
 - **`public.appUrl`** i produktion är `https://app.uppsalamakerspace.se`
   (står i exempelinställningarna och `docs/configuration.md`).
 - **Tidszon:** alla tider aktiviteterna räknar fram på servern
