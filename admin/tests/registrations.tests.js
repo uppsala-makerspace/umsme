@@ -95,9 +95,18 @@ describe('event registrations', function () {
     await withdraw(id, a, { userId });
     assert.strictEqual(await stateOf(id, a), 'withdrawn');
     assert.strictEqual(await Messages.find({ member: { $in: [b, c] }, subject: /^En plats är ledig/ }).countAsync(), before + 2);
-    // A new registration does not jump the queue to the free seat.
-    assert.strictEqual(await register(id, d, { userId }), 'queued');
     assert.strictEqual(await takeSeat(id, c, { userId }), 'approved');
+    await rejects(takeSeat(id, b, { userId }), 'taken');
+    assert.strictEqual(await stateOf(id, b), 'queued');
+    assert.strictEqual((await eventOf(id)).seatsTaken, 1);
+  });
+
+  it('gives a free seat to a new registration too, the queue having no precedence', async function () {
+    const id = await makeEvent({ maxSeats: 1, queueAllowed: true });
+    await register(id, a, { userId });
+    await register(id, b, { userId });
+    await withdraw(id, a, { userId });
+    assert.strictEqual(await register(id, c, { userId }), 'approved');
     await rejects(takeSeat(id, b, { userId }), 'taken');
     assert.strictEqual(await stateOf(id, b), 'queued');
     assert.strictEqual((await eventOf(id)).seatsTaken, 1);

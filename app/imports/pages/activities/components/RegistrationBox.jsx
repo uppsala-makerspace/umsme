@@ -39,7 +39,7 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
   if (!registration) return null;
   const { mine, seats, seatsLeft, queued, open } = registration;
   const pending = mine && ["approved", "checkedIn", "queued"].includes(mine.state);
-  const full = seatsLeft === 0 || (queued > 0 && seatsLeft !== null);
+  const full = seatsLeft === 0;
   const certificateMissing = !!registration.certificate && !registration.certificate.held;
   const blocked = certificateMissing || registration.member === false;
   return (

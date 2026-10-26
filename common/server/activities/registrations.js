@@ -75,9 +75,9 @@ const offerFreedSeats = async (eventId, freed) => {
 };
 
 /**
- * Sign a member up for an event: a seat when one is free and nobody queues,
- * else the queue when the event has one. A member signed up before and
- * withdrawn, or whose event was called off and on again, signs up anew.
+ * Sign a member up for an event: a seat when one is free, else the queue
+ * when the event has one. A member signed up before and withdrawn, or whose
+ * event was called off and on again, signs up anew.
  *
  * @param {{ info?: string, userId: string, override?: boolean }} options
  *   With `override` (board/admin adding someone) neither the certificate nor
@@ -100,8 +100,7 @@ export const register = async (eventId, memberId, { info = '', userId, override 
     throw new Meteor.Error('registered', 'Already registered');
   }
 
-  const queued = await EventRegistrations.find({ eventId, state: 'queued' }).countAsync();
-  let state = registrationOutcome({ event: resolved, seatsTaken: resolved.seatsTaken || 0, queued });
+  let state = registrationOutcome({ event: resolved, seatsTaken: resolved.seatsTaken || 0 });
   if (state === 'approved' && !(await takeSeatOf(resolved))) {
     state = resolved.queueAllowed ? 'queued' : 'full';
   }

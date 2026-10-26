@@ -157,14 +157,14 @@ export const registrationOpen = (event, now = new Date()) =>
   takesRegistrations(event) && event.status !== "cancelled" && event.start > now;
 
 /**
- * What a new registration becomes: a seat when one is free and nobody queues
- * for it (a free seat is the queue's to take first), else a place in the
- * queue when the event has one, else nothing.
+ * What a new registration becomes: a seat when one is free, whoever comes
+ * first (the queue has no precedence, it is told when seats free up), else a
+ * place in the queue when the event has one, else nothing.
  *
  * @returns {"approved"|"queued"|"full"}
  */
-export const registrationOutcome = ({ event, seatsTaken = 0, queued = 0 }) => {
-  if (seatsLeft(event, seatsTaken) > 0 && queued === 0) return "approved";
+export const registrationOutcome = ({ event, seatsTaken = 0 }) => {
+  if (seatsLeft(event, seatsTaken) > 0) return "approved";
   return event?.queueAllowed ? "queued" : "full";
 };
 
