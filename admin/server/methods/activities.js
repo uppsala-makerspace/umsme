@@ -16,6 +16,7 @@ import { createActivityFromEvent, matchingEvents, linkEvents } from '/imports/co
 import { calendarConfigured, calendarPreview, importCalendarEvents } from '/imports/common/server/activities/calendarImport';
 import { ActivityInterests } from '/imports/common/collections/activityInterests';
 import { Members } from '/imports/common/collections/members';
+import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 
 // Board and admin: activities, events and categories alike. They may choose
 // anyone as a host, so every call here is `isAdminish`.
@@ -241,6 +242,14 @@ Meteor.methods({
     check(googleEventIds, [String]);
     await requireRole(this.userId, roles);
     return importCalendarEvents({ from, to, googleEventIds }, { userId: this.userId });
+  },
+
+  /** A group's active members, by name: those who may host its events, as the app offers them. */
+  async 'activities.groupMembers'(groupId) {
+    check(groupId, String);
+    await requireRole(this.userId, roles);
+    const memberIds = (await GroupMemberships.find({ groupId, state: 'active' }, { fields: { memberId: 1 } }).fetchAsync()).map((m) => m.memberId);
+    return Members.find({ _id: { $in: memberIds } }, { fields: { name: 1, mid: 1 }, sort: { name: 1 } }).fetchAsync();
   },
 });
 

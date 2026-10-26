@@ -18,7 +18,7 @@ import {
   saveEvent, removeEvent, uploadEventImage, removeEventImage, eventImageUrl,
   saveCategory, removeCategory,
   createActivityFromEvent, matchingEvents, linkEvents, calendarConfigured, calendarPreview, importCalendar,
-  interestCount, eventRegistrations, addRegistration, withdrawRegistration, giveSeat, markAttended, closeAttendance,
+  groupMembers, interestCount, eventRegistrations, addRegistration, withdrawRegistration, giveSeat, markAttended, closeAttendance,
 } from './data';
 import { activityPath, eventPath } from './paths';
 import { activityValues, eventValues, parseClock } from '/imports/common/lib/activityValues';
@@ -114,6 +114,17 @@ export const EventEditPage = ({ _id }) => {
   useEffect(() => { reloadRegistrations(); }, [_id, savedVersion, event?.seatsTaken, event?.status]);
   const act = (action) => run(action, { then: reloadRegistrations });
 
+  // The active members of the event's group (its activity's), to pick hosts from.
+  const hostGroupId = (values.activityId ? activity?.groupId : values.groupId) || null;
+  const [members, setMembers] = useState([]);
+  useEffect(() => {
+    if (!hostGroupId) { setMembers([]); return; }
+    groupMembers(hostGroupId).then((found) => {
+      setMembers(found);
+      setNames((n) => ({ ...n, ...Object.fromEntries(found.map((m) => [m._id, m])) }));
+    }, () => setMembers([]));
+  }, [hostGroupId]);
+
   const hostIds = values.hostMemberIds.join(',');
   useEffect(() => {
     const unknown = values.hostMemberIds.filter((id) => !names[id]);
@@ -142,6 +153,7 @@ export const EventEditPage = ({ _id }) => {
     },
     onRemoveHost: (memberId) => setField('hostMemberIds', values.hostMemberIds.filter((id) => id !== memberId)),
     searchMembers,
+    groupMembers: members,
   };
   if (!_id) {
     return <EventForm isNew {...common} onSave={() => save({ then: (id) => navigate(eventPath(id)) })} />;

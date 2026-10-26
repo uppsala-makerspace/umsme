@@ -13,13 +13,13 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { DateField } from '../components/DateField';
 import { ImageField } from '../components/ImageField';
-import { MemberChips } from '../components/MemberChips';
 import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { memberPath } from '../members/paths';
 import { dateTime } from '../dates';
 import { SharedFields, native } from './SharedFields';
 import { RegistrationFields } from './RegistrationFields';
 import { FormCard } from './FormCard';
+import { HostsField } from './HostsField';
 import { StatusChip } from './eventColumns';
 import { activityPath, eventPath } from './paths';
 import { eventName, parseClock } from '/imports/common/lib/activityValues';
@@ -50,7 +50,9 @@ const ClockField = ({ label, value, onChange, helperText, ...props }) => {
  *           searchMembers: (query) => Promise<object[]>,
  *           imageUrl?: string, ownImage?: boolean, onUploadImage?: (file) => void, onRemoveImage?: () => void,
  *           uploading?: boolean, onDelete?: () => void, tab?: string, onTab?: (tab) => void,
- *           participants?: React.ReactNode, participantCount?: number, onMakeActivity?: () => void }} props
+ *           participants?: React.ReactNode, participantCount?: number, onMakeActivity?: () => void,
+ *           groupMembers?: Array<{ _id, name, mid }> }} props
+ *   `groupMembers` are the active members of the event's group, to pick hosts from.
  *   `participants` is the Participants tab's content (Participants, from the page).
  *   `imageUrl` is the image shown, the event's or its activity's; `ownImage` whether it is the event's.
  */
@@ -58,7 +60,7 @@ export const EventForm = ({
   isNew, event, activity = null, values, onChange, onSave, busy = false, error, notice, activities, groups, categories, certificates = [],
   workshopOptions, spaceOptions, groupName, hosts, onAddHost, onRemoveHost, searchMembers,
   imageUrl, ownImage = false, onUploadImage, onRemoveImage, uploading = false, onDelete, tab = 'details', onTab,
-  participants = null, participantCount, onMakeActivity,
+  participants = null, participantCount, onMakeActivity, groupMembers = [],
 }) => {
   const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
   const [confirming, setConfirming] = useState(false);
@@ -106,13 +108,10 @@ export const EventForm = ({
         </Stack>
       </FormCard>
       <FormCard title="Hosts" kind="event">
-        <Box sx={{ mb: 2 }}>
-          <MemberChips
-            label="Hosts" members={hosts} onAdd={onAddHost} onRemove={onRemoveHost} search={searchMembers}
-            href={(m) => memberPath(m._id)} empty="No hosts yet."
-            helperText={groupId ? `Members of ${groupName(groupId) || 'the group'} may host; board and admin may choose anyone.` : 'Board and admin may choose anyone.'}
-          />
-        </Box>
+        <HostsField
+          hosts={hosts} groupMembers={groupId ? groupMembers : null} groupName={groupId ? groupName(groupId) : undefined}
+          onAdd={onAddHost} onRemove={onRemoveHost} search={searchMembers} href={(m) => memberPath(m._id)}
+        />
       </FormCard>
       <SharedFields
         event values={values} onChange={onChange} inherited={values.activityId ? activity : null}

@@ -20,7 +20,7 @@ export default {
   render: (args) => <Editable {...args} />,
   args: {
     isNew: false, event: events[1], activity: intro, values: eventValues(events[1]), activities, groups, groupName, categories,
-    workshopOptions, spaceOptions, hosts, searchMembers: search, onAddHost: fn(), onRemoveHost: fn(),
+    workshopOptions, spaceOptions, hosts, groupMembers: hosts.concat([{ _id: 'm3', name: 'Cecilia Ceder', mid: '103' }]), searchMembers: search, onAddHost: fn(), onRemoveHost: fn(),
     onSave: fn(), onDelete: fn(), onUploadImage: fn(), onRemoveImage: fn(),
   },
 };

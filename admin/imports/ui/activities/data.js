@@ -96,3 +96,4 @@ export const linkEvents = (activityId, eventIds) => Meteor.callAsync('activities
 export const calendarConfigured = () => Meteor.callAsync('calendar.configured');
 export const calendarPreview = (from, to) => Meteor.callAsync('calendar.preview', from, to);
 export const importCalendar = (from, to, ids) => Meteor.callAsync('calendar.import', from, to, ids);
+export const groupMembers = (groupId) => Meteor.callAsync('activities.groupMembers', groupId);

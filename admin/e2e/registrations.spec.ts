@@ -51,5 +51,21 @@ test.describe('Registrations in admin', () => {
     await expect(field(page, 'Opens at')).toHaveValue('03:00');
     await expect(field(page, 'Closes at')).toHaveValue('18:00');
   });
+
+  test('picks hosts from the group, and anyone else by searching', async ({ page }) => {
+    await openAs(page, 'admin', '/events');
+    await page.getByText('E2E anmälan', { exact: true }).click();
+    const group = page.getByRole('group', { name: 'Members of Styrgrupp Keramik' });
+    await group.getByRole('button', { name: 'Sara Styrgrupp' }).click();
+    await page.getByRole('combobox', { name: 'Add any member' }).fill('Dagny');
+    await page.getByRole('option', { name: /Dagny Rabatt/ }).click();
+    await action(page, /^save$/i).click();
+    await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
+    await page.reload();
+    for (const name of ['Sara Styrgrupp', 'Dagny Rabatt']) {
+      await expect(page.getByRole('button', { name: `Remove ${name}` }).or(page.getByRole('link', { name }))).toBeVisible();
+    }
+    await expect(group.getByRole('button', { name: 'Sara Styrgrupp' })).toHaveAttribute('aria-pressed', 'true');
+  });
 });
 
