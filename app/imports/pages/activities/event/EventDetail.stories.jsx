@@ -4,7 +4,7 @@ import { intro, events, hosts } from "../components/fixtures";
 
 const later = (h) => new Date(Date.now() + h * 3600000);
 const registration = (over = {}) => ({
-  required: true, open: true, seats: 10, seatsLeft: 3, queued: 0, queueAllowed: true, infoRequired: false, infoPlaceholder: "",
+  required: true, open: true, member: true, notMemberReason: null, seats: 10, seatsLeft: 3, queued: 0, queueAllowed: true, infoRequired: false, infoPlaceholder: "",
   certificate: null, checkIn: null, mine: null, canWithdraw: false, canTakeSeat: false, canCheckIn: false, ...over,
 });
 const handlers = { onRegister: fn(), onWithdraw: fn(), onTakeSeat: fn(), onCheckIn: fn(), onAttended: fn(), onCloseAttendance: fn() };
@@ -27,7 +27,16 @@ export const Registered = withRegistration({ mine: { state: "approved", info: ""
 export const FullWithQueue = withRegistration({ seatsLeft: 0, queued: 2 });
 export const SeatFreeInQueue = withRegistration({ seatsLeft: 1, queued: 2, mine: { state: "queued" }, canTakeSeat: true, canWithdraw: true });
 export const CheckInOpen = withRegistration({ mine: { state: "approved" }, canCheckIn: true, canWithdraw: true, checkIn: { opens: later(-2), closes: later(20) } });
-export const NeedsCertificate = withRegistration({ certificate: { _id: "c1", name: { sv: "Svetsning" }, held: false } });
+export const NeedsCertificate = {
+  args: {
+    ...handlers,
+    data: {
+      event: { ...events[0], requiredCertificate: { _id: "c1", name: { sv: "Svetsning" } } }, hosts: hosts.slice(0, 1),
+      activityName: intro.name, canEdit: false, registration: registration({ certificate: { _id: "c1", name: { sv: "Svetsning" }, held: false } }),
+    },
+  },
+};
+export const NoMembership = withRegistration({ member: false, notMemberReason: "noMembership" });
 export const NotYetAccepted = withRegistration({ member: false, notMemberReason: "notRegistered" });
 export const AsHost = withRegistration({ mine: null }, {
   participants: [
