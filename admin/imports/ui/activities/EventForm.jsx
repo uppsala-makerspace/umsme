@@ -19,6 +19,7 @@ import { memberPath } from '../members/paths';
 import { dateTime } from '../dates';
 import { SharedFields, native } from './SharedFields';
 import { RegistrationFields } from './RegistrationFields';
+import { FormCard } from './FormCard';
 import { StatusChip } from './eventColumns';
 import { activityPath, eventPath } from './paths';
 import { eventName, parseClock } from '/imports/common/lib/activityValues';
@@ -70,50 +71,54 @@ export const EventForm = ({
 
   const form = (
     <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-        <TextField label="Activity" select fullWidth slotProps={native} value={values.activityId} onChange={(e) => onChange('activityId', e.target.value)}>
-          <option value="">(None: a free-standing event)</option>
-          {activities.map((a) => <option key={a._id} value={a._id}>{a.name?.sv || a._id}</option>)}
-        </TextField>
-        {values.activityId ? (
-          <TextField label="Group" fullWidth disabled value={activity?.groupId ? groupName(activity.groupId) || '' : 'The association'}
-            helperText="The activity's" />
-        ) : (
-          <TextField label="Owning group" select fullWidth slotProps={native} value={values.groupId} onChange={(e) => onChange('groupId', e.target.value)}
-            helperText="Any active member of it may change the event.">
-            <option value="">(The association: board and admin only)</option>
-            {groups.map((g) => <option key={g._id} value={g._id}>{g.name?.sv || g._id}</option>)}
+      <FormCard title="The event" kind="event">
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+          <TextField label="Activity" select fullWidth slotProps={native} value={values.activityId} onChange={(e) => onChange('activityId', e.target.value)}>
+            <option value="">(None: a free-standing event)</option>
+            {activities.map((a) => <option key={a._id} value={a._id}>{a.name?.sv || a._id}</option>)}
           </TextField>
-        )}
-      </Stack>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-        <DateField label="Day" required value={values.startDay} onChange={(v) => onChange('startDay', v)} />
-        <ClockField label="Starts" required value={values.startTime} onChange={(v) => onChange('startTime', v)} />
-        <ClockField label="Ends" value={values.endTime} onChange={(v) => onChange('endTime', v)}
-          helperText="Empty: counted from the duration" />
-        <DateField label="End day" value={values.endDay} onChange={(v) => onChange('endDay', v)}
-          helperText="Empty: the same day" />
-      </Stack>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-        <TextField label="Status" select slotProps={native} sx={{ minWidth: 220 }} value={values.status} onChange={(e) => onChange('status', e.target.value)}>
-          {/* Awaiting or confirmed follows from the registrations; only calling off is a choice. */}
-          {values.status === 'awaiting' && <option value="awaiting">Awaiting participants</option>}
-          <option value="confirmed">Confirmed</option>
-          <option value="cancelled">Cancelled</option>
-        </TextField>
-      </Stack>
-      <Box sx={{ mb: 2 }}>
-        <MemberChips
-          label="Hosts" members={hosts} onAdd={onAddHost} onRemove={onRemoveHost} search={searchMembers}
-          href={(m) => memberPath(m._id)} empty="No hosts yet."
-          helperText={groupId ? `Members of ${groupName(groupId) || 'the group'} may host; board and admin may choose anyone.` : 'Board and admin may choose anyone.'}
-        />
-      </Box>
+          {values.activityId ? (
+            <TextField label="Group" fullWidth disabled value={activity?.groupId ? groupName(activity.groupId) || '' : 'The association'}
+              helperText="The activity's" />
+          ) : (
+            <TextField label="Owning group" select fullWidth slotProps={native} value={values.groupId} onChange={(e) => onChange('groupId', e.target.value)}
+              helperText="Those who may create activities in it may change the event.">
+              <option value="">(The association: board and admin only)</option>
+              {groups.map((g) => <option key={g._id} value={g._id}>{g.name?.sv || g._id}</option>)}
+            </TextField>
+          )}
+        </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+          <DateField label="Day" required value={values.startDay} onChange={(v) => onChange('startDay', v)} />
+          <ClockField label="Starts" required value={values.startTime} onChange={(v) => onChange('startTime', v)} />
+          <ClockField label="Ends" value={values.endTime} onChange={(v) => onChange('endTime', v)}
+            helperText="Empty: counted from the duration" />
+          <DateField label="End day" value={values.endDay} onChange={(v) => onChange('endDay', v)}
+            helperText="Empty: the same day" />
+        </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+          <TextField label="Status" select slotProps={native} sx={{ minWidth: 220 }} value={values.status} onChange={(e) => onChange('status', e.target.value)}>
+            {/* Awaiting or confirmed follows from the registrations; only calling off is a choice. */}
+            {values.status === 'awaiting' && <option value="awaiting">Awaiting participants</option>}
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+          </TextField>
+        </Stack>
+      </FormCard>
+      <FormCard title="Hosts" kind="event">
+        <Box sx={{ mb: 2 }}>
+          <MemberChips
+            label="Hosts" members={hosts} onAdd={onAddHost} onRemove={onRemoveHost} search={searchMembers}
+            href={(m) => memberPath(m._id)} empty="No hosts yet."
+            helperText={groupId ? `Members of ${groupName(groupId) || 'the group'} may host; board and admin may choose anyone.` : 'Board and admin may choose anyone.'}
+          />
+        </Box>
+      </FormCard>
       <SharedFields
         event values={values} onChange={onChange} inherited={values.activityId ? activity : null}
-        categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions}
+        categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} certificates={certificates}
       />
-      <RegistrationFields event values={values} onChange={onChange} inherited={values.activityId ? activity : null} certificates={certificates} />
+      <RegistrationFields event values={values} onChange={onChange} inherited={values.activityId ? activity : null} />
       <Stack direction="row" spacing={1}>
         <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add' : 'Save'}</Button>
         <Button href={back.href}>{isNew ? 'Cancel' : 'Back'}</Button>

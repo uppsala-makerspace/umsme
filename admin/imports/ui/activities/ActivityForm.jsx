@@ -18,6 +18,7 @@ import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTa
 import { SharedFields, native } from './SharedFields';
 import { RegistrationFields } from './RegistrationFields';
 import { MatchingEvents } from './MatchingEvents';
+import { FormCard } from './FormCard';
 import { eventColumns } from './eventColumns';
 import { activityPath, addEventPath, eventPath } from './paths';
 
@@ -50,19 +51,21 @@ export const ActivityForm = ({
   const blocked = activity?.imageFileId || events.length > 0;
   const form = (
     <Box component="form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
-      <TextField label="Owning group" select fullWidth slotProps={native} sx={{ mb: 2 }}
-        value={values.groupId} onChange={(e) => onChange('groupId', e.target.value)}
-        helperText="Its steering group's members, or another group's responsible, may change it; any active member of the group may book its events.">
-        <option value="">(The association: board and admin only)</option>
-        {groups.map((g) => <option key={g._id} value={g._id}>{g.name?.sv || g._id}</option>)}
-      </TextField>
-      <TextField label="Who creates and changes its events" select fullWidth slotProps={native} sx={{ mb: 2 }}
-        value={values.eventBookers} onChange={(e) => onChange('eventBookers', e.target.value)}>
-        <option value="groupMembers">Every active member of the group</option>
-        <option value="activityEditors">Those who may change the activity</option>
-      </TextField>
-      <SharedFields values={values} onChange={onChange} categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} />
-      <RegistrationFields values={values} onChange={onChange} certificates={certificates} />
+      <FormCard title="Owner" kind="activity">
+        <TextField label="Owning group" select fullWidth slotProps={native} sx={{ mb: 2 }}
+          value={values.groupId} onChange={(e) => onChange('groupId', e.target.value)}
+          helperText="Its steering group's members, or another group's responsible, may change it.">
+          <option value="">(The association: board and admin only)</option>
+          {groups.map((g) => <option key={g._id} value={g._id}>{g.name?.sv || g._id}</option>)}
+        </TextField>
+        <TextField label="Who creates and changes its events" select fullWidth slotProps={native} sx={{ mb: 2 }}
+          value={values.eventBookers} onChange={(e) => onChange('eventBookers', e.target.value)}>
+          <option value="groupMembers">Every active member of the group</option>
+          <option value="activityEditors">Those who may change the activity</option>
+        </TextField>
+      </FormCard>
+      <SharedFields values={values} onChange={onChange} categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} certificates={certificates} />
+      <RegistrationFields values={values} onChange={onChange} />
       <Stack direction="row" spacing={1}>
         <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add' : 'Save'}</Button>
         <Button href="/activities">{isNew ? 'Cancel' : 'Back'}</Button>
