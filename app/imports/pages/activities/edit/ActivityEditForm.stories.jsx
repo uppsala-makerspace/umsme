@@ -22,3 +22,4 @@ export const New = { args: { isNew: true, values: activityValues(null, { groupId
 export const Existing = { args: { isNew: false, values: activityValues(stored), hasEvents: false } };
 export const WithEvents = { args: { isNew: false, values: activityValues(stored), hasEvents: true } };
 export const Failed = { args: { isNew: true, values: activityValues(null), error: "An activity needs a Swedish name" } };
+export const DefaultCheckIn = { args: { isNew: false, values: activityValues({ ...stored, registration: "required", maxSeats: 6, checkIn: "default" }) } };

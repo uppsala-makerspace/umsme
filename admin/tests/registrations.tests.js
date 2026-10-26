@@ -178,26 +178,48 @@ describe('event registrations', function () {
   });
 
   describe('check-in', function () {
+    // The day after tomorrow at 18:00; the default window is tomorrow, 03:00 to 15:00.
+    const dayAt = (days, hour) => {
+      const d = new Date();
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate() + days, hour, 0);
+    };
+
     it('opens a window, reminds once, and takes the seats of those who did not', async function () {
-      const id = await makeEvent({
-        maxSeats: 2, queueAllowed: true, checkInEnabled: true, checkInOpensHoursBefore: 72, checkInDeadline: inHours(24),
-      });
+      const id = await makeEvent({ start: dayAt(2, 18), maxSeats: 2, queueAllowed: true, checkIn: 'default' });
       await register(id, a, { userId });
       await register(id, b, { userId });
       await register(id, c, { userId });
-      assert.strictEqual(await sendCheckInReminders(new Date()), 2);
-      assert.strictEqual(await sendCheckInReminders(new Date()), 0);
-      await checkIn(id, a, { userId });
+      assert.strictEqual(await sendCheckInReminders(dayAt(1, 2)), 0);
+      assert.strictEqual(await sendCheckInReminders(dayAt(1, 4)), 2);
+      assert.strictEqual(await sendCheckInReminders(dayAt(1, 5)), 0);
+      await checkIn(id, a, { userId, now: dayAt(1, 5) });
       assert.strictEqual(await stateOf(id, a), 'checkedIn');
-      await rejects(checkIn(id, c, { userId }), 'closed');
+      await rejects(checkIn(id, c, { userId, now: dayAt(1, 5) }), 'closed');
       const offered = await Messages.find({ member: c, subject: /^En plats är ledig/ }).countAsync();
-      assert.strictEqual(await passCheckInDeadlines(inHours(25)), 1);
+      assert.strictEqual(await passCheckInDeadlines(dayAt(1, 14)), 0);
+      assert.strictEqual(await passCheckInDeadlines(dayAt(1, 16)), 1);
       assert.strictEqual(await stateOf(id, b), 'missedCheckIn');
       assert.strictEqual((await eventOf(id)).seatsTaken, 1);
       assert.strictEqual(await Messages.find({ member: c, subject: /^En plats är ledig/ }).countAsync(), offered + 1);
       // After the deadline a seat taken comes checked in.
-      assert.strictEqual(await takeSeat(id, c, { userId, now: inHours(25) }), 'checkedIn');
-      assert.strictEqual(await passCheckInDeadlines(inHours(26)), 0);
+      assert.strictEqual(await takeSeat(id, c, { userId, now: dayAt(1, 16) }), 'checkedIn');
+      assert.strictEqual(await passCheckInDeadlines(dayAt(1, 17)), 0);
+    });
+
+    it('keeps a custom window, which must open before it closes', async function () {
+      const id = await makeEvent({
+        start: dayAt(3, 18), checkIn: 'custom', checkInOpensDaysBefore: 2, checkInOpensAt: '8', checkInClosesDaysBefore: 0, checkInClosesAt: '12:00',
+      });
+      const event = await eventOf(id);
+      assert.deepStrictEqual(
+        [event.checkIn, event.checkInOpensDaysBefore, event.checkInOpensAt, event.checkInClosesDaysBefore, event.checkInClosesAt],
+        ['custom', 2, '08:00', 0, '12:00'],
+      );
+      await rejects(makeEvent({ checkIn: 'custom', checkInOpensDaysBefore: 1, checkInOpensAt: '15:00', checkInClosesDaysBefore: 1, checkInClosesAt: '03:00' }), 'bad-value');
+      await rejects(makeEvent({ checkIn: 'custom', checkInOpensAt: '15:00', checkInClosesAt: '18:00' }), 'bad-value');
+      // The default stores no times of its own.
+      const plain = await eventOf(await makeEvent({ checkIn: 'default', checkInOpensAt: '01:00' }));
+      assert.strictEqual(plain.checkInOpensAt, undefined);
     });
   });
 

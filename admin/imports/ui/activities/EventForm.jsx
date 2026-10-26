@@ -18,7 +18,7 @@ import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTa
 import { memberPath } from '../members/paths';
 import { dateTime } from '../dates';
 import { SharedFields, native } from './SharedFields';
-import { RegistrationFields, checkInShown } from './RegistrationFields';
+import { RegistrationFields } from './RegistrationFields';
 import { StatusChip } from './eventColumns';
 import { activityPath, eventPath } from './paths';
 import { eventName, parseClock } from '/imports/common/lib/activityValues';
@@ -114,14 +114,6 @@ export const EventForm = ({
         categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions}
       />
       <RegistrationFields event values={values} onChange={onChange} inherited={values.activityId ? activity : null} certificates={certificates} />
-      {checkInShown(values, values.activityId ? activity : null) && (
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <DateField label="Check-in deadline, day" value={values.checkInDeadlineDay} onChange={(v) => onChange('checkInDeadlineDay', v)}
-            helperText="Empty: the event's day" />
-          <ClockField label="Check-in deadline, time" value={values.checkInDeadlineTime} onChange={(v) => onChange('checkInDeadlineTime', v)}
-            helperText="Empty: check-in closes at the start" />
-        </Stack>
-      )}
       <Stack direction="row" spacing={1}>
         <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add' : 'Save'}</Button>
         <Button href={back.href}>{isNew ? 'Cancel' : 'Back'}</Button>

@@ -323,8 +323,8 @@ export const buildDemo = async ({ random, people, now }) => {
     durationMinutes: 120, membersOnly: true, published: true, slackChannel: '#traverkstaden',
     // Held by those who run the workshop, not by every member of the group.
     eventBookers: 'activityEditors',
-    // Six seats, a queue, and checking in the day before.
-    registration: 'required', maxSeats: 6, queueAllowed: true, checkInEnabled: true, checkInOpensHoursBefore: 48,
+    // Six seats, a queue, and checking in the day before (the default window).
+    registration: 'required', maxSeats: 6, queueAllowed: true, checkIn: 'default',
   };
   woodIntro._id = await makeActivity({ ...woodIntro, createdAt: days(-200) });
   // Past ones attended (attendance closed), the next one full with a queue,
@@ -334,7 +334,6 @@ export const buildDemo = async ({ random, people, now }) => {
     const start = at(n + 3, 18);
     const eventId = await makeEvent({
       activity: woodIntro, start, hostMemberIds: [personas.groupLeader._id, ...(n % 28 === 0 ? [personas.steering._id] : [])],
-      checkInDeadline: new Date(start.getTime() - 24 * 3600000),
       ...(n === 28 ? { status: 'cancelled' } : {}), createdAt: days(n - 20),
       ...(n < 0 ? { attendanceClosedAt: new Date(start.getTime() + 3 * 3600000) } : {}),
     });

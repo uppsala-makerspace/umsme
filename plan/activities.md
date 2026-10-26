@@ -320,8 +320,10 @@ som har en väntande begäran.
      ledig: kön har den först. Den köande ser "Ta platsen" i appen.
    - `awaiting` → `confirmed` är enkelriktat.
    - Ett event med anmälda kan inte tas bort, bara ställas in.
-   - Incheckningen öppnar 24 h före start om inget annat sägs, och stänger vid
-     start om eventet saknar deadline.
+   - Incheckning: nej, ja (standard) eller ja (anpassat). Standard är dagen
+     före, 03:00–15:00; anpassat anger för öppning och stängning hur många
+     dagar före och vilket klockslag. Fönstret stänger senast vid start.
+     `checkInDeadline` och `checkInOpensHoursBefore` utgick.
    - Åtta nya malltyper (`activity…`), en egen notiskategori som medlemmen kan
      stänga av, standardtexter som läggs in när admin och appen startar.
    - Cronjobbet (var tionde minut) körs bara med `activityCron.enabled: true`.

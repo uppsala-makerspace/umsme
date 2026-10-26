@@ -4,7 +4,8 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { ActivityCategories } from '/imports/common/collections/activityCategories';
 import { Certificates } from '/imports/common/collections/certificates';
-import { REGISTRATIONS } from '/imports/common/lib/activityRules';
+import { REGISTRATIONS, CHECK_INS } from '/imports/common/lib/activityRules';
+import { parseClock } from '/imports/common/lib/days';
 import { setEntityImage, clearEntityImage } from '/imports/common/server/entityImage';
 import { recordChange } from '/imports/common/server/auditLog';
 import { text, bilingual, setOrUnset } from '../groups/text';
@@ -72,6 +73,25 @@ const registrationChanges = async (fields, { inherit, flag }) => {
   if (minSeats !== null && maxSeats !== null && minSeats > maxSeats) {
     throw new Meteor.Error('bad-value', 'The fewest participants can not be more than the seats');
   }
+  const checkIn = text(fields.checkIn) || (inherit ? null : 'none');
+  if (checkIn && !CHECK_INS.includes(checkIn)) throw new Meteor.Error('bad-value', `Unknown check-in "${checkIn}"`);
+  // A custom window's own times; the default needs none.
+  const custom = checkIn === 'custom';
+  const clock = (value, what) => {
+    const parsed = parseClock(value);
+    if (custom && !parsed) throw new Meteor.Error('bad-value', `${what} needs a time, like 15:00`);
+    return custom ? parsed : null;
+  };
+  const opensDaysBefore = custom ? positive(fields.checkInOpensDaysBefore, 'When check-in opens', { integer: true }) : null;
+  const closesDaysBefore = custom ? positive(fields.checkInClosesDaysBefore, 'When check-in closes', { integer: true }) : null;
+  const opensAt = clock(fields.checkInOpensAt, 'When check-in opens');
+  const closesAt = clock(fields.checkInClosesAt, 'When check-in closes');
+  if (custom && (opensDaysBefore === null || closesDaysBefore === null)) {
+    throw new Meteor.Error('bad-value', 'A custom check-in needs how many days before it opens and closes');
+  }
+  if (custom && (opensDaysBefore < closesDaysBefore || (opensDaysBefore === closesDaysBefore && opensAt >= closesAt))) {
+    throw new Meteor.Error('bad-value', 'Check-in must open before it closes');
+  }
   return {
     registration,
     minSeats,
@@ -80,8 +100,11 @@ const registrationChanges = async (fields, { inherit, flag }) => {
     infoRequired: flag(fields.infoRequired),
     infoPlaceholder: text(fields.infoPlaceholder),
     requiredCertificateId: await exists(Certificates, text(fields.requiredCertificateId), 'certificate'),
-    checkInEnabled: flag(fields.checkInEnabled),
-    checkInOpensHoursBefore: positive(fields.checkInOpensHoursBefore, 'When check-in opens'),
+    checkIn,
+    checkInOpensDaysBefore: opensDaysBefore,
+    checkInOpensAt: opensAt,
+    checkInClosesDaysBefore: closesDaysBefore,
+    checkInClosesAt: closesAt,
   };
 };
 

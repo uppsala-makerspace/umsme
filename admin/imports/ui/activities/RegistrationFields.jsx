@@ -4,9 +4,11 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { checkInSettings, DEFAULT_CHECK_IN } from '/imports/common/lib/activityRules';
 import { native } from './SharedFields';
 
 const REGISTRATIONS = [['none', 'No registration'], ['optional', 'Registration possible'], ['required', 'Registration required']];
+const CHECK_INS = [['none', 'No'], ['default', 'Yes (default)'], ['custom', 'Yes (custom)']];
 
 /**
  * How one signs up: whether, how many, how few make it happen, a queue,
@@ -40,8 +42,24 @@ export const RegistrationFields = ({ values, onChange, inherited = null, event =
   ));
   const registration = values.registration || (inherited ? inherited.registration : '') || 'none';
   const takes = registration !== 'none';
-  const checkIn = values.checkInEnabled === true || values.checkInEnabled === 'yes'
-    || (values.checkInEnabled === '' && !!inherited?.checkInEnabled);
+  // The check-in in force, and the window shown: the default's or an
+  // inherited one greyed, a custom one of the form's own to edit.
+  const ownCheckIn = values.checkIn || (inherited ? '' : 'none');
+  const checkIn = ownCheckIn || inherited?.checkIn || 'none';
+  const editable = ownCheckIn === 'custom';
+  const shown = editable ? null : checkInSettings(ownCheckIn ? { checkIn: ownCheckIn } : inherited);
+  // A custom window starts from the default's times, to change what differs.
+  const chooseCheckIn = (value) => {
+    onChange('checkIn', value);
+    if (value !== 'custom') return;
+    for (const [name, setting] of [['checkInOpensDaysBefore', 'opensDaysBefore'], ['checkInOpensAt', 'opensAt'],
+      ['checkInClosesDaysBefore', 'closesDaysBefore'], ['checkInClosesAt', 'closesAt']]) {
+      if (values[name] === '' || values[name] === undefined) onChange(name, String(DEFAULT_CHECK_IN[setting]));
+    }
+  };
+  const windowField = (name, setting, title, inputMode) => (editable
+    ? <TextField label={title} fullWidth {...text(name, { inputMode })} />
+    : <TextField label={title} fullWidth disabled value={String(shown[setting])} />);
   const certificateName = (id) => certificates.find((c) => c._id === id)?.name?.sv || id;
 
   return (
@@ -72,21 +90,23 @@ export const RegistrationFields = ({ values, onChange, inherited = null, event =
             </TextField>
           </Stack>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-            {flag('checkInEnabled', 'Check-in')}
-            {checkIn && (
-              <TextField label="Check-in opens (hours before the start)" fullWidth helperText="Empty: 24"
-                {...text('checkInOpensHoursBefore', { inputMode: 'numeric' })} />
-            )}
+            <TextField label="Check-in beforehand" select fullWidth slotProps={native} value={values.checkIn}
+              onChange={(e) => chooseCheckIn(e.target.value)}
+              helperText="Those with a seat confirm they come; whoever has not by the time it closes loses the seat to the queue.">
+              {event && <option value="">{inherited ? asActivity(label(CHECK_INS, inherited.checkIn || 'none')) : '(No)'}</option>}
+              {CHECK_INS.map(([value, title]) => <option key={value} value={value}>{title}</option>)}
+            </TextField>
           </Stack>
+          {checkIn !== 'none' && (
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+              {windowField('checkInOpensDaysBefore', 'opensDaysBefore', 'Opens, days before', 'numeric')}
+              {windowField('checkInOpensAt', 'opensAt', 'Opens at', 'numeric')}
+              {windowField('checkInClosesDaysBefore', 'closesDaysBefore', 'Closes, days before', 'numeric')}
+              {windowField('checkInClosesAt', 'closesAt', 'Closes at', 'numeric')}
+            </Stack>
+          )}
         </>
       )}
     </>
   );
-};
-
-/** Whether the form's check-in applies, for the event's deadline field. */
-export const checkInShown = (values, inherited) => {
-  const registration = values.registration || inherited?.registration || 'none';
-  const checkIn = values.checkInEnabled === 'yes' || (values.checkInEnabled === '' && !!inherited?.checkInEnabled);
-  return registration !== 'none' && checkIn;
 };

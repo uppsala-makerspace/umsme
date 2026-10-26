@@ -7,7 +7,7 @@ import TimeField from "../../../components/TimeField";
  * style. Each passes its other props to the element.
  */
 const control =
-  "bg-surface border border-black rounded py-2.5 px-3 text-base font-mono w-full box-border focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/20 placeholder:text-gray-400";
+  "bg-surface border border-black rounded py-2.5 px-3 text-base font-mono w-full box-border focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/20 placeholder:text-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-300";
 
 export const Field = ({ id, label, hint, children }) => (
   <div className="mb-4 w-full">

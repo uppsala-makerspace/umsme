@@ -37,8 +37,11 @@ export const SHARED_FIELDS = [
   "infoRequired",
   "infoPlaceholder",
   "requiredCertificateId",
-  "checkInEnabled",
-  "checkInOpensHoursBefore",
+  "checkIn",
+  "checkInOpensDaysBefore",
+  "checkInOpensAt",
+  "checkInClosesDaysBefore",
+  "checkInClosesAt",
 ];
 
 // Whether an event has a value of its own for a field. An empty text, and a
@@ -180,18 +183,40 @@ export const statusFor = ({ event, seatsTaken = 0, current = "confirmed" }) => {
 export const initialStatus = (event) =>
   (takesRegistrations(event) && event.minSeats > 0 ? "awaiting" : "confirmed");
 
-/** Whether an event asks those with a seat to check in beforehand. */
-export const checkInApplies = (event) => takesRegistrations(event) && !!event?.checkInEnabled;
+export const CHECK_INS = ["none", "default", "custom"];
 
-/**
- * When checking in opens and closes: `checkInOpensHoursBefore` before the
- * start (a day when not set), and the event's deadline (its start when not set).
- */
+/** The default check-in window: the day before the event, from 03:00 to 15:00. */
+export const DEFAULT_CHECK_IN = Object.freeze({
+  opensDaysBefore: 1, opensAt: "03:00", closesDaysBefore: 1, closesAt: "15:00",
+});
+
+/** Whether an event asks those with a seat to check in beforehand. */
+export const checkInApplies = (event) =>
+  takesRegistrations(event) && ["default", "custom"].includes(event?.checkIn);
+
+/** The check-in window's settings in force: the default's, or the event's own. */
+export const checkInSettings = (event) => (event?.checkIn === "custom"
+  ? {
+    opensDaysBefore: event.checkInOpensDaysBefore ?? DEFAULT_CHECK_IN.opensDaysBefore,
+    opensAt: event.checkInOpensAt || DEFAULT_CHECK_IN.opensAt,
+    closesDaysBefore: event.checkInClosesDaysBefore ?? DEFAULT_CHECK_IN.closesDaysBefore,
+    closesAt: event.checkInClosesAt || DEFAULT_CHECK_IN.closesAt,
+  }
+  : { ...DEFAULT_CHECK_IN });
+
+// The day `days` before the start's, at a time of day, local time.
+const daysBefore = (start, days, clock) => {
+  const [h, m] = clock.split(":").map(Number);
+  return new Date(start.getFullYear(), start.getMonth(), start.getDate() - days, h, m);
+};
+
+/** When checking in opens and closes; it closes at the start at the latest. */
 export const checkInWindow = (event) => {
-  const hours = event.checkInOpensHoursBefore ?? 24;
+  const s = checkInSettings(event);
+  const closes = daysBefore(event.start, s.closesDaysBefore, s.closesAt);
   return {
-    opens: new Date(event.start.getTime() - hours * 3600000),
-    closes: event.checkInDeadline || event.start,
+    opens: daysBefore(event.start, s.opensDaysBefore, s.opensAt),
+    closes: closes > event.start ? event.start : closes,
   };
 };
 

@@ -43,8 +43,11 @@ const SharedFields = {
   infoRequired: Flag,
   infoPlaceholder: Text,
   requiredCertificateId: Text,
-  checkInEnabled: Flag,
-  checkInOpensHoursBefore: Num,
+  checkIn: Text,
+  checkInOpensDaysBefore: Num,
+  checkInOpensAt: Text,
+  checkInClosesDaysBefore: Num,
+  checkInClosesAt: Text,
 };
 const ActivityFields = { ...SharedFields, groupId: Text, eventBookers: Text };
 const EventFields = {
@@ -55,7 +58,6 @@ const EventFields = {
   end: Match.Optional(Match.Maybe(Date)),
   hostMemberIds: Match.Optional([String]),
   status: Text,
-  checkInDeadline: Match.Optional(Match.Maybe(Date)),
   googleEventId: Text,
 };
 const CategoryFields = { name: Bilingual, sortOrder: Num };

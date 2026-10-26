@@ -60,9 +60,13 @@ const activityFields = ({ required }) => ({
   infoPlaceholder: { label: "What to tell", type: String, max: 200, optional: true },
   requiredCertificateId: { label: "Required certificate", type: String, max: 50, optional: true },
   // Check-in (stage 3): confirming beforehand that one comes, in a window
-  // opening this many hours before the start and closing at the event's deadline.
-  checkInEnabled: { label: "Check-in", type: Boolean, optional: true },
-  checkInOpensHoursBefore: { label: "Check-in opens (hours before)", type: Number, min: 0, optional: true },
+  // that opens and closes some days before the start at a time of day: the
+  // default (the day before, 03:00 to 15:00), or a custom one.
+  checkIn: { label: "Check-in", type: String, allowedValues: ["none", "default", "custom"], optional: true },
+  checkInOpensDaysBefore: { label: "Check-in opens, days before", type: Number, min: 0, optional: true },
+  checkInOpensAt: { label: "Check-in opens at", type: String, regEx: /^\d{2}:\d{2}$/, optional: true },
+  checkInClosesDaysBefore: { label: "Check-in closes, days before", type: Number, min: 0, optional: true },
+  checkInClosesAt: { label: "Check-in closes at", type: String, regEx: /^\d{2}:\d{2}$/, optional: true },
   createdBy: { label: "Created by", type: String, optional: true, autoform: { omit: true } },
   createdAt: { label: "Created", type: Date, optional: true, autoform: { omit: true } },
   updatedAt: { label: "Updated", type: Date, optional: true, autoform: { omit: true } },
@@ -1893,7 +1897,6 @@ export const models = {
     "hostMemberIds.$": { type: String, max: 50 },
     // awaiting: fewer registered than its fewest participants, so far.
     status: { label: "Status", type: String, allowedValues: ["awaiting", "confirmed", "cancelled"], defaultValue: "confirmed" },
-    checkInDeadline: { label: "Check-in deadline", type: Date, optional: true },
     // Registrations holding a seat (approved, checked in, attended), kept by
     // the registration functions: the count a seat is taken against, atomically.
     seatsTaken: { label: "Seats taken", type: Number, min: 0, optional: true, autoform: { omit: true } },

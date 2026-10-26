@@ -8,6 +8,8 @@ import {
   mayBookEventOf,
   disallowedHosts,
   eventEnd,
+  checkInWindow,
+  checkInApplies,
 } from '/imports/common/lib/activityRules';
 
 const activity = {
@@ -136,6 +138,28 @@ describe('Activity rules', function () {
 
     it('lets board and admin choose anyone', function () {
       assert.deepStrictEqual(disallowedHosts({ hostMemberIds: ['m9'], groupMemberIds: [], isAdminish: true }), []);
+    });
+  });
+
+  describe('checkInWindow', function () {
+    const start = new Date(2026, 10, 19, 18, 0);
+    const local = (d) => [d.getDate(), d.getHours(), d.getMinutes()];
+
+    it('is the day before, 03:00 to 15:00, by default', function () {
+      const { opens, closes } = checkInWindow({ start, checkIn: 'default' });
+      assert.deepStrictEqual([local(opens), local(closes)], [[18, 3, 0], [18, 15, 0]]);
+    });
+
+    it('follows a custom window, closing at the start at the latest', function () {
+      const custom = { start, checkIn: 'custom', checkInOpensDaysBefore: 3, checkInOpensAt: '08:30', checkInClosesDaysBefore: 0, checkInClosesAt: '20:00' };
+      const { opens, closes } = checkInWindow(custom);
+      assert.deepStrictEqual([local(opens), closes.getTime()], [[16, 8, 30], start.getTime()]);
+    });
+
+    it('applies only with registration and a window', function () {
+      assert.strictEqual(checkInApplies({ registration: 'required', checkIn: 'default' }), true);
+      assert.strictEqual(checkInApplies({ registration: 'required', checkIn: 'none' }), false);
+      assert.strictEqual(checkInApplies({ registration: 'none', checkIn: 'custom' }), false);
     });
   });
 

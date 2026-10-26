@@ -32,4 +32,24 @@ test.describe('Registrations in admin', () => {
     await expect(field(page, 'Seats')).toHaveValue('4');
     await expect(page.getByRole('checkbox', { name: 'Queue when full' })).toBeChecked();
   });
+
+  test('check-in has a default window, shown but not to edit, or a custom one', async ({ page }) => {
+    await openAs(page, 'admin', '/activities/add');
+    await field(page, 'Name (Swedish)').fill('E2E incheckningskurs');
+    await page.getByRole('combobox', { name: 'Registration', exact: true }).selectOption('required');
+    const checkIn = page.getByRole('combobox', { name: 'Check-in beforehand' });
+    await checkIn.selectOption('default');
+    await expect(field(page, 'Opens at')).toHaveValue('03:00');
+    await expect(field(page, 'Opens at')).toBeDisabled();
+    await expect(field(page, 'Closes at')).toHaveValue('15:00');
+    await checkIn.selectOption('custom');
+    await expect(field(page, 'Closes at')).toBeEnabled();
+    await field(page, 'Closes at').fill('18:00');
+    await action(page, /^add$/i).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('E2E incheckningskurs');
+    await expect(checkIn.locator('option:checked')).toHaveText('Yes (custom)');
+    await expect(field(page, 'Opens at')).toHaveValue('03:00');
+    await expect(field(page, 'Closes at')).toHaveValue('18:00');
+  });
 });
+

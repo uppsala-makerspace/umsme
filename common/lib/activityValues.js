@@ -48,7 +48,10 @@ const sharedValues = (doc) => ({
   maxSeats: numberText(doc?.maxSeats),
   infoPlaceholder: doc?.infoPlaceholder || '',
   requiredCertificateId: doc?.requiredCertificateId || '',
-  checkInOpensHoursBefore: numberText(doc?.checkInOpensHoursBefore),
+  checkInOpensDaysBefore: numberText(doc?.checkInOpensDaysBefore),
+  checkInOpensAt: doc?.checkInOpensAt || '',
+  checkInClosesDaysBefore: numberText(doc?.checkInClosesDaysBefore),
+  checkInClosesAt: doc?.checkInClosesAt || '',
 });
 
 const sharedFields = (v) => ({
@@ -65,7 +68,10 @@ const sharedFields = (v) => ({
   maxSeats: number(v.maxSeats),
   infoPlaceholder: v.infoPlaceholder,
   requiredCertificateId: v.requiredCertificateId || null,
-  checkInOpensHoursBefore: number(v.checkInOpensHoursBefore),
+  checkInOpensDaysBefore: number(v.checkInOpensDaysBefore),
+  checkInOpensAt: v.checkInOpensAt,
+  checkInClosesDaysBefore: number(v.checkInClosesDaysBefore),
+  checkInClosesAt: v.checkInClosesAt,
 });
 
 /** The form's values for an activity, or empty ones for a new one (of `groupId`). */
@@ -77,7 +83,7 @@ export const activityValues = (activity, { groupId = '' } = {}) => ({
   registration: activity?.registration || 'none',
   queueAllowed: !!activity?.queueAllowed,
   infoRequired: !!activity?.infoRequired,
-  checkInEnabled: !!activity?.checkInEnabled,
+  checkIn: activity?.checkIn || 'none',
   eventBookers: activity?.eventBookers || 'groupMembers',
 });
 
@@ -89,7 +95,7 @@ export const activityFields = (v) => ({
   registration: v.registration,
   queueAllowed: !!v.queueAllowed,
   infoRequired: !!v.infoRequired,
-  checkInEnabled: !!v.checkInEnabled,
+  checkIn: v.checkIn,
   eventBookers: v.eventBookers,
 });
 
@@ -109,9 +115,7 @@ export const eventValues = (event, { activityId = '' } = {}) => ({
   registration: event?.registration || '',
   queueAllowed: flagText(event?.queueAllowed),
   infoRequired: flagText(event?.infoRequired),
-  checkInEnabled: flagText(event?.checkInEnabled),
-  checkInDeadlineDay: day(event?.checkInDeadline),
-  checkInDeadlineTime: clock(event?.checkInDeadline),
+  checkIn: event?.checkIn || '',
   googleEventId: event?.googleEventId || '',
 });
 
@@ -132,8 +136,7 @@ export const eventFields = (v) => ({
   registration: v.registration || null,
   queueAllowed: flagFrom(v.queueAllowed),
   infoRequired: flagFrom(v.infoRequired),
-  checkInEnabled: flagFrom(v.checkInEnabled),
-  checkInDeadline: moment(v.checkInDeadlineDay || v.startDay, v.checkInDeadlineTime),
+  checkIn: v.checkIn || null,
   googleEventId: v.googleEventId || null,
 });
 

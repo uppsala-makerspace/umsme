@@ -49,10 +49,6 @@ const changesOf = async (fields, { isAdminish, before = null }) => {
 
   const asked = fields.status || 'confirmed';
   if (!EVENT_STATUSES.includes(asked)) throw new Meteor.Error('bad-status', `Unknown status "${asked}"`);
-  const checkInDeadline = isDate(fields.checkInDeadline) ? fields.checkInDeadline : null;
-  if (checkInDeadline && checkInDeadline > fields.start) {
-    throw new Meteor.Error('bad-deadline', 'The check-in deadline must be before the start');
-  }
   // Called off, or waiting for its fewest participants, or happening: only
   // calling it off is asked for; the rest follows from its registrations.
   const resolved = resolveEvent({ ...changes.$set, start: fields.start }, activity);
@@ -71,7 +67,7 @@ const changesOf = async (fields, { isAdminish, before = null }) => {
 
   Object.assign(changes.$set, { start: fields.start, end, status });
   const googleEventId = text(fields.googleEventId);
-  for (const [field, value] of Object.entries({ activityId, groupId, hostMemberIds, checkInDeadline, googleEventId })) {
+  for (const [field, value] of Object.entries({ activityId, groupId, hostMemberIds, googleEventId })) {
     if (value && value.length !== 0) changes.$set[field] = value; else changes.$unset[field] = '';
   }
   return changes;

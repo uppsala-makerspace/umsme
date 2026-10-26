@@ -1,13 +1,15 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
-import { TextField, SelectField, CheckField, DayField, ClockField, Row } from "./fields";
+import { checkInSettings, DEFAULT_CHECK_IN } from "/imports/common/lib/activityRules";
+import { TextField, SelectField, CheckField, Row } from "./fields";
 
 /**
  * How one signs up, as in admin: whether, how many, how few make it happen,
- * a queue, information asked for, a certificate required, and check-in. On
- * an event of an activity (`inherited`) empty is as the activity; there the
- * yes/no fields are three-way and the check-in deadline is asked for.
+ * a queue, information asked for, a certificate required, and check-in, with
+ * its window: the default's (shown, not to edit) or a custom one. On an event
+ * of an activity (`inherited`) empty is as the activity; there the yes/no
+ * fields are three-way.
  */
 const RegistrationFields = ({ values, onChange, choices, inherited = null, event = false }) => {
   const { t, i18n } = useTranslation();
@@ -29,8 +31,23 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
   ));
   const kinds = ["none", "optional", "required"].map((value) => ({ value, label: t(`registrationKind_${value}`) }));
   const registration = values.registration || inherited?.registration || "none";
-  const checkIn = values.checkInEnabled === true || values.checkInEnabled === "yes"
-    || (values.checkInEnabled === "" && !!inherited?.checkInEnabled);
+  const ownCheckIn = values.checkIn || (inherited ? "" : "none");
+  const checkIn = ownCheckIn || inherited?.checkIn || "none";
+  const editable = ownCheckIn === "custom";
+  const shown = editable ? null : checkInSettings(ownCheckIn ? { checkIn: ownCheckIn } : inherited);
+  const checkIns = ["none", "default", "custom"].map((value) => ({ value, label: t(`registrationCheckIn_${value}`) }));
+  // A custom window starts from the default's times, to change what differs.
+  const chooseCheckIn = (value) => {
+    onChange("checkIn", value);
+    if (value !== "custom") return;
+    for (const [name, setting] of [["checkInOpensDaysBefore", "opensDaysBefore"], ["checkInOpensAt", "opensAt"],
+      ["checkInClosesDaysBefore", "closesDaysBefore"], ["checkInClosesAt", "closesAt"]]) {
+      if (values[name] === "" || values[name] === undefined) onChange(name, String(DEFAULT_CHECK_IN[setting]));
+    }
+  };
+  const windowField = (name, setting, label, inputMode) => (editable
+    ? <TextField label={label} {...text(name, { inputMode })} />
+    : <TextField id={`registration-${name}`} label={label} value={String(shown[setting])} onChange={() => {}} disabled />);
   const certificates = (choices.certificates || []).map((c) => ({ value: c._id, label: localized(c.name, lang) }));
   const certificateName = (id) => certificates.find((c) => c.value === id)?.label || id;
 
@@ -57,20 +74,21 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
               empty={inherited?.requiredCertificateId ? asActivity(certificateName(inherited.requiredCertificateId)) : t("activityFieldNone")}
               options={certificates} />
           </Row>
-          <Row>
-            {flag("checkInEnabled", t("registrationFieldCheckIn"))}
-            {checkIn && (
-              <TextField label={t("registrationFieldCheckInOpens")} hint={t("registrationFieldCheckInOpensHint")}
-                {...text("checkInOpensHoursBefore", { inputMode: "numeric" })} />
-            )}
-          </Row>
-          {event && checkIn && (
-            <Row>
-              <DayField id="registration-checkInDeadlineDay" label={t("registrationFieldDeadlineDay")} hint={t("registrationFieldDeadlineDayHint")}
-                value={values.checkInDeadlineDay} onChange={set("checkInDeadlineDay")} />
-              <ClockField id="registration-checkInDeadlineTime" label={t("registrationFieldDeadlineTime")} hint={t("registrationFieldDeadlineTimeHint")}
-                value={values.checkInDeadlineTime} onChange={set("checkInDeadlineTime")} />
-            </Row>
+          <SelectField id="registration-checkIn" label={t("registrationFieldCheckIn")} hint={t("registrationFieldCheckInHint")}
+            value={values.checkIn} onChange={chooseCheckIn}
+            empty={event ? (inherited ? asActivity(t(`registrationCheckIn_${inherited.checkIn || "none"}`)) : t("registrationCheckIn_none")) : undefined}
+            options={checkIns} />
+          {checkIn !== "none" && (
+            <>
+              <Row>
+                {windowField("checkInOpensDaysBefore", "opensDaysBefore", t("registrationFieldOpensDays"), "numeric")}
+                {windowField("checkInOpensAt", "opensAt", t("registrationFieldOpensAt"), "numeric")}
+              </Row>
+              <Row>
+                {windowField("checkInClosesDaysBefore", "closesDaysBefore", t("registrationFieldClosesDays"), "numeric")}
+                {windowField("checkInClosesAt", "closesAt", t("registrationFieldClosesAt"), "numeric")}
+              </Row>
+            </>
           )}
         </>
       )}

@@ -27,3 +27,5 @@ export const EventsTab = { args: { initialTab: 'events' } };
 export const ImageTab = { args: { initialTab: 'image' } };
 export const Deletable = { args: { events: [] } };
 export const New = { args: { isNew: true, activity: undefined, events: [], values: activityValues(null) } };
+export const DefaultCheckIn = { args: { values: activityValues({ ...intro, registration: 'required', maxSeats: 6, queueAllowed: true, checkIn: 'default' }) } };
+export const CustomCheckIn = { args: { values: activityValues({ ...intro, registration: 'required', checkIn: 'custom', checkInOpensDaysBefore: 3, checkInOpensAt: '08:00', checkInClosesDaysBefore: 1, checkInClosesAt: '20:00' }) } };

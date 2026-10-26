@@ -6,6 +6,7 @@ import { Messages } from '/imports/common/collections/messages';
 import { Spaces } from '/imports/common/collections/spaces';
 import { findBestTemplate, memberTemplateData } from '/imports/common/lib/message';
 import { appLink } from '/imports/common/lib/links';
+import { checkInApplies, checkInWindow } from '/imports/common/lib/activityRules';
 import { isEmailAllowed } from '/imports/common/server/emailGuard';
 import { pushMessage } from '/imports/common/server/push';
 import { publishManagerEvent, ManagerEventType } from '/imports/common/server/managerEvents';
@@ -57,7 +58,7 @@ const eventData = async (event, extra = {}) => {
     eventPlace: space?.name?.sv || '',
     eventLink: appLink(`/events/${event._id}`),
     freeSeats: 0,
-    checkInDeadline: when(event.checkInDeadline),
+    checkInDeadline: checkInApplies(event) ? when(checkInWindow(event).closes) : '',
     ...extra,
   };
 };
