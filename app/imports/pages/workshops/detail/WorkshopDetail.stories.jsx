@@ -186,3 +186,7 @@ export const Error = {
     error: "Workshop not found",
   },
 };
+
+// Activities, but none of them planned: the calendar says so, its activities still to unfold.
+export const NoPlannedEvents = { args: { ...Default.args, data: { ...sampleData, upcomingEvents: [] } } };
+

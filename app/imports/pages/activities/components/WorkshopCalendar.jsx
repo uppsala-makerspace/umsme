@@ -7,8 +7,9 @@ import { ActivityList } from "./ActivityLinks";
 
 /**
  * A workshop's or area of interest's calendar: its events to come, and
- * below them its activities, folded away until asked for. Nothing when it
- * has neither.
+ * below them its activities, folded away until asked for. With activities
+ * but no events it says none are planned, its activities still to unfold.
+ * Nothing when it has neither.
  */
 const WorkshopCalendar = ({ events, activities }) => {
   const { t } = useTranslation();
@@ -22,7 +23,7 @@ const WorkshopCalendar = ({ events, activities }) => {
           {events.map((event) => <EventRow key={event._id} event={event} />)}
         </ul>
       ) : (
-        <p className="text-gray-500 m-0 mb-2">{t("activitiesNoUpcoming")}</p>
+        <p className="text-gray-500 m-0 mb-2">{t("workshopNoPlannedEvents")}</p>
       )}
       {activities?.length > 0 && (
         <>
