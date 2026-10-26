@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import fs from "fs";
 import path from "path";
+import { serviceAccountClient } from "./googleServiceAccount";
 
 /**
  * Image storage factory with two backends:
@@ -48,25 +49,7 @@ export const createImageStore = (getConfig, name = "imageStore") => {
 
   let _client = null;
   const driveClient = () => {
-    if (_client) return _client;
-    // Imported lazily so the local backend works without the dependency present.
-    const { JWT } = require("google-auth-library");
-    const c = config();
-    let creds = c.credentials;
-    if (!creds && c.keyFile) {
-      creds = JSON.parse(fs.readFileSync(path.resolve(appRoot, c.keyFile), "utf8"));
-    }
-    if (!creds?.client_email || !creds?.private_key) {
-      throw new Meteor.Error("drive-config", `${name} credentials are not configured`);
-    }
-    _client = new JWT({
-      email: creds.client_email,
-      // Tolerate keys whose newlines arrived escaped (literal "\n"), which is
-      // common when the key is pasted into JSON/env. A real PEM needs actual
-      // line breaks or OpenSSL fails with "DECODER routines::unsupported".
-      key: creds.private_key.replace(/\\n/g, "\n"),
-      scopes: ["https://www.googleapis.com/auth/drive"],
-    });
+    if (!_client) _client = serviceAccountClient(config(), ["https://www.googleapis.com/auth/drive"], name);
     return _client;
   };
 
