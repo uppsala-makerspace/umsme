@@ -216,7 +216,9 @@ tom:
 Bara när incheckning gäller för eventet.
 
 1. Fönstret öppnar `checkInOpensHoursBefore` före start och stänger vid
-   `checkInDeadline`. Påminnelse med push + mail när det öppnar.
+   `checkInDeadline`. Påminnelse med push + mail när det öppnar, och en andra
+   två timmar innan det stänger till dem som inte checkat in, dock aldrig
+   inom en timme från den första.
 2. Den anmälde checkar in i appen (`approved` → `checkedIn`). Bara den anmälde
    själv — incheckningen sker dagen före, inte vid dörren.
 3. Vid deadline kör ett cronjobb i admin (som membership-påminnelserna): varje
@@ -380,7 +382,5 @@ demodatabaserna.
 
 ## Frågor som lämnas öppna
 
-- Hur länge före start ska påminnelsen om incheckning gå ut, och ska det gå en
-  andra påminnelse strax före deadline?
 - När kostnad blir aktuell: skapas en `StoreItem` per aktivitet, eller blir
-  anmälan själv ett köp?
+  anmälan själv ett köp? (Inte nu, beslutat 2026-10-26.)

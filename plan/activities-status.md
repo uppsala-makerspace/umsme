@@ -28,7 +28,7 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   - Aktiviteter, events och kategorier.
   - `registrations.js`: anmälan, kö, ta plats, avanmälan, inställt,
     incheckning, närvaro och de schemalagda jobben.
-  - `notify.js` och `defaultTemplates.js`: åtta malltyper som skickas som push
+  - `notify.js` och `defaultTemplates.js`: nio malltyper som skickas som push
     och mail.
   - `linking.js`: aktivitet från ett event, och event med samma namn.
   - `calendarImport.js`: import från Google-kalendern.
@@ -100,23 +100,21 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 - **Ej godkänd medlem:** betalt medlemskap räcker för att anmäla sig.
   Ändrat. Intresseanmälan och grupperna kräver fortfarande godkänt
   medlemskap.
+- **Kostnad:** ingen betalning nu; kostnaden kan beskrivas i texten.
+- **Hemsidan:** platser kvar och anmälningsläge kommer inte med i JSON:en nu.
+- **Kalender på grupp- och verkstadssidan:** delvis löst redan; återkom om
+  något saknas.
+- **Andra påminnelsen:** de som inte checkat in påminns igen två timmar innan
+  incheckningen stänger (`checkInLastCall`, `sendCheckInLastCalls`, malltypen
+  `activityCheckInLastCall`), aldrig inom en timme från den första. Byggt.
 
 ## Öppna frågor
 
 1. **`public.appUrl`** i produktion: `https://app.uppsalamakerspace.se`?
 2. **Tidszon:** incheckningsfönstret (t.ex. 03:00–15:00 dagen före) räknas i
    serverns tidszon. Går produktionsservern på svensk tid?
-7. **Kostnad:** ska varje aktivitet bli en artikel i webbshoppen, eller ska
-   anmälan själv vara ett köp?
-8. **Hemsidan:** ska platser kvar och anmälningsläge med i JSON:en?
-9. **Gruppsidan:** behåller sin aktivitetslista. Ska den också få
-   Kalender-avsnittet som verkstadssidan?
-10. **Verkstad utan aktiviteter och tillfällen:** Kalender-avsnittet döljs
-    helt. Ska rubriken synas även då?
-11. **Google-kalendern i appen:** ligger kvar som "Google-kalender" i
-    hamburgermenyn. När ska den bort?
-12. **Incheckning från etapp 3:** ska det gå en andra påminnelse strax innan
-    incheckningen stänger?
+3. **Google-kalendern i appen:** ligger kvar som "Google-kalender" i
+   hamburgermenyn. När ska den bort?
 
 ## Kända saker att veta
 
