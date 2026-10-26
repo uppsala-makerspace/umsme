@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField';
 import { checkInSettings, DEFAULT_CHECK_IN } from '/imports/common/lib/activityRules';
 import { native } from './SharedFields';
 import { FormCard } from './FormCard';
+import { ClockField } from '../components/ClockField';
 
 const REGISTRATIONS = [['none', 'No registration'], ['optional', 'Registration possible'], ['required', 'Registration required']];
 const CHECK_INS = [['none', 'No'], ['default', 'Yes (default)'], ['custom', 'Yes (custom)']];
@@ -61,9 +62,12 @@ export const RegistrationFields = ({ values, onChange, inherited = null, event =
       if (values[name] === '' || values[name] === undefined) onChange(name, String(DEFAULT_CHECK_IN[setting]));
     }
   };
-  const windowField = (name, setting, title, inputMode) => (editable
-    ? <TextField label={title} fullWidth {...text(name, { inputMode })} />
-    : <TextField label={title} fullWidth disabled value={String(shown[setting])} />);
+  // The times are time fields, the days numbers.
+  const windowField = (name, setting, title, inputMode) => {
+    if (!editable) return <TextField label={title} fullWidth disabled value={String(shown[setting])} />;
+    if (name.endsWith('At')) return <ClockField label={title} fullWidth value={values[name]} onChange={(v) => onChange(name, v)} />;
+    return <TextField label={title} fullWidth {...text(name, { inputMode })} />;
+  };
 
   const kind = event ? 'event' : 'activity';
   return (

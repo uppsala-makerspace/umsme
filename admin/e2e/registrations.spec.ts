@@ -71,8 +71,13 @@ test.describe('Registrations in admin', () => {
   test('an activity’s usual times make its duration and a new event’s times', async ({ page }) => {
     await openAs(page, 'admin', '/activities/add');
     await field(page, 'Name (Swedish)').fill('E2E tidskurs');
-    await field(page, 'Usually starts').fill('09:00');
-    await field(page, 'Usually ends').fill('12:30');
+    await field(page, 'Usually starts').fill('9x');
+    await expect(page.getByText('A time, like 18:00')).toBeVisible();
+    await field(page, 'Usually starts').fill('9');
+    await field(page, 'Usually ends').fill('1230');
+    await field(page, 'Name (English)').click();
+    await expect(field(page, 'Usually starts')).toHaveValue('09:00');
+    await expect(field(page, 'Usually ends')).toHaveValue('12:30');
     await expect(field(page, 'Duration (minutes)')).toHaveValue('210');
     await expect(field(page, 'Duration (minutes)')).toBeDisabled();
     await action(page, /^add$/i).click();

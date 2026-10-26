@@ -5,6 +5,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { FormCard } from './FormCard';
+import { ClockField } from '../components/ClockField';
 import { usualMinutes } from '/imports/common/lib/activityValues';
 
 export const native = { select: { native: true }, inputLabel: { shrink: true } };
@@ -73,8 +74,8 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
           {/* An activity's usual times, without a day: each new event of it starts from them. */}
-          {!event && <TextField label="Usually starts" fullWidth placeholder="18:00" helperText="A new event gets it" {...text('startsAt', { inputMode: 'numeric' })} />}
-          {!event && <TextField label="Usually ends" fullWidth placeholder="20:00" helperText="A new event gets it" {...text('endsAt', { inputMode: 'numeric' })} />}
+          {!event && <ClockField label="Usually starts" fullWidth helperText="A new event gets it" value={values.startsAt} onChange={(v) => onChange('startsAt', v)} />}
+          {!event && <ClockField label="Usually ends" fullWidth helperText="A new event gets it" value={values.endsAt} onChange={(v) => onChange('endsAt', v)} />}
           {usual !== null
             ? <TextField label="Duration (minutes)" fullWidth disabled value={String(usual)} helperText="From its usual times" />
             : <TextField label="Duration (minutes)" fullWidth {...text('durationMinutes', { inputMode: 'numeric' })} />}

@@ -12,6 +12,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { DateField } from '../components/DateField';
+import { ClockField } from '../components/ClockField';
 import { ImageField } from '../components/ImageField';
 import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { memberPath } from '../members/paths';
@@ -22,19 +23,9 @@ import { FormCard } from './FormCard';
 import { HostsField } from './HostsField';
 import { StatusChip } from './eventColumns';
 import { activityPath, eventPath } from './paths';
-import { eventName, parseClock } from '/imports/common/lib/activityValues';
+import { eventName } from '/imports/common/lib/activityValues';
 
 const TABS = [['details', 'Details'], ['participants', 'Participants'], ['image', 'Image']];
-
-/** A time of day, HH:MM, typed by hand. */
-const ClockField = ({ label, value, onChange, helperText, ...props }) => {
-  const wrong = parseClock(value) === null;
-  return (
-    <TextField label={label} value={value} onChange={(e) => onChange(e.target.value)} placeholder="18:00"
-      error={wrong} helperText={wrong ? 'A time, like 18:00' : helperText}
-      slotProps={{ htmlInput: { inputMode: 'numeric' }, inputLabel: { shrink: true } }} {...props} />
-  );
-};
 
 /**
  * Add an event, or show and edit one in tabs: its details (saved with Save)
