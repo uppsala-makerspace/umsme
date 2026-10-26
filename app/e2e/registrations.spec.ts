@@ -70,4 +70,19 @@ test.describe('Registrations', () => {
     await page.getByRole('button', { name: en.activityNotInterested }).click();
     await expect(page.getByText(en.activityInterestQuestion)).toBeVisible();
   });
+
+  test('an event asking for a certificate says so, and one without it cannot sign up', async ({ page }) => {
+    await openEvent(page, 'member', 'E2E wheel follow-up');
+    await expect(page.getByRole('term').filter({ hasText: en.activityFactCertificate })).toHaveCount(1);
+    await expect(page.getByRole('link', { name: 'Pottery wheel' }).first()).toBeVisible();
+    await expect(page.getByText(en.registrationLacksCertificate)).toBeVisible();
+    await expect(page.getByRole('button', { name: en.registrationSignUp })).toBeDisabled();
+  });
+
+  test('a member not yet accepted by the board is told so, and cannot sign up', async ({ page }) => {
+    await openEvent(page, 'pending', 'E2E sign-up');
+    await expect(page.getByText(en.registrationNotMember_notRegistered)).toBeVisible();
+    await expect(page.getByRole('button', { name: en.registrationSignUp })).toBeDisabled();
+  });
 });
+

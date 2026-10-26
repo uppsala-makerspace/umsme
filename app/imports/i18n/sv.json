@@ -762,7 +762,6 @@
   "registrationCheckInNow": "Bekräfta att du kommer, senast {{deadline}}. Annars går platsen till kön.",
   "registrationCheckIn": "Checka in",
   "registrationCheckInLater": "Incheckning öppnar {{opens}} och stänger {{closes}}.",
-  "registrationNeedsCertificate": "För att anmäla dig behöver du certifikatet",
   "registrationFull": "Fullt.",
   "registrationInfo": "Information till värdarna",
   "registrationJoinQueue": "Ställ dig i kö",
@@ -823,5 +822,11 @@
   "registrationFieldDeadlineDay": "Sista incheckning, dag",
   "registrationFieldDeadlineDayHint": "Tomt: tillfällets dag",
   "registrationFieldDeadlineTime": "Sista incheckning, tid",
-  "registrationFieldDeadlineTimeHint": "Tomt: vid start"
+  "registrationFieldDeadlineTimeHint": "Tomt: vid start",
+  "activityFactCertificate": "Krävs certifikat",
+  "registrationLacksCertificate": "Du har inte det krävda certifikatet:",
+  "registrationError_not-member": "Bara den som har ett giltigt medlemskap kan anmäla sig.",
+  "registrationNotMember_noMembership": "Bara den som har ett giltigt medlemskap kan anmäla sig.",
+  "registrationNotMember_notRegistered": "Ditt medlemskap har ännu inte godkänts av styrelsen. När det är godkänt kan du anmäla dig.",
+  "registrationNotMember_excluded": "Du kan inte anmäla dig."
 }

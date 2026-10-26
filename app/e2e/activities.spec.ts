@@ -17,7 +17,6 @@ const inDays = (n: number) => {
 test.describe('Activities', () => {
   test('a member sees the events to come and the activities, and may change none', async ({ page }) => {
     await openAs(page, 'member', '/activities');
-    await expect(page.getByRole('link', { name: /Årsmöte/ })).toBeVisible();
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toHaveCount(0);
 

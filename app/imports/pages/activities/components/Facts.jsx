@@ -23,6 +23,10 @@ const Facts = ({ item, slackTeam, slackChannelIds }) => {
     item.durationMinutes && [t("activityFactDuration"), t("activityDuration", { minutes: item.durationMinutes })],
     [t("activityFactCost"), item.cost ? t("activityCost", { cost: item.cost }) : t("activityFree")],
     [t("activityFactWho"), item.membersOnly ? t("activityMembersOnly") : t("activityOpenToAll")],
+    item.requiredCertificate && [t("activityFactCertificate"),
+      <Link to={`/certificates/${item.requiredCertificate._id}`} className="text-brand-green no-underline hover:underline">
+        {localized(item.requiredCertificate.name, lang) || t("activityFactCertificate")}
+      </Link>],
     item.slackChannel && [t("activityFieldSlack"),
       <a href={getSlackChannelUrl(item.slackChannel, slackTeam, slackChannelIds)} className="text-brand-green no-underline hover:underline">
         #{item.slackChannel.replace(/^#/, "")}

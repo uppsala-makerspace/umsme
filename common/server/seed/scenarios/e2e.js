@@ -190,7 +190,14 @@ export const buildE2e = async ({ people, now }) => {
     workshopId: ceramics, certifiers: [members.steering._id], defaultValidityDays: 365,
   });
   await attest(kiln, 'member', { endDate: days(335) });
-  await certificate({ name: { sv: 'Drejskiva', en: 'Pottery wheel' }, workshopId: ceramics, prerequisites: [kiln] });
+  const wheel = await certificate({ name: { sv: 'Drejskiva', en: 'Pottery wheel' }, workshopId: ceramics, prerequisites: [kiln] });
+  // An activity whose events ask for the wheel certificate, which nobody holds.
+  const wheelCourse = {
+    name: { sv: 'E2E drejfortsättning', en: 'E2E wheel follow-up' }, groupId: ceramicsGroup, durationMinutes: 120,
+    registration: 'required', maxSeats: 4, requiredCertificateId: wheel,
+  };
+  wheelCourse._id = await makeActivity(wheelCourse);
+  await makeEvent({ activity: wheelCourse, start: at(16, 18) });
   for (const purpose of ['edit', 'links', 'delete', 'mandatory', 'grant']) {
     await certificate({ name: { sv: `E2E ${purpose} certificate` } });
   }

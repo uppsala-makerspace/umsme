@@ -39,7 +39,8 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
   const { mine, seats, seatsLeft, queued, open } = registration;
   const pending = mine && ["approved", "checkedIn", "queued"].includes(mine.state);
   const full = seatsLeft === 0 || (queued > 0 && seatsLeft !== null);
-  const certificateMissing = registration.certificate && !registration.certificate.held;
+  const certificateMissing = !!registration.certificate && !registration.certificate.held;
+  const blocked = certificateMissing || registration.member === false;
   return (
     <section className="mb-6 p-4 rounded-lg bg-white border border-gray-200">
       <div className="flex items-center gap-2 mb-2">
@@ -73,18 +74,23 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
       )}
 
       {!pending && open && (
-        certificateMissing ? (
-          <p className="m-0 text-sm">
-            {t("registrationNeedsCertificate")}{" "}
-            <Link to={`/certificates/${registration.certificate._id}`} className="text-brand-green font-semibold no-underline hover:underline">
-              {localized(registration.certificate.name, lang)}
-            </Link>
-          </p>
-        ) : full && !registration.queueAllowed ? (
+        full && !registration.queueAllowed ? (
           <p className="m-0 text-sm font-semibold">{t("registrationFull")}</p>
         ) : (
           <form onSubmit={(e) => { e.preventDefault(); onRegister(info); }}>
-            {registration.infoRequired && (
+            {/* Why one may not sign up, above the greyed-out button. */}
+            {certificateMissing && (
+              <p className="m-0 mb-3 text-sm">
+                {t("registrationLacksCertificate")}{" "}
+                <Link to={`/certificates/${registration.certificate._id}`} className="text-brand-green font-semibold no-underline hover:underline">
+                  {localized(registration.certificate.name, lang)}
+                </Link>
+              </p>
+            )}
+            {!registration.member && (
+              <p className="m-0 mb-3 text-sm">{t(`registrationNotMember_${registration.notMemberReason || "noMembership"}`)}</p>
+            )}
+            {registration.infoRequired && !blocked && (
               <label className="block mb-3">
                 <span className="block mb-1 text-sm font-bold">{t("registrationInfo")}</span>
                 <textarea
@@ -94,7 +100,7 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
                 />
               </label>
             )}
-            <Button type="submit" disabled={busy}>{t(full ? "registrationJoinQueue" : "registrationSignUp")}</Button>
+            <Button type="submit" disabled={busy || blocked}>{t(full ? "registrationJoinQueue" : "registrationSignUp")}</Button>
           </form>
         )
       )}

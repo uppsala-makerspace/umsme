@@ -28,6 +28,7 @@ export const FullWithQueue = withRegistration({ seatsLeft: 0, queued: 2 });
 export const SeatFreeInQueue = withRegistration({ seatsLeft: 1, queued: 2, mine: { state: "queued" }, canTakeSeat: true, canWithdraw: true });
 export const CheckInOpen = withRegistration({ mine: { state: "approved" }, canCheckIn: true, canWithdraw: true, checkIn: { opens: later(-2), closes: later(20) } });
 export const NeedsCertificate = withRegistration({ certificate: { _id: "c1", name: { sv: "Svetsning" }, held: false } });
+export const NotYetAccepted = withRegistration({ member: false, notMemberReason: "notRegistered" });
 export const AsHost = withRegistration({ mine: null }, {
   participants: [
     { memberId: "m1", name: "Alice Andersson", state: "checkedIn", info: "" },

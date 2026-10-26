@@ -36,7 +36,7 @@ import {
 import { hasValidCertificate } from "/imports/common/server/activities/certificates";
 import { createActivity, updateActivity, removeActivity } from "/imports/common/server/activities/activities";
 import { createEvent, updateEvent, removeEvent } from "/imports/common/server/activities/events";
-import { findMemberForUser, isActiveMember } from "./utils";
+import { findMemberForUser, isActiveMember, inactiveReason } from "./utils";
 
 /**
  * Activities and events for members (plan/activities.md): everyone sees them;
@@ -144,6 +144,7 @@ const lookups = async (docs) => ({
   categories: await names(ActivityCategories, docs.map((d) => d.categoryId)),
   workshops: await names(Workshops, docs.map((d) => d.workshopId)),
   spaces: await names(Spaces, docs.map((d) => d.spaceId)),
+  certificates: await names(Certificates, docs.map((d) => d.requiredCertificateId)),
 });
 
 const described = (doc, lookup) => ({
@@ -161,6 +162,10 @@ const described = (doc, lookup) => ({
   durationMinutes: doc.durationMinutes ?? null,
   cost: doc.cost ?? null,
   membersOnly: !!doc.membersOnly,
+  // Only when one signs up: the certificate one must hold to.
+  requiredCertificate: (doc.registration || "none") !== "none" && doc.requiredCertificateId
+    ? { _id: doc.requiredCertificateId, name: lookup.certificates.get(doc.requiredCertificateId) || null }
+    : null,
 });
 
 const activityView = (activity, lookup) => ({ ...described(activity, lookup), imageUrl: activityImageUrlFor(activity) });
@@ -210,7 +215,7 @@ const eventViews = async (events, memberId = null) => {
  * queue, their own registration and what they may do with it, what it asks
  * for. Null for an event that takes no registrations.
  */
-const registrationView = async (event, activity, member, now = new Date()) => {
+const registrationView = async (event, activity, member, { active, adminish }, now = new Date()) => {
   const resolved = resolveEvent(event, activity);
   if (!takesRegistrations(resolved)) return null;
   const mine = await EventRegistrations.findOneAsync({ eventId: event._id, memberId: member._id });
@@ -233,6 +238,10 @@ const registrationView = async (event, activity, member, now = new Date()) => {
       ? { _id: certificate._id, name: certificate.name, held: await hasValidCertificate(member._id, certificate._id, now) }
       : null,
     checkIn: window ? { opens: window.opens, closes: window.closes } : null,
+    // Only a member of the association signs up (board and admin always).
+    member: active,
+    // Why not, when not: excluded, notRegistered or noMembership.
+    notMemberReason: active || adminish ? null : await inactiveReason(member),
     mine: mine ? { state: mine.state, info: mine.info || "" } : null,
     canWithdraw: !!mine && mayWithdraw(mine, resolved, now),
     canTakeSeat: !!mine && mayTakeSeat({ registration: mine, event: resolved, seatsTaken, now }),
@@ -256,7 +265,7 @@ const participantsView = async (event) => {
 
 /** Only a member of the association signs up; board and admin always may. */
 const requireActive = (who) => {
-  if (!who.active) throw new Meteor.Error("not-authorized", "Only members of the association may sign up");
+  if (!who.active) throw new Meteor.Error("not-member", "Only members of the association may sign up");
 };
 
 const getActivity = async (activityId) => {
@@ -400,7 +409,7 @@ Meteor.methods({
     return {
       event: view,
       hosts: hosts.map((m) => ({ _id: m._id, name: m.name })),
-      registration: await registrationView(event, activity, who.member),
+      registration: await registrationView(event, activity, who.member, who),
       // The participants, for the event's hosts and those who may change it.
       participants: hostsCanSee ? await participantsView(event) : null,
       attendance: mayRecordAttendance(event, who)

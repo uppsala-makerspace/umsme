@@ -257,6 +257,21 @@ export const isMemberRegistered = async (member) => {
  * @param {object} member - The member object
  * @returns {Promise<boolean>}
  */
+/**
+ * Why a member is not an active member (see isActiveMember): 'excluded',
+ * 'notRegistered' (not yet accepted by the board), 'noMembership' (no current
+ * paid membership); null when they are one.
+ */
+export const inactiveReason = async (member) => {
+  if (!member || member.excluded) return "excluded";
+  if (!(await isMemberRegistered(member))) return "notRegistered";
+  const paying = member.infamily
+    ? await Members.findOneAsync(member.infamily)
+    : member;
+  const { type } = await memberStatus(paying);
+  return type && type !== "none" ? null : "noMembership";
+};
+
 export const isActiveMember = async (member) => {
   if (!member || member.excluded) return false;
   if (!(await isMemberRegistered(member))) return false;
