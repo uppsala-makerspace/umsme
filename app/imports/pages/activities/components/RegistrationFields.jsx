@@ -13,6 +13,7 @@ import { TextField, SelectField, CheckField, Row, Card } from "./fields";
 const RegistrationFields = ({ values, onChange, choices, inherited = null, event = false }) => {
   const { t } = useTranslation();
   const set = (name) => (value) => onChange(name, value);
+  const kind = event ? "event" : "activity";
   const yesNo = (value) => t(value ? "activityYes" : "activityNo");
   const asActivity = (value) => t("activityFieldAsActivity", { value });
   const text = (name, extra = {}) => ({
@@ -52,7 +53,7 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
 
   return (
     <>
-      <Card title={t("registrationHeading")}>
+      <Card title={t("registrationHeading")} kind={kind}>
         <SelectField id="registration-registration" label={t("registrationFieldKind")} value={values.registration} onChange={set("registration")}
           empty={event ? (inherited ? asActivity(t(`registrationKind_${inherited.registration || "none"}`)) : t("registrationKind_none")) : undefined}
           options={kinds} />
@@ -69,7 +70,7 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
         )}
       </Card>
       {registration !== "none" && (
-        <Card title={t("formCardCheckIn")}>
+        <Card title={t("formCardCheckIn")} kind={kind}>
           <SelectField id="registration-checkIn" label={t("registrationFieldCheckIn")} hint={t("registrationFieldCheckInHint")}
             value={values.checkIn} onChange={chooseCheckIn}
             empty={event ? (inherited ? asActivity(t(`registrationCheckIn_${inherited.checkIn || "none"}`)) : t("registrationCheckIn_none")) : undefined}

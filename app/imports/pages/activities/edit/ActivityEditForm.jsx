@@ -20,7 +20,7 @@ const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, has
     <form onSubmit={(e) => { e.preventDefault(); onSave(); }}>
       <h2 className="text-2xl m-0 mb-4">{t(isNew ? "activityNew" : "activityEdit")}</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
-      <Card title={t("formCardOwner")}>
+      <Card title={t("formCardOwner")} kind="activity">
         <SelectField id="activity-groupId" label={t("activityFieldGroup")} value={values.groupId} onChange={(v) => onChange("groupId", v)}
           empty={choices.adminish ? t("activityFieldGroupNone") : undefined}
           options={groups.map((g) => ({ value: g._id, label: localized(g.name, lang) }))} />

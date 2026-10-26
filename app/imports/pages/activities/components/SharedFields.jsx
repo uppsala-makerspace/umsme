@@ -13,6 +13,7 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const set = (name) => (value) => onChange(name, value);
+  const kind = event ? "event" : "activity";
   const hint = (value) => (inherited && value !== undefined && value !== null && value !== "" ? String(value) : undefined);
   const text = (name, field, lang2) => ({
     id: `activity-${name}`,
@@ -39,7 +40,7 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
 
   return (
     <>
-      <Card title={t("formCardDescription")}>
+      <Card title={t("formCardDescription")} kind={kind}>
         <TextField label={t("activityFieldNameSv")} required={!inherited} {...text("nameSv", "name", "sv")} />
         <TextField label={t("activityFieldNameEn")} {...text("nameEn", "name", "en")} />
         <TextField multiline label={t("activityFieldDescriptionSv")} {...text("descriptionSv", "description", "sv")} />
@@ -51,7 +52,7 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
           <TextField label={t("activityFieldCost")} inputMode="decimal" {...text("cost", "cost")} />
         </Row>
       </Card>
-      <Card title={t("formCardPlace")}>
+      <Card title={t("formCardPlace")} kind={kind}>
         <Row>
           <SelectField id="activity-workshopId" label={t("activityFieldWorkshop")} value={values.workshopId} onChange={set("workshopId")}
             empty={none("workshopId", choices.workshops)} options={options(choices.workshops)} />
@@ -63,7 +64,7 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
           <TextField label={t("activityFieldContact")} type="email" {...text("contactEmail", "contactEmail")} />
         </Row>
       </Card>
-      <Card title={t("formCardWho")}>
+      <Card title={t("formCardWho")} kind={kind}>
         {flag("membersOnly", t("activityFieldMembersOnly"))}
         <SelectField id="activity-requiredCertificateId" label={t("registrationFieldCertificate")} hint={t("registrationFieldCertificateHint")}
           value={values.requiredCertificateId} onChange={set("requiredCertificateId")}
