@@ -250,6 +250,22 @@ export const isMemberRegistered = async (member) => {
 };
 
 /**
+ * Whether a member holds a current paid base or lab membership and is not
+ * excluded, whether or not the board has accepted them yet. Enough to sign up
+ * for events. For family members, resolves via the paying member.
+ * @param {object} member - The member object
+ * @returns {Promise<boolean>}
+ */
+export const hasPaidMembership = async (member) => {
+  if (!member || member.excluded) return false;
+  const paying = member.infamily
+    ? await Members.findOneAsync(member.infamily)
+    : member;
+  const { type } = await memberStatus(paying);
+  return !!type && type !== "none";
+};
+
+/**
  * Checks if a member is an active makerspace member: not excluded, formally
  * accepted (registered), and holding a current paid base or lab membership.
  * For family members, resolves via the paying member. Used to gate access to
@@ -257,30 +273,8 @@ export const isMemberRegistered = async (member) => {
  * @param {object} member - The member object
  * @returns {Promise<boolean>}
  */
-/**
- * Why a member is not an active member (see isActiveMember): 'excluded',
- * 'notRegistered' (not yet accepted by the board), 'noMembership' (no current
- * paid membership); null when they are one.
- */
-export const inactiveReason = async (member) => {
-  if (!member || member.excluded) return "excluded";
-  if (!(await isMemberRegistered(member))) return "notRegistered";
-  const paying = member.infamily
-    ? await Members.findOneAsync(member.infamily)
-    : member;
-  const { type } = await memberStatus(paying);
-  return type && type !== "none" ? null : "noMembership";
-};
-
-export const isActiveMember = async (member) => {
-  if (!member || member.excluded) return false;
-  if (!(await isMemberRegistered(member))) return false;
-  const paying = member.infamily
-    ? await Members.findOneAsync(member.infamily)
-    : member;
-  const { type } = await memberStatus(paying);
-  return !!type && type !== "none";
-};
+export const isActiveMember = async (member) =>
+  (await isMemberRegistered(member)) && (await hasPaidMembership(member));
 
 export const findForUser = async () => {
   let user;

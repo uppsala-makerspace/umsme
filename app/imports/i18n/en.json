@@ -822,7 +822,6 @@
   "registrationLacksCertificate": "You do not hold the required certificate:",
   "registrationError_not-member": "Only someone with a valid membership can sign up.",
   "registrationNotMember_noMembership": "Only someone with a valid membership can sign up.",
-  "registrationNotMember_notRegistered": "Your membership has not yet been accepted by the board. Once it is, you can sign up.",
   "registrationNotMember_excluded": "You cannot sign up.",
   "registrationFieldCheckInHint": "Those with a seat confirm they come. Whoever has not when check-in closes loses the seat to the queue.",
   "registrationCheckIn_none": "No",

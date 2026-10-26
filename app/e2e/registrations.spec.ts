@@ -79,10 +79,12 @@ test.describe('Registrations', () => {
     await expect(page.getByRole('button', { name: en.registrationSignUp })).toBeDisabled();
   });
 
-  test('a member not yet accepted by the board is told so, and cannot sign up', async ({ page }) => {
+  test('a paying member not yet accepted by the board may sign up', async ({ page }) => {
+    // Not clicked: the seats of E2E sign-up are counted by the test above.
     await openEvent(page, 'pending', 'E2E sign-up');
-    await expect(page.getByText(en.registrationNotMember_notRegistered)).toBeVisible();
-    await expect(page.getByRole('button', { name: en.registrationSignUp })).toBeDisabled();
+    await page.getByLabel(en.registrationInfo).fill('Nötter');
+    await expect(page.getByRole('button', { name: en.registrationSignUp })).toBeEnabled();
+    await expect(page.getByText(en.registrationNotMember_noMembership)).toHaveCount(0);
   });
 
   test('a host of an event without registration is told there is none', async ({ page }) => {

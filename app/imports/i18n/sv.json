@@ -821,7 +821,6 @@
   "registrationLacksCertificate": "Du har inte det krävda certifikatet:",
   "registrationError_not-member": "Bara den som har ett giltigt medlemskap kan anmäla sig.",
   "registrationNotMember_noMembership": "Bara den som har ett giltigt medlemskap kan anmäla sig.",
-  "registrationNotMember_notRegistered": "Ditt medlemskap har ännu inte godkänts av styrelsen. När det är godkänt kan du anmäla dig.",
   "registrationNotMember_excluded": "Du kan inte anmäla dig.",
   "registrationFieldCheckInHint": "De med plats bekräftar att de kommer. Den som inte gjort det när incheckningen stänger förlorar platsen till kön.",
   "registrationCheckIn_none": "Nej",

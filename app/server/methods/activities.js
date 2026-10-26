@@ -40,7 +40,7 @@ import {
 import {
   createEvent, updateEvent, removeEvent, setEventImage, removeEventImage,
 } from "/imports/common/server/activities/events";
-import { findMemberForUser, isActiveMember, inactiveReason } from "./utils";
+import { findMemberForUser, isActiveMember, hasPaidMembership } from "./utils";
 
 /**
  * Activities and events for members (plan/activities.md): everyone sees them;
@@ -235,9 +235,10 @@ const eventViews = async (events, memberId = null) => {
  * queue, their own registration and what they may do with it, what it asks
  * for. Null for an event that takes no registrations.
  */
-const registrationView = async (event, activity, member, { active, adminish }, now = new Date()) => {
+const registrationView = async (event, activity, member, who, now = new Date()) => {
   const resolved = resolveEvent(event, activity);
   if (!takesRegistrations(resolved)) return null;
+  const mayRegister = await maySignUp(who);
   const mine = await EventRegistrations.findOneAsync({ eventId: event._id, memberId: member._id });
   const queued = await EventRegistrations.find({ eventId: event._id, state: "queued" }).countAsync();
   const seatsTaken = event.seatsTaken || 0;
@@ -258,10 +259,10 @@ const registrationView = async (event, activity, member, { active, adminish }, n
       ? { _id: certificate._id, name: certificate.name, held: await hasValidCertificate(member._id, certificate._id, now) }
       : null,
     checkIn: window ? { opens: window.opens, closes: window.closes } : null,
-    // Only a member of the association signs up (board and admin always).
-    member: active,
-    // Why not, when not: excluded, notRegistered or noMembership.
-    notMemberReason: active || adminish ? null : await inactiveReason(member),
+    // Only one with a paid membership signs up, accepted by the board or not yet (board and admin always).
+    member: mayRegister,
+    // Why not, when not: excluded or noMembership.
+    notMemberReason: mayRegister ? null : (member.excluded ? "excluded" : "noMembership"),
     mine: mine ? { state: mine.state, info: mine.info || "" } : null,
     canWithdraw: !!mine && mayWithdraw(mine, resolved, now),
     canTakeSeat: !!mine && mayTakeSeat({ registration: mine, event: resolved, seatsTaken, now }),
@@ -283,9 +284,14 @@ const participantsView = async (event) => {
   return registrations.map((r) => ({ memberId: r.memberId, name: names.get(r.memberId) || "", state: r.state, info: r.info || "" }));
 };
 
-/** Only a member of the association signs up; board and admin always may. */
-const requireActive = (who) => {
-  if (!who.active) throw new Meteor.Error("not-member", "Only members of the association may sign up");
+/**
+ * Only one with a paid membership signs up, whether or not the board has
+ * accepted them yet; board and admin always may.
+ */
+const maySignUp = async (who) => who.active || (await hasPaidMembership(who.member));
+
+const requireMaySignUp = async (who) => {
+  if (!(await maySignUp(who))) throw new Meteor.Error("not-member", "Only members of the association may sign up");
 };
 
 const getActivity = async (activityId) => {
@@ -556,7 +562,7 @@ Meteor.methods({
     check(eventId, String);
     check(info, Match.Maybe(String));
     const who = await caller();
-    requireActive(who);
+    await requireMaySignUp(who);
     return register(eventId, who.member._id, { info: info || "", userId: Meteor.userId() });
   },
 

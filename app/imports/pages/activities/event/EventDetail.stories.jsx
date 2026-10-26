@@ -37,7 +37,6 @@ export const NeedsCertificate = {
   },
 };
 export const NoMembership = withRegistration({ member: false, notMemberReason: "noMembership" });
-export const NotYetAccepted = withRegistration({ member: false, notMemberReason: "notRegistered" });
 export const AsHost = withRegistration({ mine: null }, {
   participants: [
     { memberId: "m1", name: "Alice Andersson", state: "checkedIn", info: "" },
