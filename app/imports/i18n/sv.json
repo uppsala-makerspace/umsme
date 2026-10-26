@@ -838,5 +838,6 @@
   "formCardOwner": "Ägare",
   "formCardEvent": "Tillfället",
   "registrationFieldCertificateHint": "Gäller när man anmäler sig",
-  "registrationFieldInfoPlaceholderHint": "Visas i fältet när man anmäler sig, t.ex. ”Allergier”"
+  "registrationFieldInfoPlaceholderHint": "Visas i fältet när man anmäler sig, t.ex. ”Allergier”",
+  "registrationFieldCertificateNone": "(Inget)"
 }

@@ -839,5 +839,6 @@
   "formCardOwner": "Owner",
   "formCardEvent": "The event",
   "registrationFieldCertificateHint": "Applies when signing up",
-  "registrationFieldInfoPlaceholderHint": "Shown in the field when signing up, e.g. “Allergies”"
+  "registrationFieldInfoPlaceholderHint": "Shown in the field when signing up, e.g. “Allergies”",
+  "registrationFieldCertificateNone": "(None)"
 }

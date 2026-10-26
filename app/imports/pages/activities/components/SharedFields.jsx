@@ -21,10 +21,10 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
     placeholder: hint(lang2 ? inherited?.[field]?.[lang2] : inherited?.[field]),
   });
   const options = (docs) => docs.map((d) => ({ value: d._id, label: localized(d.name, lang) || d._id }));
-  const none = (field, docs) => {
+  const none = (field, docs, empty = "activityFieldNone") => {
     const id = inherited?.[field];
     const doc = id && docs.find((d) => d._id === id);
-    return doc ? t("activityFieldAsActivity", { value: localized(doc.name, lang) }) : t("activityFieldNone");
+    return doc ? t("activityFieldAsActivity", { value: localized(doc.name, lang) }) : t(empty);
   };
   const yesNo = (value) => t(value ? "activityYes" : "activityNo");
   const flag = (name, label) => (event ? (
@@ -66,12 +66,10 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
         </Row>
       </Card>
       <Card title={t("formCardWho")}>
-        <Row>
-          {flag("membersOnly", t("activityFieldMembersOnly"))}
-          <SelectField id="activity-requiredCertificateId" label={t("registrationFieldCertificate")} hint={t("registrationFieldCertificateHint")}
-            value={values.requiredCertificateId} onChange={set("requiredCertificateId")}
-            empty={none("requiredCertificateId", certificates)} options={options(certificates)} />
-        </Row>
+        {flag("membersOnly", t("activityFieldMembersOnly"))}
+        <SelectField id="activity-requiredCertificateId" label={t("registrationFieldCertificate")} hint={t("registrationFieldCertificateHint")}
+          value={values.requiredCertificateId} onChange={set("requiredCertificateId")}
+          empty={none("requiredCertificateId", certificates, "registrationFieldCertificateNone")} options={options(certificates)} />
         {flag("published", t("activityFieldPublished"))}
       </Card>
     </>

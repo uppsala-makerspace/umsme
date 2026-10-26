@@ -56,7 +56,7 @@ export const SelectField = ({ id, label, hint, value, onChange, options, empty }
 
 export const CheckField = ({ id, label, checked, onChange }) => (
   <label htmlFor={id} className="flex items-center gap-2 mb-4 cursor-pointer">
-    <input id={id} type="checkbox" className="w-5 h-5 accent-brand-green" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    <input id={id} type="checkbox" className="w-5 h-5 shrink-0 accent-brand-green" checked={checked} onChange={(e) => onChange(e.target.checked)} />
     <span>{label}</span>
   </label>
 );
