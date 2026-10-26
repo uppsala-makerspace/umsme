@@ -43,6 +43,7 @@
   "groupLockName": "UMSLockGroup",
   "public": {
     "adminUrl": "https://umsme.uppsalamakerspace.se",
+    "appUrl": "https://app.uppsalamakerspace.se",
     "vapidPublicKey": "BBiLE1SPDsk5tcM1JnslDERuHUxOnm4JoQMjsoo5_zN4w0kKhmVuoRbrYRYf-wOVdIYPk9Zdobw4mUkiSZOKqJc"
   },
   "private": {

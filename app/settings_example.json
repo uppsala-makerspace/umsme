@@ -1,6 +1,7 @@
 {
   "public": {
     "adminUrl": "https://umsme.uppsalamakerspace.se",
+    "appUrl": "https://app.uppsalamakerspace.se",
     "swish": {
       "disabled": false,
       "disabledMessage": {
