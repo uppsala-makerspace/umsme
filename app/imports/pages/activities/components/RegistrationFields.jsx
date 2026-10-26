@@ -59,11 +59,9 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
               <TextField label={t("registrationFieldSeats")} hint={t("registrationFieldSeatsHint")} {...text("maxSeats", { inputMode: "numeric" })} />
               <TextField label={t("registrationFieldFewest")} hint={t("registrationFieldFewestHint")} {...text("minSeats", { inputMode: "numeric" })} />
             </Row>
-            <Row>
-              {flag("queueAllowed", t("registrationFieldQueue"))}
-              {flag("infoRequired", t("registrationFieldInfo"))}
-            </Row>
+            {flag("infoRequired", t("registrationFieldInfo"))}
             <TextField label={t("registrationFieldInfoPlaceholder")} {...text("infoPlaceholder")} />
+            {flag("queueAllowed", t("registrationFieldQueue"))}
           </>
         )}
       </Card>
