@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import DateField from "../../../components/DateField";
 import TimeField from "../../../components/TimeField";
 
@@ -42,10 +43,14 @@ export const ClockField = ({ id, label, hint, value, onChange, ...props }) => (
 /** A choice among `options` ({ value, label }), the first being `empty` (value ''). */
 export const SelectField = ({ id, label, hint, value, onChange, options, empty }) => (
   <Field id={id} label={label} hint={hint}>
-    <select id={id} className={control} value={value} onChange={(e) => onChange(e.target.value)}>
-      {empty !== undefined && <option value="">{empty}</option>}
-      {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
+    {/* Its own chevron, not the browser's, which sits close to the edge. */}
+    <div className="relative">
+      <select id={id} className={`${control} appearance-none pr-10`} value={value} onChange={(e) => onChange(e.target.value)}>
+        {empty !== undefined && <option value="">{empty}</option>}
+        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+      <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" aria-hidden="true" />
+    </div>
   </Field>
 );
 
