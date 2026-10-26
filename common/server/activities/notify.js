@@ -27,6 +27,7 @@ export const ACTIVITY_TEMPLATE_TYPES = Object.freeze({
   confirmed: 'activityConfirmed',
   newEvent: 'activityNewEvent',
   checkInOpen: 'activityCheckInOpen',
+  checkInLastCall: 'activityCheckInLastCall',
   missedCheckIn: 'activityMissedCheckIn',
 });
 
@@ -129,6 +130,10 @@ export const newEvent = (event, memberIds) => sendAll('newEvent', event, memberI
 /** Check-in has opened: everyone with a seat. */
 export const checkInOpen = (event, registrations) =>
   sendAll('checkInOpen', event, registrations.map((r) => r.memberId));
+
+/** Check-in closes soon: everyone with a seat who has not checked in yet. */
+export const checkInLastCall = (event, registrations) =>
+  sendAll('checkInLastCall', event, registrations.map((r) => r.memberId));
 
 /** The check-in deadline passed without them: their seats went to the queue. */
 export const missedCheckIn = (event, registrations) =>

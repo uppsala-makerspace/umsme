@@ -461,6 +461,7 @@ export const models = {
           activityConfirmed: "Activity: event happens",
           activityNewEvent: "Activity: new event",
           activityCheckInOpen: "Activity: check in",
+          activityCheckInLastCall: "Activity: check in, last call",
           activityMissedCheckIn: "Activity: missed check-in",
         },
       },
@@ -1906,6 +1907,7 @@ export const models = {
     seatsTaken: { label: "Seats taken", type: Number, min: 0, optional: true, autoform: { omit: true } },
     // What the scheduled jobs have done, so that each is done once.
     checkInReminderSentAt: { type: Date, optional: true, autoform: { omit: true } },
+    checkInLastCallSentAt: { type: Date, optional: true, autoform: { omit: true } },
     checkInDeadlinePassedAt: { type: Date, optional: true, autoform: { omit: true } },
     attendanceClosedAt: { type: Date, optional: true, autoform: { omit: true } },
     // The Google calendar event it was imported from, or is mirrored to.

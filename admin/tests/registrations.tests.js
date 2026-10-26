@@ -12,7 +12,7 @@ import { createActivity } from '/imports/common/server/activities/activities';
 import { createEvent, updateEvent, removeEvent } from '/imports/common/server/activities/events';
 import {
   register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance,
-  sendCheckInReminders, passCheckInDeadlines,
+  sendCheckInReminders, sendCheckInLastCalls, passCheckInDeadlines,
 } from '/imports/common/server/activities/registrations';
 import { setActivityTransportsForTests } from '/imports/common/server/activities/notify';
 import { ensureActivityMessageTemplates } from '/imports/common/server/activities/defaultTemplates';
@@ -204,6 +204,11 @@ describe('event registrations', function () {
       await checkIn(id, a, { userId, now: dayAt(1, 5) });
       assert.strictEqual(await stateOf(id, a), 'checkedIn');
       await rejects(checkIn(id, c, { userId, now: dayAt(1, 5) }), 'closed');
+      // Two hours before it closes, the one who has not checked in is reminded again, once.
+      assert.strictEqual(await sendCheckInLastCalls(dayAt(1, 12)), 0);
+      assert.strictEqual(await sendCheckInLastCalls(dayAt(1, 13)), 1);
+      assert.strictEqual(await sendCheckInLastCalls(dayAt(1, 14)), 0);
+      assert.strictEqual(await Messages.find({ member: b, subject: /^Snart för sent att checka in/ }).countAsync(), 1);
       const offered = await Messages.find({ member: c, subject: /^En plats är ledig/ }).countAsync();
       assert.strictEqual(await passCheckInDeadlines(dayAt(1, 14)), 0);
       assert.strictEqual(await passCheckInDeadlines(dayAt(1, 16)), 1);
@@ -213,6 +218,19 @@ describe('event registrations', function () {
       // After the deadline a seat taken comes checked in.
       assert.strictEqual(await takeSeat(id, c, { userId, now: dayAt(1, 16) }), 'checkedIn');
       assert.strictEqual(await passCheckInDeadlines(dayAt(1, 17)), 0);
+    });
+
+    it('reminds again no sooner than an hour after the first reminder', async function () {
+      // A window from 16:00 to 17:30 on the day: the last call would be at 15:30.
+      const id = await makeEvent({
+        start: dayAt(1, 18), checkIn: 'custom', checkInOpensDaysBefore: 0, checkInOpensAt: '16:00', checkInClosesDaysBefore: 0, checkInClosesAt: '17:30',
+      });
+      await register(id, a, { userId });
+      const at = (hour, minutes) => new Date(dayAt(1, hour).getTime() + minutes * 60000);
+      assert.strictEqual(await sendCheckInReminders(at(16, 0)), 1);
+      assert.strictEqual(await sendCheckInLastCalls(at(16, 30)), 0);
+      assert.strictEqual(await sendCheckInLastCalls(at(17, 0)), 1);
+      assert.strictEqual(await sendCheckInLastCalls(at(17, 10)), 0);
     });
 
     it('keeps a custom window, which must open before it closes', async function () {

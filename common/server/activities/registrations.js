@@ -6,7 +6,8 @@ import { ActivityInterests } from '/imports/common/collections/activityInterests
 import { recordChange } from '/imports/common/server/auditLog';
 import {
   HOLDING, PENDING, resolveEvent, registrationOpen, registrationOutcome, statusFor, seatsLeft,
-  mayWithdraw, mayTakeSeat, mayCheckIn, checkInApplies, checkInWindow, checkInClosed, takesRegistrations,
+  mayWithdraw, mayTakeSeat, mayCheckIn, checkInApplies, checkInWindow, checkInClosed, checkInLastCall,
+  takesRegistrations,
 } from '/imports/common/lib/activityRules';
 import { hasValidCertificate } from './certificates';
 import * as notify from './notify';
@@ -270,6 +271,30 @@ export const sendCheckInReminders = async (now = new Date()) => {
     if ((await Events.updateAsync({ _id: event._id, checkInReminderSentAt: { $exists: false } }, { $set: { checkInReminderSentAt: now } })) !== 1) continue;
     const approved = await EventRegistrations.find({ eventId: event._id, state: 'approved' }).fetchAsync();
     if (approved.length) await notify.checkInOpen(resolved, approved);
+    sent += approved.length;
+  }
+  return sent;
+};
+
+/**
+ * The events whose check-in closes within CHECK_IN_LAST_CALL_HOURS: those with
+ * a seat who have not checked in yet are reminded again, once per event. Not
+ * within an hour of the first reminder (a short window, or a late first run),
+ * so that the two never come together.
+ */
+export const sendCheckInLastCalls = async (now = new Date()) => {
+  let sent = 0;
+  const firstBefore = new Date(now.getTime() - 3600000);
+  const events = await Events.find({
+    status: { $ne: 'cancelled' }, start: { $gt: now }, checkInReminderSentAt: { $lte: firstBefore }, checkInLastCallSentAt: { $exists: false },
+  }).fetchAsync();
+  for (const event of events) {
+    const activity = event.activityId ? await Activities.findOneAsync(event.activityId) : null;
+    const resolved = resolveEvent(event, activity);
+    if (!checkInApplies(resolved) || now < checkInLastCall(resolved) || now >= checkInWindow(resolved).closes) continue;
+    if ((await Events.updateAsync({ _id: event._id, checkInLastCallSentAt: { $exists: false } }, { $set: { checkInLastCallSentAt: now } })) !== 1) continue;
+    const approved = await EventRegistrations.find({ eventId: event._id, state: 'approved' }).fetchAsync();
+    if (approved.length) await notify.checkInLastCall(resolved, approved);
     sent += approved.length;
   }
   return sent;

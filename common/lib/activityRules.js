@@ -220,6 +220,13 @@ export const checkInWindow = (event) => {
   };
 };
 
+/** How long before check-in closes those who have not checked in are reminded again. */
+export const CHECK_IN_LAST_CALL_HOURS = 2;
+
+/** When those with a seat who have not checked in are reminded a second time. */
+export const checkInLastCall = (event) =>
+  new Date(checkInWindow(event).closes.getTime() - CHECK_IN_LAST_CALL_HOURS * 3600000);
+
 /** Whether a registration may check in now. */
 export const mayCheckIn = (registration, event, now = new Date()) => {
   if (registration?.state !== "approved" || !checkInApplies(event) || event.status === "cancelled") return false;

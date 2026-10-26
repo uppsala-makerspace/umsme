@@ -78,6 +78,15 @@ export const ACTIVITY_DEFAULT_TEMPLATES = [
     ),
   },
   {
+    type: ACTIVITY_TEMPLATE_TYPES.checkInLastCall,
+    name: 'Activity: check in, last call',
+    subject: bilingual('Snart för sent att checka in: <%= eventName %>', 'Soon too late to check in: <%= eventNameEn %>', ' — '),
+    messagetext: bilingual(
+      `Hej <%= name %>!\n\nDu har inte checkat in till <%= eventName %> <%= eventDate %> än. Bekräfta i appen att du kommer<% if (checkInDeadline) { %> senast <%= checkInDeadline %><% } %>, annars går din plats till kön.${link}${regards}`,
+      `Hello <%= name %>!\n\nYou have not checked in for <%= eventNameEn %> <%= eventDate %> yet. Confirm in the app that you are coming<% if (checkInDeadline) { %> by <%= checkInDeadline %><% } %>, or your seat goes to the queue.${link}${regardsEn}`,
+    ),
+  },
+  {
     type: ACTIVITY_TEMPLATE_TYPES.missedCheckIn,
     name: 'Activity: missed check-in',
     subject: bilingual('Din plats har gått vidare: <%= eventName %>', 'Your seat has gone on: <%= eventNameEn %>', ' — '),
