@@ -48,22 +48,6 @@ const ActivityDetail = ({ loading, error, data, slackTeam, slackChannelIds, busy
         <Markdown className="text-gray-700 mb-4" startLevel={3}>{localized(activity.description, lang)}</Markdown>
       )}
       <Facts item={activity} kind="activity" slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
-      <Card
-        title={t("activityUpcomingEvents")} kind="activity"
-        actions={canBook && (
-          <Link to={`/events/new?activity=${activity._id}`} className="text-sm font-semibold text-brand-green no-underline hover:underline">
-            + {t("eventAdd")}
-          </Link>
-        )}
-      >
-        {events.length === 0 ? (
-          <p className="text-gray-500 m-0">{t("activityNoUpcomingEvents")}</p>
-        ) : (
-          <ul className="list-none p-0 m-0">
-            {events.map((event) => <EventRow key={event._id} event={event} />)}
-          </ul>
-        )}
-      </Card>
       {onInterest && (
         <Card title={t("activityInterestHeading")} kind="activity">
           <div className="flex items-center gap-3">
@@ -78,6 +62,23 @@ const ActivityDetail = ({ loading, error, data, slackTeam, slackChannelIds, busy
           </div>
         </Card>
       )}
+      {/* Its events, last, in an event card: as an event's page ends with its activity. */}
+      <Card
+        title={t("activityUpcomingEvents")} kind="event"
+        actions={canBook && (
+          <Link to={`/events/new?activity=${activity._id}`} className="text-sm font-semibold text-brand-green no-underline hover:underline">
+            + {t("eventAdd")}
+          </Link>
+        )}
+      >
+        {events.length === 0 ? (
+          <p className="text-gray-500 m-0">{t("activityNoUpcomingEvents")}</p>
+        ) : (
+          <ul className="list-none p-0 m-0">
+            {events.map((event) => <EventRow key={event._id} event={event} />)}
+          </ul>
+        )}
+      </Card>
     </MainContent>
   );
 };
