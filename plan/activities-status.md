@@ -42,8 +42,9 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   får ändra aktiviteten (inställningen `eventBookers`).
 - **Fristående event:** bara de som får skapa aktiviteter i gruppen.
 - **Byte av ägande grupp:** bara mellan grupper där man får skapa aktiviteter.
-- **Anmälan:** kräver aktivt och av styrelsen godkänt medlemskap, och
-  certifikatet om ett krävs. Appen säger varför man inte kan anmäla sig.
+- **Anmälan:** kräver betalt medlemskap (styrelsens godkännande behövs
+  inte), och certifikatet om ett krävs. Appen säger varför man inte kan
+  anmäla sig.
 
 **Admin**
 - Menysektionen Activities: Activities, Events, Categories.
@@ -88,21 +89,23 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 - Standardmallarna läggs in vid start av admin och appen, i den databas de är
   kopplade till, om typerna saknas.
 
+## Besvarade frågor (2026-10-26)
+
+- **Minsta antal deltagare:** bekräftat för gott när det nåtts, som byggt.
+- **Kön:** har ingen förtur. En ledig plats går till den som först tar den,
+  ny anmälan eller köande; kön får besked när platser blir lediga. Ändrat.
+  (Viktigast är att kursledarna får deltagare; en ordnad kö där var och en
+  får en chans i tur och ordning är för komplicerat för en första version.)
+- **Borttagning:** ett tillfälle med anmälda kan bara ställas in, som byggt.
+- **Ej godkänd medlem:** betalt medlemskap räcker för att anmäla sig.
+  Ändrat. Intresseanmälan och grupperna kräver fortfarande godkänt
+  medlemskap.
+
 ## Öppna frågor
 
 1. **`public.appUrl`** i produktion: `https://app.uppsalamakerspace.se`?
 2. **Tidszon:** incheckningsfönstret (t.ex. 03:00–15:00 dagen före) räknas i
    serverns tidszon. Går produktionsservern på svensk tid?
-3. **Minsta antal deltagare:** när det nås blir tillfället bekräftat för gott,
-   även om någon avanmäler sig. Ska det kunna gå tillbaka till "inväntar
-   deltagare"?
-4. **Kön först:** finns det en kö hamnar en ny anmälan i kön även om en plats
-   är ledig, och kön erbjuds platsen. Rätt?
-5. **Borttagning:** ett tillfälle med anmälda kan inte tas bort, bara ställas
-   in. Rätt?
-6. **Ej godkänd medlem:** en betald men inte av styrelsen godkänd medlem kan
-   inte anmäla sig, eftersom kontrollen är densamma som för grupper och
-   dörrar. Ska det vara så?
 7. **Kostnad:** ska varje aktivitet bli en artikel i webbshoppen, eller ska
    anmälan själv vara ett köp?
 8. **Hemsidan:** ska platser kvar och anmälningsläge med i JSON:en?

@@ -169,7 +169,7 @@ styrgrupp, funktionsgrupp och ansvarsgrupp.
 | Skapa/ändra/ställa in fritt event med tillhörighet G | de som får skapa aktiviteter i G (ett fritt event är som en egen aktivitet) | `accessToFields` i `app/server/methods/activities.js` |
 | Skapa/ändra/ställa in fritt event utan tillhörighet | board/admin | |
 | Sätta hosts | skaparen: sig själv och medlemmar i samma grupp (listan finns redan via `canSeeMembers`); board/admin: vilken medlem som helst, via medlemsnummer (`groups.lookupMemberNumber`-mönstret) | |
-| Anmäla sig | aktiv medlem, med giltigt intyg för `requiredCertificateId` när det är satt | `isActiveMember` + befintlig attestering som inte gått ut |
+| Anmäla sig | medlem med betalt medlemskap, godkänd av styrelsen eller ännu inte, med giltigt intyg för `requiredCertificateId` när det är satt | `hasPaidMembership` + befintlig attestering som inte gått ut |
 | Intresseanmäla | aktiv medlem — kravet gäller inte här, intresse får man ha innan man tagit provet | `isActiveMember` |
 | Acceptera erbjuden plats | den köande själv | |
 | Checka in | den anmälde själv, inom fönstret | |
@@ -201,7 +201,8 @@ tom:
 1. **Alla** i kön får push + mail: "En plats har blivit ledig, först till kvarn."
 2. Den som accepterar först får platsen → `approved`. Accepterandet är en atomär
    uppdatering med kapacitetskontroll på servern; den andre får "platsen är redan
-   tagen". Ingen flyttas upp utan att ha sagt ja.
+   tagen". Ingen flyttas upp utan att ha sagt ja. Kön har ingen förtur: en ny
+   anmälan får också en ledig plats, om den hinner före.
 3. Släpps platsen **efter** incheckningsdeadline blir den som accepterar
    `checkedIn` direkt — att aktivt säga ja så nära inpå är åtagandet.
 4. **Ett utskick per händelse som släpper platser, inte per plats.** När
@@ -316,8 +317,9 @@ som har en väntande begäran.
    *Etapp 2 och 3 byggda på grenen `activities` (oktober 2026)*, med:
    - Platser räknas på eventet (`seatsTaken`) och tas med en villkorad
      ökning, så den sista platsen aldrig ges bort två gånger.
-   - En ny anmälan hamnar i kön när någon redan köar, även om en plats är
-     ledig: kön har den först. Den köande ser "Ta platsen" i appen.
+   - En ledig plats går till den som först tar den, ny anmälan eller köande:
+     kön har ingen förtur utan får besked när platser blir lediga. Den
+     köande ser "Ta platsen" i appen.
    - `awaiting` → `confirmed` är enkelriktat.
    - Ett event med anmälda kan inte tas bort, bara ställas in.
    - Incheckning: nej, ja (standard) eller ja (anpassat). Standard är dagen
