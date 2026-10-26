@@ -63,11 +63,16 @@ export const CheckField = ({ id, label, checked, onChange }) => (
 
 export const Row = ({ children }) => <div className="flex flex-col sm:flex-row sm:gap-4">{children}</div>;
 
-/** A part of a form, as a card with its heading, so a long form reads in parts. */
+/**
+ * A part of a form, as a card with its heading in a light green band, so a
+ * long form reads in parts and the heading stands apart from the bold labels.
+ */
 export const Card = ({ title, children }) => (
-  <section className="mb-4 p-4 rounded-lg bg-white border border-gray-200">
-    <h3 className="text-lg m-0 mb-3">{title}</h3>
-    {children}
+  <section className="mb-4 rounded-lg bg-white border border-gray-200 overflow-hidden">
+    <h3 className="m-0 px-4 py-2 bg-green-50 border-b border-green-100 text-sm font-semibold uppercase tracking-wider text-green-800">
+      {title}
+    </h3>
+    <div className="p-4 pb-0">{children}</div>
   </section>
 );
 
