@@ -53,4 +53,7 @@ export const RecordingAttendance = withRegistration({ open: false }, {
   ],
   attendance: { open: true, closed: false },
 });
+export const AsHostWithoutRegistration = {
+  args: { ...handlers, data: { event: events[2], hosts, activityName: null, canEdit: true, registration: null, participants: [], attendance: { open: false, closed: false } } },
+};
 

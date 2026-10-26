@@ -84,5 +84,12 @@ test.describe('Registrations', () => {
     await expect(page.getByText(en.registrationNotMember_notRegistered)).toBeVisible();
     await expect(page.getByRole('button', { name: en.registrationSignUp })).toBeDisabled();
   });
+
+  test('a host of an event without registration is told there is none', async ({ page }) => {
+    // The ceramics introduction's events take no registrations; groupLeader hosts them.
+    await openEvent(page, 'groupLeader', 'Wheel introduction');
+    await expect(page.getByText(en.participantsNoRegistration)).toBeVisible();
+    await expect(page.getByText(en.participantsNone)).toHaveCount(0);
+  });
 });
 

@@ -849,5 +849,6 @@
   "imageUploading": "Uploading…",
   "imageReplace": "Change image",
   "imageChoose": "Choose image",
-  "imageFailed": "The image could not be read or uploaded."
+  "imageFailed": "The image could not be read or uploaded.",
+  "participantsNoRegistration": "The event takes no registrations, so there is no list of participants."
 }

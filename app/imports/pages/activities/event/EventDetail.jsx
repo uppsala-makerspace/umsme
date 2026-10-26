@@ -72,7 +72,7 @@ const EventDetail = ({
           : <p className="m-0">{hosts.map((h) => h.name).join(", ")}</p>}
       </Card>
       <ParticipantList
-        participants={data.participants} attendance={data.attendance} busy={busy}
+        participants={data.participants} attendance={data.attendance} takesRegistrations={!!data.registration} busy={busy}
         onAttended={onAttended} onClose={onCloseAttendance}
       />
       {event.activityId && activityName && (

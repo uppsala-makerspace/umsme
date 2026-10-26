@@ -8,7 +8,7 @@ import Card from "./Card";
  * The event's participants, for its hosts: who has a seat or queues, and
  * once it has started, who came, with a button each and one to close it.
  */
-const ParticipantList = ({ participants, attendance, busy, onAttended, onClose }) => {
+const ParticipantList = ({ participants, attendance, takesRegistrations = true, busy, onAttended, onClose }) => {
   const { t } = useTranslation();
   if (!participants) return null;
   const recording = attendance?.open;
@@ -24,7 +24,7 @@ const ParticipantList = ({ participants, attendance, busy, onAttended, onClose }
     >
       {attendance?.closed && <p className="m-0 mb-2 text-sm text-gray-500">{t("participantsAttendanceClosed")}</p>}
       {participants.length === 0 ? (
-        <p className="text-gray-500 m-0">{t("participantsNone")}</p>
+        <p className="text-gray-500 m-0">{t(takesRegistrations ? "participantsNone" : "participantsNoRegistration")}</p>
       ) : (
         <ul className="list-none p-0 m-0">
           {participants.map((p) => (
@@ -56,6 +56,8 @@ const ParticipantList = ({ participants, attendance, busy, onAttended, onClose }
 };
 
 ParticipantList.propTypes = {
+  // Without registration nobody signs up, which is said rather than "nobody yet".
+  takesRegistrations: PropTypes.bool,
   participants: PropTypes.array,
   attendance: PropTypes.object,
   busy: PropTypes.bool,

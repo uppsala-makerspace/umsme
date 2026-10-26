@@ -848,5 +848,6 @@
   "imageUploading": "Laddar upp…",
   "imageReplace": "Byt bild",
   "imageChoose": "Välj bild",
-  "imageFailed": "Bilden kunde inte läsas eller laddas upp."
+  "imageFailed": "Bilden kunde inte läsas eller laddas upp.",
+  "participantsNoRegistration": "Tillfället har ingen anmälan, så det finns ingen deltagarlista."
 }
