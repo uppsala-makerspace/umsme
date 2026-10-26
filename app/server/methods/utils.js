@@ -252,16 +252,13 @@ export const isMemberRegistered = async (member) => {
 /**
  * Whether a member holds a current paid base or lab membership and is not
  * excluded, whether or not the board has accepted them yet. Enough to sign up
- * for events. For family members, resolves via the paying member.
+ * for events. For family members, memberStatus looks at the paying member's.
  * @param {object} member - The member object
  * @returns {Promise<boolean>}
  */
 export const hasPaidMembership = async (member) => {
   if (!member || member.excluded) return false;
-  const paying = member.infamily
-    ? await Members.findOneAsync(member.infamily)
-    : member;
-  const { type } = await memberStatus(paying);
+  const { type } = await memberStatus(member);
   return !!type && type !== "none";
 };
 

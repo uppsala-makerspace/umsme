@@ -13,10 +13,10 @@ const escape = (text) => String(text || "")
   .replace(/\\/g, "\\\\")
   .replace(/\r?\n/g, "\\n")
   .replace(/,/g, "\\,")
-  .replace(/;/g, "\;");
+  .replace(/;/g, "\\;");
 
 /** The lines of the file, for an event as the app shows it, and a link back to its page. */
-export const icsLines = (event, lang, { url, now = new Date() } = {}) => {
+const icsLines = (event, lang, { url, now = new Date() } = {}) => {
   const description = localized(event.description, lang);
   return [
     "BEGIN:VCALENDAR",

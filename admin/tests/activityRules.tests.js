@@ -10,8 +10,9 @@ import {
   eventEnd,
   checkInWindow,
   checkInApplies,
+  lastCallDue,
 } from '/imports/common/lib/activityRules';
-import { zonedDate, zonedParts, zonedDay, zonedClock } from '/imports/common/lib/days';
+import { zonedDate, zonedParts, zonedDay, zonedClock, zonedDayAt } from '/imports/common/lib/days';
 
 const activity = {
   _id: 'a1',
@@ -179,6 +180,16 @@ describe('Activity rules', function () {
       assert.deepStrictEqual([opens.toISOString(), closes.toISOString()], ['2026-10-24T01:00:00.000Z', '2026-10-24T13:00:00.000Z']);
       const monday = zonedDate(2026, 9, 26, 18, 0);
       assert.strictEqual(checkInWindow({ start: monday, checkIn: 'default' }).opens.toISOString(), '2026-10-25T02:00:00.000Z');
+    });
+
+    it('reminds a second time within two hours of closing, not within an hour of the first', function () {
+      const event = { start, registration: 'required', checkIn: 'default' };
+      const at = (clock) => zonedDayAt(start, -1, clock);
+      assert.strictEqual(lastCallDue(event, at('03:00'), at('12:59')), false);
+      assert.strictEqual(lastCallDue(event, at('03:00'), at('13:00')), true);
+      assert.strictEqual(lastCallDue(event, at('12:30'), at('13:00')), false);
+      assert.strictEqual(lastCallDue(event, at('03:00'), at('15:00')), false);
+      assert.strictEqual(lastCallDue(event, null, at('13:00')), false);
     });
 
     it('applies only with registration and a window', function () {

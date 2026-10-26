@@ -88,7 +88,7 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
               </p>
             )}
             {!registration.member && (
-              <p className="m-0 mb-3 text-sm">{t(`registrationNotMember_${registration.notMemberReason || "noMembership"}`)}</p>
+              <p className="m-0 mb-3 text-sm">{t(`registrationNotMember_${registration.notMemberReason}`)}</p>
             )}
             {registration.infoRequired && !blocked && (
               <label className="block mb-3">

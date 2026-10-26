@@ -41,7 +41,7 @@ import {
   createEvent, updateEvent, removeEvent, setEventImage, removeEventImage,
 } from "/imports/common/server/activities/events";
 import { findMemberForUser, isActiveMember, hasPaidMembership } from "./utils";
-import { zonedDate, zonedParts } from "/imports/common/lib/days";
+import { zonedDayAt } from "/imports/common/lib/days";
 
 /**
  * Activities and events for members (plan/activities.md): everyone sees them;
@@ -236,7 +236,8 @@ const eventViews = async (events, memberId = null) => {
  * queue, their own registration and what they may do with it, what it asks
  * for. Null for an event that takes no registrations.
  */
-const registrationView = async (event, activity, member, who, now = new Date()) => {
+const registrationView = async (event, activity, who, now = new Date()) => {
+  const { member } = who;
   const resolved = resolveEvent(event, activity);
   if (!takesRegistrations(resolved)) return null;
   const mayRegister = await maySignUp(who);
@@ -289,7 +290,7 @@ const participantsView = async (event) => {
  * Only one with a paid membership signs up, whether or not the board has
  * accepted them yet; board and admin always may.
  */
-const maySignUp = async (who) => who.active || (await hasPaidMembership(who.member));
+const maySignUp = async (who) => who.adminish || (await hasPaidMembership(who.member));
 
 const requireMaySignUp = async (who) => {
   if (!(await maySignUp(who))) throw new Meteor.Error("not-member", "Only members of the association may sign up");
@@ -412,8 +413,7 @@ Meteor.methods({
     check(activityId, String);
     const who = await caller();
     const activity = await getActivity(activityId);
-    const { year, month, day } = zonedParts(new Date());
-    const today = zonedDate(year, month - 1, day);
+    const today = zonedDayAt(new Date());
     const events = await Events.find({ activityId, end: { $gte: today } }, { sort: { start: 1 } }).fetchAsync();
     const access = await accessTo(who.member, activity.groupId, who, activity);
     return {
@@ -444,7 +444,7 @@ Meteor.methods({
     return {
       event: view,
       hosts: hosts.map((m) => ({ _id: m._id, name: m.name })),
-      registration: await registrationView(event, activity, who.member, who),
+      registration: await registrationView(event, activity, who),
       // The participants, for the event's hosts and those who may change it.
       participants: hostsCanSee ? await participantsView(event) : null,
       attendance: mayRecordAttendance(event, who)

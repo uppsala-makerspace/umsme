@@ -47,9 +47,8 @@ const zoneFormat = new Intl.DateTimeFormat('en-US', {
 
 /** A moment's year, month (1–12), day, hour, minute and second in Swedish time. */
 export const zonedParts = (date) => {
-  const parts = Object.fromEntries(zoneFormat.formatToParts(date)
+  return Object.fromEntries(zoneFormat.formatToParts(date)
     .filter((p) => p.type !== 'literal').map((p) => [p.type, Number(p.value)]));
-  return { ...parts, hour: parts.hour % 24 };
 };
 
 // How far Swedish time is ahead of UTC at a moment: one hour in winter, two in summer.
@@ -68,6 +67,16 @@ export const zonedDate = (year, monthIndex, day, hour = 0, minute = 0) => {
   // Twice, so that a wall time near the change of summer time finds its own offset.
   const first = wall - offsetAt(wall);
   return new Date(wall - offsetAt(first));
+};
+
+/**
+ * A time of day (HH:MM, midnight when left out), Swedish time, on the day a
+ * moment falls on there, or `addDays` days after it (before, when negative).
+ */
+export const zonedDayAt = (date, addDays = 0, clock = '00:00') => {
+  const { year, month, day } = zonedParts(date);
+  const [hour, minute] = clock.split(':').map(Number);
+  return zonedDate(year, month - 1, day + addDays, hour, minute);
 };
 
 /** The day, YYYY-MM-DD, in Swedish time. */

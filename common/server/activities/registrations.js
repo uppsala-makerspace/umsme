@@ -5,9 +5,8 @@ import { EventRegistrations } from '/imports/common/collections/eventRegistratio
 import { ActivityInterests } from '/imports/common/collections/activityInterests';
 import { recordChange } from '/imports/common/server/auditLog';
 import {
-  HOLDING, PENDING, resolveEvent, registrationOpen, registrationOutcome, statusFor, seatsLeft,
-  mayWithdraw, mayTakeSeat, mayCheckIn, checkInApplies, checkInWindow, checkInClosed, checkInLastCall,
-  takesRegistrations,
+  HOLDING, PENDING, resolveEvent, registrationOpen, statusFor, seatsLeft,
+  mayWithdraw, mayTakeSeat, mayCheckIn, checkInApplies, checkInWindow, checkInClosed, lastCallDue, takesRegistrations,
 } from '/imports/common/lib/activityRules';
 import { hasValidCertificate } from './certificates';
 import * as notify from './notify';
@@ -101,10 +100,8 @@ export const register = async (eventId, memberId, { info = '', userId, override 
     throw new Meteor.Error('registered', 'Already registered');
   }
 
-  let state = registrationOutcome({ event: resolved, seatsTaken: resolved.seatsTaken || 0 });
-  if (state === 'approved' && !(await takeSeatOf(resolved))) {
-    state = resolved.queueAllowed ? 'queued' : 'full';
-  }
+  // A free seat goes to whoever comes first; the queue has no precedence, it is told when seats free up.
+  let state = (await takeSeatOf(resolved)) ? 'approved' : (resolved.queueAllowed ? 'queued' : 'full');
   if (state === 'full') throw new Meteor.Error('full', 'The event is full');
   // So near the start that check-in has closed: taking the seat is the commitment.
   if (state === 'approved' && checkInClosed(resolved, now)) state = 'checkedIn';
@@ -257,19 +254,34 @@ export const closeAttendance = async (eventId, { userId, now = new Date() }) => 
 // --- Scheduled (stage 3) ---------------------------------------------------
 
 /**
+ * The events a job is due for, each claimed once by setting its marker (first,
+ * so that a failing send is not repeated every run), with those holding an
+ * unchecked seat. `isDue` is asked of the event resolved against its activity.
+ */
+const claimDue = async ({ marker, query, isDue }, now) => {
+  const claimed = [];
+  const events = await Events.find({ status: { $ne: 'cancelled' }, [marker]: { $exists: false }, ...query }).fetchAsync();
+  for (const event of events) {
+    const activity = event.activityId ? await Activities.findOneAsync(event.activityId) : null;
+    const resolved = resolveEvent(event, activity);
+    if (!checkInApplies(resolved) || !isDue(resolved, event)) continue;
+    if ((await Events.updateAsync({ _id: event._id, [marker]: { $exists: false } }, { $set: { [marker]: now } })) !== 1) continue;
+    const approved = await EventRegistrations.find({ eventId: event._id, state: 'approved' }).fetchAsync();
+    claimed.push({ event, resolved, approved });
+  }
+  return claimed;
+};
+
+/**
  * The events whose check-in has opened and whose seat holders have not been
  * reminded: each one with a seat is told, once per event.
  */
 export const sendCheckInReminders = async (now = new Date()) => {
   let sent = 0;
-  const events = await Events.find({ status: { $ne: 'cancelled' }, start: { $gt: now }, checkInReminderSentAt: { $exists: false } }).fetchAsync();
-  for (const event of events) {
-    const activity = event.activityId ? await Activities.findOneAsync(event.activityId) : null;
-    const resolved = resolveEvent(event, activity);
-    if (!checkInApplies(resolved) || now < checkInWindow(resolved).opens) continue;
-    // Marked first, so that a failing send is not repeated every run.
-    if ((await Events.updateAsync({ _id: event._id, checkInReminderSentAt: { $exists: false } }, { $set: { checkInReminderSentAt: now } })) !== 1) continue;
-    const approved = await EventRegistrations.find({ eventId: event._id, state: 'approved' }).fetchAsync();
+  const due = await claimDue({
+    marker: 'checkInReminderSentAt', query: { start: { $gt: now } }, isDue: (resolved) => now >= checkInWindow(resolved).opens,
+  }, now);
+  for (const { resolved, approved } of due) {
     if (approved.length) await notify.checkInOpen(resolved, approved);
     sent += approved.length;
   }
@@ -277,23 +289,17 @@ export const sendCheckInReminders = async (now = new Date()) => {
 };
 
 /**
- * The events whose check-in closes within CHECK_IN_LAST_CALL_HOURS: those with
- * a seat who have not checked in yet are reminded again, once per event. Not
- * within an hour of the first reminder (a short window, or a late first run),
- * so that the two never come together.
+ * Shortly before check-in closes (lastCallDue): those with a seat who have
+ * not checked in yet are reminded again, once per event.
  */
 export const sendCheckInLastCalls = async (now = new Date()) => {
   let sent = 0;
-  const firstBefore = new Date(now.getTime() - 3600000);
-  const events = await Events.find({
-    status: { $ne: 'cancelled' }, start: { $gt: now }, checkInReminderSentAt: { $lte: firstBefore }, checkInLastCallSentAt: { $exists: false },
-  }).fetchAsync();
-  for (const event of events) {
-    const activity = event.activityId ? await Activities.findOneAsync(event.activityId) : null;
-    const resolved = resolveEvent(event, activity);
-    if (!checkInApplies(resolved) || now < checkInLastCall(resolved) || now >= checkInWindow(resolved).closes) continue;
-    if ((await Events.updateAsync({ _id: event._id, checkInLastCallSentAt: { $exists: false } }, { $set: { checkInLastCallSentAt: now } })) !== 1) continue;
-    const approved = await EventRegistrations.find({ eventId: event._id, state: 'approved' }).fetchAsync();
+  const due = await claimDue({
+    marker: 'checkInLastCallSentAt',
+    query: { start: { $gt: now }, checkInReminderSentAt: { $exists: true } },
+    isDue: (resolved, event) => lastCallDue(resolved, event.checkInReminderSentAt, now),
+  }, now);
+  for (const { resolved, approved } of due) {
     if (approved.length) await notify.checkInLastCall(resolved, approved);
     sent += approved.length;
   }
@@ -307,13 +313,12 @@ export const sendCheckInLastCalls = async (now = new Date()) => {
  */
 export const passCheckInDeadlines = async (now = new Date()) => {
   let missed = 0;
-  const events = await Events.find({ status: { $ne: 'cancelled' }, checkInDeadlinePassedAt: { $exists: false }, start: { $gt: new Date(now.getTime() - 7 * 86400000) } }).fetchAsync();
-  for (const event of events) {
-    const activity = event.activityId ? await Activities.findOneAsync(event.activityId) : null;
-    const resolved = resolveEvent(event, activity);
-    if (!checkInApplies(resolved) || now < checkInWindow(resolved).closes) continue;
-    if ((await Events.updateAsync({ _id: event._id, checkInDeadlinePassedAt: { $exists: false } }, { $set: { checkInDeadlinePassedAt: now } })) !== 1) continue;
-    const late = await EventRegistrations.find({ eventId: event._id, state: 'approved' }).fetchAsync();
+  const due = await claimDue({
+    marker: 'checkInDeadlinePassedAt',
+    query: { start: { $gt: new Date(now.getTime() - 7 * 86400000) } },
+    isDue: (resolved) => now >= checkInWindow(resolved).closes,
+  }, now);
+  for (const { event, resolved, approved: late } of due) {
     for (const registration of late) await setState(registration, 'missedCheckIn', { userId: null, now });
     await releaseSeats(event._id, late.length);
     if (late.length) await notify.missedCheckIn(resolved, late);

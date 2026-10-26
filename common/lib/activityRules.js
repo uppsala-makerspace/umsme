@@ -6,7 +6,7 @@
  * is for every active member of the group, and board and admin always may.
  */
 import { mayEditGroup } from "./groupRules";
-import { zonedDate, zonedParts } from "./days";
+import { zonedDayAt } from "./days";
 
 export const EVENT_STATUSES = ["awaiting", "confirmed", "cancelled"];
 
@@ -158,18 +158,6 @@ export const registrationOpen = (event, now = new Date()) =>
   takesRegistrations(event) && event.status !== "cancelled" && event.start > now;
 
 /**
- * What a new registration becomes: a seat when one is free, whoever comes
- * first (the queue has no precedence, it is told when seats free up), else a
- * place in the queue when the event has one, else nothing.
- *
- * @returns {"approved"|"queued"|"full"}
- */
-export const registrationOutcome = ({ event, seatsTaken = 0 }) => {
-  if (seatsLeft(event, seatsTaken) > 0) return "approved";
-  return event?.queueAllowed ? "queued" : "full";
-};
-
-/**
  * An event's status from its registrations: called off stays so; one waiting
  * for its fewest participants is `awaiting` until enough hold a seat, and then
  * `confirmed` for good (people plan by it, so it does not go back).
@@ -206,11 +194,7 @@ export const checkInSettings = (event) => (event?.checkIn === "custom"
   : { ...DEFAULT_CHECK_IN });
 
 // The day `days` before the start's, at a time of day, Swedish time.
-const daysBefore = (start, days, clock) => {
-  const [h, m] = clock.split(":").map(Number);
-  const { year, month, day } = zonedParts(start);
-  return zonedDate(year, month - 1, day - days, h, m);
-};
+const daysBefore = (start, days, clock) => zonedDayAt(start, -days, clock);
 
 /** When checking in opens and closes; it closes at the start at the latest. */
 export const checkInWindow = (event) => {
@@ -222,12 +206,19 @@ export const checkInWindow = (event) => {
   };
 };
 
-/** How long before check-in closes those who have not checked in are reminded again. */
-export const CHECK_IN_LAST_CALL_HOURS = 2;
+const HOUR = 3600000;
 
-/** When those with a seat who have not checked in are reminded a second time. */
-export const checkInLastCall = (event) =>
-  new Date(checkInWindow(event).closes.getTime() - CHECK_IN_LAST_CALL_HOURS * 3600000);
+/**
+ * Whether those with a seat who have not checked in are reminded a second
+ * time now: within two hours of check-in closing, and never within an hour
+ * of the first reminder (a short window, or a late first run), so that the
+ * two do not come together.
+ */
+export const lastCallDue = (event, reminderSentAt, now = new Date()) => {
+  if (!checkInApplies(event) || !reminderSentAt) return false;
+  const { closes } = checkInWindow(event);
+  return now >= new Date(closes.getTime() - 2 * HOUR) && now < closes && reminderSentAt.getTime() <= now.getTime() - HOUR;
+};
 
 /** Whether a registration may check in now. */
 export const mayCheckIn = (registration, event, now = new Date()) => {
