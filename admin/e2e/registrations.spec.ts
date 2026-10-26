@@ -67,5 +67,20 @@ test.describe('Registrations in admin', () => {
     }
     await expect(group.getByRole('button', { name: 'Sara Styrgrupp' })).toHaveAttribute('aria-pressed', 'true');
   });
+
+  test('an activity’s usual times make its duration and a new event’s times', async ({ page }) => {
+    await openAs(page, 'admin', '/activities/add');
+    await field(page, 'Name (Swedish)').fill('E2E tidskurs');
+    await field(page, 'Usually starts').fill('09:00');
+    await field(page, 'Usually ends').fill('12:30');
+    await expect(field(page, 'Duration (minutes)')).toHaveValue('210');
+    await expect(field(page, 'Duration (minutes)')).toBeDisabled();
+    await action(page, /^add$/i).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('E2E tidskurs');
+    await openTab(page, /^events/i);
+    await action(page, /^add event$/i).click();
+    await expect(field(page, 'Starts')).toHaveValue('09:00');
+    await expect(field(page, 'Ends')).toHaveValue('12:30');
+  });
 });
 

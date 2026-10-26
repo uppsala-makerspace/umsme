@@ -3,6 +3,7 @@ import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
 import { recordChange } from '/imports/common/server/auditLog';
 import { EVENT_BOOKERS } from '/imports/common/lib/activityRules';
+import { parseClock } from '/imports/common/lib/days';
 import { sharedChanges, ownerGroupId, currentOf, imageActions } from './shared';
 
 /**
@@ -23,6 +24,19 @@ const changesOf = async (fields) => {
   changes.$set.eventBookers = eventBookers;
   const groupId = await ownerGroupId(fields.groupId);
   if (groupId) changes.$set.groupId = groupId; else changes.$unset.groupId = '';
+  // Its usual times, without a day; both make its duration.
+  const startsAt = parseClock(fields.startsAt);
+  const endsAt = parseClock(fields.endsAt);
+  if (startsAt === null || endsAt === null) throw new Meteor.Error('bad-value', 'A time is written like 18:00');
+  if (startsAt && endsAt) {
+    const minutes = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+    if (minutes(endsAt) <= minutes(startsAt)) throw new Meteor.Error('bad-value', 'An activity must end after it starts');
+    changes.$set.durationMinutes = minutes(endsAt) - minutes(startsAt);
+    delete changes.$unset.durationMinutes;
+  }
+  for (const [field, value] of Object.entries({ startsAt, endsAt })) {
+    if (value) changes.$set[field] = value; else changes.$unset[field] = '';
+  }
   return changes;
 };
 

@@ -68,6 +68,14 @@ describe('activities and events', function () {
       await rejects(createActivity({ name: { sv: 'Fel' }, eventBookers: 'anyone' }, { userId }), 'bad-value');
     });
 
+    it('keeps its usual times, which make its duration', async function () {
+      const id = await createActivity({ name: { sv: 'Kvällskurs' }, startsAt: '18.30', endsAt: '21', durationMinutes: 45 }, { userId });
+      const activity = await Activities.findOneAsync(id);
+      assert.deepStrictEqual([activity.startsAt, activity.endsAt, activity.durationMinutes], ['18:30', '21:00', 150]);
+      await rejects(createActivity({ name: { sv: 'Baklänges' }, startsAt: '21:00', endsAt: '18:00' }, { userId }), 'bad-value');
+      await rejects(createActivity({ name: { sv: 'Fel' }, startsAt: '25:00' }, { userId }), 'bad-value');
+    });
+
     it('needs a Swedish name, and refuses what does not exist', async function () {
       await rejects(createActivity({ name: { en: 'Intro' } }, { userId }), 'bad-name');
       await rejects(createActivity({ name: { sv: 'Intro' }, groupId: 'nope' }, { userId }), 'not-found');

@@ -852,5 +852,9 @@
   "participantsNoRegistration": "Tillfället har ingen anmälan, så det finns ingen deltagarlista.",
   "workshopShowActivities": "Visa aktiviteter ({{count}})",
   "workshopHideActivities": "Dölj aktiviteter ({{count}})",
-  "workshopNoPlannedEvents": "Inga planerade tillfällen."
+  "workshopNoPlannedEvents": "Inga planerade tillfällen.",
+  "activityFieldStartsAt": "Börjar vanligtvis",
+  "activityFieldEndsAt": "Slutar vanligtvis",
+  "activityFieldUsualHint": "Nya tillfällen får tiden",
+  "activityFieldDurationFromTimes": "Från tiderna"
 }

@@ -853,5 +853,9 @@
   "participantsNoRegistration": "The event takes no registrations, so there is no list of participants.",
   "workshopShowActivities": "Show activities ({{count}})",
   "workshopHideActivities": "Hide activities ({{count}})",
-  "workshopNoPlannedEvents": "No planned events."
+  "workshopNoPlannedEvents": "No planned events.",
+  "activityFieldStartsAt": "Usually starts",
+  "activityFieldEndsAt": "Usually ends",
+  "activityFieldUsualHint": "New events get the time",
+  "activityFieldDurationFromTimes": "From the times"
 }

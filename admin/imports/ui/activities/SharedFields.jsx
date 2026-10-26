@@ -5,6 +5,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { FormCard } from './FormCard';
+import { usualMinutes } from '/imports/common/lib/activityValues';
 
 export const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -54,6 +55,7 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
   ));
 
   const kind = event ? 'event' : 'activity';
+  const usual = event ? null : usualMinutes(values.startsAt, values.endsAt);
   const certificateOptions = certificates.map((c) => ({ value: c._id, label: c.name?.sv || c._id }));
 
   return (
@@ -70,7 +72,12 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
           </TextField>
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Duration (minutes)" fullWidth {...text('durationMinutes', { inputMode: 'numeric' })} />
+          {/* An activity's usual times, without a day: each new event of it starts from them. */}
+          {!event && <TextField label="Usually starts" fullWidth placeholder="18:00" helperText="A new event gets it" {...text('startsAt', { inputMode: 'numeric' })} />}
+          {!event && <TextField label="Usually ends" fullWidth placeholder="20:00" helperText="A new event gets it" {...text('endsAt', { inputMode: 'numeric' })} />}
+          {usual !== null
+            ? <TextField label="Duration (minutes)" fullWidth disabled value={String(usual)} helperText="From its usual times" />
+            : <TextField label="Duration (minutes)" fullWidth {...text('durationMinutes', { inputMode: 'numeric' })} />}
           <TextField label="Cost (kr)" fullWidth {...text('cost', { inputMode: 'decimal' })} />
         </Stack>
       </FormCard>

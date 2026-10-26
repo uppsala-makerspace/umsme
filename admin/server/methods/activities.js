@@ -50,7 +50,7 @@ const SharedFields = {
   checkInClosesDaysBefore: Num,
   checkInClosesAt: Text,
 };
-const ActivityFields = { ...SharedFields, groupId: Text, eventBookers: Text };
+const ActivityFields = { ...SharedFields, groupId: Text, eventBookers: Text, startsAt: Text, endsAt: Text };
 const EventFields = {
   ...SharedFields,
   activityId: Text,

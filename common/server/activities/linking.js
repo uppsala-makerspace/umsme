@@ -22,6 +22,10 @@ export const sameName = (event, activity) => {
   return namesOf(event).some((name) => wanted.includes(name));
 };
 
+const pad = (n) => String(n).padStart(2, '0');
+const clock = (date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+const sameDay = (a, b) => a.toDateString() === b.toDateString();
+
 const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
 /**
@@ -58,6 +62,8 @@ export const createActivityFromEvent = async (eventId, { userId }) => {
     ...fields,
     groupId: event.groupId || null,
     durationMinutes: event.durationMinutes || Math.round((event.end - event.start) / 60000),
+    // Its times, when on one day, become the activity's usual ones.
+    ...(sameDay(event.start, event.end) ? { startsAt: clock(event.start), endsAt: clock(event.end) } : {}),
     // Images belong to the event; the activity gets its own.
     imageFileId: undefined,
     imageMimeType: undefined,

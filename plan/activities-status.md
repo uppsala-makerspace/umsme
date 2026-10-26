@@ -59,6 +59,8 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 - Kalender i bottennavigeringen (`/activities`).
   - Flikarna Tillfällen och Aktiviteter.
   - Väljaren Kommande, Tidigare och Mina anmälningar, tio tillfällen åt gången.
+- Aktiviteter har vanliga tider (börjar/slutar, utan dag); ett nytt tillfälle
+  får dem ifyllda och behöver bara sin dag, och längden räknas ur dem.
 - Aktivitets- och tillfällessidor i färgade kort.
 - Anmälningsruta: anmälan, kö, ta plats, incheckning och avanmälan, med
   förklaring när man inte får anmäla sig.

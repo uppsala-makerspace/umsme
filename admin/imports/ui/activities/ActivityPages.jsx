@@ -21,7 +21,7 @@ import {
   groupMembers, interestCount, eventRegistrations, addRegistration, withdrawRegistration, giveSeat, markAttended, closeAttendance,
 } from './data';
 import { activityPath, eventPath } from './paths';
-import { activityValues, eventValues, parseClock } from '/imports/common/lib/activityValues';
+import { activityValues, eventValues, parseClock, usualTimes } from '/imports/common/lib/activityValues';
 
 const Loading = () => <Typography color="text.secondary">Loading…</Typography>;
 
@@ -113,6 +113,12 @@ export const EventEditPage = ({ _id }) => {
   const reloadRegistrations = () => (_id ? eventRegistrations(_id).then(setRegistrations, (e) => setError(e.reason || e.message)) : null);
   useEffect(() => { reloadRegistrations(); }, [_id, savedVersion, event?.seatsTaken, event?.status]);
   const act = (action) => run(action, { then: reloadRegistrations });
+
+  // A new event takes its activity's usual times, where it has none yet.
+  useEffect(() => {
+    if (_id || !activity) return;
+    for (const [field, value] of Object.entries(usualTimes(values, activity))) setField(field, value);
+  }, [activity?._id]);
 
   // The active members of the event's group (its activity's), to pick hosts from.
   const hostGroupId = (values.activityId ? activity?.groupId : values.groupId) || null;

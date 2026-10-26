@@ -223,5 +223,17 @@ test.describe('Activities', () => {
     await openAs(page, 'groupLeader', '/events/new');
     await expect(page.getByLabel(en.eventFieldActivity).locator('option', { hasText: en.eventFieldFree })).toHaveCount(1);
   });
+
+  test('a new event of an activity with usual times needs only its day', async ({ page }) => {
+    await openAs(page, 'steering', '/activities?tab=activities');
+    await page.getByRole('link', { name: /E2E evening course/ }).click();
+    await page.getByRole('link', { name: `+ ${en.eventAdd}` }).click();
+    await expect(page.getByLabel(en.eventFieldStarts)).toHaveValue('18:30');
+    await expect(page.getByLabel(en.eventFieldEnds)).toHaveValue('21:00');
+    await page.getByLabel(en.eventFieldDay).fill(inDays(11));
+    await page.getByRole('button', { name: en.save }).click();
+    await expect(page.getByRole('heading', { name: 'E2E evening course' })).toBeVisible();
+    await expect(page.getByText(/18:30–21:00/)).toBeVisible();
+  });
 });
 

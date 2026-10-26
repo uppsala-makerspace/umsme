@@ -6,7 +6,7 @@ import Layout from "/imports/components/Layout/Layout";
 import { useSignedIn } from "../components/useSignedIn";
 import MainContent from "/imports/components/MainContent";
 import Loader from "/imports/components/Loader";
-import { eventValues, eventFields, parseClock } from "/imports/common/lib/activityValues";
+import { eventValues, eventFields, parseClock, usualTimes } from "/imports/common/lib/activityValues";
 import EventEditForm from "./EventEditForm.jsx";
 import { useImage } from "../components/useImage";
 
@@ -83,6 +83,12 @@ export default () => {
       }
     })();
   }, [activityId, groupId, !!values]);
+
+  // A new event takes its activity's usual times, where it has none yet.
+  useEffect(() => {
+    if (eventId || !activity) return;
+    setValues((v) => (v ? { ...v, ...usualTimes(v, activity) } : v));
+  }, [activity?._id]);
 
   if (!userId && !loggingIn) {
     return <Navigate to="/login" />;

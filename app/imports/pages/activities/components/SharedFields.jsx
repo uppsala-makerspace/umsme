@@ -1,7 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
-import { TextField, SelectField, CheckField, Row, Card } from "./fields";
+import { TextField, SelectField, CheckField, ClockField, Row, Card } from "./fields";
+import { usualMinutes } from "/imports/common/lib/activityValues";
 
 /**
  * The fields an activity and an event share. On an event of an activity
@@ -14,6 +15,7 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
   const lang = i18n.language || "sv";
   const set = (name) => (value) => onChange(name, value);
   const kind = event ? "event" : "activity";
+  const usual = event ? null : usualMinutes(values.startsAt, values.endsAt);
   const hint = (value) => (inherited && value !== undefined && value !== null && value !== "" ? String(value) : undefined);
   const text = (name, field, lang2) => ({
     id: `activity-${name}`,
@@ -47,8 +49,17 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
         <TextField multiline label={t("activityFieldDescriptionEn")} {...text("descriptionEn", "description", "en")} />
         <SelectField id="activity-categoryId" label={t("activityFieldCategory")} value={values.categoryId} onChange={set("categoryId")}
           empty={none("categoryId", choices.categories)} options={options(choices.categories)} />
+        {/* An activity's usual times, without a day: each new event of it starts from them. */}
+        {!event && (
+          <Row>
+            <ClockField id="activity-startsAt" label={t("activityFieldStartsAt")} hint={t("activityFieldUsualHint")} value={values.startsAt} onChange={set("startsAt")} />
+            <ClockField id="activity-endsAt" label={t("activityFieldEndsAt")} hint={t("activityFieldUsualHint")} value={values.endsAt} onChange={set("endsAt")} />
+          </Row>
+        )}
         <Row>
-          <TextField label={t("activityFieldDuration")} inputMode="numeric" {...text("durationMinutes", "durationMinutes")} />
+          {usual !== null
+            ? <TextField id="activity-duration" label={t("activityFieldDuration")} hint={t("activityFieldDurationFromTimes")} value={String(usual)} onChange={() => {}} disabled />
+            : <TextField label={t("activityFieldDuration")} inputMode="numeric" {...text("durationMinutes", "durationMinutes")} />}
           <TextField label={t("activityFieldCost")} inputMode="decimal" {...text("cost", "cost")} />
         </Row>
       </Card>

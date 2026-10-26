@@ -85,6 +85,8 @@ export const activityValues = (activity, { groupId = '' } = {}) => ({
   infoRequired: !!activity?.infoRequired,
   checkIn: activity?.checkIn || 'none',
   eventBookers: activity?.eventBookers || 'groupMembers',
+  startsAt: activity?.startsAt || '',
+  endsAt: activity?.endsAt || '',
 });
 
 export const activityFields = (v) => ({
@@ -97,6 +99,8 @@ export const activityFields = (v) => ({
   infoRequired: !!v.infoRequired,
   checkIn: v.checkIn,
   eventBookers: v.eventBookers,
+  startsAt: v.startsAt,
+  endsAt: v.endsAt,
 });
 
 /** The form's values for an event, or empty ones for a new one (of `activityId`). */
@@ -147,3 +151,22 @@ export const categoryFields = (v) => ({ name: pair(v, 'name'), sortOrder: number
 
 /** An event's name: its own, or its activity's. */
 export const eventName = (event, activity) => event?.name?.sv || activity?.name?.sv || '';
+
+/**
+ * A new event's times from its activity's usual ones, where the form has
+ * none yet: only the changes to make.
+ */
+export const usualTimes = (values, activity) => ({
+  ...(!values.startTime && activity?.startsAt ? { startTime: activity.startsAt } : {}),
+  ...(!values.endTime && activity?.endsAt ? { endTime: activity.endsAt } : {}),
+});
+
+/** The minutes between an activity's usual start and end (HH:MM), or null unless both are whole and in order. */
+export const usualMinutes = (startsAt, endsAt) => {
+  const start = parseClock(startsAt);
+  const end = parseClock(endsAt);
+  if (!start || !end) return null;
+  const minutes = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+  return minutes(end) > minutes(start) ? minutes(end) - minutes(start) : null;
+};
+

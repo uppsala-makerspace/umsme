@@ -1883,6 +1883,10 @@ export const models = {
   // Something we usually do (plan/activities.md).
   activity: {
     ...activityFields({ required: true }),
+    // When its events usually start and end, without a day: filled in for
+    // each new event of it, which then only needs its day.
+    startsAt: { label: "Usually starts at", type: String, regEx: /^\d{2}:\d{2}$/, optional: true },
+    endsAt: { label: "Usually ends at", type: String, regEx: /^\d{2}:\d{2}$/, optional: true },
     // Who may create and change its events: every active member of its group
     // (empty is so), or only those who may change the activity itself.
     eventBookers: { label: "Who books events", type: String, allowedValues: ["groupMembers", "activityEditors"], optional: true },
