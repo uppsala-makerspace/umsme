@@ -93,13 +93,13 @@ test.describe('Activities', () => {
     await expect(page.getByRole('heading', { name: en.navCalendar })).toBeVisible();
     await expect(page.getByRole('link', { name: new RegExp(`${WHEEL}`) }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) })).toHaveCount(0);
-    await page.getByRole('button', { name: /^Show all activities/ }).click();
+    await page.getByRole('button', { name: /^Show activities/ }).click();
     // With the number of its planned events: other tests may add some.
     const activity = page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) });
     await expect(activity).toBeVisible();
     await page.getByRole('button', { name: en.workshopHideActivities }).click();
     await expect(activity).toHaveCount(0);
-    await page.getByRole('button', { name: /^Show all activities/ }).click();
+    await page.getByRole('button', { name: /^Show activities/ }).click();
     await activity.click();
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await page.getByRole('link', { name: CERAMICS, exact: true }).click();

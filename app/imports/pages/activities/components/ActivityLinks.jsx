@@ -4,8 +4,12 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
 
-/** Activities as links, each with the number of its planned events. */
-export const ActivityList = ({ activities }) => {
+/**
+ * Activities as links, each with the number of its planned events. Marked
+ * (`marked`) with the activities' light blue and a blue edge, as a
+ * workshop's steering group is with green, where they stand among events.
+ */
+export const ActivityList = ({ activities, marked = false }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   return (
@@ -14,7 +18,9 @@ export const ActivityList = ({ activities }) => {
         <li key={activity._id} className="mb-2">
           <Link
             to={`/activities/${activity._id}`}
-            className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
+            className={`flex justify-between items-center p-3 rounded-lg border border-gray-200 no-underline text-inherit ${
+            marked ? "border-l-4 border-l-sky-400 bg-sky-50 hover:bg-sky-100" : "bg-white hover:bg-gray-50"
+          }`}
           >
             <span className="font-semibold">{localized(activity.name, lang)}</span>
             <span className="flex items-center ml-2">

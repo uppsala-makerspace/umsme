@@ -1645,6 +1645,11 @@ video {
   border-left-color: rgb(239 68 68 / var(--tw-border-opacity, 1));
 }
 
+.border-l-sky-400 {
+  --tw-border-opacity: 1;
+  border-left-color: rgb(56 189 248 / var(--tw-border-opacity, 1));
+}
+
 .border-l-sky-500 {
   --tw-border-opacity: 1;
   border-left-color: rgb(14 165 233 / var(--tw-border-opacity, 1));
@@ -2536,6 +2541,11 @@ body {
 .hover\:bg-red-600:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(220 38 38 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-sky-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(224 242 254 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-yellow-100:hover {

@@ -29,7 +29,7 @@ const WorkshopCalendar = ({ events, activities }) => {
             className="w-full py-2 bg-transparent border-none text-[#5fc86f] hover:text-[#096817] cursor-pointer">
             {open ? t("workshopHideActivities") : t("workshopShowActivities", { count: activities.length })}
           </button>
-          {open && <ActivityList activities={activities} />}
+          {open && <ActivityList activities={activities} marked />}
         </>
       )}
     </section>
