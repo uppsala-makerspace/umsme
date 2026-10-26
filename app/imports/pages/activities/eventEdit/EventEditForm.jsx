@@ -5,7 +5,7 @@ import Button from "../../../components/Button";
 import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
 import RegistrationFields from "../components/RegistrationFields";
-import { Field, SelectField, DayField, ClockField, Row } from "../components/fields";
+import { Field, SelectField, DayField, ClockField, Row, Card } from "../components/fields";
 
 /**
  * Add or change an event: of an activity (whose values show greyed where the
@@ -26,39 +26,43 @@ const EventEditForm = ({
     <form onSubmit={(e) => { e.preventDefault(); onSave(); }}>
       <h2 className="text-2xl m-0 mb-4">{t(isNew ? "eventNew" : "eventEdit")}</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
-      <Row>
-        <SelectField id="event-activityId" label={t("eventFieldActivity")} value={values.activityId} onChange={(v) => onChange("activityId", v)}
-          empty={t("eventFieldFree")} options={choices.activities.map((a) => ({ value: a._id, label: localized(a.name, lang) }))} />
-        {!values.activityId && (
-          <SelectField id="event-groupId" label={t("activityFieldGroup")} value={values.groupId} onChange={(v) => onChange("groupId", v)}
-            empty={choices.adminish ? t("activityFieldGroupNone") : undefined}
-            options={groups.map((g) => ({ value: g._id, label: localized(g.name, lang) }))} />
-        )}
-      </Row>
-      <Row>
-        <DayField id="event-startDay" required label={t("eventFieldDay")} value={values.startDay} onChange={(v) => onChange("startDay", v)} />
-        <ClockField id="event-startTime" required label={t("eventFieldStarts")} value={values.startTime} onChange={(v) => onChange("startTime", v)} />
-        <ClockField id="event-endTime" label={t("eventFieldEnds")} hint={t("eventFieldEndsHint")} value={values.endTime} onChange={(v) => onChange("endTime", v)} />
-      </Row>
-      <SelectField id="event-status" label={t("eventFieldStatus")} value={values.status} onChange={(v) => onChange("status", v)}
-        options={[
-          ...(values.status === "awaiting" ? [{ value: "awaiting", label: t("eventAwaiting") }] : []),
-          { value: "confirmed", label: t("eventConfirmed") },
-          { value: "cancelled", label: t("eventCancelled") },
-        ]} />
-      <Field id="event-hosts" label={t("eventFieldHosts")} hint={t("eventFieldHostsHint")}>
-        <div id="event-hosts" className="flex flex-wrap gap-2">
-          {hostChoices.map((m) => {
-            const on = values.hostMemberIds.includes(m._id);
-            return (
-              <button key={m._id} type="button" aria-pressed={on} onClick={() => toggleHost(m._id)}
-                className={`text-sm rounded-full py-1 px-3 border cursor-pointer ${on ? "bg-brand-green text-white border-brand-green" : "bg-white text-gray-700 border-gray-300"}`}>
-                {m.name}
-              </button>
-            );
-          })}
-        </div>
-      </Field>
+      <Card title={t("formCardEvent")}>
+        <Row>
+          <SelectField id="event-activityId" label={t("eventFieldActivity")} value={values.activityId} onChange={(v) => onChange("activityId", v)}
+            empty={t("eventFieldFree")} options={choices.activities.map((a) => ({ value: a._id, label: localized(a.name, lang) }))} />
+          {!values.activityId && (
+            <SelectField id="event-groupId" label={t("activityFieldGroup")} value={values.groupId} onChange={(v) => onChange("groupId", v)}
+              empty={choices.adminish ? t("activityFieldGroupNone") : undefined}
+              options={groups.map((g) => ({ value: g._id, label: localized(g.name, lang) }))} />
+          )}
+        </Row>
+        <Row>
+          <DayField id="event-startDay" required label={t("eventFieldDay")} value={values.startDay} onChange={(v) => onChange("startDay", v)} />
+          <ClockField id="event-startTime" required label={t("eventFieldStarts")} value={values.startTime} onChange={(v) => onChange("startTime", v)} />
+          <ClockField id="event-endTime" label={t("eventFieldEnds")} hint={t("eventFieldEndsHint")} value={values.endTime} onChange={(v) => onChange("endTime", v)} />
+        </Row>
+        <SelectField id="event-status" label={t("eventFieldStatus")} value={values.status} onChange={(v) => onChange("status", v)}
+          options={[
+            ...(values.status === "awaiting" ? [{ value: "awaiting", label: t("eventAwaiting") }] : []),
+            { value: "confirmed", label: t("eventConfirmed") },
+            { value: "cancelled", label: t("eventCancelled") },
+          ]} />
+      </Card>
+      <Card title={t("eventFieldHosts")}>
+        <Field id="event-hosts" label="" hint={t("eventFieldHostsHint")}>
+          <div id="event-hosts" className="flex flex-wrap gap-2">
+            {hostChoices.map((m) => {
+              const on = values.hostMemberIds.includes(m._id);
+              return (
+                <button key={m._id} type="button" aria-pressed={on} onClick={() => toggleHost(m._id)}
+                  className={`text-sm rounded-full py-1 px-3 border cursor-pointer ${on ? "bg-brand-green text-white border-brand-green" : "bg-white text-gray-700 border-gray-300"}`}>
+                  {m.name}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+      </Card>
       {values.activityId && <p className="text-sm text-gray-500 mb-4">{t("activityFieldInheritHint")}</p>}
       <SharedFields event values={values} onChange={onChange} choices={choices} inherited={values.activityId ? activity : null} />
       <RegistrationFields event values={values} onChange={onChange} choices={choices} inherited={values.activityId ? activity : null} />

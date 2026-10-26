@@ -831,5 +831,12 @@
   "registrationFieldOpensDays": "Opens, days before",
   "registrationFieldOpensAt": "Opens at",
   "registrationFieldClosesDays": "Closes, days before",
-  "registrationFieldClosesAt": "Closes at"
+  "registrationFieldClosesAt": "Closes at",
+  "formCardDescription": "Name and description",
+  "formCardPlace": "Where and contact",
+  "formCardWho": "Who can take part",
+  "formCardCheckIn": "Check-in",
+  "formCardOwner": "Owner",
+  "formCardEvent": "The event",
+  "registrationFieldCertificateHint": "Applies when signing up"
 }

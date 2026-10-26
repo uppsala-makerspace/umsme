@@ -1,8 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { localized } from "/imports/common/lib/groupRules";
 import { checkInSettings, DEFAULT_CHECK_IN } from "/imports/common/lib/activityRules";
-import { TextField, SelectField, CheckField, Row } from "./fields";
+import { TextField, SelectField, CheckField, Row, Card } from "./fields";
 
 /**
  * How one signs up, as in admin: whether, how many, how few make it happen,
@@ -12,8 +11,7 @@ import { TextField, SelectField, CheckField, Row } from "./fields";
  * fields are three-way.
  */
 const RegistrationFields = ({ values, onChange, choices, inherited = null, event = false }) => {
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language || "sv";
+  const { t } = useTranslation();
   const set = (name) => (value) => onChange(name, value);
   const yesNo = (value) => t(value ? "activityYes" : "activityNo");
   const asActivity = (value) => t("activityFieldAsActivity", { value });
@@ -48,32 +46,29 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
   const windowField = (name, setting, label, inputMode) => (editable
     ? <TextField label={label} {...text(name, { inputMode })} />
     : <TextField id={`registration-${name}`} label={label} value={String(shown[setting])} onChange={() => {}} disabled />);
-  const certificates = (choices.certificates || []).map((c) => ({ value: c._id, label: localized(c.name, lang) }));
-  const certificateName = (id) => certificates.find((c) => c.value === id)?.label || id;
 
   return (
     <>
-      <h3 className="text-lg mt-2 mb-3">{t("registrationHeading")}</h3>
-      <Row>
+      <Card title={t("registrationHeading")}>
         <SelectField id="registration-registration" label={t("registrationFieldKind")} value={values.registration} onChange={set("registration")}
           empty={event ? (inherited ? asActivity(t(`registrationKind_${inherited.registration || "none"}`)) : t("registrationKind_none")) : undefined}
           options={kinds} />
-        <TextField label={t("registrationFieldSeats")} hint={t("registrationFieldSeatsHint")} {...text("maxSeats", { inputMode: "numeric" })} />
-        <TextField label={t("registrationFieldFewest")} hint={t("registrationFieldFewestHint")} {...text("minSeats", { inputMode: "numeric" })} />
-      </Row>
-      {registration !== "none" && (
-        <>
-          <Row>
-            {flag("queueAllowed", t("registrationFieldQueue"))}
-            {flag("infoRequired", t("registrationFieldInfo"))}
-          </Row>
-          <Row>
+        {registration !== "none" && (
+          <>
+            <Row>
+              <TextField label={t("registrationFieldSeats")} hint={t("registrationFieldSeatsHint")} {...text("maxSeats", { inputMode: "numeric" })} />
+              <TextField label={t("registrationFieldFewest")} hint={t("registrationFieldFewestHint")} {...text("minSeats", { inputMode: "numeric" })} />
+            </Row>
+            <Row>
+              {flag("queueAllowed", t("registrationFieldQueue"))}
+              {flag("infoRequired", t("registrationFieldInfo"))}
+            </Row>
             <TextField label={t("registrationFieldInfoPlaceholder")} {...text("infoPlaceholder")} />
-            <SelectField id="registration-requiredCertificateId" label={t("registrationFieldCertificate")} value={values.requiredCertificateId}
-              onChange={set("requiredCertificateId")}
-              empty={inherited?.requiredCertificateId ? asActivity(certificateName(inherited.requiredCertificateId)) : t("activityFieldNone")}
-              options={certificates} />
-          </Row>
+          </>
+        )}
+      </Card>
+      {registration !== "none" && (
+        <Card title={t("formCardCheckIn")}>
           <SelectField id="registration-checkIn" label={t("registrationFieldCheckIn")} hint={t("registrationFieldCheckInHint")}
             value={values.checkIn} onChange={chooseCheckIn}
             empty={event ? (inherited ? asActivity(t(`registrationCheckIn_${inherited.checkIn || "none"}`)) : t("registrationCheckIn_none")) : undefined}
@@ -90,7 +85,7 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
               </Row>
             </>
           )}
-        </>
+        </Card>
       )}
     </>
   );

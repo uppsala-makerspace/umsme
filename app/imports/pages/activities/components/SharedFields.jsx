@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
-import { TextField, SelectField, CheckField, Row } from "./fields";
+import { TextField, SelectField, CheckField, Row, Card } from "./fields";
 
 /**
  * The fields an activity and an event share. On an event of an activity
@@ -35,34 +35,45 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
     <CheckField id={`activity-${name}`} label={label} checked={!!values[name]} onChange={set(name)} />
   ));
 
+  const certificates = choices.certificates || [];
+
   return (
     <>
-      <Row>
-        <TextField label={t("activityFieldNameSv")} required={!inherited} {...text("nameSv", "name", "sv")} />
-        <TextField label={t("activityFieldNameEn")} {...text("nameEn", "name", "en")} />
-      </Row>
-      <TextField multiline label={t("activityFieldDescriptionSv")} {...text("descriptionSv", "description", "sv")} />
-      <TextField multiline label={t("activityFieldDescriptionEn")} {...text("descriptionEn", "description", "en")} />
-      <Row>
-        <SelectField id="activity-categoryId" label={t("activityFieldCategory")} value={values.categoryId} onChange={set("categoryId")}
-          empty={none("categoryId", choices.categories)} options={options(choices.categories)} />
-        <SelectField id="activity-workshopId" label={t("activityFieldWorkshop")} value={values.workshopId} onChange={set("workshopId")}
-          empty={none("workshopId", choices.workshops)} options={options(choices.workshops)} />
-      </Row>
-      <Row>
-        <SelectField id="activity-spaceId" label={t("activityFieldSpace")} value={values.spaceId} onChange={set("spaceId")}
-          empty={none("spaceId", choices.spaces)} options={options(choices.spaces)} />
-        <TextField label={t("activityFieldDuration")} inputMode="numeric" {...text("durationMinutes", "durationMinutes")} />
-        <TextField label={t("activityFieldCost")} inputMode="decimal" {...text("cost", "cost")} />
-      </Row>
-      <Row>
-        <TextField label={t("activityFieldSlack")} {...text("slackChannel", "slackChannel")} />
-        <TextField label={t("activityFieldContact")} type="email" {...text("contactEmail", "contactEmail")} />
-      </Row>
-      <Row>
-        {flag("membersOnly", t("activityFieldMembersOnly"))}
+      <Card title={t("formCardDescription")}>
+        <Row>
+          <TextField label={t("activityFieldNameSv")} required={!inherited} {...text("nameSv", "name", "sv")} />
+          <TextField label={t("activityFieldNameEn")} {...text("nameEn", "name", "en")} />
+        </Row>
+        <TextField multiline label={t("activityFieldDescriptionSv")} {...text("descriptionSv", "description", "sv")} />
+        <TextField multiline label={t("activityFieldDescriptionEn")} {...text("descriptionEn", "description", "en")} />
+        <Row>
+          <SelectField id="activity-categoryId" label={t("activityFieldCategory")} value={values.categoryId} onChange={set("categoryId")}
+            empty={none("categoryId", choices.categories)} options={options(choices.categories)} />
+          <TextField label={t("activityFieldDuration")} inputMode="numeric" {...text("durationMinutes", "durationMinutes")} />
+          <TextField label={t("activityFieldCost")} inputMode="decimal" {...text("cost", "cost")} />
+        </Row>
+      </Card>
+      <Card title={t("formCardPlace")}>
+        <Row>
+          <SelectField id="activity-workshopId" label={t("activityFieldWorkshop")} value={values.workshopId} onChange={set("workshopId")}
+            empty={none("workshopId", choices.workshops)} options={options(choices.workshops)} />
+          <SelectField id="activity-spaceId" label={t("activityFieldSpace")} value={values.spaceId} onChange={set("spaceId")}
+            empty={none("spaceId", choices.spaces)} options={options(choices.spaces)} />
+        </Row>
+        <Row>
+          <TextField label={t("activityFieldSlack")} {...text("slackChannel", "slackChannel")} />
+          <TextField label={t("activityFieldContact")} type="email" {...text("contactEmail", "contactEmail")} />
+        </Row>
+      </Card>
+      <Card title={t("formCardWho")}>
+        <Row>
+          {flag("membersOnly", t("activityFieldMembersOnly"))}
+          <SelectField id="activity-requiredCertificateId" label={t("registrationFieldCertificate")} hint={t("registrationFieldCertificateHint")}
+            value={values.requiredCertificateId} onChange={set("requiredCertificateId")}
+            empty={none("requiredCertificateId", certificates)} options={options(certificates)} />
+        </Row>
         {flag("published", t("activityFieldPublished"))}
-      </Row>
+      </Card>
     </>
   );
 };

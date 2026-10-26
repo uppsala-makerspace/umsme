@@ -830,5 +830,12 @@
   "registrationFieldOpensDays": "Öppnar, dagar före",
   "registrationFieldOpensAt": "Öppnar kl.",
   "registrationFieldClosesDays": "Stänger, dagar före",
-  "registrationFieldClosesAt": "Stänger kl."
+  "registrationFieldClosesAt": "Stänger kl.",
+  "formCardDescription": "Namn och beskrivning",
+  "formCardPlace": "Var och kontakt",
+  "formCardWho": "Vem kan delta",
+  "formCardCheckIn": "Incheckning",
+  "formCardOwner": "Ägare",
+  "formCardEvent": "Tillfället",
+  "registrationFieldCertificateHint": "Gäller när man anmäler sig"
 }

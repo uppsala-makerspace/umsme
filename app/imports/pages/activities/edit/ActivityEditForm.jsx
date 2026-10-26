@@ -5,7 +5,7 @@ import Button from "../../../components/Button";
 import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
 import RegistrationFields from "../components/RegistrationFields";
-import { SelectField } from "../components/fields";
+import { SelectField, Card } from "../components/fields";
 
 /**
  * Add or change an activity: its owning group (one the member may create
@@ -20,15 +20,17 @@ const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, has
     <form onSubmit={(e) => { e.preventDefault(); onSave(); }}>
       <h2 className="text-2xl m-0 mb-4">{t(isNew ? "activityNew" : "activityEdit")}</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
-      <SelectField id="activity-groupId" label={t("activityFieldGroup")} value={values.groupId} onChange={(v) => onChange("groupId", v)}
-        empty={choices.adminish ? t("activityFieldGroupNone") : undefined}
-        options={groups.map((g) => ({ value: g._id, label: localized(g.name, lang) }))} />
-      <SelectField id="activity-eventBookers" label={t("activityFieldEventBookers")} value={values.eventBookers}
-        onChange={(v) => onChange("eventBookers", v)}
-        options={[
-          { value: "groupMembers", label: t("activityEventBookersGroupMembers") },
-          { value: "activityEditors", label: t("activityEventBookersActivityEditors") },
-        ]} />
+      <Card title={t("formCardOwner")}>
+        <SelectField id="activity-groupId" label={t("activityFieldGroup")} value={values.groupId} onChange={(v) => onChange("groupId", v)}
+          empty={choices.adminish ? t("activityFieldGroupNone") : undefined}
+          options={groups.map((g) => ({ value: g._id, label: localized(g.name, lang) }))} />
+        <SelectField id="activity-eventBookers" label={t("activityFieldEventBookers")} value={values.eventBookers}
+          onChange={(v) => onChange("eventBookers", v)}
+          options={[
+            { value: "groupMembers", label: t("activityEventBookersGroupMembers") },
+            { value: "activityEditors", label: t("activityEventBookersActivityEditors") },
+          ]} />
+      </Card>
       <SharedFields values={values} onChange={onChange} choices={choices} />
       <RegistrationFields values={values} onChange={onChange} choices={choices} />
       <div className="flex gap-3 mt-2">
