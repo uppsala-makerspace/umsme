@@ -84,6 +84,8 @@ describe('event registrations', function () {
     const subjects = (await Messages.find({ member: { $in: [a, b] }, type: 'activity' }, { sort: { senddate: -1 } }).fetchAsync()).map((m) => m.subject);
     assert.ok(subjects.some((s) => s.startsWith('Du är anmäld')));
     assert.ok(subjects.some((s) => s.startsWith('Du står i kö')));
+    // Each message knows its event, for the app to link to.
+    assert.strictEqual(await Messages.find({ member: { $in: [a, b] }, type: 'activity', event: id }).countAsync(), 2);
     assert.ok(pushed.length > 0);
   });
 

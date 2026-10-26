@@ -28,6 +28,12 @@ test.describe('Registrations', () => {
     await page.getByRole('button', { name: en.registrationSignUp }).click();
     await expect(page.getByText(en.registrationState_approved, { exact: true })).toBeVisible();
     await expect(page.getByText('2 of 3 seats left')).toBeVisible();
+    // The message about it leads back to the event.
+    await page.goto('/messages');
+    await page.getByRole('button', { name: /Personal messages/ }).click();
+    await page.getByText(/You are registered: E2E sign-up/).first().click();
+    await page.getByRole('link', { name: en.messageToEvent }).click();
+    await expect(page.getByRole('heading', { name: 'E2E sign-up', level: 2 })).toBeVisible();
     await page.getByRole('button', { name: en.registrationWithdraw }).click();
     await expect(page.getByText(en.registrationState_withdrawn, { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: en.registrationSignUp })).toBeVisible();

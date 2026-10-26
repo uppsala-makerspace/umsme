@@ -80,7 +80,7 @@ const send = async (kind, event, memberId, extra = {}) => {
     const subject = compile(template.subject)(data);
     const messagetext = compile(template.messagetext)(data);
     const messageId = await Messages.insertAsync({
-      template: template._id, member: member._id, type: 'activity',
+      template: template._id, member: member._id, type: 'activity', event: event._id,
       to: member.email || 'In-app', subject, senddate: new Date(), messagetext,
     });
     try {

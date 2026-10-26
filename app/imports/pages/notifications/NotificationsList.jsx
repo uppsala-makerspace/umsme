@@ -25,7 +25,7 @@ const readMoreHref = (n) => {
   if (!n.entityId) return null;
   // Anything originating from a Messages row (reminder / welcome / confirmation /
   // status) carries the entityId and lives behind the message detail page.
-  if (n.category === "membershipReminders" || n.category === "accountAndPayments") {
+  if (["membershipReminders", "accountAndPayments", "activities"].includes(n.category)) {
     return `/messages/message/${n.entityId}`;
   }
   if (n.category === "announcements") return `/messages/announcement/${n.entityId}`;

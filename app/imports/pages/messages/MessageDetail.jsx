@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import MainContent from "../../components/MainContent";
 import Loader from "../../components/Loader";
@@ -71,6 +72,15 @@ const MessageDetail = ({ loading, kind, item }) => {
         <div className="whitespace-pre-wrap">{linkify(item.messagetext)}</div>
       ) : (
         body && <Markdown startLevel={2}>{body}</Markdown>
+      )}
+      {isMessage && item.event && (
+        <Link
+          to={`/events/${item.event}`}
+          className="mt-6 flex justify-between items-center rounded-lg border border-gray-200 bg-white py-3 px-4 font-semibold text-brand-green no-underline hover:bg-gray-50"
+        >
+          {t("messageToEvent")}
+          <span className="text-xl">&rarr;</span>
+        </Link>
       )}
     </MainContent>
   );

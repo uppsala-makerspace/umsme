@@ -33,6 +33,17 @@ const privateMessage = {
   senddate: now,
 };
 
+const activityMessage = {
+  _id: "m2",
+  type: "activity",
+  event: "e1",
+  subject: "Du är anmäld: Introduktion svarv — You are registered: Wheel introduction",
+  messagetext: "Hej Anna!\n\nDu har en plats på Introduktion svarv 2026-11-19 18:00 i Keramikverkstaden. Kan du inte komma, avanmäl dig i appen så att någon annan får platsen.\n\nVänliga hälsningar\nUppsala Makerspace",
+  member: "abc",
+  template: "tpl",
+  senddate: now,
+};
+
 export default {
   title: "Pages/MessageDetail",
   component: MessageDetail,
@@ -75,5 +86,13 @@ export const PrivateMessage = {
     loading: false,
     kind: "message",
     item: privateMessage,
+  },
+};
+
+export const ActivityMessage = {
+  args: {
+    loading: false,
+    kind: "message",
+    item: activityMessage,
   },
 };

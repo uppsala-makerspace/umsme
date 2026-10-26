@@ -329,6 +329,14 @@ export const models = {
       optional: true,
       autoform: { omit: true },
     },
+    // And an activity message to its event, which the app links to.
+    event: {
+      label: "Event",
+      type: String,
+      max: 50,
+      optional: true,
+      autoform: { omit: true },
+    },
     type: {
       label: "Message type",
       type: String,
