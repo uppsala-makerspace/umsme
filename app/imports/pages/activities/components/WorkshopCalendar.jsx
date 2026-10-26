@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import EventRow from "./EventRow";
 import { ActivityList } from "./ActivityLinks";
 
@@ -26,8 +27,10 @@ const WorkshopCalendar = ({ events, activities }) => {
       {activities?.length > 0 && (
         <>
           <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)}
-            className="w-full py-2 bg-transparent border-none text-[#5fc86f] hover:text-[#096817] cursor-pointer">
-            {t(open ? "workshopHideActivities" : "workshopShowActivities", { count: activities.length })}
+            className="w-full flex items-center justify-between py-2 px-0 bg-transparent border-none text-left text-[#5fc86f] hover:text-[#096817] cursor-pointer">
+            <span>{t(open ? "workshopHideActivities" : "workshopShowActivities", { count: activities.length })}</span>
+            {/* Down when folded, up when open. */}
+            <ChevronDownIcon className={`w-5 h-5 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
           </button>
           {open && <ActivityList activities={activities} marked />}
         </>
