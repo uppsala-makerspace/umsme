@@ -5,6 +5,7 @@ import { Events } from '/imports/common/collections/events';
 import { Spaces } from '/imports/common/collections/spaces';
 import { createEvent } from './events';
 import { normalizedName } from './linking';
+import { zonedDate } from '/imports/common/lib/days';
 
 /**
  * Importing the association's Google calendar as events: each calendar event
@@ -70,8 +71,12 @@ const fetchItems = async (from, to) => {
   return items;
 };
 
-// An all-day event is a day, at midnight local time; its end is the day after.
-const moment = (value) => (value.dateTime ? new Date(value.dateTime) : new Date(`${value.date}T00:00:00`));
+// An all-day event is a day, at midnight Swedish time; its end is the day after.
+const moment = (value) => {
+  if (value.dateTime) return new Date(value.dateTime);
+  const [y, m, d] = value.date.split('-').map(Number);
+  return zonedDate(y, m - 1, d);
+};
 
 const plainText = (html) => (html || '')
   .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n').replace(/<[^>]+>/g, '')

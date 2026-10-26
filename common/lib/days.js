@@ -32,3 +32,52 @@ export const parseClock = (text) => {
   const [h, min] = [Number(m[1]), Number(m[2] || 0)];
   return h < 24 && min < 60 ? `${pad(h)}:${pad(min)}` : null;
 };
+
+/**
+ * The association's time zone. The times members see and set (an event at
+ * 18:00, check-in closing at 15:00 the day before, the times in a mail) are
+ * Swedish times, summer or winter, whatever time zone the server runs in.
+ */
+export const TIME_ZONE = 'Europe/Stockholm';
+
+const zoneFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: TIME_ZONE, hourCycle: 'h23',
+  year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric',
+});
+
+/** A moment's year, month (1–12), day, hour, minute and second in Swedish time. */
+export const zonedParts = (date) => {
+  const parts = Object.fromEntries(zoneFormat.formatToParts(date)
+    .filter((p) => p.type !== 'literal').map((p) => [p.type, Number(p.value)]));
+  return { ...parts, hour: parts.hour % 24 };
+};
+
+// How far Swedish time is ahead of UTC at a moment: one hour in winter, two in summer.
+const offsetAt = (ms) => {
+  const p = zonedParts(new Date(ms));
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - (ms - (ms % 1000));
+};
+
+/**
+ * The moment of a Swedish wall time, as `new Date(year, monthIndex, day,
+ * hour, minute)` is of a local one: monthIndex from 0, and a day out of range
+ * rolls over into the month before or after.
+ */
+export const zonedDate = (year, monthIndex, day, hour = 0, minute = 0) => {
+  const wall = Date.UTC(year, monthIndex, day, hour, minute);
+  // Twice, so that a wall time near the change of summer time finds its own offset.
+  const first = wall - offsetAt(wall);
+  return new Date(wall - offsetAt(first));
+};
+
+/** The day, YYYY-MM-DD, in Swedish time. */
+export const zonedDay = (date) => {
+  const p = zonedParts(date);
+  return `${p.year}-${pad(p.month)}-${pad(p.day)}`;
+};
+
+/** HH:MM, in Swedish time. */
+export const zonedClock = (date) => {
+  const p = zonedParts(date);
+  return `${pad(p.hour)}:${pad(p.minute)}`;
+};

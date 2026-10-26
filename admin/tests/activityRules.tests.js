@@ -11,6 +11,7 @@ import {
   checkInWindow,
   checkInApplies,
 } from '/imports/common/lib/activityRules';
+import { zonedDate, zonedParts, zonedDay, zonedClock } from '/imports/common/lib/days';
 
 const activity = {
   _id: 'a1',
@@ -141,9 +142,24 @@ describe('Activity rules', function () {
     });
   });
 
+  describe('Swedish time', function () {
+    it('is the same wall time in summer and winter, whatever the server runs in', function () {
+      assert.strictEqual(zonedDate(2026, 6, 1, 18, 0).toISOString(), '2026-07-01T16:00:00.000Z');
+      assert.strictEqual(zonedDate(2026, 11, 1, 18, 0).toISOString(), '2026-12-01T17:00:00.000Z');
+      const winter = new Date('2026-12-01T17:00:00Z');
+      assert.deepStrictEqual([zonedDay(winter), zonedClock(winter)], ['2026-12-01', '18:00']);
+    });
+
+    it('rolls a day out of range over into the next month, and finds the night of the change', function () {
+      assert.strictEqual(zonedDay(zonedDate(2026, 10, 0, 3, 0)), '2026-10-31');
+      assert.strictEqual(zonedDate(2026, 9, 25, 3, 0).toISOString(), '2026-10-25T02:00:00.000Z');
+      assert.strictEqual(zonedDate(2026, 2, 29, 3, 0).toISOString(), '2026-03-29T01:00:00.000Z');
+    });
+  });
+
   describe('checkInWindow', function () {
-    const start = new Date(2026, 10, 19, 18, 0);
-    const local = (d) => [d.getDate(), d.getHours(), d.getMinutes()];
+    const start = zonedDate(2026, 10, 19, 18, 0);
+    const local = (d) => { const p = zonedParts(d); return [p.day, p.hour, p.minute]; };
 
     it('is the day before, 03:00 to 15:00, by default', function () {
       const { opens, closes } = checkInWindow({ start, checkIn: 'default' });
@@ -154,6 +170,15 @@ describe('Activity rules', function () {
       const custom = { start, checkIn: 'custom', checkInOpensDaysBefore: 3, checkInOpensAt: '08:30', checkInClosesDaysBefore: 0, checkInClosesAt: '20:00' };
       const { opens, closes } = checkInWindow(custom);
       assert.deepStrictEqual([local(opens), closes.getTime()], [[16, 8, 30], start.getTime()]);
+    });
+
+    it('keeps to Swedish time across the change to winter time', function () {
+      // Summer time ends in the night to Sunday 2026-10-25.
+      const sunday = zonedDate(2026, 9, 25, 18, 0);
+      const { opens, closes } = checkInWindow({ start: sunday, checkIn: 'default' });
+      assert.deepStrictEqual([opens.toISOString(), closes.toISOString()], ['2026-10-24T01:00:00.000Z', '2026-10-24T13:00:00.000Z']);
+      const monday = zonedDate(2026, 9, 26, 18, 0);
+      assert.strictEqual(checkInWindow({ start: monday, checkIn: 'default' }).opens.toISOString(), '2026-10-25T02:00:00.000Z');
     });
 
     it('applies only with registration and a window', function () {

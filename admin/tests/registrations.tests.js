@@ -1,5 +1,6 @@
 import assert from 'assert';
 import { Members } from '/imports/common/collections/members';
+import { zonedDate, zonedParts } from '/imports/common/lib/days';
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
 import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
@@ -187,10 +188,10 @@ describe('event registrations', function () {
   });
 
   describe('check-in', function () {
-    // The day after tomorrow at 18:00; the default window is tomorrow, 03:00 to 15:00.
+    // Days from today at an hour, Swedish time; the default window is the day before, 03:00 to 15:00.
     const dayAt = (days, hour) => {
-      const d = new Date();
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate() + days, hour, 0);
+      const { year, month, day } = zonedParts(new Date());
+      return zonedDate(year, month - 1, day + days, hour, 0);
     };
 
     it('opens a window, reminds once, and takes the seats of those who did not', async function () {

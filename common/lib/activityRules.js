@@ -6,6 +6,7 @@
  * is for every active member of the group, and board and admin always may.
  */
 import { mayEditGroup } from "./groupRules";
+import { zonedDate, zonedParts } from "./days";
 
 export const EVENT_STATUSES = ["awaiting", "confirmed", "cancelled"];
 
@@ -204,10 +205,11 @@ export const checkInSettings = (event) => (event?.checkIn === "custom"
   }
   : { ...DEFAULT_CHECK_IN });
 
-// The day `days` before the start's, at a time of day, local time.
+// The day `days` before the start's, at a time of day, Swedish time.
 const daysBefore = (start, days, clock) => {
   const [h, m] = clock.split(":").map(Number);
-  return new Date(start.getFullYear(), start.getMonth(), start.getDate() - days, h, m);
+  const { year, month, day } = zonedParts(start);
+  return zonedDate(year, month - 1, day - days, h, m);
 };
 
 /** When checking in opens and closes; it closes at the start at the latest. */

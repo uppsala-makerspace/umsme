@@ -7,6 +7,7 @@ import { Spaces } from '/imports/common/collections/spaces';
 import { findBestTemplate, memberTemplateData } from '/imports/common/lib/message';
 import { appLink } from '/imports/common/lib/links';
 import { checkInApplies, checkInWindow } from '/imports/common/lib/activityRules';
+import { zonedDay, zonedClock } from '/imports/common/lib/days';
 import { isEmailAllowed } from '/imports/common/server/emailGuard';
 import { pushMessage } from '/imports/common/server/push';
 import { publishManagerEvent, ManagerEventType } from '/imports/common/server/managerEvents';
@@ -45,10 +46,8 @@ export const setActivityTransportsForTests = (value) => {
   transportOverride = value;
 };
 
-const pad = (n) => String(n).padStart(2, '0');
-const when = (date) => (date
-  ? `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-  : '');
+// Swedish time, whatever time zone the server runs in.
+const when = (date) => (date ? `${zonedDay(date)} ${zonedClock(date)}` : '');
 
 const eventData = async (event, extra = {}) => {
   const space = event.spaceId ? await Spaces.findOneAsync(event.spaceId, { fields: { name: 1 } }) : null;

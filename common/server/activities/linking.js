@@ -3,6 +3,7 @@ import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
 import { recordChange } from '/imports/common/server/auditLog';
 import { SHARED_FIELDS } from '/imports/common/lib/activityRules';
+import { zonedDay, zonedClock } from '/imports/common/lib/days';
 import { createActivity } from './activities';
 
 /**
@@ -22,9 +23,7 @@ export const sameName = (event, activity) => {
   return namesOf(event).some((name) => wanted.includes(name));
 };
 
-const pad = (n) => String(n).padStart(2, '0');
-const clock = (date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-const sameDay = (a, b) => a.toDateString() === b.toDateString();
+const sameDay = (a, b) => zonedDay(a) === zonedDay(b);
 
 const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
@@ -63,7 +62,7 @@ export const createActivityFromEvent = async (eventId, { userId }) => {
     groupId: event.groupId || null,
     durationMinutes: event.durationMinutes || Math.round((event.end - event.start) / 60000),
     // Its times, when on one day, become the activity's usual ones.
-    ...(sameDay(event.start, event.end) ? { startsAt: clock(event.start), endsAt: clock(event.end) } : {}),
+    ...(sameDay(event.start, event.end) ? { startsAt: zonedClock(event.start), endsAt: zonedClock(event.end) } : {}),
     // Images belong to the event; the activity gets its own.
     imageFileId: undefined,
     imageMimeType: undefined,

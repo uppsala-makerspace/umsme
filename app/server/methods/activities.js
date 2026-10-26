@@ -41,6 +41,7 @@ import {
   createEvent, updateEvent, removeEvent, setEventImage, removeEventImage,
 } from "/imports/common/server/activities/events";
 import { findMemberForUser, isActiveMember, hasPaidMembership } from "./utils";
+import { zonedDate, zonedParts } from "/imports/common/lib/days";
 
 /**
  * Activities and events for members (plan/activities.md): everyone sees them;
@@ -411,8 +412,8 @@ Meteor.methods({
     check(activityId, String);
     const who = await caller();
     const activity = await getActivity(activityId);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { year, month, day } = zonedParts(new Date());
+    const today = zonedDate(year, month - 1, day);
     const events = await Events.find({ activityId, end: { $gte: today } }, { sort: { start: 1 } }).fetchAsync();
     const access = await accessTo(who.member, activity.groupId, who, activity);
     return {
