@@ -814,7 +814,7 @@
   "registrationFieldFewestHint": "Tills dess inväntar tillfället fler",
   "registrationFieldQueue": "Kö när det är fullt",
   "registrationFieldInfo": "Fråga efter information",
-  "registrationFieldInfoPlaceholder": "Vad deltagaren ska skriva",
+  "registrationFieldInfoPlaceholder": "Hjälptext i informationsfältet",
   "registrationFieldCertificate": "Certifikat som krävs",
   "registrationFieldCheckIn": "Incheckning i förväg",
   "activityFactCertificate": "Krävs certifikat",
@@ -837,5 +837,6 @@
   "formCardCheckIn": "Incheckning",
   "formCardOwner": "Ägare",
   "formCardEvent": "Tillfället",
-  "registrationFieldCertificateHint": "Gäller när man anmäler sig"
+  "registrationFieldCertificateHint": "Gäller när man anmäler sig",
+  "registrationFieldInfoPlaceholderHint": "Visas i fältet när man anmäler sig, t.ex. ”Allergier”"
 }

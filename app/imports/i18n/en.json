@@ -815,7 +815,7 @@
   "registrationFieldFewestHint": "Until then the event awaits more",
   "registrationFieldQueue": "Queue when full",
   "registrationFieldInfo": "Ask for information",
-  "registrationFieldInfoPlaceholder": "What the participant should write",
+  "registrationFieldInfoPlaceholder": "Help text in the information field",
   "registrationFieldCertificate": "Required certificate",
   "registrationFieldCheckIn": "Check-in beforehand",
   "activityFactCertificate": "Certificate required",
@@ -838,5 +838,6 @@
   "formCardCheckIn": "Check-in",
   "formCardOwner": "Owner",
   "formCardEvent": "The event",
-  "registrationFieldCertificateHint": "Applies when signing up"
+  "registrationFieldCertificateHint": "Applies when signing up",
+  "registrationFieldInfoPlaceholderHint": "Shown in the field when signing up, e.g. “Allergies”"
 }

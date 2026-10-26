@@ -42,6 +42,9 @@ export const RegistrationFields = ({ values, onChange, inherited = null, event =
   ));
   const registration = values.registration || (inherited ? inherited.registration : '') || 'none';
   const takes = registration !== 'none';
+  // Whether it asks for information, its own or as the activity: then the field's help text.
+  const asksInfo = values.infoRequired === true || values.infoRequired === 'yes'
+    || (values.infoRequired === '' && !!inherited?.infoRequired);
   // The check-in in force, and the window shown: the default's or an
   // inherited one greyed, a custom one of the form's own to edit.
   const ownCheckIn = values.checkIn || (inherited ? '' : 'none');
@@ -81,7 +84,10 @@ export const RegistrationFields = ({ values, onChange, inherited = null, event =
             {flag('infoRequired', 'Asks for information')}
           </Stack>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-            <TextField label="What to tell (shown when signing up)" fullWidth {...text('infoPlaceholder')} />
+            {asksInfo && (
+              <TextField label="Help text in the information field" fullWidth helperText="Shown in the field when signing up, e.g. “Allergies”"
+                {...text('infoPlaceholder')} />
+            )}
             <TextField label="Required certificate" select fullWidth slotProps={native} value={values.requiredCertificateId}
               onChange={(e) => onChange('requiredCertificateId', e.target.value)}
               helperText="Only those who hold it may sign up">

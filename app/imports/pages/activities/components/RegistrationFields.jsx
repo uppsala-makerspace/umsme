@@ -29,6 +29,9 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
   ));
   const kinds = ["none", "optional", "required"].map((value) => ({ value, label: t(`registrationKind_${value}`) }));
   const registration = values.registration || inherited?.registration || "none";
+  // Whether it asks for information, its own or as the activity: then the field's help text.
+  const asksInfo = values.infoRequired === true || values.infoRequired === "yes"
+    || (values.infoRequired === "" && !!inherited?.infoRequired);
   const ownCheckIn = values.checkIn || (inherited ? "" : "none");
   const checkIn = ownCheckIn || inherited?.checkIn || "none";
   const editable = ownCheckIn === "custom";
@@ -60,7 +63,7 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
               <TextField label={t("registrationFieldFewest")} hint={t("registrationFieldFewestHint")} {...text("minSeats", { inputMode: "numeric" })} />
             </Row>
             {flag("infoRequired", t("registrationFieldInfo"))}
-            <TextField label={t("registrationFieldInfoPlaceholder")} {...text("infoPlaceholder")} />
+            {asksInfo && <TextField label={t("registrationFieldInfoPlaceholder")} hint={t("registrationFieldInfoPlaceholderHint")} {...text("infoPlaceholder")} />}
             {flag("queueAllowed", t("registrationFieldQueue"))}
           </>
         )}
