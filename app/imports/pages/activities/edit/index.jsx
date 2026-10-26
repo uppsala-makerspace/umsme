@@ -7,6 +7,7 @@ import MainContent from "/imports/components/MainContent";
 import Loader from "/imports/components/Loader";
 import { activityValues, activityFields } from "/imports/common/lib/activityValues";
 import ActivityEditForm from "./ActivityEditForm.jsx";
+import { useImage } from "../components/useImage";
 
 /** /activities/new[?group=…] and /activities/:activityId/edit, for those who may. */
 export default () => {
@@ -21,6 +22,10 @@ export default () => {
   const [values, setValues] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const image = useImage({
+    prefix: "activities", docId: activityId,
+    load: async () => ({ url: (await Meteor.callAsync("activities.get", activityId)).activity.imageUrl, own: true }),
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -35,6 +40,7 @@ export default () => {
             return;
           }
           setStored(result.own);
+          image.setShown({ url: result.activity.imageUrl, own: true });
           setHasEvents(result.events.length > 0);
           setValues(activityValues(result.own));
         } else {
@@ -64,6 +70,8 @@ export default () => {
         navigate(back);
       } else {
         const id = await Meteor.callAsync("activities.create", activityFields(values));
+        // The activity exists even if its image fails: on to it, where the image can be tried again.
+        await image.uploadPending(id).catch((err) => console.error("Image upload failed:", err));
         navigate(`/activities/${id}`);
       }
     } catch (err) {
@@ -90,6 +98,7 @@ export default () => {
             isNew={!activityId} values={values} choices={choices} saving={saving} error={error} hasEvents={hasEvents}
             onChange={(field, value) => setValues((v) => ({ ...v, [field]: value }))}
             onSave={save} onCancel={() => navigate(back)} onDelete={activityId ? remove : undefined}
+            image={{ ...image.card, inherited: false }}
           />
         )}
       </MainContent>

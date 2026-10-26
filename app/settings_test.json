@@ -14,6 +14,7 @@
     }
   },
   "private": {
+    "workshopImages": { "localPath": "../.demo-data/e2e-workshop-images" },
     "recipientWhitelist": [],
     "homeAssistant": {
       "url": "http://localhost:8123",

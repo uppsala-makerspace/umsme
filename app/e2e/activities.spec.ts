@@ -176,5 +176,29 @@ test.describe('Activities', () => {
     await expect(owner.locator('option')).toHaveCount(2);
     expect((await owner.locator('option').allTextContents()).sort()).toEqual([CERAMICS, 'Glazing group'].sort());
   });
+
+  test('a member of the steering group gives an activity an image, and a new event one of its own', async ({ page }) => {
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+    await openAs(page, 'steering', '/activities?tab=activities');
+    await page.getByRole('link', { name: /E2E image aktivitet|E2E edit aktivitet/ }).first().click();
+    await page.getByRole('link', { name: en.edit }).click();
+    await page.locator('input[type="file"]').setInputFiles({ name: 'a.png', mimeType: 'image/png', buffer: png });
+    await expect(page.getByRole('button', { name: en.removeImage })).toBeVisible();
+    await page.getByRole('button', { name: en.removeImage }).click();
+    await expect(page.getByText(en.imageNone)).toBeVisible();
+
+    // A new event: the image waits until the event is created.
+    await page.goto('/events/new');
+    await page.getByLabel(en.activityFieldGroup).selectOption({ label: CERAMICS });
+    await page.getByLabel(en.activityFieldNameSv).fill('E2E bildkväll');
+    await page.getByLabel(en.eventFieldDay).fill(inDays(9));
+    await page.getByLabel(en.eventFieldStarts).fill('18:00');
+    await page.getByLabel(en.eventFieldEnds).fill('20:00');
+    await page.locator('input[type="file"]').setInputFiles({ name: 'b.png', mimeType: 'image/png', buffer: png });
+    await expect(page.getByRole('button', { name: en.removeImage })).toBeVisible();
+    await page.getByRole('button', { name: en.save }).click();
+    await expect(page.getByRole('heading', { name: 'E2E bildkväll' })).toBeVisible();
+    await expect(page.locator('main img').first()).toHaveAttribute('src', /\/api\/events\/.+\/image\?v=/);
+  });
 });
 

@@ -841,5 +841,12 @@
   "registrationFieldInfoPlaceholderHint": "Visas i fältet när man anmäler sig, t.ex. ”Allergier”",
   "registrationFieldCertificateNone": "(Inget)",
   "detailsHeading": "Uppgifter",
-  "activityInterestHeading": "Intresse"
+  "activityInterestHeading": "Intresse",
+  "formCardImage": "Bild",
+  "imageInherited": "Aktivitetens bild. Välj en egen för att byta.",
+  "imageNone": "Ingen bild än.",
+  "imageUploading": "Laddar upp…",
+  "imageReplace": "Byt bild",
+  "imageChoose": "Välj bild",
+  "imageFailed": "Bilden kunde inte läsas eller laddas upp."
 }

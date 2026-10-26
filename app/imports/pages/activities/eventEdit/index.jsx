@@ -8,6 +8,7 @@ import MainContent from "/imports/components/MainContent";
 import Loader from "/imports/components/Loader";
 import { eventValues, eventFields, parseClock } from "/imports/common/lib/activityValues";
 import EventEditForm from "./EventEditForm.jsx";
+import { useImage } from "../components/useImage";
 
 /** /events/new[?activity=…] and /events/:eventId/edit, for the group's members. */
 export default () => {
@@ -24,6 +25,14 @@ export default () => {
   const [hostChoices, setHostChoices] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  // The event's image: its own, or else its activity's, shown greyed.
+  const image = useImage({
+    prefix: "events", docId: eventId,
+    load: async () => {
+      const result = await Meteor.callAsync("events.get", eventId);
+      return { url: result.event.imageUrl, own: !!result.own?.imageFileId };
+    },
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -38,6 +47,7 @@ export default () => {
             return;
           }
           setStored(result.own);
+          image.setShown({ url: result.event.imageUrl, own: !!result.own?.imageFileId });
           const v = eventValues(result.own);
           // The app has no end day: one the same as the start is no end day.
           setValues({ ...v, endDay: v.endDay === v.startDay ? "" : v.endDay });
@@ -90,6 +100,8 @@ export default () => {
         navigate(back);
       } else {
         const id = await Meteor.callAsync("events.create", eventFields(values));
+        // The event exists even if its image fails: on to it, where the image can be tried again.
+        await image.uploadPending(id).catch((err) => console.error("Image upload failed:", err));
         navigate(`/events/${id}`);
       }
     } catch (err) {
@@ -117,6 +129,14 @@ export default () => {
             saving={saving} error={error}
             onChange={(field, value) => setValues((v) => ({ ...v, [field]: value }))}
             onSave={save} onCancel={() => navigate(back)} onDelete={eventId ? remove : undefined}
+            image={(() => {
+              // A new event of an activity shows the activity's image until it has its own.
+              const activityImage = activity?.imageFileId
+                ? `/api/activities/${activity._id}/image?v=${encodeURIComponent(activity.imageFileId)}`
+                : null;
+              const url = image.card.imageUrl || (values.activityId ? activityImage : null);
+              return { ...image.card, imageUrl: url, inherited: !!url && !image.card.own };
+            })()}
           />
         )}
       </MainContent>

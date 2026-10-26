@@ -842,5 +842,12 @@
   "registrationFieldInfoPlaceholderHint": "Shown in the field when signing up, e.g. “Allergies”",
   "registrationFieldCertificateNone": "(None)",
   "detailsHeading": "Details",
-  "activityInterestHeading": "Interest"
+  "activityInterestHeading": "Interest",
+  "formCardImage": "Image",
+  "imageInherited": "The activity's image. Choose one of its own to change it.",
+  "imageNone": "No image yet.",
+  "imageUploading": "Uploading…",
+  "imageReplace": "Change image",
+  "imageChoose": "Choose image",
+  "imageFailed": "The image could not be read or uploaded."
 }

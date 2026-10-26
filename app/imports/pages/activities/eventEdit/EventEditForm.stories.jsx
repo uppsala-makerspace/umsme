@@ -23,3 +23,6 @@ export const OfAnActivity = { args: { isNew: false, values: eventValues(stored) 
 export const NewOfAnActivity = { args: { isNew: true, values: eventValues(null, { activityId: "a1" }) } };
 export const NewFreeStanding = { args: { isNew: true, activity: null, values: { ...eventValues(null), groupId: "g2" } } };
 export const Failed = { args: { isNew: true, values: eventValues(null, { activityId: "a1" }), error: "Give the day and the start time." } };
+const picture = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect width="800" height="400" fill="#c8a26b"/></svg>')}`;
+export const InheritedImage = { args: { isNew: false, values: eventValues(stored), image: { imageUrl: picture, inherited: true, onSelect: fn(), onRemove: fn() } } };
+

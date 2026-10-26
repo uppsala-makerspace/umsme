@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../../../components/Button";
 import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
+import ImageCard from "../components/ImageCard";
 import RegistrationFields from "../components/RegistrationFields";
 import { Field, SelectField, DayField, ClockField, Row, Card } from "../components/fields";
 
@@ -13,7 +14,7 @@ import { Field, SelectField, DayField, ClockField, Row, Card } from "../componen
  * times, status, hosts among the group's active members, and the shared fields.
  */
 const EventEditForm = ({
-  isNew, values, onChange, choices, activity, hostChoices, saving, error, onSave, onCancel, onDelete,
+  isNew, values, onChange, choices, activity, hostChoices, saving, error, onSave, onCancel, onDelete, image,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
@@ -27,6 +28,7 @@ const EventEditForm = ({
     <form onSubmit={(e) => { e.preventDefault(); onSave(); }}>
       <h2 className="text-2xl m-0 mb-4">{t(isNew ? "eventNew" : "eventEdit")}</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
+      {image && <ImageCard kind="event" {...image} />}
       <Card title={t("formCardEvent")}>
         <Row>
           <SelectField id="event-activityId" label={t("eventFieldActivity")} value={values.activityId} onChange={(v) => onChange("activityId", v)}
@@ -91,6 +93,8 @@ const EventEditForm = ({
 };
 
 EventEditForm.propTypes = {
+  // ImageCard's props: imageUrl, inherited, busy, error, onSelect, onRemove.
+  image: PropTypes.object,
   isNew: PropTypes.bool,
   values: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,

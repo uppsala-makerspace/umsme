@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../../../components/Button";
 import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
+import ImageCard from "../components/ImageCard";
 import RegistrationFields from "../components/RegistrationFields";
 import { SelectField, Card } from "../components/fields";
 
@@ -11,7 +12,7 @@ import { SelectField, Card } from "../components/fields";
  * Add or change an activity: its owning group (one the member may create
  * activities for) and the shared fields. Removal only for one without events.
  */
-const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, hasEvents, onSave, onCancel, onDelete }) => {
+const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, hasEvents, onSave, onCancel, onDelete, image }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const [confirming, setConfirming] = useState(false);
@@ -20,6 +21,7 @@ const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, has
     <form onSubmit={(e) => { e.preventDefault(); onSave(); }}>
       <h2 className="text-2xl m-0 mb-4">{t(isNew ? "activityNew" : "activityEdit")}</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
+      {image && <ImageCard kind="activity" {...image} />}
       <Card title={t("formCardOwner")} kind="activity">
         <SelectField id="activity-groupId" label={t("activityFieldGroup")} value={values.groupId} onChange={(v) => onChange("groupId", v)}
           empty={choices.adminish ? t("activityFieldGroupNone") : undefined}
@@ -59,6 +61,8 @@ const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, has
 };
 
 ActivityEditForm.propTypes = {
+  // ImageCard's props: imageUrl, inherited, busy, error, onSelect, onRemove.
+  image: PropTypes.object,
   isNew: PropTypes.bool,
   values: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,

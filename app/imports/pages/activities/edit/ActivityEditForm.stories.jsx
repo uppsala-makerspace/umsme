@@ -23,3 +23,7 @@ export const Existing = { args: { isNew: false, values: activityValues(stored), 
 export const WithEvents = { args: { isNew: false, values: activityValues(stored), hasEvents: true } };
 export const Failed = { args: { isNew: true, values: activityValues(null), error: "An activity needs a Swedish name" } };
 export const DefaultCheckIn = { args: { isNew: false, values: activityValues({ ...stored, registration: "required", maxSeats: 6, checkIn: "default" }) } };
+const picture = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect width="800" height="400" fill="#c8a26b"/></svg>')}`;
+export const WithImage = { args: { isNew: false, values: activityValues(stored), image: { imageUrl: picture, inherited: false, onSelect: fn(), onRemove: fn() } } };
+export const NoImage = { args: { isNew: true, values: activityValues(null, { groupId: "g1" }), image: { imageUrl: null, inherited: false, onSelect: fn(), onRemove: fn() } } };
+

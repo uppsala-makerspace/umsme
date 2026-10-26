@@ -34,8 +34,12 @@ import {
   register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance,
 } from "/imports/common/server/activities/registrations";
 import { hasValidCertificate } from "/imports/common/server/activities/certificates";
-import { createActivity, updateActivity, removeActivity } from "/imports/common/server/activities/activities";
-import { createEvent, updateEvent, removeEvent } from "/imports/common/server/activities/events";
+import {
+  createActivity, updateActivity, removeActivity, setActivityImage, removeActivityImage,
+} from "/imports/common/server/activities/activities";
+import {
+  createEvent, updateEvent, removeEvent, setEventImage, removeEventImage,
+} from "/imports/common/server/activities/events";
 import { findMemberForUser, isActiveMember, inactiveReason } from "./utils";
 
 /**
@@ -584,4 +588,40 @@ Meteor.methods({
     const who = await caller();
     return setInterest(activityId, who.member._id, interested);
   },
+
+  /** Set or replace an activity's image: for those who may change it. */
+  "activities.uploadImage": async (activityId, imageBase64, mimeType) => {
+    check(activityId, String);
+    check(imageBase64, String);
+    check(mimeType, String);
+    const who = await caller();
+    if (!(await accessTo(who.member, (await getActivity(activityId)).groupId, who)).edit) refuse();
+    return setActivityImage(activityId, { imageBase64, mimeType }, { userId: Meteor.userId() });
+  },
+
+  "activities.removeImage": async (activityId) => {
+    check(activityId, String);
+    const who = await caller();
+    if (!(await accessTo(who.member, (await getActivity(activityId)).groupId, who)).edit) refuse();
+    await removeActivityImage(activityId, { userId: Meteor.userId() });
+  },
+
+  /** Set or replace an event's own image: for those who may change the event. */
+  "events.uploadImage": async (eventId, imageBase64, mimeType) => {
+    check(eventId, String);
+    check(imageBase64, String);
+    check(mimeType, String);
+    const who = await caller();
+    if (!(await accessToEvent(who, await getEvent(eventId))).book) refuse();
+    return setEventImage(eventId, { imageBase64, mimeType }, { userId: Meteor.userId() });
+  },
+
+  /** Remove an event's own image: it shows its activity's again, if any. */
+  "events.removeImage": async (eventId) => {
+    check(eventId, String);
+    const who = await caller();
+    if (!(await accessToEvent(who, await getEvent(eventId))).book) refuse();
+    await removeEventImage(eventId, { userId: Meteor.userId() });
+  },
 });
+
