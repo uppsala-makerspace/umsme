@@ -200,5 +200,19 @@ test.describe('Activities', () => {
     await expect(page.getByRole('heading', { name: 'E2E bildkväll' })).toBeVisible();
     await expect(page.locator('main img').first()).toHaveAttribute('src', /\/api\/events\/.+\/image\?v=/);
   });
+
+  test('one who may not create activities makes no free-standing event', async ({ page }) => {
+    // Books events of the function group's open activity, creates no activities.
+    await openAs(page, 'discounted', '/events/new');
+    const activity = page.getByLabel(en.eventFieldActivity);
+    await expect(activity.locator('option', { hasText: en.eventFieldFree })).toHaveCount(0);
+    await expect(activity.locator('option:checked')).not.toHaveText('');
+    await expect(page.getByLabel(en.activityFieldGroup)).toHaveCount(0);
+  });
+
+  test('one who may create activities may make a free-standing event', async ({ page }) => {
+    await openAs(page, 'groupLeader', '/events/new');
+    await expect(page.getByLabel(en.eventFieldActivity).locator('option', { hasText: en.eventFieldFree })).toHaveCount(1);
+  });
 });
 

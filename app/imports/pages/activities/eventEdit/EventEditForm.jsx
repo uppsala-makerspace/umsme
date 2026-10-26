@@ -21,6 +21,8 @@ const EventEditForm = ({
   const [confirming, setConfirming] = useState(false);
   // A free-standing event belongs to a group one may create activities for.
   const groups = choices.groups.filter((g) => g.edit || g._id === values.groupId);
+  // Free-standing only for one who may create activities in some group (or one already so).
+  const mayBeFree = choices.adminish || choices.groups.some((g) => g.edit) || (!isNew && !values.activityId);
   const toggleHost = (id) => onChange("hostMemberIds", values.hostMemberIds.includes(id)
     ? values.hostMemberIds.filter((h) => h !== id)
     : [...values.hostMemberIds, id]);
@@ -32,7 +34,8 @@ const EventEditForm = ({
       <Card title={t("formCardEvent")}>
         <Row>
           <SelectField id="event-activityId" label={t("eventFieldActivity")} value={values.activityId} onChange={(v) => onChange("activityId", v)}
-            empty={t("eventFieldFree")} options={choices.activities.map((a) => ({ value: a._id, label: localized(a.name, lang) }))} />
+            empty={mayBeFree ? t("eventFieldFree") : undefined}
+          options={choices.activities.map((a) => ({ value: a._id, label: localized(a.name, lang) }))} />
           {!values.activityId && (
             <SelectField id="event-groupId" label={t("activityFieldGroup")} value={values.groupId} onChange={(v) => onChange("groupId", v)}
               empty={choices.adminish ? t("activityFieldGroupNone") : undefined}

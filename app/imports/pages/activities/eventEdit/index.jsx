@@ -52,7 +52,9 @@ export default () => {
           // The app has no end day: one the same as the start is no end day.
           setValues({ ...v, endDay: v.endDay === v.startDay ? "" : v.endDay });
         } else {
-          const activityId = params.get("activity") || "";
+          // One who may not make a free-standing event starts from an activity.
+          const mayBeFree = loaded.adminish || loaded.groups.some((g) => g.edit);
+          const activityId = params.get("activity") || (mayBeFree ? "" : loaded.activities[0]?._id || "");
           setValues({
             ...eventValues(null, { activityId }),
             groupId: (activityId || loaded.adminish) ? "" : loaded.groups.find((g) => g.edit)?._id || "",
