@@ -716,7 +716,7 @@
   "eventDeleteConfirm": "Delete the event for good? To call it off, set its status to cancelled.",
   "eventCancelled": "Cancelled",
   "eventConfirmed": "Confirmed",
-  "eventOf": "An event of:",
+  "eventOf": "Belongs to the activity:",
   "eventHosts": "Hosts",
   "eventNoHosts": "No hosts yet.",
   "eventFieldActivity": "Activity",
@@ -840,5 +840,7 @@
   "formCardEvent": "The event",
   "registrationFieldCertificateHint": "Applies when signing up",
   "registrationFieldInfoPlaceholderHint": "Shown in the field when signing up, e.g. “Allergies”",
-  "registrationFieldCertificateNone": "(None)"
+  "registrationFieldCertificateNone": "(None)",
+  "detailsHeading": "Details",
+  "activityInterestHeading": "Interest"
 }

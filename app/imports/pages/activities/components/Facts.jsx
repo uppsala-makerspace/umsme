@@ -4,12 +4,13 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
+import Card from "./Card";
 
 /**
  * What there is to know about an activity or an event, as short lines:
  * group, category, where, how long, the cost, who it is for, and whom to ask.
  */
-const Facts = ({ item, slackTeam, slackChannelIds }) => {
+const Facts = ({ item, kind, slackTeam, slackChannelIds }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const rows = [
@@ -35,19 +36,22 @@ const Facts = ({ item, slackTeam, slackChannelIds }) => {
       <a href={`mailto:${item.contactEmail}`} className="text-brand-green no-underline hover:underline">{item.contactEmail}</a>],
   ].filter(Boolean);
   return (
-    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm mb-6">
-      {rows.map(([label, value]) => (
-        <React.Fragment key={label}>
-          <dt className="text-gray-500">{label}</dt>
-          <dd className="m-0">{value}</dd>
-        </React.Fragment>
-      ))}
-    </dl>
+    <Card title={t("detailsHeading")} kind={kind}>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm m-0">
+        {rows.map(([label, value]) => (
+          <React.Fragment key={label}>
+            <dt className="text-gray-500">{label}</dt>
+            <dd className="m-0">{value}</dd>
+          </React.Fragment>
+        ))}
+      </dl>
+    </Card>
   );
 };
 
 Facts.propTypes = {
   item: PropTypes.object.isRequired,
+  kind: PropTypes.oneOf(["activity", "event"]).isRequired,
   slackTeam: PropTypes.string,
   slackChannelIds: PropTypes.object,
 };

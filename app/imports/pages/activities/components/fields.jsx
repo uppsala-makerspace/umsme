@@ -2,6 +2,7 @@ import React from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import DateField from "../../../components/DateField";
 import TimeField from "../../../components/TimeField";
+import CardBase from "./Card";
 
 /**
  * The form fields of the activity and event forms, labelled, in the app's
@@ -63,24 +64,6 @@ export const CheckField = ({ id, label, checked, onChange }) => (
 
 export const Row = ({ children }) => <div className="flex flex-col sm:flex-row sm:gap-4">{children}</div>;
 
-// The heading bands: light blue on an activity's form, light green on an
-// event's, so the two, alike as they are, are told apart at a glance.
-const BANDS = {
-  activity: "bg-sky-50 border-sky-100 text-sky-800",
-  event: "bg-green-50 border-green-100 text-green-800",
-};
-
-/**
- * A part of a form, as a card with its heading in a coloured band, so a long
- * form reads in parts and the heading stands apart from the bold labels.
- * `kind` is what the form is about: "activity" or "event".
- */
-export const Card = ({ title, kind = "event", children }) => (
-  <section className="mb-4 rounded-lg bg-white border border-gray-200 overflow-hidden">
-    <h3 className={`m-0 px-4 py-2 border-b text-sm font-semibold uppercase tracking-wider ${BANDS[kind]}`}>
-      {title}
-    </h3>
-    <div className="p-4 pb-0">{children}</div>
-  </section>
-);
+/** A part of a form, as a card (see Card): its fields keep their own space below. */
+export const Card = (props) => <CardBase form {...props} />;
 

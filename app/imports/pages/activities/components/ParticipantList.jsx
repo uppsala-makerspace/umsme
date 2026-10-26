@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { StatePill } from "./RegistrationBox";
+import Card from "./Card";
 
 /**
  * The event's participants, for its hosts: who has a seat or queues, and
@@ -12,16 +13,15 @@ const ParticipantList = ({ participants, attendance, busy, onAttended, onClose }
   if (!participants) return null;
   const recording = attendance?.open;
   return (
-    <section className="mb-6">
-      <div className="flex items-center border-b border-gray-200 pb-2 mb-2">
-        <h3 className="text-lg m-0 text-gray-700">{t("participants")}</h3>
-        {recording && (
-          <button type="button" disabled={busy} onClick={onClose}
-            className="ml-auto bg-transparent border-none p-0 text-sm font-semibold text-brand-green cursor-pointer">
-            {t("participantsCloseAttendance")}
-          </button>
-        )}
-      </div>
+    <Card
+      title={t("participants")} kind="event"
+      actions={recording && (
+        <button type="button" disabled={busy} onClick={onClose}
+          className="bg-transparent border-none p-0 text-sm font-semibold text-brand-green cursor-pointer">
+          {t("participantsCloseAttendance")}
+        </button>
+      )}
+    >
       {attendance?.closed && <p className="m-0 mb-2 text-sm text-gray-500">{t("participantsAttendanceClosed")}</p>}
       {participants.length === 0 ? (
         <p className="text-gray-500 m-0">{t("participantsNone")}</p>
@@ -51,7 +51,7 @@ const ParticipantList = ({ participants, attendance, busy, onAttended, onClose }
         </ul>
       )}
       {recording && <p className="m-0 mt-2 text-xs text-gray-500">{t("participantsHint")}</p>}
-    </section>
+    </Card>
   );
 };
 

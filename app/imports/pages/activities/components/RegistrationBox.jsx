@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../../../components/Button";
 import { localized } from "/imports/common/lib/groupRules";
 import { eventWhen } from "./format";
+import Card from "./Card";
 
 const STATE_TONES = {
   approved: "bg-green-100 text-green-800",
@@ -42,11 +43,10 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
   const certificateMissing = !!registration.certificate && !registration.certificate.held;
   const blocked = certificateMissing || registration.member === false;
   return (
-    <section className="mb-6 p-4 rounded-lg bg-white border border-gray-200">
-      <div className="flex items-center gap-2 mb-2">
-        <h3 className="text-lg m-0">{t(registration.required ? "registrationRequired" : "registrationOptional")}</h3>
-        {mine && <span className="ml-auto"><StatePill state={mine.state} /></span>}
-      </div>
+    <Card
+      title={t(registration.required ? "registrationRequired" : "registrationOptional")} kind="event"
+      actions={mine && <StatePill state={mine.state} />}
+    >
       <p className="m-0 mb-3 text-sm text-gray-600">
         {seats === null
           ? t("registrationNoLimit")
@@ -111,7 +111,7 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
           {t(mine.state === "queued" ? "registrationLeaveQueue" : "registrationWithdraw")}
         </button>
       )}
-    </section>
+    </Card>
   );
 };
 

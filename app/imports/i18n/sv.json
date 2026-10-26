@@ -715,7 +715,7 @@
   "eventDeleteConfirm": "Ta bort tillfället för gott? Vill du bara ställa in det, ändra status till inställt.",
   "eventCancelled": "Inställt",
   "eventConfirmed": "Bekräftat",
-  "eventOf": "Ett tillfälle av:",
+  "eventOf": "Hör till aktivitet:",
   "eventHosts": "Värdar",
   "eventNoHosts": "Inga värdar ännu.",
   "eventFieldActivity": "Aktivitet",
@@ -839,5 +839,7 @@
   "formCardEvent": "Tillfället",
   "registrationFieldCertificateHint": "Gäller när man anmäler sig",
   "registrationFieldInfoPlaceholderHint": "Visas i fältet när man anmäler sig, t.ex. ”Allergier”",
-  "registrationFieldCertificateNone": "(Inget)"
+  "registrationFieldCertificateNone": "(Inget)",
+  "detailsHeading": "Uppgifter",
+  "activityInterestHeading": "Intresse"
 }

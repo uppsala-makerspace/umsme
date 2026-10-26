@@ -7,6 +7,7 @@ import Loader from "../../../components/Loader";
 import Markdown from "../../../components/Markdown";
 import { localized } from "/imports/common/lib/groupRules";
 import Facts from "../components/Facts";
+import Card from "../components/Card";
 import RegistrationBox from "../components/RegistrationBox";
 import ParticipantList from "../components/ParticipantList";
 import { eventWhen } from "../components/format";
@@ -64,28 +65,23 @@ const EventDetail = ({
       {localized(event.description, lang) && (
         <Markdown className="text-gray-700 mb-4" startLevel={3}>{localized(event.description, lang)}</Markdown>
       )}
-      <Facts item={event} slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
-      <section className="mb-6">
-        <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">{t("eventHosts")}</h3>
+      <Facts item={event} kind="event" slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
+      <Card title={t("eventHosts")} kind="event">
         {hosts.length === 0
-          ? <p className="text-gray-500">{t("eventNoHosts")}</p>
+          ? <p className="text-gray-500 m-0">{t("eventNoHosts")}</p>
           : <p className="m-0">{hosts.map((h) => h.name).join(", ")}</p>}
-      </section>
+      </Card>
       <ParticipantList
         participants={data.participants} attendance={data.attendance} busy={busy}
         onAttended={onAttended} onClose={onCloseAttendance}
       />
       {event.activityId && activityName && (
-        <Link
-          to={`/activities/${event.activityId}`}
-          className="flex justify-between items-center p-3 mb-6 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
-        >
-          <div className="flex-1 min-w-0">
-            <span className="block text-xs text-gray-500">{t("eventOf")}</span>
-            <span className="block font-semibold leading-snug">{localized(activityName, lang)}</span>
-          </div>
-          <span className="text-gray-400 text-xl ml-2">&rarr;</span>
-        </Link>
+        <Card title={t("eventOf")} kind="activity">
+          <Link to={`/activities/${event.activityId}`} className="flex justify-between items-center no-underline text-inherit">
+            <span className="font-semibold leading-snug">{localized(activityName, lang)}</span>
+            <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+          </Link>
+        </Card>
       )}
     </MainContent>
   );

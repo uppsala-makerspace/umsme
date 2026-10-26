@@ -8,6 +8,7 @@ import Markdown from "../../../components/Markdown";
 import { localized } from "/imports/common/lib/groupRules";
 import EventRow from "../components/EventRow";
 import Facts from "../components/Facts";
+import Card from "../components/Card";
 
 /** One activity: what it is, and the times it happens next. */
 const ActivityDetail = ({ loading, error, data, slackTeam, slackChannelIds, busy, onInterest }) => {
@@ -46,37 +47,37 @@ const ActivityDetail = ({ loading, error, data, slackTeam, slackChannelIds, busy
       {localized(activity.description, lang) && (
         <Markdown className="text-gray-700 mb-4" startLevel={3}>{localized(activity.description, lang)}</Markdown>
       )}
-      <Facts item={activity} slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
-      {onInterest && (
-        <div className="flex items-center gap-3 mb-6 p-3 rounded-lg bg-white border border-gray-200">
-          <p className="m-0 flex-1 text-sm">
-            {data.interested ? t("activityInterested") : t("activityInterestQuestion")}
-            {data.interestCount > 0 && <span className="block text-xs text-gray-500">{t("activityInterestCount", { count: data.interestCount })}</span>}
-          </p>
-          <button type="button" disabled={busy} aria-pressed={!!data.interested} onClick={() => onInterest(!data.interested)}
-            className={`text-sm rounded-full py-1 px-3 border cursor-pointer ${data.interested ? "bg-brand-green text-white border-brand-green" : "bg-white text-gray-700 border-gray-300"}`}>
-            {t(data.interested ? "activityNotInterested" : "activityInterest")}
-          </button>
-        </div>
-      )}
-
-      <section className="mb-6">
-        <div className="flex items-center border-b border-gray-200 pb-2 mb-2">
-          <h3 className="text-lg m-0 text-gray-700">{t("activityUpcomingEvents")}</h3>
-          {canBook && (
-            <Link to={`/events/new?activity=${activity._id}`} className="ml-auto text-sm font-semibold text-brand-green no-underline hover:underline">
-              + {t("eventAdd")}
-            </Link>
-          )}
-        </div>
+      <Facts item={activity} kind="activity" slackTeam={slackTeam} slackChannelIds={slackChannelIds} />
+      <Card
+        title={t("activityUpcomingEvents")} kind="activity"
+        actions={canBook && (
+          <Link to={`/events/new?activity=${activity._id}`} className="text-sm font-semibold text-brand-green no-underline hover:underline">
+            + {t("eventAdd")}
+          </Link>
+        )}
+      >
         {events.length === 0 ? (
-          <p className="text-gray-500">{t("activityNoUpcomingEvents")}</p>
+          <p className="text-gray-500 m-0">{t("activityNoUpcomingEvents")}</p>
         ) : (
           <ul className="list-none p-0 m-0">
             {events.map((event) => <EventRow key={event._id} event={event} />)}
           </ul>
         )}
-      </section>
+      </Card>
+      {onInterest && (
+        <Card title={t("activityInterestHeading")} kind="activity">
+          <div className="flex items-center gap-3">
+            <p className="m-0 flex-1 text-sm">
+              {data.interested ? t("activityInterested") : t("activityInterestQuestion")}
+              {data.interestCount > 0 && <span className="block text-xs text-gray-500">{t("activityInterestCount", { count: data.interestCount })}</span>}
+            </p>
+            <button type="button" disabled={busy} aria-pressed={!!data.interested} onClick={() => onInterest(!data.interested)}
+              className={`text-sm rounded-full py-1 px-3 border cursor-pointer ${data.interested ? "bg-brand-green text-white border-brand-green" : "bg-white text-gray-700 border-gray-300"}`}>
+              {t(data.interested ? "activityNotInterested" : "activityInterest")}
+            </button>
+          </div>
+        </Card>
+      )}
     </MainContent>
   );
 };
