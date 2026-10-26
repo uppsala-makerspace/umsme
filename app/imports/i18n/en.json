@@ -852,5 +852,5 @@
   "imageFailed": "The image could not be read or uploaded.",
   "participantsNoRegistration": "The event takes no registrations, so there is no list of participants.",
   "workshopShowActivities": "Show activities ({{count}})",
-  "workshopHideActivities": "Hide activities"
+  "workshopHideActivities": "Hide activities ({{count}})"
 }

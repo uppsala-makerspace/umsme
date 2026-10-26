@@ -97,7 +97,7 @@ test.describe('Activities', () => {
     // With the number of its planned events: other tests may add some.
     const activity = page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) });
     await expect(activity).toBeVisible();
-    await page.getByRole('button', { name: en.workshopHideActivities }).click();
+    await page.getByRole('button', { name: /^Hide activities \(\d+\)$/ }).click();
     await expect(activity).toHaveCount(0);
     await page.getByRole('button', { name: /^Show activities/ }).click();
     await activity.click();
