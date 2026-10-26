@@ -86,12 +86,21 @@ test.describe('Activities', () => {
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
   });
 
-  test('the workshop and the group link to their activities', async ({ page }) => {
+  test('the workshop shows its calendar and unfolds its activities; the group links to them', async ({ page }) => {
     await openAs(page, 'member', '/workshops');
     await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
+    // Its calendar: the events to come, its activities folded away.
+    await expect(page.getByRole('heading', { name: en.navCalendar })).toBeVisible();
+    await expect(page.getByRole('link', { name: new RegExp(`${WHEEL}`) }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) })).toHaveCount(0);
+    await page.getByRole('button', { name: /^Show all activities/ }).click();
     // With the number of its planned events: other tests may add some.
-    await expect(page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) })).toBeVisible();
-    await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
+    const activity = page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) });
+    await expect(activity).toBeVisible();
+    await page.getByRole('button', { name: en.workshopHideActivities }).click();
+    await expect(activity).toHaveCount(0);
+    await page.getByRole('button', { name: /^Show all activities/ }).click();
+    await activity.click();
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await page.getByRole('link', { name: CERAMICS, exact: true }).click();
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();

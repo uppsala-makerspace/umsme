@@ -70,6 +70,22 @@ export const activityLinks = async (selector) => {
   return links;
 };
 
+/**
+ * The events to come shown at a workshop or area of interest, soonest first:
+ * its own, and those of its activities that do not say otherwise.
+ */
+export const upcomingEventsAt = async (workshopId, memberId, limit = 10) => {
+  const activityIds = (await Activities.find({ workshopId }, { fields: { _id: 1 } }).fetchAsync()).map((a) => a._id);
+  const events = await Events.find(
+    {
+      end: { $gte: new Date() },
+      $or: [{ workshopId }, { activityId: { $in: activityIds }, workshopId: { $exists: false } }],
+    },
+    { sort: { start: 1 }, limit },
+  ).fetchAsync();
+  return eventViews(events, memberId);
+};
+
 const requireMember = async () => {
   const member = await findMemberForUser();
   if (!member) throw new Meteor.Error("not-found", "Member not found");

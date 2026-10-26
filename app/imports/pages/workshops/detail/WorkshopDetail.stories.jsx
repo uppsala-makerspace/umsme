@@ -28,6 +28,10 @@ const sampleData = {
   relatedGroups: [
     { _id: "grp4", name: { sv: "IT-gruppen", en: "IT group" }, type: "function", memberCount: 7, myState: null },
   ],
+  upcomingEvents: [
+    { _id: "e1", name: { sv: "Introduktion träverkstaden" }, start: new Date(2026, 10, 19, 18), end: new Date(2026, 10, 19, 20),
+      status: "confirmed", registration: "required", seatsLeft: 2, spaceName: { sv: "Träverkstaden" } },
+  ],
   activities: [
     { _id: "a1", name: { sv: "Introduktion träverkstaden" }, plannedEvents: 3 },
     { _id: "a2", name: { sv: "Svarvkurs" }, plannedEvents: 0 },

@@ -18,7 +18,7 @@ import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
 import AreaOfInterestTag from "../../../components/AreaOfInterestTag";
-import ActivityLinks from "../../activities/components/ActivityLinks";
+import WorkshopCalendar from "../../activities/components/WorkshopCalendar";
 
 // One group row in the "get involved" / "related groups" lists, in the same
 // style as the groups list page. The responsible steering group is rendered
@@ -90,6 +90,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     relatedGroups = [],
     certificates,
     activities = [],
+    upcomingEvents = [],
     mapView,
     canEdit,
     canSeeRevenue,
@@ -163,7 +164,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
         )}
       </SpaceMapSection>
 
-      <ActivityLinks activities={activities} />
+      <WorkshopCalendar events={upcomingEvents} activities={activities} />
 
       {certificates.length > 0 && (
         <section className="mb-6">
