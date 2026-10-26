@@ -108,13 +108,21 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   incheckningen stänger (`checkInLastCall`, `sendCheckInLastCalls`, malltypen
   `activityCheckInLastCall`), aldrig inom en timme från den första. Byggt.
 
+- **`public.appUrl`** i produktion är `https://app.uppsalamakerspace.se`
+  (står i exempelinställningarna och `docs/configuration.md`).
+- **Tidszon:** alla tider aktiviteterna räknar fram på servern
+  (incheckningsfönster, tider i mail, vanliga tider ur ett event, heldags-
+  händelser från kalendern, dagens tillfällen) räknas nu i Europe/Stockholm
+  med `zonedDate`/`zonedParts` i `common/lib/days.js`, oavsett serverns
+  tidszon och med sommar- och vintertid. Admins tester går igenom även med
+  `TZ=UTC`.
+- **Google-kalendern i appen:** sidan är borta, `/calendar` leder till
+  `/activities`. "Lägg till i kalender" (en .ics-fil) finns nu på
+  tillfällets sida. Appen behöver inte längre `public.googleCalendar`.
+
 ## Öppna frågor
 
-1. **`public.appUrl`** i produktion: `https://app.uppsalamakerspace.se`?
-2. **Tidszon:** incheckningsfönstret (t.ex. 03:00–15:00 dagen före) räknas i
-   serverns tidszon. Går produktionsservern på svensk tid?
-3. **Google-kalendern i appen:** ligger kvar som "Google-kalender" i
-   hamburgermenyn. När ska den bort?
+Inga just nu.
 
 ## Kända saker att veta
 
