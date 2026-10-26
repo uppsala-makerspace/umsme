@@ -696,7 +696,7 @@
   "activityFieldSpace": "Space",
   "activityFieldSlack": "Slack channel",
   "activityFieldContact": "Contact email",
-  "activityFieldDuration": "Duration (min.)",
+  "activityFieldDuration": "Duration (minutes)",
   "activityFieldCost": "Cost (kr)",
   "activityFieldMembersOnly": "For members only",
   "activityFieldPublished": "Shown on the website",

@@ -44,9 +44,9 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
         <TextField label={t("activityFieldNameEn")} {...text("nameEn", "name", "en")} />
         <TextField multiline label={t("activityFieldDescriptionSv")} {...text("descriptionSv", "description", "sv")} />
         <TextField multiline label={t("activityFieldDescriptionEn")} {...text("descriptionEn", "description", "en")} />
+        <SelectField id="activity-categoryId" label={t("activityFieldCategory")} value={values.categoryId} onChange={set("categoryId")}
+          empty={none("categoryId", choices.categories)} options={options(choices.categories)} />
         <Row>
-          <SelectField id="activity-categoryId" label={t("activityFieldCategory")} value={values.categoryId} onChange={set("categoryId")}
-            empty={none("categoryId", choices.categories)} options={options(choices.categories)} />
           <TextField label={t("activityFieldDuration")} inputMode="numeric" {...text("durationMinutes", "durationMinutes")} />
           <TextField label={t("activityFieldCost")} inputMode="decimal" {...text("cost", "cost")} />
         </Row>
