@@ -7,7 +7,11 @@ import { recordChange } from '/imports/common/server/auditLog';
 import {
   HOLDING, PENDING, resolveEvent, registrationOpen, statusFor, seatsLeft,
   mayWithdraw, mayTakeSeat, mayCheckIn, checkInApplies, checkInWindow, checkInClosed, lastCallDue, takesRegistrations, registerAgainAt,
+  grantsOnAttendance,
 } from '/imports/common/lib/activityRules';
+import { Certificates } from '/imports/common/collections/certificates';
+import { canCertify } from '/imports/common/server/certificates/canCertify';
+import { grantOnAttendance } from '/imports/common/server/certificates/certificates';
 import { hasValidCertificate } from './certificates';
 import * as notify from './notify';
 
@@ -221,8 +225,15 @@ export const setInterest = async (activityId, memberId, interested) => {
 /**
  * A host marks who came, or takes it back. One marked as not having come is
  * back where they were (with a seat); a no-show can be corrected to came.
+ *
+ * An event that gives its certificate on attendance gives it to one who came
+ * when the host recording it (`certifierMemberId`) may certify it. Taking the
+ * attendance back leaves the certificate.
+ *
+ * @returns {Promise<{ certificate: 'granted'|'missing-prerequisites'|'not-certifier'|null }>}
+ *   what became of the certificate; null when the event gives none on attendance
  */
-export const markAttended = async (eventId, memberId, attended, { userId, now = new Date() }) => {
+export const markAttended = async (eventId, memberId, attended, { userId, certifierMemberId = null, now = new Date() }) => {
   const { resolved } = await resolvedEvent(eventId);
   if (resolved.status === 'cancelled') throw new Meteor.Error('closed', 'The event was called off');
   if (now < resolved.start) throw new Meteor.Error('closed', 'Attendance is recorded from the start');
@@ -234,12 +245,22 @@ export const markAttended = async (eventId, memberId, attended, { userId, now = 
     // A no-show held no seat in the count any more; coming takes it back.
     if (registration.state === 'noShow') await Events.updateAsync(eventId, { $inc: { seatsTaken: 1 } });
     await setState(registration, 'attended', { userId, now });
-  } else {
-    if (registration.state !== 'attended') return;
+    return { certificate: await certificateForAttending(resolved, memberId, { userId, certifierMemberId, now }) };
+  }
+  if (registration.state === 'attended') {
     const state = resolved.attendanceClosedAt ? 'noShow' : 'approved';
     if (state === 'noShow') await releaseSeats(eventId);
     await setState(registration, state, { userId, now });
   }
+  return { certificate: null };
+};
+
+const certificateForAttending = async (resolved, memberId, { userId, certifierMemberId, now }) => {
+  if (!grantsOnAttendance(resolved)) return null;
+  const certificate = await Certificates.findOneAsync(resolved.targetCertificateId);
+  if (!certificate) return null;
+  if (!(await canCertify(certifierMemberId, certificate))) return 'not-certifier';
+  return grantOnAttendance({ certificateId: certificate._id, memberId, certifierId: certifierMemberId, now }, { userId });
 };
 
 /**

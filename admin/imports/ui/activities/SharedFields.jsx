@@ -12,6 +12,8 @@ export const native = { select: { native: true }, inputLabel: { shrink: true } }
 
 const yesNo = (value) => (value ? 'yes' : 'no');
 
+const GRANT_LABELS = { onAttendance: 'On attendance', manual: 'By a host' };
+
 /**
  * The fields an activity and an event share. On an event of an activity
  * (`inherited` is the activity) an empty field is the activity's: its value
@@ -106,6 +108,22 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
           <option value="">{none('requiredCertificateId', certificateOptions, '(None)')}</option>
           {certificateOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </TextField>
+        <TextField label="Certificate it gives" select fullWidth slotProps={native} sx={{ mb: 2 }} value={values.targetCertificateId}
+          onChange={(e) => onChange('targetCertificateId', e.target.value)} helperText="What those who take part may come away with.">
+          <option value="">{none('targetCertificateId', certificateOptions, '(None)')}</option>
+          {certificateOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </TextField>
+        {(values.targetCertificateId || inherited?.targetCertificateId) && (
+          <TextField label="How it is given" select fullWidth slotProps={native} sx={{ mb: 2 }}
+            value={event ? values.certificateGrant : values.certificateGrant || 'manual'}
+            onChange={(e) => onChange('certificateGrant', e.target.value)}
+            helperText="On attendance: when a host who may certify it records that one came. By a host: in the certificate's own flow, when one asks.">
+            {event && (
+              <option value="">{inherited?.certificateGrant ? `(As the activity: ${GRANT_LABELS[inherited.certificateGrant]})` : `(${GRANT_LABELS.manual})`}</option>
+            )}
+            {Object.entries(GRANT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </TextField>
+        )}
         <Box sx={{ mb: 2 }}>{flag('published', 'Shown on the website')}</Box>
       </FormCard>
     </>

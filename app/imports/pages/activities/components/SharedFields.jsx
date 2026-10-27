@@ -80,6 +80,19 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
         <SelectField id="activity-requiredCertificateId" label={t("registrationFieldCertificate")} hint={t("registrationFieldCertificateHint")}
           value={values.requiredCertificateId} onChange={set("requiredCertificateId")}
           empty={none("requiredCertificateId", certificates, "registrationFieldCertificateNone")} options={options(certificates)} />
+        <SelectField id="activity-targetCertificateId" label={t("activityFieldTargetCertificate")} hint={t("activityFieldTargetCertificateHint")}
+          value={values.targetCertificateId} onChange={set("targetCertificateId")}
+          empty={none("targetCertificateId", certificates, "registrationFieldCertificateNone")} options={options(certificates)} />
+        {(values.targetCertificateId || inherited?.targetCertificateId) && (
+          <SelectField id="activity-certificateGrant" label={t("activityFieldCertificateGrant")} hint={t("activityFieldCertificateGrantHint")}
+            value={event ? values.certificateGrant : values.certificateGrant || "manual"} onChange={set("certificateGrant")}
+            empty={event
+              ? (inherited?.certificateGrant
+                ? t("activityFieldAsActivity", { value: t(`activityGrant_${inherited.certificateGrant}`) })
+                : t("activityGrant_manual"))
+              : undefined}
+            options={["onAttendance", "manual"].map((value) => ({ value, label: t(`activityGrant_${value}`) }))} />
+        )}
         {flag("published", t("activityFieldPublished"))}
       </Card>
     </>

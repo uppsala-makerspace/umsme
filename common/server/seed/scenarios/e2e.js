@@ -200,6 +200,26 @@ export const buildE2e = async ({ people, now }) => {
   };
   wheelCourse._id = await makeActivity(wheelCourse);
   await makeEvent({ activity: wheelCourse, start: at(16, 18) });
+  // Certificates the events give (stage 5): a glazing course giving its own
+  // certificate on attendance, started and hosted by its certifier
+  // (steering), and a talk where a host gives it by hand, one there having
+  // asked for it.
+  const glazing = await certificate({ name: { sv: 'E2E glasering', en: 'E2E glazing' }, certifiers: [members.steering._id], defaultValidityDays: 365 });
+  const glazingCourse = {
+    name: { sv: 'E2E glaseringskurs', en: 'E2E glazing course' }, groupId: ceramicsGroup, durationMinutes: 120,
+    registration: 'required', targetCertificateId: glazing, certificateGrant: 'onAttendance',
+  };
+  glazingCourse._id = await makeActivity(glazingCourse);
+  const glazingNow = await makeEvent({
+    activity: glazingCourse, start: started, end: new Date(now.getTime() + 3600000), hostMemberIds: [members.steering._id],
+  });
+  await makeRegistration(glazingNow, members.discounted._id, { at: days(-3) });
+  const glazingTalk = await makeEvent({
+    ...registered, name: { sv: 'E2E glaseringssamtal', en: 'E2E glazing talk' }, start: started, end: new Date(now.getTime() + 3600000),
+    hostMemberIds: [members.steering._id], targetCertificateId: glazing, certificateGrant: 'manual',
+  });
+  await makeRegistration(glazingTalk, members.quarterly._id, { at: days(-3) });
+  await Attestations.insertAsync({ certificateId: glazing, memberId: members.quarterly._id, startDate: days(-1), attempt: 1 });
   for (const purpose of ['edit', 'links', 'delete', 'mandatory', 'grant']) {
     await certificate({ name: { sv: `E2E ${purpose} certificate` } });
   }

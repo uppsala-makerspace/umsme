@@ -8,7 +8,8 @@ import Card from "./Card";
 
 /**
  * What there is to know about an activity or an event, as short lines:
- * group, category, where, how long, the cost, who it is for, and whom to ask.
+ * group, category, where, how long, the cost, who it is for, the certificate
+ * it asks for and the one it gives, and whom to ask.
  */
 const Facts = ({ item, kind, slackTeam, slackChannelIds }) => {
   const { t, i18n } = useTranslation();
@@ -28,6 +29,13 @@ const Facts = ({ item, kind, slackTeam, slackChannelIds }) => {
       <Link to={`/certificates/${item.requiredCertificate._id}`} className="text-brand-green no-underline hover:underline">
         {localized(item.requiredCertificate.name, lang) || t("activityFactCertificate")}
       </Link>],
+    item.targetCertificate && [t("activityFactTargetCertificate"),
+      <>
+        <Link to={`/certificates/${item.targetCertificate._id}`} className="text-brand-green no-underline hover:underline">
+          {localized(item.targetCertificate.name, lang) || t("activityFactTargetCertificate")}
+        </Link>
+        {" · "}{t(`activityGrantFact_${item.targetCertificate.grant}`)}
+      </>],
     item.slackChannel && [t("activityFieldSlack"),
       <a href={getSlackChannelUrl(item.slackChannel, slackTeam, slackChannelIds)} className="text-brand-green no-underline hover:underline">
         #{item.slackChannel.replace(/^#/, "")}

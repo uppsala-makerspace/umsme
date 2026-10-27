@@ -53,6 +53,36 @@ export const RecordingAttendance = withRegistration({ open: false }, {
   ],
   attendance: { open: true, closed: false },
 });
+// An event giving its certificate on attendance, its host certifying it: one
+// came and got it, one has asked for it, and a notice of the last one marked.
+const glazing = { _id: "c9", name: { sv: "Glasering" }, grant: "onAttendance" };
+export const GivesCertificate = {
+  args: {
+    ...handlers,
+    attendanceNotice: "Alice Andersson fick intyget.",
+    data: {
+      event: { ...events[0], targetCertificate: glazing }, hosts: hosts.slice(0, 1), activityName: intro.name, canEdit: false,
+      registration: registration({ open: false }),
+      participants: [
+        { memberId: "m1", name: "Alice Andersson", state: "attended", info: "", certificate: "held" },
+        { memberId: "m2", name: "Bertil Berg", state: "approved", info: "", certificate: "pending", requestId: "a1" },
+        { memberId: "m3", name: "Cecilia Ceder", state: "approved", info: "", certificate: null },
+      ],
+      attendance: { open: true, closed: false },
+      certificateGrant: { onAttendance: true, mayCertify: true, noCertifierHost: false },
+    },
+  },
+};
+// The same, but none of its hosts may certify it.
+export const NoCertifierHost = {
+  args: {
+    ...handlers,
+    data: {
+      ...GivesCertificate.args.data, attendance: { open: true, closed: false },
+      certificateGrant: { onAttendance: true, mayCertify: false, noCertifierHost: true },
+    },
+  },
+};
 export const AsHostWithoutRegistration = {
   args: { ...handlers, data: { event: events[2], hosts, activityName: null, canEdit: true, registration: null, participants: [], attendance: { open: false, closed: false } } },
 };

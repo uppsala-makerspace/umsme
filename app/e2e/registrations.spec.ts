@@ -63,6 +63,25 @@ test.describe('Registrations', () => {
     await expect(row(stayed)).toContainText(en.registrationState_noShow);
   });
 
+  test('a host who may certify gives the certificate by recording who came', async ({ page }) => {
+    // E2E glazing course gives E2E glazing on attendance; steering hosts it and certifies glazing.
+    await openEvent(page, 'steering', 'E2E glazing course');
+    await expect(page.getByRole('definition').filter({ hasText: 'E2E glazing' })).toContainText(en.activityGrantFact_onAttendance);
+    const came = testUsers.discounted.name as string;
+    const row = page.getByRole('listitem').filter({ hasText: came });
+    await row.getByRole('button', { name: en.participantsCame }).click();
+    await expect(page.getByRole('status')).toHaveText(en.participantsCertificateGranted.replace('{{name}}', came));
+    await expect(row).toContainText(en.participantsHoldsCertificate);
+  });
+
+  test('a host who may certify sees who has asked for the certificate, and goes to the request', async ({ page }) => {
+    await openEvent(page, 'steering', 'E2E glazing talk');
+    const asked = testUsers.quarterly.name as string;
+    await page.getByRole('listitem').filter({ hasText: asked }).getByRole('link', { name: new RegExp(en.participantsAskedForCertificate) }).click();
+    await expect(page).toHaveURL(/\/certifier-requests\//);
+    await expect(page.getByText(asked).first()).toBeVisible();
+  });
+
   test('a member who is no host sees no participants', async ({ page }) => {
     await openEvent(page, 'member', 'E2E attendance');
     await expect(page.getByRole('heading', { name: en.participants })).toHaveCount(0);

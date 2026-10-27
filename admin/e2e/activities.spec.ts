@@ -66,6 +66,12 @@ test.describe('Activities', () => {
     await expect(page.getByText('On the website', { exact: true })).toBeVisible();
   });
 
+  test('shows the certificate an activity gives, and how', async ({ page }) => {
+    await openActivity(page, 'E2E glaseringskurs');
+    await expect(page.getByRole('combobox', { name: 'Certificate it gives' }).locator('option:checked')).toHaveText('E2E glasering');
+    await expect(page.getByRole('combobox', { name: 'How it is given' }).locator('option:checked')).toHaveText('On attendance');
+  });
+
   test('lists its events, the tab in the URL, and is not deleted while it has them', async ({ page }) => {
     await openActivity(page, WHEEL);
     await expect(page.getByText(/can not be deleted while it has events/i)).toBeVisible();

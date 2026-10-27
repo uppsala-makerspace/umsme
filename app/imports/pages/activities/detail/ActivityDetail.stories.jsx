@@ -12,3 +12,6 @@ export const Interested = { args: { onInterest: () => {}, data: { activity: intr
 export const AsAMember = { args: { data: { activity: intro, events: [events[0]], canEdit: false, canBook: false } } };
 export const NoEvents = { args: { data: { activity: intro, events: [], canEdit: false, canBook: true } } };
 export const Failed = { args: { data: null, error: "Activity not found" } };
+export const GivesCertificate = {
+  args: { onInterest: () => {}, data: { activity: { ...intro, targetCertificate: { _id: "c9", name: { sv: "Glasering" }, grant: "manual" } }, events: [], canEdit: false, canBook: false } },
+};

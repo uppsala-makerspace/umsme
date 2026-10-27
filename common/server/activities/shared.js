@@ -4,7 +4,7 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { ActivityCategories } from '/imports/common/collections/activityCategories';
 import { Certificates } from '/imports/common/collections/certificates';
-import { REGISTRATIONS, CHECK_INS } from '/imports/common/lib/activityRules';
+import { REGISTRATIONS, CHECK_INS, CERTIFICATE_GRANTS } from '/imports/common/lib/activityRules';
 import { parseClock } from '/imports/common/lib/days';
 import { setEntityImage, clearEntityImage } from '/imports/common/server/entityImage';
 import { recordChange } from '/imports/common/server/auditLog';
@@ -53,8 +53,24 @@ export const sharedChanges = async (fields, { inherit }) => {
     membersOnly: flag(fields.membersOnly),
     published: flag(fields.published),
     ...(await registrationChanges(fields, { inherit, flag })),
+    ...(await targetChanges(fields, { inherit })),
   });
   return changes;
+};
+
+/**
+ * The certificate it gives, and how. On an activity the way goes with the
+ * certificate, given by hand unless said; on an event either may be left to
+ * the activity.
+ */
+const targetChanges = async (fields, { inherit }) => {
+  const targetCertificateId = await exists(Certificates, text(fields.targetCertificateId), 'certificate');
+  const grant = text(fields.certificateGrant) || null;
+  if (grant && !CERTIFICATE_GRANTS.includes(grant)) throw new Meteor.Error('bad-value', `Unknown way to give the certificate "${grant}"`);
+  return {
+    targetCertificateId,
+    certificateGrant: inherit ? grant : (targetCertificateId ? grant || 'manual' : null),
+  };
 };
 
 /**

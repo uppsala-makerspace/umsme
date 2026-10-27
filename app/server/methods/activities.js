@@ -10,6 +10,9 @@ import { Workshops } from "/imports/common/collections/workshops";
 import { Spaces } from "/imports/common/collections/spaces";
 import { Members } from "/imports/common/collections/members";
 import { Certificates } from "/imports/common/collections/certificates";
+import { Attestations } from "/imports/common/collections/attestations";
+import { metCertificateIds } from "/imports/common/lib/rules";
+import { canCertify } from "/imports/common/server/certificates/canCertify";
 import { EventRegistrations } from "/imports/common/collections/eventRegistrations";
 import { ActivityInterests } from "/imports/common/collections/activityInterests";
 import { activityImageUrlFor, eventImageUrlFor } from "/imports/common/server/workshopImage";
@@ -29,6 +32,7 @@ import {
   checkInApplies,
   checkInWindow,
   attendanceOpen,
+  grantsOnAttendance,
   PENDING,
 } from "/imports/common/lib/activityRules";
 import {
@@ -171,7 +175,7 @@ const lookups = async (docs) => ({
   categories: await names(ActivityCategories, docs.map((d) => d.categoryId)),
   workshops: await names(Workshops, docs.map((d) => d.workshopId)),
   spaces: await names(Spaces, docs.map((d) => d.spaceId)),
-  certificates: await names(Certificates, docs.map((d) => d.requiredCertificateId)),
+  certificates: await names(Certificates, docs.flatMap((d) => [d.requiredCertificateId, d.targetCertificateId])),
 });
 
 const described = (doc, lookup) => ({
@@ -192,6 +196,10 @@ const described = (doc, lookup) => ({
   // Only when one signs up: the certificate one must hold to.
   requiredCertificate: (doc.registration || "none") !== "none" && doc.requiredCertificateId
     ? { _id: doc.requiredCertificateId, name: lookup.certificates.get(doc.requiredCertificateId) || null }
+    : null,
+  // The certificate it gives, and how: on attendance, or by a host.
+  targetCertificate: doc.targetCertificateId
+    ? { _id: doc.targetCertificateId, name: lookup.certificates.get(doc.targetCertificateId) || null, grant: doc.certificateGrant || "manual" }
     : null,
 });
 
@@ -283,15 +291,52 @@ const registrationView = async (event, activity, who, now = new Date()) => {
 /** Whether the member hosts the event, or may record its attendance as board/admin. */
 const mayRecordAttendance = (event, who) => who.adminish || (event.hostMemberIds || []).includes(who.member._id);
 
-/** The event's participants for its hosts: names and states, those who withdrew left out. */
-const participantsView = async (event) => {
+/**
+ * The event's participants for its hosts: names and states, those who withdrew
+ * left out. With a certificate it gives, where each stands with it: `held`, or
+ * `pending` with the request's id.
+ */
+const participantsView = async (event, resolved) => {
   const registrations = await EventRegistrations.find(
     { eventId: event._id, state: { $nin: ["withdrawn", "cancelled"] } },
     { sort: { registeredAt: 1 } },
   ).fetchAsync();
-  const members = await Members.find({ _id: { $in: registrations.map((r) => r.memberId) } }, { fields: { name: 1 } }).fetchAsync();
+  const memberIds = registrations.map((r) => r.memberId);
+  const members = await Members.find({ _id: { $in: memberIds } }, { fields: { name: 1 } }).fetchAsync();
   const names = new Map(members.map((m) => [m._id, m.name]));
-  return registrations.map((r) => ({ memberId: r.memberId, name: names.get(r.memberId) || "", state: r.state, info: r.info || "" }));
+  const certificateId = resolved.targetCertificateId;
+  const attestations = certificateId
+    ? await Attestations.find({ certificateId, memberId: { $in: memberIds } }).fetchAsync()
+    : [];
+  const standing = (memberId) => {
+    const own = attestations.filter((a) => a.memberId === memberId);
+    if (metCertificateIds(own).has(certificateId)) return { certificate: "held" };
+    const pending = own.find((a) => !a.certifierId);
+    return pending ? { certificate: "pending", requestId: pending._id } : { certificate: null };
+  };
+  return registrations.map((r) => ({
+    memberId: r.memberId, name: names.get(r.memberId) || "", state: r.state, info: r.info || "",
+    ...(certificateId ? standing(r.memberId) : {}),
+  }));
+};
+
+/**
+ * For the hosts of an event that gives a certificate: whether the caller may
+ * certify it, and, giving it on attendance, whether none of its hosts may.
+ */
+const certificateGrantView = async (resolved, who) => {
+  if (!resolved.targetCertificateId) return null;
+  const certificate = await Certificates.findOneAsync(resolved.targetCertificateId);
+  if (!certificate) return null;
+  let hostMayCertify = false;
+  for (const memberId of resolved.hostMemberIds || []) {
+    if (await canCertify(memberId, certificate)) { hostMayCertify = true; break; }
+  }
+  return {
+    onAttendance: grantsOnAttendance(resolved),
+    mayCertify: await canCertify(who.member._id, certificate),
+    noCertifierHost: grantsOnAttendance(resolved) && !hostMayCertify,
+  };
 };
 
 /**
@@ -343,6 +388,8 @@ const SharedFields = {
   infoRequired: Flag,
   infoPlaceholder: Text,
   requiredCertificateId: Text,
+  targetCertificateId: Text,
+  certificateGrant: Text,
   checkIn: Text,
   checkInOpensDaysBefore: Num,
   checkInOpensAt: Text,
@@ -451,15 +498,18 @@ Meteor.methods({
       : [];
     const access = await accessToEvent(who, event);
     const hostsCanSee = mayRecordAttendance(event, who) || access.book;
+    const resolved = resolveEvent(event, activity);
     return {
       event: view,
       hosts: hosts.map((m) => ({ _id: m._id, name: m.name })),
       registration: await registrationView(event, activity, who),
       // The participants, for the event's hosts and those who may change it.
-      participants: hostsCanSee ? await participantsView(event) : null,
+      participants: hostsCanSee ? await participantsView(event, resolved) : null,
       attendance: mayRecordAttendance(event, who)
-        ? { open: attendanceOpen(resolveEvent(event, activity)), closed: !!event.attendanceClosedAt }
+        ? { open: attendanceOpen(resolved), closed: !!event.attendanceClosedAt }
         : null,
+      // For those who see the participants: the certificate the event gives.
+      certificateGrant: hostsCanSee ? await certificateGrantView(resolved, who) : null,
       activityName: activity?.name || null,
       canEdit: access.book,
       // The event as stored and its activity, for its edit form.
@@ -596,14 +646,18 @@ Meteor.methods({
     await checkIn(eventId, who.member._id, { userId: Meteor.userId() });
   },
 
-  /** A host marks who came, or takes it back. */
+  /**
+   * A host marks who came, or takes it back; on an event that gives its
+   * certificate on attendance the host gives it, if they may certify it.
+   * Returns what became of the certificate (see markAttended).
+   */
   "events.markAttended": async (eventId, memberId, attended) => {
     check(eventId, String);
     check(memberId, String);
     check(attended, Boolean);
     const who = await caller();
     if (!mayRecordAttendance(await getEvent(eventId), who)) refuse();
-    await markAttended(eventId, memberId, attended, { userId: Meteor.userId() });
+    return markAttended(eventId, memberId, attended, { userId: Meteor.userId(), certifierMemberId: who.member._id });
   },
 
   /** A host closes the attendance: the rest did not come. */

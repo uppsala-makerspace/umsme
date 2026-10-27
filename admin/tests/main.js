@@ -17,6 +17,7 @@ import "./activities.tests";
 import "./registrations.tests";
 import "./linking.tests";
 import "./calendarSync.tests";
+import "./targetCertificates.tests";
 import "./areaOfInterestMigration.tests";
 import "./storageRules.tests";
 import "./storageDigest.tests";

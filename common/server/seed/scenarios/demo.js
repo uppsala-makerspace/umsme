@@ -247,7 +247,7 @@ export const buildDemo = async ({ random, people, now }) => {
     name: { sv: 'Retrodatorer', en: 'Retro computers' }, kind: 'areaOfInterest', status: 'established',
     groupId: retroGroup, primarySpaceId: spaces.big, createdAt: days(-500),
   });
-  await groupWithMembers({
+  const laserGroup = await groupWithMembers({
     name: { sv: 'Laseransvariga', en: 'Laser keepers' }, type: 'responsibility',
     parentGroupId: steeringGroups.wood, responsibleMemberId: personas.steering._id,
     joinPolicy: 'request-responsible', allowJoinRequests: true,
@@ -282,12 +282,13 @@ export const buildDemo = async ({ random, people, now }) => {
     name: { sv: 'Keramikugn', en: 'Ceramics kiln' }, workshopId: workshops.ceramics,
     prerequisites: [intro], certifiers: pickMembers(labMembers, 1).map((m) => m._id),
   });
+  // A pending request has no certifier yet: that is what makes it pending.
   const attest = (certificateId, member, { start, end, certifierId = '__system__', pending = false } = {}) =>
     Attestations.insertAsync({
-      certificateId, memberId: member._id, certifierId,
+      certificateId, memberId: member._id,
       startDate: start || days(-random.int(20, 700)),
       ...(end ? { endDate: end } : {}),
-      ...(pending ? {} : { confirmedAt: start || days(-random.int(20, 700)) }),
+      ...(pending ? { attempt: 1 } : { certifierId, confirmedAt: start || days(-random.int(20, 700)) }),
     });
   const introduced = labMembers.filter(() => random.chance(0.85));
   for (const member of [...introduced, personas.member, personas.steering, personas.groupLeader]) {
@@ -298,7 +299,7 @@ export const buildDemo = async ({ random, people, now }) => {
   }
   for (const member of pickMembers(introduced, 10)) await attest(welding, member, { end: days(random.int(30, 600)) });
   for (const member of pickMembers(introduced, 6)) await attest(kiln, member);
-  await attest(laser, personas.base, { start: days(-1), certifierId: personas.steering._id, pending: true });
+  await attest(laser, personas.base, { start: days(-1), pending: true });
 
   // --- Activities and events ----------------------------------------------
   // The wood workshop's introduction every other week, with events behind and
@@ -372,6 +373,18 @@ export const buildDemo = async ({ random, people, now }) => {
   openEvening._id = await makeActivity({ ...openEvening, createdAt: days(-300) });
   await makeEvent({ activity: openEvening, start: at(-60, 18), hostMemberIds: [personas.board._id], createdAt: days(-80) });
   await makeEvent({ activity: openEvening, start: at(18, 18), hostMemberIds: [personas.board._id], createdAt: days(-5) });
+  // The laser cutter's introduction gives its certificate on attendance, by
+  // the laser keepers' certifiers: base, who has asked for it, is signed up.
+  const laserIntro = {
+    name: { sv: 'Laserintroduktion', en: 'Laser cutter introduction' },
+    description: { sv: 'Gå igenom laserskäraren med en av de laseransvariga, och få intyget när du varit med.', en: 'Go through the laser cutter with one of its keepers, and get the certificate for having come.' },
+    groupId: laserGroup, workshopId: workshops.wood, spaceId: spaces.wood, categoryId: courses, durationMinutes: 90,
+    membersOnly: true, published: true, registration: 'required', maxSeats: 4, requiredCertificateId: intro,
+    targetCertificateId: laser, certificateGrant: 'onAttendance',
+  };
+  laserIntro._id = await makeActivity({ ...laserIntro, createdAt: days(-30) });
+  const laserEvent = await makeEvent({ activity: laserIntro, start: at(6, 18), hostMemberIds: [personas.steering._id], createdAt: days(-10) });
+  await makeRegistration(laserEvent, personas.base._id, { at: days(-1) });
   const weldingCourse = await makeActivity({
     name: { sv: 'Svetskurs', en: 'Welding course' }, groupId: steeringGroups.metal, workshopId: workshops.metal,
     categoryId: courses, durationMinutes: 240, published: false, createdAt: days(-10),

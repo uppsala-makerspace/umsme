@@ -18,6 +18,8 @@ export default () => {
 
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState(null);
+  // What became of the certificate the event gives, when someone was marked as come.
+  const [attendanceNotice, setAttendanceNotice] = useState(null);
 
   const load = () => Meteor.callAsync("events.get", eventId)
     .then((result) => { setData(result); setError(null); }, (err) => setError(err.reason || err.message));
@@ -32,13 +34,28 @@ export default () => {
   const act = async (method, ...args) => {
     setBusy(true);
     setActionError(null);
+    setAttendanceNotice(null);
+    let result;
     try {
-      await Meteor.callAsync(method, eventId, ...args);
+      result = await Meteor.callAsync(method, eventId, ...args);
     } catch (err) {
       setActionError(t(`registrationError_${err.error}`, { defaultValue: err.reason || err.message }));
     }
     await load();
     setBusy(false);
+    return result;
+  };
+
+  const CERTIFICATE_NOTICES = {
+    granted: "participantsCertificateGranted",
+    "missing-prerequisites": "participantsCertificateMissingPrerequisites",
+    "not-certifier": "participantsCertificateNotCertifier",
+  };
+  const markAttended = async (memberId, attended) => {
+    const result = await act("events.markAttended", memberId, attended);
+    const key = CERTIFICATE_NOTICES[result?.certificate];
+    const name = data?.participants?.find((p) => p.memberId === memberId)?.name || "";
+    if (key) setAttendanceNotice(t(key, { name }));
   };
 
   if (!userId && !loggingIn) {
@@ -54,7 +71,8 @@ export default () => {
         onWithdraw={() => act("events.withdraw")}
         onTakeSeat={() => act("events.takeSeat")}
         onCheckIn={() => act("events.checkIn")}
-        onAttended={(memberId, attended) => act("events.markAttended", memberId, attended)}
+        attendanceNotice={attendanceNotice}
+        onAttended={markAttended}
         onCloseAttendance={() => act("events.closeAttendance")} />
     </Layout>
   );

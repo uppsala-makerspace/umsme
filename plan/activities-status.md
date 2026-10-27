@@ -1,16 +1,15 @@
-# Aktiviteter — status och öppna frågor (2026-10-26)
+# Aktiviteter — status och öppna frågor (2026-10-27)
 
 Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 `plan/activities.md` (beslut, datamodell, behörighet, etapper).
 
 ## Läge
 
-- All kod ligger på grenen **`activities`** (48 commits från `master`), inte
-  pushad, inte ihopslagen med `master`.
-- Etapp 1, 2 och 3 är byggda, plus några tillägg (nedan). Etapp 4
-  (kalendersynk) är byggd; 5 (mål-certifikat) återstår.
-- Tester gröna vid senaste körningen: admin `npm test` (551), admin e2e (221),
-  app e2e (46). Storybook bygger i båda.
+- All kod ligger på grenen **`activities`** (omkring 78 commits från
+  `master`), inte pushad, inte ihopslagen med `master`.
+- Alla fem etapperna är byggda, plus några tillägg (nedan).
+- Tester gröna vid senaste körningen: admin `npm test` (576, även med
+  `TZ=UTC`), admin e2e (224), app e2e (54). Storybook bygger i båda.
 
 ## Vad som finns
 
@@ -78,6 +77,23 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 - Publicerade aktiviteter med kommande tillfällen.
 - Fristående publicerade tillfällen.
 - Kategorier.
+
+**Mål-certifikat (etapp 5)**
+- En aktivitet (eller ett tillfälle) anger `targetCertificateId`, det
+  certifikat den ger, och `certificateGrant`: `onAttendance` eller `manual`
+  (standard).
+- Vid närvaro ger den värd som registrerar närvaron intyget, om värden får
+  certifiera det (`canCertify`, nu i `common/server/certificates/`) och
+  deltagaren har förkunskaperna. En väntande begäran bekräftas; den som redan
+  har intyget får ett nytt från i dag. Ångrad närvaro lämnar intyget.
+  Närvaro registrerad i admin ger inget intyg.
+- Minst en av värdarna måste få certifiera när värdarna sätts på ett sådant
+  tillfälle (`no-certifier-host`); tillfällen utan värdar godkänns, och
+  tillfällets sida varnar värdarna om ingen får certifiera.
+- Tillfällets och aktivitetens uppgifter visar "Ger certifikatet: X · vid
+  närvaro/delas ut av en värd". Värdarna ser per deltagare "Har intyget" eller
+  "Har begärt intyget" (länk till begäran för den som får certifiera), och
+  efter "Kom" vad som hände med intyget.
 
 ## Inställningar som behövs i produktion
 
@@ -153,4 +169,6 @@ Inga just nu.
 - Slå ihop `activities` med `master` och pusha. Före kalendersynken i
   produktion: servicekonto och `location` i admins
   `private.googleCalendar` (`docs/configuration.md`, avsnitt 13).
-- **Etapp 5:** mål-certifikat som delas ut vid närvaro.
+- Mindre saker: påminnelserna nollställs inte när ett tillfälle flyttas; den
+  som missat incheckningen kan anmäla sig igen direkt; dagsbubblorna finns
+  bara i kalendern; egen pushtext kräver ändrade mallar.

@@ -3,7 +3,7 @@ import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Members } from '/imports/common/collections/members';
-import { wouldCreateCycle } from '/imports/common/lib/rules';
+import { wouldCreateCycle, findMissingPrerequisites, metCertificateIds } from '/imports/common/lib/rules';
 import { recordChange } from '/imports/common/server/auditLog';
 import { text, bilingual, setOrUnset } from '../groups/text';
 
@@ -147,6 +147,35 @@ export const grantAttestation = async ({ certificateId, memberId, certifierId, s
   const docId = await Attestations.insertAsync(doc);
   await recordChange({ userId, domain: 'attestations', action: 'grant', docId, after: doc });
   return docId;
+};
+
+/**
+ * Give a certificate for taking part in an event that gives it (plan/activities.md,
+ * stage 5), with the host who recorded the attendance as certifier: their
+ * right to certify is the caller's to check. The prerequisites must be held,
+ * as when a certifier confirms a request. A pending request is confirmed; else
+ * a new attestation is granted from now, so one who holds it already has it
+ * for longer.
+ *
+ * @returns {Promise<'granted'|'missing-prerequisites'>}
+ */
+export const grantOnAttendance = async ({ certificateId, memberId, certifierId, now = new Date() }, { userId }) => {
+  const certificate = await current(certificateId);
+  const held = await Attestations.find({ memberId }).fetchAsync();
+  if (findMissingPrerequisites(certificate, metCertificateIds(held, now)).length) return 'missing-prerequisites';
+  const pending = held.find((a) => a.certificateId === certificateId && !a.certifierId);
+  if (!pending) {
+    await grantAttestation({ certificateId, memberId, certifierId, startDate: now }, { userId });
+    return 'granted';
+  }
+  const $set = { certifierId, confirmedAt: now };
+  if (certificate.defaultValidityDays) {
+    $set.endDate = new Date(now);
+    $set.endDate.setDate($set.endDate.getDate() + certificate.defaultValidityDays);
+  }
+  await Attestations.updateAsync(pending._id, { $set });
+  await recordChange({ userId, domain: 'attestations', action: 'confirm', docId: pending._id, before: pending, after: { ...pending, ...$set } });
+  return 'granted';
 };
 
 /** Take back an attestation. */
