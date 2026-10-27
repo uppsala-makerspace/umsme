@@ -81,19 +81,21 @@ const ParticipantList = ({
   const lang = i18n.language || "sv";
   if (!participants) return null;
   const recording = attendance?.open;
-  // Below the name: the certificate held, linked, for a host who may certify
-  // it to the attestation, where they comment on it as on any request; else,
-  // to one who came, a button to the request through which they certify or
-  // comment (made if there is none). A request of one not marked as come is
-  // linked, or said.
+  // Below the name: the certificate held, or a request commented on and not
+  // confirmed, linked for a host who may certify it to the request, where
+  // they comment or certify as on any; else, to one who came, a button to the
+  // request through which they certify or comment (made if there is none). A
+  // request of one not marked as come is linked, or said.
   const request = (id) => `/certifier-requests/${id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`;
   const certificateLine = (p) => {
     if (!certificate) return null;
-    if (p.certificate === "held") {
+    const name = localized(certificate.name, lang);
+    if (p.certificate === "held" || p.certificate === "commented") {
+      const held = p.certificate === "held";
       return (
         <Link to={certificate.mayCertify ? request(p.attestationId) : `/certificates/${certificate._id}`}
-          className="text-xs text-green-700 no-underline hover:underline">
-          {t("participantsCertificateLink", { name: localized(certificate.name, lang) })} &rarr;
+          className={`text-xs no-underline hover:underline ${held ? "text-green-700" : "text-gray-700"}`}>
+          {t(held ? "participantsCertificateLink" : "participantsCommentLink", { name })} &rarr;
         </Link>
       );
     }

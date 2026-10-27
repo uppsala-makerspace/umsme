@@ -71,6 +71,7 @@ export const GivesCertificate = {
         { memberId: "m1", name: "Alice Andersson", state: "attended", info: "", certificate: "held", attestationId: "a0" },
         { memberId: "m4", name: "Erik Ek", state: "attended", info: "", certificate: null },
         { memberId: "m2", name: "Bertil Berg", state: "approved", info: "", certificate: "pending", attestationId: "a1" },
+        { memberId: "m5", name: "Fredrik Fors", state: "attended", info: "", certificate: "commented", attestationId: "a2" },
         { memberId: "m3", name: "Cecilia Ceder", state: "approved", info: "", certificate: null },
       ],
       attendance: { open: true, closed: false, searchByName: false },

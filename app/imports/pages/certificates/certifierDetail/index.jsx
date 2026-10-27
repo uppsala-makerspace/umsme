@@ -51,12 +51,11 @@ export default () => {
     }
   };
 
+  // Denying keeps the request, not confirmed, with the comment saying why:
+  // the member reads it and may ask again (a new attempt).
   const handleDeny = async (comment, privateComment) => {
     try {
-      if (comment || privateComment) {
-        await Meteor.callAsync("certificates.addComment", attestationId, comment, privateComment);
-      }
-      await Meteor.callAsync("certificates.remove", attestationId);
+      await Meteor.callAsync("certificates.addComment", attestationId, comment, privateComment);
       navigate(doneTo);
     } catch (err) {
       console.error("Error denying:", err);

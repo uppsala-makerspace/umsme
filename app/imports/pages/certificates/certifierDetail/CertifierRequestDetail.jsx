@@ -158,7 +158,7 @@ const CertifierRequestDetail = ({
         </Button>
       </section>
 
-      {/* Actions */}
+      {/* Actions. A denial says why, in the comment the member reads. */}
       {!isConfirmed && (
         <section className="mb-6">
           <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("actions")}</h3>
@@ -174,7 +174,7 @@ const CertifierRequestDetail = ({
               variant="danger"
               className="flex-1"
               onClick={() => handleAction(onDeny)}
-              disabled={actionLoading}
+              disabled={actionLoading || !comment.trim()}
             >
               {t("denyRequest")}
             </Button>

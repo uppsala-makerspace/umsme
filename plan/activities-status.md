@@ -87,9 +87,13 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   deltagarens förfrågan i den vanliga certifieringen (`/certifier-requests/:id`),
   där hen godkänner med publik eller privat kommentar och sedan kommer
   tillbaka till tillfället (`?returnTo=`). Finns ingen förfrågan skapas en i
-  deltagarens namn (`certificateRequestFor`), om förkunskaperna finns. Ett
-  godkänt intyg länkas från raden till samma sida. Deltagaren kan också
-  begära intyget som vanligt.
+  deltagarens namn (`certificateRequestFor`), om förkunskaperna finns. Raden
+  visar sedan "Certifikat: X" när det är godkänt och "Kommentar: X" när en
+  certifierare kommenterat och nekat; båda länkar till samma sida. Deltagaren
+  kan också begära certifikatet som vanligt.
+- "Neka" på förfrågningssidan behåller nu förfrågan, inte godkänd, med
+  kommentaren (som krävs), i stället för att ta bort den: deltagaren läser
+  den och kan begära igen. Det gäller hela certifieringen.
 - Värdar sätts fritt; tillfällets sida varnar om ingen av dem får certifiera.
 - Tillfällets och aktivitetens uppgifter visar "Ger certifikatet: X". Värdarna
   ser per deltagare "Har intyget" eller "Har begärt intyget" (länk till

@@ -111,6 +111,18 @@ test.describe('Registrations', () => {
     await page.getByRole('listitem').filter({ hasText: asked }).getByRole('link', { name: new RegExp(en.participantsAskedForCertificate) }).click();
     await expect(page).toHaveURL(/\/certifier-requests\//);
     await expect(page.getByText(asked).first()).toBeVisible();
+
+    // Denied with a comment, the request stays: the row says Comment, then Certificate once confirmed.
+    await expect(page.getByRole('button', { name: en.denyRequest })).toBeDisabled();
+    await page.getByPlaceholder(en.publicCommentPlaceholder).fill('Glasera tunnare först.');
+    await page.getByRole('button', { name: en.denyRequest }).click();
+    await expect(page.getByRole('heading', { name: 'E2E glazing talk', level: 2 })).toBeVisible();
+    const row = page.getByRole('listitem').filter({ hasText: asked });
+    const commented = row.getByRole('link', { name: new RegExp(en.participantsCommentLink.replace('{{name}}', 'E2E glazing')) });
+    await commented.click();
+    await expect(page.getByPlaceholder(en.publicCommentPlaceholder)).toHaveValue('Glasera tunnare först.');
+    await page.getByRole('button', { name: en.confirmRequest }).click();
+    await expect(row.getByRole('link', { name: new RegExp(en.participantsCertificateLink.replace('{{name}}', 'E2E glazing')) })).toBeVisible();
   });
 
   test('a member who is no host sees no participants', async ({ page }) => {
