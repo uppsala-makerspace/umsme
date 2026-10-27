@@ -84,7 +84,6 @@ const Expenses = ({
       key: "approve",
       label: t("expensesToApproveTab"),
       badge: toApprove.length > 0 ? toApprove.length : undefined,
-      badgeTone: "red",
     },
     { key: "accounts", label: t("expenseAccountsTab") },
   ].filter(Boolean);

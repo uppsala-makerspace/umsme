@@ -89,7 +89,7 @@ const CertifierRequestDetail = ({
       {/* Requester Info */}
       <section className="mb-6">
         <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">{t("requesterInfo")}</h3>
-        <div className={`p-4 rounded-lg bg-white border border-gray-200 ${isConfirmed ? "border-l-4 border-l-[#5fc86f] bg-green-50" : "border-l-4 border-l-violet-500 bg-violet-50"}`}>
+        <div className={`p-4 rounded-lg bg-white border border-gray-200 ${isConfirmed ? "border-l-4 border-l-[#5fc86f] bg-green-50" : "border-l-4 border-l-red-600 bg-red-50"}`}>
           <div className="flex flex-col gap-2">
             <p className="m-0 text-sm text-gray-600">
               <span className="font-semibold text-gray-700">{t("requester")}:</span> {attestation.requesterName}

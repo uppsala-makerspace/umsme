@@ -1677,11 +1677,6 @@ video {
   border-left-color: rgb(14 165 233 / var(--tw-border-opacity, 1));
 }
 
-.border-l-violet-500 {
-  --tw-border-opacity: 1;
-  border-left-color: rgb(139 92 246 / var(--tw-border-opacity, 1));
-}
-
 .bg-\[\#ccc\] {
   --tw-bg-opacity: 1;
   background-color: rgb(204 204 204 / var(--tw-bg-opacity, 1));
@@ -1814,16 +1809,6 @@ video {
 
 .bg-transparent {
   background-color: transparent;
-}
-
-.bg-violet-50 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(245 243 255 / var(--tw-bg-opacity, 1));
-}
-
-.bg-violet-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(139 92 246 / var(--tw-bg-opacity, 1));
 }
 
 .bg-white {

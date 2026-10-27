@@ -6,7 +6,8 @@ const statusClasses = {
   valid: "border-l-4 border-l-[#5fc86f]",
   expired: "border-l-4 border-l-gray-400 opacity-70",
   available: "border-l-4 border-l-blue-500",
-  "to-confirm": "border-l-4 border-l-violet-500",
+  // Waiting for the reader to confirm: red, as what waits on one is throughout.
+  "to-confirm": "border-l-4 border-l-red-600",
   confirmed: "border-l-4 border-l-[#5fc86f] bg-green-50",
   locked: "border-l-4 border-l-gray-400 bg-gray-50 opacity-80",
 };
