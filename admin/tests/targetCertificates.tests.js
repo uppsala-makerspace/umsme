@@ -10,12 +10,12 @@ import { AuditLog } from '/imports/common/collections/auditLog';
 import { canCertify } from '/imports/common/server/certificates/canCertify';
 import { createEvent } from '/imports/common/server/activities/events';
 import {
-  register, markAttended, closeAttendance, addAttendee, giveCertificate,
+  register, markAttended, closeAttendance, addAttendee, certificateRequestFor,
 } from '/imports/common/server/activities/registrations';
 import { setActivityTransportsForTests } from '/imports/common/server/activities/notify';
 
-// Stage 5: the certificate an event gives, given by a host who may certify it
-// to one who came; and adding one who came without a seat.
+// Stage 5: the certificate an event gives, certified by a host who may to one
+// who came, through a request; and adding one who came without a seat.
 
 const prefix = 'targettest-';
 const userId = `${prefix}user`;
@@ -23,7 +23,6 @@ const board = { userId, isAdminish: true };
 const [host, other, p1, p2, roleHolder] = ['host', 'other', 'p1', 'p2', 'role'].map((k) => `${prefix}${k}`);
 const members = [host, other, p1, p2, roleHolder];
 const HOUR = 3600000;
-const DAY = 86400000;
 const inHours = (n) => new Date(Date.now() + n * HOUR);
 
 const rejects = (promise, error) => assert.rejects(promise, (e) => e.error === error);
@@ -90,47 +89,35 @@ describe('certificates events give', function () {
     assert.strictEqual(await canCertify(null, certificate), false);
   });
 
-  it('gives no certificate for coming; a host who may certify gives it, to one who came', async function () {
+  it('gives no certificate for coming; a host who may certify gets a request to certify one who came by', async function () {
     const id = await makeEvent();
     await markAttended(id, p1, true, { userId, now: later });
     assert.strictEqual((await attestationsOf(p1, glazing)).length, 0);
 
-    await rejects(giveCertificate(id, p1, { userId, certifierMemberId: other, now: later }), 'not-certifier');
-    await rejects(giveCertificate(id, p2, { userId, certifierMemberId: host, now: later }), 'bad-state');
-    assert.strictEqual(await giveCertificate(id, p1, { userId, certifierMemberId: host, now: later }), 'granted');
-    const [given] = await attestationsOf(p1, glazing);
-    assert.strictEqual(given.certifierId, host);
-    assert.ok(given.confirmedAt);
-    assert.strictEqual(Math.round((given.endDate - given.startDate) / DAY), 365);
-
-    // Taken back, the attendance leaves the certificate.
-    await markAttended(id, p1, false, { userId, now: later });
+    await rejects(certificateRequestFor(id, p1, { userId, certifierMemberId: other, now: later }), 'not-certifier');
+    await rejects(certificateRequestFor(id, p2, { userId, certifierMemberId: host, now: later }), 'bad-state');
+    const requestId = await certificateRequestFor(id, p1, { userId, certifierMemberId: host, now: later });
+    const [made] = await attestationsOf(p1, glazing);
+    assert.strictEqual(made._id, requestId);
+    // A request, pending: the certifier confirms it, or comments, on its page.
+    assert.strictEqual(made.certifierId, undefined);
+    // Asked again, it is the same request.
+    assert.strictEqual(await certificateRequestFor(id, p1, { userId, certifierMemberId: roleHolder, now: later }), requestId);
     assert.strictEqual((await attestationsOf(p1, glazing)).length, 1);
   });
 
-  it('confirms a pending request, and gives one who holds it a new one from now', async function () {
+  it('uses the request one has made already', async function () {
     const id = await makeEvent();
     const requested = await Attestations.insertAsync({ certificateId: glazing, memberId: p1, startDate: inHours(-24), attempt: 1 });
     await markAttended(id, p1, true, { userId, now: later });
-    await giveCertificate(id, p1, { userId, certifierMemberId: roleHolder, now: later });
-    const [confirmed] = await attestationsOf(p1, glazing);
-    assert.strictEqual(confirmed._id, requested);
-    assert.strictEqual(confirmed.certifierId, roleHolder);
-
-    // p2 holds it, running out soon: given again, it lasts longer.
-    await Attestations.insertAsync({ certificateId: glazing, memberId: p2, certifierId: host, startDate: inHours(-24 * 300), endDate: inHours(24 * 10), confirmedAt: inHours(-24 * 300) });
-    await markAttended(id, p2, true, { userId, now: later });
-    await giveCertificate(id, p2, { userId, certifierMemberId: host, now: later });
-    const held = await attestationsOf(p2, glazing);
-    assert.strictEqual(held.length, 2);
-    assert.ok(held[1].endDate > inHours(24 * 300));
+    assert.strictEqual(await certificateRequestFor(id, p1, { userId, certifierMemberId: host, now: later }), requested);
   });
 
-  it('gives it not to one without its prerequisites', async function () {
+  it('makes no request for one without its prerequisites', async function () {
     const advanced = await Certificates.insertAsync({ name: { sv: `${prefix}Avancerad` }, certifiers: [host], prerequisites: [basics] });
     const id = await makeEvent({ certificateId: advanced });
     await markAttended(id, p1, true, { userId, now: later });
-    assert.strictEqual(await giveCertificate(id, p1, { userId, certifierMemberId: host, now: later }), 'missing-prerequisites');
+    await rejects(certificateRequestFor(id, p1, { userId, certifierMemberId: host, now: later }), 'missing-prerequisites');
     assert.strictEqual((await attestationsOf(p1, advanced)).length, 0);
   });
 
@@ -149,8 +136,8 @@ describe('certificates events give', function () {
     await addAttendee(id, p1, { userId, now: later });
     assert.strictEqual(await stateOf(id, p1), 'attended');
     assert.strictEqual((await Events.findOneAsync(id)).seatsTaken, 3);
-    // The one added may be given the certificate.
-    assert.strictEqual(await giveCertificate(id, roleHolder, { userId, certifierMemberId: host, now: later }), 'granted');
+    // The one added may be certified.
+    assert.ok(await certificateRequestFor(id, roleHolder, { userId, certifierMemberId: host, now: later }));
     await closeAttendance(id, { userId, now: later });
     await rejects(addAttendee(id, other, { userId, now: later }), 'closed');
   });

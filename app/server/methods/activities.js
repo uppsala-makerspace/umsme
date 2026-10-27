@@ -35,7 +35,7 @@ import {
   PENDING,
 } from "/imports/common/lib/activityRules";
 import {
-  register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance, addAttendee, giveCertificate,
+  register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance, addAttendee, certificateRequestFor,
 } from "/imports/common/server/activities/registrations";
 import { hasValidCertificate } from "/imports/common/server/activities/certificates";
 import {
@@ -699,13 +699,17 @@ Meteor.methods({
     await addAttendee(eventId, memberId, { userId: Meteor.userId() });
   },
 
-  /** A host who may certify gives the event's certificate to one who came (see giveCertificate). */
-  "events.giveCertificate": async (eventId, memberId) => {
+  /**
+   * For a host who may certify the event's certificate: the request through
+   * which they certify one who came, or comment on it, made if there is none
+   * (see certificateRequestFor). Returns its id.
+   */
+  "events.certificateRequest": async (eventId, memberId) => {
     check(eventId, String);
     check(memberId, String);
     const who = await caller();
     if (!(await mayRecordAttendance(await getEvent(eventId), who))) refuse();
-    return giveCertificate(eventId, memberId, { userId: Meteor.userId(), certifierMemberId: who.member._id });
+    return certificateRequestFor(eventId, memberId, { userId: Meteor.userId(), certifierMemberId: who.member._id });
   },
 
   /** Show interest in an activity, or stop. */

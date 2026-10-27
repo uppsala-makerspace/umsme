@@ -11,7 +11,8 @@ import {
 } from '/imports/common/lib/activityRules';
 import { Certificates } from '/imports/common/collections/certificates';
 import { canCertify } from '/imports/common/server/certificates/canCertify';
-import { grantForEvent } from '/imports/common/server/certificates/certificates';
+import { Attestations } from '/imports/common/collections/attestations';
+import { findMissingPrerequisites, metCertificateIds } from '/imports/common/lib/rules';
 import { Members } from '/imports/common/collections/members';
 import { hasValidCertificate } from './certificates';
 import * as notify from './notify';
@@ -226,7 +227,7 @@ export const setInterest = async (activityId, memberId, interested) => {
 /**
  * A host marks who came, or takes it back. One marked as not having come is
  * back where they were (with a seat); a no-show can be corrected to came.
- * Coming gives no certificate: a host gives it (giveCertificate).
+ * Coming gives no certificate: a host certifies it (certificateRequestFor).
  */
 export const markAttended = async (eventId, memberId, attended, { userId, now = new Date() }) => {
   const { resolved } = await resolvedEvent(eventId);
@@ -277,19 +278,30 @@ export const addAttendee = async (eventId, memberId, { userId, now = new Date() 
 };
 
 /**
- * A host who may certify the certificate an event gives gives it to one who
- * came, if they hold its prerequisites (see grantForEvent).
+ * For a host who may certify the certificate an event gives: the request
+ * through which they certify one who came, or comment on it, in the
+ * certificate's own flow. Their pending request when they have one; else one
+ * is made in their name, if they hold its prerequisites, as when they ask.
  *
- * @returns {Promise<'granted'|'missing-prerequisites'>}
+ * @returns {Promise<string>} the request's (attestation's) id
  */
-export const giveCertificate = async (eventId, memberId, { userId, certifierMemberId, now = new Date() }) => {
+export const certificateRequestFor = async (eventId, memberId, { userId, certifierMemberId, now = new Date() }) => {
   const { resolved } = await resolvedEvent(eventId);
   const certificate = resolved.targetCertificateId ? await Certificates.findOneAsync(resolved.targetCertificateId) : null;
   if (!certificate) throw new Meteor.Error('no-certificate', 'The event gives no certificate');
   if (!(await canCertify(certifierMemberId, certificate))) throw new Meteor.Error('not-certifier', 'You may not certify this certificate');
   const registration = await registrationOf(eventId, memberId);
-  if (registration.state !== 'attended') throw new Meteor.Error('bad-state', 'The certificate is given to those who came');
-  return grantForEvent({ certificateId: certificate._id, memberId, certifierId: certifierMemberId, now }, { userId });
+  if (registration.state !== 'attended') throw new Meteor.Error('bad-state', 'The certificate is for those who came');
+  const held = await Attestations.find({ memberId }).fetchAsync();
+  const pending = held.find((a) => a.certificateId === certificate._id && !a.certifierId);
+  if (pending) return pending._id;
+  if (findMissingPrerequisites(certificate, metCertificateIds(held, now)).length) {
+    throw new Meteor.Error('missing-prerequisites', 'The prerequisites are missing');
+  }
+  const doc = { certificateId: certificate._id, memberId, startDate: now, attempt: 1 };
+  const docId = await Attestations.insertAsync(doc);
+  await recordChange({ userId, domain: 'attestations', action: 'requestForAttendee', docId, after: doc });
+  return docId;
 };
 
 /**

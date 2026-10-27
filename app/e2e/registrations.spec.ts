@@ -71,19 +71,16 @@ test.describe('Registrations', () => {
     const row = (name: string) => page.getByRole('listitem').filter({ hasText: name });
     await row(came).getByRole('button', { name: en.participantsCame }).click();
     await expect(row(came)).toContainText(en.registrationState_attended);
-    // Coming gives no certificate; the host gives it, and the row links to it.
-    const held = en.participantsCertificateLink.replace('{{name}}', 'E2E glazing');
-    await expect(row(came).getByRole('link', { name: new RegExp(held) })).toHaveCount(0);
-    await row(came).getByRole('button', { name: en.participantsGiveCertificate }).click();
-    await expect(page.getByRole('status')).toHaveText(en.participantsCertificateGranted.replace('{{name}}', came));
-    await expect(row(came).getByRole('link', { name: new RegExp(held) })).toBeVisible();
-    await expect(row(came).getByRole('button', { name: en.participantsGiveCertificate })).toHaveCount(0);
-    await expect(row(came).getByRole('button', { name: en.participantsUndo })).toBeVisible();
-    // The certificate given opens as any request does, to comment on.
-    await row(came).getByRole('link', { name: new RegExp(held) }).click();
-    await expect(page).toHaveURL(/\/certifier-requests\//);
+    // Coming gives no certificate; the host certifies through a request made for it.
+    await row(came).getByRole('button', { name: en.participantsCertifyOrComment }).click();
+    await expect(page).toHaveURL(/\/certifier-requests\/.*returnTo=/);
     await expect(page.getByText(en.publicComment)).toBeVisible();
-    await page.goBack();
+    await page.getByRole('button', { name: en.confirmRequest }).click();
+    // Confirmed, back at the event, the row links to the certificate.
+    await expect(page.getByRole('heading', { name: 'E2E glazing course', level: 2 })).toBeVisible();
+    const held = en.participantsCertificateLink.replace('{{name}}', 'E2E glazing');
+    await expect(row(came).getByRole('link', { name: new RegExp(held) })).toBeVisible();
+    await expect(row(came).getByRole('button', { name: en.participantsCertifyOrComment })).toHaveCount(0);
 
     // One who came without signing up, found by membership number.
     const added = testUsers.base;

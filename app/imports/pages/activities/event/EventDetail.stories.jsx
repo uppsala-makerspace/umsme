@@ -53,18 +53,17 @@ export const RecordingAttendance = withRegistration({ open: false }, {
   ],
   attendance: { open: true, closed: false },
 });
-// An event giving a certificate, its host certifying it: one came and got it,
-// one came and may get it, one has asked for it; and a notice of the last one given.
+// An event giving a certificate, its host certifying it: one came and holds
+// it, one came and may be certified, one has asked for it.
 const glazing = { _id: "c9", name: { sv: "Glasering" } };
 const attendanceHandlers = {
-  onGiveCertificate: fn(), onAddAttendee: fn(),
+  onCertify: fn(), onAddAttendee: fn(),
   onFindMembers: async (query) => [{ _id: "m7", name: `Doris Dahl (${query})`, mid: "1234" }],
 };
 export const GivesCertificate = {
   args: {
     ...handlers,
     ...attendanceHandlers,
-    attendanceNotice: "Alice Andersson fick intyget.",
     data: {
       event: { ...events[0], targetCertificate: glazing }, hosts: hosts.slice(0, 1), activityName: intro.name, canEdit: false,
       registration: registration({ open: false }),

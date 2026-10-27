@@ -81,12 +81,15 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 **Mål-certifikat (etapp 5)**
 - En aktivitet (eller ett tillfälle) anger `targetCertificateId`, det
   certifikat den ger. Det finns inget val av hur.
-- Närvaro och intyg är skilda: att markera "Kom" ger inget intyg. En värd som
-  får certifiera (`canCertify`, nu i `common/server/certificates/`) ger
-  intyget med "Ge intyget" vid en närvarande (`giveCertificate`), om
-  deltagaren har förkunskaperna. En väntande begäran bekräftas; den som redan
-  har intyget får ett nytt från i dag. Ångrad närvaro lämnar intyget.
-  Deltagaren kan också begära intyget som vanligt.
+- Närvaro och intyg är skilda: att markera närvaro ger inget intyg. En värd
+  som får certifiera (`canCertify`, nu i `common/server/certificates/`)
+  trycker "Certifiera eller kommentera" vid en närvarande och kommer till
+  deltagarens förfrågan i den vanliga certifieringen (`/certifier-requests/:id`),
+  där hen godkänner med publik eller privat kommentar och sedan kommer
+  tillbaka till tillfället (`?returnTo=`). Finns ingen förfrågan skapas en i
+  deltagarens namn (`certificateRequestFor`), om förkunskaperna finns. Ett
+  godkänt intyg länkas från raden till samma sida. Deltagaren kan också
+  begära intyget som vanligt.
 - Värdar sätts fritt; tillfällets sida varnar om ingen av dem får certifiera.
 - Tillfällets och aktivitetens uppgifter visar "Ger certifikatet: X". Värdarna
   ser per deltagare "Har intyget" eller "Har begärt intyget" (länk till

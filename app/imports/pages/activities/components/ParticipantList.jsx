@@ -70,12 +70,12 @@ AddAttendee.propTypes = {
  * and once it has started, who came, with a button each, a search to add one
  * who came without a seat, and one to close it. With a certificate the event
  * gives (`certificate`), who holds it or has asked for it, and for a host who
- * may certify it a button to give it to one who came; a warning when none of
- * the hosts may; and `notice`, what became of the last one given.
+ * may certify it a way to the request through which they certify or comment
+ * (and back to `returnTo`); and a warning when none of the hosts may.
  */
 const ParticipantList = ({
   participants, attendance, takesRegistrations = true, busy, onAttended, onClose,
-  certificate = null, notice = null, onGiveCertificate, onFindMembers, onAddAttendee,
+  certificate = null, returnTo = null, onCertify, onFindMembers, onAddAttendee,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
@@ -83,29 +83,34 @@ const ParticipantList = ({
   const recording = attendance?.open;
   // Below the name: the certificate held, linked, for a host who may certify
   // it to the attestation, where they comment on it as on any request; else,
-  // to one who came, a button to give it; a request is said beside it.
+  // to one who came, a button to the request through which they certify or
+  // comment (made if there is none). A request of one not marked as come is
+  // linked, or said.
+  const request = (id) => `/certifier-requests/${id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`;
   const certificateLine = (p) => {
     if (!certificate) return null;
     if (p.certificate === "held") {
       return (
-        <Link to={certificate.mayCertify ? `/certifier-requests/${p.attestationId}` : `/certificates/${certificate._id}`}
+        <Link to={certificate.mayCertify ? request(p.attestationId) : `/certificates/${certificate._id}`}
           className="text-xs text-green-700 no-underline hover:underline">
           {t("participantsCertificateLink", { name: localized(certificate.name, lang) })} &rarr;
         </Link>
       );
     }
-    const give = certificate.mayCertify && p.state === "attended" && (
-      <button type="button" disabled={busy} onClick={() => onGiveCertificate(p.memberId)}
-        className={`${pillButton} border-green-700 text-green-800`}>
-        {t("participantsGiveCertificate")}
-      </button>
-    );
-    const asked = p.certificate === "pending" && (certificate.mayCertify ? (
-      <Link to={`/certifier-requests/${p.attestationId}`} className="text-xs font-semibold text-red-700 no-underline hover:underline">
+    if (certificate.mayCertify && p.state === "attended") {
+      return (
+        <button type="button" disabled={busy} onClick={() => onCertify(p.memberId)}
+          className={`${pillButton} border-green-700 text-green-800`}>
+          {t("participantsCertifyOrComment")}
+        </button>
+      );
+    }
+    if (p.certificate !== "pending") return null;
+    return certificate.mayCertify ? (
+      <Link to={request(p.attestationId)} className="text-xs font-semibold text-red-700 no-underline hover:underline">
         {t("participantsAskedForCertificate")} &rarr;
       </Link>
-    ) : <span className="text-xs text-gray-500">{t("participantsAskedForCertificate")}</span>);
-    return give || asked ? <>{give}{asked}</> : null;
+    ) : <span className="text-xs text-gray-500">{t("participantsAskedForCertificate")}</span>;
   };
   // Last on the row: marking one as come, or taking it back.
   const attendanceButton = (p) => {
@@ -167,7 +172,6 @@ const ParticipantList = ({
           })}
         </ul>
       )}
-      {notice && <p className="m-0 mt-2 text-sm" role="status">{notice}</p>}
       {recording && onFindMembers && (
         <AddAttendee byName={!!attendance.searchByName} busy={busy} onFind={onFindMembers} onAdd={onAddAttendee} />
       )}
@@ -185,8 +189,8 @@ ParticipantList.propTypes = {
   onAttended: PropTypes.func,
   onClose: PropTypes.func,
   certificate: PropTypes.shape({ _id: PropTypes.string, name: PropTypes.object, mayCertify: PropTypes.bool, noCertifierHost: PropTypes.bool }),
-  notice: PropTypes.string,
-  onGiveCertificate: PropTypes.func,
+  returnTo: PropTypes.string,
+  onCertify: PropTypes.func,
   onFindMembers: PropTypes.func,
   onAddAttendee: PropTypes.func,
 };

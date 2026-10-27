@@ -1,7 +1,8 @@
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback } from "react";
-import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Navigate, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { safeReturnTo } from "../../expenses/utils";
 import Layout from "/imports/components/Layout/Layout";
 import CertifierRequestDetail from "./CertifierRequestDetail.jsx";
 
@@ -9,6 +10,9 @@ export default () => {
   const user = useTracker(() => Meteor.user());
   const { attestationId } = useParams();
   const navigate = useNavigate();
+  // Opened from an event's participants, confirming or removing goes back there.
+  const [searchParams] = useSearchParams();
+  const doneTo = safeReturnTo(searchParams.get("returnTo")) || "/certificates?tab=requests";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
@@ -40,7 +44,7 @@ export default () => {
         comment || undefined,
         privateComment || undefined
       );
-      navigate("/certificates?tab=requests");
+      navigate(doneTo);
     } catch (err) {
       console.error("Error confirming:", err);
       throw err;
@@ -53,7 +57,7 @@ export default () => {
         await Meteor.callAsync("certificates.addComment", attestationId, comment, privateComment);
       }
       await Meteor.callAsync("certificates.remove", attestationId);
-      navigate("/certificates?tab=requests");
+      navigate(doneTo);
     } catch (err) {
       console.error("Error denying:", err);
       throw err;

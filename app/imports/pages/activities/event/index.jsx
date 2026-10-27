@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import React, { useState, useEffect, useContext } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "/imports/components/Layout/Layout";
 import { useSignedIn } from "../components/useSignedIn";
@@ -10,6 +10,7 @@ import EventDetail from "./EventDetail.jsx";
 export default () => {
   const { t } = useTranslation();
   const { eventId } = useParams();
+  const navigate = useNavigate();
   const { user, userId, loggingIn } = useSignedIn();
   const { slackChannels } = useContext(AppDataContext);
   const [loading, setLoading] = useState(true);
@@ -18,8 +19,6 @@ export default () => {
 
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState(null);
-  // What became of the certificate the event gives, when a host gave it.
-  const [attendanceNotice, setAttendanceNotice] = useState(null);
 
   const load = () => Meteor.callAsync("events.get", eventId)
     .then((result) => { setData(result); setError(null); }, (err) => setError(err.reason || err.message));
@@ -34,7 +33,6 @@ export default () => {
   const act = async (method, ...args) => {
     setBusy(true);
     setActionError(null);
-    setAttendanceNotice(null);
     let result;
     try {
       result = await Meteor.callAsync(method, eventId, ...args);
@@ -46,14 +44,10 @@ export default () => {
     return result;
   };
 
-  const CERTIFICATE_NOTICES = {
-    granted: "participantsCertificateGranted",
-    "missing-prerequisites": "participantsCertificateMissingPrerequisites",
-  };
-  const giveCertificate = async (memberId) => {
-    const result = await act("events.giveCertificate", memberId);
-    const name = data?.participants?.find((p) => p.memberId === memberId)?.name || "";
-    if (CERTIFICATE_NOTICES[result]) setAttendanceNotice(t(CERTIFICATE_NOTICES[result], { name }));
+  // To the request through which a host certifies one who came, or comments on it, and back here.
+  const certify = async (memberId) => {
+    const requestId = await act("events.certificateRequest", memberId);
+    if (requestId) navigate(`/certifier-requests/${requestId}?returnTo=${encodeURIComponent(`/events/${eventId}`)}`);
   };
 
   if (!userId && !loggingIn) {
@@ -69,9 +63,8 @@ export default () => {
         onWithdraw={() => act("events.withdraw")}
         onTakeSeat={() => act("events.takeSeat")}
         onCheckIn={() => act("events.checkIn")}
-        attendanceNotice={attendanceNotice}
         onAttended={(memberId, attended) => act("events.markAttended", memberId, attended)}
-        onGiveCertificate={giveCertificate}
+        onCertify={certify}
         onFindMembers={(query) => Meteor.callAsync("events.findMembers", eventId, query)}
         onAddAttendee={(memberId) => act("events.addAttendee", memberId)}
         onCloseAttendance={() => act("events.closeAttendance")} />

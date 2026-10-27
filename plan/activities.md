@@ -357,9 +357,10 @@ som har en väntande begäran.
    *Byggd på grenen `activities` (oktober 2026)*, ändrad efter första
    versionen: aktiviteten anger bara vilket certifikat den ger (inget
    `certificateGrant`); närvaro ger inget intyg, utan en värd som får
-   certifiera ger det med en egen knapp vid en närvarande; en väntande
-   begäran bekräftas, annars ett nytt intyg från i dag; förkunskaperna
-   kontrolleras; värdar sätts fritt, med en varning om ingen får certifiera.
+   certifiera går från en närvarande till deltagarens förfrågan i det
+   vanliga flödet (skapad i deltagarens namn om den saknas, när
+   förkunskaperna finns) och godkänner eller kommenterar där; värdar sätts
+   fritt, med en varning om ingen får certifiera.
    Dessutom kan den som för närvaron lägga till en medlem som kom
    (medlemsnummer; namn för board/admin) på tillfällen med anmälan.
 
