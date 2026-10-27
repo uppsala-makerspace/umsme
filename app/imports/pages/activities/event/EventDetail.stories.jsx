@@ -75,7 +75,7 @@ export const GivesCertificate = {
         { memberId: "m3", name: "Cecilia Ceder", state: "approved", info: "", certificate: null },
       ],
       attendance: { open: true, closed: false, searchByName: false },
-      certificate: { mayCertify: true, noCertifierHost: false },
+      certificate: { ...glazing, mayCertify: true, noCertifierHost: false },
     },
   },
 };
@@ -87,7 +87,7 @@ export const NoCertifierHost = {
     ...attendanceHandlers,
     data: {
       ...GivesCertificate.args.data, attendance: { open: true, closed: false, searchByName: true },
-      certificate: { mayCertify: false, noCertifierHost: true },
+      certificate: { ...glazing, mayCertify: false, noCertifierHost: true },
     },
   },
 };

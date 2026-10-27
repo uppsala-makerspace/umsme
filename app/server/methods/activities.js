@@ -336,7 +336,10 @@ const certificateView = async (resolved, who) => {
   for (const memberId of resolved.hostMemberIds || []) {
     if (await canCertify(memberId, certificate)) { hostMayCertify = true; break; }
   }
-  return { mayCertify: await canCertify(who.member._id, certificate), noCertifierHost: !hostMayCertify };
+  return {
+    _id: certificate._id, name: certificate.name,
+    mayCertify: await canCertify(who.member._id, certificate), noCertifierHost: !hostMayCertify,
+  };
 };
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { localized } from "/imports/common/lib/groupRules";
 import { StatePill } from "./RegistrationBox";
 import Card from "./Card";
 
@@ -76,9 +77,55 @@ const ParticipantList = ({
   participants, attendance, takesRegistrations = true, busy, onAttended, onClose,
   certificate = null, notice = null, onGiveCertificate, onFindMembers, onAddAttendee,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || "sv";
   if (!participants) return null;
   const recording = attendance?.open;
+  // Below the name: the certificate held, linked; else, to one who came, a
+  // button to give it (for a host who may); a request is said beside it.
+  const certificateLine = (p) => {
+    if (!certificate) return null;
+    if (p.certificate === "held") {
+      return (
+        <Link to={`/certificates/${certificate._id}`} className="text-xs text-green-700 no-underline hover:underline">
+          {t("participantsCertificateLink", { name: localized(certificate.name, lang) })} &rarr;
+        </Link>
+      );
+    }
+    const give = certificate.mayCertify && p.state === "attended" && (
+      <button type="button" disabled={busy} onClick={() => onGiveCertificate(p.memberId)}
+        className={`${pillButton} border-green-700 text-green-800`}>
+        {t("participantsGiveCertificate")}
+      </button>
+    );
+    const asked = p.certificate === "pending" && (certificate.mayCertify ? (
+      <Link to={`/certifier-requests/${p.requestId}`} className="text-xs font-semibold text-red-700 no-underline hover:underline">
+        {t("participantsAskedForCertificate")} &rarr;
+      </Link>
+    ) : <span className="text-xs text-gray-500">{t("participantsAskedForCertificate")}</span>);
+    return give || asked ? <>{give}{asked}</> : null;
+  };
+  // Last on the row: marking one as come, or taking it back.
+  const attendanceButton = (p) => {
+    if (!recording) return null;
+    if (["approved", "checkedIn", "noShow"].includes(p.state)) {
+      return (
+        <button type="button" disabled={busy} onClick={() => onAttended(p.memberId, true)}
+          className={`${pillButton} border-brand-green text-brand-green`}>
+          {t("participantsCame")}
+        </button>
+      );
+    }
+    if (p.state === "attended") {
+      return (
+        <button type="button" disabled={busy} onClick={() => onAttended(p.memberId, false)}
+          className={`${pillButton} border-gray-300 text-gray-600`}>
+          {t("participantsUndo")}
+        </button>
+      );
+    }
+    return null;
+  };
   return (
     <Card
       title={t("participants")} kind="event"
@@ -97,39 +144,25 @@ const ParticipantList = ({
         <p className="text-gray-500 m-0">{t(takesRegistrations ? "participantsNone" : "participantsNoRegistration")}</p>
       ) : (
         <ul className="list-none p-0 m-0">
-          {participants.map((p) => (
-            <li key={p.memberId} className="flex items-center gap-2 py-2 border-b border-gray-100">
-              <div className="flex-1 min-w-0">
-                <span className="block">{p.name}</span>
+          {participants.map((p) => {
+            const below = certificateLine(p);
+            const button = attendanceButton(p);
+            return (
+              <li key={p.memberId} className="py-2 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="flex-1 min-w-0">{p.name}</span>
+                  <StatePill state={p.state} />
+                </div>
                 {p.info && <span className="block text-xs text-gray-500">{p.info}</span>}
-                {p.certificate === "held" && <span className="block text-xs text-green-700">{t("participantsHoldsCertificate")}</span>}
-                {p.certificate === "pending" && (certificate?.mayCertify ? (
-                  <Link to={`/certifier-requests/${p.requestId}`} className="block text-xs font-semibold text-red-700 no-underline hover:underline">
-                    {t("participantsAskedForCertificate")} &rarr;
-                  </Link>
-                ) : <span className="block text-xs text-gray-500">{t("participantsAskedForCertificate")}</span>)}
-              </div>
-              <StatePill state={p.state} />
-              {certificate?.mayCertify && p.state === "attended" && p.certificate !== "held" && (
-                <button type="button" disabled={busy} onClick={() => onGiveCertificate(p.memberId)}
-                  className={`${pillButton} border-green-700 text-green-800`}>
-                  {t("participantsGiveCertificate")}
-                </button>
-              )}
-              {recording && ["approved", "checkedIn", "noShow"].includes(p.state) && (
-                <button type="button" disabled={busy} onClick={() => onAttended(p.memberId, true)}
-                  className={`${pillButton} border-brand-green text-brand-green`}>
-                  {t("participantsCame")}
-                </button>
-              )}
-              {recording && p.state === "attended" && (
-                <button type="button" disabled={busy} onClick={() => onAttended(p.memberId, false)}
-                  className={`${pillButton} border-gray-300 text-gray-600`}>
-                  {t("participantsUndo")}
-                </button>
-              )}
-            </li>
-          ))}
+                {(below || button) && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">{below}</div>
+                    {button}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
       {notice && <p className="m-0 mt-2 text-sm" role="status">{notice}</p>}
@@ -149,7 +182,7 @@ ParticipantList.propTypes = {
   busy: PropTypes.bool,
   onAttended: PropTypes.func,
   onClose: PropTypes.func,
-  certificate: PropTypes.shape({ mayCertify: PropTypes.bool, noCertifierHost: PropTypes.bool }),
+  certificate: PropTypes.shape({ _id: PropTypes.string, name: PropTypes.object, mayCertify: PropTypes.bool, noCertifierHost: PropTypes.bool }),
   notice: PropTypes.string,
   onGiveCertificate: PropTypes.func,
   onFindMembers: PropTypes.func,

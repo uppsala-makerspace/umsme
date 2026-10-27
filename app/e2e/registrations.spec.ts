@@ -71,11 +71,14 @@ test.describe('Registrations', () => {
     const row = (name: string) => page.getByRole('listitem').filter({ hasText: name });
     await row(came).getByRole('button', { name: en.participantsCame }).click();
     await expect(row(came)).toContainText(en.registrationState_attended);
-    // Coming gives no certificate; the host gives it.
-    await expect(row(came)).not.toContainText(en.participantsHoldsCertificate);
+    // Coming gives no certificate; the host gives it, and the row links to it.
+    const held = en.participantsCertificateLink.replace('{{name}}', 'E2E glazing');
+    await expect(row(came).getByRole('link', { name: new RegExp(held) })).toHaveCount(0);
     await row(came).getByRole('button', { name: en.participantsGiveCertificate }).click();
     await expect(page.getByRole('status')).toHaveText(en.participantsCertificateGranted.replace('{{name}}', came));
-    await expect(row(came)).toContainText(en.participantsHoldsCertificate);
+    await expect(row(came).getByRole('link', { name: new RegExp(held) })).toBeVisible();
+    await expect(row(came).getByRole('button', { name: en.participantsGiveCertificate })).toHaveCount(0);
+    await expect(row(came).getByRole('button', { name: en.participantsUndo })).toBeVisible();
 
     // One who came without signing up, found by membership number.
     const added = testUsers.base;
