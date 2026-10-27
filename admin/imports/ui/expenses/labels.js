@@ -2,7 +2,8 @@ import { EXPENSE_STATUSES } from '/imports/expenses/expenseFilters';
 
 export { EXPENSE_STATUSES };
 
-export const STATUS_COLOR = { pending: 'default', submitted: 'info', confirmed: 'primary', rejected: 'error', reimbursed: 'success' };
+// Submitted, waiting for approval, is red as in the app; rejected is blue.
+export const STATUS_COLOR = { pending: 'default', submitted: 'error', confirmed: 'primary', rejected: 'info', reimbursed: 'success' };
 
 /** A reimbursed invoice is paid; the stored status is the same. */
 export const statusText = (expense) => (expense?.status === 'reimbursed' && expense?.type === 'invoice' ? 'paid' : expense?.status);

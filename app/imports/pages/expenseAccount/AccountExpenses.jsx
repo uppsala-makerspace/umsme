@@ -18,8 +18,8 @@ import { isInvoice } from "/imports/common/lib/expenseType";
 
 // Same status accents as the member's own expense list (ExpenseItem).
 const statusAccent = {
-  submitted: "border-l-blue-500",
-  rejected: "border-l-red-500 bg-red-50",
+  submitted: "border-l-red-600",
+  rejected: "border-l-blue-500 bg-blue-50",
   confirmed: "border-l-[#5fc86f]",
   reimbursed: "border-l-gray-400 bg-green-50",
 };

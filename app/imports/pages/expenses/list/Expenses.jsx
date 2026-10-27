@@ -54,9 +54,8 @@ const Expenses = ({
 
   // A row in the review tab: the submitter's name leads, since that is what
   // distinguishes the entries from each other here.
-  // Those waiting for my review have the red of the home page's and the tab's count.
-  const reviewRow = (e, waiting = false) => (
-    <ExpenseItem key={e._id} to={`/expenses/${e._id}`} status={e.status} waiting={waiting}>
+  const reviewRow = (e) => (
+    <ExpenseItem key={e._id} to={`/expenses/${e._id}`} status={e.status}>
       <span className="block font-semibold leading-snug truncate">{e.submitterName}</span>
       <span className="block text-sm text-gray-500 mt-0.5 truncate">
         {e.note || t("expenseUntitled", { date: formatDate(e.date, lang) })}
@@ -173,7 +172,7 @@ const Expenses = ({
             {toApprove.length === 0 ? (
               <p className="text-center text-gray-500 p-8 italic">{t("expenseNoneToApprove")}</p>
             ) : (
-              <ul className="list-none p-0 m-0">{toApprove.map((e) => reviewRow(e, true))}</ul>
+              <ul className="list-none p-0 m-0">{toApprove.map(reviewRow)}</ul>
             )}
           </section>
 
@@ -184,7 +183,7 @@ const Expenses = ({
               <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">
                 {t("expensesRecentlyReviewed")}
               </h3>
-              <ul className="list-none p-0 m-0">{recentlyReviewed.map((e) => reviewRow(e))}</ul>
+              <ul className="list-none p-0 m-0">{recentlyReviewed.map(reviewRow)}</ul>
             </section>
           )}
         </div>

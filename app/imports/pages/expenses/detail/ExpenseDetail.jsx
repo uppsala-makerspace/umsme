@@ -119,11 +119,11 @@ const ExpenseDetail = ({
       <p className="text-sm text-gray-500 mb-4">{t(statusLabelKey({ ...expense, type: invoice ? "invoice" : "receipt" }))}</p>
 
       {expense.status === "rejected" && expense.rejectionReason && (
-        <div className="p-4 mb-6 bg-red-50 border border-red-200 rounded-lg">
-          <span className="block text-xs font-semibold text-red-700 uppercase tracking-wide mb-1">
+        <div className="p-4 mb-6 bg-blue-50 border border-blue-200 rounded-lg">
+          <span className="block text-xs font-semibold text-blue-800 uppercase tracking-wide mb-1">
             {t("expenseRejectionReason")}
           </span>
-          <p className="m-0 text-sm text-red-700">{expense.rejectionReason}</p>
+          <p className="m-0 text-sm text-blue-800">{expense.rejectionReason}</p>
         </div>
       )}
 

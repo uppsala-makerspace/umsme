@@ -3,18 +3,16 @@ import { Link } from "react-router-dom";
 
 const statusClasses = {
   pending: "border-l-4 border-l-amber-500",
-  submitted: "border-l-4 border-l-blue-500",
-  rejected: "border-l-4 border-l-red-500 bg-red-50",
+  // Waiting for review: red, as the counts of those waiting for one's approval.
+  submitted: "border-l-4 border-l-red-600",
+  rejected: "border-l-4 border-l-blue-500 bg-blue-50",
   confirmed: "border-l-4 border-l-[#5fc86f]",
   reimbursed: "border-l-4 border-l-gray-400 bg-green-50",
 };
 
-// Waiting for the reader's review: red, as the counts of them are.
-const WAITING = "border-l-4 border-l-red-600";
-
-const ExpenseItem = ({ to, status, waiting = false, children }) => {
+const ExpenseItem = ({ to, status, children }) => {
   const base = "mb-3 rounded-lg bg-white border border-gray-200";
-  const statusCls = waiting ? WAITING : statusClasses[status] || "";
+  const statusCls = statusClasses[status] || "";
 
   return (
     <li className={`${base} ${statusCls}`}>
