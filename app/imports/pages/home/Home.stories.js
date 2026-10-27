@@ -146,6 +146,8 @@ export const MemberPayingWithGroups = {
     groupCount: 12,
     myGroupCount: 3,
     activityCount: 8,
+    expensesAllowed: true,
+    expensesToApprove: 2,
   },
 };
 

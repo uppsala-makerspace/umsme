@@ -82,6 +82,7 @@ export default () => {
       groupCount={memberInfo?.groupCounts?.total}
       myGroupCount={memberInfo?.groupCounts?.mine}
       activityCount={memberInfo?.activityCount}
+      expensesToApprove={memberInfo?.expensesToApprove}
     />
   </Layout>;
 };

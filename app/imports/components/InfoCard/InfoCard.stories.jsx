@@ -13,6 +13,8 @@ export const Grid = {
       <InfoCard href="slack://channel?team=T1&id=C1" Icon={HashtagIcon} title="Slack-kanal" subtitle="#träverkstaden" />
       <InfoCard href="https://tutorial.uppsalamakerspace.se" Icon={BookOpenIcon} title="Guider" />
       <InfoCard to="/expenses" Icon={BookOpenIcon} title="Utlägg" disabled />
+      <InfoCard to="/groups" Icon={UsersIcon} title="Grupper" subtitle="12 grupper" badge={3} />
+      <InfoCard to="/expenses?tab=approve" Icon={BookOpenIcon} title="Utlägg" badge={2} badgeTone="red" />
     </div>
   ),
 };

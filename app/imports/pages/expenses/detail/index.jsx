@@ -1,14 +1,17 @@
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Navigate, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import ExpenseDetail from "./ExpenseDetail.jsx";
 import { safeReturnTo } from "../utils";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 export default () => {
   const { expenseId } = useParams();
   const navigate = useNavigate();
+  // The home page's count of expenses to approve changes with a review.
+  const { refetch: refetchMemberInfo } = useContext(MemberInfoContext);
   const [searchParams] = useSearchParams();
   // Where to go when done. Set when the expense was started from (or opened
   // from) a group's expense account page; otherwise the member's own list.
@@ -95,6 +98,7 @@ export default () => {
     try {
       await Meteor.callAsync("expenses.approve", expenseId);
       await fetchData();
+      refetchMemberInfo();
     } catch (err) {
       alert(err.reason || err.message);
     }
@@ -103,6 +107,7 @@ export default () => {
     try {
       await Meteor.callAsync("expenses.unapprove", expenseId);
       await fetchData();
+      refetchMemberInfo();
     } catch (err) {
       alert(err.reason || err.message);
     }
@@ -111,6 +116,7 @@ export default () => {
     try {
       await Meteor.callAsync("expenses.reject", expenseId, reason);
       await fetchData();
+      refetchMemberInfo();
     } catch (err) {
       alert(err.reason || err.message);
     }

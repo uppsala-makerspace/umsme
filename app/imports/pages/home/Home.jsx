@@ -34,7 +34,7 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, expensesAllowed, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement, groupCount, myGroupCount, activityCount }) => {
+export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, expensesAllowed, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement, groupCount, myGroupCount, activityCount, expensesToApprove }) => {
   const { t, i18n } = useTranslation();
 
   if (loading) {
@@ -131,10 +131,12 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
         />
         <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />
         <InfoCard
-          to="/expenses"
+          to={expensesToApprove > 0 ? "/expenses?tab=approve" : "/expenses"}
           Icon={DocumentTextIcon}
           title={t("expenses")}
           disabled={!expensesAllowed}
+          badge={expensesAllowed ? expensesToApprove : 0}
+          badgeTone="red"
         />
         <InfoCard to="/store" Icon={ShoppingBagIcon} title={t("store")} />
         <InfoCard

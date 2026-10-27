@@ -6,7 +6,8 @@ import { Groups } from "/imports/common/collections/groups";
 import { Activities } from "/imports/common/collections/activities";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { memberStatus } from '/imports/common/lib/utils';
-import { findMemberForUser, findForUser, expenseAccessAllowed } from "/server/methods/utils";
+import { findMemberForUser, findForUser, expenseAccessAllowed, approvableAccountIdsFor } from "/server/methods/utils";
+import { Expenses } from "/imports/common/collections/expenses";
 import Invites from "/imports/common/collections/Invites";
 
 Meteor.methods({
@@ -104,6 +105,13 @@ Meteor.methods({
     // And the number of activities, for the Activities card.
     const activityCount = await Activities.find({}).countAsync();
 
-    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed, groupCounts, activityCount});
+    // The expenses waiting for this member's review, as in expenses.getToApprove:
+    // submitted, on an account they approve for, not their own. For the Expenses card.
+    const approvable = expensesAllowed ? await approvableAccountIdsFor(member) : [];
+    const expensesToApprove = approvable.length
+      ? await Expenses.find({ status: "submitted", expenseAccountId: { $in: approvable }, memberId: { $ne: member._id } }).countAsync()
+      : 0;
+
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed, groupCounts, activityCount, expensesToApprove});
   },
 });

@@ -8,15 +8,17 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
  * external link target. External web links open in a new tab and get an
  * open-in-new indicator, matching the guides button on the home page.
  * A disabled card is rendered grayed out and without its link. `badge`
- * renders a green counter bubble in the card's top-right corner (hidden
- * when falsy/zero).
+ * renders a counter bubble in the card's top-right corner (hidden when
+ * falsy/zero): green, or red (`badgeTone="red"`) for what waits on the reader.
  */
-const InfoCard = ({ to, href, Icon, title, subtitle, disabled, badge }) => {
+const InfoCard = ({ to, href, Icon, title, subtitle, disabled, badge, badgeTone = "green" }) => {
   const external = !disabled && !!href && href.startsWith("http");
   const content = (
     <>
       {badge > 0 && (
-        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-brand-green text-white text-xs font-bold flex items-center justify-center">
+        <span className={`absolute top-3 right-3 min-w-5 h-5 px-1 rounded-full text-white text-xs font-bold flex items-center justify-center ${
+          badgeTone === "red" ? "bg-red-600" : "bg-brand-green"
+        }`}>
           {badge}
         </span>
       )}
