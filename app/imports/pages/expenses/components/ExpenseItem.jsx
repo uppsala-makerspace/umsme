@@ -9,9 +9,12 @@ const statusClasses = {
   reimbursed: "border-l-4 border-l-gray-400 bg-green-50",
 };
 
-const ExpenseItem = ({ to, status, children }) => {
+// Waiting for the reader's review: red, as the counts of them are.
+const WAITING = "border-l-4 border-l-red-600";
+
+const ExpenseItem = ({ to, status, waiting = false, children }) => {
   const base = "mb-3 rounded-lg bg-white border border-gray-200";
-  const statusCls = statusClasses[status] || "";
+  const statusCls = waiting ? WAITING : statusClasses[status] || "";
 
   return (
     <li className={`${base} ${statusCls}`}>

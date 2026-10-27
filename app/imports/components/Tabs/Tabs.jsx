@@ -15,7 +15,9 @@ const Tabs = ({ tabs, activeTab, onTabChange }) => (
       >
         {tab.label}
         {tab.badge != null && (
-          <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 ml-2 bg-violet-500 text-white rounded-full text-xs font-semibold">
+          <span className={`inline-flex items-center justify-center min-w-5 h-5 px-1.5 ml-2 text-white rounded-full text-xs font-semibold ${
+            tab.badgeTone === "red" ? "bg-red-600" : "bg-violet-500"
+          }`}>
             {tab.badge}
           </span>
         )}
@@ -30,6 +32,8 @@ Tabs.propTypes = {
       key: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
       badge: PropTypes.number,
+      // Red for what waits on the reader (expenses to approve), as on the home page.
+      badgeTone: PropTypes.oneOf(["violet", "red"]),
     })
   ).isRequired,
   activeTab: PropTypes.string.isRequired,
