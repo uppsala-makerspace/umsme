@@ -58,6 +58,7 @@ const GroupDetail = lazyWithRetry(() => import('/imports/pages/groups/detail'));
 const GroupEdit = lazyWithRetry(() => import('/imports/pages/groups/edit'));
 const GroupRules = lazyWithRetry(() => import('/imports/pages/groups/rules'));
 const Activities = lazyWithRetry(() => import('/imports/pages/activities'));
+const EventCalendar = lazyWithRetry(() => import('/imports/pages/activities/calendar'));
 const ActivityDetail = lazyWithRetry(() => import('/imports/pages/activities/detail'));
 const ActivityEdit = lazyWithRetry(() => import('/imports/pages/activities/edit'));
 const EventDetail = lazyWithRetry(() => import('/imports/pages/activities/event'));
@@ -88,7 +89,7 @@ export const App = () => {
             <Route path="/storage" element={<Storage />} />
             <Route path="/liability" element={<Liability />} />
             <Route path="/account" element={<Account />} />
-            <Route path="/calendar" element={<Navigate to="/activities" replace />} />
+            <Route path="/calendar" element={<EventCalendar />} />
             <Route path="/map" element={<Map />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/certificates" element={<Certificates />} />

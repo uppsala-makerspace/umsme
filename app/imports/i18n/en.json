@@ -736,8 +736,6 @@
   "timeFieldPlaceholder": "HH:MM",
   "timeFieldWrong": "Write the time as HH:MM, for example 18:00",
   "timeFieldOpenClock": "Choose a time",
-  "activitiesTabEvents": "Events",
-  "activitiesTabActivities": "Activities",
   "activitiesNoPast": "No past events.",
   "eventsLoadMore": "Load more events",
   "eventsWhen": "Which events",

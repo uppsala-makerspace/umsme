@@ -7,6 +7,7 @@ import {
   BookOpenIcon,
   UserGroupIcon,
   ShoppingBagIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import Button from "../../components/Button";
 import InfoCard from "../../components/InfoCard";
@@ -112,6 +113,7 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
       <h3 className="text-center">{t("greeting2")} {name}!</h3>
       <section className="mt-4 mb-2 grid grid-cols-2 gap-3">
         <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />
+        <InfoCard to="/activities" Icon={SparklesIcon} title={t("activities")} />
         <InfoCard
           to="/groups"
           Icon={UserGroupIcon}

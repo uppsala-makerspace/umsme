@@ -94,7 +94,7 @@ export default () => {
     return <Navigate to="/login" />;
   }
 
-  const back = eventId ? `/events/${eventId}` : activityId ? `/activities/${activityId}` : "/activities";
+  const back = eventId ? `/events/${eventId}` : activityId ? `/activities/${activityId}` : "/calendar";
   const save = async () => {
     if (!values.startDay || !parseClock(values.startTime)) {
       setError(t("eventNeedsStart"));
@@ -120,7 +120,7 @@ export default () => {
   const remove = async () => {
     try {
       await Meteor.callAsync("events.remove", eventId);
-      navigate(stored.activityId ? `/activities/${stored.activityId}` : "/activities");
+      navigate(stored.activityId ? `/activities/${stored.activityId}` : "/calendar");
     } catch (err) {
       setError(err.reason || err.message);
     }

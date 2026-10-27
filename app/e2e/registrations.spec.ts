@@ -8,7 +8,7 @@ import en from '../imports/i18n/en.json';
 
 /** Open an event to come from the events tab, loading more until it shows. */
 const openEvent = async (page: Page, persona: string, name: string) => {
-  await openAs(page, persona, '/activities');
+  await openAs(page, persona, '/calendar');
   const link = page.getByRole('link', { name: new RegExp(name) }).first();
   const more = page.getByRole('button', { name: en.eventsLoadMore });
   await expect(link.or(more).first()).toBeVisible();
@@ -46,7 +46,7 @@ test.describe('Registrations', () => {
     await expect(page.getByText(en.registrationState_queued, { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: en.registrationLeaveQueue })).toBeVisible();
 
-    await page.goto('/activities');
+    await page.goto('/calendar');
     await page.getByRole('combobox', { name: en.eventsWhen }).selectOption('mine');
     await expect(page.getByRole('link', { name: /E2E full/ })).toContainText(en.registrationState_queued);
   });
@@ -69,7 +69,7 @@ test.describe('Registrations', () => {
   });
 
   test('a member shows interest in an activity', async ({ page }) => {
-    await openAs(page, 'member', '/activities?tab=activities');
+    await openAs(page, 'member', '/activities');
     await page.getByRole('link', { name: /E2E open activity/ }).click();
     await page.getByRole('button', { name: en.activityInterest }).click();
     await expect(page.getByText(en.activityInterested)).toBeVisible();

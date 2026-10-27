@@ -382,10 +382,11 @@ Meteor.methods({
     return {
       activities: activities.map((a) => activityView(a, lookup)),
       canCreateActivity: groups.some((g) => g.edit),
-      // A free-standing event, the calendar's New event, as an activity: see accessToFields.
-      canCreateEvent: groups.some((g) => g.edit),
     };
   },
+
+  /** Whether the caller may add a free-standing event, the calendar's New event: as an activity (see accessToFields). */
+  "events.mayCreate": async () => (await myGroups(await caller())).some((g) => g.edit),
 
   /**
    * A page of events (cancelled ones too, marked): those not yet over, soonest

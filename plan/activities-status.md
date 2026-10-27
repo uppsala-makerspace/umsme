@@ -57,9 +57,9 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 - "Find events by name" på aktivitetens flik Events.
 
 **Appen**
-- Kalender i bottennavigeringen (`/activities`).
-  - Flikarna Tillfällen och Aktiviteter.
-  - Väljaren Kommande, Tidigare och Mina anmälningar, tio tillfällen åt gången.
+- Kalender i bottennavigeringen (`/calendar`): tillfällena, med väljaren
+  Kommande, Tidigare och Mina anmälningar, tio tillfällen åt gången.
+- Aktiviteterna på egen sida (`/activities`), ett kort på startsidan.
 - Aktiviteter har vanliga tider (börjar/slutar, utan dag); ett nytt tillfälle
   får dem ifyllda och behöver bara sin dag, och längden räknas ur dem.
 - Aktivitets- och tillfällessidor i färgade kort.
@@ -124,8 +124,8 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   med `zonedDate`/`zonedParts` i `common/lib/days.js`, oavsett serverns
   tidszon och med sommar- och vintertid. Admins tester går igenom även med
   `TZ=UTC`.
-- **Google-kalendern i appen:** sidan är borta, `/calendar` leder till
-  `/activities`. "Lägg till i kalender" (en .ics-fil) finns nu på
+- **Google-kalendern i appen:** sidan är borta; `/calendar` är nu
+  tillfällenas kalender. "Lägg till i kalender" (en .ics-fil) finns nu på
   tillfällets sida. Appen behöver inte längre `public.googleCalendar`.
 
 ## Öppna frågor

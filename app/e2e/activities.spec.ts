@@ -16,11 +16,11 @@ const inDays = (n: number) => {
 
 test.describe('Activities', () => {
   test('a member sees the events to come and the activities, and may change none', async ({ page }) => {
-    await openAs(page, 'member', '/activities');
+    await openAs(page, 'member', '/calendar');
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toHaveCount(0);
 
-    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
+    await page.goto('/activities');
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await expect(page.getByRole('link', { name: CERAMICS, exact: true })).toBeVisible();
@@ -29,7 +29,7 @@ test.describe('Activities', () => {
   });
 
   test('an event to come may be added to one\'s own calendar', async ({ page }) => {
-    await openAs(page, 'member', '/activities');
+    await openAs(page, 'member', '/calendar');
     await page.getByRole('link', { name: new RegExp(WHEEL) }).first().click();
     await expect(page.getByRole('heading', { name: WHEEL, level: 2 })).toBeVisible();
     const add = page.getByRole('link', { name: en.addToCalendar });
@@ -39,19 +39,23 @@ test.describe('Activities', () => {
     expect(href).toContain(`SUMMARY:${WHEEL}`);
   });
 
-  test('the old Google calendar page leads to the calendar', async ({ page }) => {
-    await openAs(page, 'member', '/calendar');
+  test('the calendar is in the bottom navigation, the activities a card on the home page', async ({ page }) => {
+    await openAs(page, 'member', '/');
+    await page.getByRole('link', { name: en.activities, exact: true }).click();
     await expect(page).toHaveURL(/\/activities$/);
+    await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
+    await page.getByRole('navigation').getByRole('link', { name: en.navCalendar }).click();
+    await expect(page).toHaveURL(/\/calendar$/);
+    await expect(page.getByRole('combobox', { name: en.eventsWhen })).toBeVisible();
   });
 
   test('a cancelled event is marked', async ({ page }) => {
-    await openAs(page, 'member', '/activities');
+    await openAs(page, 'member', '/calendar');
     await expect(page.getByRole('link', { name: new RegExp(`${WHEEL}.*${en.eventCancelled}`) })).toBeVisible();
   });
 
   test('a member of the steering group adds an event, its hosts among the group', async ({ page }) => {
     await openAs(page, 'steering', '/activities');
-    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
     await page.getByRole('link', { name: `+ ${en.eventAdd}` }).click();
     await expect(page.getByRole('heading', { name: en.eventNew })).toBeVisible();
@@ -84,7 +88,6 @@ test.describe('Activities', () => {
 
   test('a member of the steering group changes the activity', async ({ page }) => {
     await openAs(page, 'steering', '/activities');
-    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
     await page.getByRole('link', { name: /E2E edit aktivitet/ }).click();
     await page.getByRole('link', { name: en.edit }).click();
     await page.getByLabel(en.activityFieldDescriptionSv).fill('Ändrad i appen.');
@@ -94,7 +97,6 @@ test.describe('Activities', () => {
 
   test('a member outside the group is sent back from the edit page', async ({ page }) => {
     await openAs(page, 'member', '/activities');
-    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
     const url = page.url();
     await page.goto(`${url}/edit`);
@@ -122,19 +124,18 @@ test.describe('Activities', () => {
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
   });
 
-  test('going back from an activity lands on the activities tab', async ({ page }) => {
+  test('going back from an activity lands on the activities', async ({ page }) => {
     await openAs(page, 'member', '/activities');
-    await page.getByRole('button', { name: en.activitiesTabActivities }).click();
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await page.goBack();
-    await expect(page).toHaveURL(/\?tab=activities$/);
+    await expect(page).toHaveURL(/\/activities$/);
     await expect(page.getByRole('link', { name: /E2E historik/ })).toBeVisible();
   });
 
   test('lists past events, latest first, ten at a time', async ({ page }) => {
     // Someone who may add events: the button is there for those to come only.
-    await openAs(page, 'steering', '/activities');
+    await openAs(page, 'steering', '/calendar');
     await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toBeVisible();
     await page.getByRole('combobox', { name: en.eventsWhen }).selectOption('past');
     await expect(page).toHaveURL(/\?when=past$/);
@@ -169,7 +170,7 @@ test.describe('Activities', () => {
   });
 
   test('an activity may keep its events to those who may change it', async ({ page }) => {
-    await openAs(page, 'discounted', '/activities?tab=activities');
+    await openAs(page, 'discounted', '/activities');
     await page.getByRole('link', { name: /E2E open activity/ }).click();
     await expect(page.getByRole('link', { name: `+ ${en.eventAdd}` })).toBeVisible();
     await page.goBack();
@@ -179,7 +180,7 @@ test.describe('Activities', () => {
   });
 
   test('the responsible books the events of an activity kept to its editors', async ({ page }) => {
-    await openAs(page, 'groupLeader', '/activities?tab=activities');
+    await openAs(page, 'groupLeader', '/activities');
     await page.getByRole('link', { name: /E2E kept activity/ }).click();
     await expect(page.getByRole('link', { name: `+ ${en.eventAdd}` })).toBeVisible();
     await page.getByRole('link', { name: en.edit }).click();
@@ -188,13 +189,13 @@ test.describe('Activities', () => {
 
   test('only those who may create activities see New event on the calendar', async ({ page }) => {
     // A member of a function group and an activity group, responsible for neither.
-    await openAs(page, 'discounted', '/activities');
+    await openAs(page, 'discounted', '/calendar');
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toHaveCount(0);
   });
 
   test('a steering group member moves an activity only to their group or an activity group below it', async ({ page }) => {
-    await openAs(page, 'steering', '/activities?tab=activities');
+    await openAs(page, 'steering', '/activities');
     await page.getByRole('link', { name: /E2E edit aktivitet/ }).click();
     await page.getByRole('link', { name: en.edit }).click();
     const owner = page.getByLabel(en.activityFieldGroup);
@@ -204,7 +205,7 @@ test.describe('Activities', () => {
 
   test('a member of the steering group gives an activity an image, and a new event one of its own', async ({ page }) => {
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
-    await openAs(page, 'steering', '/activities?tab=activities');
+    await openAs(page, 'steering', '/activities');
     await page.getByRole('link', { name: /E2E image aktivitet|E2E edit aktivitet/ }).first().click();
     await page.getByRole('link', { name: en.edit }).click();
     await page.locator('input[type="file"]').setInputFiles({ name: 'a.png', mimeType: 'image/png', buffer: png });
@@ -241,7 +242,7 @@ test.describe('Activities', () => {
   });
 
   test('a new event of an activity with usual times needs only its day', async ({ page }) => {
-    await openAs(page, 'steering', '/activities?tab=activities');
+    await openAs(page, 'steering', '/activities');
     await page.getByRole('link', { name: /E2E evening course/ }).click();
     await page.getByRole('link', { name: `+ ${en.eventAdd}` }).click();
     await expect(page.getByLabel(en.eventFieldStarts)).toHaveValue('18:30');

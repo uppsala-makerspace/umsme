@@ -147,7 +147,8 @@ Member-facing Progressive Web App built with React 19, react-router-dom, and Tai
 | `/certifier-requests/:attestationId` | CertifierRequestDetail | Certifier attestation review   |
 | `/liability`                       | Liability              | Liability document approval      |
 | `/storage`                         | Storage                | Storage unit management          |
-| `/calendar`                        | (redirect)             | To `/activities`; the Google Calendar page is gone |
+| `/calendar`                        | Calendar               | The events: to come, past, one's own (bottom navigation) |
+| `/activities`                      | Activities             | The activities (a card on the home page) |
 | `/map`                             | Map                    | Facility map                     |
 | `/contact`                         | Contact                | Contact information              |
 | `/install`                         | Install                | PWA installation instructions    |
