@@ -7,14 +7,15 @@ import { Certificates } from '/imports/common/collections/certificates';
 import { Attestations } from '/imports/common/collections/attestations';
 import { Members } from '/imports/common/collections/members';
 import { AuditLog } from '/imports/common/collections/auditLog';
-import { grantsOnAttendance } from '/imports/common/lib/activityRules';
 import { canCertify } from '/imports/common/server/certificates/canCertify';
-import { createEvent, updateEvent, currentEvent } from '/imports/common/server/activities/events';
-import { register, markAttended } from '/imports/common/server/activities/registrations';
+import { createEvent } from '/imports/common/server/activities/events';
+import {
+  register, markAttended, closeAttendance, addAttendee, giveCertificate,
+} from '/imports/common/server/activities/registrations';
 import { setActivityTransportsForTests } from '/imports/common/server/activities/notify';
 
-// Stage 5: the certificate an event gives, on attendance through a host who
-// may certify it, or by a host in the certificate's own flow.
+// Stage 5: the certificate an event gives, given by a host who may certify it
+// to one who came; and adding one who came without a seat.
 
 const prefix = 'targettest-';
 const userId = `${prefix}user`;
@@ -22,11 +23,12 @@ const board = { userId, isAdminish: true };
 const [host, other, p1, p2, roleHolder] = ['host', 'other', 'p1', 'p2', 'role'].map((k) => `${prefix}${k}`);
 const members = [host, other, p1, p2, roleHolder];
 const HOUR = 3600000;
-const inHours = (n) => new Date(Date.now() + n * HOUR);
 const DAY = 86400000;
+const inHours = (n) => new Date(Date.now() + n * HOUR);
 
 const rejects = (promise, error) => assert.rejects(promise, (e) => e.error === error);
 const attestationsOf = (memberId, certificateId) => Attestations.find({ memberId, certificateId }, { sort: { startDate: 1 } }).fetchAsync();
+const stateOf = async (eventId, memberId) => (await EventRegistrations.findOneAsync({ eventId, memberId }))?.state;
 
 const cleanup = async () => {
   const events = (await Events.find({ createdBy: userId }).fetchAsync()).map((e) => e._id);
@@ -68,11 +70,11 @@ describe('certificates events give', function () {
     await Attestations.removeAsync({ memberId: { $in: members } });
   });
 
-  // A started event giving glazing, hosted by `hosts`, with p1 and p2 signed up.
-  const startedEvent = async ({ grant = 'onAttendance', hosts = [host, other], certificateId = glazing } = {}) => {
+  // An event giving `certificateId` (glazing), starting in two days, with p1 and p2 signed up.
+  const makeEvent = async ({ certificateId = glazing, registration = 'required', hosts = [host, other] } = {}) => {
     const id = await createEvent({
-      name: { sv: `${prefix}Kurs` }, start: inHours(48), durationMinutes: 60, registration: 'required',
-      targetCertificateId: certificateId, certificateGrant: grant, hostMemberIds: hosts,
+      name: { sv: `${prefix}Kurs` }, start: inHours(48), durationMinutes: 60, registration,
+      targetCertificateId: certificateId, hostMemberIds: hosts,
     }, board);
     await register(id, p1, { userId });
     await register(id, p2, { userId });
@@ -88,34 +90,37 @@ describe('certificates events give', function () {
     assert.strictEqual(await canCertify(null, certificate), false);
   });
 
-  it('gives the certificate on attendance through a host who may certify it, and only then', async function () {
-    const id = await startedEvent();
-    assert.strictEqual(grantsOnAttendance(await currentEvent(id)), true);
-    assert.deepStrictEqual(await markAttended(id, p1, true, { userId, certifierMemberId: other, now: later }), { certificate: 'not-certifier' });
+  it('gives no certificate for coming; a host who may certify gives it, to one who came', async function () {
+    const id = await makeEvent();
+    await markAttended(id, p1, true, { userId, now: later });
     assert.strictEqual((await attestationsOf(p1, glazing)).length, 0);
 
-    assert.deepStrictEqual(await markAttended(id, p2, true, { userId, certifierMemberId: host, now: later }), { certificate: 'granted' });
-    const [given] = await attestationsOf(p2, glazing);
+    await rejects(giveCertificate(id, p1, { userId, certifierMemberId: other, now: later }), 'not-certifier');
+    await rejects(giveCertificate(id, p2, { userId, certifierMemberId: host, now: later }), 'bad-state');
+    assert.strictEqual(await giveCertificate(id, p1, { userId, certifierMemberId: host, now: later }), 'granted');
+    const [given] = await attestationsOf(p1, glazing);
     assert.strictEqual(given.certifierId, host);
     assert.ok(given.confirmedAt);
     assert.strictEqual(Math.round((given.endDate - given.startDate) / DAY), 365);
 
     // Taken back, the attendance leaves the certificate.
-    assert.deepStrictEqual(await markAttended(id, p2, false, { userId, certifierMemberId: host, now: later }), { certificate: null });
-    assert.strictEqual((await attestationsOf(p2, glazing)).length, 1);
+    await markAttended(id, p1, false, { userId, now: later });
+    assert.strictEqual((await attestationsOf(p1, glazing)).length, 1);
   });
 
   it('confirms a pending request, and gives one who holds it a new one from now', async function () {
-    const id = await startedEvent();
+    const id = await makeEvent();
     const requested = await Attestations.insertAsync({ certificateId: glazing, memberId: p1, startDate: inHours(-24), attempt: 1 });
-    await markAttended(id, p1, true, { userId, certifierMemberId: host, now: later });
+    await markAttended(id, p1, true, { userId, now: later });
+    await giveCertificate(id, p1, { userId, certifierMemberId: roleHolder, now: later });
     const [confirmed] = await attestationsOf(p1, glazing);
     assert.strictEqual(confirmed._id, requested);
-    assert.strictEqual(confirmed.certifierId, host);
+    assert.strictEqual(confirmed.certifierId, roleHolder);
 
-    // p2 holds it, running out soon: attending gives a new one, so for longer.
+    // p2 holds it, running out soon: given again, it lasts longer.
     await Attestations.insertAsync({ certificateId: glazing, memberId: p2, certifierId: host, startDate: inHours(-24 * 300), endDate: inHours(24 * 10), confirmedAt: inHours(-24 * 300) });
-    await markAttended(id, p2, true, { userId, certifierMemberId: host, now: later });
+    await markAttended(id, p2, true, { userId, now: later });
+    await giveCertificate(id, p2, { userId, certifierMemberId: host, now: later });
     const held = await attestationsOf(p2, glazing);
     assert.strictEqual(held.length, 2);
     assert.ok(held[1].endDate > inHours(24 * 300));
@@ -123,35 +128,35 @@ describe('certificates events give', function () {
 
   it('gives it not to one without its prerequisites', async function () {
     const advanced = await Certificates.insertAsync({ name: { sv: `${prefix}Avancerad` }, certifiers: [host], prerequisites: [basics] });
-    const id = await startedEvent({ certificateId: advanced });
-    assert.deepStrictEqual(await markAttended(id, p1, true, { userId, certifierMemberId: host, now: later }), { certificate: 'missing-prerequisites' });
+    const id = await makeEvent({ certificateId: advanced });
+    await markAttended(id, p1, true, { userId, now: later });
+    assert.strictEqual(await giveCertificate(id, p1, { userId, certifierMemberId: host, now: later }), 'missing-prerequisites');
     assert.strictEqual((await attestationsOf(p1, advanced)).length, 0);
-    await Attestations.insertAsync({ certificateId: basics, memberId: p2, certifierId: host, startDate: inHours(-24), confirmedAt: inHours(-24) });
-    assert.deepStrictEqual(await markAttended(id, p2, true, { userId, certifierMemberId: host, now: later }), { certificate: 'granted' });
   });
 
-  it('gives nothing on attendance when given by a host by hand', async function () {
-    const id = await startedEvent({ grant: 'manual' });
-    assert.deepStrictEqual(await markAttended(id, p1, true, { userId, certifierMemberId: host, now: later }), { certificate: null });
-    assert.strictEqual((await attestationsOf(p1, glazing)).length, 0);
+  it('takes hosts none of whom may certify it', async function () {
+    await makeEvent({ hosts: [other] });
   });
 
-  it('asks that one of its hosts may certify it, when the hosts are set', async function () {
-    await rejects(startedEvent({ hosts: [other] }), 'no-certifier-host');
-    // By hand, any host will do; and without hosts it waits for one.
-    await startedEvent({ grant: 'manual', hosts: [other] });
-    const id = await createEvent({
-      name: { sv: `${prefix}Kurs` }, start: inHours(48), durationMinutes: 60, targetCertificateId: glazing, certificateGrant: 'onAttendance',
-    }, board);
-    const event = await currentEvent(id);
-    await rejects(updateEvent(id, { name: event.name, start: event.start, end: event.end, targetCertificateId: glazing, certificateGrant: 'onAttendance', hostMemberIds: [other] }, board), 'no-certifier-host');
-    await updateEvent(id, { name: event.name, start: event.start, end: event.end, targetCertificateId: glazing, certificateGrant: 'onAttendance', hostMemberIds: [other, roleHolder] }, board);
+  it('adds one who came without a seat as come, while the attendance is recorded', async function () {
+    const id = await makeEvent({ registration: 'optional' });
+    await rejects(addAttendee(id, roleHolder, { userId, now: inHours(1) }), 'closed');
+    await addAttendee(id, roleHolder, { userId, now: later });
+    assert.strictEqual(await stateOf(id, roleHolder), 'attended');
+    assert.strictEqual((await Events.findOneAsync(id)).seatsTaken, 3);
+    await rejects(addAttendee(id, roleHolder, { userId, now: later }), 'registered');
+    // One with a seat is marked as come.
+    await addAttendee(id, p1, { userId, now: later });
+    assert.strictEqual(await stateOf(id, p1), 'attended');
+    assert.strictEqual((await Events.findOneAsync(id)).seatsTaken, 3);
+    // The one added may be given the certificate.
+    assert.strictEqual(await giveCertificate(id, roleHolder, { userId, certifierMemberId: host, now: later }), 'granted');
+    await closeAttendance(id, { userId, now: later });
+    await rejects(addAttendee(id, other, { userId, now: later }), 'closed');
   });
 
-  it('keeps the way it is given only with a certificate to give', async function () {
-    const id = await createEvent({ name: { sv: `${prefix}Kurs` }, start: inHours(48), durationMinutes: 60, targetCertificateId: glazing }, board);
-    const event = await currentEvent(id);
-    assert.strictEqual(event.targetCertificateId, glazing);
-    await rejects(createEvent({ name: { sv: `${prefix}Kurs` }, start: inHours(48), durationMinutes: 60, targetCertificateId: glazing, certificateGrant: 'often' }, board), 'bad-value');
+  it('adds nobody to an event without registration', async function () {
+    const id = await createEvent({ name: { sv: `${prefix}Kurs` }, start: inHours(48), durationMinutes: 60, registration: 'none' }, board);
+    await rejects(addAttendee(id, p1, { userId, now: later }), 'closed');
   });
 });

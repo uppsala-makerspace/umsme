@@ -8,10 +8,8 @@ import { clearEntityImage } from '/imports/common/server/entityImage';
 import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
 import { CalendarRemovals } from '/imports/common/collections/calendarRemovals';
 import {
-  EVENT_STATUSES, PENDING, disallowedHosts, eventEnd, resolveEvent, statusFor, initialStatus, grantsOnAttendance,
+  EVENT_STATUSES, PENDING, disallowedHosts, eventEnd, resolveEvent, statusFor, initialStatus,
 } from '/imports/common/lib/activityRules';
-import { Certificates } from '/imports/common/collections/certificates';
-import { canCertify } from '/imports/common/server/certificates/canCertify';
 import { cancelRegistrations, announceNewEvent } from './registrations';
 import { text } from '../groups/text';
 import { sharedChanges, ownerGroupId, currentOf, imageActions } from './shared';
@@ -34,24 +32,6 @@ const isDate = (value) => value instanceof Date && !Number.isNaN(value.getTime()
 const activeMemberIds = async (groupId) => (groupId
   ? (await GroupMemberships.find({ groupId, state: 'active' }, { fields: { memberId: 1 } }).fetchAsync()).map((m) => m.memberId)
   : []);
-
-/**
- * An event that gives its certificate on attendance gives it through a host
- * who may certify it, so one of its hosts must (board and admin too). Asked
- * when the hosts are set, or the event comes to give a certificate on
- * attendance, not on every change: an event without hosts passes.
- */
-const requireCertifierHost = async ({ hostMemberIds, resolved, before, activity }) => {
-  if (!hostMemberIds.length || !grantsOnAttendance(resolved)) return;
-  const was = before ? resolveEvent(before, activity) : null;
-  const sameHosts = before && [...(before.hostMemberIds || [])].sort().join() === [...hostMemberIds].sort().join();
-  if (sameHosts && grantsOnAttendance(was) && was.targetCertificateId === resolved.targetCertificateId) return;
-  const certificate = await Certificates.findOneAsync(resolved.targetCertificateId);
-  for (const memberId of hostMemberIds) {
-    if (await canCertify(memberId, certificate)) return;
-  }
-  throw new Meteor.Error('no-certifier-host', `The event gives ${certificate?.name?.sv || 'a certificate'} on attendance: one of its hosts must be able to certify it`);
-};
 
 const changesOf = async (fields, { isAdminish, before = null }) => {
   const changes = await sharedChanges(fields, { inherit: true });
@@ -85,7 +65,6 @@ const changesOf = async (fields, { isAdminish, before = null }) => {
   }
   const outside = disallowedHosts({ hostMemberIds, groupMemberIds: await activeMemberIds(groupId), isAdminish });
   if (outside.length) throw new Meteor.Error('bad-host', 'Hosts must be active members of the group');
-  await requireCertifierHost({ hostMemberIds, resolved, before, activity });
 
   Object.assign(changes.$set, { start: fields.start, end, status });
   const googleEventId = text(fields.googleEventId);

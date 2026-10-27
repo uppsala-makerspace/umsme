@@ -17,7 +17,7 @@ import { icsDataUrl } from "../components/ics";
 /** One event: when, what, who hosts it, and the activity it is of. */
 const EventDetail = ({
   loading, error, data, slackTeam, slackChannelIds,
-  busy, actionError, attendanceNotice, onRegister, onWithdraw, onTakeSeat, onCheckIn, onAttended, onCloseAttendance,
+  busy, actionError, attendanceNotice, onGiveCertificate, onFindMembers, onAddAttendee, onRegister, onWithdraw, onTakeSeat, onCheckIn, onAttended, onCloseAttendance,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
@@ -89,7 +89,8 @@ const EventDetail = ({
       </Card>
       <ParticipantList
         participants={data.participants} attendance={data.attendance} takesRegistrations={!!data.registration} busy={busy}
-        certificateGrant={data.certificateGrant} notice={attendanceNotice}
+        certificate={data.certificate} notice={attendanceNotice}
+        onGiveCertificate={onGiveCertificate} onFindMembers={onFindMembers} onAddAttendee={onAddAttendee}
         onAttended={onAttended} onClose={onCloseAttendance}
       />
       {event.activityId && activityName && (
@@ -108,6 +109,9 @@ EventDetail.propTypes = {
   busy: PropTypes.bool,
   actionError: PropTypes.string,
   attendanceNotice: PropTypes.string,
+  onGiveCertificate: PropTypes.func,
+  onFindMembers: PropTypes.func,
+  onAddAttendee: PropTypes.func,
   onRegister: PropTypes.func,
   onWithdraw: PropTypes.func,
   onTakeSeat: PropTypes.func,

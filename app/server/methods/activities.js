@@ -32,11 +32,10 @@ import {
   checkInApplies,
   checkInWindow,
   attendanceOpen,
-  grantsOnAttendance,
   PENDING,
 } from "/imports/common/lib/activityRules";
 import {
-  register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance,
+  register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance, addAttendee, giveCertificate,
 } from "/imports/common/server/activities/registrations";
 import { hasValidCertificate } from "/imports/common/server/activities/certificates";
 import {
@@ -197,9 +196,9 @@ const described = (doc, lookup) => ({
   requiredCertificate: (doc.registration || "none") !== "none" && doc.requiredCertificateId
     ? { _id: doc.requiredCertificateId, name: lookup.certificates.get(doc.requiredCertificateId) || null }
     : null,
-  // The certificate it gives, and how: on attendance, or by a host.
+  // The certificate it gives: by a host to those who came, or when one asks.
   targetCertificate: doc.targetCertificateId
-    ? { _id: doc.targetCertificateId, name: lookup.certificates.get(doc.targetCertificateId) || null, grant: doc.certificateGrant || "manual" }
+    ? { _id: doc.targetCertificateId, name: lookup.certificates.get(doc.targetCertificateId) || null }
     : null,
 });
 
@@ -288,8 +287,13 @@ const registrationView = async (event, activity, who, now = new Date()) => {
   };
 };
 
-/** Whether the member hosts the event, or may record its attendance as board/admin. */
-const mayRecordAttendance = (event, who) => who.adminish || (event.hostMemberIds || []).includes(who.member._id);
+/**
+ * Whether the member may keep the event's attendance (mark who came, add who
+ * came, close it): its hosts, those who may change it, and board/admin.
+ */
+const mayRecordAttendance = async (event, who) => who.adminish
+  || (event.hostMemberIds || []).includes(who.member._id)
+  || (await accessToEvent(who, event)).book;
 
 /**
  * The event's participants for its hosts: names and states, those who withdrew
@@ -322,9 +326,9 @@ const participantsView = async (event, resolved) => {
 
 /**
  * For the hosts of an event that gives a certificate: whether the caller may
- * certify it, and, giving it on attendance, whether none of its hosts may.
+ * give it, and whether none of its hosts may.
  */
-const certificateGrantView = async (resolved, who) => {
+const certificateView = async (resolved, who) => {
   if (!resolved.targetCertificateId) return null;
   const certificate = await Certificates.findOneAsync(resolved.targetCertificateId);
   if (!certificate) return null;
@@ -332,12 +336,10 @@ const certificateGrantView = async (resolved, who) => {
   for (const memberId of resolved.hostMemberIds || []) {
     if (await canCertify(memberId, certificate)) { hostMayCertify = true; break; }
   }
-  return {
-    onAttendance: grantsOnAttendance(resolved),
-    mayCertify: await canCertify(who.member._id, certificate),
-    noCertifierHost: grantsOnAttendance(resolved) && !hostMayCertify,
-  };
+  return { mayCertify: await canCertify(who.member._id, certificate), noCertifierHost: !hostMayCertify };
 };
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
  * Only one with a paid membership signs up, whether or not the board has
@@ -389,7 +391,6 @@ const SharedFields = {
   infoPlaceholder: Text,
   requiredCertificateId: Text,
   targetCertificateId: Text,
-  certificateGrant: Text,
   checkIn: Text,
   checkInOpensDaysBefore: Num,
   checkInOpensAt: Text,
@@ -497,7 +498,8 @@ Meteor.methods({
       ? await Members.find({ _id: { $in: view.hostMemberIds } }, { fields: { name: 1 } }).fetchAsync()
       : [];
     const access = await accessToEvent(who, event);
-    const hostsCanSee = mayRecordAttendance(event, who) || access.book;
+    const keepsAttendance = await mayRecordAttendance(event, who);
+    const hostsCanSee = keepsAttendance || access.book;
     const resolved = resolveEvent(event, activity);
     return {
       event: view,
@@ -505,11 +507,12 @@ Meteor.methods({
       registration: await registrationView(event, activity, who),
       // The participants, for the event's hosts and those who may change it.
       participants: hostsCanSee ? await participantsView(event, resolved) : null,
-      attendance: mayRecordAttendance(event, who)
-        ? { open: attendanceOpen(resolved), closed: !!event.attendanceClosedAt }
+      // For those who keep the attendance; adding who came by name is for board/admin.
+      attendance: keepsAttendance
+        ? { open: attendanceOpen(resolved), closed: !!event.attendanceClosedAt, searchByName: who.adminish }
         : null,
       // For those who see the participants: the certificate the event gives.
-      certificateGrant: hostsCanSee ? await certificateGrantView(resolved, who) : null,
+      certificate: hostsCanSee ? await certificateView(resolved, who) : null,
       activityName: activity?.name || null,
       canEdit: access.book,
       // The event as stored and its activity, for its edit form.
@@ -646,26 +649,58 @@ Meteor.methods({
     await checkIn(eventId, who.member._id, { userId: Meteor.userId() });
   },
 
-  /**
-   * A host marks who came, or takes it back; on an event that gives its
-   * certificate on attendance the host gives it, if they may certify it.
-   * Returns what became of the certificate (see markAttended).
-   */
+  /** A host marks who came, or takes it back. */
   "events.markAttended": async (eventId, memberId, attended) => {
     check(eventId, String);
     check(memberId, String);
     check(attended, Boolean);
     const who = await caller();
-    if (!mayRecordAttendance(await getEvent(eventId), who)) refuse();
-    return markAttended(eventId, memberId, attended, { userId: Meteor.userId(), certifierMemberId: who.member._id });
+    if (!(await mayRecordAttendance(await getEvent(eventId), who))) refuse();
+    await markAttended(eventId, memberId, attended, { userId: Meteor.userId() });
   },
 
   /** A host closes the attendance: the rest did not come. */
   "events.closeAttendance": async (eventId) => {
     check(eventId, String);
     const who = await caller();
-    if (!mayRecordAttendance(await getEvent(eventId), who)) refuse();
+    if (!(await mayRecordAttendance(await getEvent(eventId), who))) refuse();
     return closeAttendance(eventId, { userId: Meteor.userId() });
+  },
+
+  /**
+   * Members to add as come, for those who keep the attendance: by membership
+   * number, or, for board and admin, by name too (at most ten).
+   */
+  "events.findMembers": async (eventId, query) => {
+    check(eventId, String);
+    check(query, String);
+    const who = await caller();
+    if (!(await mayRecordAttendance(await getEvent(eventId), who))) refuse();
+    const wanted = query.trim();
+    if (!wanted) return [];
+    const selector = /^\d+$/.test(wanted) || !who.adminish
+      ? { mid: wanted }
+      : { name: { $regex: escapeRegex(wanted), $options: "i" } };
+    const found = await Members.find(selector, { fields: { name: 1, mid: 1 }, sort: { name: 1 }, limit: 10 }).fetchAsync();
+    return found.map((m) => ({ _id: m._id, name: m.name, mid: m.mid }));
+  },
+
+  /** A host adds a member who came, as come (see addAttendee). */
+  "events.addAttendee": async (eventId, memberId) => {
+    check(eventId, String);
+    check(memberId, String);
+    const who = await caller();
+    if (!(await mayRecordAttendance(await getEvent(eventId), who))) refuse();
+    await addAttendee(eventId, memberId, { userId: Meteor.userId() });
+  },
+
+  /** A host who may certify gives the event's certificate to one who came (see giveCertificate). */
+  "events.giveCertificate": async (eventId, memberId) => {
+    check(eventId, String);
+    check(memberId, String);
+    const who = await caller();
+    if (!(await mayRecordAttendance(await getEvent(eventId), who))) refuse();
+    return giveCertificate(eventId, memberId, { userId: Meteor.userId(), certifierMemberId: who.member._id });
   },
 
   /** Show interest in an activity, or stop. */

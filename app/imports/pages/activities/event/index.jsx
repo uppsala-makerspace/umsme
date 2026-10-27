@@ -18,7 +18,7 @@ export default () => {
 
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState(null);
-  // What became of the certificate the event gives, when someone was marked as come.
+  // What became of the certificate the event gives, when a host gave it.
   const [attendanceNotice, setAttendanceNotice] = useState(null);
 
   const load = () => Meteor.callAsync("events.get", eventId)
@@ -49,13 +49,11 @@ export default () => {
   const CERTIFICATE_NOTICES = {
     granted: "participantsCertificateGranted",
     "missing-prerequisites": "participantsCertificateMissingPrerequisites",
-    "not-certifier": "participantsCertificateNotCertifier",
   };
-  const markAttended = async (memberId, attended) => {
-    const result = await act("events.markAttended", memberId, attended);
-    const key = CERTIFICATE_NOTICES[result?.certificate];
+  const giveCertificate = async (memberId) => {
+    const result = await act("events.giveCertificate", memberId);
     const name = data?.participants?.find((p) => p.memberId === memberId)?.name || "";
-    if (key) setAttendanceNotice(t(key, { name }));
+    if (CERTIFICATE_NOTICES[result]) setAttendanceNotice(t(CERTIFICATE_NOTICES[result], { name }));
   };
 
   if (!userId && !loggingIn) {
@@ -72,7 +70,10 @@ export default () => {
         onTakeSeat={() => act("events.takeSeat")}
         onCheckIn={() => act("events.checkIn")}
         attendanceNotice={attendanceNotice}
-        onAttended={markAttended}
+        onAttended={(memberId, attended) => act("events.markAttended", memberId, attended)}
+        onGiveCertificate={giveCertificate}
+        onFindMembers={(query) => Meteor.callAsync("events.findMembers", eventId, query)}
+        onAddAttendee={(memberId) => act("events.addAttendee", memberId)}
         onCloseAttendance={() => act("events.closeAttendance")} />
     </Layout>
   );

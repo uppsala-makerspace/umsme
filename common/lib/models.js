@@ -59,10 +59,9 @@ const activityFields = ({ required }) => ({
   infoRequired: { label: "Asks for information", type: Boolean, optional: true },
   infoPlaceholder: { label: "What to tell", type: String, max: 200, optional: true },
   requiredCertificateId: { label: "Required certificate", type: String, max: 50, optional: true },
-  // Stage 5: the certificate it gives, and how: when a host who may certify
-  // it records one's attendance, or by a host in the certificate's own flow.
+  // Stage 5: the certificate it gives, by a host who may certify it to those
+  // who came, or in the certificate's own flow when one asks for it.
   targetCertificateId: { label: "Certificate it gives", type: String, max: 50, optional: true },
-  certificateGrant: { label: "How the certificate is given", type: String, allowedValues: ["onAttendance", "manual"], optional: true },
   // Check-in (stage 3): confirming beforehand that one comes, in a window
   // that opens and closes some days before the start at a time of day: the
   // default (the day before, 03:00 to 15:00), or a custom one.

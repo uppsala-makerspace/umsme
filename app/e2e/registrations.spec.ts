@@ -63,15 +63,41 @@ test.describe('Registrations', () => {
     await expect(row(stayed)).toContainText(en.registrationState_noShow);
   });
 
-  test('a host who may certify gives the certificate by recording who came', async ({ page }) => {
-    // E2E glazing course gives E2E glazing on attendance; steering hosts it and certifies glazing.
+  test('a host marks who came, adds one who came by number, and gives the certificate apart', async ({ page }) => {
+    // E2E glazing course gives E2E glazing and takes optional registration; steering hosts it and certifies glazing.
     await openEvent(page, 'steering', 'E2E glazing course');
-    await expect(page.getByRole('definition').filter({ hasText: 'E2E glazing' })).toContainText(en.activityGrantFact_onAttendance);
+    await expect(page.getByRole('definition').filter({ hasText: 'E2E glazing' })).toBeVisible();
     const came = testUsers.discounted.name as string;
-    const row = page.getByRole('listitem').filter({ hasText: came });
-    await row.getByRole('button', { name: en.participantsCame }).click();
+    const row = (name: string) => page.getByRole('listitem').filter({ hasText: name });
+    await row(came).getByRole('button', { name: en.participantsCame }).click();
+    await expect(row(came)).toContainText(en.registrationState_attended);
+    // Coming gives no certificate; the host gives it.
+    await expect(row(came)).not.toContainText(en.participantsHoldsCertificate);
+    await row(came).getByRole('button', { name: en.participantsGiveCertificate }).click();
     await expect(page.getByRole('status')).toHaveText(en.participantsCertificateGranted.replace('{{name}}', came));
-    await expect(row).toContainText(en.participantsHoldsCertificate);
+    await expect(row(came)).toContainText(en.participantsHoldsCertificate);
+
+    // One who came without signing up, found by membership number.
+    const added = testUsers.base;
+    await page.getByRole('textbox', { name: en.participantsAddSearch }).fill(added.mid as string);
+    await page.getByRole('button', { name: en.participantsAddSearch }).click();
+    await row(added.name as string).getByRole('button', { name: en.participantsAddCame }).click();
+    await expect(row(added.name as string)).toContainText(en.registrationState_attended);
+  });
+
+  test('board finds a member to add by name', async ({ page }) => {
+    await openEvent(page, 'board', 'E2E glazing course');
+    const wanted = testUsers.familyMember.name as string;
+    await page.getByRole('textbox', { name: en.participantsAddSearch }).fill(wanted.split(' ')[0]);
+    await page.getByRole('button', { name: en.participantsAddSearch }).click();
+    await expect(page.getByRole('listitem').filter({ hasText: wanted }).getByRole('button', { name: en.participantsAddCame })).toBeVisible();
+  });
+
+  test('a host who is no board member finds nobody by name', async ({ page }) => {
+    await openEvent(page, 'steering', 'E2E glazing course');
+    await page.getByRole('textbox', { name: en.participantsAddSearch }).fill(testUsers.member.name as string);
+    await page.getByRole('button', { name: en.participantsAddSearch }).click();
+    await expect(page.getByText(en.participantsAddNone)).toBeVisible();
   });
 
   test('a host who may certify sees who has asked for the certificate, and goes to the request', async ({ page }) => {

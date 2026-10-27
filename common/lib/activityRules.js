@@ -39,7 +39,6 @@ export const SHARED_FIELDS = [
   "infoPlaceholder",
   "requiredCertificateId",
   "targetCertificateId",
-  "certificateGrant",
   "checkIn",
   "checkInOpensDaysBefore",
   "checkInOpensAt",
@@ -261,8 +260,3 @@ export const mayTakeSeat = ({ registration, event, seatsTaken = 0, now = new Dat
 export const attendanceOpen = (event, now = new Date()) =>
   event.status !== "cancelled" && takesRegistrations(event) && now >= event.start && !event.attendanceClosedAt;
 
-
-export const CERTIFICATE_GRANTS = ["onAttendance", "manual"];
-
-/** Whether an event gives its certificate when a host records one's attendance (else a host gives it by hand). */
-export const grantsOnAttendance = (event) => !!event?.targetCertificateId && event.certificateGrant === "onAttendance";

@@ -373,14 +373,15 @@ export const buildDemo = async ({ random, people, now }) => {
   openEvening._id = await makeActivity({ ...openEvening, createdAt: days(-300) });
   await makeEvent({ activity: openEvening, start: at(-60, 18), hostMemberIds: [personas.board._id], createdAt: days(-80) });
   await makeEvent({ activity: openEvening, start: at(18, 18), hostMemberIds: [personas.board._id], createdAt: days(-5) });
-  // The laser cutter's introduction gives its certificate on attendance, by
-  // the laser keepers' certifiers: base, who has asked for it, is signed up.
+  // The laser cutter's introduction gives its certificate, by the laser
+  // keepers' certifiers to those who came: base, who has asked for it, is
+  // signed up.
   const laserIntro = {
     name: { sv: 'Laserintroduktion', en: 'Laser cutter introduction' },
-    description: { sv: 'Gå igenom laserskäraren med en av de laseransvariga, och få intyget när du varit med.', en: 'Go through the laser cutter with one of its keepers, and get the certificate for having come.' },
+    description: { sv: 'Gå igenom laserskäraren med en av de laseransvariga, som ger dig intyget efteråt.', en: 'Go through the laser cutter with one of its keepers, who gives you the certificate afterwards.' },
     groupId: laserGroup, workshopId: workshops.wood, spaceId: spaces.wood, categoryId: courses, durationMinutes: 90,
     membersOnly: true, published: true, registration: 'required', maxSeats: 4, requiredCertificateId: intro,
-    targetCertificateId: laser, certificateGrant: 'onAttendance',
+    targetCertificateId: laser,
   };
   laserIntro._id = await makeActivity({ ...laserIntro, createdAt: days(-30) });
   const laserEvent = await makeEvent({ activity: laserIntro, start: at(6, 18), hostMemberIds: [personas.steering._id], createdAt: days(-10) });

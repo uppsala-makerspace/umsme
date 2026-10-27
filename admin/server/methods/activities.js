@@ -45,7 +45,6 @@ const SharedFields = {
   infoPlaceholder: Text,
   requiredCertificateId: Text,
   targetCertificateId: Text,
-  certificateGrant: Text,
   checkIn: Text,
   checkInOpensDaysBefore: Num,
   checkInOpensAt: Text,

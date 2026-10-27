@@ -80,20 +80,27 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 
 **Mål-certifikat (etapp 5)**
 - En aktivitet (eller ett tillfälle) anger `targetCertificateId`, det
-  certifikat den ger, och `certificateGrant`: `onAttendance` eller `manual`
-  (standard).
-- Vid närvaro ger den värd som registrerar närvaron intyget, om värden får
-  certifiera det (`canCertify`, nu i `common/server/certificates/`) och
+  certifikat den ger. Det finns inget val av hur.
+- Närvaro och intyg är skilda: att markera "Kom" ger inget intyg. En värd som
+  får certifiera (`canCertify`, nu i `common/server/certificates/`) ger
+  intyget med "Ge intyget" vid en närvarande (`giveCertificate`), om
   deltagaren har förkunskaperna. En väntande begäran bekräftas; den som redan
   har intyget får ett nytt från i dag. Ångrad närvaro lämnar intyget.
-  Närvaro registrerad i admin ger inget intyg.
-- Minst en av värdarna måste få certifiera när värdarna sätts på ett sådant
-  tillfälle (`no-certifier-host`); tillfällen utan värdar godkänns, och
-  tillfällets sida varnar värdarna om ingen får certifiera.
-- Tillfällets och aktivitetens uppgifter visar "Ger certifikatet: X · vid
-  närvaro/delas ut av en värd". Värdarna ser per deltagare "Har intyget" eller
-  "Har begärt intyget" (länk till begäran för den som får certifiera), och
-  efter "Kom" vad som hände med intyget.
+  Deltagaren kan också begära intyget som vanligt.
+- Värdar sätts fritt; tillfällets sida varnar om ingen av dem får certifiera.
+- Tillfällets och aktivitetens uppgifter visar "Ger certifikatet: X". Värdarna
+  ser per deltagare "Har intyget" eller "Har begärt intyget" (länk till
+  begäran för den som får certifiera).
+
+**Lägga till närvarande**
+- På tillfällen med frivillig eller krävd anmälan kan den som för närvaron
+  (värdarna, de som får ändra tillfället, board/admin) lägga till en medlem
+  som kom, från start tills närvaron stängs (`addAttendee`). Medlemmen blir
+  närvarande direkt; varken medlemskap eller krav på intyg kontrolleras, och
+  platserna får överskridas.
+- Sökningen är på medlemsnummer; board och admin söker också på namn
+  (`events.findMembers`).
+- De som får ändra tillfället för nu närvaron, inte bara värdarna.
 
 ## Inställningar som behövs i produktion
 

@@ -30,12 +30,9 @@ const Facts = ({ item, kind, slackTeam, slackChannelIds }) => {
         {localized(item.requiredCertificate.name, lang) || t("activityFactCertificate")}
       </Link>],
     item.targetCertificate && [t("activityFactTargetCertificate"),
-      <>
-        <Link to={`/certificates/${item.targetCertificate._id}`} className="text-brand-green no-underline hover:underline">
-          {localized(item.targetCertificate.name, lang) || t("activityFactTargetCertificate")}
-        </Link>
-        {" · "}{t(`activityGrantFact_${item.targetCertificate.grant}`)}
-      </>],
+      <Link to={`/certificates/${item.targetCertificate._id}`} className="text-brand-green no-underline hover:underline">
+        {localized(item.targetCertificate.name, lang) || t("activityFactTargetCertificate")}
+      </Link>],
     item.slackChannel && [t("activityFieldSlack"),
       <a href={getSlackChannelUrl(item.slackChannel, slackTeam, slackChannelIds)} className="text-brand-green no-underline hover:underline">
         #{item.slackChannel.replace(/^#/, "")}

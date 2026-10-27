@@ -151,15 +151,15 @@ export const grantAttestation = async ({ certificateId, memberId, certifierId, s
 
 /**
  * Give a certificate for taking part in an event that gives it (plan/activities.md,
- * stage 5), with the host who recorded the attendance as certifier: their
- * right to certify is the caller's to check. The prerequisites must be held,
+ * stage 5), with the host giving it as certifier: their right to certify is
+ * the caller's to check. The prerequisites must be held,
  * as when a certifier confirms a request. A pending request is confirmed; else
  * a new attestation is granted from now, so one who holds it already has it
  * for longer.
  *
  * @returns {Promise<'granted'|'missing-prerequisites'>}
  */
-export const grantOnAttendance = async ({ certificateId, memberId, certifierId, now = new Date() }, { userId }) => {
+export const grantForEvent = async ({ certificateId, memberId, certifierId, now = new Date() }, { userId }) => {
   const certificate = await current(certificateId);
   const held = await Attestations.find({ memberId }).fetchAsync();
   if (findMissingPrerequisites(certificate, metCertificateIds(held, now)).length) return 'missing-prerequisites';

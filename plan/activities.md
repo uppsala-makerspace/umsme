@@ -354,13 +354,14 @@ som har en väntande begäran.
    *Byggd på grenen `activities` (oktober 2026), se Kalendern ovan.*
 5. **Mål-certifikat.** Visning på aktivitets- och eventsidor, hosts väntande
    begäranden, och `onAttendance` med kontrollen vid host-tilldelning.
-   *Byggd på grenen `activities` (oktober 2026)*, med: certifieraren är den
-   värd som registrerar närvaron, och bara om den får certifiera; en väntande
-   begäran bekräftas, annars ett nytt intyg från i dag (förlänger ett
-   befintligt); förkunskaperna kontrolleras; ångrad närvaro lämnar intyget;
-   närvaro registrerad i admin ger inget intyg. Kontrollen av värdar görs när
-   värdarna sätts eller tillfället börjar ge intyget vid närvaro, inte vid
-   varje ändring; tillfällen utan värdar godkänns.
+   *Byggd på grenen `activities` (oktober 2026)*, ändrad efter första
+   versionen: aktiviteten anger bara vilket certifikat den ger (inget
+   `certificateGrant`); närvaro ger inget intyg, utan en värd som får
+   certifiera ger det med en egen knapp vid en närvarande; en väntande
+   begäran bekräftas, annars ett nytt intyg från i dag; förkunskaperna
+   kontrolleras; värdar sätts fritt, med en varning om ingen får certifiera.
+   Dessutom kan den som för närvaron lägga till en medlem som kom
+   (medlemsnummer; namn för board/admin) på tillfällen med anmälan.
 
 ## Risker att bevaka
 

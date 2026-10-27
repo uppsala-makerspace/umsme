@@ -7,11 +7,12 @@ import { recordChange } from '/imports/common/server/auditLog';
 import {
   HOLDING, PENDING, resolveEvent, registrationOpen, statusFor, seatsLeft,
   mayWithdraw, mayTakeSeat, mayCheckIn, checkInApplies, checkInWindow, checkInClosed, lastCallDue, takesRegistrations, registerAgainAt,
-  grantsOnAttendance,
+  attendanceOpen,
 } from '/imports/common/lib/activityRules';
 import { Certificates } from '/imports/common/collections/certificates';
 import { canCertify } from '/imports/common/server/certificates/canCertify';
-import { grantOnAttendance } from '/imports/common/server/certificates/certificates';
+import { grantForEvent } from '/imports/common/server/certificates/certificates';
+import { Members } from '/imports/common/collections/members';
 import { hasValidCertificate } from './certificates';
 import * as notify from './notify';
 
@@ -225,15 +226,9 @@ export const setInterest = async (activityId, memberId, interested) => {
 /**
  * A host marks who came, or takes it back. One marked as not having come is
  * back where they were (with a seat); a no-show can be corrected to came.
- *
- * An event that gives its certificate on attendance gives it to one who came
- * when the host recording it (`certifierMemberId`) may certify it. Taking the
- * attendance back leaves the certificate.
- *
- * @returns {Promise<{ certificate: 'granted'|'missing-prerequisites'|'not-certifier'|null }>}
- *   what became of the certificate; null when the event gives none on attendance
+ * Coming gives no certificate: a host gives it (giveCertificate).
  */
-export const markAttended = async (eventId, memberId, attended, { userId, certifierMemberId = null, now = new Date() }) => {
+export const markAttended = async (eventId, memberId, attended, { userId, now = new Date() }) => {
   const { resolved } = await resolvedEvent(eventId);
   if (resolved.status === 'cancelled') throw new Meteor.Error('closed', 'The event was called off');
   if (now < resolved.start) throw new Meteor.Error('closed', 'Attendance is recorded from the start');
@@ -245,22 +240,56 @@ export const markAttended = async (eventId, memberId, attended, { userId, certif
     // A no-show held no seat in the count any more; coming takes it back.
     if (registration.state === 'noShow') await Events.updateAsync(eventId, { $inc: { seatsTaken: 1 } });
     await setState(registration, 'attended', { userId, now });
-    return { certificate: await certificateForAttending(resolved, memberId, { userId, certifierMemberId, now }) };
-  }
-  if (registration.state === 'attended') {
+  } else {
+    if (registration.state !== 'attended') return;
     const state = resolved.attendanceClosedAt ? 'noShow' : 'approved';
     if (state === 'noShow') await releaseSeats(eventId);
     await setState(registration, state, { userId, now });
   }
-  return { certificate: null };
 };
 
-const certificateForAttending = async (resolved, memberId, { userId, certifierMemberId, now }) => {
-  if (!grantsOnAttendance(resolved)) return null;
-  const certificate = await Certificates.findOneAsync(resolved.targetCertificateId);
-  if (!certificate) return null;
-  if (!(await canCertify(certifierMemberId, certificate))) return 'not-certifier';
-  return grantOnAttendance({ certificateId: certificate._id, memberId, certifierId: certifierMemberId, now }, { userId });
+/**
+ * A host adds a member who came without a seat, as come, while the attendance
+ * is recorded: from the start until it is closed. Neither the membership nor
+ * the certificate signing up asks for is asked here, and the seats may run
+ * over: they came. One who holds a seat already is marked as come.
+ */
+export const addAttendee = async (eventId, memberId, { userId, now = new Date() }) => {
+  const { resolved } = await resolvedEvent(eventId);
+  if (!attendanceOpen(resolved, now)) throw new Meteor.Error('closed', 'Participants are added while the attendance is recorded');
+  if (!(await Members.findOneAsync(memberId, { fields: { _id: 1 } }))) throw new Meteor.Error('not-found', 'No such member');
+  const existing = await EventRegistrations.findOneAsync({ eventId, memberId });
+  if (existing?.state === 'attended') throw new Meteor.Error('registered', 'Already marked as come');
+  if (existing && ['approved', 'checkedIn', 'noShow'].includes(existing.state)) {
+    await markAttended(eventId, memberId, true, { userId, now });
+    return;
+  }
+  const fields = { state: 'attended', stateChangedAt: now, registeredAt: now };
+  let registrationId;
+  if (existing) {
+    registrationId = existing._id;
+    await EventRegistrations.updateAsync(existing._id, { $set: fields, $unset: { seatReleasedAt: '' } });
+  } else {
+    registrationId = await EventRegistrations.insertAsync({ eventId, memberId, ...fields });
+  }
+  await Events.updateAsync(eventId, { $inc: { seatsTaken: 1 } });
+  await recordChange({ userId, domain: DOMAIN, action: 'addAttendee', docId: registrationId, before: existing || null, after: { eventId, memberId, ...fields } });
+};
+
+/**
+ * A host who may certify the certificate an event gives gives it to one who
+ * came, if they hold its prerequisites (see grantForEvent).
+ *
+ * @returns {Promise<'granted'|'missing-prerequisites'>}
+ */
+export const giveCertificate = async (eventId, memberId, { userId, certifierMemberId, now = new Date() }) => {
+  const { resolved } = await resolvedEvent(eventId);
+  const certificate = resolved.targetCertificateId ? await Certificates.findOneAsync(resolved.targetCertificateId) : null;
+  if (!certificate) throw new Meteor.Error('no-certificate', 'The event gives no certificate');
+  if (!(await canCertify(certifierMemberId, certificate))) throw new Meteor.Error('not-certifier', 'You may not certify this certificate');
+  const registration = await registrationOf(eventId, memberId);
+  if (registration.state !== 'attended') throw new Meteor.Error('bad-state', 'The certificate is given to those who came');
+  return grantForEvent({ certificateId: certificate._id, memberId, certifierId: certifierMemberId, now }, { userId });
 };
 
 /**

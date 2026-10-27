@@ -53,33 +53,41 @@ export const RecordingAttendance = withRegistration({ open: false }, {
   ],
   attendance: { open: true, closed: false },
 });
-// An event giving its certificate on attendance, its host certifying it: one
-// came and got it, one has asked for it, and a notice of the last one marked.
-const glazing = { _id: "c9", name: { sv: "Glasering" }, grant: "onAttendance" };
+// An event giving a certificate, its host certifying it: one came and got it,
+// one came and may get it, one has asked for it; and a notice of the last one given.
+const glazing = { _id: "c9", name: { sv: "Glasering" } };
+const attendanceHandlers = {
+  onGiveCertificate: fn(), onAddAttendee: fn(),
+  onFindMembers: async (query) => [{ _id: "m7", name: `Doris Dahl (${query})`, mid: "1234" }],
+};
 export const GivesCertificate = {
   args: {
     ...handlers,
+    ...attendanceHandlers,
     attendanceNotice: "Alice Andersson fick intyget.",
     data: {
       event: { ...events[0], targetCertificate: glazing }, hosts: hosts.slice(0, 1), activityName: intro.name, canEdit: false,
       registration: registration({ open: false }),
       participants: [
         { memberId: "m1", name: "Alice Andersson", state: "attended", info: "", certificate: "held" },
+        { memberId: "m4", name: "Erik Ek", state: "attended", info: "", certificate: null },
         { memberId: "m2", name: "Bertil Berg", state: "approved", info: "", certificate: "pending", requestId: "a1" },
         { memberId: "m3", name: "Cecilia Ceder", state: "approved", info: "", certificate: null },
       ],
-      attendance: { open: true, closed: false },
-      certificateGrant: { onAttendance: true, mayCertify: true, noCertifierHost: false },
+      attendance: { open: true, closed: false, searchByName: false },
+      certificate: { mayCertify: true, noCertifierHost: false },
     },
   },
 };
-// The same, but none of its hosts may certify it.
+// The same, seen by board or admin (who add by name too), none of its hosts
+// certifying it.
 export const NoCertifierHost = {
   args: {
     ...handlers,
+    ...attendanceHandlers,
     data: {
-      ...GivesCertificate.args.data, attendance: { open: true, closed: false },
-      certificateGrant: { onAttendance: true, mayCertify: false, noCertifierHost: true },
+      ...GivesCertificate.args.data, attendance: { open: true, closed: false, searchByName: true },
+      certificate: { mayCertify: false, noCertifierHost: true },
     },
   },
 };
