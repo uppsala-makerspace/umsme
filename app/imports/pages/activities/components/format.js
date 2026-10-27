@@ -14,9 +14,21 @@ const clock = (date, lang) =>
   new Date(date).toLocaleTimeString(locale(lang), { hour: "2-digit", minute: "2-digit" });
 
 /** The day and times; the end's day too when it is another. */
-export const eventWhen = (event, lang) => {
+export const eventWhen = (event, lang) => `${eventDay(event.start, lang)} ${eventTimes(event, lang)}`;
+
+/** The times only, for a list already by day; the end's day too when it is another. */
+export const eventTimes = (event, lang) => {
   const start = new Date(event.start);
   const end = new Date(event.end);
   const sameDay = start.toDateString() === end.toDateString();
-  return `${eventDay(start, lang)} ${clock(start, lang)}–${sameDay ? "" : `${eventDay(end, lang)} `}${clock(end, lang)}`;
+  return `${clock(start, lang)}–${sameDay ? "" : `${eventDay(end, lang)} `}${clock(end, lang)}`;
 };
+
+/** The short weekday and the day of the month, "tis" and "27", for a list by day. */
+export const weekdayAndDay = (date, lang) => {
+  const d = new Date(date);
+  return { weekday: d.toLocaleDateString(locale(lang), { weekday: "short" }).replace(/\.$/, ""), day: d.getDate() };
+};
+
+/** The month and year, "november 2026", heading a list by day. */
+export const monthOf = (date, lang) => new Date(date).toLocaleDateString(locale(lang), { month: "long", year: "numeric" });

@@ -5,14 +5,14 @@ import { useTranslation } from "react-i18next";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
-import EventRow from "../components/EventRow";
+import EventDays from "../components/EventDays";
 
 export const WHENS = ["upcoming", "past", "mine"];
 
 /**
  * The calendar: events to come, soonest first, those past, latest first, or
- * one's own registrations, a page at a time with a button for more, and a
- * link to add one for those who may.
+ * one's own registrations, by day, a page at a time with a button for more,
+ * and a link to add one for those who may.
  */
 const Calendar = ({ when, onWhen, events, loading, hasMore, loadingMore, onLoadMore, canCreateEvent }) => {
   const { t } = useTranslation();
@@ -43,9 +43,7 @@ const Calendar = ({ when, onWhen, events, loading, hasMore, loadingMore, onLoadM
         <p className="text-gray-500 text-center p-6">{t({ past: "activitiesNoPast", mine: "eventsMineNone" }[when] || "activitiesNoUpcoming")}</p>
       ) : (
         <>
-          <ul className="list-none p-0 m-0">
-            {events.map((event) => <EventRow key={event._id} event={event} />)}
-          </ul>
+          <EventDays events={events} />
           {hasMore && (
             <button
               type="button"

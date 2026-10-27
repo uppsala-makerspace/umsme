@@ -3,11 +3,14 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
-import { eventWhen } from "./format";
+import { eventTimes, eventWhen } from "./format";
 import { StatePill } from "./RegistrationBox";
 
-/** One event in a list: when, what, where; cancelled ones struck through. */
-const EventRow = ({ event }) => {
+/**
+ * One event in a list: when, what, where; cancelled ones struck through. In
+ * a list by day (`timesOnly`) the day is the list's, and the row says the times.
+ */
+const EventRow = ({ event, timesOnly = false }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const cancelled = event.status === "cancelled";
@@ -18,7 +21,7 @@ const EventRow = ({ event }) => {
         className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
       >
         <div className="flex-1 min-w-0">
-          <span className="block text-xs text-gray-500">{eventWhen(event, lang)}</span>
+          <span className="block text-xs text-gray-500">{timesOnly ? eventTimes(event, lang) : eventWhen(event, lang)}</span>
           <span className={`block font-semibold leading-snug ${cancelled ? "line-through text-gray-500" : ""}`}>
             {localized(event.name, lang)}
           </span>
@@ -52,6 +55,7 @@ const EventRow = ({ event }) => {
 
 EventRow.propTypes = {
   event: PropTypes.object.isRequired,
+  timesOnly: PropTypes.bool,
 };
 
 export default EventRow;
