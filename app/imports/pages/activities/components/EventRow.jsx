@@ -3,13 +3,14 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
-import { eventTimes, eventWhen } from "./format";
+import { eventTimes, eventWhen, plainText } from "./format";
 import { StatePill } from "./RegistrationBox";
 
 /**
  * One event in a list: when, what, where; cancelled ones struck through. In
  * a list by day (`timesOnly`) the day is the list's, and the row says the times
- * and, after them, the workshop when there is one.
+ * and, after them, the workshop when there is one; below the name the start of
+ * the description, as much as fits on a line, instead of the place and group.
  */
 const EventRow = ({ event, timesOnly = false }) => {
   const { t, i18n } = useTranslation();
@@ -30,7 +31,11 @@ const EventRow = ({ event, timesOnly = false }) => {
           <span className={`block font-semibold leading-snug ${cancelled ? "line-through text-gray-500" : ""}`}>
             {localized(event.name, lang)}
           </span>
-          {(event.spaceName || event.groupName) && (
+          {timesOnly ? (
+            plainText(localized(event.description, lang)) && (
+              <span className="block text-xs text-gray-500 mt-0.5 truncate">{plainText(localized(event.description, lang))}</span>
+            )
+          ) : (event.spaceName || event.groupName) && (
             <span className="block text-xs text-gray-500 mt-0.5">
               {[localized(event.spaceName, lang), localized(event.groupName, lang)].filter(Boolean).join(" · ")}
             </span>

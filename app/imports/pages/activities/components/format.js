@@ -32,3 +32,12 @@ export const weekdayAndDay = (date, lang) => {
 
 /** The month and year, "november 2026", heading a list by day. */
 export const monthOf = (date, lang) => new Date(date).toLocaleDateString(locale(lang), { month: "long", year: "numeric" });
+
+/** A description's text without its Markdown, on one line: the start of it for a list. */
+export const plainText = (markdown) => (markdown || "")
+  .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+  .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+  .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
+  .replace(/(\*\*|__|\*|_|`|~~)/g, "")
+  .replace(/\s+/g, " ")
+  .trim();

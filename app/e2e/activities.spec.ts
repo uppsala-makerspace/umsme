@@ -20,6 +20,8 @@ test.describe('Activities', () => {
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toBeVisible();
     // After the times, the workshop.
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toContainText(/\d{2}:\d{2} · Ceramics workshop/);
+    // Below the name the start of the description, not the place and the group.
+    await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).not.toContainText(CERAMICS);
     await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toHaveCount(0);
 
     await page.goto('/activities');
