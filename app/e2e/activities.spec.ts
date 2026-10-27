@@ -18,6 +18,8 @@ test.describe('Activities', () => {
   test('a member sees the events to come and the activities, and may change none', async ({ page }) => {
     await openAs(page, 'member', '/calendar');
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toBeVisible();
+    // After the times, the workshop.
+    await expect(page.getByRole('link', { name: new RegExp(WHEEL) }).first()).toContainText(/\d{2}:\d{2} · Ceramics workshop/);
     await expect(page.getByRole('link', { name: `+ ${en.eventNew}` })).toHaveCount(0);
 
     await page.goto('/activities');

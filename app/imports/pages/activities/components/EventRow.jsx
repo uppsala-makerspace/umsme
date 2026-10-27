@@ -8,7 +8,8 @@ import { StatePill } from "./RegistrationBox";
 
 /**
  * One event in a list: when, what, where; cancelled ones struck through. In
- * a list by day (`timesOnly`) the day is the list's, and the row says the times.
+ * a list by day (`timesOnly`) the day is the list's, and the row says the times
+ * and, after them, the workshop when there is one.
  */
 const EventRow = ({ event, timesOnly = false }) => {
   const { t, i18n } = useTranslation();
@@ -21,7 +22,11 @@ const EventRow = ({ event, timesOnly = false }) => {
         className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
       >
         <div className="flex-1 min-w-0">
-          <span className="block text-xs text-gray-500">{timesOnly ? eventTimes(event, lang) : eventWhen(event, lang)}</span>
+          <span className="block text-xs text-gray-500">
+            {timesOnly
+              ? [eventTimes(event, lang), event.workshopId && localized(event.workshopName, lang)].filter(Boolean).join(" · ")
+              : eventWhen(event, lang)}
+          </span>
           <span className={`block font-semibold leading-snug ${cancelled ? "line-through text-gray-500" : ""}`}>
             {localized(event.name, lang)}
           </span>
