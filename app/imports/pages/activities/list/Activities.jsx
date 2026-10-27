@@ -6,29 +6,47 @@ import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import { localized } from "/imports/common/lib/groupRules";
 import { PlannedCount } from "../components/ActivityLinks";
+import FilterSelect from "../components/FilterSelect";
+
+/** The filter's choice for activities shown at no workshop: the makerspace as a whole. */
+export const NO_WORKSHOP = "none";
+
+const workshopOf = (activity) => activity.workshopId || NO_WORKSHOP;
 
 /**
- * The activities, what the association usually does, each with the number of
- * its planned events as on a workshop's page, and a link to add one for those
- * who may.
+ * The activities, what the association usually does, each with the workshop
+ * it is shown at ("Makerspace" for none) and the number of its planned events
+ * as on a workshop's page. A filter by workshop (`workshop`: a workshop's id,
+ * NO_WORKSHOP, or "" for all) among those the activities are at, and a link to
+ * add one for those who may.
  */
-const Activities = ({ loading, activities, canCreateActivity }) => {
+const Activities = ({ loading, activities, canCreateActivity, workshop, onWorkshop }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
+  const workshopName = (activity) => (activity.workshopId ? localized(activity.workshopName, lang) : t("activityNoWorkshop"));
+  const workshops = [...new Map(activities.map((a) => [workshopOf(a), workshopName(a)])).entries()]
+    .sort(([a, nameA], [b, nameB]) => (a === NO_WORKSHOP) - (b === NO_WORKSHOP) || nameA.localeCompare(nameB, lang));
+  const shown = workshop ? activities.filter((a) => workshopOf(a) === workshop) : activities;
   return (
     <MainContent>
       {loading ? <Loader /> : (
         <>
-          {canCreateActivity && (
-            <div className="flex justify-end mb-3">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            {workshops.length > 1 ? (
+              <FilterSelect
+                label={t("activitiesWorkshopFilter")} value={workshop} onChange={onWorkshop}
+                options={[{ value: "", label: t("activitiesAllWorkshops") }, ...workshops.map(([value, label]) => ({ value, label }))]}
+              />
+            ) : <span />}
+            {canCreateActivity && (
               <Link to="/activities/new" className="text-sm font-semibold text-brand-green no-underline hover:underline">+ {t("activityNew")}</Link>
-            </div>
-          )}
-          {activities.length === 0 ? (
+            )}
+          </div>
+          {shown.length === 0 ? (
             <p className="text-gray-500 text-center p-6">{t("activitiesNone")}</p>
           ) : (
             <ul className="list-none p-0 m-0">
-              {activities.map((activity) => (
+              {shown.map((activity) => (
                 <li key={activity._id} className="mb-2">
                   <Link
                     to={`/activities/${activity._id}`}
@@ -40,7 +58,7 @@ const Activities = ({ loading, activities, canCreateActivity }) => {
                     <div className="flex-1 min-w-0">
                       <span className="block font-semibold leading-snug">{localized(activity.name, lang)}</span>
                       <span className="block text-xs text-gray-500 mt-0.5">
-                        {[localized(activity.categoryName, lang), localized(activity.groupName, lang) || t("activityAssociation")]
+                        {[workshopName(activity), localized(activity.categoryName, lang), localized(activity.groupName, lang) || t("activityAssociation")]
                           .filter(Boolean).join(" · ")}
                       </span>
                     </div>
@@ -63,12 +81,16 @@ Activities.propTypes = {
   loading: PropTypes.bool,
   activities: PropTypes.array,
   canCreateActivity: PropTypes.bool,
+  workshop: PropTypes.string,
+  onWorkshop: PropTypes.func,
 };
 
 Activities.defaultProps = {
   loading: false,
   activities: [],
   canCreateActivity: false,
+  workshop: "",
+  onWorkshop: () => {},
 };
 
 export default Activities;

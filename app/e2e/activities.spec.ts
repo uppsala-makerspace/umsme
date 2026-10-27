@@ -129,6 +129,27 @@ test.describe('Activities', () => {
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
   });
 
+  test('the activities say their workshop, and are filtered by it', async ({ page }) => {
+    await openAs(page, 'member', '/activities');
+    const wheel = page.getByRole('link', { name: new RegExp(WHEEL) });
+    await expect(wheel).toContainText('Ceramics workshop');
+    // One at no workshop is the makerspace's.
+    await expect(page.getByRole('main').getByText(new RegExp(`^${en.activityNoWorkshop} ·`)).first()).toBeVisible();
+    const filter = page.getByRole('combobox', { name: en.activitiesWorkshopFilter });
+    await filter.selectOption({ label: 'Ceramics workshop' });
+    await expect(page).toHaveURL(/\?workshop=/);
+    await expect(wheel).toBeVisible();
+    await expect(page.getByRole('main').getByText(new RegExp(`^${en.activityNoWorkshop} ·`))).toHaveCount(0);
+    await filter.selectOption({ label: en.activityNoWorkshop });
+    await expect(wheel).toHaveCount(0);
+    // Back from an activity, the choice is still there.
+    await page.getByRole('main').getByRole('listitem').first().getByRole('link').click();
+    await page.goBack();
+    await expect(page).toHaveURL(/\?workshop=none$/);
+    await filter.selectOption({ label: en.activitiesAllWorkshops });
+    await expect(page).toHaveURL(/\/activities$/);
+  });
+
   test('going back from an activity lands on the activities', async ({ page }) => {
     await openAs(page, 'member', '/activities');
     await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
