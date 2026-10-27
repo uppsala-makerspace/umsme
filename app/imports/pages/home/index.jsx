@@ -81,6 +81,7 @@ export default () => {
       hasNewAnnouncement={hasNewAnnouncement}
       groupCount={memberInfo?.groupCounts?.total}
       myGroupCount={memberInfo?.groupCounts?.mine}
+      activityCount={memberInfo?.activityCount}
     />
   </Layout>;
 };

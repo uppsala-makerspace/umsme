@@ -4,7 +4,7 @@ import { intro, fika } from "../components/fixtures";
 export default {
   title: "Pages/Activities/List",
   component: Activities,
-  args: { activities: [intro, fika], canCreateActivity: true },
+  args: { activities: [{ ...intro, plannedEvents: 2 }, { ...fika, plannedEvents: 0 }], canCreateActivity: true },
 };
 
 export const All = {};

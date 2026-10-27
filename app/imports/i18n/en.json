@@ -592,6 +592,8 @@
   "engageInWorkshop": "Get involved in the workshop",
 
   "groups": "Groups",
+  "activitiesCountSubtitle_one": "{{count}} activity",
+  "activitiesCountSubtitle_other": "{{count}} activities",
   "groupsCountSubtitle_one": "{{count}} group",
   "groupsCountSubtitle_other": "{{count}} groups",
   "noGroups": "No groups yet.",

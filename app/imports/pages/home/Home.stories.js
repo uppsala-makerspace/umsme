@@ -145,6 +145,7 @@ export const MemberPayingWithGroups = {
     liabilityOutdated: false,
     groupCount: 12,
     myGroupCount: 3,
+    activityCount: 8,
   },
 };
 
@@ -158,6 +159,7 @@ export const MemberPayingNotInAnyGroup = {
     liabilityOutdated: false,
     groupCount: 12,
     myGroupCount: 0,
+    activityCount: 8,
   },
 };
 

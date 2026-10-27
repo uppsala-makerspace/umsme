@@ -5,8 +5,13 @@ import { useTranslation } from "react-i18next";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import { localized } from "/imports/common/lib/groupRules";
+import { PlannedCount } from "../components/ActivityLinks";
 
-/** The activities, what the association usually does, with a link to add one for those who may. */
+/**
+ * The activities, what the association usually does, each with the number of
+ * its planned events as on a workshop's page, and a link to add one for those
+ * who may.
+ */
 const Activities = ({ loading, activities, canCreateActivity }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
@@ -39,7 +44,10 @@ const Activities = ({ loading, activities, canCreateActivity }) => {
                           .filter(Boolean).join(" · ")}
                       </span>
                     </div>
-                    <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+                    <span className="flex items-center ml-2">
+                      <PlannedCount count={activity.plannedEvents || 0} />
+                      <span className="text-gray-400 text-xl ml-2">&rarr;</span>
+                    </span>
                   </Link>
                 </li>
               ))}

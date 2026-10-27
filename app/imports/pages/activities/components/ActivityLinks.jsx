@@ -4,13 +4,31 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
 
+/** The number of an activity's planned events, green when there are any. */
+export const PlannedCount = ({ count = 0 }) => {
+  const { t } = useTranslation();
+  return (
+    <span
+      title={t("activityPlannedEvents", { count })}
+      aria-label={t("activityPlannedEvents", { count })}
+      className={`min-w-6 h-6 px-2 rounded-full text-xs font-semibold flex items-center justify-center ${
+        count ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-500"
+      }`}
+    >
+      {count}
+    </span>
+  );
+};
+
+PlannedCount.propTypes = { count: PropTypes.number };
+
 /**
  * Activities as links, each with the number of its planned events. Marked
  * (`marked`) with the activities' light blue and a blue edge, as a
  * workshop's steering group is with green, where they stand among events.
  */
 export const ActivityList = ({ activities, marked = false }) => {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const lang = i18n.language || "sv";
   return (
     <ul className="list-none p-0 m-0">
@@ -24,15 +42,7 @@ export const ActivityList = ({ activities, marked = false }) => {
           >
             <span className="font-semibold">{localized(activity.name, lang)}</span>
             <span className="flex items-center ml-2">
-              <span
-                title={t("activityPlannedEvents", { count: activity.plannedEvents || 0 })}
-                aria-label={t("activityPlannedEvents", { count: activity.plannedEvents || 0 })}
-                className={`min-w-6 h-6 px-2 rounded-full text-xs font-semibold flex items-center justify-center ${
-                  activity.plannedEvents ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-500"
-                }`}
-              >
-                {activity.plannedEvents || 0}
-              </span>
+              <PlannedCount count={activity.plannedEvents || 0} />
               <span className="text-gray-400 text-xl ml-2">&rarr;</span>
             </span>
           </Link>

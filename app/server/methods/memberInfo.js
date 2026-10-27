@@ -3,6 +3,7 @@ import { Members } from "/imports/common/collections/members";
 import { Memberships } from "/imports/common/collections/memberships";
 import { LiabilityDocuments } from "/imports/common/collections/liabilityDocuments";
 import { Groups } from "/imports/common/collections/groups";
+import { Activities } from "/imports/common/collections/activities";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { memberStatus } from '/imports/common/lib/utils';
 import { findMemberForUser, findForUser, expenseAccessAllowed } from "/server/methods/utils";
@@ -100,6 +101,9 @@ Meteor.methods({
       }).countAsync(),
     };
 
-    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed, groupCounts});
+    // And the number of activities, for the Activities card.
+    const activityCount = await Activities.find({}).countAsync();
+
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed, groupCounts, activityCount});
   },
 });

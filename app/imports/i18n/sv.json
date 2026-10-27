@@ -591,6 +591,8 @@
   "engageInWorkshop": "Engagera dig i verkstaden",
 
   "groups": "Grupper",
+  "activitiesCountSubtitle_one": "{{count}} aktivitet",
+  "activitiesCountSubtitle_other": "{{count}} aktiviteter",
   "groupsCountSubtitle_one": "{{count}} grupp",
   "groupsCountSubtitle_other": "{{count}} grupper",
   "noGroups": "Inga grupper ännu.",

@@ -61,15 +61,20 @@ const EVENTS_PAGE = 10;
  */
 export const activityLinks = async (selector) => {
   const activities = await Activities.find(selector, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
-  const now = new Date();
-  const links = [];
-  for (const activity of activities) {
-    links.push({
-      ...activity,
-      plannedEvents: await Events.find({ activityId: activity._id, end: { $gte: now }, status: { $ne: "cancelled" } }).countAsync(),
-    });
-  }
-  return links;
+  const planned = await plannedEventCounts(activities.map((a) => a._id));
+  return activities.map((activity) => ({ ...activity, plannedEvents: planned.get(activity._id) || 0 }));
+};
+
+/** How many events each activity has planned, to come and not cancelled, by its id: in one query. */
+const plannedEventCounts = async (activityIds) => {
+  const counts = new Map();
+  if (!activityIds.length) return counts;
+  const events = await Events.find(
+    { activityId: { $in: activityIds }, end: { $gte: new Date() }, status: { $ne: "cancelled" } },
+    { fields: { activityId: 1 } },
+  ).fetchAsync();
+  for (const { activityId } of events) counts.set(activityId, (counts.get(activityId) || 0) + 1);
+  return counts;
 };
 
 /**
@@ -379,8 +384,9 @@ Meteor.methods({
     const groups = await myGroups(who);
     const activities = await Activities.find({}, { sort: { "name.sv": 1 } }).fetchAsync();
     const lookup = await lookups(activities);
+    const planned = await plannedEventCounts(activities.map((a) => a._id));
     return {
-      activities: activities.map((a) => activityView(a, lookup)),
+      activities: activities.map((a) => ({ ...activityView(a, lookup), plannedEvents: planned.get(a._id) || 0 })),
       canCreateActivity: groups.some((g) => g.edit),
     };
   },

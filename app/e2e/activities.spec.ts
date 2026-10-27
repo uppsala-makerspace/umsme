@@ -41,9 +41,14 @@ test.describe('Activities', () => {
 
   test('the calendar is in the bottom navigation, the activities a card on the home page', async ({ page }) => {
     await openAs(page, 'member', '/');
-    await page.getByRole('link', { name: en.activities, exact: true }).click();
+    // The card says how many activities there are, as the groups' says how many groups.
+    const card = page.getByRole('link', { name: new RegExp(`^${en.activities}.*\\d+ activit`) });
+    await card.click();
     await expect(page).toHaveURL(/\/activities$/);
-    await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
+    // Each with the number of its planned events, as on a workshop's page.
+    const wheel = page.getByRole('link', { name: new RegExp(WHEEL) });
+    await expect(wheel).toBeVisible();
+    await expect(wheel.getByLabel(/planned event/)).toBeVisible();
     await page.getByRole('navigation').getByRole('link', { name: en.navCalendar }).click();
     await expect(page).toHaveURL(/\/calendar$/);
     await expect(page.getByRole('combobox', { name: en.eventsWhen })).toBeVisible();

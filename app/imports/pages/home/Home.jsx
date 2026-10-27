@@ -34,7 +34,7 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, expensesAllowed, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement, groupCount, myGroupCount }) => {
+export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, expensesAllowed, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement, groupCount, myGroupCount, activityCount }) => {
   const { t, i18n } = useTranslation();
 
   if (loading) {
@@ -112,8 +112,12 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
       <Logo />
       <h3 className="text-center">{t("greeting2")} {name}!</h3>
       <section className="mt-4 mb-2 grid grid-cols-2 gap-3">
-        <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />
-        <InfoCard to="/activities" Icon={SparklesIcon} title={t("activities")} />
+        <InfoCard
+          to="/activities"
+          Icon={SparklesIcon}
+          title={t("activities")}
+          subtitle={activityCount > 0 ? t("activitiesCountSubtitle", { count: activityCount }) : undefined}
+        />
         <InfoCard
           to="/groups"
           Icon={UserGroupIcon}
@@ -125,6 +129,7 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
           }
           badge={myGroupCount}
         />
+        <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />
         <InfoCard
           to="/expenses"
           Icon={DocumentTextIcon}
