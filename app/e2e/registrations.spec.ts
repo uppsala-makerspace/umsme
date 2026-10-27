@@ -79,6 +79,11 @@ test.describe('Registrations', () => {
     await expect(row(came).getByRole('link', { name: new RegExp(held) })).toBeVisible();
     await expect(row(came).getByRole('button', { name: en.participantsGiveCertificate })).toHaveCount(0);
     await expect(row(came).getByRole('button', { name: en.participantsUndo })).toBeVisible();
+    // The certificate given opens as any request does, to comment on.
+    await row(came).getByRole('link', { name: new RegExp(held) }).click();
+    await expect(page).toHaveURL(/\/certifier-requests\//);
+    await expect(page.getByText(en.publicComment)).toBeVisible();
+    await page.goBack();
 
     // One who came without signing up, found by membership number.
     const added = testUsers.base;

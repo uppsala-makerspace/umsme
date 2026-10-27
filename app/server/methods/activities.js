@@ -297,8 +297,8 @@ const mayRecordAttendance = async (event, who) => who.adminish
 
 /**
  * The event's participants for its hosts: names and states, those who withdrew
- * left out. With a certificate it gives, where each stands with it: `held`, or
- * `pending` with the request's id.
+ * left out. With a certificate it gives, where each stands with it: `held` or
+ * `pending`, with the attestation's id (the latest held, or the request).
  */
 const participantsView = async (event, resolved) => {
   const registrations = await EventRegistrations.find(
@@ -314,9 +314,11 @@ const participantsView = async (event, resolved) => {
     : [];
   const standing = (memberId) => {
     const own = attestations.filter((a) => a.memberId === memberId);
-    if (metCertificateIds(own).has(certificateId)) return { certificate: "held" };
+    const held = own.filter((a) => metCertificateIds([a]).has(certificateId))
+      .sort((a, b) => (b.confirmedAt || b.startDate) - (a.confirmedAt || a.startDate))[0];
+    if (held) return { certificate: "held", attestationId: held._id };
     const pending = own.find((a) => !a.certifierId);
-    return pending ? { certificate: "pending", requestId: pending._id } : { certificate: null };
+    return pending ? { certificate: "pending", attestationId: pending._id } : { certificate: null };
   };
   return registrations.map((r) => ({
     memberId: r.memberId, name: names.get(r.memberId) || "", state: r.state, info: r.info || "",

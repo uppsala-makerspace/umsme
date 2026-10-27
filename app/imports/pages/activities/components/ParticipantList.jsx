@@ -81,13 +81,15 @@ const ParticipantList = ({
   const lang = i18n.language || "sv";
   if (!participants) return null;
   const recording = attendance?.open;
-  // Below the name: the certificate held, linked; else, to one who came, a
-  // button to give it (for a host who may); a request is said beside it.
+  // Below the name: the certificate held, linked, for a host who may certify
+  // it to the attestation, where they comment on it as on any request; else,
+  // to one who came, a button to give it; a request is said beside it.
   const certificateLine = (p) => {
     if (!certificate) return null;
     if (p.certificate === "held") {
       return (
-        <Link to={`/certificates/${certificate._id}`} className="text-xs text-green-700 no-underline hover:underline">
+        <Link to={certificate.mayCertify ? `/certifier-requests/${p.attestationId}` : `/certificates/${certificate._id}`}
+          className="text-xs text-green-700 no-underline hover:underline">
           {t("participantsCertificateLink", { name: localized(certificate.name, lang) })} &rarr;
         </Link>
       );
@@ -99,7 +101,7 @@ const ParticipantList = ({
       </button>
     );
     const asked = p.certificate === "pending" && (certificate.mayCertify ? (
-      <Link to={`/certifier-requests/${p.requestId}`} className="text-xs font-semibold text-red-700 no-underline hover:underline">
+      <Link to={`/certifier-requests/${p.attestationId}`} className="text-xs font-semibold text-red-700 no-underline hover:underline">
         {t("participantsAskedForCertificate")} &rarr;
       </Link>
     ) : <span className="text-xs text-gray-500">{t("participantsAskedForCertificate")}</span>);
