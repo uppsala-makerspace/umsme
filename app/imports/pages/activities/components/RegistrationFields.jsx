@@ -22,8 +22,8 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
     ...extra,
   });
   const flag = (name, label) => (event ? (
-    <SelectField id={`registration-${name}`} label={label} value={values[name]} onChange={set(name)}
-      empty={inherited ? asActivity(yesNo(inherited[name])) : t("activityNo")}
+    <SelectField id={`registration-${name}`} label={label} value={values[name] || (inherited ? "" : "no")} onChange={set(name)}
+      empty={inherited ? asActivity(yesNo(inherited[name])) : undefined}
       options={[{ value: "yes", label: t("activityYes") }, { value: "no", label: t("activityNo") }]} />
   ) : (
     <CheckField id={`registration-${name}`} label={label} checked={!!values[name]} onChange={set(name)} />
@@ -54,8 +54,8 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
   return (
     <>
       <Card title={t("registrationHeading")} kind={kind}>
-        <SelectField id="registration-registration" label={t("registrationFieldKind")} value={values.registration} onChange={set("registration")}
-          empty={event ? (inherited ? asActivity(t(`registrationKind_${inherited.registration || "none"}`)) : t("registrationKind_none")) : undefined}
+        <SelectField id="registration-registration" label={t("registrationFieldKind")} value={values.registration || (inherited ? "" : "none")} onChange={set("registration")}
+          empty={inherited ? asActivity(t(`registrationKind_${inherited.registration || "none"}`)) : undefined}
           options={kinds} />
         {registration !== "none" && (
           <>
@@ -72,8 +72,8 @@ const RegistrationFields = ({ values, onChange, choices, inherited = null, event
       {registration !== "none" && (
         <Card title={t("formCardCheckIn")} kind={kind}>
           <SelectField id="registration-checkIn" label={t("registrationFieldCheckIn")} hint={t("registrationFieldCheckInHint")}
-            value={values.checkIn} onChange={chooseCheckIn}
-            empty={event ? (inherited ? asActivity(t(`registrationCheckIn_${inherited.checkIn || "none"}`)) : t("registrationCheckIn_none")) : undefined}
+            value={values.checkIn || (inherited ? "" : "none")} onChange={chooseCheckIn}
+            empty={inherited ? asActivity(t(`registrationCheckIn_${inherited.checkIn || "none"}`)) : undefined}
             options={checkIns} />
           {checkIn !== "none" && (
             <>

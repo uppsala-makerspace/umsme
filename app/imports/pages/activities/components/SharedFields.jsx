@@ -31,8 +31,8 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
   };
   const yesNo = (value) => t(value ? "activityYes" : "activityNo");
   const flag = (name, label) => (event ? (
-    <SelectField id={`activity-${name}`} label={label} value={values[name]} onChange={set(name)}
-      empty={inherited ? t("activityFieldAsActivity", { value: yesNo(inherited[name]) }) : t("activityNo")}
+    <SelectField id={`activity-${name}`} label={label} value={values[name] || (inherited ? "" : "no")} onChange={set(name)}
+      empty={inherited ? t("activityFieldAsActivity", { value: yesNo(inherited[name]) }) : undefined}
       options={[{ value: "yes", label: t("activityYes") }, { value: "no", label: t("activityNo") }]} />
   ) : (
     <CheckField id={`activity-${name}`} label={label} checked={!!values[name]} onChange={set(name)} />

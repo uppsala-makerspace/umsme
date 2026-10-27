@@ -269,6 +269,11 @@ test.describe('Activities', () => {
   test('one who may create activities may make a free-standing event', async ({ page }) => {
     await openAs(page, 'groupLeader', '/events/new');
     await expect(page.getByLabel(en.eventFieldActivity).locator('option', { hasText: en.eventFieldFree })).toHaveCount(1);
+    // Free-standing, nothing is as an activity: a yes/no is just yes or no, no registration just one choice.
+    await page.getByLabel(en.eventFieldActivity).selectOption({ label: en.eventFieldFree });
+    await expect(page.getByLabel(en.activityFieldMembersOnly).locator('option')).toHaveText([en.activityYes, en.activityNo]);
+    await expect(page.getByLabel(en.activityFieldMembersOnly)).toHaveValue('no');
+    await expect(page.getByLabel(en.registrationFieldKind).locator('option', { hasText: en.registrationKind_none })).toHaveCount(1);
   });
 
   test('a new event of an activity with usual times needs only its day', async ({ page }) => {

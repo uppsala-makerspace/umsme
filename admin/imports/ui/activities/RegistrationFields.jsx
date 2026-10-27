@@ -34,8 +34,8 @@ export const RegistrationFields = ({ values, onChange, inherited = null, event =
     };
   };
   const flag = (name, title) => (event ? (
-    <TextField label={title} select fullWidth slotProps={native} value={values[name]} onChange={(e) => onChange(name, e.target.value)}>
-      <option value="">{inherited ? asActivity(yesNo(inherited[name])) : '(No)'}</option>
+    <TextField label={title} select fullWidth slotProps={native} value={values[name] || (inherited ? '' : 'no')} onChange={(e) => onChange(name, e.target.value)}>
+      {inherited && <option value="">{asActivity(yesNo(inherited[name]))}</option>}
       <option value="yes">Yes</option>
       <option value="no">No</option>
     </TextField>
@@ -74,9 +74,9 @@ export const RegistrationFields = ({ values, onChange, inherited = null, event =
     <>
       <FormCard title="Registration" kind={kind}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="Registration" select fullWidth slotProps={native} value={values.registration}
+          <TextField label="Registration" select fullWidth slotProps={native} value={values.registration || (inherited ? '' : 'none')}
             onChange={(e) => onChange('registration', e.target.value)}>
-            {event && <option value="">{inherited ? asActivity(label(REGISTRATIONS, inherited.registration || 'none')) : '(No registration)'}</option>}
+            {inherited && <option value="">{asActivity(label(REGISTRATIONS, inherited.registration || 'none'))}</option>}
             {REGISTRATIONS.map(([value, title]) => <option key={value} value={value}>{title}</option>)}
           </TextField>
           {takes && <TextField label="Seats" fullWidth helperText="Empty: no limit" {...text('maxSeats', { inputMode: 'numeric' })} />}
@@ -95,10 +95,10 @@ export const RegistrationFields = ({ values, onChange, inherited = null, event =
       </FormCard>
       {takes && (
         <FormCard title="Check-in" kind={kind}>
-          <TextField label="Check-in beforehand" select fullWidth slotProps={native} sx={{ mb: 2 }} value={values.checkIn}
+          <TextField label="Check-in beforehand" select fullWidth slotProps={native} sx={{ mb: 2 }} value={values.checkIn || (inherited ? '' : 'none')}
             onChange={(e) => chooseCheckIn(e.target.value)}
             helperText="Those with a seat confirm they come; whoever has not by the time it closes loses the seat to the queue.">
-            {event && <option value="">{inherited ? asActivity(label(CHECK_INS, inherited.checkIn || 'none')) : '(No)'}</option>}
+            {inherited && <option value="">{asActivity(label(CHECK_INS, inherited.checkIn || 'none'))}</option>}
             {CHECK_INS.map(([value, title]) => <option key={value} value={value}>{title}</option>)}
           </TextField>
           {checkIn !== 'none' && (

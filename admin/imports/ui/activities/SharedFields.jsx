@@ -46,8 +46,8 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
     : empty);
   const categoryOptions = categories.map((c) => ({ value: c._id, label: c.name?.sv || c._id }));
   const flag = (name, label) => (event ? (
-    <TextField label={label} select fullWidth slotProps={native} value={values[name]} onChange={(e) => onChange(name, e.target.value)}>
-      <option value="">{inherited ? `(As the activity: ${yesNo(inherited[name])})` : '(No)'}</option>
+    <TextField label={label} select fullWidth slotProps={native} value={values[name] || (inherited ? '' : 'no')} onChange={(e) => onChange(name, e.target.value)}>
+      {inherited && <option value="">{`(As the activity: ${yesNo(inherited[name])})`}</option>}
       <option value="yes">Yes</option>
       <option value="no">No</option>
     </TextField>
