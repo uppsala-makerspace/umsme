@@ -717,7 +717,7 @@
   "eventDeleteConfirm": "Ta bort tillfället för gott? Vill du bara ställa in det, ändra status till inställt.",
   "eventCancelled": "Inställt",
   "eventConfirmed": "Bekräftat",
-  "eventOf": "Hör till aktivitet:",
+  "eventOf": "Läs mer om aktiviteten:",
   "eventHosts": "Värdar",
   "eventNoHosts": "Inga värdar ännu.",
   "eventFieldActivity": "Aktivitet",
