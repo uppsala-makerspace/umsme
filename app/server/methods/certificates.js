@@ -1,38 +1,10 @@
 import { Meteor } from "meteor/meteor";
-import { Accounts } from "meteor/accounts-base";
-import { Roles } from "meteor/roles";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Attestations } from "/imports/common/collections/attestations";
 import { Members } from "/imports/common/collections/members";
 import { findMemberForUser } from "./utils";
 import { findMissingPrerequisites, metCertificateIds } from "/imports/common/lib/rules";
-
-/**
- * Check if a member can certify a given certificate.
- * A member can certify if they are in the certificate's certifiers list
- * or have the certificate's certifierRole.
- */
-const canCertify = async (memberId, certificate) => {
-  if (!memberId || !certificate) return false;
-
-  // Check if member is in the certifiers list
-  if (certificate.certifiers && certificate.certifiers.includes(memberId)) {
-    return true;
-  }
-
-  // Check if member has the certifier role
-  if (certificate.certifierRole) {
-    const member = await Members.findOneAsync(memberId);
-    if (member) {
-      const user = Accounts.findUserByEmail(member.email);
-      if (user && await Roles.userIsInRoleAsync(user._id, certificate.certifierRole)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-};
+import { canCertify } from "/imports/common/server/certificates/canCertify";
 
 Meteor.methods({
   /**
