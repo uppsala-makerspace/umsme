@@ -81,8 +81,8 @@ const ParticipantList = ({
   const lang = i18n.language || "sv";
   if (!participants) return null;
   const recording = attendance?.open;
-  // Below the name: the certificate held, or a request commented on and not
-  // confirmed, linked for a host who may certify it to the request, where
+  // Below the name: the certificate held (green), or a request commented on
+  // and not confirmed (red: not passed yet), linked for a host who may certify it to the request, where
   // they comment or certify as on any; else, to one who came, a button to the
   // request through which they certify or comment (made if there is none). A
   // request of one not marked as come is linked, or said.
@@ -94,7 +94,7 @@ const ParticipantList = ({
       const held = p.certificate === "held";
       return (
         <Link to={certificate.mayCertify ? request(p.attestationId) : `/certificates/${certificate._id}`}
-          className={`text-xs no-underline hover:underline ${held ? "text-green-700" : "text-gray-700"}`}>
+          className={`text-xs no-underline hover:underline ${held ? "text-green-700" : "text-red-700"}`}>
           {t(held ? "participantsCertificateLink" : "participantsCommentLink", { name })} &rarr;
         </Link>
       );
