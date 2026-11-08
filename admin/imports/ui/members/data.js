@@ -17,6 +17,7 @@ export const familyCandidatePage = (patronId) => ({ page, pageSize, sort, search
 
 export const getMember = (memberId) => Meteor.callAsync('members.get', memberId);
 export const memberDetail = (memberId) => Meteor.callAsync('members.detail', memberId);
+export const memberActivity = (memberId, scope = 'member') => Meteor.callAsync('members.activity', memberId, scope);
 export const createMember = (fields, { infamily, paymentId }) => Meteor.callAsync('members.create', fields, { infamily: infamily || null, paymentId: paymentId || null });
 export const updateMember = (memberId, fields, expectedUpdatedAt) => Meteor.callAsync('members.update', memberId, fields, expectedUpdatedAt ?? null);
 export const setRegistered = (memberId, on) => Meteor.callAsync('members.setRegistered', memberId, on);

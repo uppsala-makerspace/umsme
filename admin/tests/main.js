@@ -37,6 +37,7 @@ import "./memberList.tests";
 import "./memberStats.tests";
 import "./lockOverview.tests";
 import "./doorUnlocks.tests";
+import "./memberActivity.tests";
 import "./expenseAccounts.tests";
 import "./payments.tests";
 import "./messages.tests";

@@ -15,6 +15,7 @@ import runMigrations from './migrations';
 import { runSeedFromEnv } from '/imports/common/server/seed/runFromEnv';
 import { ensureStorageIndexes } from '/imports/common/server/storageIndexes';
 import { ensureAuditLogIndexes } from '/imports/common/server/auditLog';
+import { ensureDoorUnlockIndexes } from '/imports/common/server/doors/doorUnlocks';
 import { ensureStorageMessageTemplates } from '/imports/common/server/storageMessages/defaults';
 import { applyMailUrlFromSettings } from '/imports/common/server/mailUrl';
 import { setUpMails } from './mail/mails';
@@ -27,6 +28,7 @@ Meteor.startup(async () => {
   await setupAccounts();
   await ensureStorageIndexes();
   await ensureAuditLogIndexes();
+  await ensureDoorUnlockIndexes();
   await setUpMails();
   await ensureStorageMessageTemplates();
   await runMigrations();

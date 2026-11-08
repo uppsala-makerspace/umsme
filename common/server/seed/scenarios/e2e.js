@@ -194,11 +194,16 @@ export const buildE2e = async ({ people, now }) => {
   ], { now });
 
   // Door openings: Maja through the app and the lock, and a guest the lock
-  // could not tie to a member.
-  for (const [daysAgo, method] of [[1, 'app'], [3, 'app'], [6, 'danalock']]) {
+  // could not tie to a member. Maja's two older ones are for the Activity
+  // tab: one in an earlier month of the last year, one beyond it that the tab
+  // does not count.
+  for (const [daysAgo, method] of [[1, 'app'], [3, 'app'], [6, 'danalock'], [200, 'app'], [400, 'danalock']]) {
     await DoorUnlocks.insertAsync({ timestamp: days(-daysAgo), door: 'outerDoor', memberid: members.member._id, method });
   }
   await DoorUnlocks.insertAsync({ timestamp: days(-2), door: 'outerDoor', extid: 'user-guest-gast@example.org', method: 'danalock' });
+  // Frida, in Fredrik's family, has opened the door; Fredrik has not. The
+  // Activity tab shows the difference between his openings and the family's.
+  await DoorUnlocks.insertAsync({ timestamp: days(-4), door: 'outerDoor', memberid: members.familyMember._id, method: 'app' });
 
   // Expense accounts: the ceramics account with its steering group's two
   // members as approvers and a budget, and one each for the admin tests that

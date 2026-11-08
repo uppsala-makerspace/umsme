@@ -15,7 +15,9 @@ export const READ_ONLY_METHODS = new Set([
   "login",
   "logout",
 
-  // Member info and app data
+  // Member info and app data. findInfoForUser updates lastSeenAt, but not on
+  // a switch token (touchLastSeen's selector excludes it), so it stays read
+  // only here.
   "findInfoForUser",
   "findMembershipsForUser",
   "checkIsAdmin",

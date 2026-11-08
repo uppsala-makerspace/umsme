@@ -7,6 +7,7 @@ import "./tests/init";
 import "./api/expenseReceipt";
 import "./api/workshopImage";
 import { ensureStorageIndexes } from "/imports/common/server/storageIndexes";
+import { ensureDoorUnlockIndexes } from "/imports/common/server/doors/doorUnlocks";
 import { applyMailUrlFromSettings } from "/imports/common/server/mailUrl";
 import { runSeedFromEnv } from "/imports/common/server/seed/runFromEnv";
 import { enforceReadOnlyWhileImpersonating } from "./impersonation/readOnly";
@@ -19,5 +20,6 @@ Meteor.startup(async () => {
   enforceReadOnlyWhileImpersonating();
   const seedSummary = await runSeedFromEnv();
   await ensureStorageIndexes();
+  await ensureDoorUnlockIndexes();
   if (seedSummary) console.log(seedSummary().map((line) => `[seed] ${line}`).join("\n"));
 });

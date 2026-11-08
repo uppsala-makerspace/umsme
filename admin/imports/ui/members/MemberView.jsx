@@ -43,14 +43,14 @@ const familyColumns = [
 
 /** The tabs a member has: a family member has no memberships or messages of their own. */
 export const tabsFor = (member) => (member.infamily
-  ? ['details', 'family', 'comments', 'certificates']
-  : ['details', 'family', 'memberships', 'messages', 'comments', 'certificates']);
+  ? ['details', 'family', 'comments', 'certificates', 'activity']
+  : ['details', 'family', 'memberships', 'messages', 'comments', 'certificates', 'activity']);
 
 // Forms and text to read are at most FORM_WIDTH wide; lists take the full width.
 const FORM_TABS = ['details', 'comments'];
 const Panel = ({ tab, shown, children }) => <TabPanel value={tab} shown={shown} label={LABELS[tab]} form={FORM_TABS.includes(tab)}>{children}</TabPanel>;
 
-const LABELS = { details: 'Details', family: 'Family members', memberships: 'Memberships', messages: 'Messages', comments: 'Comments', certificates: 'Certificates' };
+const LABELS = { details: 'Details', family: 'Family members', memberships: 'Memberships', messages: 'Messages', comments: 'Comments', certificates: 'Certificates', activity: 'Activity' };
 
 /**
  * A member's page: their status, registration and exclusion above, and tabs
@@ -63,11 +63,12 @@ const LABELS = { details: 'Details', family: 'Family members', memberships: 'Mem
  *           busy?: boolean, error?: string, notice?: string, now?: Date,
  *           tab: string, onTab: (tab) => void, counts?: { messages?, comments?, certificates? },
  *           on: { refresh, register, exclude, remove, removeFromFamily, cancelInvite, declineInvite },
- *           messages?: React.ReactNode, comments?: React.ReactNode, certificates?: React.ReactNode }} props
+ *           messages?: React.ReactNode, comments?: React.ReactNode, certificates?: React.ReactNode,
+ *           activity?: React.ReactNode }} props
  *   `detail` as members.detail returns it; `member` carries its reminderState.
  *   `tab` one of tabsFor(member); another shows the details.
  */
-export const MemberView = ({ member, detail, values, onChange, onSave, busy = false, error, notice, now = new Date(), tab, onTab, counts = {}, on, messages, comments, certificates }) => {
+export const MemberView = ({ member, detail, values, onChange, onSave, busy = false, error, notice, now = new Date(), tab, onTab, counts = {}, on, messages, comments, certificates, activity }) => {
   const [asking, setAsking] = useState(null);
   const ask = (title, text, confirmLabel, then) => setAsking({ title, text, confirmLabel, then });
   const patron = member.family && !member.infamily;
@@ -166,6 +167,7 @@ export const MemberView = ({ member, detail, values, onChange, onSave, busy = fa
       {!member.infamily && <Panel tab="messages" shown={shown}>{messages}</Panel>}
       <Panel tab="comments" shown={shown}>{comments}</Panel>
       <Panel tab="certificates" shown={shown}>{certificates}</Panel>
+      <Panel tab="activity" shown={shown}>{activity}</Panel>
 
       <Dialog open={!!asking} onClose={() => setAsking(null)}>
         <DialogTitle>{asking?.title}</DialogTitle>

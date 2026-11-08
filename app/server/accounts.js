@@ -2,6 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
 import { syncLinkedRolesForUser } from "/imports/common/server/linkedRoleSync";
 import { impersonationOfToken, isExpired } from "/server/impersonation/impersonationOf";
+import { touchLastSeen } from "/imports/common/server/users/lastSeen";
 
 /**
  * A switch-user token (see server/impersonation) lasts a limited time. Once it
@@ -63,6 +64,18 @@ Accounts.onLogin(async function (loginInfo) {
     await syncLinkedRolesForUser(user);
   } catch (err) {
     console.error("[linkedRoleSync] onLogin sync failed:", err);
+  }
+
+  // When the member was last in the app: every start and reconnect logs in.
+  // A resume login may be an admin's switch to this user, which must not
+  // count; a password or OAuth login never is. Never blocks the login.
+  try {
+    const resume = loginInfo.type === "resume" ? loginInfo.methodArguments?.[0]?.resume : null;
+    await touchLastSeen(loginInfo.user._id, {
+      hashedToken: typeof resume === "string" ? Accounts._hashLoginToken(resume) : undefined,
+    });
+  } catch (err) {
+    console.error("[lastSeen] onLogin update failed:", err);
   }
 });
 

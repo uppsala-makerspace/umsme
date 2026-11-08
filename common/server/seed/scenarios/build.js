@@ -2,6 +2,7 @@
  * Pieces both scenarios build the same way: the liability agreement and the
  * named personas.
  */
+import { Meteor } from 'meteor/meteor';
 import { makeUser } from '../accounts';
 import { makeMember, pay, joinFamily, inviteToFamily } from '../members';
 import { makeLiabilityDocument } from '../documents';
@@ -51,6 +52,9 @@ export const makePersonas = async (list, { people, days, now, liability }) => {
       email: persona.email, username: persona.username, password: PASSWORD,
       verified: persona.verified !== false, roles: persona.roles || [],
     });
+    if (persona.lastSeen !== undefined) {
+      await Meteor.users.updateAsync(userIds[persona.key], { $set: { lastSeenAt: days(persona.lastSeen) } });
+    }
     if (persona.member === false) continue;
     const generated = people.person();
     const member = await makeMember({

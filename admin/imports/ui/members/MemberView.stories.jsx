@@ -36,6 +36,7 @@ export default {
     messages: <Placeholder>The member’s messages (MessagesFor).</Placeholder>,
     comments: <Placeholder>The comments (CommentsFor).</Placeholder>,
     certificates: <Placeholder>The certificates (MemberCertificatesSection).</Placeholder>,
+    activity: <Placeholder>The activity (MemberActivitySection).</Placeholder>,
   },
 };
 

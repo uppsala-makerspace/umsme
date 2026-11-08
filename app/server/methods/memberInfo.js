@@ -7,6 +7,8 @@ import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { memberStatus } from '/imports/common/lib/utils';
 import { findMemberForUser, findForUser, expenseAccessAllowed } from "/server/methods/utils";
 import Invites from "/imports/common/collections/Invites";
+import { Accounts } from "meteor/accounts-base";
+import { touchLastSeen } from "/imports/common/server/users/lastSeen";
 
 Meteor.methods({
   findMemberForUser: findMemberForUser,
@@ -34,7 +36,18 @@ Meteor.methods({
    *     liabilityOutdated
    *   }>}
    */
-  findInfoForUser: async () => {
+  async findInfoForUser() {
+    // The client calls this every five minutes while the app is open, so it
+    // also keeps lastSeenAt current for an app left open for days. Skipped
+    // while an admin views the app as this user. Never fails the call.
+    try {
+      await touchLastSeen(this.userId, {
+        hashedToken: this.connection ? Accounts._getLoginToken(this.connection.id) : undefined,
+      });
+    } catch (err) {
+      console.error("[lastSeen] findInfoForUser update failed:", err);
+    }
+
     const info = await findForUser();
 
     if (!info.member) {

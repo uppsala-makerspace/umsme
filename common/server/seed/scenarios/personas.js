@@ -19,12 +19,14 @@ const at = (local) => `${local}@example.org`;
 /**
  * `payments` lists [paymentType, daysFromNow] pairs, oldest first.
  * `roles` are admin roles; `member: false` means a login without a member.
+ * `lastSeen` is when the login was last in the app, in days from now; none
+ * means never.
  */
 const SHARED = [
   { key: 'admin', email: at('admin'), name: 'Astrid Admin', roles: ['admin'],
     description: 'admin role, lab member',
     payments: [['memberLab', -700], ['memberLab', -335]] },
-  { key: 'board', email: at('board'), name: 'Bertil Styrelse', roles: ['board'],
+  { key: 'board', email: at('board'), name: 'Bertil Styrelse', roles: ['board'], lastSeen: -3,
     description: 'board role, lab member',
     payments: [['memberLab', -420], ['memberLab', -60]] },
   { key: 'treasurer', email: at('treasurer'), name: 'Kerstin Kassör', roles: ['treasurer'],
@@ -33,7 +35,7 @@ const SHARED = [
   { key: 'storage', email: at('storage'), name: 'Lars Lagerhållare', roles: ['storage'],
     description: 'storage role, lab member',
     payments: [['memberLab', -200]] },
-  { key: 'member', email: at('member'), name: 'Maja Medlem',
+  { key: 'member', lastSeen: 0, email: at('member'), name: 'Maja Medlem',
     description: 'active lab member, liability approved',
     payments: [['memberBase', -800], ['memberLab', -430], ['memberLab', -70]] },
   { key: 'base', email: at('base'), name: 'Bo Basmedlem',
@@ -51,7 +53,7 @@ const SHARED = [
   { key: 'expired', email: at('expired'), name: 'Erik Utgången',
     description: 'membership expired half a year ago',
     payments: [['memberBase', -560]] },
-  { key: 'family', email: at('family'), name: 'Fredrik Familj',
+  { key: 'family', lastSeen: -40, email: at('family'), name: 'Fredrik Familj',
     description: 'family payer with two family members',
     payments: [['familyLab', -90]] },
   { key: 'familyMember', email: at('family-member'), name: 'Frida Familj', familyOf: 'family',

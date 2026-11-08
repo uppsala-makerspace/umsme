@@ -577,6 +577,8 @@ export const models = {
       optional: true,
     },
     "emails.$.verified": { label: "Verified", type: Boolean, optional: true },
+    // When the user was last in the member app (common/server/users/lastSeen.js).
+    lastSeenAt: { label: "Last in the app", type: Date, optional: true },
   },
   invites: {
     email: {
