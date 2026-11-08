@@ -86,6 +86,8 @@ const SHARED = [
 ];
 
 const E2E_ONLY = [
+  { key: 'adminAccount', username: 'admin', roles: ['admin'], member: false,
+    description: 'the account named admin, as in production: no email, no member; the only one that may switch user in the app. Admin\'s startup (adminAvailable) finds it and sets its password.' },
   { key: 'noliability2', email: at('noliability2'), name: 'Nanna Ansvarslös', liability: 'none',
     description: 'second member without liability, for the unlock test',
     payments: [['memberLab', -20]] },

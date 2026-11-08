@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { MemberInfoContext } from "/imports/context/MemberInfoContext";
+import { AppDataContext } from "/imports/context/AppDataContext";
 
 export const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,7 @@ export const HamburgerMenu = () => {
   const { memberInfo } = useContext(MemberInfoContext);
   const hasMember = !!memberInfo?.member;
   const expensesAllowed = !!memberInfo?.expensesAllowed;
+  const { canImpersonate } = useContext(AppDataContext);
   const menuRef = useRef(null);
 
   // Close menu when clicking outside
@@ -27,7 +29,9 @@ export const HamburgerMenu = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  if (!hasMember) {
+  // The admin account usually has no member, but still needs the way to
+  // switch user (and to log out).
+  if (!hasMember && !canImpersonate) {
     return null;
   }
 
@@ -64,20 +68,23 @@ export const HamburgerMenu = () => {
           : "hidden"
         }`}>
           {[
-            { to: "/account", label: "myAccount" },
-            { to: "/profile", label: "myProfile" },
-            { to: "/messages", label: "messages" },
-            { to: "/certificates", label: "certificates" },
-            { to: "/groups", label: "groups" },
-            { to: "/tool", label: "viewTools" },
-            { to: "/storage", label: "myBox" },
-            { to: "/store", label: "store" },
-            { to: "/purchases", label: "storeMyPurchases" },
-            ...(expensesAllowed ? [{ to: "/expenses", label: "expenses" }] : []),
-            { to: "/liability", label: "liability" },
-            { to: "/install", label: "installApp" },
-            { to: "/settings", label: "settings" },
-            { to: "/contact", label: "contactUs" },
+            ...(canImpersonate ? [{ to: "/impersonate", label: "impersonationMenu" }] : []),
+            ...(!hasMember ? [] : [
+              { to: "/account", label: "myAccount" },
+              { to: "/profile", label: "myProfile" },
+              { to: "/messages", label: "messages" },
+              { to: "/certificates", label: "certificates" },
+              { to: "/groups", label: "groups" },
+              { to: "/tool", label: "viewTools" },
+              { to: "/storage", label: "myBox" },
+              { to: "/store", label: "store" },
+              { to: "/purchases", label: "storeMyPurchases" },
+              ...(expensesAllowed ? [{ to: "/expenses", label: "expenses" }] : []),
+              { to: "/liability", label: "liability" },
+              { to: "/install", label: "installApp" },
+              { to: "/settings", label: "settings" },
+              { to: "/contact", label: "contactUs" },
+            ]),
           ].flatMap(({ to, label }) => {
             const item = (
               <li key={to} className="text-lg font-bold mx-4 my-2 cursor-pointer">

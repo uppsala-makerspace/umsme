@@ -9,6 +9,7 @@ import { AppDataProvider } from '/imports/context/AppDataContext';
 import { MessagesProvider } from '/imports/context/MessagesContext';
 import Loader from '/imports/components/Loader/Loader';
 import useAutoReconnect from '/imports/hooks/useAutoReconnect';
+import { ImpersonationWatcher } from '/imports/components/ImpersonationBanner';
 
 const Login = lazyWithRetry(() => import('/imports/pages/login'));
 const Register = lazyWithRetry(() => import('/imports/pages/register'));
@@ -58,6 +59,7 @@ const Groups = lazyWithRetry(() => import('/imports/pages/groups'));
 const GroupDetail = lazyWithRetry(() => import('/imports/pages/groups/detail'));
 const GroupEdit = lazyWithRetry(() => import('/imports/pages/groups/edit'));
 const GroupRules = lazyWithRetry(() => import('/imports/pages/groups/rules'));
+const Impersonate = lazyWithRetry(() => import('/imports/pages/impersonate'));
 
 export const App = () => {
   useAutoReconnect();
@@ -69,6 +71,7 @@ export const App = () => {
       <MemberInfoProvider>
       <MessagesProvider>
       <AppDataProvider>
+        <ImpersonationWatcher />
         <ChunkErrorBoundary>
         <Suspense fallback={<Loader />}>
           <Routes>
@@ -121,6 +124,7 @@ export const App = () => {
             <Route path="/groups/:groupId" element={<GroupDetail />} />
             <Route path="/groups/:groupId/edit" element={<GroupEdit />} />
             <Route path="/groups/:groupId/rules" element={<GroupRules />} />
+            <Route path="/impersonate" element={<Impersonate />} />
           </Routes>
         </Suspense>
         </ChunkErrorBoundary>

@@ -667,5 +667,16 @@
   "guidesUrl": "Guide-URL",
   "image": "Bild",
   "uploadImage": "Ladda upp bild",
-  "removeImage": "Ta bort bild"
+  "removeImage": "Ta bort bild",
+  "impersonationMenu": "Byt användare",
+  "impersonationTitle": "Byt användare",
+  "impersonationIntro": "Se appen som en annan medlem ser den. Du kan bara titta – ändringar är avstängda tills du går tillbaka till admin.",
+  "impersonationSearchPlaceholder": "Namn eller medlemsnummer",
+  "impersonationSearch": "Sök",
+  "impersonationNoResults": "Inga medlemmar hittades.",
+  "impersonationNoAccount": "Har inget konto i appen",
+  "impersonationSwitching": "Byter användare…",
+  "impersonationViewingAs": "Du ser appen som {{name}}",
+  "impersonationReadOnly": "Bara visning – ändringar är avstängda",
+  "impersonationSwitchBack": "Tillbaka till admin"
 }

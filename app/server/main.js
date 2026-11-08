@@ -9,10 +9,14 @@ import "./api/workshopImage";
 import { ensureStorageIndexes } from "/imports/common/server/storageIndexes";
 import { applyMailUrlFromSettings } from "/imports/common/server/mailUrl";
 import { runSeedFromEnv } from "/imports/common/server/seed/runFromEnv";
+import { enforceReadOnlyWhileImpersonating } from "./impersonation/readOnly";
 
 applyMailUrlFromSettings();
 
 Meteor.startup(async () => {
+  // First, and after every module above has registered its methods: a method
+  // registered later would escape the read-only rule for switched users.
+  enforceReadOnlyWhileImpersonating();
   const seedSummary = await runSeedFromEnv();
   await ensureStorageIndexes();
   if (seedSummary) console.log(seedSummary().map((line) => `[seed] ${line}`).join("\n"));

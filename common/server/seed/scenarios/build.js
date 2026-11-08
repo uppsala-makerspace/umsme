@@ -46,9 +46,10 @@ export const makePersonas = async (list, { people, days, now, liability }) => {
   const members = {};
   const userIds = {};
   for (const persona of list) {
-    people.reserve(persona.email);
+    if (persona.email) people.reserve(persona.email);
     userIds[persona.key] = await makeUser({
-      email: persona.email, password: PASSWORD, verified: persona.verified !== false, roles: persona.roles || [],
+      email: persona.email, username: persona.username, password: PASSWORD,
+      verified: persona.verified !== false, roles: persona.roles || [],
     });
     if (persona.member === false) continue;
     const generated = people.person();

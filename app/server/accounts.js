@@ -1,6 +1,25 @@
 import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
 import { syncLinkedRolesForUser } from "/imports/common/server/linkedRoleSync";
+import { impersonationOfToken, isExpired } from "/server/impersonation/impersonationOf";
+
+/**
+ * A switch-user token (see server/impersonation) lasts a limited time. Once it
+ * has expired it is removed and the login refused; the client then switches
+ * back to the admin.
+ */
+Accounts.validateLoginAttempt(async (attempt) => {
+  if (attempt.type !== "resume" || !attempt.allowed || !attempt.user) return true;
+  const token = attempt.methodArguments?.[0]?.resume;
+  if (typeof token !== "string") return true;
+  const hashedToken = Accounts._hashLoginToken(token);
+  const impersonation = await impersonationOfToken(attempt.user._id, hashedToken);
+  if (!impersonation || !isExpired(impersonation.startedAt)) return true;
+  await Meteor.users.updateAsync(attempt.user._id, {
+    $pull: { "services.resume.loginTokens": { hashedToken } },
+  });
+  throw new Meteor.Error("impersonation-expired", "The switch to another user has expired");
+});
 
 /**
  * If a user has already been created, and used their Google email, this will
@@ -22,8 +41,12 @@ Accounts.setAdditionalFindUserOnExternalLogin(
  * 2. This prevents the user from creating another user (regular email based) that duplicates the oauth user.
  */
 Accounts.onLogin(async function (loginInfo) {
-  if (!loginInfo.user.emails && loginInfo.user.services) {
-    const email = loginInfo.user.services?.google.email || loginInfo.user.services?.facebook.email;
+  // Only OAuth accounts have an email to copy. A password account without one
+  // (the account named admin) must not fail here: an error in onLogin fails
+  // the login.
+  const oauthEmail = loginInfo.user.services?.google?.email || loginInfo.user.services?.facebook?.email;
+  if (!loginInfo.user.emails && oauthEmail) {
+    const email = oauthEmail;
     await Meteor.users.updateAsync(loginInfo.user._id, {
       $set: {
         emails: [{ address: email, verified: true }],
