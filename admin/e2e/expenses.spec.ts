@@ -80,6 +80,13 @@ test.describe('Expenses', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/reimbursed/i);
   });
 
+  test('the treasurer marks their own expense reimbursed', async ({ page }) => {
+    await openExpense(page, 'treasurer', 'E2E own reimburse');
+    await page.getByLabel(/bookkeeping account/i).selectOption('5010');
+    await confirmed(page, /^mark as reimbursed$/i, /^(mark as reimbursed|yes|ok|confirm)/i);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/reimbursed/i);
+  });
+
   test('undoes a reimbursement', async ({ page }) => {
     await openExpense(page, 'treasurer', 'E2E unreimburse');
     await confirmed(page, /^undo "?mark as reimbursed"?$/i, /^(undo|yes|ok|confirm|move back)/i);

@@ -48,8 +48,10 @@ as `expensesAllowed` in the member info payload and also gates the bank-details
 section of the profile (section 7).
 
 Admin actions are role-gated per method (section 6), and **no one can review
-their own expense**: confirm, reject, and reimburse all refuse when the acting
-admin's member record is the submitter (`assertNotOwnExpense`).
+their own expense**: confirm, unconfirm and reject refuse when the acting
+admin's member record is the submitter (`assertNotOwnExpense`). Reimburse
+refuses too, except for the treasurer, who may pay out their own expense once
+someone else has confirmed it; that confirmation is the control.
 
 ## 3. Expense Accounts and Groups
 
@@ -200,7 +202,7 @@ with `rejected` as a side exit and three backward transitions (undoing a confirm
 | `confirmed` → `submitted` | account approver or admin/board/treasurer (app) | `expenses.unapprove` | undo an approval made by mistake; anyone who may review the account, not your own; clears `confirmedAt/By`; refused once reimbursed |
 | `confirmed` → `submitted` | admin/board/treasurer (admin) | `expenses.unconfirm` | undo a confirmation; not your own; clears `confirmedAt/By`; refused once reimbursed |
 | `submitted`/`confirmed` → `rejected` | admin/board/treasurer (admin) | `expenses.reject` | reason required (shown to the member); clears `confirmedAt/By` |
-| `confirmed` → `reimbursed` | treasurer/admin (admin) | `expenses.reimburse` | sets `bookkeepingAccount`, `reimbursedDate`, `reimbursedAt/By` — see [accounting.md](accounting.md) §4 |
+| `confirmed` → `reimbursed` | treasurer/admin (admin) | `expenses.reimburse` | the treasurer also their own, admins not their own; sets `bookkeepingAccount`, `reimbursedDate`, `reimbursedAt/By` — see [accounting.md](accounting.md) §4 |
 | `reimbursed` → `confirmed` | treasurer/admin (admin) | `expenses.unreimburse` | keeps `bookkeepingAccount`/`reimbursedDate` as defaults for a redo |
 
 All writes go through server methods; direct client writes to the collection
