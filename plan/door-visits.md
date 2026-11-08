@@ -235,3 +235,31 @@ Test: `admin/tests/migrateUnlocks.tests.js`.
   `weekdayAverages` i `visitStats.js`). Valet Unique members påverkar det inte:
   en medlem ger högst ett besök per dag. Öppen fråga: ska Unique members i
   stället visa hur många olika medlemmar som kommit på respektive veckodag?
+
+## Tillägg: dörröppningar per timme
+
+Ett tredje diagram för Per day och Per month: genomsnittligt antal
+dörröppningar per dag i varje timme (00–23, svensk tid) över månadens
+respektive årets dagar fram till idag. Alla öppningar räknas, även
+låsanvändare utan medlem: det visar aktiviteten i lokalen, inte besök
+(`hours` från servern, `hourlyOpenings` i `visitStats.js`).
+
+Färger ur Chart.js palett: huvuddiagrammet standardblått, veckodagar lila,
+timmar orange.
+
+Demoseeden lägger nu öppningarna på ett rimligt dygn (mest kvällar, nästan
+inget på natten) så att timdiagrammet säger något.
+
+## Tillägg: sidan Activity
+
+Besöksstatistiken och listan över dörröppningar är nu en sida, **Activity**
+(`/activity`, menyn Statistics → Activity), med flikarna **Door statistics**
+(standard) och **Door unlocks** (`?tab=unlocks`). Båda flikarna hålls
+monterade. Flikarna har inga egna rubriker längre (konventionen i
+`admin/CLAUDE.md`): en grå rad i `TabToolbar`, och statistikens tre delar har
+var sin `TabPart` (Visits, Average visits per weekday, Door openings per hour
+of the day). De gamla adresserna `/door` och `/doorunlocks` går vidare till
+sin flik med `window.location.replace`, så att Tillbaka inte landar på dem igen.
+
+Filer: `admin/imports/ui/doors/{Activity,ActivityPage}.jsx`, `Activity.stories.jsx`,
+`admin/client/ui/door/index.js`, `admin/imports/ui/shell/menu.js`.

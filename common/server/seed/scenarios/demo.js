@@ -444,6 +444,14 @@ export const buildDemo = async ({ random, people, now }) => {
     rare: { perWeek: 0.05, weight: 1 },
   };
   const habitNames = Object.entries(habits).flatMap(([name, { weight }]) => Array(weight).fill(name));
+  // When in the day people come: mostly evenings, some daytime, hardly at
+  // night (hour 0-23, local time). The door statistics chart it per hour.
+  const hourWeights = [1, 0, 0, 0, 0, 0, 1, 2, 4, 6, 7, 7, 6, 7, 8, 10, 13, 17, 22, 24, 19, 12, 5, 2];
+  const hourTotal = hourWeights.reduce((a, b) => a + b, 0);
+  const pickHour = () => {
+    let left = random.next() * hourTotal;
+    return hourWeights.findIndex((w) => (left -= w) < 0);
+  };
   for (const member of labMembers) {
     const habit = random.pick(habitNames);
     // Days ago the habit runs between: the whole year, or a stretch of two to
@@ -452,7 +460,9 @@ export const buildDemo = async ({ random, people, now }) => {
     const to = habit === 'stretch' ? Math.max(0, from - random.int(60, 120)) : 0;
     const count = Math.round((habits[habit].perWeek * (from - to)) / 7);
     for (let n = 0; n < count; n += 1) {
-      const timestamp = new Date(now.getTime() - (to + random.next() * (from - to)) * DAY_MS);
+      const timestamp = new Date(now.getTime() - (to + Math.floor(random.next() * (from - to))) * DAY_MS);
+      timestamp.setHours(pickHour(), random.int(0, 59), random.int(0, 59), 0);
+      if (timestamp > now) continue;
       await DoorUnlocks.insertAsync({ timestamp, door: random.chance(0.8) ? doors[0] : doors[1], memberid: member._id, method: random.chance(0.9) ? 'app' : 'danalock' });
     }
   }

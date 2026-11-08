@@ -34,6 +34,10 @@ const average = (bars, unfinished) => {
 const weekdays = (scale) => [['Mon', 16], ['Tue', 9], ['Wed', 11], ['Thu', 10], ['Fri', 7], ['Sat', 18], ['Sun', 6]]
   .map(([weekday, avg]) => ({ weekday, days: scale, visits: Math.round(avg * scale), average: avg }));
 
+// Average openings per hour: the evenings busiest, a few at night.
+const hourCurve = [0.2, 0.1, 0, 0, 0, 0, 0.1, 0.4, 1.2, 2.1, 2.6, 2.4, 2.2, 2.5, 2.7, 3.1, 3.8, 4.6, 5.9, 6.4, 5.2, 3.4, 1.6, 0.6];
+const hours = (days) => hourCurve.map((average, hour) => ({ hour, openings: Math.round(average * days), average }));
+
 const months = [
   [260, 61], [301, 66], [288, 63], [312, 68], [275, 64], [240, 59], [198, 52], [221, 55], [296, 67], [334, 70], [104, 49],
 ].map(([visits, unique], i) => ({ key: `2026-${String(i + 1).padStart(2, '0')}`, visits, unique }));
@@ -45,14 +49,14 @@ const years = [['2025', 1040, 97], ['2026', 2829, 121]].map(([key, visits, uniqu
 export const PerDay = {
   args: {
     query: { view: 'day', month: '2026-10' },
-    stats: { view: 'day', month: '2026-10', bars: days, total: { visits: sum(days, 'visits'), unique: 58 }, average: average(days), weekdays: weekdays(31 / 7), available },
+    stats: { view: 'day', month: '2026-10', bars: days, total: { visits: sum(days, 'visits'), unique: 58 }, average: average(days), weekdays: weekdays(31 / 7), hours: hours(31), available },
   },
 };
 
 export const PerMonth = {
   args: {
     query: { view: 'month', year: 2026 },
-    stats: { view: 'month', year: 2026, bars: months, total: { visits: sum(months, 'visits'), unique: 121 }, average: average(months, true), weekdays: weekdays(319 / 7), available },
+    stats: { view: 'month', year: 2026, bars: months, total: { visits: sum(months, 'visits'), unique: 121 }, average: average(months, true), weekdays: weekdays(319 / 7), hours: hours(319), available },
   },
 };
 

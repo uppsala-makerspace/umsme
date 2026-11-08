@@ -8,6 +8,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { ChartCanvas } from '../components/ChartCanvas';
+import { TabPart, TabToolbar } from '../components/PageTabs';
 import { monthLabel, monthName, quarterLabel, quarterName, dayLabel } from '../periods';
 
 const VIEWS = { day: 'Per day', month: 'Per month', quarter: 'Per quarter', year: 'Per year' };
@@ -15,6 +16,13 @@ const UNITS = { day: 'day', month: 'month', quarter: 'quarter', year: 'year' };
 const COUNTS = { visits: 'Visits', unique: 'Unique members' };
 
 const number = (n) => n.toLocaleString('sv-SE');
+
+// From Chart.js's own palette (what its Colors plugin uses), so they sit with
+// the default blue of the main chart: purple for weekdays, orange for hours.
+const PALETTE = {
+  purple: { borderColor: 'rgb(153, 102, 255)', backgroundColor: 'rgba(153, 102, 255, 0.5)' },
+  orange: { borderColor: 'rgb(255, 159, 64)', backgroundColor: 'rgba(255, 159, 64, 0.5)' },
+};
 // An average to one decimal below ten ("2,4"), whole above ("450").
 const average = (n) => n.toLocaleString('sv-SE', { maximumFractionDigits: n < 10 ? 1 : 0 });
 const AVERAGE_OF = { visits: 'visits', unique: 'unique member visits' };
@@ -39,7 +47,7 @@ const WeekdayChart = ({ stats }) => {
     type: 'bar',
     data: {
       labels: stats.weekdays.map((w) => w.weekday),
-      datasets: [{ label: 'Average visits', data: stats.weekdays.map((w) => Math.round(w.average * 10) / 10), borderWidth: 2 }],
+      datasets: [{ label: 'Average visits', data: stats.weekdays.map((w) => Math.round(w.average * 10) / 10), borderWidth: 2, ...PALETTE.purple }],
     },
     options: {
       responsive: true,
@@ -49,14 +57,39 @@ const WeekdayChart = ({ stats }) => {
   }), [stats.weekdays]);
   const days = stats.weekdays.reduce((sum, w) => sum + w.days, 0);
   return (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="h6" component="h2">Average visits per weekday</Typography>
+    <TabPart title="Average visits per weekday" sx={{ mt: 4 }}>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
         Over the {days} days of {stats.view === 'day' ? monthName(stats.month) : stats.year}
         {' '}shown, days without visits included.
       </Typography>
       <ChartCanvas config={config} label="Average visits per weekday" height={240} />
-    </Box>
+    </TabPart>
+  );
+};
+
+/** The average door openings per hour of the day, over the month's or the year's days. */
+const HourChart = ({ stats }) => {
+  const config = useMemo(() => ({
+    type: 'bar',
+    data: {
+      labels: stats.hours.map((h) => String(h.hour).padStart(2, '0')),
+      datasets: [{ label: 'Average openings', data: stats.hours.map((h) => Math.round(h.average * 100) / 100), borderWidth: 2, ...PALETTE.orange }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } },
+    },
+  }), [stats.hours]);
+  const days = stats.weekdays.reduce((sum, w) => sum + w.days, 0);
+  return (
+    <TabPart title="Door openings per hour of the day" sx={{ mt: 4 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        The activity in the space: every opening, not visits, also by lock users not tied to a member.
+        Average openings per day in each hour, Swedish time, over the {days} days shown.
+      </Typography>
+      <ChartCanvas config={config} label="Door openings per hour of the day" height={240} />
+    </TabPart>
   );
 };
 
@@ -73,13 +106,15 @@ const periodName = (stats) => {
 };
 
 /**
- * The door visits of the whole association: a visit is a day a member opened
+ * The Door statistics tab of the Activity page (Activity.jsx), so without a
+ * heading of its own: the door visits of the whole association: a visit is a day a member opened
  * any door, at most one a day per member. Per day of a month, or per month of
  * a year, per quarter or per year, counting visits or unique members (each
  * member once per bar). A bar opens the period below it.
  *
  * @param {{ stats?: { view, month?, year?, bars: {key, visits, unique}[], total: {visits, unique},
  *   average: {visits, unique, over}, weekdays?: {weekday, days, visits, average}[],
+ *   hours?: {hour, openings, average}[],
  *   available: { months: string[], years: number[] } },
  *   query: { view: 'day'|'month'|'quarter'|'year', month?: string, year?: number },
  *   onQuery: (query) => void, count: 'visits'|'unique', onCount: (count) => void,
@@ -116,12 +151,8 @@ export const DoorStats = ({ stats, query, onQuery, count, onCount, loading = fal
   const months = stats?.available.months || [];
   const years = stats?.available.years || [];
   return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ mb: 1 }}>Door visits</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        A visit is a day a member opened any door: at most one a day per member.
-        {view !== 'day' && ' Unique members counts each member once per bar.'}
-      </Typography>
+    <Box component="section" aria-label="Door statistics">
+      <TabToolbar note={`Visits to the space: a visit is a day a member opened any door, at most one a day per member.${view !== 'day' ? ' Unique members counts each member once per bar.' : ''}`} />
 
       <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center', mb: 2 }}>
         <ToggleButtonGroup exclusive size="small" value={query.view} aria-label="View"
@@ -154,26 +185,29 @@ export const DoorStats = ({ stats, query, onQuery, count, onCount, loading = fal
       {!stats && loading && <Typography color="text.secondary">Counting…</Typography>}
       {stats && (
         <>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            <strong>{periodName(stats)}:</strong>{' '}
-            {`${number(stats.total.visits)} ${stats.total.visits === 1 ? 'visit' : 'visits'} by ${number(stats.total.unique)} ${stats.total.unique === 1 ? 'member' : 'members'}`}
-            {/* An average per day or per month; per quarter or year it says little. */}
-            {['day', 'month'].includes(stats.view) && stats.average?.over > 0
-              && `, on average ${average(stats.average[measure])} ${AVERAGE_OF[measure]} per ${UNITS[stats.view]}`}
-          </Typography>
-          {stats.total.visits === 0 ? (
-            <Typography color="text.secondary">No visits in {periodName(stats) || 'this period'}.</Typography>
-          ) : (
-            <>
-              <ChartCanvas config={config} label={`${COUNTS[measure]} per ${UNITS[stats.view]}`} />
-              {stats.view !== 'day' && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Click a bar to see it {stats.view === 'month' ? 'by day' : 'by month'}.
-                </Typography>
-              )}
-              {stats.weekdays && <WeekdayChart stats={stats} />}
-            </>
-          )}
+          <TabPart title="Visits">
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              <strong>{periodName(stats)}:</strong>{' '}
+              {`${number(stats.total.visits)} ${stats.total.visits === 1 ? 'visit' : 'visits'} by ${number(stats.total.unique)} ${stats.total.unique === 1 ? 'member' : 'members'}`}
+              {/* An average per day or per month; per quarter or year it says little. */}
+              {['day', 'month'].includes(stats.view) && stats.average?.over > 0
+                && `, on average ${average(stats.average[measure])} ${AVERAGE_OF[measure]} per ${UNITS[stats.view]}`}
+            </Typography>
+            {stats.total.visits === 0 ? (
+              <Typography color="text.secondary">No visits in {periodName(stats) || 'this period'}.</Typography>
+            ) : (
+              <>
+                <ChartCanvas config={config} label={`${COUNTS[measure]} per ${UNITS[stats.view]}`} />
+                {stats.view !== 'day' && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Click a bar to see it {stats.view === 'month' ? 'by day' : 'by month'}.
+                  </Typography>
+                )}
+              </>
+            )}
+          </TabPart>
+          {stats.total.visits > 0 && stats.weekdays && <WeekdayChart stats={stats} />}
+          {stats.total.visits > 0 && stats.hours && stats.weekdays && <HourChart stats={stats} />}
         </>
       )}
     </Box>

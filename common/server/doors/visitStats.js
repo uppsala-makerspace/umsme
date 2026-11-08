@@ -86,6 +86,33 @@ export const weekdayAverages = (fromDay, toDay, visitsOnDay) => {
 };
 
 /**
+ * Door openings per hour of the day (Swedish time) from `fromDay` to `toDay`:
+ * [{ hour: 0…23, openings, average }], `average` per day over those days.
+ * Every opening counts, also a lock user's not tied to a member: this is the
+ * activity in the space, not the members' visits.
+ */
+export const hourlyOpenings = async (fromDay, toDay) => {
+  const days = fromDay <= toDay ? daysBetween(fromDay, toDay).length : 0;
+  const hours = Array.from({ length: 24 }, (_, hour) => ({ hour, openings: 0, average: 0 }));
+  if (!days) return hours;
+  const utc = (day) => { const [y, m, d] = day.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+  const groups = await DoorUnlocks.rawCollection().aggregate([
+    { $match: { timestamp: { $gte: new Date(utc(fromDay) - 2 * DAY_MS), $lt: new Date(utc(toDay) + 3 * DAY_MS) } } },
+    { $group: {
+      _id: {
+        day: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp', timezone: ACTIVITY_TIME_ZONE } },
+        hour: { $hour: { date: '$timestamp', timezone: ACTIVITY_TIME_ZONE } },
+      },
+      count: { $sum: 1 },
+    } },
+  ]).toArray();
+  for (const { _id: { day, hour }, count } of groups) {
+    if (day >= fromDay && day <= toDay) hours[hour].openings += count;
+  }
+  return hours.map((h) => ({ ...h, average: h.openings / days }));
+};
+
+/**
  * The member-days with an opening between two days (Swedish time), both
  * included: [{ day: '2026-10-01', memberid }].
  */
@@ -119,8 +146,9 @@ export const memberDays = async ({ fromDay, toDay }) => {
  * @param {{ view: 'day'|'month'|'quarter'|'year', month?: string, year?: number, now?: Date }} options
  *   `month` ("YYYY-MM") for the day view, `year` for the month view; the
  *   current one when left out.
- * Per day and per month also the average visits per weekday, over the days
- * shown (the month's, or the year's, up to today).
+ * Per day and per month also the average visits per weekday, and the
+ * average door openings per hour of the day, over the days shown (the
+ * month's, or the year's, up to today).
  *
  * The average per bar is over the bars shown, except an unfinished month,
  * quarter or year (the one today is in), which would pull it down; per day it
@@ -131,6 +159,7 @@ export const memberDays = async ({ fromDay, toDay }) => {
  *   total: { visits: number, unique: number },
  *   average: { visits: number, unique: number, over: number },
  *   weekdays?: { weekday: string, days: number, visits: number, average: number }[],
+ *   hours?: { hour: number, openings: number, average: number }[],
  *   available: { months: string[], years: number[] } }>}  `available`: what
  *   can be chosen, from the first opening to now, newest first
  */
@@ -199,7 +228,10 @@ export const doorVisitStats = async ({ view, month, year, now = new Date() }) =>
     bars: shown,
     total: { visits, unique: everyone.size },
     average: { visits: mean('visits'), unique: mean('unique'), over: averaged.length },
-    ...(view === 'day' || view === 'month' ? { weekdays: weekdayAverages(fromDay, toDay, visitsOnDay) } : {}),
+    ...(view === 'day' || view === 'month' ? {
+      weekdays: weekdayAverages(fromDay, toDay, visitsOnDay),
+      hours: await hourlyOpenings(fromDay, toDay),
+    } : {}),
     available: { months, years: [...new Set(months.map((m) => Number(m.slice(0, 4))))] },
   };
 };

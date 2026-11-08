@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
-import { doorVisitStats, memberDays, weekdayAverages } from '/imports/common/server/doors/visitStats';
+import { doorVisitStats, memberDays, weekdayAverages, hourlyOpenings } from '/imports/common/server/doors/visitStats';
 
 // The test's openings are in 2099, and `now` too, so that the day and month
 // views see only them; the quarter and year views reach back to the first
@@ -107,6 +107,23 @@ describe('door visit statistics', function () {
 
     const quarters = await doorVisitStats({ view: 'quarter', now });
     assert.strictEqual(quarters.weekdays, undefined, 'not per quarter or year');
+  });
+
+  it('counts every opening per hour of the day, in Swedish time', async function () {
+    // March 2099, winter time until the 29th: 08:00, 12:00 and 15:00 UTC are
+    // 09, 13 and 16; the lock user's 12:00 counts too (13); 21:30 UTC on the
+    // 31st is 23:30 summer time. 31 days.
+    const march = await doorVisitStats({ view: 'day', month: '2099-03', now });
+    const at = (hour) => march.hours[hour];
+    assert.strictEqual(march.hours.length, 24);
+    assert.deepStrictEqual(at(9), { hour: 9, openings: 1, average: 1 / 31 });
+    assert.deepStrictEqual(at(13), { hour: 13, openings: 2, average: 2 / 31 }, 'the lock user\'s opening counts');
+    assert.deepStrictEqual(at(16), { hour: 16, openings: 1, average: 1 / 31 });
+    assert.deepStrictEqual(at(23), { hour: 23, openings: 1, average: 1 / 31 });
+    assert.strictEqual(march.hours.reduce((sum, h) => sum + h.openings, 0), 5);
+
+    assert.strictEqual((await doorVisitStats({ view: 'year', now })).hours, undefined, 'not per quarter or year');
+    assert.ok((await hourlyOpenings('2099-08-01', '2099-07-31')).every((h) => h.openings === 0 && h.average === 0));
   });
 
   it('counts days without visits in the weekday average', function () {
