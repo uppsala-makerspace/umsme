@@ -11,7 +11,7 @@ export const MENU = [
   { key: 'operation', title: 'Operation', items: [['/workshops', 'Workshops & areas of interest'], ['/groups', 'Groups'], ['/spaces', 'Spaces'], ['/certificates', 'Certificates'], ['/liability', 'Liability'], ['/storage', 'Storage']] },
   { key: 'economy', title: 'Economy', items: [['/payments', 'Payments'], ['/storeitems', 'Store items'], ['/expenses', 'Expenses'], ['/expenses/confirm', 'Confirm expenses'], ['/expenses/reimburse', 'Reimburse expenses'], ['/expenses/accounts', 'Expense accounts'], ['/accounting/bankexport', 'Bank export']] },
   { key: 'messages', title: 'Messages', items: [['/mail', 'Mail'], ['/templates', 'Templates'], ['/announcements', 'Announcements']] },
-  { key: 'statistics', title: 'Statistics', items: [['/stats', 'Memberships'], ['/revenue', 'Revenue'], ['/doorunlocks', 'Door unlocks']] },
+  { key: 'statistics', title: 'Statistics', items: [['/stats', 'Memberships'], ['/revenue', 'Revenue'], ['/doorunlocks', 'Door unlocks'], ['/door', 'Door visits']] },
   { key: 'admin', title: 'Admin', items: [['/users', 'Users'], ['/admin', 'Batch operations']] },
 ];
 

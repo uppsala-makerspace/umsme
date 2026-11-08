@@ -9,18 +9,13 @@ import MenuItem from '@mui/material/MenuItem';
 import { TabPart, TabToolbar } from '../components/PageTabs';
 import { ChartCanvas } from '../components/ChartCanvas';
 import { dateTime } from '../dates';
+import { monthLabel, monthName, daysOf } from '../periods';
 
 /** lastSeenAt has been recorded since this month; before, app use is not known. */
 export const APP_USE_RECORDED_SINCE = '2026-11';
 
 const METHODS = { app: 'via the app', danalock: 'via Danalock' };
 
-/** "Nov", with the year on the first bar and on January: "Dec 2025", "Jan 2026". */
-const monthLabel = (key, index) => {
-  const [year, month] = key.split('-').map(Number);
-  const name = new Date(Date.UTC(year, month - 1, 15)).toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' });
-  return index === 0 || month === 1 ? `${name} ${year}` : name;
-};
 
 const Line = ({ label, children, muted }) => (
   <Typography variant="body2" color={muted ? 'text.secondary' : undefined} sx={{ mb: 0.5 }}>
@@ -67,22 +62,6 @@ const MeasureChoice = ({ measure, onMeasure }) => (
 
 const counted = (n, measure) => `${n} ${n === 1 ? MEASURES[measure].one : MEASURES[measure].many}`;
 
-/** "November 2026". */
-const monthName = (key) => {
-  const [year, month] = key.split('-').map(Number);
-  return new Date(Date.UTC(year, month - 1, 15)).toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-};
-
-/** The days of a month, "2026-02-01" …, with what `days` has for each, else 0. */
-const daysOf = (monthKey, days) => {
-  const [year, month] = monthKey.split('-').map(Number);
-  const count = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  const known = Object.fromEntries(days.filter((d) => d.day.startsWith(`${monthKey}-`)).map((d) => [d.day, d]));
-  return Array.from({ length: count }, (_, i) => {
-    const day = `${monthKey}-${String(i + 1).padStart(2, '0')}`;
-    return { day, label: String(i + 1), openings: known[day]?.openings || 0, visits: known[day]?.visits || 0 };
-  });
-};
 
 /** Which period the chart shows: the last twelve months, or one of them by day. */
 const PeriodChoice = ({ months, month, onMonth }) => (
@@ -108,9 +87,8 @@ const DoorsPart = ({ doors, scope, family, busy, onScope }) => {
       datasets: [{
         label: MEASURES[measure].label,
         data: bars.map((b) => b[measure]),
+        // No colours of our own: Chart.js's default palette (its Colors plugin).
         borderWidth: 2,
-        borderColor: 'rgba(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
       }],
     },
     options: {

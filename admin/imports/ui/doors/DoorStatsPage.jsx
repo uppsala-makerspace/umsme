@@ -1,23 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DoorStats } from './DoorStats';
-import { doorVisits } from './data';
+import { doorVisitStats } from './data';
 
+/**
+ * /door: the door visits. Fetches again when the view or period changes, not
+ * when what to count does (the answer has both); the last answer stays shown
+ * meanwhile.
+ */
 export const DoorStatsPage = () => {
-  const [visits, setVisits] = useState(null);
-  const [source, setSource] = useState(null);
-  const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState({ view: 'day' });
+  const [count, setCount] = useState('visits');
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const onCheck = async (from) => {
-    setBusy(true);
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
     setError(null);
-    try {
-      setVisits(await doorVisits(from));
-      setSource(from);
-    } catch (e) {
-      setError(e.reason || e.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-  return <DoorStats visits={visits} source={source} onCheck={onCheck} busy={busy} error={error} />;
+    doorVisitStats(query)
+      .then((result) => { if (!cancelled) setStats(result); })
+      .catch((e) => { if (!cancelled) setError(e.reason || e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [query]);
+  return (
+    <DoorStats stats={stats} query={query} onQuery={setQuery} count={count} onCount={setCount}
+      loading={loading} error={error} />
+  );
 };

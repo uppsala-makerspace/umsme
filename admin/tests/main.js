@@ -38,6 +38,8 @@ import "./memberStats.tests";
 import "./lockOverview.tests";
 import "./doorUnlocks.tests";
 import "./memberActivity.tests";
+import "./doorVisitStats.tests";
+import "./migrateUnlocks.tests";
 import "./expenseAccounts.tests";
 import "./payments.tests";
 import "./messages.tests";

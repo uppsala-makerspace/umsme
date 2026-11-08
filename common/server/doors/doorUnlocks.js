@@ -4,8 +4,9 @@ import { Members } from '/imports/common/collections/members';
 
 /**
  * The door openings for admin: pages of the list, searched, sorted and paged
- * on the server (there are years of them), and visits per member for the
- * door statistics.
+ * on the server (there are years of them), and one member's openings for the
+ * Activity tab of the member's page. The door visit statistics are in
+ * visitStats.js.
  */
 
 const escape = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -44,28 +45,6 @@ export const doorUnlocksPage = async ({ search, sort, page = 0, pageSize = 50 })
   return { rows: unlocks.map((u) => ({ ...u, memberName: u.memberid ? names[u.memberid] || null : null })), total };
 };
 
-/** How many opened the door how often: the buckets of the door statistics. */
-export const visitBuckets = (visitsPerPerson) => {
-  const counts = Object.values(visitsPerPerson);
-  const within = (low, high) => counts.filter((n) => n >= low && n <= high).length;
-  return {
-    labels: ['1-5', '6-10', '11-20', '21-50', '50-?'],
-    counts: [within(1, 5), within(6, 10), within(11, 20), within(21, 50), counts.filter((n) => n > 50).length],
-  };
-};
-
-/** Visits per member over the last six months, from DoorUnlocks. */
-export const recordedVisits = async (now = new Date()) => {
-  const since = new Date(now);
-  since.setMonth(since.getMonth() - 6);
-  const perPerson = {};
-  await DoorUnlocks.find({ timestamp: { $gte: since } }, { fields: { memberid: 1, extid: 1 } }).forEachAsync((u) => {
-    const who = u.memberid || u.extid;
-    if (who) perPerson[who] = (perPerson[who] || 0) + 1;
-  });
-  return perPerson;
-};
-
 // --- One member's openings (the Activity tab of a member's page) -------------
 
 export const ACTIVITY_TIME_ZONE = 'Europe/Stockholm';
@@ -73,7 +52,7 @@ export const ACTIVITY_MONTHS = 12;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** "YYYY-MM" of a date in the activity time zone. */
-const monthKey = (date) => {
+export const monthKey = (date) => {
   const parts = new Intl.DateTimeFormat('sv-SE', { timeZone: ACTIVITY_TIME_ZONE, year: 'numeric', month: '2-digit' })
     .formatToParts(date);
   const get = (type) => parts.find((p) => p.type === type).value;
@@ -161,10 +140,15 @@ export const memberDoorActivity = async (memberIds, { now = new Date() } = {}) =
   };
 };
 
-/** The index memberDoorActivity reads by. Called at startup by admin and the app. */
+/**
+ * The indexes the door openings are read by: one member's (memberDoorActivity)
+ * and a period's (the door visit statistics, the list of openings). Called at
+ * startup by admin and the app.
+ */
 export const ensureDoorUnlockIndexes = async () => {
   await DoorUnlocks.rawCollection().createIndex(
     { memberid: 1, timestamp: -1 },
     { name: 'doorunlocks_member_timestamp' },
   );
+  await DoorUnlocks.rawCollection().createIndex({ timestamp: 1 }, { name: 'doorunlocks_timestamp' });
 };
