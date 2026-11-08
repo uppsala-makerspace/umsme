@@ -278,15 +278,21 @@ export const findForUser = async () => {
   let email;
   let verified;
   let member;
-  if (Meteor.userId()) {
-    user = await Meteor.userAsync();
-    const firstEmail = user?.emails?.[0];
-    const firstService = user?.service?.[0];
+  const found = Meteor.userId() && await Meteor.userAsync({
+    fields: { username: 1, emails: 1, "services.google.email": 1, "services.facebook.email": 1 },
+  });
+  if (found) {
+    const { services, ...account } = found;
+    // `user` reaches the client through findInfoForUser, so it must never
+    // carry `services` (password hash, login tokens).
+    user = account;
+    const firstEmail = user.emails?.[0];
+    const oauthEmail = services?.google?.email || services?.facebook?.email;
     if (firstEmail) {
       email = firstEmail?.address?.toLowerCase();
       verified = firstEmail.verified;
-    } else if (firstService) {
-      email = firstService.email?.toLowerCase();
+    } else if (oauthEmail) {
+      email = oauthEmail.toLowerCase();
       verified = true;
     }
     // Resolve the member by matching ANY verified email, not just emails[0].

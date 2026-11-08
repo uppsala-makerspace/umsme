@@ -1,6 +1,7 @@
 import { reactRoute } from '../../react/reactRoute';
-import { DoorStatsPage } from '/imports/ui/doors/DoorStatsPage';
-import { DoorUnlockListPage } from '/imports/ui/doors/DoorUnlockListPage';
+import { ActivityPage, DoorStatsMoved, DoorUnlocksMoved } from '/imports/ui/doors/ActivityPage';
 
-reactRoute('/door', 'door', DoorStatsPage);
-reactRoute('/doorunlocks', 'doorunlocks', DoorUnlockListPage);
+reactRoute('/activity', 'activity', ActivityPage);
+// The pages the Activity page replaced, for bookmarks.
+reactRoute('/door', 'door', DoorStatsMoved);
+reactRoute('/doorunlocks', 'doorunlocks', DoorUnlocksMoved);

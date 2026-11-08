@@ -18,3 +18,4 @@ import './groups';
 import './workshops';
 import './store';
 import './activities';
+import './impersonation';

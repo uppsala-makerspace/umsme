@@ -6,6 +6,7 @@ export const AppDataContext = createContext({
   paymentOptions: null,
   doors: null,
   isAdmin: false,
+  canImpersonate: false,
   slackChannels: null,
   mandatoryCertStatus: null,
   loading: true,
@@ -17,6 +18,7 @@ export const AppDataProvider = ({ children }) => {
   const [paymentOptions, setPaymentOptions] = useState(null);
   const [doors, setDoors] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canImpersonate, setCanImpersonate] = useState(false);
   const [slackChannels, setSlackChannels] = useState(null);
   const [mandatoryCertStatus, setMandatoryCertStatus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,7 @@ export const AppDataProvider = ({ children }) => {
       setPaymentOptions(null);
       setDoors(null);
       setIsAdmin(false);
+      setCanImpersonate(false);
       setSlackChannels(null);
       setMandatoryCertStatus(null);
       setLoading(false);
@@ -37,7 +40,13 @@ export const AppDataProvider = ({ children }) => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        // Sequential calls to avoid DDP login race condition
+        // Sequential calls to avoid DDP login race condition.
+        // First, so that a failing call below (e.g. for the admin account,
+        // which has no member) cannot hide the switch-user entry.
+        const impersonator = await Meteor.callAsync("impersonation.canStart");
+        if (cancelled) return;
+        setCanImpersonate(impersonator);
+
         const options = await Meteor.callAsync("payment.getOptions");
         if (cancelled) return;
         setPaymentOptions(options || []);
@@ -72,7 +81,7 @@ export const AppDataProvider = ({ children }) => {
   }, [userId]);
 
   return (
-    <AppDataContext.Provider value={{ paymentOptions, doors, isAdmin, slackChannels, mandatoryCertStatus, loading }}>
+    <AppDataContext.Provider value={{ paymentOptions, doors, isAdmin, canImpersonate, slackChannels, mandatoryCertStatus, loading }}>
       {children}
     </AppDataContext.Provider>
   );

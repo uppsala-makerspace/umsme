@@ -7,6 +7,7 @@
  * External services are off in demo, so what they would have produced (bank
  * rows to match, Swish payments, door unlocks, sent mails) is seeded here.
  */
+import { Meteor } from 'meteor/meteor';
 import { Members } from '/imports/common/collections/members';
 import { Payments } from '/imports/common/collections/payments';
 import { Groups } from '/imports/common/collections/groups';
@@ -140,9 +141,13 @@ export const buildDemo = async ({ random, people, now }) => {
     }
     bulk.push(await Members.findOneAsync(member._id));
   }
-  // A few bulk members can log in too, as the app would have it.
+  // A few bulk members can log in too, as the app would have it; most of
+  // them have used the app lately, some never.
   for (const member of random.shuffle(bulk).slice(0, 20)) {
-    await makeUser({ email: member.email, password: PASSWORD });
+    const userId = await makeUser({ email: member.email, password: PASSWORD });
+    if (random.chance(0.8)) {
+      await Meteor.users.updateAsync(userId, { $set: { lastSeenAt: days(-random.int(0, 120)) } });
+    }
   }
   log(`${bulk.length} other members`);
 
@@ -527,12 +532,40 @@ export const buildDemo = async ({ random, people, now }) => {
     await Comments.insertAsync({ about: member._id, text, created: days(-random.int(1, 300)) });
   }
 
-  // --- Door unlocks over the last month -----------------------------------
+  // --- Door unlocks over the last year ------------------------------------
+  // Each lab member comes as often as their habit says: a few several times a
+  // week, most now and then, some only for a stretch of a few months (a
+  // project), a few hardly ever. The member page's Activity tab charts them.
   const doors = ['outerDoor', 'upperFloor'];
-  for (let n = 0; n < 400; n += 1) {
-    const member = random.pick(labMembers);
-    const timestamp = new Date(now.getTime() - random.next() * 30 * DAY_MS);
-    await DoorUnlocks.insertAsync({ timestamp, door: random.pick(doors), memberid: member._id, method: random.chance(0.9) ? 'app' : 'danalock' });
+  const habits = {
+    frequent: { perWeek: 3, weight: 2 },
+    regular: { perWeek: 1, weight: 3 },
+    occasional: { perWeek: 0.3, weight: 3 },
+    stretch: { perWeek: 2, weight: 1 },
+    rare: { perWeek: 0.05, weight: 1 },
+  };
+  const habitNames = Object.entries(habits).flatMap(([name, { weight }]) => Array(weight).fill(name));
+  // When in the day people come: mostly evenings, some daytime, hardly at
+  // night (hour 0-23, local time). The door statistics chart it per hour.
+  const hourWeights = [1, 0, 0, 0, 0, 0, 1, 2, 4, 6, 7, 7, 6, 7, 8, 10, 13, 17, 22, 24, 19, 12, 5, 2];
+  const hourTotal = hourWeights.reduce((a, b) => a + b, 0);
+  const pickHour = () => {
+    let left = random.next() * hourTotal;
+    return hourWeights.findIndex((w) => (left -= w) < 0);
+  };
+  for (const member of labMembers) {
+    const habit = random.pick(habitNames);
+    // Days ago the habit runs between: the whole year, or a stretch of two to
+    // four months somewhere in it.
+    const from = habit === 'stretch' ? random.int(90, 365) : 365;
+    const to = habit === 'stretch' ? Math.max(0, from - random.int(60, 120)) : 0;
+    const count = Math.round((habits[habit].perWeek * (from - to)) / 7);
+    for (let n = 0; n < count; n += 1) {
+      const timestamp = new Date(now.getTime() - (to + Math.floor(random.next() * (from - to))) * DAY_MS);
+      timestamp.setHours(pickHour(), random.int(0, 59), random.int(0, 59), 0);
+      if (timestamp > now) continue;
+      await DoorUnlocks.insertAsync({ timestamp, door: random.chance(0.8) ? doors[0] : doors[1], memberid: member._id, method: random.chance(0.9) ? 'app' : 'danalock' });
+    }
   }
 
   // --- Storage ---------------------------------------------------------------

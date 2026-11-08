@@ -35,7 +35,7 @@ const requireRole = async (roles) => {
 };
 
 // Resolve the acting admin user's member record so we can enforce the
-// no-self-confirmation / no-self-reimbursement rule. Returns null for accounts
+// no-self-review rule (the treasurer may still reimburse their own). Returns null for accounts
 // with no matching member (e.g. the bare `admin` login), which can never be an
 // expense submitter. Matching uses any verified email (see memberForUser).
 const actingMember = async () => memberForUser(await Meteor.userAsync());
@@ -170,7 +170,8 @@ Meteor.methods({
   },
 
   /**
-   * Mark a confirmed expense as reimbursed (treasurer, not the submitter). The
+   * Mark a confirmed expense as reimbursed (treasurer, also their own; admin,
+   * not their own). The
    * treasurer picks the BAS bookkeeping account (from settings) and the actual
    * reimbursement payment date (the Phase 2 verification date) in the same step.
    */
@@ -190,7 +191,11 @@ Meteor.methods({
       throw new Meteor.Error('bad-date', 'Invalid reimbursement date');
     }
     const me = await actingMemberId();
-    assertNotOwnExpense(expense, me);
+    // The treasurer may pay out their own expense: someone else has already
+    // approved it, and that approval is the control. Admins may not.
+    if (!(await Roles.userIsInRoleAsync(Meteor.userId(), ['treasurer']))) {
+      assertNotOwnExpense(expense, me);
+    }
     await Expenses.updateAsync(expenseId, {
       $set: withActor({
         status: 'reimbursed',

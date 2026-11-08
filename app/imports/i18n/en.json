@@ -872,5 +872,16 @@
   "activityFieldStartsAt": "Usually starts",
   "activityFieldEndsAt": "Usually ends",
   "activityFieldUsualHint": "New events get the time",
-  "activityFieldDurationFromTimes": "From the times"
+  "activityFieldDurationFromTimes": "From the times",
+  "impersonationMenu": "Switch user",
+  "impersonationTitle": "Switch user",
+  "impersonationIntro": "See the app as another member sees it. You can only look – changes are disabled until you switch back to admin.",
+  "impersonationSearchPlaceholder": "Name or member number",
+  "impersonationSearch": "Search",
+  "impersonationNoResults": "No members found.",
+  "impersonationNoAccount": "Has no app account",
+  "impersonationSwitching": "Switching user…",
+  "impersonationViewingAs": "You are viewing the app as {{name}}",
+  "impersonationReadOnly": "View only – changes are disabled",
+  "impersonationSwitchBack": "Back to admin"
 }

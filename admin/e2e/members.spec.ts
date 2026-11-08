@@ -190,3 +190,83 @@ test.describe('Member tabs', () => {
     await expect(page.getByRole('tab', { name: /^messages/i })).toHaveCount(0);
   });
 });
+
+// The Activity tab: when the member last used the app and opened a door. Maja
+// (persona member) has used the app today and has door openings 1, 3, 6, 200
+// and 400 days ago, of which the last twelve months hold four (more if a lock
+// test has synced the fake lock's log by then); Nora
+// (newcomer) has neither.
+test.describe('Activity', () => {
+  // By the name, which only this persona has (an address like
+  // member@example.org is part of other addresses too); wait for the one row
+  // the search leaves, as openMember does.
+  const openActivity = async (page: Page, name: string) => {
+    await openAs(page, 'admin', '/members');
+    await search(page, name);
+    await expect(rows(page)).toHaveCount(1);
+    await rows(page).getByText(name, { exact: true }).click();
+    await expect(page).toHaveURL(/\/member\//);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(name);
+    await openTab(page, /^activity/i);
+    const tab = page.getByRole('region', { name: 'Activity' });
+    await expect(tab.getByRole('heading', { name: 'Doors' })).toBeVisible();
+    return tab;
+  };
+
+  test('shows when the member last used the app and opened a door', async ({ page }) => {
+    const tab = await openActivity(page, 'Maja Medlem');
+    await expect(tab.getByText(/Last used the app: \d{4}-\d{2}-\d{2} \d{2}:\d{2}/)).toBeVisible();
+    await expect(tab.getByText(/Last opened: \d{4}-\d{2}-\d{2} \d{2}:\d{2}, outerDoor, via the app/)).toBeVisible();
+    // At least the four seeded: the lock tests may sync more of hers from the
+    // fake lock's log first.
+    const line = tab.getByText(/Last 12 months: \d+ openings/);
+    await expect(line).toBeVisible();
+    const total = Number((await line.textContent())?.match(/(\d+) openings/)?.[1]);
+    expect(total).toBeGreaterThanOrEqual(4);
+    await expect(tab.getByRole('img', { name: 'Door openings per month' })).toBeVisible();
+    // The same chart as visits: days with an opening.
+    await tab.getByRole('button', { name: 'Visits', exact: true }).click();
+    await expect(tab.getByRole('img', { name: 'Visits per month' })).toBeVisible();
+
+    // One month by day: the month of her opening yesterday, and back.
+    const month = new Date(Date.now() - 24 * 3600 * 1000)
+      .toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'Europe/Stockholm' });
+    await tab.getByLabel('Period').click();
+    await page.getByRole('option', { name: month }).click();
+    await expect(tab.getByText(new RegExp(`^${month}: \\d+ openings?, \\d+ visits?$`))).toBeVisible();
+    await expect(tab.getByRole('img', { name: `Visits per day, ${month}` })).toBeVisible();
+    await tab.getByLabel('Period').click();
+    await page.getByRole('option', { name: 'Last 12 months' }).click();
+    await expect(tab.getByRole('img', { name: 'Visits per month' })).toBeVisible();
+  });
+
+  test('says never for a member without activity', async ({ page }) => {
+    const tab = await openActivity(page, 'Nora Ny');
+    await expect(tab.getByText('Last used the app: Never')).toBeVisible();
+    await expect(tab.getByText('Last opened: Never')).toBeVisible();
+    await expect(tab.getByText('No openings in the last 12 months.')).toBeVisible();
+  });
+
+  test('shows the whole family’s openings on request', async ({ page }) => {
+    const tab = await openActivity(page, 'Fredrik Familj');
+    // His own by default: Frida, in his family, has opened the door, he has not.
+    await expect(tab.getByRole('button', { name: 'This member', pressed: true })).toBeVisible();
+    await expect(tab.getByText('Last opened: Never')).toBeVisible();
+    await tab.getByRole('button', { name: /^Whole family \(3\)$/ }).click();
+    await expect(tab.getByRole('button', { name: /^Whole family/, pressed: true })).toBeVisible();
+    await expect(tab.getByText(/Last opened: .*, by Frida Familj/)).toBeVisible();
+    await expect(tab.getByText('Last 12 months: 1 opening, 1 visit')).toBeVisible();
+  });
+
+  test('offers no choice outside a family', async ({ page }) => {
+    const tab = await openActivity(page, 'Nora Ny');
+    await expect(tab.getByRole('button', { name: /^Whole family/ })).toHaveCount(0);
+  });
+
+  test('is closed to a role without access to members', async ({ page }) => {
+    await openAs(page, 'storage', '/');
+    await page.waitForFunction(() => (window as any).Meteor?.status().connected && (window as any).Meteor.userId());
+    const error = await page.evaluate(() => (window as any).Meteor.callAsync('members.activity', 'any').then(() => null, (e: any) => e.error));
+    expect(error).toBe('not-authorized');
+  });
+});

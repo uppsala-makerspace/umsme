@@ -4,8 +4,8 @@ import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
 import { ServerDataList } from '../components/ServerDataList';
+import { TabToolbar } from '../components/PageTabs';
 import { moment } from '../announcements/labels';
 
 const columns = [
@@ -21,17 +21,19 @@ const columns = [
 ];
 
 /**
- * Every opening of the doors, newest first, paged on the server. Names are
+ * The Door unlocks tab of the Activity page (Activity.jsx): every opening of
+ * the doors, newest first, paged on the server. Names are
  * left out unless asked for.
  *
  * @param {{ rows: object[], total: number, loading: boolean, error?: string, query: object,
  *           onQueryChange: (query) => void, showNames: boolean, onShowNamesChange: (show) => void }} props
  */
 export const DoorUnlockList = ({ showNames, onShowNamesChange, error, ...list }) => (
-  <Box>
-    <Typography variant="h4" component="h1" sx={{ mb: 1 }}>Door unlocks</Typography>
-    <FormControlLabel sx={{ mb: 1 }} label="Show names"
-      control={<Checkbox size="small" checked={showNames} onChange={(e) => onShowNamesChange(e.target.checked)} />} />
+  <Box component="section" aria-label="Door unlocks">
+    <TabToolbar note="Every opening of the doors, newest first.">
+      <FormControlLabel label="Show names" sx={{ mr: 0 }}
+        control={<Checkbox size="small" checked={showNames} onChange={(e) => onShowNamesChange(e.target.checked)} />} />
+    </TabToolbar>
     {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
     <ServerDataList {...list} columns={columns} empty="No door openings." columnVisibilityModel={{ memberName: showNames }} />
   </Box>

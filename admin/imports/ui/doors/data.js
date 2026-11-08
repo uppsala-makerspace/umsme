@@ -4,5 +4,5 @@ import { Meteor } from 'meteor/meteor';
 export const doorUnlocksPage = ({ page, pageSize, sort, search }) =>
   Meteor.callAsync('doorUnlocks.page', { page, pageSize, sort, search });
 
-/** How many opened the door how often: source 'lock' (its log) or 'recorded' (here). */
-export const doorVisits = (source) => Meteor.callAsync('doorUnlocks.visits', source);
+/** Door visits per day, month, quarter or year: query { view, month?, year? }. */
+export const doorVisitStats = (query) => Meteor.callAsync('doorStats.visits', query);

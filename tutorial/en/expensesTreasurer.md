@@ -52,4 +52,4 @@ The payment date and bookkeeping account are used for the automatic matching aga
 - **Approved by mistake:** click **Undo confirmation** and then **Yes, undo the confirmation**. The expense goes back to Submitted and must be approved again, in admin or by an approver in the app. This only works until the expense has been paid.
 - **The expense shouldn't be paid:** click **Reject…** and write a reason. The member sees the reason in the app and can correct and submit again.
 
-You can't reimburse your own expenses; someone else has to.
+You can also reimburse your own expenses, once someone else has approved them.

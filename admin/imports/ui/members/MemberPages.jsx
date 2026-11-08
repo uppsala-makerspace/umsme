@@ -10,6 +10,7 @@ import { useServerList } from '../components/useServerList';
 import { CommentsFor } from '../comments/CommentsFor';
 import { MessagesFor } from '../messages/MessagesFor';
 import { MemberCertificatesSection } from '../certificates/MemberCertificatesSection';
+import { MemberActivitySection } from './MemberActivitySection';
 import { MemberList } from './MemberList';
 import { MemberView } from './MemberView';
 import { MemberForm, memberValues, memberFields } from './MemberForm';
@@ -134,6 +135,7 @@ export const MemberViewPage = ({ _id }) => {
       messages={!member.infamily && <MessagesFor memberId={_id} onCount={counted('messages')} />}
       comments={<CommentsFor about={_id} onCount={counted('comments')} inTab />}
       certificates={<MemberCertificatesSection memberId={_id} onCount={counted('certificates')} />}
+      activity={<MemberActivitySection memberId={_id} />}
     />
   );
 };

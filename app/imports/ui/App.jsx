@@ -9,6 +9,7 @@ import { AppDataProvider } from '/imports/context/AppDataContext';
 import { MessagesProvider } from '/imports/context/MessagesContext';
 import Loader from '/imports/components/Loader/Loader';
 import useAutoReconnect from '/imports/hooks/useAutoReconnect';
+import { ImpersonationWatcher } from '/imports/components/ImpersonationBanner';
 
 const Login = lazyWithRetry(() => import('/imports/pages/login'));
 const Register = lazyWithRetry(() => import('/imports/pages/register'));
@@ -63,6 +64,7 @@ const ActivityDetail = lazyWithRetry(() => import('/imports/pages/activities/det
 const ActivityEdit = lazyWithRetry(() => import('/imports/pages/activities/edit'));
 const EventDetail = lazyWithRetry(() => import('/imports/pages/activities/event'));
 const EventEdit = lazyWithRetry(() => import('/imports/pages/activities/eventEdit'));
+const Impersonate = lazyWithRetry(() => import('/imports/pages/impersonate'));
 
 export const App = () => {
   useAutoReconnect();
@@ -74,6 +76,7 @@ export const App = () => {
       <MemberInfoProvider>
       <MessagesProvider>
       <AppDataProvider>
+        <ImpersonationWatcher />
         <ChunkErrorBoundary>
         <Suspense fallback={<Loader />}>
           <Routes>
@@ -133,6 +136,7 @@ export const App = () => {
             <Route path="/events/new" element={<EventEdit />} />
             <Route path="/events/:eventId" element={<EventDetail />} />
             <Route path="/events/:eventId/edit" element={<EventEdit />} />
+            <Route path="/impersonate" element={<Impersonate />} />
           </Routes>
         </Suspense>
         </ChunkErrorBoundary>

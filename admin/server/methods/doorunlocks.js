@@ -1,13 +1,11 @@
 import { Meteor } from 'meteor/meteor';
 import { Roles } from 'meteor/roles';
-import { Unlocks } from '/imports/common/collections/unlocks';
-import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
-import { Members } from '/imports/common/collections/members';
 import { check, Match } from 'meteor/check';
 import { runDoorUnlockSyncAndMail } from '../cronjob/syncAndMailUnlocks';
-import { lockVisits } from '../lock/visits';
 import { requireRole, DOMAIN_ROLES } from '/imports/common/server/authz';
-import { doorUnlocksPage, recordedVisits, visitBuckets } from '/imports/common/server/doors/doorUnlocks';
+import { doorUnlocksPage } from '/imports/common/server/doors/doorUnlocks';
+import { migrateUnlocks } from '/imports/common/server/doors/migrateUnlocks';
+import { doorVisitStats, VISIT_VIEWS } from '/imports/common/server/doors/visitStats';
 
 Meteor.methods({
   /** A page of the door openings. */
@@ -22,11 +20,18 @@ Meteor.methods({
     return doorUnlocksPage({ ...options, sort: options.sort || undefined });
   },
 
-  /** How many opened the door how often in six months: by the lock's log, or by what is recorded here. */
-  async 'doorUnlocks.visits'(source) {
-    check(source, Match.OneOf('lock', 'recorded'));
-    await requireRole(this.userId, source === 'lock' ? DOMAIN_ROLES.lock : DOMAIN_ROLES.doors);
-    return visitBuckets(source === 'lock' ? await lockVisits() : await recordedVisits());
+  /**
+   * Door visits (days a member opened any door) per day of a month, per month
+   * of a year, per quarter or per year, for the door statistics.
+   */
+  async 'doorStats.visits'(options) {
+    check(options, {
+      view: Match.OneOf(...VISIT_VIEWS),
+      month: Match.Optional(Match.Where((m) => typeof m === 'string' && /^\d{4}-\d{2}$/.test(m))),
+      year: Match.Optional(Match.Integer),
+    });
+    await requireRole(this.userId, DOMAIN_ROLES.doors);
+    return doorVisitStats(options);
   },
 
   async 'forceSyncDoorUnlocks'() {
@@ -36,40 +41,12 @@ Meteor.methods({
     return await runDoorUnlockSyncAndMail();
   },
 
+  /** Move the legacy lock log (`unlocks`) into doorunlocks; see migrateUnlocks. */
   async 'migrateUnlocksToDoorUnlocks'() {
     if (!Meteor.userId() || !await Roles.userIsInRoleAsync(Meteor.userId(), 'admin')) {
       throw new Meteor.Error('Not authorized');
     }
-
-    const legacy = await Unlocks.find({}).fetchAsync();
-    const result = { scanned: legacy.length, withMember: 0, withExtid: 0, skipped: 0 };
-
-    for (const row of legacy) {
-      const timestamp = row.timestamp;
-      const existing = await DoorUnlocks.findOneAsync({ timestamp, door: 'outerDoor' });
-      if (existing) {
-        result.skipped += 1;
-        continue;
-      }
-
-      const username = row.username || '';
-      const colonLocation = username.lastIndexOf(':');
-      const cleaned = colonLocation === -1 ? username : username.substring(0, colonLocation);
-
-      const member = cleaned ? await Members.findOneAsync({ email: cleaned }) : null;
-      const doc = { timestamp, door: 'outerDoor', method: 'danalock' };
-      if (member) {
-        doc.memberid = member._id;
-        result.withMember += 1;
-      } else {
-        doc.extid = `${row.user}-${cleaned}`;
-        result.withExtid += 1;
-      }
-      await DoorUnlocks.insertAsync(doc);
-    }
-
-    await Unlocks.removeAsync({});
-
-    return result;
+    this.unblock();
+    return migrateUnlocks();
   },
 });

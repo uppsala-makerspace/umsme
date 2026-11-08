@@ -10,6 +10,7 @@ import {
   removeMember, addFamilyMember, removeFromFamily, memberDetail, memberExport, memberDraftFromPayment, pendingMembers,
 } from '/imports/common/server/members/members';
 import { sendAutoWelcome } from '../messages/messages';
+import { memberActivity, ACTIVITY_SCOPES } from '/imports/common/server/members/activity';
 
 const roles = DOMAIN_ROLES.members;
 const Details = Object.fromEntries(MEMBER_DETAIL_FIELDS.map((f) => [f, Match.Optional(Match.OneOf(null, String, Boolean, Number, Date))]));
@@ -56,6 +57,13 @@ Meteor.methods({
     check(memberId, String);
     await requireRole(this.userId, roles);
     return memberDetail(memberId);
+  },
+  /** What the member has done: last in the app, door openings, the member's or the family's (the Activity tab). */
+  async 'members.activity'(memberId, scope = 'member') {
+    check(memberId, String);
+    check(scope, Match.OneOf(...ACTIVITY_SCOPES));
+    await requireRole(this.userId, roles);
+    return memberActivity(memberId, { scope });
   },
   async 'members.create'(fields, { infamily, paymentId }) {
     check(fields, Details);

@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { Members } from '/imports/common/collections/members';
-import { doorUnlocksPage, visitBuckets } from '/imports/common/server/doors/doorUnlocks';
+import { doorUnlocksPage } from '/imports/common/server/doors/doorUnlocks';
 
 const prefix = 'doortest-';
 
@@ -24,9 +24,5 @@ describe('door unlocks', function () {
     assert.strictEqual(rows[0].memberName, 'Doortest Person');
     const both = await doorUnlocksPage({ search: `${prefix}door`, sort: { field: 'timestamp', direction: 'asc' } });
     assert.deepStrictEqual(both.rows.map((r) => r.method), ['app', 'danalock']);
-  });
-
-  it('buckets visits per person', function () {
-    assert.deepStrictEqual(visitBuckets({ a: 1, b: 7, c: 7, d: 60 }).counts, [1, 2, 0, 0, 1]);
   });
 });
