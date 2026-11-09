@@ -155,8 +155,9 @@ entry of kind `activity` has fields of its own instead of `status`, `tag`,
 | `registration`    | string    | Whether one signs up: `required`, `optional` or `none`. What its events have unless an event says otherwise. |
 | `seats`           | number    | How many may sign up for an event, unless an event says otherwise. Absent when there is no sign-up or no limit. |
 | `events`          | array     | Its events from now on, soonest first. Absent when none is planned. |
+| `pastEvents`      | array     | Its latest events that are over, latest first: at most 10. The same shape as `events`. Absent when there are none. |
 
-Each item in `events` has `start` and `end` (ISO 8601, UTC) and `status`,
+Each item in `events` and `pastEvents` has `start` and `end` (ISO 8601, UTC) and `status`,
 `confirmed` or `cancelled`: a cancelled event stays in the list, so that
 whoever planned to come can see it is off. An event has a `name` or a `space`
 only when they differ from the activity's. Every event also has:

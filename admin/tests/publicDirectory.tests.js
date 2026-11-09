@@ -3,6 +3,7 @@ import {
   buildDirectory,
   PUBLIC_WORKSHOP_STATUSES,
   PUBLIC_GROUP_TYPES,
+  PAST_EVENTS,
 } from '/imports/common/lib/publicDirectory';
 
 const WORKSHOPS = [
@@ -397,6 +398,29 @@ describe('publicDirectory', function () {
       assert.strictEqual(events[1].name, undefined);
       assert.deepStrictEqual(events[1].space, { spaceId: 'kitchen', floor: 'floor1' });
       assert.strictEqual(events[0].space.spaceId, 'textile_workshop');
+    });
+
+    it('lists an activity’s latest past events, latest first, the same shape', function () {
+      const intro = byId(directory().entries, 'textilintro');
+      assert.deepStrictEqual(intro.pastEvents, [
+        { start: '2026-11-01T17:00:00.000Z', end: '2026-11-01T19:00:00.000Z', status: 'confirmed', registration: 'none',
+          space: { spaceId: 'textile_workshop', floor: 'floor2' } },
+      ]);
+      assert.strictEqual(byId(directory().entries, 'glasintro').pastEvents, undefined);
+      // A free-standing event that is over is not published anywhere.
+      const over = { _id: 'e8', name: { sv: 'Gammal städdag' }, start: at('2026-10-01T09:00:00Z'), end: at('2026-10-01T12:00:00Z'), status: 'confirmed', published: true };
+      const { events } = buildAll({ activities: ACTIVITIES, events: [...EVENTS, over], categories: CATEGORIES, now, imageUrlFor });
+      assert.deepStrictEqual(events.map((e) => e.id), ['staddag-2026-11-29']);
+    });
+
+    it('publishes at most the latest past events of an activity', function () {
+      const many = Array.from({ length: PAST_EVENTS + 2 }, (_, i) => ({
+        _id: `p${i}`, activityId: 'a1', status: 'confirmed',
+        start: new Date(Date.UTC(2026, 9, i + 1, 17)), end: new Date(Date.UTC(2026, 9, i + 1, 19)),
+      }));
+      const { pastEvents } = byId(buildAll({ activities: ACTIVITIES, events: many, now }).entries, 'textilintro');
+      assert.strictEqual(pastEvents.length, PAST_EVENTS);
+      assert.strictEqual(pastEvents[0].start, new Date(Date.UTC(2026, 9, PAST_EVENTS + 2, 17)).toISOString());
     });
 
     it('publishes free-standing events that are published, apart', function () {

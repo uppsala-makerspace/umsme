@@ -26,6 +26,9 @@ export const PUBLIC_WORKSHOP_STATUSES = ["established", "trial"];
  */
 export const PUBLIC_GROUP_TYPES = ["function"];
 
+// How many of an activity's past events are published: the latest.
+export const PAST_EVENTS = 10;
+
 // Areas of interest share the workshops collection; a document without a kind
 // predates them and is a workshop.
 const workshopKind = (w) => (w.kind === "areaOfInterest" ? "areaOfInterest" : "workshop");
@@ -81,7 +84,8 @@ const spaceLinksFor = (doc, spaceById) => {
  * @param {(entry: {doc: object, kind: string}) => string|null} args.imageUrlFor
  *   kind is also "activity", and "event" for an event resolved against its activity
  * @param {Array<object>} args.activities  all activities; the published ones are entries
- * @param {Array<object>} args.events      all events; those to come are published
+ * @param {Array<object>} args.events      all events; those to come are published, and
+ *   an activity's latest past ones (PAST_EVENTS of them)
  * @param {Array<object>} args.categories  all categories of activities
  * @param {Object<string, string>} args.memberNames  member id → name, for the
  *   hosts of events that show them; only the first name is published
@@ -159,8 +163,14 @@ export const buildDirectory = ({
     return names.length > 0 ? names : null;
   };
 
-  // An activity's events: when, and where or what differs from the activity.
-  const eventsOf = (activity) => toCome
+  // An activity's past events, latest first.
+  const past = events
+    .filter((e) => e.end < now)
+    .sort((a, b) => b.start - a.start);
+
+  // An activity's events, to come or past: when, and where or what differs
+  // from the activity.
+  const eventsOf = (activity, list = toCome) => list
     .filter((e) => e.activityId === activity._id)
     .map((e) => resolveEvent(e, activity))
     .filter((e) => e.published)
@@ -175,6 +185,7 @@ export const buildDirectory = ({
 
   const activityEntry = (doc, id) => {
     const upcoming = eventsOf(doc);
+    const before = eventsOf(doc, past).slice(0, PAST_EVENTS);
     return withoutEmpty({
       id,
       kind: "activity",
@@ -191,6 +202,7 @@ export const buildDirectory = ({
       registration: registrationOf(doc),
       ...seatsOf(doc),
       events: upcoming.length > 0 ? upcoming : null,
+      pastEvents: before.length > 0 ? before : null,
     });
   };
 

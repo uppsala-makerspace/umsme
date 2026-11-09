@@ -80,8 +80,11 @@ export const makePublicDirectoryHandler = () => async (req, res) => {
   const spaceById = new Map(spaces.map((s) => [s._id, s]));
   const now = new Date();
   const activities = await Activities.find({ published: true }).fetchAsync();
-  // Events of activities take `published` from them, so all to come are read.
-  const events = await Events.find({ end: { $gte: now } }).fetchAsync();
+  // Events of activities take `published` from them, so all to come are read;
+  // and the past ones of published activities, of which the latest are shown.
+  const events = await Events.find({
+    $or: [{ end: { $gte: now } }, { activityId: { $in: activities.map((a) => a._id) }, end: { $lt: now } }],
+  }).fetchAsync();
   const categories = await ActivityCategories.find({}).fetchAsync();
   // The names of the hosts of events that show them, and nothing else about
   // any member; buildDirectory publishes only the first name.
