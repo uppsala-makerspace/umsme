@@ -17,6 +17,7 @@ import { ImageField } from '../components/ImageField';
 import { FORM_WIDTH, PageTabs, TabPanel, TabToolbar } from '../components/PageTabs';
 import { SharedFields, native } from './SharedFields';
 import { RegistrationFields } from './RegistrationFields';
+import { VisibilityFields } from './VisibilityFields';
 import { MatchingEvents } from './MatchingEvents';
 import { FormCard } from './FormCard';
 import { eventColumns } from './eventColumns';
@@ -64,7 +65,8 @@ export const ActivityForm = ({
           <option value="activityEditors">Those who may change the activity</option>
         </TextField>
       </FormCard>
-      <SharedFields values={values} onChange={onChange} categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} certificates={certificates} />
+      <SharedFields values={values} onChange={onChange} categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} certificates={certificates}
+        afterDescription={<VisibilityFields values={values} onChange={onChange} />} />
       <RegistrationFields values={values} onChange={onChange} />
       <Stack direction="row" spacing={1}>
         <Button type="submit" variant="contained" disabled={busy}>{isNew ? 'Add' : 'Save'}</Button>

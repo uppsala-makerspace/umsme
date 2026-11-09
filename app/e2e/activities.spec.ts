@@ -273,6 +273,8 @@ test.describe('Activities', () => {
     await page.getByLabel(en.eventFieldActivity).selectOption({ label: en.eventFieldFree });
     await expect(page.getByLabel(en.activityFieldMembersOnly).locator('option')).toHaveText([en.activityYes, en.activityNo]);
     await expect(page.getByLabel(en.activityFieldMembersOnly)).toHaveValue('no');
+    await expect(page.getByLabel(en.activityFieldHostsPublished).locator('option')).toHaveText([en.activityYes, en.activityNo]);
+    await expect(page.getByLabel(en.activityFieldPublished, { exact: true })).toHaveValue('no');
     await expect(page.getByLabel(en.registrationFieldKind).locator('option', { hasText: en.registrationKind_none })).toHaveCount(1);
   });
 

@@ -31,6 +31,7 @@ export const SHARED_FIELDS = [
   "cost",
   "membersOnly",
   "published",
+  "hostsPublished",
   "registration",
   "minSeats",
   "maxSeats",

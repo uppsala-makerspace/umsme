@@ -6,6 +6,7 @@ import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
 import ImageCard from "../components/ImageCard";
 import RegistrationFields from "../components/RegistrationFields";
+import VisibilityFields from "../components/VisibilityFields";
 import { Field, SelectField, DayField, ClockField, Row, Card } from "../components/fields";
 
 /**
@@ -54,6 +55,7 @@ const EventEditForm = ({
             { value: "cancelled", label: t("eventCancelled") },
           ]} />
       </Card>
+      <VisibilityFields event values={values} onChange={onChange} inherited={values.activityId ? activity : null} />
       <Card title={t("eventFieldHosts")}>
         <Field id="event-hosts" label="" hint={t("eventFieldHostsHint")}>
           <div id="event-hosts" className="flex flex-wrap gap-2">

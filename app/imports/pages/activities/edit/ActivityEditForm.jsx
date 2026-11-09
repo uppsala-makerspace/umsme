@@ -6,6 +6,7 @@ import { localized } from "/imports/common/lib/groupRules";
 import SharedFields from "../components/SharedFields";
 import ImageCard from "../components/ImageCard";
 import RegistrationFields from "../components/RegistrationFields";
+import VisibilityFields from "../components/VisibilityFields";
 import { SelectField, Card } from "../components/fields";
 
 /**
@@ -33,7 +34,8 @@ const ActivityEditForm = ({ isNew, values, onChange, choices, saving, error, has
             { value: "activityEditors", label: t("activityEventBookersActivityEditors") },
           ]} />
       </Card>
-      <SharedFields values={values} onChange={onChange} choices={choices} />
+      <SharedFields values={values} onChange={onChange} choices={choices}
+        afterDescription={<VisibilityFields values={values} onChange={onChange} />} />
       <RegistrationFields values={values} onChange={onChange} choices={choices} />
       <div className="flex gap-3 mt-2">
         <Button type="submit" disabled={saving}>{saving ? t("saving") : t("save")}</Button>

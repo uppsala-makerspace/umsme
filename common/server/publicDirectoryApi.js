@@ -3,9 +3,11 @@ import { Groups } from "/imports/common/collections/groups";
 import { Spaces } from "/imports/common/collections/spaces";
 import { Activities } from "/imports/common/collections/activities";
 import { Events } from "/imports/common/collections/events";
+import { Members } from "/imports/common/collections/members";
 import { ActivityCategories } from "/imports/common/collections/activityCategories";
 import { adminBaseUrl } from "/imports/common/lib/links";
 import { buildDirectory } from "/imports/common/lib/publicDirectory";
+import { resolveEvent } from "/imports/common/lib/activityRules";
 import {
   workshopImageUrlFor,
   groupImageUrlFor,
@@ -81,6 +83,16 @@ export const makePublicDirectoryHandler = () => async (req, res) => {
   // Events of activities take `published` from them, so all to come are read.
   const events = await Events.find({ end: { $gte: now } }).fetchAsync();
   const categories = await ActivityCategories.find({}).fetchAsync();
+  // The names of the hosts of events that show them, and nothing else about
+  // any member; buildDirectory publishes only the first name.
+  const activityById = new Map(activities.map((a) => [a._id, a]));
+  const hostIds = [...new Set(events
+    .map((e) => resolveEvent(e, activityById.get(e.activityId)))
+    .filter((e) => e.published && e.hostsPublished)
+    .flatMap((e) => e.hostMemberIds || []))];
+  const memberNames = Object.fromEntries((hostIds.length
+    ? await Members.find({ _id: { $in: hostIds } }, { fields: { name: 1 } }).fetchAsync()
+    : []).map((m) => [m._id, m.name]));
 
   const directory = buildDirectory({
     workshops,
@@ -91,6 +103,7 @@ export const makePublicDirectoryHandler = () => async (req, res) => {
     activities,
     events,
     categories,
+    memberNames,
     now,
   });
 

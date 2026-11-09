@@ -136,7 +136,7 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   Ändrat. Intresseanmälan och grupperna kräver fortfarande godkänt
   medlemskap.
 - **Kostnad:** ingen betalning nu; kostnaden kan beskrivas i texten.
-- **Hemsidan:** platser kvar och anmälningsläge kommer inte med i JSON:en nu.
+- **Hemsidan:** JSON:en har nu anmälan (`registration`), platser (`seats`, `seatsLeft`) och, när aktiviteten eller tillfället valt det i Synlighet, värdarnas förnamn (`hosts`). Se `docs/public-api.md`.
 - **Kalender på grupp- och verkstadssidan:** delvis löst redan; återkom om
   något saknas.
 - **Andra påminnelsen:** de som inte checkat in påminns igen två timmar innan

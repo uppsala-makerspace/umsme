@@ -50,6 +50,9 @@ const activityFields = ({ required }) => ({
   cost: { label: "Cost (kr)", type: Number, min: 0, optional: true },
   membersOnly: { label: "For members only", type: Boolean, optional: true },
   published: { label: "Shown on the website", type: Boolean, optional: true },
+  // Whether the hosts' first names go to the website with the event; never
+  // anything else about them. Unset means no.
+  hostsPublished: { label: "Hosts' first names on the website", type: Boolean, optional: true },
   // Registration (plan/activities.md, stage 2): whether one signs up, how
   // many may, how few make it happen, a queue when full, what one must hold.
   registration: { label: "Registration", type: String, allowedValues: ["none", "optional", "required"], optional: true },

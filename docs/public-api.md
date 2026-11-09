@@ -131,9 +131,13 @@ entry of kind `activity` has fields of its own instead of `status`, `tag`,
   "durationMinutes": 120,
   "cost": 50,
   "membersOnly": true,
+  "registration": "required",
+  "seats": 8,
   "events": [
-    { "start": "2026-11-05T17:00:00.000Z", "end": "2026-11-05T19:00:00.000Z", "status": "confirmed" },
+    { "start": "2026-11-05T17:00:00.000Z", "end": "2026-11-05T19:00:00.000Z", "status": "confirmed",
+      "registration": "required", "seats": 8, "seatsLeft": 3, "hosts": ["Anna", "Bo"] },
     { "start": "2026-11-19T17:00:00.000Z", "end": "2026-11-19T19:00:00.000Z", "status": "cancelled",
+      "registration": "optional",
       "name": { "sv": "Extra introduktion" }, "space": { "spaceId": "bigroom", "floor": "floor1" } }
   ]
 }
@@ -148,19 +152,30 @@ entry of kind `activity` has fields of its own instead of `status`, `tag`,
 | `durationMinutes` | number    | How long an event usually lasts. |
 | `cost`            | number    | What taking part costs, in kronor. Absent when free. |
 | `membersOnly`     | boolean   | Whether only members may take part. |
+| `registration`    | string    | Whether one signs up: `required`, `optional` or `none`. What its events have unless an event says otherwise. |
+| `seats`           | number    | How many may sign up for an event, unless an event says otherwise. Absent when there is no sign-up or no limit. |
 | `events`          | array     | Its events from now on, soonest first. Absent when none is planned. |
 
 Each item in `events` has `start` and `end` (ISO 8601, UTC) and `status`,
 `confirmed` or `cancelled`: a cancelled event stays in the list, so that
 whoever planned to come can see it is off. An event has a `name` or a `space`
-only when they differ from the activity's.
+only when they differ from the activity's. Every event also has:
+
+| Field          | Type     | Description |
+| -------------- | -------- | ----------- |
+| `registration` | string   | Whether one signs up for this event: `required`, `optional` or `none`. |
+| `seats`        | number   | How many may sign up. Absent when there is no sign-up or no limit. |
+| `seatsLeft`    | number   | How many seats are free now; `0` when full (one can then join the queue, if the event has one). Present together with `seats`. |
+| `hosts`        | string[] | The first names of the hosts, who run the event. Only when the activity or the event is set to show them, and the event has hosts; otherwise absent. Nothing else about the hosts is published. |
 
 ### `events`
 
 Events that belong to no activity, such as a cleaning day or the annual
 meeting, from now on and soonest first. They describe themselves with the
 fields an activity has (`name`, `text`, `image`, `category`, `workshop`,
-`group`, `space`, `cost`, `membersOnly`), plus `start`, `end` and `status`.
+`group`, `space`, `cost`, `membersOnly`, `registration`), plus `start`, `end`,
+`status`, `seats` and `seatsLeft` as for an activity's events, and, when set to
+show them, `hosts`.
 Their `id` is made from the Swedish name and the day, e.g.
 `staddag-2026-11-29`, unique among the events.
 
@@ -231,8 +246,10 @@ same values the member app uses, so a consumer need not hardcode them.
 | Activities marked to be shown on the website, and their events to come that are too | Activities and events not marked so, events that are over |
 | Free-standing events to come that are marked to be shown | |
 
-No member data is published: no names of members, group membership, the
-hosts of an event or contact details. See [groups-and-workshops.md](groups-and-workshops.md) for
+No member data is published, with one exception: the first names of an
+event's hosts, when the activity or the event is set to show them (the
+Visibility section of its form). Nothing else about the hosts, and no other
+names of members, group membership or contact details. See [groups-and-workshops.md](groups-and-workshops.md) for
 what the statuses and group types mean.
 
 ---

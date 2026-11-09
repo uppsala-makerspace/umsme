@@ -390,6 +390,7 @@ const SharedFields = {
   cost: Num,
   membersOnly: Flag,
   published: Flag,
+  hostsPublished: Flag,
   registration: Text,
   minSeats: Num,
   maxSeats: Num,

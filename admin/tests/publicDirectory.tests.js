@@ -419,4 +419,61 @@ describe('publicDirectory', function () {
       assert.deepStrictEqual([events, categories], [[], []]);
     });
   });
+
+  describe('registration and hosts', function () {
+    const now = new Date('2026-11-10T12:00:00Z');
+    const day = (d) => ({ start: new Date(`2026-11-${d}T17:00:00Z`), end: new Date(`2026-11-${d}T19:00:00Z`), status: 'confirmed' });
+    const memberNames = { m1: 'Anna Andersson', m2: '  Bo  Berg ', m3: 'Cecilia Ceder' };
+    const ACTIVITIES = [
+      // Sign-up required, hosts shown: what its events have unless they say otherwise.
+      { _id: 'a1', name: { sv: 'Svarvkurs' }, published: true, registration: 'required', hostsPublished: true, maxSeats: 6 },
+      // Nothing set: no sign-up, hosts not shown.
+      { _id: 'a2', name: { sv: 'Öppen kväll' }, published: true },
+    ];
+    const EVENTS = [
+      // Takes both from the activity; a host no longer a member is left out.
+      { _id: 'e1', activityId: 'a1', ...day(11), hostMemberIds: ['m1', 'gone', 'm2'], seatsTaken: 4 },
+      // Says otherwise on both.
+      { _id: 'e2', activityId: 'a1', ...day(12), hostMemberIds: ['m1'], hostsPublished: false, registration: 'optional', maxSeats: 3, seatsTaken: 5 },
+      // Shows hosts, though its activity does not.
+      { _id: 'e3', activityId: 'a2', ...day(13), hostMemberIds: ['m3'], hostsPublished: true },
+      // Shown hosts, but none.
+      { _id: 'e4', activityId: 'a1', ...day(14), hostMemberIds: [] },
+      // Free-standing: its own.
+      { _id: 'e5', name: { sv: 'Planering ny webb' }, ...day(15), published: true, registration: 'optional', hostsPublished: true, hostMemberIds: ['m2'], maxSeats: 10, seatsTaken: 2 },
+      { _id: 'e6', name: { sv: 'Besök från kommunen' }, ...day(16), published: true, hostMemberIds: ['m1'] },
+    ];
+    const directory = () => buildAll({ activities: ACTIVITIES, events: EVENTS, memberNames, now });
+    const eventsOf = (id) => byId(directory().entries, id).events;
+
+    it('says whether one signs up, for an activity and each event', function () {
+      assert.strictEqual(byId(directory().entries, 'svarvkurs').registration, 'required');
+      assert.strictEqual(byId(directory().entries, 'oppen-kvall').registration, 'none');
+      assert.deepStrictEqual(eventsOf('svarvkurs').map((e) => e.registration), ['required', 'optional', 'required']);
+      assert.deepStrictEqual(eventsOf('oppen-kvall').map((e) => e.registration), ['none']);
+      assert.deepStrictEqual(directory().events.map((e) => e.registration), ['optional', 'none']);
+    });
+
+    it('gives the seats and those left, only where one signs up with a limit', function () {
+      assert.strictEqual(byId(directory().entries, 'svarvkurs').seats, 6);
+      assert.strictEqual(byId(directory().entries, 'oppen-kvall').seats, undefined);
+      // Inherited 6 with 4 taken; its own 3 with 5 taken is full, not negative; none taken.
+      assert.deepStrictEqual(eventsOf('svarvkurs').map((e) => [e.seats, e.seatsLeft]), [[6, 2], [3, 0], [6, 6]]);
+      assert.deepStrictEqual(eventsOf('oppen-kvall').map((e) => [e.seats, e.seatsLeft]), [[undefined, undefined]]);
+      assert.deepStrictEqual(directory().events.map((e) => [e.seats, e.seatsLeft]), [[10, 8], [undefined, undefined]]);
+    });
+
+    it('names the hosts by first name, only where the activity or event shows them', function () {
+      assert.deepStrictEqual(eventsOf('svarvkurs').map((e) => e.hosts), [['Anna', 'Bo'], undefined, undefined]);
+      assert.deepStrictEqual(eventsOf('oppen-kvall').map((e) => e.hosts), [['Cecilia']]);
+      assert.deepStrictEqual(directory().events.map((e) => e.hosts), [['Bo'], undefined]);
+    });
+
+    it('publishes nothing else about the hosts', function () {
+      const json = JSON.stringify(directory());
+      for (const hidden of ['Andersson', 'Berg', 'Ceder', 'm1', 'm2', 'm3', 'hostMemberIds', 'hostsPublished']) {
+        assert.ok(!json.includes(hidden), `${hidden} is published`);
+      }
+    });
+  });
 });

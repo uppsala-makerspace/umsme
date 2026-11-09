@@ -10,7 +10,7 @@
  */
 import { withUniqueSlugs } from "./slug";
 import { SPACE_COLORS, spaceColorName } from "./spaceColors";
-import { resolveEvent } from "./activityRules";
+import { resolveEvent, REGISTRATIONS, seatsLeft } from "./activityRules";
 
 /**
  * Only workshops and areas of interest that exist for members to use. A forming
@@ -83,6 +83,8 @@ const spaceLinksFor = (doc, spaceById) => {
  * @param {Array<object>} args.activities  all activities; the published ones are entries
  * @param {Array<object>} args.events      all events; those to come are published
  * @param {Array<object>} args.categories  all categories of activities
+ * @param {Object<string, string>} args.memberNames  member id → name, for the
+ *   hosts of events that show them; only the first name is published
  * @param {Date} args.now                  what "to come" is counted from
  * @return {{entries: Array<object>, spaces: Array<object>, palette: object,
  *           events: Array<object>, categories: Array<object>}}
@@ -96,6 +98,7 @@ export const buildDirectory = ({
   activities = [],
   events = [],
   categories = [],
+  memberNames = {},
   now = new Date(),
 }) => {
   const published = [
@@ -140,6 +143,22 @@ export const buildDirectory = ({
     status: event.status,
   });
 
+  // Whether one signs up: required, optional or not at all (unset is none).
+  const registrationOf = (doc) => (REGISTRATIONS.includes(doc.registration) ? doc.registration : "none");
+  // The seats of one that takes sign-ups and has a limit: how many, and for an
+  // event how many are left. Without a limit there is nothing to count.
+  const seatsOf = (doc, { left = false } = {}) => (registrationOf(doc) !== "none" && doc.maxSeats
+    ? { seats: doc.maxSeats, ...(left ? { seatsLeft: seatsLeft(doc, doc.seatsTaken || 0) } : {}) }
+    : {});
+  // The hosts of a (resolved) event, by first name only, when the event or its
+  // activity says so. Nothing else about them; a host no longer a member is left out.
+  const firstName = (name) => String(name || "").trim().split(/\s+/)[0] || null;
+  const hostsOf = (event) => {
+    if (!event.hostsPublished) return null;
+    const names = (event.hostMemberIds || []).map((id) => firstName(memberNames[id])).filter(Boolean);
+    return names.length > 0 ? names : null;
+  };
+
   // An activity's events: when, and where or what differs from the activity.
   const eventsOf = (activity) => toCome
     .filter((e) => e.activityId === activity._id)
@@ -149,6 +168,9 @@ export const buildDirectory = ({
       ...eventTimes(e),
       name: e.name !== activity.name ? bilingual(e.name) : null,
       space: spaceOf(e.spaceId),
+      registration: registrationOf(e),
+      ...seatsOf(e, { left: true }),
+      hosts: hostsOf(e),
     }));
 
   const activityEntry = (doc, id) => {
@@ -166,6 +188,8 @@ export const buildDirectory = ({
       durationMinutes: doc.durationMinutes ?? null,
       cost: doc.cost ?? null,
       membersOnly: !!doc.membersOnly,
+      registration: registrationOf(doc),
+      ...seatsOf(doc),
       events: upcoming.length > 0 ? upcoming : null,
     });
   };
@@ -246,6 +270,9 @@ export const buildDirectory = ({
     space: spaceOf(e.spaceId),
     cost: e.cost ?? null,
     membersOnly: !!e.membersOnly,
+    registration: registrationOf(e),
+    ...seatsOf(e, { left: true }),
+    hosts: hostsOf(e),
   }));
 
   const exportedCategories = [...categories]

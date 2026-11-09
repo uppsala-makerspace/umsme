@@ -13,6 +13,20 @@ export const native = { select: { native: true }, inputLabel: { shrink: true } }
 const yesNo = (value) => (value ? 'yes' : 'no');
 
 /**
+ * A yes/no field. On an activity a checkbox; on an event a choice of yes and
+ * no, and, on an event of an activity (`inherited`), "as the activity" too.
+ */
+export const FlagField = ({ name, label, values, onChange, inherited = null, event = false }) => (event ? (
+  <TextField label={label} select fullWidth slotProps={native} value={values[name] || (inherited ? '' : 'no')} onChange={(e) => onChange(name, e.target.value)}>
+    {inherited && <option value="">{`(As the activity: ${yesNo(inherited[name])})`}</option>}
+    <option value="yes">Yes</option>
+    <option value="no">No</option>
+  </TextField>
+) : (
+  <FormControlLabel label={label} control={<Checkbox checked={!!values[name]} onChange={(e) => onChange(name, e.target.checked)} />} />
+));
+
+/**
  * The fields an activity and an event share. On an event of an activity
  * (`inherited` is the activity) an empty field is the activity's: its value
  * shows greyed in the field, and a choice offers "as the activity". On an
@@ -20,10 +34,12 @@ const yesNo = (value) => (value ? 'yes' : 'no');
  *
  * @param {{ values: object, onChange: (field, value) => void, inherited?: object|null, event?: boolean,
  *           categories: Array<{ _id, name }>, workshopOptions: Array<{ value, label }>,
- *           spaceOptions: Array<{ value, label }>, certificates?: Array<{ _id, name }> }} props
+ *           spaceOptions: Array<{ value, label }>, certificates?: Array<{ _id, name }>,
+ *           afterDescription?: React.ReactNode }} props
  *   `event` makes the yes/no fields three-way (yes, no, as the activity) rather than checkboxes.
+ *   `afterDescription` is drawn between the first card and the rest (an activity's Visibility).
  */
-export const SharedFields = ({ values, onChange, inherited = null, event = false, categories, workshopOptions, spaceOptions, certificates = [] }) => {
+export const SharedFields = ({ values, onChange, inherited = null, event = false, categories, workshopOptions, spaceOptions, certificates = [], afterDescription = null }) => {
   const from = (field, lang) => {
     const value = lang ? inherited?.[field]?.[lang] : inherited?.[field];
     return value === undefined || value === null || value === '' ? undefined : String(value);
@@ -45,15 +61,7 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
     ? `(As the activity: ${labelOf(options, inherited[field])})`
     : empty);
   const categoryOptions = categories.map((c) => ({ value: c._id, label: c.name?.sv || c._id }));
-  const flag = (name, label) => (event ? (
-    <TextField label={label} select fullWidth slotProps={native} value={values[name] || (inherited ? '' : 'no')} onChange={(e) => onChange(name, e.target.value)}>
-      {inherited && <option value="">{`(As the activity: ${yesNo(inherited[name])})`}</option>}
-      <option value="yes">Yes</option>
-      <option value="no">No</option>
-    </TextField>
-  ) : (
-    <FormControlLabel label={label} control={<Checkbox checked={!!values[name]} onChange={(e) => onChange(name, e.target.checked)} />} />
-  ));
+  const flag = (name, label) => <FlagField name={name} label={label} values={values} onChange={onChange} inherited={inherited} event={event} />;
 
   const kind = event ? 'event' : 'activity';
   const usual = event ? null : usualMinutes(values.startsAt, values.endsAt);
@@ -82,6 +90,7 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
           <TextField label="Cost (kr)" fullWidth {...text('cost', { inputMode: 'decimal' })} />
         </Stack>
       </FormCard>
+      {afterDescription}
       <FormCard title="Where and contact" kind={kind}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
           <TextField label="Shown at workshop" select fullWidth slotProps={native} value={values.workshopId} onChange={(e) => onChange('workshopId', e.target.value)}
@@ -112,7 +121,6 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
           <option value="">{none('targetCertificateId', certificateOptions, '(None)')}</option>
           {certificateOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </TextField>
-        <Box sx={{ mb: 2 }}>{flag('published', 'Shown on the website')}</Box>
       </FormCard>
     </>
   );

@@ -56,11 +56,15 @@ test.describe('Activities', () => {
     await openActivity(page, 'E2E edit aktivitet');
     await field(page, 'Description (Swedish, markdown)').fill('En aktivitet för test.');
     await page.getByRole('combobox', { name: 'Category' }).selectOption({ label: 'Kurs' });
-    await page.getByRole('checkbox', { name: 'Shown on the website' }).check();
+    // Both website choices sit in Visibility.
+    const visibility = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Visibility' }) });
+    await visibility.getByRole('checkbox', { name: 'Shown on the website', exact: true }).check();
+    await visibility.getByRole('checkbox', { name: "Hosts' first names shown on the website" }).check();
     await saveButton(page).click();
     await expect(page.getByText(/^saved\.?$/i)).toBeVisible();
 
     await openActivity(page, 'E2E edit aktivitet');
+    await expect(page.getByRole('checkbox', { name: "Hosts' first names shown on the website" })).toBeChecked();
     await expect(field(page, 'Description (Swedish, markdown)')).toHaveValue('En aktivitet för test.');
     await expect(page.getByRole('combobox', { name: 'Category' }).locator('option:checked')).toHaveText('Kurs');
     await expect(page.getByText('On the website', { exact: true })).toBeVisible();

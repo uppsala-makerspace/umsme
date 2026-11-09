@@ -132,7 +132,7 @@ export const buildE2e = async ({ people, now }) => {
   await makeCategory('E2E delete category', null, 6);
   const wheelIntro = {
     name: { sv: 'Drejintroduktion', en: 'Wheel introduction' }, description: { sv: 'Grunderna i drejning.' },
-    groupId: ceramicsGroup, workshopId: ceramics, categoryId: courses, durationMinutes: 120, published: true,
+    groupId: ceramicsGroup, workshopId: ceramics, categoryId: courses, durationMinutes: 120, published: true, hostsPublished: true,
   };
   wheelIntro._id = await makeActivity(wheelIntro);
   await makeEvent({ activity: wheelIntro, start: at(-10, 18), hostMemberIds: [members.groupLeader._id] });

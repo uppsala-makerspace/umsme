@@ -326,7 +326,7 @@ export const buildDemo = async ({ random, people, now }) => {
       en: 'Safety, machines and routines in the wood workshop. After it you may use the workshop’s hand tools.',
     },
     groupId: steeringGroups.wood, workshopId: workshops.wood, spaceId: spaces.wood, categoryId: courses,
-    durationMinutes: 120, startsAt: '18:00', endsAt: '20:00', membersOnly: true, published: true, slackChannel: '#traverkstaden',
+    durationMinutes: 120, startsAt: '18:00', endsAt: '20:00', membersOnly: true, published: true, hostsPublished: true, slackChannel: '#traverkstaden',
     // Held by those who run the workshop, not by every member of the group.
     eventBookers: 'activityEditors',
     // Six seats, a queue, and checking in the day before (the default window).
@@ -360,7 +360,7 @@ export const buildDemo = async ({ random, people, now }) => {
   const fika = {
     name: { sv: 'Pysselfika', en: 'Craft fika' },
     description: { sv: 'Ta med ett projekt och fika med andra medlemmar.', en: 'Bring a project and have fika with other members.' },
-    groupId: premisesGroup, spaceId: spaces.big, categoryId: social, durationMinutes: 180, startsAt: '14:00', endsAt: '17:00', membersOnly: false, published: true,
+    groupId: premisesGroup, spaceId: spaces.big, categoryId: social, durationMinutes: 180, startsAt: '14:00', endsAt: '17:00', membersOnly: false, published: true, hostsPublished: true,
     // Signing up is possible, so that the hosts know roughly how many come.
     registration: 'optional',
   };
@@ -400,7 +400,7 @@ export const buildDemo = async ({ random, people, now }) => {
   for (const member of pickMembers(active, 6, [personas.member._id])) await makeInterest(weldingCourse, member._id, days(-random.int(1, 9)));
   await makeEvent({
     name: { sv: 'Städdag', en: 'Cleaning day' }, groupId: premisesGroup, spaceId: spaces.big,
-    description: { sv: 'Vi städar lokalen tillsammans. Fika bjuds på.' }, membersOnly: false, published: true,
+    description: { sv: 'Vi städar lokalen tillsammans. Fika bjuds på.' }, membersOnly: false, published: true, hostsPublished: true,
     start: at(24, 10), durationMinutes: 300, hostMemberIds: premisesMembers.slice(0, 2), createdAt: days(-7),
   });
   log('4 activities and their events');

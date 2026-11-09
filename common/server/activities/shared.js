@@ -52,6 +52,7 @@ export const sharedChanges = async (fields, { inherit }) => {
     cost: positive(fields.cost, 'The cost'),
     membersOnly: flag(fields.membersOnly),
     published: flag(fields.published),
+    hostsPublished: flag(fields.hostsPublished),
     ...(await registrationChanges(fields, { inherit, flag })),
     targetCertificateId: await exists(Certificates, text(fields.targetCertificateId), 'certificate'),
   });

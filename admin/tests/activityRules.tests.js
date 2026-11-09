@@ -62,6 +62,14 @@ describe('Activity rules', function () {
       assert.deepStrictEqual(inheritedFields(free, null), []);
     });
 
+    it("takes whether the hosts are shown on the website, unless the event says", function () {
+      const shown = { ...activity, hostsPublished: true };
+      assert.strictEqual(resolveEvent({}, shown).hostsPublished, true);
+      assert.strictEqual(resolveEvent({ hostsPublished: false }, shown).hostsPublished, false);
+      assert.strictEqual(resolveEvent({ hostsPublished: true }, activity).hostsPublished, true);
+      assert.strictEqual(resolveEvent({}, activity).hostsPublished, undefined);
+    });
+
     it('tells which fields are inherited', function () {
       assert.deepStrictEqual(
         inheritedFields({ name: { en: 'Intro' }, durationMinutes: 60 }, activity),

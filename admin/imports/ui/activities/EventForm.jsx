@@ -21,6 +21,7 @@ import { SharedFields, native } from './SharedFields';
 import { RegistrationFields } from './RegistrationFields';
 import { FormCard } from './FormCard';
 import { HostsField } from './HostsField';
+import { VisibilityFields } from './VisibilityFields';
 import { StatusChip } from './eventColumns';
 import { activityPath, eventPath } from './paths';
 import { eventName } from '/imports/common/lib/activityValues';
@@ -98,6 +99,7 @@ export const EventForm = ({
           </TextField>
         </Stack>
       </FormCard>
+      <VisibilityFields event values={values} onChange={onChange} inherited={values.activityId ? activity : null} />
       <FormCard title="Hosts" kind="event">
         <HostsField
           hosts={hosts} groupMembers={groupId ? groupMembers : null} groupName={groupId ? groupName(groupId) : undefined}

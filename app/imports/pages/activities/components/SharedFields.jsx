@@ -5,12 +5,30 @@ import { TextField, SelectField, CheckField, ClockField, Row, Card } from "./fie
 import { usualMinutes } from "/imports/common/lib/activityValues";
 
 /**
+ * A yes/no field: on an activity a checkbox; on an event a choice of yes and
+ * no, and on an event of an activity (`inherited`) "as the activity" too.
+ */
+export const FlagField = ({ name, label, values, onChange, inherited = null, event = false }) => {
+  const { t } = useTranslation();
+  const yesNo = (value) => t(value ? "activityYes" : "activityNo");
+  return event ? (
+    <SelectField id={`activity-${name}`} label={label} value={values[name] || (inherited ? "" : "no")} onChange={(value) => onChange(name, value)}
+      empty={inherited ? t("activityFieldAsActivity", { value: yesNo(inherited[name]) }) : undefined}
+      options={[{ value: "yes", label: t("activityYes") }, { value: "no", label: t("activityNo") }]} />
+  ) : (
+    <CheckField id={`activity-${name}`} label={label} checked={!!values[name]} onChange={(value) => onChange(name, value)} />
+  );
+};
+
+/**
  * The fields an activity and an event share. On an event of an activity
  * (`inherited`, the activity as stored) what is left empty is the activity's:
  * its value shows greyed in the field, and a choice offers "as the activity".
  * `event` makes the yes/no fields three-way rather than checkboxes.
+ * `afterDescription` is drawn between the first card and the rest (an
+ * activity's Visibility).
  */
-const SharedFields = ({ values, onChange, choices, inherited = null, event = false }) => {
+const SharedFields = ({ values, onChange, choices, inherited = null, event = false, afterDescription = null }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const set = (name) => (value) => onChange(name, value);
@@ -29,14 +47,7 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
     const doc = id && docs.find((d) => d._id === id);
     return doc ? t("activityFieldAsActivity", { value: localized(doc.name, lang) }) : t(empty);
   };
-  const yesNo = (value) => t(value ? "activityYes" : "activityNo");
-  const flag = (name, label) => (event ? (
-    <SelectField id={`activity-${name}`} label={label} value={values[name] || (inherited ? "" : "no")} onChange={set(name)}
-      empty={inherited ? t("activityFieldAsActivity", { value: yesNo(inherited[name]) }) : undefined}
-      options={[{ value: "yes", label: t("activityYes") }, { value: "no", label: t("activityNo") }]} />
-  ) : (
-    <CheckField id={`activity-${name}`} label={label} checked={!!values[name]} onChange={set(name)} />
-  ));
+  const flag = (name, label) => <FlagField name={name} label={label} values={values} onChange={onChange} inherited={inherited} event={event} />;
 
   const certificates = choices.certificates || [];
 
@@ -63,6 +74,7 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
           <TextField label={t("activityFieldCost")} inputMode="decimal" {...text("cost", "cost")} />
         </Row>
       </Card>
+      {afterDescription}
       <Card title={t("formCardPlace")} kind={kind}>
         <Row>
           <SelectField id="activity-workshopId" label={t("activityFieldWorkshop")} value={values.workshopId} onChange={set("workshopId")}
@@ -83,7 +95,6 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
         <SelectField id="activity-targetCertificateId" label={t("activityFieldTargetCertificate")} hint={t("activityFieldTargetCertificateHint")}
           value={values.targetCertificateId} onChange={set("targetCertificateId")}
           empty={none("targetCertificateId", certificates, "registrationFieldCertificateNone")} options={options(certificates)} />
-        {flag("published", t("activityFieldPublished"))}
       </Card>
     </>
   );

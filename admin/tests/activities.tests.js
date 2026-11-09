@@ -52,6 +52,7 @@ describe('activities and events', function () {
       const created = await Activities.findOneAsync(id);
       assert.deepStrictEqual(created.name, { sv: 'Intro' });
       assert.strictEqual(created.membersOnly, false);
+      assert.strictEqual(created.hostsPublished, false, 'an activity says yes or no: unset is no');
       assert.strictEqual(created.createdBy, userId);
       await updateActivity(id, { name: { sv: 'Intro', en: 'Intro' }, groupId }, { userId, expectedUpdatedAt: created.updatedAt });
       const updated = await Activities.findOneAsync(id);
@@ -119,10 +120,12 @@ describe('activities and events', function () {
     });
 
     it('leaves what is not set to the activity', async function () {
-      const id = await createEvent({ activityId, start, membersOnly: null, published: false }, member);
+      const id = await createEvent({ activityId, start, membersOnly: null, published: false, hostsPublished: true }, member);
       const event = await Events.findOneAsync(id);
       assert.strictEqual(event.name, undefined);
       assert.strictEqual('membersOnly' in event, false);
+      assert.strictEqual('hostsPublished' in (await Events.findOneAsync(await createEvent({ activityId, start, hostsPublished: null }, member))), false);
+      assert.strictEqual(event.hostsPublished, true);
       assert.strictEqual(event.published, false);
       assert.strictEqual(event.status, 'confirmed');
     });
