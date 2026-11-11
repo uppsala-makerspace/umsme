@@ -75,3 +75,42 @@ export const Timeout = {
     ...baseActions,
   },
 };
+
+// Webshop purchases: the page names the item instead of the membership.
+const purchaseActions = { ...baseActions, onPurchases: fn() };
+const purchase = {
+  item: {
+    code: "tshirt",
+    name: { sv: "T-shirt med logga", en: "T-shirt with logo" },
+    imageUrl: "https://placehold.co/256x256/png?text=T-shirt",
+    available: true,
+  },
+  amount: "200",
+  comment: "Storlek M",
+};
+
+// Purchase waiting for the payment
+export const PurchaseProcessing = {
+  args: { step: "processing", qrCode: null, error: null, purchase, ...purchaseActions },
+};
+
+// Purchase approved, with image and comment
+export const PurchaseSuccess = {
+  args: { step: "success", qrCode: null, error: null, purchase, ...purchaseActions },
+};
+
+// Purchase approved, an item without image and no comment
+export const PurchaseSuccessPlain = {
+  args: {
+    step: "success",
+    qrCode: null,
+    error: null,
+    purchase: { item: { ...purchase.item, imageUrl: null }, amount: "50", comment: null },
+    ...purchaseActions,
+  },
+};
+
+// Purchase failed
+export const PurchaseError = {
+  args: { step: "error", qrCode: null, error: "Payment was declined", purchase, ...purchaseActions },
+};

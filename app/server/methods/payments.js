@@ -4,6 +4,8 @@ import { getSwishClient } from "./swish-client.js";
 import { Buffer } from "buffer";
 import { check, Match } from "meteor/check";
 import { initiatedPayments } from "/imports/common/collections/initiatedPayments.js";
+import { StoreItems } from "/imports/common/collections/storeItems";
+import { purchasedItem } from "./store";
 import { findMemberForUser, sanitizeForSwish } from "/server/methods/utils";
 import { loadJson } from "/imports/common/server/configLoader";
 import { memberStatus } from "/imports/common/lib/utils";
@@ -183,10 +185,19 @@ Meteor.methods({
       throw new Meteor.Error("payment-not-found", "Payment not found");
     }
 
+    // What the payment is for, so that the payment page can say it: a
+    // membership, or an item of the webshop with the buyer's comment.
+    const kind = payment.kind || "membership";
+    const item = kind === "storeItem" && payment.storeItem
+      ? purchasedItem(await StoreItems.findOneAsync(payment.storeItem))
+      : null;
+
     return {
       status: payment.status,
       amount: payment.amount,
       paymentType: payment.paymentType,
+      kind,
+      ...(kind === "storeItem" ? { item, comment: payment.comment || null } : {}),
       createdAt: payment.createdAt,
       resolvedAt: payment.resolvedAt,
       error: payment.error,

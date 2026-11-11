@@ -23,6 +23,9 @@ export default function InitiatedPaymentPage() {
   const [step, setStep] = useState("processing");
   const [qrCode] = useState(initialQrCode);
   const [error, setError] = useState(null);
+  // What the payment is for: a membership, or an item of the webshop. Known
+  // from the first answer, so the waiting view can say it too.
+  const [purchase, setPurchase] = useState(null);
 
   const pollIntervalRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -47,6 +50,9 @@ export default function InitiatedPaymentPage() {
     pollIntervalRef.current = setInterval(async () => {
       try {
         const result = await Meteor.callAsync("payment.getStatus", externalId);
+        if (result.kind === "storeItem") {
+          setPurchase((known) => known || { item: result.item, amount: result.amount, comment: result.comment });
+        }
 
         if (result.status === "PAID") {
           clearTimeouts();
@@ -69,16 +75,18 @@ export default function InitiatedPaymentPage() {
     return clearTimeouts;
   }, [externalId]);
 
-  // Handle retry - go back to membership selection
+  // Retry or cancel: back to what was being paid for, the item or the memberships.
+  const backTo = purchase
+    ? (purchase.item?.available ? `/store/${purchase.item.code}` : "/store")
+    : "/membership";
   const handleRetry = useCallback(() => {
     clearTimeouts();
-    navigate("/membership");
-  }, [navigate]);
+    navigate(backTo);
+  }, [navigate, backTo]);
+  const handleCancel = handleRetry;
 
-  // Handle cancel / back
-  const handleCancel = useCallback(() => {
-    clearTimeouts();
-    navigate("/membership");
+  const handlePurchases = useCallback(() => {
+    navigate("/purchases");
   }, [navigate]);
 
   // Handle back to start after success
@@ -103,6 +111,8 @@ export default function InitiatedPaymentPage() {
         qrCode={qrCode}
         error={error}
         awaitingApproval={awaitingApproval}
+        purchase={purchase}
+        onPurchases={handlePurchases}
         onRetry={handleRetry}
         onCancel={handleCancel}
         onBackToStart={handleBackToStart}

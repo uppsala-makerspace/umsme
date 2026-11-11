@@ -13,7 +13,7 @@ import { StorageUnits, StorageRequests, StorageOffers } from '/imports/common/co
 import { daysFromNow } from '../dates';
 import { makeStorageWalls, makeStorageUnit } from '../storage';
 import { makeLiabilityDocument, makeMessageTemplate } from '../documents';
-import { makeStoreItem, makePurchase } from '../shop';
+import { makeStoreItem, makePurchase, makeInitiatedPayment } from '../shop';
 import { makeCategory, makeActivity, makeEvent, makeRegistration } from '../activities';
 import { makeFakeLock } from '../lock';
 import { makeFakeBank } from '../bank';
@@ -262,6 +262,13 @@ export const buildE2e = async ({ people, now }) => {
   });
   await makePurchase(members.member, { _id: clay, code: 'lera', price: 150 }, { at: days(-10) });
   await makePurchase(members.base, { _id: clay, code: 'lera', price: 150 }, { at: days(-3) });
+  // The app's payment page after paying: a purchase with a comment and a
+  // membership, with known ids for the test that opens them.
+  await makeInitiatedPayment(members.member, {
+    externalId: 'E2EPURCHASEPAID', amount: 150, at: days(-10),
+    item: { _id: clay, code: 'lera' }, comment: 'Till drejkursen',
+  });
+  await makeInitiatedPayment(members.member, { externalId: 'E2EMEMBERSHIPPAID', amount: 300, at: days(-200) });
   await makeStoreItem({
     code: 'gava', name: { sv: 'Gåva', en: 'Donation' }, minPrice: 20, maxPrice: 5000, bookkeepingAccount: '3990',
     requiresMembership: false, commentRequired: false,

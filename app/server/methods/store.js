@@ -55,6 +55,21 @@ const requireMember = async () => {
   return member;
 };
 
+/**
+ * A bought item as the buyer is shown it: on a purchase's page and on the
+ * payment page while paying. `available` decides whether to link to the
+ * item's page: store.getItem only serves available items, so linking to a
+ * hidden one would land the buyer on "item not found".
+ */
+export const purchasedItem = (item) => (item
+  ? {
+      code: item.code,
+      name: item.name,
+      imageUrl: storeItemImageUrlFor(item),
+      available: item.status === "available",
+    }
+  : null);
+
 Meteor.methods({
   /**
    * The items on sale. Items requiring membership are listed for everyone —
@@ -241,17 +256,7 @@ Meteor.methods({
         comment: payment.comment || null,
         itemCode: payment.itemCode || null,
       },
-      // `available` decides whether the receipt links to the item's page:
-      // store.getItem only serves available items, so linking to a hidden one
-      // would land the buyer on "item not found".
-      item: item
-        ? {
-            code: item.code,
-            name: item.name,
-            imageUrl: storeItemImageUrlFor(item),
-            available: item.status === "available",
-          }
-        : null,
+      item: purchasedItem(item),
       memberName: member.name,
     };
   },
