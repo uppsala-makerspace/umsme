@@ -96,6 +96,12 @@ export const updateEvent = async (docId, fields, { userId, isAdminish, expectedU
   const before = await currentEvent(docId, expectedUpdatedAt);
   const { $set, $unset } = await changesOf(fields, { isAdminish, before });
   $set.updatedAt = new Date();
+  // Moved: what was sent for the old time is to be sent again for the new one.
+  if ($set.start && before.start && $set.start.getTime() !== before.start.getTime()) {
+    for (const marker of ['reminderDayBeforeSentAt', 'reminderSoonSentAt', 'checkInReminderSentAt', 'checkInLastCallSentAt']) {
+      if (before[marker]) $unset[marker] = '';
+    }
+  }
   await Events.updateAsync(docId, Object.keys($unset).length ? { $set, $unset } : { $set });
   await recordChange({ userId, domain: DOMAIN, action: 'update', docId, before, after: await Events.findOneAsync(docId) });
   if ($set.status === 'cancelled' && before.status !== 'cancelled') await cancelRegistrations(docId);

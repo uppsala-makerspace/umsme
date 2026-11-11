@@ -27,8 +27,13 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   - Aktiviteter, events och kategorier.
   - `registrations.js`: anmälan, kö, ta plats, avanmälan, inställt,
     incheckning, närvaro och de schemalagda jobben.
-  - `notify.js` och `defaultTemplates.js`: nio malltyper som skickas som push
-    och mail.
+  - `notify.js` och `defaultTemplates.js`: tretton malltyper som skickas som
+    push och mail.
+  - Påminnelser inför tillfället (`sendEventReminders`): 24 timmar och två
+    timmar före, till dem med plats och till värdarna (egna mallar, med antal
+    anmälda, tak och kö). Där tillfället har incheckning ersätter
+    incheckningsmeddelandet deltagarnas påminnelse dagen före. Ett tillfälle som
+    flyttas påminns på nytt för den nya tiden, även om incheckningen.
   - `linking.js`: aktivitet från ett event, och event med samma namn.
   - `calendarImport.js`: import från Google-kalendern.
 
@@ -183,6 +188,5 @@ Inga just nu.
 - Slå ihop `activities` med `master` och pusha. Före kalendersynken i
   produktion: servicekonto och `location` i admins
   `private.googleCalendar` (`docs/configuration.md`, avsnitt 13).
-- Mindre saker: påminnelserna nollställs inte när ett tillfälle flyttas; den
-  som missat incheckningen kan anmäla sig igen direkt; dagsbubblorna finns
+- Mindre saker: den som missat incheckningen kan anmäla sig igen direkt; dagsbubblorna finns
   bara i kalendern; egen pushtext kräver ändrade mallar.

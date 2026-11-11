@@ -9,11 +9,12 @@ import { Attestations } from '/imports/common/collections/attestations';
 import { Certificates } from '/imports/common/collections/certificates';
 import { Messages } from '/imports/common/collections/messages';
 import { AuditLog } from '/imports/common/collections/auditLog';
+import { MessageTemplates } from '/imports/common/collections/templates';
 import { createActivity } from '/imports/common/server/activities/activities';
 import { createEvent, updateEvent, removeEvent } from '/imports/common/server/activities/events';
 import {
   register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance,
-  sendCheckInReminders, sendCheckInLastCalls, passCheckInDeadlines,
+  sendCheckInReminders, sendCheckInLastCalls, passCheckInDeadlines, sendEventReminders,
 } from '/imports/common/server/activities/registrations';
 import { setActivityTransportsForTests } from '/imports/common/server/activities/notify';
 import { ensureActivityMessageTemplates } from '/imports/common/server/activities/defaultTemplates';
@@ -205,6 +206,77 @@ describe('event registrations', function () {
     assert.strictEqual(await Messages.find({ member: d, subject: /^Nytt tillfälle/ }).countAsync(), 1);
     await setInterest(activityId, d, false);
     assert.strictEqual(await ActivityInterests.find({ activityId }).countAsync(), 0);
+  });
+
+  describe('reminders before the event', function () {
+    // Far ahead, so that the other tests' events (a few days out) are not due.
+    const base = inHours(1000);
+    const at = (hours) => new Date(base.getTime() + hours * HOUR);
+    const fields = (start, more = {}) => ({
+      name: { sv: `${prefix}Svarvning` }, start, durationMinutes: 60, registration: 'required',
+      maxSeats: 2, queueAllowed: true, hostMemberIds: [d], ...more,
+    });
+    const count = (eventId, member, subject) => Messages.find({ event: eventId, member, subject }).countAsync();
+
+    it('reminds those with a seat and the hosts 24 hours and two hours before, once each', async function () {
+      const id = await createEvent(fields(at(30)), board);
+      await register(id, a, { userId });
+      await register(id, b, { userId });
+      await register(id, c, { userId }); // queued
+      assert.strictEqual(await sendEventReminders(at(5)), 0, 'not yet 24 hours before');
+      assert.strictEqual(await sendEventReminders(at(7)), 3, 'two with a seat and the host');
+      assert.strictEqual(await sendEventReminders(at(8)), 0, 'once');
+      assert.strictEqual(await count(id, a, /^Påminnelse:/), 1);
+      assert.strictEqual(await count(id, c, /^Påminnelse:/), 0, 'not the queue');
+      const host = await Messages.findOneAsync({ event: id, member: d, subject: /^Du är värd i morgon/ });
+      assert.ok(host.messagetext.includes('Anmälda: 2 av 2'), host.messagetext);
+      assert.ok(host.messagetext.includes('I kö: 1'), host.messagetext);
+      assert.strictEqual(await sendEventReminders(at(27)), 0, 'not yet two hours before');
+      assert.strictEqual(await sendEventReminders(at(29)), 3);
+      assert.strictEqual(await sendEventReminders(at(29.5)), 0, 'once');
+      assert.strictEqual(await count(id, b, /^Snart:/), 1);
+      assert.strictEqual(await count(id, d, /^Du är värd snart/), 1);
+    });
+
+    it('leaves the day before to the check-in message where there is check-in', async function () {
+      const id = await createEvent(fields(at(130), { checkIn: 'default' }), board);
+      await register(id, a, { userId });
+      assert.strictEqual(await sendEventReminders(at(107)), 1, 'only the host');
+      assert.strictEqual(await count(id, a, /^Påminnelse:/), 0);
+      assert.strictEqual(await count(id, d, /^Du är värd i morgon/), 1);
+      assert.strictEqual(await sendEventReminders(at(129)), 2, 'two hours before, both');
+      assert.strictEqual(await count(id, a, /^Snart:/), 1);
+    });
+
+    it('sends only the two-hour reminder for an event put up late, and none for one called off or without hosts', async function () {
+      const late = await createEvent(fields(at(201), { hostMemberIds: [] }), board);
+      await register(late, a, { userId });
+      assert.strictEqual(await sendEventReminders(at(200)), 1, 'one reminder, to the one with a seat; no hosts');
+      assert.strictEqual(await count(late, a, /^Påminnelse:/), 0);
+      assert.strictEqual(await count(late, a, /^Snart:/), 1);
+      const off = await createEvent(fields(at(310)), board);
+      await register(off, b, { userId });
+      await Events.updateAsync(off, { $set: { status: 'cancelled' } });
+      assert.strictEqual(await sendEventReminders(at(300)), 0);
+      assert.strictEqual(await sendEventReminders(at(309)), 0);
+    });
+
+    it('reminds again for the new time when an event is moved', async function () {
+      const id = await createEvent(fields(at(420)), board);
+      await register(id, a, { userId });
+      assert.strictEqual(await sendEventReminders(at(400)), 2);
+      await updateEvent(id, fields(at(450)), board);
+      assert.strictEqual((await eventOf(id)).reminderDayBeforeSentAt, undefined);
+      assert.strictEqual(await sendEventReminders(at(400)), 0, 'the new time is not 24 hours away');
+      assert.strictEqual(await sendEventReminders(at(430)), 2);
+      assert.strictEqual(await count(id, a, /^Påminnelse:/), 2);
+    });
+
+    it('has a default template for each reminder', async function () {
+      for (const type of ['activityReminderDayBefore', 'activityReminderSoon', 'activityHostDayBefore', 'activityHostSoon']) {
+        assert.ok(await MessageTemplates.findOneAsync({ type }), type);
+      }
+    });
   });
 
   describe('check-in', function () {

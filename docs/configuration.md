@@ -43,7 +43,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `serviceConfigurations` | OAuth credentials (Google, Facebook)      |
 | `tests.path`         | Absolute path to the test-questions root (see [certificates.md](certificates.md#7b-test-based-certificates) for layout). Same setting in app's `settings.json`. |
 | `private.googleDrive` | Receipt storage for expenses; same block as the app (see section 12). Admin uses it to download receipts for review. |
-| `activityCron.enabled` | **Must be explicitly `true`** for the events' scheduled jobs: check-in reminders and deadlines, and the Google calendar sync. Keep unset in dev, like `reminderCron`. |
+| `activityCron.enabled` | **Must be explicitly `true`** for the events' scheduled jobs: reminders before an event (24 hours and two hours, to participants and hosts), check-in reminders and deadlines, and the Google calendar sync. Keep unset in dev, like `reminderCron`. |
 | `private.googleCalendar` | The association's Google calendar: import of its events, and events mirrored to it (see section 13). `"fake"` for a stand-in (demo, e2e). |
 | `private.receiptTokenSecret` | Secret for signing receipt-image URLs (see section 12). If unset, a random per-process secret is used. |
 

@@ -94,6 +94,41 @@ export const ACTIVITY_DEFAULT_TEMPLATES = [
       `Hej <%= name %>!\n\nDu checkade inte in till <%= eventName %> <%= eventDate %> i tid, så din plats har gått till kön.${link}${regards}`,
       `Hello <%= name %>!\n\nYou did not check in for <%= eventNameEn %> <%= eventDate %> in time, so your seat has gone to the queue.${link}${regardsEn}`,
     ),
+  },  {
+    type: ACTIVITY_TEMPLATE_TYPES.reminderDayBefore,
+    name: 'Activity: reminder, day before',
+    subject: bilingual('Påminnelse: <%= eventName %> i morgon', 'Reminder: <%= eventNameEn %> tomorrow', ' — '),
+    messagetext: bilingual(
+      `Hej <%= name %>!\n\nDu har en plats på <%= eventName %> <%= eventDate %>${place}. Kan du inte komma, avanmäl dig i appen så att någon annan kan ta platsen.${link}${regards}`,
+      `Hello <%= name %>!\n\nYou have a seat at <%= eventNameEn %> <%= eventDate %>${placeEn}. If you cannot come, withdraw in the app so that someone else can take the seat.${link}${regardsEn}`,
+    ),
+  },
+  {
+    type: ACTIVITY_TEMPLATE_TYPES.reminderSoon,
+    name: 'Activity: reminder, two hours before',
+    subject: bilingual('Snart: <%= eventName %>', 'Soon: <%= eventNameEn %>', ' — '),
+    messagetext: bilingual(
+      `Hej <%= name %>!\n\n<%= eventName %> börjar <%= eventDate %>${place}. Välkommen! Kan du inte komma, avanmäl dig i appen så att någon annan kan ta platsen.${link}${regards}`,
+      `Hello <%= name %>!\n\n<%= eventNameEn %> starts <%= eventDate %>${placeEn}. Welcome! If you cannot come, withdraw in the app so that someone else can take the seat.${link}${regardsEn}`,
+    ),
+  },
+  {
+    type: ACTIVITY_TEMPLATE_TYPES.hostDayBefore,
+    name: 'Activity: hosts, day before',
+    subject: bilingual('Du är värd i morgon: <%= eventName %>', 'You host tomorrow: <%= eventNameEn %>', ' — '),
+    messagetext: bilingual(
+      `Hej <%= name %>!\n\nDu är värd för <%= eventName %> <%= eventDate %>${place}.\n\nAnmälda: <%= participants %><% if (seats) { %> av <%= seats %><% } %>\nI kö: <%= queued %>\n\nDeltagarna ser du på tillfällets sida i appen.${link}${regards}`,
+      `Hello <%= name %>!\n\nYou host <%= eventNameEn %> <%= eventDate %>${placeEn}.\n\nSigned up: <%= participants %><% if (seats) { %> of <%= seats %><% } %>\nIn the queue: <%= queued %>\n\nThe participants are on the event's page in the app.${link}${regardsEn}`,
+    ),
+  },
+  {
+    type: ACTIVITY_TEMPLATE_TYPES.hostSoon,
+    name: 'Activity: hosts, two hours before',
+    subject: bilingual('Du är värd snart: <%= eventName %>', 'You host soon: <%= eventNameEn %>', ' — '),
+    messagetext: bilingual(
+      `Hej <%= name %>!\n\n<%= eventName %> börjar <%= eventDate %>${place}. Anmälda: <%= participants %><% if (seats) { %> av <%= seats %><% } %>, i kö: <%= queued %>.${link}${regards}`,
+      `Hello <%= name %>!\n\n<%= eventNameEn %> starts <%= eventDate %>${placeEn}. Signed up: <%= participants %><% if (seats) { %> of <%= seats %><% } %>, in the queue: <%= queued %>.${link}${regardsEn}`,
+    ),
   },
 ];
 

@@ -189,7 +189,7 @@ Copy `example-settings.json` to `settings.json` and configure:
 - `lockUsername/lockPassword` - Door lock API credentials
 - `deliverMails` - Set false to disable email sending
 - `reminderCron.enabled` - Must be explicitly `true` to send membership-expiry reminders (mail + push). Leave unset/false in dev so a copied member DB never triggers reminders.
-- `activityCron.enabled` - Must be explicitly `true` for the events' check-in job (reminders when check-in opens, seats given to the queue at the deadline; mail + push) and the Google calendar sync. Leave unset/false in dev, like `reminderCron`.
+- `activityCron.enabled` - Must be explicitly `true` for the events' reminder and check-in job (reminders to participants and hosts 24 hours and two hours before, reminders when check-in opens, seats given to the queue at the deadline; mail + push) and the Google calendar sync. Leave unset/false in dev, like `reminderCron`.
 - `private.googleCalendar` - The calendar the events are imported from and mirrored to; `serviceAccount` to write (see `docs/configuration.md`, section 13), `"fake"` for a stand-in.
 - `lockApi` - `"fake"` puts a stand-in for the Danalock API in place (`server/lock/`), its state in the collection `fakeLockApi`, seeded by the demo and e2e scenarios. Leave unset in production.
 - `bankproxy` - The umsme-bank proxy's URL, or `"fake"` for a stand-in (`server/bank/`) whose transactions and sign-in state live in `fakeBankApi`, seeded likewise. `settings_demo.json` sets both to `"fake"`.

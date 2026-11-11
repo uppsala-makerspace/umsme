@@ -30,6 +30,10 @@ export const ACTIVITY_TEMPLATE_TYPES = Object.freeze({
   checkInOpen: 'activityCheckInOpen',
   checkInLastCall: 'activityCheckInLastCall',
   missedCheckIn: 'activityMissedCheckIn',
+  reminderDayBefore: 'activityReminderDayBefore',
+  reminderSoon: 'activityReminderSoon',
+  hostDayBefore: 'activityHostDayBefore',
+  hostSoon: 'activityHostSoon',
 });
 
 const DEFAULT_FROM = 'Uppsala Makerspace <info@uppsalamakerspace.se>';
@@ -137,3 +141,23 @@ export const checkInLastCall = (event, registrations) =>
 /** The check-in deadline passed without them: their seats went to the queue. */
 export const missedCheckIn = (event, registrations) =>
   sendAll('missedCheckIn', event, registrations.map((r) => r.memberId));
+
+/** The day before (24 hours): everyone with a seat. */
+export const reminderDayBefore = (event, registrations) =>
+  sendAll('reminderDayBefore', event, registrations.map((r) => r.memberId));
+
+/** Two hours before: everyone with a seat. */
+export const reminderSoon = (event, registrations) =>
+  sendAll('reminderSoon', event, registrations.map((r) => r.memberId));
+
+// What the hosts are told about who comes: those with a seat, the limit
+// (empty without one) and the queue.
+const hostCounts = ({ participants = 0, seats = null, queued = 0 }) => ({ participants, seats: seats || '', queued });
+
+/** The day before (24 hours): the hosts, with how many come and queue. */
+export const hostDayBefore = (event, counts) =>
+  sendAll('hostDayBefore', event, event.hostMemberIds || [], hostCounts(counts));
+
+/** Two hours before: the hosts, with how many come and queue. */
+export const hostSoon = (event, counts) =>
+  sendAll('hostSoon', event, event.hostMemberIds || [], hostCounts(counts));

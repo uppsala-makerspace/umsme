@@ -327,13 +327,13 @@ export const closeAttendance = async (eventId, { userId, now = new Date() }) => 
  * so that a failing send is not repeated every run), with those holding an
  * unchecked seat. `isDue` is asked of the event resolved against its activity.
  */
-const claimDue = async ({ marker, query, isDue }, now) => {
+const claimDue = async ({ marker, query, isDue, applies = checkInApplies }, now) => {
   const claimed = [];
   const events = await Events.find({ status: { $ne: 'cancelled' }, [marker]: { $exists: false }, ...query }).fetchAsync();
   for (const event of events) {
     const activity = event.activityId ? await Activities.findOneAsync(event.activityId) : null;
     const resolved = resolveEvent(event, activity);
-    if (!checkInApplies(resolved) || !isDue(resolved, event)) continue;
+    if (!applies(resolved) || !isDue(resolved, event)) continue;
     if ((await Events.updateAsync({ _id: event._id, [marker]: { $exists: false } }, { $set: { [marker]: now } })) !== 1) continue;
     const approved = await EventRegistrations.find({ eventId: event._id, state: 'approved' }).fetchAsync();
     claimed.push({ event, resolved, approved });
@@ -395,6 +395,63 @@ export const passCheckInDeadlines = async (now = new Date()) => {
     missed += late.length;
   }
   return missed;
+};
+
+// --- Reminders before the event ------------------------------------------------
+
+const HOUR = 3600000;
+export const REMINDER_DAY_BEFORE_MS = 24 * HOUR;
+export const REMINDER_SOON_MS = 2 * HOUR;
+const COMING = ['approved', 'checkedIn'];
+
+/**
+ * Remind those with a seat and the hosts before an event: 24 hours before and
+ * two hours before, each once per event. An event with check-in does without
+ * the participants' day-before reminder: its check-in message is that. A
+ * day-before reminder that is due only when the two-hour one is too (an event
+ * put up, or first seen, late) is marked done unsent, so that nobody gets two
+ * at once. Returns how many messages went out.
+ */
+export const sendEventReminders = async (now = new Date()) => {
+  let sent = 0;
+  const remind = async ({ marker, within, toParticipants, toHosts, skip = () => false }) => {
+    const due = await claimDue({
+      marker,
+      query: { start: { $gt: now, $lte: new Date(now.getTime() + within) } },
+      isDue: () => true,
+      applies: () => true,
+    }, now);
+    for (const { event, resolved } of due) {
+      if (skip(resolved)) continue;
+      const coming = await EventRegistrations.find({ eventId: event._id, state: { $in: COMING } }).fetchAsync();
+      const queued = await EventRegistrations.find({ eventId: event._id, state: 'queued' }).countAsync();
+      const hosts = event.hostMemberIds || [];
+      if (hosts.length) {
+        await toHosts(resolved, { participants: coming.length, seats: resolved.maxSeats || null, queued });
+        sent += hosts.length;
+      }
+      const participants = toParticipants(resolved) ? coming : [];
+      if (participants.length) {
+        await notify[toParticipants(resolved)](resolved, participants);
+        sent += participants.length;
+      }
+    }
+  };
+  await remind({
+    marker: 'reminderDayBeforeSentAt',
+    within: REMINDER_DAY_BEFORE_MS,
+    // Too late for the day before: the two-hour one goes instead.
+    skip: (resolved) => resolved.start.getTime() - now.getTime() <= REMINDER_SOON_MS,
+    toParticipants: (resolved) => (checkInApplies(resolved) ? null : 'reminderDayBefore'),
+    toHosts: notify.hostDayBefore,
+  });
+  await remind({
+    marker: 'reminderSoonSentAt',
+    within: REMINDER_SOON_MS,
+    toParticipants: () => 'reminderSoon',
+    toHosts: notify.hostSoon,
+  });
+  return sent;
 };
 
 /** How many seats an event has left; Infinity without a limit. */

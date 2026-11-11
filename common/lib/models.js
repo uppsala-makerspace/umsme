@@ -477,6 +477,10 @@ export const models = {
           activityCheckInOpen: "Activity: check in",
           activityCheckInLastCall: "Activity: check in, last call",
           activityMissedCheckIn: "Activity: missed check-in",
+          activityReminderDayBefore: "Activity: reminder, day before",
+          activityReminderSoon: "Activity: reminder, two hours before",
+          activityHostDayBefore: "Activity: hosts, day before",
+          activityHostSoon: "Activity: hosts, two hours before",
         },
       },
     },
@@ -1925,6 +1929,9 @@ export const models = {
     checkInReminderSentAt: { type: Date, optional: true, autoform: { omit: true } },
     checkInLastCallSentAt: { type: Date, optional: true, autoform: { omit: true } },
     checkInDeadlinePassedAt: { type: Date, optional: true, autoform: { omit: true } },
+    // The reminders before the event, to those with a seat and to the hosts.
+    reminderDayBeforeSentAt: { type: Date, optional: true, autoform: { omit: true } },
+    reminderSoonSentAt: { type: Date, optional: true, autoform: { omit: true } },
     attendanceClosedAt: { type: Date, optional: true, autoform: { omit: true } },
     // The Google calendar event it was imported from, or is mirrored to.
     googleEventId: { label: "Google calendar event", type: String, max: 200, optional: true },
