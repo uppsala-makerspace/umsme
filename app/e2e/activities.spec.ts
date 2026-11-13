@@ -113,24 +113,29 @@ test.describe('Activities', () => {
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
   });
 
-  test('the workshop shows its calendar and unfolds its activities; the group links to them', async ({ page }) => {
+  test('the workshop shows its calendar and its activities as tabs; the group links to them', async ({ page }) => {
     await openAs(page, 'member', '/workshops');
     await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
-    // Its calendar: the events to come (other tests add some, so which five
-    // come first varies), its activities folded away.
-    await expect(page.getByRole('heading', { name: en.navCalendar })).toBeVisible();
-    const calendar = page.locator('section', { has: page.getByRole('heading', { name: en.navCalendar }) });
+    // The calendar's tab first: the events to come (other tests add some, so
+    // which five come first varies), not the activities.
+    const calendar = page.locator('section', { has: page.getByRole('button', { name: en.navCalendar, exact: true }) });
     await expect(calendar.getByRole('list').first().getByRole('listitem').first()).toBeVisible();
-    await expect(page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) })).toHaveCount(0);
-    await page.getByRole('button', { name: /^Show activities/ }).click();
     // With the number of its planned events: other tests may add some.
     const activity = page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) });
-    await expect(activity).toBeVisible();
-    await page.getByRole('button', { name: /^Hide activities \(\d+\)$/ }).click();
     await expect(activity).toHaveCount(0);
-    await page.getByRole('button', { name: /^Show activities/ }).click();
+    await calendar.getByRole('button', { name: /^Activities \(\d+\)$/ }).click();
+    await expect(page).toHaveURL(/\?tab=activities$/);
+    await expect(activity).toBeVisible();
+    await calendar.getByRole('button', { name: en.navCalendar, exact: true }).click();
+    await expect(activity).toHaveCount(0);
+    await calendar.getByRole('button', { name: /^Activities/ }).click();
     await activity.click();
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
+    // Back from the activity, on the activities' tab.
+    await page.goBack();
+    await expect(page).toHaveURL(/\?tab=activities$/);
+    await expect(activity).toBeVisible();
+    await activity.click();
     await page.getByRole('link', { name: CERAMICS, exact: true }).click();
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
   });
@@ -138,7 +143,7 @@ test.describe('Activities', () => {
   test('the workshop shows five events to come, and loads more', async ({ page }) => {
     await openAs(page, 'member', '/workshops');
     await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
-    const calendar = page.locator('section', { has: page.getByRole('heading', { name: en.navCalendar }) });
+    const calendar = page.locator('section', { has: page.getByRole('button', { name: en.navCalendar, exact: true }) });
     const events = calendar.getByRole('list').first().getByRole('listitem');
     await expect(events).toHaveCount(5);
     await calendar.getByRole('button', { name: en.eventsLoadMore }).click();
@@ -149,8 +154,8 @@ test.describe('Activities', () => {
     const GLAZING = 'E2E glazing evening';
     await openAs(page, 'steering', '/workshops');
     await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
-    // Among its activities (its event is too far ahead for the workshop's calendar of the next ten).
-    await page.getByRole('button', { name: /^Show activities/ }).click();
+    // Among its activities (its event is too far ahead for the workshop's calendar).
+    await page.getByRole('button', { name: /^Activities \(\d+\)$/ }).click();
     await page.getByRole('link', { name: new RegExp(`${GLAZING} \\d+ planned events?`) }).click();
     await expect(page.getByRole('heading', { name: GLAZING })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Ceramics workshop' })).toBeVisible();

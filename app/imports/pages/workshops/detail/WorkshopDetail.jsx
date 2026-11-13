@@ -65,7 +65,8 @@ const GroupRow = ({ group, highlighted }) => {
 
 // `upcomingEventsMore` in the data says there are more events to come than
 // shown; `onLoadMore` fetches them, `loadingMore` while it does.
-const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds, loadingMore, onLoadMore }) => {
+// `tab` is the calendar's or the activities' tab, changed with `onTab`.
+const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds, loadingMore, onLoadMore, tab, onTab }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
 
@@ -167,7 +168,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds, load
         )}
       </SpaceMapSection>
 
-      <WorkshopCalendar events={upcomingEvents} activities={activities}
+      <WorkshopCalendar events={upcomingEvents} activities={activities} tab={tab} onTab={onTab}
         hasMore={upcomingEventsMore} loadingMore={loadingMore} onLoadMore={onLoadMore} />
 
       {certificates.length > 0 && (
@@ -250,6 +251,8 @@ WorkshopDetail.propTypes = {
   slackChannelIds: PropTypes.object,
   loadingMore: PropTypes.bool,
   onLoadMore: PropTypes.func,
+  tab: PropTypes.string,
+  onTab: PropTypes.func,
 };
 
 WorkshopDetail.defaultProps = {
@@ -260,6 +263,8 @@ WorkshopDetail.defaultProps = {
   slackChannelIds: null,
   loadingMore: false,
   onLoadMore: undefined,
+  tab: "calendar",
+  onTab: () => {},
 };
 
 export default WorkshopDetail;

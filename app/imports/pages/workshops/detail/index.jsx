@@ -1,20 +1,30 @@
 import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import Layout from "/imports/components/Layout/Layout";
 import { AppDataContext } from "/imports/context/AppDataContext";
 import WorkshopDetail from "./WorkshopDetail.jsx";
+import { useSignedIn } from "../../activities/components/useSignedIn";
+import { WORKSHOP_TABS } from "../../activities/components/WorkshopCalendar";
 
 export default () => {
   const { workshopId } = useParams();
-  const user = useTracker(() => Meteor.user());
+  const { user, userId, loggingIn } = useSignedIn();
   const { slackChannels } = useContext(AppDataContext);
   const slackTeam = Meteor.settings?.public?.slack?.team;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  // The calendar's or the activities' tab, in the address so that going
+  // back from an activity lands on it; a step in the address, not the history.
+  const [params, setParams] = useSearchParams();
+  const tab = WORKSHOP_TABS.includes(params.get("tab")) ? params.get("tab") : "calendar";
+  const chooseTab = (value) => setParams((current) => {
+    const next = new URLSearchParams(current);
+    if (value === "calendar") next.delete("tab"); else next.set("tab", value);
+    return next;
+  }, { replace: true });
 
   const fetchData = useCallback(async () => {
     try {
@@ -52,7 +62,8 @@ export default () => {
     }
   };
 
-  if (!Meteor.userId()) {
+  // Not while the sign-in is being resumed: a link opened directly has no user yet.
+  if (!userId && !loggingIn) {
     return <Navigate to="/login" />;
   }
 
@@ -66,6 +77,8 @@ export default () => {
         slackChannelIds={slackChannels}
         loadingMore={loadingMore}
         onLoadMore={loadMore}
+        tab={tab}
+        onTab={chooseTab}
       />
     </Layout>
   );

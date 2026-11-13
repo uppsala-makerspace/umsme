@@ -174,10 +174,10 @@ Inga just nu.
 
 ## Kända saker att veta
 
-- **Inloggningsfel på andra sidor:** appens befintliga sidor (verkstäder,
-  grupper med flera) skickar till startsidan om de öppnas via direktlänk
-  medan inloggningen återupptas. Aktivitetssidorna väntar
-  (`activities/components/useSignedIn.js`); de andra är inte ändrade.
+- **Inloggningsfel på andra sidor:** appens befintliga sidor (grupper med
+  flera) skickar till startsidan om de öppnas via direktlänk medan
+  inloggningen återupptas. Aktivitetssidorna och verkstadernas lista och sida
+  väntar (`activities/components/useSignedIn.js`); de andra är inte ändrade.
 - **Tillfälliga testfel:** fulla e2e-körningar faller ibland i sin helhet
   innan servern hunnit starta. En omkörning går igenom. Användartestet i
   admin (`users.spec.ts`) är också instabilt i full körning men passerar
