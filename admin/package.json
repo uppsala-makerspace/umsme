@@ -4,7 +4,7 @@
   "scripts": {
     "build": "meteor build dist --architecture os.linux.x86_64",
     "start": "meteor run --settings settings.json",
-    "demo": "MONGO_URL=mongodb://localhost:27017/umsme-demo?replicaSet=rs0 meteor run --port 3100 --settings settings_demo.json",
+    "demo": "MONGO_URL=mongodb://localhost:27017/umsme-demo?replicaSet=rs0 meteor run --port 3100 --settings $([ -f settings_demo.local.json ] && echo settings_demo.local.json || echo settings_demo.json)",
     "seed:demo": "SEED=demo npm run demo",
     "start:test": "METEOR_LOCAL_DIR=.meteor/local-e2e SEED=e2e MONGO_URL=mongodb://localhost:27017/umsme-admin-e2e?replicaSet=rs0 meteor run --production --port 3200 --settings settings_demo.json",
     "start:test:dev": "METEOR_LOCAL_DIR=.meteor/local-e2e SEED=e2e MONGO_URL=mongodb://localhost:27017/umsme-admin-e2e?replicaSet=rs0 meteor run --port 3200 --settings settings_demo.json",

@@ -124,7 +124,8 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 
 - `activityCron.enabled: true` i admin: påminnelser om incheckning och
   deadline-jobbet. Det är avstängt utan inställningen.
-- `private.googleCalendar: { apiKey, calendarId }` i admin, för importen. I
+- `private.googleCalendar.calendarId` i admin; importen läser också med
+  servicekontot, så kalendern behöver inte vara offentlig. I
   `settings_demo.json` är den `"fake"`.
 - `public.appUrl` i admin och appen, för länkar i mail. Utan den saknas länken.
 - Standardmallarna läggs in vid start av admin och appen, i den databas de är

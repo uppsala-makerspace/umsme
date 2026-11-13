@@ -48,7 +48,6 @@
   },
   "private": {
     "googleCalendar": {
-      "apiKey": "",
       "calendarId": "",
       "keyFile": "config/calendar-service-account.json",
       "location": "Uppsala Makerspace, <street>, Uppsala"

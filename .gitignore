@@ -16,3 +16,6 @@ certs/
 admin/dist/
 # Demo data: receipts and logs written by scripts/demo.sh
 .demo-data/
+
+# Local settings with secrets (e.g. a test calendar for the demo)
+settings*.local.json

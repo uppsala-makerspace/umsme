@@ -1,20 +1,19 @@
 import { Meteor } from 'meteor/meteor';
-import { fetch } from 'meteor/fetch';
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
 import { Spaces } from '/imports/common/collections/spaces';
 import { createEvent } from './events';
 import { normalizedName } from './linking';
 import { zonedDate } from '/imports/common/lib/days';
+import { calendarSettings, calendarConfigured, eventsUrl, calendarRequest } from './googleCalendar';
 
 /**
  * Importing the association's Google calendar as events: each calendar event
  * once (by its id, kept as the event's googleEventId), free-standing, or of
  * the activity that has its name. Nobody is told of an imported event.
  *
- * The calendar is `private.googleCalendar` in admin's settings, `{ apiKey,
- * calendarId }` as the app's public one, or "fake" for a stand-in calendar
- * of a few events around today (demo and e2e).
+ * The calendar and its settings: googleCalendar.js, read as the service
+ * account. The fake one has a few events around today (demo and e2e).
  */
 
 const DAY = 86400000;
@@ -40,13 +39,8 @@ const fakeItems = (now) => {
   ];
 };
 
-const calendarSettings = () => Meteor.settings?.private?.googleCalendar;
-
 /** Whether a calendar is configured to import from. */
-export const calendarConfigured = () => {
-  const settings = calendarSettings();
-  return settings === 'fake' || !!(settings?.apiKey && settings?.calendarId);
-};
+export { calendarConfigured };
 
 /** The calendar's raw events between two moments, every page of them. */
 const fetchItems = async (from, to) => {
@@ -54,17 +48,23 @@ const fetchItems = async (from, to) => {
   if (settings === 'fake') {
     return fakeItems(new Date()).filter((item) => new Date(item.end.dateTime || item.end.date) > from && new Date(item.start.dateTime || item.start.date) < to);
   }
-  if (!settings?.apiKey || !settings?.calendarId) throw new Meteor.Error('not-configured', 'No calendar is configured (private.googleCalendar)');
+  if (!calendarConfigured()) throw new Meteor.Error('not-configured', 'No calendar is configured (private.googleCalendar)');
   const items = [];
   let pageToken = null;
   do {
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(settings.calendarId)}/events`
-      + `?key=${encodeURIComponent(settings.apiKey)}&singleEvents=true&orderBy=startTime&maxResults=250`
-      + `&timeMin=${encodeURIComponent(from.toISOString())}&timeMax=${encodeURIComponent(to.toISOString())}`
-      + (pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '');
-    const response = await fetch(url);
-    if (!response.ok) throw new Meteor.Error('calendar-failed', `The calendar answered ${response.status}`);
-    const page = await response.json();
+    let page;
+    try {
+      page = (await calendarRequest(settings, {
+        url: eventsUrl(settings),
+        params: {
+          singleEvents: true, orderBy: 'startTime', maxResults: 250,
+          timeMin: from.toISOString(), timeMax: to.toISOString(),
+          ...(pageToken ? { pageToken } : {}),
+        },
+      })).data;
+    } catch (error) {
+      throw new Meteor.Error('calendar-failed', `The calendar answered ${error?.response?.status ?? error.message}`);
+    }
     items.push(...(page.items || []));
     pageToken = page.nextPageToken || null;
   } while (pageToken && items.length < 2000);

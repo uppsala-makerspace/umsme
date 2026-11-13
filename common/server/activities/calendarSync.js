@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 import crypto from 'crypto';
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
@@ -7,7 +6,7 @@ import { CalendarRemovals } from '/imports/common/collections/calendarRemovals';
 import { resolveEvent } from '/imports/common/lib/activityRules';
 import { calendarEntry } from '/imports/common/lib/calendarEntry';
 import { appBaseUrl } from '/imports/common/lib/links';
-import { serviceAccountClient } from '/imports/common/server/googleServiceAccount';
+import { calendarSettings, calendarConfigured, eventsUrl, calendarRequest } from './googleCalendar';
 
 /**
  * Events mirrored to the association's Google calendar (plan/activities.md,
@@ -21,35 +20,19 @@ import { serviceAccountClient } from '/imports/common/server/googleServiceAccoun
  * UMSME touches only the calendar events of its own events: those it created
  * and those it imported (googleEventId), whatever is changed in Google.
  *
- * The calendar is admin's `private.googleCalendar`: `{ calendarId,
- * credentials | keyFile, location }`, the service account given as for
- * `googleDrive`, or "fake" for an in-memory stand-in (demo and e2e).
+ * The calendar and its settings: googleCalendar.js.
  */
 
 const DAY = 86400000;
-const SCOPE = 'https://www.googleapis.com/auth/calendar.events';
-
-const calendarSettings = () => Meteor.settings?.private?.googleCalendar;
-
-/** Whether the service account that writes is given: inline or as a key file. */
-const hasServiceAccount = (settings) => !!(settings?.credentials || settings?.keyFile);
-
 /** Whether a calendar is configured to write to. */
-export const calendarSyncConfigured = () => {
-  const settings = calendarSettings();
-  return settings === 'fake' || !!(settings?.calendarId && hasServiceAccount(settings));
-};
+export const calendarSyncConfigured = calendarConfigured;
 
 // The calendar event is gone from Google: write it anew, or count it removed.
 const gone = (error) => [404, 410].includes(error?.response?.status ?? error?.status);
 
 const googleTransport = (settings) => {
-  let client;
-  const request = (opts) => {
-    client = client || serviceAccountClient(settings, [SCOPE], 'googleCalendar');
-    return client.request(opts);
-  };
-  const events = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(settings.calendarId)}/events`;
+  const request = (opts) => calendarRequest(settings, opts);
+  const events = eventsUrl(settings);
   return {
     insert: async (body) => (await request({ url: events, method: 'POST', data: body })).data.id,
     update: async (id, body) => { await request({ url: `${events}/${encodeURIComponent(id)}`, method: 'PUT', data: body }); },

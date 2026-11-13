@@ -120,7 +120,10 @@ Each environment has its own ports and database, so they can all run at once:
 | E2e (`npm run test:e2e`) | 3200 | 3201 | – | `umsme-admin-e2e`, `umsme-e2e` |
 
 `./scripts/demo.sh` seeds the database `umsme-demo` and starts all three apps
-against it. Seeding runs at startup when `SEED=demo` or `SEED=e2e` is set
+against it. Admin's demo reads `admin/settings_demo.local.json` instead of
+`settings_demo.json` when it exists: git ignores it (`settings*.local.json`),
+so secrets such as a test calendar's service account go there, and the e2e
+tests, which use `settings_demo.json`, are not affected. Seeding runs at startup when `SEED=demo` or `SEED=e2e` is set
 (`runSeedFromEnv` in `common/server/seed/runFromEnv.js`, called by admin and
 the app): the demo seeds in admin, the app's e2e tests in the app. The
 scenarios are in `common/server/seed/scenarios/`, built from the blocks in

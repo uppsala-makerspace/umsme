@@ -62,7 +62,7 @@ export const CalendarImport = ({
       <Link href="/events" underline="hover" variant="body2">← Events</Link>
       <Typography variant="h4" component="h1" sx={{ mt: 0.5, mb: 2 }}>Import from the calendar</Typography>
       {configured === false && (
-        <Alert severity="info" sx={{ mb: 2 }}>No calendar is configured: set private.googleCalendar ({'{ apiKey, calendarId }'}) in admin’s settings.</Alert>
+        <Alert severity="info" sx={{ mb: 2 }}>No calendar is configured: set private.googleCalendar ({'{ calendarId, credentials }'}, shared with the service account) in admin’s settings.</Alert>
       )}
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Each calendar event is imported once. One with an activity’s name becomes an event of it; the rest are

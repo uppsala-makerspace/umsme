@@ -422,9 +422,10 @@ The "Open in admin" links in the expense manager events are built from `public.a
 ## 13. Google Calendar (activities)
 
 Admin reads the association's Google calendar to import its events
-(`common/server/activities/calendarImport.js`, with the API key) and mirrors
-events to it (`common/server/activities/calendarSync.js`, with a service
-account). The mirror is a job every five minutes that writes what differs
+(`common/server/activities/calendarImport.js`) and mirrors events to it
+(`common/server/activities/calendarSync.js`), both as a service account the
+calendar is shared with, so the calendar need not be public
+(`common/server/activities/googleCalendar.js`). The mirror is a job every five minutes that writes what differs
 from what it last wrote, so a failed write is tried again by itself. Only
 events shown on the website (`published`, inherited from the activity) go to
 the calendar; a called-off event stays with "INSTÄLLT: " before its name.
@@ -437,7 +438,6 @@ in Google are written over.
 "public": { "appUrl": "https://app.uppsalamakerspace.se" },
 "private": {
   "googleCalendar": {
-    "apiKey": "…",
     "calendarId": "…@group.calendar.google.com",
     "credentials": { "client_email": "…", "private_key": "…" },
     "location": "Uppsala Makerspace, <street>, Uppsala"
@@ -447,9 +447,8 @@ in Google are written over.
 
 | Key | Purpose |
 |-----|---------|
-| `apiKey` | Reading the calendar, for the import |
-| `calendarId` | The calendar to read and write |
-| `credentials` | The service account that writes, inline: `{ "client_email", "private_key" }`, as for `googleDrive`. Without it (or `keyFile`) nothing is written. |
+| `calendarId` | The calendar to import from and write to |
+| `credentials` | The service account that writes, inline: `{ "client_email", "private_key" }`, as for `googleDrive`. Without it (or `keyFile`) the calendar is neither read nor written. |
 | `keyFile` | Instead of `credentials`: path (relative to the app's working dir) to the service account's JSON key |
 | `location` | The calendar event's place, after the workshop's name when the event has one |
 
