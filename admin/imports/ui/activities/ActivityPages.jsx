@@ -32,7 +32,7 @@ export const ActivityListPage = () => {
   const { categories } = useCategories();
   return (
     <ActivityList
-      {...list} groupName={choices.groupName}
+      {...list} groupName={choices.groupName} groupWorkshops={choices.groupWorkshops}
       categoryName={(id) => categories.find((c) => c._id === id)?.name?.sv}
       workshopName={(id) => choices.workshops.find((w) => w._id === id)?.name?.sv}
     />
@@ -59,6 +59,7 @@ export const ActivityEditPage = ({ _id }) => {
   const common = {
     values, onChange: setField, busy, error, notice, groups: choices.groups, categories, certificates,
     workshopOptions: choices.workshopOptions, spaceOptions: choices.spaceOptions, groupName: choices.groupName,
+    groupWorkshops: choices.groupWorkshops,
   };
   if (!_id) {
     return <ActivityForm isNew {...common} onSave={() => run(() => saveActivity(values, null), { then: (id) => navigate(activityPath(id)) })} />;
@@ -152,6 +153,7 @@ export const EventEditPage = ({ _id }) => {
   const common = {
     values, onChange: setField, busy, error, notice, activity, activities, groups: choices.groups, categories, certificates,
     workshopOptions: choices.workshopOptions, spaceOptions: choices.spaceOptions, groupName: choices.groupName,
+    groupWorkshops: choices.groupWorkshops,
     hosts: values.hostMemberIds.map((id) => names[id] || { _id: id, name: id }),
     onAddHost: (member) => {
       setNames((n) => ({ ...n, [member._id]: member }));

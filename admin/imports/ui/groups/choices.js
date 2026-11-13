@@ -3,6 +3,7 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { Groups } from '/imports/common/collections/groups';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
+import { groupWorkshopIds } from '/imports/common/lib/activityRules';
 
 const FLOORS = { floor1: 'Floor 1', floor2: 'Floor 2' };
 const byName = (a, b) => (a.name?.sv || '').localeCompare(b.name?.sv || '', 'sv');
@@ -14,7 +15,7 @@ const byName = (a, b) => (a.name?.sv || '').localeCompare(b.name?.sv || '', 'sv'
 export const useChoices = () => useTracker(() => {
   const handle = Meteor.subscribe('admin.groupsAndWorkshops.choices');
   const groups = Groups.find({}, { fields: { name: 1, type: 1, parentGroupId: 1 } }).fetch().sort(byName);
-  const workshops = Workshops.find({}, { fields: { name: 1, kind: 1, groupId: 1 } }).fetch().sort(byName);
+  const workshops = Workshops.find({}, { fields: { name: 1, kind: 1, groupId: 1, status: 1 } }).fetch().sort(byName);
   const spaces = Spaces.find({}, { fields: { name: 1, floor: 1 } }).fetch().sort(byName);
   return {
     loading: !handle.ready(),
@@ -23,6 +24,8 @@ export const useChoices = () => useTracker(() => {
     spaceOptions: spaces.map((s) => ({ value: s._id, label: `${s.name?.sv || s._id} (${FLOORS[s.floor] || s.floor})`, group: FLOORS[s.floor] })),
     workshopOptions: workshops.map((w) => ({ value: w._id, label: w.name?.sv || w._id, group: w.kind === 'areaOfInterest' ? 'Areas of interest' : 'Workshops' })),
     groupName: (id) => groups.find((g) => g._id === id)?.name?.sv,
+    // Group id → the workshop its activities are at when they name none.
+    groupWorkshops: groupWorkshopIds(groups, workshops),
   };
 }, []);
 

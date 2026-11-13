@@ -4,7 +4,8 @@ import { Events } from '/imports/common/collections/events';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Members } from '/imports/common/collections/members';
 import { CalendarRemovals } from '/imports/common/collections/calendarRemovals';
-import { resolveEvent } from '/imports/common/lib/activityRules';
+import { resolveEvent, withGroupWorkshop } from '/imports/common/lib/activityRules';
+import { loadGroupWorkshops } from './groupWorkshops';
 import { calendarEntry } from '/imports/common/lib/calendarEntry';
 import { appBaseUrl } from '/imports/common/lib/links';
 import { calendarSettings, calendarConfigured, eventsUrl, calendarRequest } from './googleCalendar';
@@ -124,7 +125,9 @@ export const syncCalendar = async (now = new Date()) => {
 
   const events = await Events.find({ end: { $gte: new Date(now.getTime() - 7 * DAY) } }).fetchAsync();
   const activities = await byId(Activities, events.map((e) => e.activityId).filter(Boolean));
-  const resolved = events.map((e) => resolveEvent(e, activities.get(e.activityId)));
+  // The place names the group's workshop where neither the event nor its activity names one.
+  const groupWorkshops = await loadGroupWorkshops();
+  const resolved = events.map((e) => withGroupWorkshop(resolveEvent(e, activities.get(e.activityId)), groupWorkshops));
   const workshops = await byId(Workshops, resolved.map((e) => e.workshopId).filter(Boolean));
   // The names of the hosts of events that show them; calendarEntry keeps only their first names.
   const hostIds = [...new Set(resolved.filter((e) => e.published && e.hostsPublished).flatMap((e) => e.hostMemberIds || []))];

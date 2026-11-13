@@ -50,7 +50,7 @@ const TABS = [['details', 'Details'], ['participants', 'Participants'], ['image'
  */
 export const EventForm = ({
   isNew, event, activity = null, values, onChange, onSave, busy = false, error, notice, activities, groups, categories, certificates = [],
-  workshopOptions, spaceOptions, groupName, hosts, onAddHost, onRemoveHost, searchMembers,
+  workshopOptions, spaceOptions, groupName, groupWorkshops = {}, hosts, onAddHost, onRemoveHost, searchMembers,
   imageUrl, ownImage = false, onUploadImage, onRemoveImage, uploading = false, onDelete, tab = 'details', onTab,
   participants = null, participantCount, onMakeActivity, groupMembers = [],
 }) => {
@@ -109,6 +109,7 @@ export const EventForm = ({
       <SharedFields
         event values={values} onChange={onChange} inherited={values.activityId ? activity : null}
         categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} certificates={certificates}
+        groupWorkshops={groupWorkshops}
       />
       <RegistrationFields event values={values} onChange={onChange} inherited={values.activityId ? activity : null} />
       <Stack direction="row" spacing={1}>

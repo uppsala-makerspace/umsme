@@ -711,6 +711,7 @@
   "activityFieldGroupNone": "(Föreningen – bara styrelsen)",
   "activityFieldNone": "(Ingen)",
   "activityFieldAsActivity": "(Som aktiviteten: {{value}})",
+  "activityFieldFromGroup": "(Från gruppen: {{value}})",
   "activityFieldInheritHint": "Det du lämnar tomt tas från aktiviteten.",
   "activityYes": "Ja",
   "activityNo": "Nej",

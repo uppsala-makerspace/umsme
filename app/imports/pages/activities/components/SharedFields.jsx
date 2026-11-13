@@ -47,6 +47,21 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
     const doc = id && docs.find((d) => d._id === id);
     return doc ? t("activityFieldAsActivity", { value: localized(doc.name, lang) }) : t(empty);
   };
+  // The workshop left empty: the activity's (its own, or its group's), or on
+  // an activity or a free-standing event the group's (choices.groupWorkshops).
+  const groupWorkshops = choices.groupWorkshops || {};
+  const workshopName = (id) => {
+    const doc = id && choices.workshops.find((d) => d._id === id);
+    return doc ? localized(doc.name, lang) : null;
+  };
+  const noWorkshop = () => {
+    if (inherited) {
+      const name = workshopName(inherited.workshopId || groupWorkshops[inherited.groupId]);
+      return name ? t("activityFieldAsActivity", { value: name }) : t("activityFieldNone");
+    }
+    const name = workshopName(groupWorkshops[values.groupId]);
+    return name ? t("activityFieldFromGroup", { value: name }) : t("activityFieldNone");
+  };
   const flag = (name, label) => <FlagField name={name} label={label} values={values} onChange={onChange} inherited={inherited} event={event} />;
 
   const certificates = choices.certificates || [];
@@ -78,7 +93,7 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
       <Card title={t("formCardPlace")} kind={kind}>
         <Row>
           <SelectField id="activity-workshopId" label={t("activityFieldWorkshop")} value={values.workshopId} onChange={set("workshopId")}
-            empty={none("workshopId", choices.workshops)} options={options(choices.workshops)} />
+            empty={noWorkshop()} options={options(choices.workshops)} />
           <SelectField id="activity-spaceId" label={t("activityFieldSpace")} value={values.spaceId} onChange={set("spaceId")}
             empty={none("spaceId", choices.spaces)} options={options(choices.spaces)} />
         </Row>

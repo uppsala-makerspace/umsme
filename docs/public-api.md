@@ -146,7 +146,7 @@ entry of kind `activity` has fields of its own instead of `status`, `tag`,
 | Field             | Type      | Description |
 | ----------------- | --------- | ----------- |
 | `category`        | string    | `id` of one of the `categories`. |
-| `workshop`        | string    | `id` of the workshop or area of interest it is shown at. Absent for something of the whole association, and when that workshop is not published. |
+| `workshop`        | string    | `id` of the workshop or area of interest it is shown at: its own, or else its group's (that of the steering group the group is, or is an activity group under). Absent for something of the whole association or of a function group that names none, and when that workshop is not published. |
 | `group`           | string    | `id` of the function group that holds it, when that group is published. |
 | `space`           | object    | The room, as `(spaceId, floor)`. |
 | `durationMinutes` | number    | How long an event usually lasts. |

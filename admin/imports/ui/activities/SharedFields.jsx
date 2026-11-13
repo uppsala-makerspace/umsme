@@ -35,11 +35,13 @@ export const FlagField = ({ name, label, values, onChange, inherited = null, eve
  * @param {{ values: object, onChange: (field, value) => void, inherited?: object|null, event?: boolean,
  *           categories: Array<{ _id, name }>, workshopOptions: Array<{ value, label }>,
  *           spaceOptions: Array<{ value, label }>, certificates?: Array<{ _id, name }>,
- *           afterDescription?: React.ReactNode }} props
+ *           groupWorkshops?: Object<string, string>, afterDescription?: React.ReactNode }} props
  *   `event` makes the yes/no fields three-way (yes, no, as the activity) rather than checkboxes.
  *   `afterDescription` is drawn between the first card and the rest (an activity's Visibility).
+ *   `groupWorkshops` (group id → workshop id) names the workshop an empty
+ *   workshop field stands for: the group's (groupWorkshopIds).
  */
-export const SharedFields = ({ values, onChange, inherited = null, event = false, categories, workshopOptions, spaceOptions, certificates = [], afterDescription = null }) => {
+export const SharedFields = ({ values, onChange, inherited = null, event = false, categories, workshopOptions, spaceOptions, certificates = [], groupWorkshops = {}, afterDescription = null }) => {
   const from = (field, lang) => {
     const value = lang ? inherited?.[field]?.[lang] : inherited?.[field];
     return value === undefined || value === null || value === '' ? undefined : String(value);
@@ -60,6 +62,16 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
   const none = (field, options, empty) => (inherited?.[field]
     ? `(As the activity: ${labelOf(options, inherited[field])})`
     : empty);
+  // The workshop left empty: the activity's (its own, or its group's), or on
+  // an activity or a free-standing event the group's.
+  const noWorkshop = () => {
+    if (inherited) {
+      const id = inherited.workshopId || groupWorkshops[inherited.groupId];
+      return id ? `(As the activity: ${labelOf(workshopOptions, id)})` : '(None)';
+    }
+    const id = groupWorkshops[values.groupId];
+    return id ? `(From the group: ${labelOf(workshopOptions, id)})` : '(None)';
+  };
   const categoryOptions = categories.map((c) => ({ value: c._id, label: c.name?.sv || c._id }));
   const flag = (name, label) => <FlagField name={name} label={label} values={values} onChange={onChange} inherited={inherited} event={event} />;
 
@@ -94,8 +106,8 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
       <FormCard title="Where and contact" kind={kind}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
           <TextField label="Shown at workshop" select fullWidth slotProps={native} value={values.workshopId} onChange={(e) => onChange('workshopId', e.target.value)}
-            helperText="A workshop or an area of interest; none for something of the whole association.">
-            <option value="">{none('workshopId', workshopOptions, '(None)')}</option>
+            helperText="A workshop or an area of interest. Left empty, the group's: that of the steering group the group is or is under.">
+            <option value="">{noWorkshop()}</option>
             {workshopOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </TextField>
           <TextField label="Space" select fullWidth slotProps={native} value={values.spaceId} onChange={(e) => onChange('spaceId', e.target.value)}>

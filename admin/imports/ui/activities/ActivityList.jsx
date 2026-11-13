@@ -11,14 +11,20 @@ import { activityPath } from './paths';
  * The activities.
  *
  * @param {{ loading: boolean, activities: object[], groupName: (id) => string,
- *           categoryName: (id) => string, workshopName: (id) => string }} props
+ *           categoryName: (id) => string, workshopName: (id) => string,
+ *           groupWorkshops?: Object<string, string> }} props
  */
-export const ActivityList = ({ loading, activities, groupName, categoryName, workshopName }) => {
+export const ActivityList = ({ loading, activities, groupName, categoryName, workshopName, groupWorkshops = {} }) => {
   const columns = [
     linkColumn('name', 'Name', (a) => activityPath(a._id), { valueGetter: (value) => value?.sv || '' }),
     { field: 'groupId', headerName: 'Group', width: 220, valueGetter: (value) => (value ? groupName(value) || '' : 'The association') },
     { field: 'categoryId', headerName: 'Category', width: 180, valueGetter: (value) => (value ? categoryName(value) || '' : '') },
-    { field: 'workshopId', headerName: 'Shown at', width: 220, valueGetter: (value) => (value ? workshopName(value) || '' : '') },
+    // Left empty, the group's workshop (groupWorkshopIds), marked as such.
+    { field: 'workshopId', headerName: 'Shown at', width: 220, valueGetter: (value, row) => {
+      if (value) return workshopName(value) || '';
+      const fromGroup = groupWorkshops[row.groupId];
+      return fromGroup ? `${workshopName(fromGroup) || ''} (from the group)` : '';
+    } },
     { field: 'published', headerName: 'Website', width: 110, valueGetter: (value) => (value ? 'Shown' : '') },
   ];
   return (

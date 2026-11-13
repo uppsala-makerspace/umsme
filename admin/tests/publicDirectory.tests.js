@@ -388,6 +388,27 @@ describe('publicDirectory', function () {
       assert.strictEqual(byId(directory().entries, 'glasintro').workshop, undefined);
     });
 
+    it("shows an activity that names no workshop at its group's, and its events with it", function () {
+      const workshops = [{ _id: 'wk', name: { sv: 'Keramikverkstaden' }, status: 'established', groupId: 'steer' }];
+      const groups = [
+        { _id: 'steer', name: { sv: 'Styrgrupp Keramik' }, type: 'steering' },
+        { _id: 'glaze', name: { sv: 'Glasyrgruppen' }, type: 'responsibility', parentGroupId: 'steer' },
+        { _id: 'it', name: { sv: 'IT-gruppen' }, type: 'function' },
+      ];
+      const start = new Date(now.getTime() + 86400000);
+      const { entries, events } = buildAll({
+        workshops, groups, now,
+        activities: [
+          { _id: 'ga', name: { sv: 'Glasyrkväll' }, groupId: 'glaze', published: true },
+          { _id: 'ia', name: { sv: 'IT-kväll' }, groupId: 'it', published: true },
+        ],
+        events: [{ _id: 'free', name: { sv: 'Glasyrdag' }, groupId: 'glaze', published: true, start, end: new Date(start.getTime() + 3600000) }],
+      });
+      assert.strictEqual(byId(entries, 'glasyrkvall').workshop, 'keramikverkstaden');
+      assert.strictEqual(byId(entries, 'it-kvall').workshop, undefined);
+      assert.strictEqual(events[0].workshop, 'keramikverkstaden');
+    });
+
     it('lists an activity’s published events to come, soonest first, cancelled ones marked', function () {
       const { events } = byId(directory().entries, 'textilintro');
       assert.deepStrictEqual(events.map((e) => [e.start, e.status]), [

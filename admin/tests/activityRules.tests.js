@@ -1,6 +1,8 @@
 import assert from 'assert';
 import {
   resolveEvent,
+  groupWorkshopIds,
+  withGroupWorkshop,
   inheritedFields,
   eventGroupId,
   mayEditActivity,
@@ -227,6 +229,46 @@ describe('Activity rules', function () {
 
     it('is null without a length', function () {
       assert.strictEqual(eventEnd(new Date(), undefined), null);
+    });
+  });
+
+  describe('groupWorkshopIds and withGroupWorkshop', function () {
+    const groups = [
+      { _id: 'steer', type: 'steering' },
+      { _id: 'sub', type: 'responsibility', parentGroupId: 'steer' },
+      { _id: 'func', type: 'function' },
+      { _id: 'twice', type: 'steering' },
+      { _id: 'subOfTwice', type: 'responsibility', parentGroupId: 'twice' },
+      { _id: 'lonely', type: 'steering' },
+      { _id: 'gone', type: 'steering' },
+    ];
+    const workshops = [
+      { _id: 'wood', groupId: 'steer', status: 'established' },
+      { _id: 'a', groupId: 'twice', status: 'established' },
+      { _id: 'b', groupId: 'twice', status: 'trial' },
+      { _id: 'old', groupId: 'gone', status: 'decommissioned' },
+    ];
+    const map = groupWorkshopIds(groups, workshops);
+
+    it("gives a steering group the one it is responsible for, and an activity group its steering group's", function () {
+      assert.strictEqual(map.steer, 'wood');
+      assert.strictEqual(map.sub, 'wood');
+    });
+
+    it('gives none to a function group, to one responsible for several or none, or for a decommissioned one', function () {
+      for (const id of ['func', 'twice', 'subOfTwice', 'lonely', 'gone']) assert.strictEqual(map[id], undefined, id);
+    });
+
+    it("fills in the group's workshop only where none is named, and marks it", function () {
+      assert.deepStrictEqual(withGroupWorkshop({ _id: 'x', groupId: 'sub' }, map), { _id: 'x', groupId: 'sub', workshopId: 'wood', workshopFromGroup: true });
+      assert.deepStrictEqual(withGroupWorkshop({ _id: 'x', groupId: 'sub', workshopId: 'a' }, map), { _id: 'x', groupId: 'sub', workshopId: 'a' });
+      assert.deepStrictEqual(withGroupWorkshop({ _id: 'x', groupId: 'func' }, map), { _id: 'x', groupId: 'func' });
+    });
+
+    it("lets an activity's event take the group's workshop through the activity", function () {
+      const activity = withGroupWorkshop({ _id: 'act', groupId: 'sub', name: { sv: 'Glasyr' } }, map);
+      assert.strictEqual(resolveEvent({ _id: 'e', activityId: 'act' }, activity).workshopId, 'wood');
+      assert.strictEqual(resolveEvent({ _id: 'e', activityId: 'act', workshopId: 'a' }, activity).workshopId, 'a');
     });
   });
 });

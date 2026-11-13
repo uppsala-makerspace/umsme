@@ -5,7 +5,7 @@ import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Spaces } from "/imports/common/collections/spaces";
 import { StoreItems } from "/imports/common/collections/storeItems";
-import { activityLinks, upcomingEventsAt } from "./activities";
+import { activityLinks, activitiesAtSelector, upcomingEventsAt } from "./activities";
 import { workshopImageUrlFor, spaceIconUrlFor } from "/imports/common/server/workshopImage";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
 import {
@@ -123,7 +123,7 @@ Meteor.methods({
       relatedGroups,
       certificates,
       // The activities shown at it, to link to.
-      activities: await activityLinks({ workshopId }),
+      activities: await activityLinks(await activitiesAtSelector(workshopId)),
       // Its calendar: the events to come, its own and its activities'.
       upcomingEvents: await upcomingEventsAt(workshopId, member._id),
       mapView: await spacesMapView(workshop),

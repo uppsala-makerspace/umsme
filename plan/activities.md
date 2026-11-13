@@ -31,8 +31,15 @@ Vi vill kunna:
 - **Tillhörighet och visningskoppling är två olika fält.** Tillhörigheten
   (`groupId`) säger vem som äger och får redigera. Visningskopplingen
   (`workshopId`: en verkstad eller ett intresseområde) säger var aktiviteten
-  visas. **Tom visningskoppling betyder något** — en aktivitet av större
-  karaktär, som öppen kväll — och får därför aldrig fyllas i från tillhörigheten.
+  visas. **Tom visningskoppling ärver gruppens** (ändrat 2026-11-13): en
+  styrgrupps verkstad eller intresseområde, det den ansvarar för, och för en
+  aktivitetsgrupp styrgruppens. Funktionsgrupper och föreningens egna
+  aktiviteter ärver inget, där väljs den. Ansvarar en styrgrupp för flera
+  ärvs inget. Det räknas ut när det visas (`groupWorkshopIds`,
+  `withGroupWorkshop` i `common/lib/activityRules.js`) och sparas aldrig;
+  formulären visar "Från gruppen: …" i det tomma fältet. Ett tillfälle ärver
+  aktivitetens, ett fristående sin grupps. Att uttryckligen välja ingen
+  verkstad i en styr- eller aktivitetsgrupp går inte.
   Intressegrupper finns inte längre; intresseområden är en sorts verkstad
   (`workshop.kind: "areaOfInterest"`), så någon separat koppling till grupper
   behövs inte.
@@ -81,7 +88,7 @@ regler (överskrivning, kapacitet, kö, incheckning, behörighet) i
 | `categoryId` | String, optional | mot `activityCategories` |
 | `imageFileId`, `imageMimeType` | | samma bildlager som grupper/verkstäder |
 | `groupId` | String, optional | **tillhörighet** — vem som äger. Sätts vid skapandet, ändras bara av board/admin. Tom → föreningsgemensam, bara board/admin |
-| `workshopId` | String, optional | **visningskoppling**: en verkstad eller ett intresseområde |
+| `workshopId` | String, optional | **visningskoppling**: en verkstad eller ett intresseområde; tom → gruppens (se ovan) |
 | `spaceId` | String, optional | normal plats, mot `Spaces` |
 | `slackChannel`, `contactEmail` | String, optional | inga standardvärden |
 | `durationMinutes` | Number | normal längd |

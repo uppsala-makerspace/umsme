@@ -133,6 +133,22 @@ test.describe('Activities', () => {
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
   });
 
+  test("an activity group's activity that names no workshop is at its steering group's", async ({ page }) => {
+    const GLAZING = 'E2E glazing evening';
+    await openAs(page, 'steering', '/workshops');
+    await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
+    // Among its activities (its event is too far ahead for the workshop's calendar of the next ten).
+    await page.getByRole('button', { name: /^Show activities/ }).click();
+    await page.getByRole('link', { name: new RegExp(`${GLAZING} \\d+ planned events?`) }).click();
+    await expect(page.getByRole('heading', { name: GLAZING })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Ceramics workshop' })).toBeVisible();
+    // Its form says where an empty workshop field puts it.
+    await page.getByRole('link', { name: en.edit }).click();
+    const workshop = page.getByLabel(en.activityFieldWorkshop);
+    await expect(workshop).toHaveValue('');
+    await expect(workshop.locator('option').first()).toHaveText(en.activityFieldFromGroup.replace('{{value}}', 'Ceramics workshop'));
+  });
+
   test('the activities say their workshop, and are filtered by it', async ({ page }) => {
     await openAs(page, 'member', '/activities');
     const wheel = page.getByRole('link', { name: new RegExp(WHEEL) });

@@ -151,6 +151,11 @@ export const buildE2e = async ({ people, now }) => {
   toCancel._id = await makeActivity(toCancel);
   await makeEvent({ activity: toCancel, start: at(15, 18) });
   await makeActivity({ name: { sv: 'E2E events aktivitet' }, groupId: ceramicsGroup, durationMinutes: 90 });
+  // An activity of the glazing group that names no workshop: it is at the
+  // ceramics workshop, its steering group's.
+  const glazingEvening = { name: { sv: 'E2E glasyrkväll', en: 'E2E glazing evening' }, groupId: glazingGroup, durationMinutes: 120 };
+  glazingEvening._id = await makeActivity(glazingEvening);
+  await makeEvent({ activity: glazingEvening, start: at(45, 18) });
   // A weekly activity with twelve past events: more than a page of them.
   const history = { name: { sv: 'E2E historik' }, groupId: ceramicsGroup, durationMinutes: 60 };
   history._id = await makeActivity(history);

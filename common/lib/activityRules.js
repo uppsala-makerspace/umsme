@@ -277,3 +277,47 @@ export const publishedHostNames = (event, memberNames = {}) => {
   const names = (event.hostMemberIds || []).map((id) => firstName(memberNames[id])).filter(Boolean);
   return names.length > 0 ? names : null;
 };
+
+/**
+ * The workshop or area of interest each group's activities are at when they
+ * name none themselves, by group id: a steering group's is the one it is
+ * responsible for (Workshop.groupId), an activity group's (a responsibility
+ * group) its steering group's. A steering group responsible for several has
+ * none, as it cannot be told which is meant; a function group has none, its
+ * activities name one themselves. A decommissioned one counts for nothing.
+ *
+ * @param {Array<{_id, type, parentGroupId}>} groups
+ * @param {Array<{_id, groupId, status}>} workshops
+ * @returns {Object<string, string>} group id → workshop id
+ */
+export const groupWorkshopIds = (groups, workshops) => {
+  const responsibleFor = new Map();
+  for (const w of workshops) {
+    if (!w.groupId || w.status === "decommissioned") continue;
+    responsibleFor.set(w.groupId, [...(responsibleFor.get(w.groupId) || []), w._id]);
+  }
+  const ofSteering = (groupId) => {
+    const ids = responsibleFor.get(groupId) || [];
+    return ids.length === 1 ? ids[0] : null;
+  };
+  const byId = new Map(groups.map((g) => [g._id, g]));
+  const result = {};
+  for (const g of groups) {
+    const workshopId = g.type === "steering" ? ofSteering(g._id)
+      : g.type === "responsibility" && byId.get(g.parentGroupId)?.type === "steering" ? ofSteering(g.parentGroupId)
+        : null;
+    if (workshopId) result[g._id] = workshopId;
+  }
+  return result;
+};
+
+/**
+ * An activity, or an event resolved against its activity (or free-standing),
+ * with the workshop it is at: its own, or else its group's
+ * (groupWorkshopIds), then marked `workshopFromGroup`. For showing only; never
+ * stored.
+ */
+export const withGroupWorkshop = (doc, groupWorkshops = {}) => {
+  if (!doc || doc.workshopId || !groupWorkshops[doc.groupId]) return doc;
+  return { ...doc, workshopId: groupWorkshops[doc.groupId], workshopFromGroup: true };
+};

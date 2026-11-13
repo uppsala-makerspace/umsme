@@ -712,6 +712,7 @@
   "activityFieldGroupNone": "(The association – board only)",
   "activityFieldNone": "(None)",
   "activityFieldAsActivity": "(As the activity: {{value}})",
+  "activityFieldFromGroup": "(From the group: {{value}})",
   "activityFieldInheritHint": "What you leave empty is taken from the activity.",
   "activityYes": "Yes",
   "activityNo": "No",

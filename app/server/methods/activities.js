@@ -33,7 +33,9 @@ import {
   checkInWindow,
   attendanceOpen,
   PENDING,
+  withGroupWorkshop,
 } from "/imports/common/lib/activityRules";
+import { loadGroupWorkshops, atWorkshopSelector } from "/imports/common/server/activities/groupWorkshops";
 import {
   register, withdraw, takeSeat, checkIn, setInterest, markAttended, closeAttendance, addAttendee, certificateRequestFor,
 } from "/imports/common/server/activities/registrations";
@@ -81,15 +83,31 @@ const plannedEventCounts = async (activityIds) => {
 };
 
 /**
+ * The activities shown at a workshop or area of interest: those that name it,
+ * and those of a group whose it is that name none (groupWorkshopIds).
+ */
+export const activitiesAtSelector = async (workshopId, groupWorkshops = null) =>
+  atWorkshopSelector(groupWorkshops || (await loadGroupWorkshops()), workshopId);
+
+/**
  * The events to come shown at a workshop or area of interest, soonest first:
- * its own, and those of its activities that do not say otherwise.
+ * its own, those of its activities that do not say otherwise, and the
+ * free-standing ones of a group whose it is that name none.
  */
 export const upcomingEventsAt = async (workshopId, memberId, limit = 10) => {
-  const activityIds = (await Activities.find({ workshopId }, { fields: { _id: 1 } }).fetchAsync()).map((a) => a._id);
+  const groupWorkshops = await loadGroupWorkshops();
+  const activityIds = (await Activities.find(await activitiesAtSelector(workshopId, groupWorkshops), { fields: { _id: 1 } }).fetchAsync())
+    .map((a) => a._id);
+  const none = { $in: [null, ""] };
+  const freeStanding = atWorkshopSelector(groupWorkshops, workshopId).$or[1];
   const events = await Events.find(
     {
       end: { $gte: new Date() },
-      $or: [{ workshopId }, { activityId: { $in: activityIds }, workshopId: { $exists: false } }],
+      $or: [
+        { workshopId },
+        { activityId: { $in: activityIds }, workshopId: none },
+        { activityId: none, ...freeStanding },
+      ],
     },
     { sort: { start: 1 }, limit },
   ).fetchAsync();
@@ -233,8 +251,12 @@ const activitiesById = async (events) => {
  * Events as members see them, with what each refers to named; with
  * `memberId`, that member's registration state on each (`myState`).
  */
-const eventViews = async (events, memberId = null) => {
-  const activities = await activitiesById(events);
+const eventViews = async (stored, memberId = null) => {
+  // Where no workshop is named, the group's (withGroupWorkshop): the
+  // activity's for its events, the event's own group's for a free-standing one.
+  const groupWorkshops = await loadGroupWorkshops();
+  const activities = new Map([...(await activitiesById(stored))].map(([id, a]) => [id, withGroupWorkshop(a, groupWorkshops)]));
+  const events = stored.map((e) => (e.activityId ? e : withGroupWorkshop(e, groupWorkshops)));
   const resolved = events.map((e) => resolveEvent(e, activities.get(e.activityId)));
   const lookup = await lookups(resolved);
   const mine = memberId
@@ -438,7 +460,9 @@ Meteor.methods({
   "activities.list": async () => {
     const who = await caller();
     const groups = await myGroups(who);
-    const activities = await Activities.find({}, { sort: { "name.sv": 1 } }).fetchAsync();
+    const groupWorkshops = await loadGroupWorkshops();
+    const activities = (await Activities.find({}, { sort: { "name.sv": 1 } }).fetchAsync())
+      .map((a) => withGroupWorkshop(a, groupWorkshops));
     const lookup = await lookups(activities);
     const planned = await plannedEventCounts(activities.map((a) => a._id));
     return {
@@ -482,8 +506,9 @@ Meteor.methods({
     const today = zonedDayAt(new Date());
     const events = await Events.find({ activityId, end: { $gte: today } }, { sort: { start: 1 } }).fetchAsync();
     const access = await accessTo(who.member, activity.groupId, who, activity);
+    const shown = withGroupWorkshop(activity, await loadGroupWorkshops());
     return {
-      activity: activityView(activity, await lookups([activity])),
+      activity: activityView(shown, await lookups([shown])),
       events: await eventViews(events, who.member._id),
       interested: !!(await ActivityInterests.findOneAsync({ activityId, memberId: who.member._id })),
       interestCount: await ActivityInterests.find({ activityId }).countAsync(),
@@ -556,6 +581,8 @@ Meteor.methods({
       activities,
       categories: categories.map((c) => ({ _id: c._id, name: c.name })),
       workshops,
+      // Group id → the workshop its activities are at when they name none: the form's placeholder.
+      groupWorkshops: await loadGroupWorkshops(),
       spaces,
       certificates,
     };

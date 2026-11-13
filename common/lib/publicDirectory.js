@@ -10,7 +10,7 @@
  */
 import { withUniqueSlugs } from "./slug";
 import { SPACE_COLORS, spaceColorName } from "./spaceColors";
-import { resolveEvent, REGISTRATIONS, seatsLeft, publishedHostNames } from "./activityRules";
+import { resolveEvent, REGISTRATIONS, seatsLeft, publishedHostNames, groupWorkshopIds, withGroupWorkshop } from "./activityRules";
 
 /**
  * Only workshops and areas of interest that exist for members to use. A forming
@@ -99,12 +99,17 @@ export const buildDirectory = ({
   spaces = [],
   iconUrlFor,
   imageUrlFor,
-  activities = [],
-  events = [],
+  activities: ownActivities = [],
+  events: ownEvents = [],
   categories = [],
   memberNames = {},
   now = new Date(),
 }) => {
+  // Activities, and free-standing events, that name no workshop are at their
+  // group's (groupWorkshopIds); an activity's events take it from the activity.
+  const groupWorkshops = groupWorkshopIds(groups, workshops);
+  const activities = ownActivities.map((a) => withGroupWorkshop(a, groupWorkshops));
+  const events = ownEvents.map((e) => (e.activityId ? e : withGroupWorkshop(e, groupWorkshops)));
   const published = [
     ...workshops
       .filter((w) => PUBLIC_WORKSHOP_STATUSES.includes(w.status))

@@ -287,7 +287,7 @@ export default () => {
     if (!(await hasRole(this.userId, [...new Set([...DOMAIN_ROLES.groups, ...DOMAIN_ROLES.expenses])]))) return this.ready();
     return [
       Groups.find({}, { fields: { name: 1, type: 1, parentGroupId: 1 } }),
-      Workshops.find({}, { fields: { name: 1, kind: 1, groupId: 1 } }),
+      Workshops.find({}, { fields: { name: 1, kind: 1, groupId: 1, status: 1 } }),
       Spaces.find({}, { fields: { name: 1, floor: 1, spaceId: 1 } }),
     ];
   });

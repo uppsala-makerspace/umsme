@@ -380,11 +380,12 @@ export const buildDemo = async ({ random, people, now }) => {
   await makeEvent({ activity: openEvening, start: at(18, 18), hostMemberIds: [personas.board._id], createdAt: days(-5) });
   // The laser cutter's introduction gives its certificate, by the laser
   // keepers' certifiers to those who came: base, who has asked for it, is
-  // signed up.
+  // signed up. It names no workshop: it is at the wood workshop, that of the
+  // steering group its group is under.
   const laserIntro = {
     name: { sv: 'Laserintroduktion', en: 'Laser cutter introduction' },
     description: { sv: 'Gå igenom laserskäraren med en av de laseransvariga, som ger dig intyget efteråt.', en: 'Go through the laser cutter with one of its keepers, who gives you the certificate afterwards.' },
-    groupId: laserGroup, workshopId: workshops.wood, spaceId: spaces.wood, categoryId: courses, durationMinutes: 90,
+    groupId: laserGroup, spaceId: spaces.wood, categoryId: courses, durationMinutes: 90,
     membersOnly: true, published: true, registration: 'required', maxSeats: 4, requiredCertificateId: intro,
     targetCertificateId: laser,
   };

@@ -43,7 +43,7 @@ const TABS = [['details', 'Details'], ['image', 'Image'], ['events', 'Events']];
  */
 export const ActivityForm = ({
   isNew, activity, events = [], values, onChange, onSave, busy = false, error, notice, groups, categories, certificates = [],
-  workshopOptions, spaceOptions, groupName, imageUrl, onUploadImage, onRemoveImage, uploading = false, onDelete,
+  workshopOptions, spaceOptions, groupName, groupWorkshops = {}, imageUrl, onUploadImage, onRemoveImage, uploading = false, onDelete,
   tab = 'details', onTab, interestCount, matching = null, onFindMatching, onLinkMatching, onCloseMatching,
 }) => {
   const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
@@ -66,6 +66,7 @@ export const ActivityForm = ({
         </TextField>
       </FormCard>
       <SharedFields values={values} onChange={onChange} categories={categories} workshopOptions={workshopOptions} spaceOptions={spaceOptions} certificates={certificates}
+        groupWorkshops={groupWorkshops}
         afterDescription={<VisibilityFields values={values} onChange={onChange} />} />
       <RegistrationFields values={values} onChange={onChange} />
       <Stack direction="row" spacing={1}>
