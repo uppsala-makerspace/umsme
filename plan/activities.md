@@ -270,7 +270,8 @@ kommer via aktiviteten, och ett misslyckat försök görs om nästa körning
 (felet syns som `calendarError` på tillfällets sida i admin). Borttagna
 tillfällen lämnar sitt kalender-id i `calendarRemovals`. Bara tillfällen som
 visas på hemsidan (`published`) kommer med; importerade sätts som visade.
-Innehåll: svensk titel, beskrivning på svenska och engelska, länk till
+Innehåll: svensk titel, beskrivning på svenska och engelska, värdarnas
+förnamn när tillfället visar dem på hemsidan (`hostsPublished`), länk till
 tillfället i appen, och som plats verkstaden och föreningens adress
 (`private.googleCalendar.location`). Servicekontot ligger i admins
 `private.googleCalendar` (`credentials` eller `keyFile`, som för

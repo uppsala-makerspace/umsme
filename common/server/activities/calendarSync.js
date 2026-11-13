@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
 import { Workshops } from '/imports/common/collections/workshops';
+import { Members } from '/imports/common/collections/members';
 import { CalendarRemovals } from '/imports/common/collections/calendarRemovals';
 import { resolveEvent } from '/imports/common/lib/activityRules';
 import { calendarEntry } from '/imports/common/lib/calendarEntry';
@@ -125,8 +126,13 @@ export const syncCalendar = async (now = new Date()) => {
   const activities = await byId(Activities, events.map((e) => e.activityId).filter(Boolean));
   const resolved = events.map((e) => resolveEvent(e, activities.get(e.activityId)));
   const workshops = await byId(Workshops, resolved.map((e) => e.workshopId).filter(Boolean));
+  // The names of the hosts of events that show them; calendarEntry keeps only their first names.
+  const hostIds = [...new Set(resolved.filter((e) => e.published && e.hostsPublished).flatMap((e) => e.hostMemberIds || []))];
+  const memberNames = Object.fromEntries((hostIds.length
+    ? await Members.find({ _id: { $in: hostIds } }, { fields: { name: 1 } }).fetchAsync()
+    : []).map((m) => [m._id, m.name]));
   for (const [i, event] of events.entries()) {
-    const entry = calendarEntry(resolved[i], { ...where, workshopName: workshops.get(resolved[i].workshopId)?.name?.sv || '' });
+    const entry = calendarEntry(resolved[i], { ...where, memberNames, workshopName: workshops.get(resolved[i].workshopId)?.name?.sv || '' });
     try {
       const done = await syncEvent(calendar, event, entry);
       if (done) counts[done] += 1;

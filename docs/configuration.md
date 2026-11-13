@@ -448,6 +448,8 @@ calendar is shared with, so the calendar need not be public
 from what it last wrote, so a failed write is tried again by itself. Only
 events shown on the website (`published`, inherited from the activity) go to
 the calendar; a called-off event stays with "INSTÄLLT: " before its name.
+The hosts' first names are in the description when the event shows them on
+the website, as in the public JSON.
 UMSME touches only the calendar events of its own events, created or
 imported; an imported event is UMSME's from then on, and changes made to it
 in Google are written over.

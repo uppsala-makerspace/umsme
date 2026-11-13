@@ -5,6 +5,7 @@
  */
 
 import { TIME_ZONE, zonedClock, zonedDay } from './days';
+import { publishedHostNames } from './activityRules';
 
 export const CANCELLED_PREFIX = 'INSTÄLLT: ';
 
@@ -20,23 +21,26 @@ const when = (date, wholeDays) => (wholeDays ? { date: zonedDay(date) } : { date
  * shown on the website is in the calendar.
  *
  * @param {object} event - resolveEvent(event, activity)
- * @param {{ workshopName?: string, address?: string, appUrl?: string }} where
+ * @param {{ workshopName?: string, address?: string, appUrl?: string, memberNames?: Object<string, string> }} where
  *   The workshop's name and the association's address make up the place;
- *   the app's address gives the link to the event.
+ *   the app's address gives the link to the event; the hosts' names (member
+ *   id → name) give their first names, when the event shows them on the
+ *   website.
  * @returns {object|null}
  */
-export const calendarEntry = (event, { workshopName = '', address = '', appUrl = '' } = {}) => {
+export const calendarEntry = (event, { workshopName = '', address = '', appUrl = '', memberNames = {} } = {}) => {
   if (!event?.published) return null;
   const name = text(event.name);
   const sv = text(event.description);
   const en = (event.description?.en || '').trim();
   const link = appUrl ? `${appUrl.replace(/\/+$/, '')}/events/${event._id}` : '';
+  const hosts = publishedHostNames(event, memberNames);
   const wholeDays = allDay(event.start, event.end);
   return {
     // Confirmed in Google's sense, also when called off: then it stays, marked in its title.
     status: 'confirmed',
     summary: `${event.status === 'cancelled' ? CANCELLED_PREFIX : ''}${name}`,
-    description: [sv, en !== sv ? en : '', link].filter(Boolean).join('\n\n'),
+    description: [sv, en !== sv ? en : '', hosts ? `Värdar / Hosts: ${hosts.join(', ')}` : '', link].filter(Boolean).join('\n\n'),
     location: [workshopName, address].filter(Boolean).join(', '),
     start: when(event.start, wholeDays),
     end: when(event.end, wholeDays),

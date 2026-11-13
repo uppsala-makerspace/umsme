@@ -261,3 +261,19 @@ export const mayTakeSeat = ({ registration, event, seatsTaken = 0, now = new Dat
 export const attendanceOpen = (event, now = new Date()) =>
   event.status !== "cancelled" && takesRegistrations(event) && now >= event.start && !event.attendanceClosedAt;
 
+/**
+ * The hosts of an event resolved against its activity, as published: by
+ * first name only, and only when the event or its activity shows them
+ * (hostsPublished). A host without a name (no longer a member) is left out.
+ * For the website's JSON and the Google calendar alike.
+ *
+ * @param {object} event - resolveEvent(event, activity)
+ * @param {Object<string, string>} memberNames - member id → name
+ * @returns {Array<string>|null} the first names, or null when none are shown
+ */
+export const publishedHostNames = (event, memberNames = {}) => {
+  if (!event?.hostsPublished) return null;
+  const firstName = (name) => String(name || "").trim().split(/\s+/)[0] || null;
+  const names = (event.hostMemberIds || []).map((id) => firstName(memberNames[id])).filter(Boolean);
+  return names.length > 0 ? names : null;
+};

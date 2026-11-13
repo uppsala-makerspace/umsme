@@ -88,6 +88,18 @@ describe('the Google calendar', function () {
       assert.strictEqual(calendarEntry(event, { address: 'Gatan 1' }).location, 'Gatan 1');
     });
 
+    it('names the hosts by first name, only when the event shows them on the website', function () {
+      const hosted = { ...event, hostMemberIds: ['m1', 'm2', 'gone'] };
+      const memberNames = { m1: 'Anna Andersson', m2: 'Bo Berg' };
+      const appUrl = 'https://app.example.org';
+      assert.strictEqual(
+        calendarEntry({ ...hosted, hostsPublished: true }, { memberNames, appUrl }).description,
+        'Vi täljer.\n\nWe whittle.\n\nVärdar / Hosts: Anna, Bo\n\nhttps://app.example.org/events/e1',
+      );
+      assert.ok(!calendarEntry(hosted, { memberNames }).description.includes('Värdar'));
+      assert.ok(!calendarEntry({ ...hosted, hostsPublished: true, hostMemberIds: ['gone'] }, { memberNames }).description.includes('Värdar'));
+    });
+
     it('writes midnight to midnight as whole days', function () {
       const entry = calendarEntry({ ...event, start: zonedDate(2026, 10, 21), end: zonedDate(2026, 10, 22) });
       assert.deepStrictEqual([entry.start, entry.end], [{ date: '2026-11-21' }, { date: '2026-11-22' }]);

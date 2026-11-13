@@ -10,7 +10,7 @@
  */
 import { withUniqueSlugs } from "./slug";
 import { SPACE_COLORS, spaceColorName } from "./spaceColors";
-import { resolveEvent, REGISTRATIONS, seatsLeft } from "./activityRules";
+import { resolveEvent, REGISTRATIONS, seatsLeft, publishedHostNames } from "./activityRules";
 
 /**
  * Only workshops and areas of interest that exist for members to use. A forming
@@ -155,13 +155,8 @@ export const buildDirectory = ({
     ? { seats: doc.maxSeats, ...(left ? { seatsLeft: seatsLeft(doc, doc.seatsTaken || 0) } : {}) }
     : {});
   // The hosts of a (resolved) event, by first name only, when the event or its
-  // activity says so. Nothing else about them; a host no longer a member is left out.
-  const firstName = (name) => String(name || "").trim().split(/\s+/)[0] || null;
-  const hostsOf = (event) => {
-    if (!event.hostsPublished) return null;
-    const names = (event.hostMemberIds || []).map((id) => firstName(memberNames[id])).filter(Boolean);
-    return names.length > 0 ? names : null;
-  };
+  // activity says so. Nothing else about them.
+  const hostsOf = (event) => publishedHostNames(event, memberNames);
 
   // An activity's past events, latest first.
   const past = events
