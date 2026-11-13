@@ -128,6 +128,9 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
   servicekontot, så kalendern behöver inte vara offentlig. I
   `settings_demo.json` är den `"fake"`.
 - `public.appUrl` i admin och appen, för länkar i mail. Utan den saknas länken.
+- `deliverMails: true` i appen också, inte bara i admin: appen skickar mejlen
+  om anmälan, kö, plats och avbokning. Utan den blir det bara meddelande och
+  push.
 - Standardmallarna läggs in vid start av admin och appen, i den databas de är
   kopplade till, om typerna saknas.
 

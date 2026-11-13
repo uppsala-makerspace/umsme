@@ -62,6 +62,7 @@ storage event publications reactive without polling-driver limitations.
 
 | Key                               | Purpose                                    |
 |-----------------------------------|--------------------------------------------|
+| `deliverMails`                    | Must be truthy for the app to send activity mail (signed up, queued, got a seat, cancelled). Without it members get only the in-app message and push. See section 9. |
 | `public.swish.disabled`           | Kill switch for Swish payments             |
 | `public.adminUrl`                 | Public base URL of the admin app, used to build links into admin (e.g. expense manager events). Same value as admin's own `public.adminUrl`. |
 | `public.vapidPublicKey`           | VAPID public key for push                  |
@@ -71,6 +72,7 @@ storage event publications reactive without polling-driver limitations.
 | `private.vapidPrivateKey`         | VAPID private key for push                 |
 | `private.paymentOptionsPath`      | Path to payment options JSON               |
 | `private.mailUrl`                 | SMTP connection URL (deployment secret)    |
+| `private.activityNotifications`   | Optional `{ from, replyTo }` for activity mail (see section 9) |
 | `private.homeAssistant`           | Home Assistant URL, token, lock configs (see below) |
 | `private.swish`                   | Swish API config (see below)               |
 | `private.roomsPath`               | Path to rooms config JSON                  |
@@ -218,7 +220,7 @@ Facebook OAuth infrastructure is present but currently commented out.
 Email requires:
 
 1. The `MAIL_URL` environment variable or `private.mailUrl` setting pointing to an SMTP server.
-2. `Meteor.settings.deliverMails` must be truthy in the admin app. If not set, all email sending methods will refuse to send.
+2. `Meteor.settings.deliverMails` must be truthy in **each app that sends mail**: admin, and the member app, which sends the activity mail a member's own action causes (signed up, queued, got a seat, cancelled). In an app without it, mail is not sent: members still get the in-app message and push.
 
 Sender addresses are configured via `Meteor.settings.from` (string or array) and `Meteor.settings.noreply`.
 
@@ -247,6 +249,23 @@ Storage decisions use the existing `Messages` collection and app-push
 implementation. There is no storage-specific worker, delivery collection, SMS
 provider, or retry configuration. A member without an email address still gets
 the persistent in-app message.
+
+### Activity notifications
+
+Activity mail is sent from `Uppsala Makerspace <info@uppsalamakerspace.se>`
+by default. Admin sends the reminders before events and the check-in
+messages; the member app sends what a member's own action causes. Override
+the sender or add a reply-to address under `private.activityNotifications`,
+in both apps:
+
+```json
+"private": {
+  "activityNotifications": {
+    "from": "Uppsala Makerspace <info@uppsalamakerspace.se>",
+    "replyTo": "info@uppsalamakerspace.se"
+  }
+}
+```
 
 ### Membership reminder cron
 

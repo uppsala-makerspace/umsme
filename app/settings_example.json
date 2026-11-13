@@ -1,4 +1,5 @@
 {
+  "deliverMails": true,
   "public": {
     "adminUrl": "https://umsme.uppsalamakerspace.se",
     "appUrl": "https://app.uppsalamakerspace.se",
