@@ -89,12 +89,16 @@ const plannedEventCounts = async (activityIds) => {
 export const activitiesAtSelector = async (workshopId, groupWorkshops = null) =>
   atWorkshopSelector(groupWorkshops || (await loadGroupWorkshops()), workshopId);
 
+/** How many of a workshop's events to come its page shows at a time. */
+export const WORKSHOP_EVENTS_PAGE = 5;
+
 /**
- * The events to come shown at a workshop or area of interest, soonest first:
- * its own, those of its activities that do not say otherwise, and the
- * free-standing ones of a group whose it is that name none.
+ * A page of the events to come shown at a workshop or area of interest,
+ * soonest first: its own, those of its activities that do not say otherwise,
+ * and the free-standing ones of a group whose it is that name none. `more`
+ * tells whether there are others after them.
  */
-export const upcomingEventsAt = async (workshopId, memberId, limit = 10) => {
+export const upcomingEventsAt = async (workshopId, memberId, { skip = 0, limit = WORKSHOP_EVENTS_PAGE } = {}) => {
   const groupWorkshops = await loadGroupWorkshops();
   const activityIds = (await Activities.find(await activitiesAtSelector(workshopId, groupWorkshops), { fields: { _id: 1 } }).fetchAsync())
     .map((a) => a._id);
@@ -109,9 +113,9 @@ export const upcomingEventsAt = async (workshopId, memberId, limit = 10) => {
         { activityId: none, ...freeStanding },
       ],
     },
-    { sort: { start: 1 }, limit },
+    { sort: { start: 1 }, skip: Math.max(0, skip), limit: limit + 1 },
   ).fetchAsync();
-  return eventViews(events, memberId);
+  return { events: await eventViews(events.slice(0, limit), memberId), more: events.length > limit };
 };
 
 const requireMember = async () => {

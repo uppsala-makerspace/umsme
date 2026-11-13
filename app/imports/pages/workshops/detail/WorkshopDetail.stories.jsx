@@ -190,3 +190,12 @@ export const Error = {
 // Activities, but none of them planned: the calendar says so, its activities still to unfold.
 export const NoPlannedEvents = { args: { ...Default.args, data: { ...sampleData, upcomingEvents: [] } } };
 
+
+// More events to come than shown: five, and Load more events under them.
+const fiveEvents = [0, 1, 2, 3, 4].map((i) => ({
+  ...sampleData.upcomingEvents[0], _id: `e${i + 1}`,
+  start: new Date(2026, 10, 19 + 7 * i, 18), end: new Date(2026, 10, 19 + 7 * i, 20),
+}));
+export const MoreEvents = {
+  args: { ...Default.args, data: { ...sampleData, upcomingEvents: fiveEvents, upcomingEventsMore: true }, onLoadMore: () => {} },
+};

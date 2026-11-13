@@ -116,9 +116,11 @@ test.describe('Activities', () => {
   test('the workshop shows its calendar and unfolds its activities; the group links to them', async ({ page }) => {
     await openAs(page, 'member', '/workshops');
     await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
-    // Its calendar: the events to come, its activities folded away.
+    // Its calendar: the events to come (other tests add some, so which five
+    // come first varies), its activities folded away.
     await expect(page.getByRole('heading', { name: en.navCalendar })).toBeVisible();
-    await expect(page.getByRole('link', { name: new RegExp(`${WHEEL}`) }).first()).toBeVisible();
+    const calendar = page.locator('section', { has: page.getByRole('heading', { name: en.navCalendar }) });
+    await expect(calendar.getByRole('list').first().getByRole('listitem').first()).toBeVisible();
     await expect(page.getByRole('link', { name: new RegExp(`${WHEEL} \\d+ planned events?`) })).toHaveCount(0);
     await page.getByRole('button', { name: /^Show activities/ }).click();
     // With the number of its planned events: other tests may add some.
@@ -131,6 +133,16 @@ test.describe('Activities', () => {
     await expect(page.getByRole('heading', { name: WHEEL })).toBeVisible();
     await page.getByRole('link', { name: CERAMICS, exact: true }).click();
     await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
+  });
+
+  test('the workshop shows five events to come, and loads more', async ({ page }) => {
+    await openAs(page, 'member', '/workshops');
+    await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
+    const calendar = page.locator('section', { has: page.getByRole('heading', { name: en.navCalendar }) });
+    const events = calendar.getByRole('list').first().getByRole('listitem');
+    await expect(events).toHaveCount(5);
+    await calendar.getByRole('button', { name: en.eventsLoadMore }).click();
+    await expect.poll(() => events.count()).toBeGreaterThan(5);
   });
 
   test("an activity group's activity that names no workshop is at its steering group's", async ({ page }) => {

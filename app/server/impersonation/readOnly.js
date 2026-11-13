@@ -81,6 +81,7 @@ export const READ_ONLY_METHODS = new Set([
   "groups.lookupMemberNumber",
   "workshops.list",
   "workshops.getDetails",
+  "workshops.upcomingEvents",
   "storage.member.getState",
 ]);
 

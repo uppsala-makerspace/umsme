@@ -63,7 +63,9 @@ const GroupRow = ({ group, highlighted }) => {
   );
 };
 
-const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) => {
+// `upcomingEventsMore` in the data says there are more events to come than
+// shown; `onLoadMore` fetches them, `loadingMore` while it does.
+const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds, loadingMore, onLoadMore }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
 
@@ -91,6 +93,7 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
     certificates,
     activities = [],
     upcomingEvents = [],
+    upcomingEventsMore = false,
     mapView,
     canEdit,
     canSeeRevenue,
@@ -164,7 +167,8 @@ const WorkshopDetail = ({ loading, error, data, slackTeam, slackChannelIds }) =>
         )}
       </SpaceMapSection>
 
-      <WorkshopCalendar events={upcomingEvents} activities={activities} />
+      <WorkshopCalendar events={upcomingEvents} activities={activities}
+        hasMore={upcomingEventsMore} loadingMore={loadingMore} onLoadMore={onLoadMore} />
 
       {certificates.length > 0 && (
         <section className="mb-6">
@@ -244,6 +248,8 @@ WorkshopDetail.propTypes = {
   data: PropTypes.object,
   slackTeam: PropTypes.string,
   slackChannelIds: PropTypes.object,
+  loadingMore: PropTypes.bool,
+  onLoadMore: PropTypes.func,
 };
 
 WorkshopDetail.defaultProps = {
@@ -252,6 +258,8 @@ WorkshopDetail.defaultProps = {
   data: null,
   slackTeam: undefined,
   slackChannelIds: null,
+  loadingMore: false,
+  onLoadMore: undefined,
 };
 
 export default WorkshopDetail;

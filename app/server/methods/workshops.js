@@ -1,4 +1,5 @@
 import { Meteor } from "meteor/meteor";
+import { check, Match } from "meteor/check";
 import { Workshops } from "/imports/common/collections/workshops";
 import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
@@ -74,6 +75,20 @@ Meteor.methods({
   },
 
   /**
+   * More of a workshop's events to come, after the first `skip`: the page's
+   * Load more events.
+   */
+  "workshops.upcomingEvents": async (workshopId, skip) => {
+    check(workshopId, String);
+    check(skip, Match.Integer);
+    const member = await requireMember();
+    if (!(await Workshops.findOneAsync(workshopId, { fields: { _id: 1 } }))) {
+      throw new Meteor.Error("not-found", "Workshop not found");
+    }
+    return upcomingEventsAt(workshopId, member._id, { skip });
+  },
+
+  /**
    * One workshop plus its responsible group and linked certificates.
    */
   "workshops.getDetails": async (workshopId) => {
@@ -115,6 +130,8 @@ Meteor.methods({
     const certificates = (
       await Certificates.find({ workshopId }, { sort: { "name.sv": 1 } }).fetchAsync()
     ).map((c) => ({ _id: c._id, name: c.name, mandatory: c.mandatory }));
+    // Its calendar: the first page of the events to come, its own and its activities'.
+    const upcoming = await upcomingEventsAt(workshopId, member._id);
 
     return {
       workshop: publicWorkshopFields(workshop),
@@ -124,8 +141,8 @@ Meteor.methods({
       certificates,
       // The activities shown at it, to link to.
       activities: await activityLinks(await activitiesAtSelector(workshopId)),
-      // Its calendar: the events to come, its own and its activities'.
-      upcomingEvents: await upcomingEventsAt(workshopId, member._id),
+      upcomingEvents: upcoming.events,
+      upcomingEventsMore: upcoming.more,
       mapView: await spacesMapView(workshop),
       canEdit: await canEditWorkshop(member, workshop),
       // Only offered when the web shop sells something for the workshop.

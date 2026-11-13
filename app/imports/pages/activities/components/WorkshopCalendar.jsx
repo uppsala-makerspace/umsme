@@ -9,9 +9,10 @@ import { ActivityList } from "./ActivityLinks";
  * A workshop's or area of interest's calendar: its events to come, and
  * below them its activities, folded away until asked for. With activities
  * but no events it says none are planned, its activities still to unfold.
- * Nothing when it has neither.
+ * Nothing when it has neither. The events come a page at a time: with
+ * `hasMore` a button loads more (`onLoadMore`), as on the calendar.
  */
-const WorkshopCalendar = ({ events, activities }) => {
+const WorkshopCalendar = ({ events, activities, hasMore = false, loadingMore = false, onLoadMore }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   if (!events?.length && !activities?.length) return null;
@@ -19,9 +20,21 @@ const WorkshopCalendar = ({ events, activities }) => {
     <section className="mb-6">
       <h3 className="text-lg mb-2 text-gray-700 border-b border-gray-200 pb-2">{t("navCalendar")}</h3>
       {events?.length ? (
-        <ul className="list-none p-0 m-0">
-          {events.map((event) => <EventRow key={event._id} event={event} />)}
-        </ul>
+        <>
+          <ul className="list-none p-0 m-0">
+            {events.map((event) => <EventRow key={event._id} event={event} />)}
+          </ul>
+          {hasMore && (
+            <button
+              type="button"
+              onClick={onLoadMore}
+              disabled={loadingMore}
+              className="w-full py-2 bg-transparent border-none text-[#5fc86f] hover:text-[#096817] disabled:text-gray-400 cursor-pointer disabled:cursor-default"
+            >
+              {loadingMore ? t("loading") : t("eventsLoadMore")}
+            </button>
+          )}
+        </>
       ) : (
         <p className="text-gray-500 m-0 mb-2">{t("workshopNoPlannedEvents")}</p>
       )}
@@ -43,6 +56,9 @@ const WorkshopCalendar = ({ events, activities }) => {
 WorkshopCalendar.propTypes = {
   events: PropTypes.array,
   activities: PropTypes.array,
+  hasMore: PropTypes.bool,
+  loadingMore: PropTypes.bool,
+  onLoadMore: PropTypes.func,
 };
 
 export default WorkshopCalendar;
