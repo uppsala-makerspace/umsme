@@ -22,8 +22,8 @@ import { serviceAccountClient } from '/imports/common/server/googleServiceAccoun
  * and those it imported (googleEventId), whatever is changed in Google.
  *
  * The calendar is admin's `private.googleCalendar`: `{ calendarId,
- * serviceAccount: { credentials | keyFile }, location }`, or "fake" for an
- * in-memory stand-in (demo and e2e).
+ * credentials | keyFile, location }`, the service account given as for
+ * `googleDrive`, or "fake" for an in-memory stand-in (demo and e2e).
  */
 
 const DAY = 86400000;
@@ -31,10 +31,13 @@ const SCOPE = 'https://www.googleapis.com/auth/calendar.events';
 
 const calendarSettings = () => Meteor.settings?.private?.googleCalendar;
 
+/** Whether the service account that writes is given: inline or as a key file. */
+const hasServiceAccount = (settings) => !!(settings?.credentials || settings?.keyFile);
+
 /** Whether a calendar is configured to write to. */
 export const calendarSyncConfigured = () => {
   const settings = calendarSettings();
-  return settings === 'fake' || !!(settings?.calendarId && settings?.serviceAccount);
+  return settings === 'fake' || !!(settings?.calendarId && hasServiceAccount(settings));
 };
 
 // The calendar event is gone from Google: write it anew, or count it removed.
@@ -43,7 +46,7 @@ const gone = (error) => [404, 410].includes(error?.response?.status ?? error?.st
 const googleTransport = (settings) => {
   let client;
   const request = (opts) => {
-    client = client || serviceAccountClient(settings.serviceAccount, [SCOPE], 'googleCalendar.serviceAccount');
+    client = client || serviceAccountClient(settings, [SCOPE], 'googleCalendar');
     return client.request(opts);
   };
   const events = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(settings.calendarId)}/events`;

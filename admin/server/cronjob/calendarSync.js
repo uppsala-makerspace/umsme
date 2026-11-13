@@ -11,7 +11,7 @@ import { calendarSyncConfigured, syncCalendar } from '/imports/common/server/act
  */
 export const runCalendarSyncJob = async (now = new Date()) => {
   if (Meteor.settings?.activityCron?.enabled !== true) return 'Calendar sync disabled (activityCron.enabled is not true)';
-  if (!calendarSyncConfigured()) return 'Calendar sync disabled (no private.googleCalendar.serviceAccount)';
+  if (!calendarSyncConfigured()) return 'Calendar sync disabled (no service account in private.googleCalendar)';
   const { created, updated, removed, failed } = await syncCalendar(now);
   return `Calendar: ${created} created, ${updated} updated, ${removed} removed, ${failed} failed`;
 };

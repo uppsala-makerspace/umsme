@@ -50,7 +50,7 @@
     "googleCalendar": {
       "apiKey": "",
       "calendarId": "",
-      "serviceAccount": { "keyFile": "config/calendar-service-account.json" },
+      "keyFile": "config/calendar-service-account.json",
       "location": "Uppsala Makerspace, <street>, Uppsala"
     },
     "recipientWhitelist": [],

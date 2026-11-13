@@ -116,7 +116,8 @@ Fortsättningspunkt för arbetet med aktiviteter. Planen i sin helhet:
 
 ## Inställningar som behövs i produktion
 
-- `private.googleCalendar.serviceAccount` och `.location` i admin, för att
+- Servicekontot (`credentials` eller `keyFile`, som för `googleDrive`) och
+  `location` i admins `private.googleCalendar`, för att
   spegla tillfällen till kalendern (jobbet var femte minut, kräver också
   `activityCron.enabled`). Kalendern delas med servicekontots e-post med
   "Göra ändringar i händelser".

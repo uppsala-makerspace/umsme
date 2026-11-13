@@ -105,7 +105,7 @@ describe('the Google calendar', function () {
     before(async function () {
       await cleanup();
       saved = Meteor.settings.private;
-      Meteor.settings.private = { ...saved, googleCalendar: { calendarId: 'test', serviceAccount: {}, location: 'Uppsala Makerspace' } };
+      Meteor.settings.private = { ...saved, googleCalendar: { calendarId: 'test', credentials: {}, location: 'Uppsala Makerspace' } };
     });
     after(async function () {
       setCalendarTransportForTests(null);

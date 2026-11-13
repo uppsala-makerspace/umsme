@@ -439,7 +439,7 @@ in Google are written over.
   "googleCalendar": {
     "apiKey": "…",
     "calendarId": "…@group.calendar.google.com",
-    "serviceAccount": { "keyFile": "config/calendar-service-account.json" },
+    "credentials": { "client_email": "…", "private_key": "…" },
     "location": "Uppsala Makerspace, <street>, Uppsala"
   }
 }
@@ -449,7 +449,8 @@ in Google are written over.
 |-----|---------|
 | `apiKey` | Reading the calendar, for the import |
 | `calendarId` | The calendar to read and write |
-| `serviceAccount` | The account that writes: `{ "keyFile": "path relative to PWD" }` or `{ "credentials": { "client_email", "private_key" } }`, as for `googleDrive`. Without it nothing is written. |
+| `credentials` | The service account that writes, inline: `{ "client_email", "private_key" }`, as for `googleDrive`. Without it (or `keyFile`) nothing is written. |
+| `keyFile` | Instead of `credentials`: path (relative to the app's working dir) to the service account's JSON key |
 | `location` | The calendar event's place, after the workshop's name when the event has one |
 
 Setting up the service account (it may be the same as Google Drive's):
@@ -458,11 +459,12 @@ Setting up the service account (it may be the same as Google Drive's):
    create a service account with a JSON key.
 2. In Google Calendar, share the calendar with the service account's email,
    with "Make changes to events".
-3. Put the key where `keyFile` points (it is a secret, like the Swish
+3. Put the key's `client_email` and `private_key` in `credentials`, or the
+   key file where `keyFile` points (it is a secret, like the Swish
    certificates), and turn on `activityCron.enabled`.
 
-The job runs only with `activityCron.enabled: true` and a `serviceAccount`
-(or `"fake"`), so a development copy of the database never writes to the
+The job runs only with `activityCron.enabled: true` and a service account
+(`credentials` or `keyFile`, or `"fake"`), so a development copy of the database never writes to the
 real calendar. An event whose write failed shows the error on its page in
 admin.
 

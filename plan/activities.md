@@ -273,7 +273,8 @@ visas på hemsidan (`published`) kommer med; importerade sätts som visade.
 Innehåll: svensk titel, beskrivning på svenska och engelska, länk till
 tillfället i appen, och som plats verkstaden och föreningens adress
 (`private.googleCalendar.location`). Servicekontot ligger i admins
-`private.googleCalendar.serviceAccount`; appen behöver inget.
+`private.googleCalendar` (`credentials` eller `keyFile`, som för
+`googleDrive`); appen behöver inget.
 
 ## Hemsidan
 
