@@ -16,7 +16,11 @@ export const LoginButton = ({ conf, onError = () => {} }) => {
   };
 
   return (
+    // type="button": the buttons sit inside the login form, and a button
+    // without a type is a submit button. Enter in the password field would
+    // then "click" the first of them, Google, as well as log in by email.
     <Button
+      type="button"
       variant="social"
       fullWidth
       disabled={!conf}
