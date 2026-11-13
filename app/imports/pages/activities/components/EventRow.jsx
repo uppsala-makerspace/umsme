@@ -16,6 +16,25 @@ const EventRow = ({ event, timesOnly = false }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const cancelled = event.status === "cancelled";
+  const seats = !cancelled && !event.myState && event.registration !== "none" && event.seatsLeft !== null && event.seatsLeft !== undefined;
+  const badges = [
+    !cancelled && event.myState && <StatePill key="mine" state={event.myState} />,
+    seats && (
+      <span key="seats" className={`text-xs font-semibold whitespace-nowrap ${event.seatsLeft === 0 ? "text-red-700" : "text-gray-500"}`}>
+        {event.seatsLeft === 0 ? t("registrationFullShort") : t("registrationSeatsLeftShort", { count: event.seatsLeft })}
+      </span>
+    ),
+    event.status === "awaiting" && !cancelled && (
+      <span key="awaiting" className="text-xs font-semibold rounded-full py-0.5 px-2 bg-amber-100 text-amber-800 whitespace-nowrap">
+        {t("eventAwaiting")}
+      </span>
+    ),
+    cancelled && (
+      <span key="cancelled" className="text-xs font-semibold rounded-full py-0.5 px-2 bg-red-100 text-red-800 whitespace-nowrap">
+        {t("eventCancelled")}
+      </span>
+    ),
+  ].filter(Boolean);
   return (
     <li className="mb-2">
       <Link
@@ -23,12 +42,14 @@ const EventRow = ({ event, timesOnly = false }) => {
         className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 no-underline text-inherit hover:bg-gray-50"
       >
         <div className="flex-1 min-w-0">
-          <span className="block text-xs text-gray-500">
+          {/* On one line: a soft hyphen in a name (Trä­verkstaden) would otherwise break it in two. */}
+          <span className="block text-xs text-gray-500 whitespace-nowrap truncate">
             {timesOnly
               ? [eventTimes(event, lang), event.workshopId && localized(event.workshopName, lang)].filter(Boolean).join(" · ")
               : eventWhen(event, lang)}
           </span>
-          <span className={`block font-semibold leading-snug ${cancelled ? "line-through text-gray-500" : ""}`}>
+          {/* A long word (Träverkstadsintroduktion) breaks rather than run past the row. */}
+          <span className={`block font-semibold leading-snug break-words ${cancelled ? "line-through text-gray-500" : ""}`}>
             {localized(event.name, lang)}
           </span>
           {timesOnly ? (
@@ -40,23 +61,10 @@ const EventRow = ({ event, timesOnly = false }) => {
               {[localized(event.spaceName, lang), localized(event.groupName, lang)].filter(Boolean).join(" · ")}
             </span>
           )}
+          {/* Where one stands, the seats and the event's state: on a line of
+              their own below, so that the name and times keep the row's width. */}
+          {badges.length > 0 && <span className="flex flex-wrap items-center justify-end gap-2 mt-1">{badges}</span>}
         </div>
-        {!cancelled && event.myState && <span className="flex-shrink-0 ml-2"><StatePill state={event.myState} /></span>}
-        {!cancelled && !event.myState && event.registration !== "none" && event.seatsLeft !== null && event.seatsLeft !== undefined && (
-          <span className={`flex-shrink-0 ml-2 text-xs font-semibold ${event.seatsLeft === 0 ? "text-red-700" : "text-gray-500"}`}>
-            {event.seatsLeft === 0 ? t("registrationFullShort") : t("registrationSeatsLeftShort", { count: event.seatsLeft })}
-          </span>
-        )}
-        {event.status === "awaiting" && !cancelled && (
-          <span className="flex-shrink-0 text-xs font-semibold rounded-full py-0.5 px-2 bg-amber-100 text-amber-800 ml-2">
-            {t("eventAwaiting")}
-          </span>
-        )}
-        {cancelled && (
-          <span className="flex-shrink-0 text-xs font-semibold rounded-full py-0.5 px-2 bg-red-100 text-red-800 ml-2">
-            {t("eventCancelled")}
-          </span>
-        )}
         <span className="text-gray-400 text-xl ml-2">&rarr;</span>
       </Link>
     </li>
