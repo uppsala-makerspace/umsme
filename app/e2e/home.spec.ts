@@ -31,6 +31,19 @@ test.describe('Home', () => {
     await expect(others.getByText('Obevakat utlägg')).toHaveCount(0);
   });
 
+  test('the calendar tab says, in red, how many events to come I have a seat at', async ({ page }) => {
+    // Base has a seat at E2E full and E2E participants (scenarios/e2e.js); no test changes them.
+    await openAs(page, 'base', '/');
+    const nav = page.getByRole('navigation').last();
+    await expect(nav.getByRole('link', { name: new RegExp(`^2\\s*${en.navCalendar}$`) })).toBeVisible();
+  });
+
+  test('one with no seat at an event to come sees no count on the calendar tab', async ({ page }) => {
+    await openAs(page, 'groupLeader', '/');
+    const nav = page.getByRole('navigation').last();
+    await expect(nav.getByRole('link', { name: en.navCalendar, exact: true })).toBeVisible();
+  });
+
   test('one with nothing to approve sees no count on the Expenses card', async ({ page }) => {
     await openAs(page, 'member', '/');
     await expect(page.getByRole('main').getByText(en.expenses, { exact: true })).toBeVisible();

@@ -11,6 +11,8 @@ import { Expenses } from "/imports/common/collections/expenses";
 import Invites from "/imports/common/collections/Invites";
 import { Accounts } from "meteor/accounts-base";
 import { touchLastSeen } from "/imports/common/server/users/lastSeen";
+import { Events } from "/imports/common/collections/events";
+import { EventRegistrations } from "/imports/common/collections/eventRegistrations";
 
 Meteor.methods({
   findMemberForUser: findMemberForUser,
@@ -127,6 +129,16 @@ Meteor.methods({
       ? await Expenses.find({ status: "submitted", expenseAccountId: { $in: assigned }, memberId: { $ne: member._id } }).countAsync()
       : 0;
 
-    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed, groupCounts, activityCount, expensesToApprove});
+    // The events to come the member has a seat at (registered or checked in;
+    // not queued), not called off. For the red count on the calendar's tab.
+    const seatEventIds = (await EventRegistrations.find(
+      { memberId: member._id, state: { $in: ["approved", "checkedIn"] } },
+      { fields: { eventId: 1 } },
+    ).fetchAsync()).map((r) => r.eventId);
+    const upcomingRegistrations = seatEventIds.length
+      ? await Events.find({ _id: { $in: seatEventIds }, end: { $gte: new Date() }, status: { $ne: "cancelled" } }).countAsync()
+      : 0;
+
+    return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed, groupCounts, activityCount, expensesToApprove, upcomingRegistrations});
   },
 });

@@ -640,12 +640,20 @@ video {
   right: -0.25rem;
 }
 
+.-right-2\.5 {
+  right: -0.625rem;
+}
+
 .-right-8 {
   right: -2rem;
 }
 
 .-top-1 {
   top: -0.25rem;
+}
+
+.-top-1\.5 {
+  top: -0.375rem;
 }
 
 .bottom-3 {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,6 +15,7 @@ import {
   CalendarDaysIcon as CalendarSolid,
   WrenchScrewdriverIcon as WrenchSolid,
 } from "@heroicons/react/24/solid";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 
 // Certificates moved to the hamburger menu when Workshops took its tab slot
 // (certificates are also reachable from each workshop's page), and the
@@ -31,6 +32,10 @@ const navItems = [
 export default () => {
   const { t } = useTranslation();
   const location = useLocation();
+  // The events to come one has a seat at, in red on the calendar's icon, as
+  // the home page counts what waits on the reader.
+  const { memberInfo } = useContext(MemberInfoContext);
+  const counts = { "/calendar": memberInfo?.upcomingRegistrations || 0 };
 
   const isActive = (item) => {
     if (item.exact) {
@@ -44,13 +49,21 @@ export default () => {
       {navItems.map((item) => {
         const active = isActive(item);
         const Icon = active ? item.SolidIcon : item.OutlineIcon;
+        const count = counts[item.path] || 0;
         return (
           <NavLink
             key={item.path}
             to={item.path}
             className={`flex-1 flex flex-col items-center no-underline text-xs py-1 ${active ? "text-brand-green" : "text-gray-500"}`}
           >
-            <Icon className="w-6 h-6 mb-1" />
+            <span className="relative block">
+              <Icon className="w-6 h-6 mb-1" />
+              {count > 0 && (
+                <span className="absolute -top-1.5 -right-2.5 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center">
+                  {count}
+                </span>
+              )}
+            </span>
             <span>{t(item.labelKey)}</span>
           </NavLink>
         );

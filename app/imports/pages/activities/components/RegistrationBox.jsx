@@ -7,9 +7,11 @@ import { localized } from "/imports/common/lib/groupRules";
 import { eventWhen } from "./format";
 import Card from "./Card";
 
+// Red while one has a seat at an event to come, to stand out (as the red
+// counts of what waits on the reader); green once one has been.
 const STATE_TONES = {
-  approved: "bg-green-100 text-green-800",
-  checkedIn: "bg-green-100 text-green-800",
+  approved: "bg-red-600 text-white",
+  checkedIn: "bg-red-600 text-white",
   attended: "bg-green-100 text-green-800",
   queued: "bg-amber-100 text-amber-800",
 };

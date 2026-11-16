@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import Layout from "/imports/components/Layout/Layout";
 import { useSignedIn } from "../components/useSignedIn";
 import { AppDataContext } from "/imports/context/AppDataContext";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 import EventDetail from "./EventDetail.jsx";
 
 export default () => {
@@ -13,6 +14,8 @@ export default () => {
   const navigate = useNavigate();
   const { user, userId, loggingIn } = useSignedIn();
   const { slackChannels } = useContext(AppDataContext);
+  // Refreshed after a change to one's registration: the calendar tab's count.
+  const { refetch: refetchMemberInfo } = useContext(MemberInfoContext);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -41,6 +44,7 @@ export default () => {
     }
     await load();
     setBusy(false);
+    if (["events.register", "events.withdraw", "events.takeSeat", "events.checkIn"].includes(method)) refetchMemberInfo();
     return result;
   };
 

@@ -28,6 +28,8 @@ test.describe('Registrations', () => {
     await page.getByRole('button', { name: en.registrationSignUp }).click();
     await expect(page.getByText(en.registrationState_approved, { exact: true })).toBeVisible();
     await expect(page.getByText('2 of 3 seats left')).toBeVisible();
+    // The calendar tab counts it at once.
+    await expect(page.getByRole('navigation').last().getByRole('link', { name: new RegExp(`^1\\s*${en.navCalendar}$`) })).toBeVisible();
     // The message about it leads back to the event.
     await page.goto('/messages');
     await page.getByRole('button', { name: /Personal messages/ }).click();
