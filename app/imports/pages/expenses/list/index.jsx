@@ -10,6 +10,7 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const [expenses, setExpenses] = useState([]);
   const [toApprove, setToApprove] = useState([]);
+  const [otherToApprove, setOtherToApprove] = useState([]);
   const [recentlyReviewed, setRecentlyReviewed] = useState([]);
   const [isApprover, setIsApprover] = useState(false);
   const [accounts, setAccounts] = useState([]);
@@ -27,6 +28,7 @@ export default () => {
       // Sequential, never Promise.all — see app/CLAUDE.md.
       const review = await Meteor.callAsync("expenses.getToApprove");
       setToApprove(review.pending);
+      setOtherToApprove(review.otherPending || []);
       setRecentlyReviewed(review.recentlyReviewed);
       setIsApprover(review.isApprover);
       const myAccounts = await Meteor.callAsync("expenses.getMyAccounts");
@@ -80,6 +82,7 @@ export default () => {
         expenses={expenses}
         isApprover={isApprover}
         toApprove={toApprove}
+        otherToApprove={otherToApprove}
         recentlyReviewed={recentlyReviewed}
         accounts={accounts}
         budgetOverview={{

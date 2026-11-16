@@ -88,9 +88,21 @@ source for "which accounts may this member use" and is applied both by
 `expenses.getAccounts` (the picker) and when an expense's account is set or
 submitted.
 
-Approvers are **stored but not yet authoritative**: confirm/reject/reimburse
-remain role-based in admin (section 6). In-app approval by the account's
-approvers is a planned follow-up.
+In the app the account's approvers, and holders of the admin, board and
+treasurer roles, approve and reject (`canReviewExpense`); in admin
+confirm/reject/reimburse stay role-based (section 6).
+
+**What waits for whom.** A reviewer role may approve on every account, but
+only some are the member's to approve (`assignedAccountIds` in
+`common/lib/expenseApproval.js`): the accounts naming them as an approver or
+naming a group they are an active member of, and, for a reviewer role, the
+accounts naming no approvers at all (no one else is there to). The red count
+on the home page's Expenses card and on the Approve tab counts only those
+(`findInfoForUser`, `expenses.getToApprove`'s `pending`); the Approve tab lists
+the rest the role allows below them, under "Others you may also approve"
+(`otherPending`), uncounted. So the board is not told to approve what an
+account's own approvers are there for, and what is theirs is not lost among
+the rest.
 
 ### The group's account overview (app)
 

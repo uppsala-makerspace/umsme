@@ -18,6 +18,7 @@ const Expenses = ({
   expenses,
   isApprover,
   toApprove,
+  otherToApprove,
   recentlyReviewed,
   accounts,
   budgetOverview,
@@ -175,6 +176,17 @@ const Expenses = ({
             )}
           </section>
 
+          {/* What a reviewer role lets one approve, but others are named for:
+              not counted on the tab, but there to take when needed. */}
+          {otherToApprove.length > 0 && (
+            <section className="mb-8">
+              <h3 className="text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">
+                {t("expensesOtherToApprove")}
+              </h3>
+              <ul className="list-none p-0 m-0">{otherToApprove.map(reviewRow)}</ul>
+            </section>
+          )}
+
           {/* Just-reviewed expenses linger for a day so the reviewer can see
               the outcome of what they did. */}
           {recentlyReviewed.length > 0 && (
@@ -260,6 +272,7 @@ Expenses.propTypes = {
   expenses: PropTypes.array,
   isApprover: PropTypes.bool,
   toApprove: PropTypes.array,
+  otherToApprove: PropTypes.array,
   recentlyReviewed: PropTypes.array,
   accounts: PropTypes.array,
   // Props for AccountBudgets except onYearChange: { loading, error, year, availableYears, accounts, bookkeeping }.
@@ -273,6 +286,7 @@ Expenses.defaultProps = {
   expenses: [],
   isApprover: false,
   toApprove: [],
+  otherToApprove: [],
   recentlyReviewed: [],
   accounts: [],
   budgetOverview: { loading: true, year: new Date().getFullYear() },

@@ -561,6 +561,7 @@
   "myExpensesTab": "My expenses",
   "expensesToApproveTab": "Approve",
   "expensesToApprove": "Expenses to approve",
+  "expensesOtherToApprove": "Others you may also approve",
   "expenseNoneToApprove": "No expenses are waiting for your approval.",
   "expensesRecentlyReviewed": "Recently reviewed",
   "expenseAccountsTab": "Accounts",

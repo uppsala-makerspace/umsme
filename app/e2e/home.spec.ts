@@ -16,6 +16,21 @@ test.describe('Home', () => {
     await expect(page.getByRole('main').getByRole('listitem')).toHaveCount(2);
   });
 
+  test('the board counts only what is theirs to approve, and sees the others below', async ({ page }) => {
+    // The board may approve every expense, but only the one on the account
+    // naming no approvers is theirs; the ceramics ones have their approvers.
+    await openAs(page, 'board', '/');
+    const card = page.getByRole('link', { name: `1 ${en.expenses}`, exact: true });
+    await expect(card).toBeVisible();
+    await card.click();
+    const mine = page.locator('section', { has: page.getByRole('heading', { name: en.expensesToApprove }) });
+    await expect(mine.getByRole('listitem')).toHaveCount(1);
+    await expect(mine.getByText('Obevakat utlägg')).toBeVisible();
+    const others = page.locator('section', { has: page.getByRole('heading', { name: en.expensesOtherToApprove }) });
+    await expect(others.getByText('Keramik').first()).toBeVisible();
+    await expect(others.getByText('Obevakat utlägg')).toHaveCount(0);
+  });
+
   test('one with nothing to approve sees no count on the Expenses card', async ({ page }) => {
     await openAs(page, 'member', '/');
     await expect(page.getByRole('main').getByText(en.expenses, { exact: true })).toBeVisible();

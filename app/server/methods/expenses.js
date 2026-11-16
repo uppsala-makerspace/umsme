@@ -13,6 +13,7 @@ import {
   expenseAccessAllowed,
   expenseAccountsFor,
   approvableAccountIdsFor,
+  reviewAccountIdsFor,
   visibleExpenseAccountsFor,
   canViewExpenseAccount,
 } from "./utils";
@@ -383,14 +384,14 @@ Meteor.methods({
    */
   "expenses.getToApprove": async () => {
     const member = await requireMember();
-    const accountIds = await approvableAccountIdsFor(member);
+    const { approvable: accountIds, assigned } = await reviewAccountIdsFor(member);
     // No reviewable accounts at all: not an approver, so the tab stays hidden.
     if (accountIds.length === 0) {
-      return { isApprover: false, pending: [], recentlyReviewed: [] };
+      return { isApprover: false, pending: [], otherPending: [], recentlyReviewed: [] };
     }
 
     const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const pending = await Expenses.find(
+    const submitted = await Expenses.find(
       {
         status: "submitted",
         expenseAccountId: { $in: accountIds },
@@ -398,6 +399,11 @@ Meteor.methods({
       },
       { sort: { submittedAt: 1 } }
     ).fetchAsync();
+    // Those that are the member's to review (assignedAccountIds) wait for
+    // them and are counted; the rest a reviewer role only lets them review.
+    const mine = new Set(assigned);
+    const pending = submitted.filter((e) => mine.has(e.expenseAccountId));
+    const otherPending = submitted.filter((e) => !mine.has(e.expenseAccountId));
     const recentlyReviewed = await Expenses.find(
       {
         expenseAccountId: { $in: accountIds },
@@ -412,7 +418,7 @@ Meteor.methods({
 
     const accounts = await ExpenseAccounts.find({ _id: { $in: accountIds } }).fetchAsync();
     const accountById = Object.fromEntries(accounts.map((a) => [a._id, a]));
-    const memberIds = [...new Set([...pending, ...recentlyReviewed].map((e) => e.memberId))];
+    const memberIds = [...new Set([...submitted, ...recentlyReviewed].map((e) => e.memberId))];
     const submitters = await Members.find(
       { _id: { $in: memberIds } },
       { fields: { name: 1 } }
@@ -435,6 +441,7 @@ Meteor.methods({
     return {
       isApprover: true,
       pending: pending.map(enrich),
+      otherPending: otherPending.map(enrich),
       recentlyReviewed: recentlyReviewed.map(enrich),
     };
   },

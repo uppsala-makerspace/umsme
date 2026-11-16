@@ -63,6 +63,16 @@ export const Approver = {
   args: { loading: false, expenses: sample, isApprover: true, toApprove, recentlyReviewed, accounts },
 };
 
+// A board member: theirs to approve, and below them the others the role lets them approve.
+export const ApproverWithOthers = {
+  args: {
+    loading: false, expenses: sample, isApprover: true, toApprove: toApprove.slice(0, 1), recentlyReviewed, accounts,
+    otherToApprove: [
+      { _id: "r5", status: "submitted", date: daysAgo(3), submittedAt: daysAgo(3), amount: 250, accountName: "Keramik", note: "Glasyr", submitterName: "Gustav Gran" },
+    ],
+  },
+};
+
 export const ApproverNothingToDo = {
   args: { loading: false, expenses: sample, isApprover: true, toApprove: [], recentlyReviewed: [], accounts },
 };

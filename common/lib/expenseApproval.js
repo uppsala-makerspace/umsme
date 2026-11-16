@@ -37,6 +37,28 @@ export const approvableAccountIds = (accounts, memberId, hasReviewerRole, member
     .map((a) => a._id);
 };
 
+const hasApprovers = (a) => (a.approverMemberIds || []).length > 0 || (a.approverGroupIds || []).length > 0;
+
+/**
+ * The accounts whose expenses are this member's to review, as opposed to
+ * those they only may: the ones naming the member as an approver or naming a
+ * group the member is an active member of, and, for a holder of a reviewer
+ * role, those naming no approvers at all (no one else is there to). What the
+ * app counts as waiting for the member; always within approvableAccountIds.
+ *
+ * @param {Array<object>} accounts  All expense accounts
+ * @param {string} memberId
+ * @param {boolean} hasReviewerRole  Holds admin/board/treasurer
+ * @param {Array<string>} memberGroupIds  Groups the member is an active member of
+ * @return {Array<string>} account ids
+ */
+export const assignedAccountIds = (accounts, memberId, hasReviewerRole, memberGroupIds = []) => {
+  const named = new Set(approvableAccountIds(accounts, memberId, false, memberGroupIds));
+  return accounts
+    .filter((a) => named.has(a._id) || (hasReviewerRole && !hasApprovers(a)))
+    .map((a) => a._id);
+};
+
 /** Statuses a reviewer may look at: everything that has left the submitter's
  *  hands. A `pending` draft is the submitter's private working copy. */
 const VISIBLE_TO_REVIEWER = ["submitted", "confirmed", "rejected", "reimbursed"];

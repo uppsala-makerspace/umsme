@@ -7,7 +7,7 @@ import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { memberStatus } from "/imports/common/lib/utils";
-import { REVIEWER_ROLES, approvableAccountIds } from "/imports/common/lib/expenseApproval";
+import { REVIEWER_ROLES, approvableAccountIds, assignedAccountIds } from "/imports/common/lib/expenseApproval";
 import { memberForUser } from "/imports/common/server/memberForUser";
 import { spaceIconUrlFor } from "/imports/common/server/workshopImage";
 import { mayEditGroup } from "/imports/common/lib/groupRules";
@@ -83,6 +83,27 @@ export const approvableAccountIdsFor = async (member) => {
     await hasReviewerRole(),
     await myActiveGroupIds(member)
   );
+};
+
+/**
+ * The accounts whose expenses this member may review, and among them those
+ * that are theirs to (assignedAccountIds): named as an approver, in an
+ * approver group, or, for a reviewer role, naming no approvers.
+ *
+ * @return {Promise<{approvable: Array<string>, assigned: Array<string>}>} account ids
+ */
+export const reviewAccountIdsFor = async (member) => {
+  if (!member?._id) return { approvable: [], assigned: [] };
+  const accounts = await ExpenseAccounts.find(
+    {},
+    { fields: { approverMemberIds: 1, approverGroupIds: 1 } }
+  ).fetchAsync();
+  const reviewer = await hasReviewerRole();
+  const groupIds = await myActiveGroupIds(member);
+  return {
+    approvable: approvableAccountIds(accounts, member._id, reviewer, groupIds),
+    assigned: assignedAccountIds(accounts, member._id, reviewer, groupIds),
+  };
 };
 
 /** Whether this member may review anyone's expenses at all. */

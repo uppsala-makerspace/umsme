@@ -6,7 +6,7 @@ import { Groups } from "/imports/common/collections/groups";
 import { Activities } from "/imports/common/collections/activities";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { memberStatus } from '/imports/common/lib/utils';
-import { findMemberForUser, findForUser, expenseAccessAllowed, approvableAccountIdsFor } from "/server/methods/utils";
+import { findMemberForUser, findForUser, expenseAccessAllowed, reviewAccountIdsFor } from "/server/methods/utils";
 import { Expenses } from "/imports/common/collections/expenses";
 import Invites from "/imports/common/collections/Invites";
 import { Accounts } from "meteor/accounts-base";
@@ -119,10 +119,12 @@ Meteor.methods({
     const activityCount = await Activities.find({}).countAsync();
 
     // The expenses waiting for this member's review, as in expenses.getToApprove:
-    // submitted, on an account they approve for, not their own. For the Expenses card.
-    const approvable = expensesAllowed ? await approvableAccountIdsFor(member) : [];
-    const expensesToApprove = approvable.length
-      ? await Expenses.find({ status: "submitted", expenseAccountId: { $in: approvable }, memberId: { $ne: member._id } }).countAsync()
+    // submitted, on an account that is theirs to review (assignedAccountIds,
+    // not every one a reviewer role lets them review), not their own. For the
+    // Expenses card.
+    const assigned = expensesAllowed ? (await reviewAccountIdsFor(member)).assigned : [];
+    const expensesToApprove = assigned.length
+      ? await Expenses.find({ status: "submitted", expenseAccountId: { $in: assigned }, memberId: { $ne: member._id } }).countAsync()
       : 0;
 
     return Object.assign(info, {memberships, status, familyMembers, familyInvites, invite, paying, liabilityDate, liabilityOutdated, swishAllowed, expensesAllowed, groupCounts, activityCount, expensesToApprove});

@@ -2,6 +2,7 @@ import assert from 'assert';
 import {
   REVIEWER_ROLES,
   approvableAccountIds,
+  assignedAccountIds,
   canReviewExpense,
   canViewExpense,
   canUnapproveExpense,
@@ -60,6 +61,36 @@ describe('expenseApproval', function () {
 
     it('names the three reviewer roles', function () {
       assert.deepStrictEqual(REVIEWER_ROLES, ['admin', 'board', 'treasurer']);
+    });
+  });
+
+  describe('assignedAccountIds', function () {
+    const accounts = [
+      { _id: 'named', approverMemberIds: ['m1'] },
+      { _id: 'byGroup', approverGroupIds: ['g1'] },
+      { _id: 'others', approverMemberIds: ['m9'] },
+      { _id: 'none' },
+      { _id: 'empty', approverMemberIds: [], approverGroupIds: [] },
+    ];
+
+    it('gives the accounts naming the member, or a group of theirs', function () {
+      assert.deepStrictEqual(assignedAccountIds(accounts, 'm1', false, ['g1']), ['named', 'byGroup']);
+    });
+
+    it('gives a role holder also the accounts naming no approvers, but not those naming others', function () {
+      assert.deepStrictEqual(assignedAccountIds(accounts, 'm2', true, []), ['none', 'empty']);
+      assert.deepStrictEqual(assignedAccountIds(accounts, 'm1', true, []), ['named', 'none', 'empty']);
+    });
+
+    it('never gives one without a role the accounts naming no approvers', function () {
+      assert.deepStrictEqual(assignedAccountIds(accounts, 'm2', false, []), []);
+    });
+
+    it('is within what the member may approve', function () {
+      for (const role of [true, false]) {
+        const approvable = approvableAccountIds(accounts, 'm1', role, ['g1']);
+        assert.ok(assignedAccountIds(accounts, 'm1', role, ['g1']).every((id) => approvable.includes(id)));
+      }
     });
   });
 
