@@ -39,6 +39,21 @@ test.describe('Registrations', () => {
     await expect(page.getByRole('button', { name: en.registrationSignUp })).toBeVisible();
   });
 
+  test('optional registration says one is welcome without, and asks whether one comes', async ({ page }) => {
+    await openEvent(page, 'base', 'E2E open evening');
+    await expect(page.getByRole('heading', { name: en.registrationOptional })).toBeVisible();
+    await expect(page.getByText(en.registrationOptionalInfo)).toBeVisible();
+    await expect(page.getByRole('button', { name: en.registrationImComing })).toBeVisible();
+    await expect(page.getByRole('button', { name: en.registrationSignUp })).toHaveCount(0);
+  });
+
+  test('required registration says so, and registers', async ({ page }) => {
+    await openEvent(page, 'base', 'E2E sign-up');
+    await expect(page.getByRole('heading', { name: en.registrationRequired })).toBeVisible();
+    await expect(page.getByText(en.registrationOptionalInfo)).toHaveCount(0);
+    await expect(page.getByRole('button', { name: en.registrationSignUp, exact: true })).toBeVisible();
+  });
+
   test('a member queues for a full event, and finds it among their registrations', async ({ page }) => {
     await openEvent(page, 'member', 'E2E full');
     await expect(page.getByText('0 of 1 seats left')).toBeVisible();

@@ -47,6 +47,8 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
       title={t(registration.required ? "registrationRequired" : "registrationOptional")} kind="event"
       actions={mine && <StatePill state={mine.state} />}
     >
+      {/* Optional: say so, so that nobody stays away for not having registered. */}
+      {!registration.required && <p className="m-0 mb-2 text-sm">{t("registrationOptionalInfo")}</p>}
       <p className="m-0 mb-3 text-sm text-gray-600">
         {seats === null
           ? t("registrationNoLimit")
@@ -103,7 +105,9 @@ const RegistrationBox = ({ registration, busy, error, onRegister, onWithdraw, on
                 />
               </label>
             )}
-            <Button type="submit" disabled={busy || blocked}>{t(full ? "registrationJoinQueue" : "registrationSignUp")}</Button>
+            <Button type="submit" disabled={busy || blocked}>
+              {t(full ? "registrationJoinQueue" : registration.required ? "registrationSignUp" : "registrationImComing")}
+            </Button>
           </form>
         )
       )}

@@ -173,6 +173,8 @@ export const buildE2e = async ({ people, now }) => {
   // came; and one for admin to add a participant to.
   const registered = { groupId: ceramicsGroup, registration: 'required', durationMinutes: 120, hostMemberIds: [members.groupLeader._id] };
   await makeEvent({ ...registered, name: { sv: 'E2E anmälan', en: 'E2E sign-up' }, start: at(12, 18), maxSeats: 3, infoRequired: true, infoPlaceholder: 'Allergier' });
+  // Optional registration: welcome without, and one tells that one comes.
+  await makeEvent({ ...registered, registration: 'optional', name: { sv: 'E2E öppen kväll', en: 'E2E open evening' }, start: at(46, 18), maxSeats: 10 });
   const full = await makeEvent({ ...registered, name: { sv: 'E2E fullt', en: 'E2E full' }, start: at(13, 18), maxSeats: 1, queueAllowed: true });
   await makeRegistration(full, members.base._id, { at: days(-2) });
   const started = new Date(now.getTime() - 3600000);
