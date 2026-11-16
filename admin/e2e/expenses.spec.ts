@@ -64,6 +64,21 @@ test.describe('Expenses', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/confirmed/i);
   });
 
+  test('the treasurer confirms an expense, and their own invoice but not their own receipt', async ({ page }) => {
+    await openExpense(page, 'treasurer', 'E2E treasurer confirm');
+    await confirmed(page, /^confirm$/i);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/confirmed/i);
+
+    await openExpense(page, 'treasurer', 'E2E own invoice');
+    await confirmed(page, /^confirm$/i);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/confirmed/i);
+
+    await openExpense(page, 'treasurer', 'E2E own receipt');
+    await confirmed(page, /^confirm$/i);
+    await expect(page.getByText('You cannot review your own expense')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/submitted/i);
+  });
+
   test('rejects an expense with a reason', async ({ page }) => {
     await openExpense(page, 'admin', 'E2E reject');
     await action(page, /^reject/i).click();

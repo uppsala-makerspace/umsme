@@ -345,6 +345,13 @@ export const buildE2e = async ({ people, now }) => {
   await expense('E2E queued', 'confirmed');
   // The treasurer's own, which they may reimburse themselves.
   await expense('E2E own reimburse', 'confirmed', { memberId: members.treasurer._id });
+  // The treasurer's own invoice, which they may confirm, and their own
+  // receipt, which they may not; and someone else's, which they may. On an
+  // account of their own, so that the ceramics approvers' count stays as it is.
+  const officeAccount = await account('E2E kansli', { groupIds: [premisesGroup]});
+  await expense('E2E own invoice', 'submitted', { memberId: members.treasurer._id, type: 'invoice', dueDate: days(12), amount: 900, expenseAccountId: officeAccount });
+  await expense('E2E own receipt', 'submitted', { memberId: members.treasurer._id, expenseAccountId: officeAccount });
+  await expense('E2E treasurer confirm', 'submitted', { expenseAccountId: officeAccount });
   await expense('E2E invoice', 'confirmed', { type: 'invoice', dueDate: days(10), amount: 1200 });
   await expense('E2E unreimburse', 'reimbursed');
   await expense('E2E paid', 'reimbursed', { amount: 480 });

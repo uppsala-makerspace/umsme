@@ -35,7 +35,8 @@ const requireRole = async (roles) => {
 };
 
 // Resolve the acting admin user's member record so we can enforce the
-// no-self-review rule (the treasurer may still reimburse their own). Returns null for accounts
+// no-self-review rule (the treasurer may still reimburse their own, and
+// confirm their own invoice). Returns null for accounts
 // with no matching member (e.g. the bare `admin` login), which can never be an
 // expense submitter. Matching uses any verified email (see memberForUser).
 const actingMember = async () => memberForUser(await Meteor.userAsync());
@@ -51,6 +52,14 @@ const assertNotOwnExpense = (expense, me) => {
   if (me && me === expense.memberId) {
     throw new Meteor.Error('self-review', 'You cannot review your own expense');
   }
+};
+
+// The treasurer may confirm, and undo confirming, their own invoice: it is
+// paid to the supplier, not to them. Their own receipt still needs someone
+// else's confirmation, as everyone's does.
+const assertMayReviewOwn = async (expense, me) => {
+  if (isInvoice(expense) && (await Roles.userIsInRoleAsync(Meteor.userId(), ['treasurer']))) return;
+  assertNotOwnExpense(expense, me);
 };
 
 // Build a $set that records the actor only when we could resolve one. The
@@ -89,17 +98,18 @@ Meteor.methods({
   },
 
   /**
-   * Confirm a submitted expense (admin/board, not the submitter).
+   * Confirm a submitted expense (admin/board/treasurer, as approving in the
+   * app; not the submitter, but the treasurer their own invoice).
    */
   'expenses.confirm': async (expenseId) => {
-    await requireRole(['admin', 'board']);
+    await requireRole(['admin', 'board', 'treasurer']);
     const expense = await getExpense(expenseId);
     if (expense.status !== 'submitted') {
       throw new Meteor.Error('bad-state', 'Only submitted expenses can be confirmed');
     }
     const actor = await actingMember();
     const me = actor?._id || null;
-    assertNotOwnExpense(expense, me);
+    await assertMayReviewOwn(expense, me);
     await Expenses.updateAsync(expenseId, {
       $set: withActor({ status: 'confirmed', confirmedAt: new Date() }, 'confirmedBy', me),
     });
@@ -113,8 +123,9 @@ Meteor.methods({
   /**
    * Undo a confirmation: a confirmed expense goes back to submitted and waits
    * for review again. For approvals made by mistake, here or in the app. Same
-   * roles as rejecting, never on your own expense, and only until it has been
-   * reimbursed or paid.
+   * roles as rejecting, never on your own expense (but the treasurer on their
+   * own invoice, as when confirming), and only until it has been reimbursed or
+   * paid.
    */
   'expenses.unconfirm': async (expenseId) => {
     await requireRole(['admin', 'board', 'treasurer']);
@@ -123,7 +134,7 @@ Meteor.methods({
       throw new Meteor.Error('bad-state', 'Only confirmed expenses can be un-confirmed');
     }
     const actor = await actingMember();
-    assertNotOwnExpense(expense, actor?._id || null);
+    await assertMayReviewOwn(expense, actor?._id || null);
     // Conditional on the status, so a reimbursement made meanwhile is never undone.
     const changed = await Expenses.updateAsync(
       { _id: expenseId, status: 'confirmed' },
