@@ -1,7 +1,7 @@
 import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback } from "react";
 import { Navigate, useParams } from "react-router-dom";
+import { useSignedIn } from "../../activities/components/useSignedIn";
 import { useTranslation } from "react-i18next";
 import Layout from "/imports/components/Layout/Layout";
 import RulesView from "/imports/components/RulesView";
@@ -12,7 +12,7 @@ export default () => {
   const { groupId } = useParams();
   const { i18n } = useTranslation();
   const lang = i18n.language || "sv";
-  const user = useTracker(() => Meteor.user());
+  const { user, userId, loggingIn } = useSignedIn();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -35,7 +35,8 @@ export default () => {
     fetchData();
   }, [user?._id, fetchData]);
 
-  if (!Meteor.userId()) {
+  // Not while the sign-in is being resumed: a link opened directly has no user yet.
+  if (!userId && !loggingIn) {
     return <Navigate to="/login" />;
   }
 

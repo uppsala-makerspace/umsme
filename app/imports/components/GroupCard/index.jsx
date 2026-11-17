@@ -33,7 +33,7 @@ export const MembershipChip = ({ myState, myIsResponsible }) => {
 
 /**
  * Group preview card: image banner, name with type tag (and membership chip
- * when the caller's state is known), member count, and a truncated
+ * when the caller's state is known), member count and categories, and a truncated
  * description excerpt in detailed mode. Used by the group list and the map's
  * space popup.
  */
@@ -61,10 +61,22 @@ const GroupCard = ({ group, compact = false }) => {
               <GroupTypeTag type={group.type} />
               <MembershipChip myState={group.myState} myIsResponsible={group.myIsResponsible} />
             </span>
-            {typeof group.memberCount === "number" && (
-              <span className="block text-xs text-gray-500 mt-0.5">
-                {group.memberCount}{" "}
-                {group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}
+            {(typeof group.memberCount === "number" || group.categories?.length > 0) && (
+              <span className="flex flex-wrap items-center gap-1.5 text-xs text-gray-500 mt-0.5">
+                {typeof group.memberCount === "number" && (
+                  <span>
+                    {group.memberCount}{" "}
+                    {group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}
+                  </span>
+                )}
+                {(group.categories || []).map((category) => (
+                  <span
+                    key={category._id}
+                    className="inline-block rounded-full py-0.5 px-2 bg-gray-100 text-gray-700"
+                  >
+                    {localized(category.name, lang)}
+                  </span>
+                ))}
               </span>
             )}
             {excerpt && (

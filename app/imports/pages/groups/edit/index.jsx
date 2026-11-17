@@ -1,7 +1,7 @@
 import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback } from "react";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { useSignedIn } from "../../activities/components/useSignedIn";
 import Layout from "/imports/components/Layout/Layout";
 import MainContent from "/imports/components/MainContent";
 import Loader from "/imports/components/Loader";
@@ -11,7 +11,7 @@ import EntityEditForm from "/imports/components/EntityEditForm";
 export default () => {
   const { groupId } = useParams();
   const navigate = useNavigate();
-  const user = useTracker(() => Meteor.user());
+  const { user, userId, loggingIn } = useSignedIn();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -66,7 +66,8 @@ export default () => {
     }
   };
 
-  if (!Meteor.userId()) {
+  // Not while the sign-in is being resumed: a link opened directly has no user yet.
+  if (!userId && !loggingIn) {
     return <Navigate to="/login" />;
   }
 

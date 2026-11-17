@@ -1,14 +1,14 @@
 import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Navigate, useParams } from "react-router-dom";
+import { useSignedIn } from "../../activities/components/useSignedIn";
 import Layout from "/imports/components/Layout/Layout";
 import { AppDataContext } from "/imports/context/AppDataContext";
 import GroupDetail from "./GroupDetail.jsx";
 
 export default () => {
   const { groupId } = useParams();
-  const user = useTracker(() => Meteor.user());
+  const { user, userId, loggingIn } = useSignedIn();
   const { slackChannels } = useContext(AppDataContext);
   const slackTeam = Meteor.settings?.public?.slack?.team;
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,8 @@ export default () => {
     }
   };
 
-  if (!Meteor.userId()) {
+  // Not while the sign-in is being resumed: a link opened directly has no user yet.
+  if (!userId && !loggingIn) {
     return <Navigate to="/login" />;
   }
 

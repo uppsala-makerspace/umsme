@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { Roles } from "meteor/roles";
 import { Groups } from "/imports/common/collections/groups";
+import { Categories } from "/imports/common/collections/categories";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Workshops } from "/imports/common/collections/workshops";
 import { Members } from "/imports/common/collections/members";
@@ -113,9 +114,19 @@ Meteor.methods({
   "groups.list": async () => {
     const member = await requireMember();
     const groups = await Groups.find({}, { sort: { "name.sv": 1 } }).fetchAsync();
+    // Each group's categories, named, for the list's tags and its filter.
+    const categoryById = new Map(
+      (await Categories.find({}, { fields: { name: 1, sortOrder: 1 } }).fetchAsync()).map((c) => [c._id, c])
+    );
     const result = [];
     for (const group of groups) {
-      result.push(await groupSummary(group, member._id));
+      result.push({
+        ...(await groupSummary(group, member._id)),
+        categories: (group.categoryIds || [])
+          .map((id) => categoryById.get(id))
+          .filter(Boolean)
+          .map((c) => ({ _id: c._id, name: c.name, sortOrder: c.sortOrder })),
+      });
     }
     return result;
   },

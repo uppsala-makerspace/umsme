@@ -9,6 +9,7 @@ const sampleGroups = [
     joinPolicy: "request-any",
     imageUrl: "https://placehold.co/600x300?text=Tr%C3%A4gruppen",
     memberCount: 5,
+    categories: [{ _id: "c1", name: { sv: "Hantverk", en: "Crafts" }, sortOrder: 4 }],
     myState: "active",
     myIsResponsible: false,
   },
@@ -29,6 +30,10 @@ const sampleGroups = [
     type: "function",
     joinPolicy: "request-responsible",
     memberCount: 4,
+    categories: [
+      { _id: "c2", name: { sv: "Elektronik", en: "Electronics" }, sortOrder: 6 },
+      { _id: "c3", name: { sv: "Digital tillverkning", en: "Digital fabrication" }, sortOrder: 5 },
+    ],
     myState: "pending",
     myIsResponsible: false,
   },

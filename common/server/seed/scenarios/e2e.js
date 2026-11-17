@@ -131,6 +131,9 @@ export const buildE2e = async ({ people, now }) => {
   const courses = await makeCategory('Kurs', 'Course', 1);
   await makeCategory('E2E edit category', null, 5);
   await makeCategory('E2E delete category', null, 6);
+  // A category the premises group has, for the app's group filter.
+  const premises = await makeCategory('Lokaler', 'Premises', 7);
+  await Groups.updateAsync(premisesGroup, { $set: { categoryIds: [premises] } });
   const wheelIntro = {
     name: { sv: 'Drejintroduktion', en: 'Wheel introduction' }, description: { sv: 'Grunderna i drejning.' },
     groupId: ceramicsGroup, workshopId: ceramics, categoryId: courses, durationMinutes: 120, published: true, hostsPublished: true,

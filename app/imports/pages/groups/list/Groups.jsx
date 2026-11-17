@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { FunnelIcon, QueueListIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, FunnelIcon, QueueListIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import { localized } from "/imports/common/lib/groupRules";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Input from "../../../components/Input";
@@ -33,6 +34,63 @@ const COMPACT_KEY = "groupsListCompact";
 // The filter is remembered too — the toggle beside it is, and losing the choice
 // every time you visit a group and come back would be its own annoyance.
 const FILTER_KEY = "groupsListFilter";
+const CATEGORY_FILTER_KEY = "groupsListCategories";
+
+const readCategories = () => {
+  if (typeof localStorage === "undefined") return [];
+  return (localStorage.getItem(CATEGORY_FILTER_KEY) || "").split(",").filter(Boolean);
+};
+
+// The categories the groups have, each once, in the order admin keeps them.
+const categoriesOf = (groups, lang) => {
+  const byId = new Map();
+  for (const group of groups) {
+    for (const category of group.categories || []) byId.set(category._id, category);
+  }
+  return [...byId.values()].sort(
+    (a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity)
+      || localized(a.name, lang).localeCompare(localized(b.name, lang), lang)
+  );
+};
+
+/**
+ * One filter of the section: its name above a button that says what is
+ * chosen, opening the checkboxes (CheckboxDropdown).
+ */
+const FilterDropdown = ({ id, label, summary, options, selected, onToggle }) => (
+  <div className="flex-1 min-w-0">
+    <span id={id} className="block text-xs font-semibold uppercase text-gray-500 mb-1">
+      {label}
+    </span>
+    <CheckboxDropdown
+      options={options}
+      selected={selected}
+      onToggle={onToggle}
+      panelClassName="min-w-max"
+      renderTrigger={({ open, toggle }) => (
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={open}
+          aria-labelledby={id}
+          className="w-full flex items-center justify-between gap-2 p-2 border border-gray-300 rounded-lg bg-white text-left text-sm cursor-pointer"
+        >
+          <span className="truncate">{summary}</span>
+          <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
+        </button>
+      )}
+    />
+  </div>
+);
+
+// What a dropdown's button says: all, none, or the chosen ones by name. Without
+// `all` every choice is named, as for categories, where none chosen means all.
+const summaryOf = (options, selected, { all = null, none }) => {
+  const chosen = options.filter((o) => selected.includes(o.key));
+  if (chosen.length === 0) return none;
+  if (all && chosen.length === options.length) return all;
+  return chosen.map((o) => o.label).join(", ");
+};
 
 const readFilter = () => {
   if (typeof localStorage === "undefined") return DEFAULT_FILTER;
@@ -61,12 +119,15 @@ const matchesSearch = (group, needle) => {
 };
 
 const Groups = ({ loading, groups }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || "sv";
   const [search, setSearch] = useState("");
   const [compact, setCompact] = useState(
     () => typeof localStorage !== "undefined" && localStorage.getItem(COMPACT_KEY) === "true"
   );
   const [filter, setFilter] = useState(readFilter);
+  const [chosenCategories, setChosenCategories] = useState(readCategories);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   if (loading) {
     return (
@@ -95,6 +156,41 @@ const Groups = ({ loading, groups }) => {
     }
   };
 
+  const toggleCategory = (id) => {
+    const next = chosenCategories.includes(id)
+      ? chosenCategories.filter((c) => c !== id)
+      : [...chosenCategories, id];
+    setChosenCategories(next);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(CATEGORY_FILTER_KEY, next.join(","));
+    }
+  };
+
+  // Only the categories some group has can be chosen; one remembered from
+  // before that no group has any longer is left out, rather than hiding all.
+  const categories = categoriesOf(groups, lang);
+  const activeCategories = chosenCategories.filter((id) => categories.some((c) => c._id === id));
+  // What differs from the standard filter, shown on the closed filter button:
+  // each type ticked or unticked against the default, and each chosen category.
+  const filtered = activeCategories.length > 0
+    || FILTER_KEYS.some((key) => filter.includes(key) !== DEFAULT_FILTER.includes(key));
+
+  const clearFilters = () => {
+    setFilter(DEFAULT_FILTER);
+    setChosenCategories([]);
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem(FILTER_KEY);
+      localStorage.removeItem(CATEGORY_FILTER_KEY);
+    }
+  };
+
+  const typeOptions = FILTER_KEYS.map((key) => ({
+    key,
+    label: key === "mine" ? t("groupFilterMine") : t(TYPE_LABEL_KEYS[key]),
+    divider: key === "mine",
+  }));
+  const categoryOptions = categories.map((c) => ({ key: c._id, label: localized(c.name, lang) }));
+
   // The member's own relation to a group. Wider than isJoined below: a pending
   // application counts, because silencing your own application just because it
   // happens to be for a steering group is worse than a slightly loose label.
@@ -104,8 +200,13 @@ const Groups = ({ loading, groups }) => {
   // "mine" adds to the selection rather than narrowing it: a group shows if its
   // type is ticked OR the member has a relation to it. That is what lets the
   // default hide steering groups while keeping the ones you are part of.
+  // Categories narrow it down: with some chosen, a group shows if it has any of them.
+  const matchesCategories = (g) =>
+    activeCategories.length === 0
+    || (g.categories || []).some((c) => activeCategories.includes(c._id));
   const matchesFilter = (g) =>
-    filter.includes(g.type) || (filter.includes("mine") && isRelatedToMe(g));
+    (filter.includes(g.type) || (filter.includes("mine") && isRelatedToMe(g)))
+    && matchesCategories(g);
 
   const needle = search.trim().toLowerCase();
   const typeOrdered = TYPE_ORDER.flatMap((type) =>
@@ -140,30 +241,67 @@ const Groups = ({ loading, groups }) => {
         >
           <ToggleIcon className="w-6 h-6" aria-hidden="true" />
         </button>
-        {/* align="right": the trigger sits at the right edge, so a left-aligned
-            panel would hang off the screen. */}
-        <CheckboxDropdown
-          options={FILTER_KEYS.map((key) => ({
-            key,
-            label: key === "mine" ? t("groupFilterMine") : t(TYPE_LABEL_KEYS[key]),
-            divider: key === "mine",
-          }))}
-          selected={filter}
-          onToggle={toggleFilter}
-          align="right"
-          renderTrigger={({ open, toggle }) => (
-            <button
-              onClick={toggle}
-              aria-expanded={open}
-              aria-label={t("groupFilter")}
-              title={t("groupFilter")}
-              className="flex-shrink-0 p-2.5 rounded bg-white border border-gray-200 cursor-pointer text-gray-600 hover:bg-gray-50"
-            >
-              <FunnelIcon className="w-6 h-6" aria-hidden="true" />
-            </button>
-          )}
-        />
+        <button
+          type="button"
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          aria-expanded={filtersOpen}
+          aria-controls="group-filters"
+          aria-label={filtered ? t("groupFilterActive") : t("groupFilter")}
+          title={filtered ? t("groupFilterActive") : t("groupFilter")}
+          className={`flex flex-shrink-0 items-center gap-0.5 py-2.5 pl-2.5 pr-1.5 rounded border cursor-pointer hover:bg-gray-50 ${
+            filtersOpen ? "bg-gray-100 border-gray-300 text-gray-800" : "bg-white border-gray-200 text-gray-600"
+          }`}
+        >
+          <span className="relative block">
+            <FunnelIcon className="w-6 h-6" aria-hidden="true" />
+            {/* A filter other than the standard one shows while the section is closed. */}
+            {filtered && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-brand-green" aria-hidden="true" />
+            )}
+          </span>
+          {/* Points down while the section is closed, up while it is open. */}
+          <ChevronDownIcon
+            className={`w-4 h-4 transition-transform ${filtersOpen ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
       </div>
+
+      {filtersOpen && (
+        <div id="group-filters" className="mb-4 rounded-lg border border-gray-200 bg-white p-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <FilterDropdown
+              id="group-filter-types"
+              label={t("groupFilterTypes")}
+              summary={summaryOf(typeOptions, filter, { all: t("groupFilterAll"), none: t("groupFilterNone") })}
+              options={typeOptions}
+              selected={filter}
+              onToggle={toggleFilter}
+            />
+            {categoryOptions.length > 0 && (
+              <FilterDropdown
+                id="group-filter-categories"
+                label={t("groupFilterCategories")}
+                summary={summaryOf(categoryOptions, activeCategories, { none: t("groupFilterAll") })}
+                options={categoryOptions}
+                selected={activeCategories}
+                onToggle={toggleCategory}
+              />
+            )}
+          </div>
+          {filtered && (
+            <div className="mt-3 text-right">
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="bg-transparent border-none p-0 text-sm text-gray-600 underline cursor-pointer hover:text-gray-900"
+              >
+                {t("groupFilterClear")}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {groups.length === 0 ? (
         <p className="text-center text-gray-500 p-8 italic">{t("noGroups")}</p>
