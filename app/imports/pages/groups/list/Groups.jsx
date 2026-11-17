@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { ChevronDownIcon, FunnelIcon, QueueListIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { localized } from "/imports/common/lib/groupRules";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
 import Input from "../../../components/Input";
 import GroupCard from "../../../components/GroupCard";
-import CheckboxDropdown from "../../../components/CheckboxDropdown";
+import {
+  ViewToggle, FilterButton, FilterSection, FilterDropdown, filterSummary, toggled,
+} from "../../../components/ListFilters";
 
 // One flat list: function groups first, and last the workshop-bound groups
 // (steering groups and their responsibility subgroups). Each row carries a
@@ -51,45 +52,6 @@ const categoriesOf = (groups, lang) => {
     (a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity)
       || localized(a.name, lang).localeCompare(localized(b.name, lang), lang)
   );
-};
-
-/**
- * One filter of the section: its name above a button that says what is
- * chosen, opening the checkboxes (CheckboxDropdown).
- */
-const FilterDropdown = ({ id, label, summary, options, selected, onToggle }) => (
-  <div className="flex-1 min-w-0">
-    <span id={id} className="block text-xs font-semibold uppercase text-gray-500 mb-1">
-      {label}
-    </span>
-    <CheckboxDropdown
-      options={options}
-      selected={selected}
-      onToggle={onToggle}
-      panelClassName="min-w-max"
-      renderTrigger={({ open, toggle }) => (
-        <button
-          type="button"
-          onClick={toggle}
-          aria-expanded={open}
-          aria-labelledby={id}
-          className="w-full flex items-center justify-between gap-2 p-2 border border-gray-300 rounded-lg bg-white text-left text-sm cursor-pointer"
-        >
-          <span className="truncate">{summary}</span>
-          <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
-        </button>
-      )}
-    />
-  </div>
-);
-
-// What a dropdown's button says: all, none, or the chosen ones by name. Without
-// `all` every choice is named, as for categories, where none chosen means all.
-const summaryOf = (options, selected, { all = null, none }) => {
-  const chosen = options.filter((o) => selected.includes(o.key));
-  if (chosen.length === 0) return none;
-  if (all && chosen.length === options.length) return all;
-  return chosen.map((o) => o.label).join(", ");
 };
 
 const readFilter = () => {
@@ -144,12 +106,9 @@ const Groups = ({ loading, groups }) => {
       localStorage.setItem(COMPACT_KEY, String(next));
     }
   };
-  const ToggleIcon = compact ? Squares2X2Icon : QueueListIcon;
 
   const toggleFilter = (key) => {
-    const next = filter.includes(key)
-      ? filter.filter((k) => k !== key)
-      : [...filter, key];
+    const next = toggled(filter, key);
     setFilter(next);
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(FILTER_KEY, next.join(","));
@@ -157,9 +116,7 @@ const Groups = ({ loading, groups }) => {
   };
 
   const toggleCategory = (id) => {
-    const next = chosenCategories.includes(id)
-      ? chosenCategories.filter((c) => c !== id)
-      : [...chosenCategories, id];
+    const next = toggled(chosenCategories, id);
     setChosenCategories(next);
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(CATEGORY_FILTER_KEY, next.join(","));
@@ -233,74 +190,34 @@ const Groups = ({ loading, groups }) => {
           aria-label={t("searchGroups")}
           className="mb-0 flex-1"
         />
-        <button
-          onClick={toggleCompact}
-          aria-label={compact ? t("moreInfo") : t("lessInfo")}
-          title={compact ? t("moreInfo") : t("lessInfo")}
-          className="flex-shrink-0 p-2.5 rounded bg-white border border-gray-200 cursor-pointer text-gray-600 hover:bg-gray-50"
-        >
-          <ToggleIcon className="w-6 h-6" aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setFiltersOpen(!filtersOpen)}
-          aria-expanded={filtersOpen}
-          aria-controls="group-filters"
-          aria-label={filtered ? t("groupFilterActive") : t("groupFilter")}
-          title={filtered ? t("groupFilterActive") : t("groupFilter")}
-          className={`flex flex-shrink-0 items-center gap-0.5 py-2.5 pl-2.5 pr-1.5 rounded border cursor-pointer hover:bg-gray-50 ${
-            filtersOpen ? "bg-gray-100 border-gray-300 text-gray-800" : "bg-white border-gray-200 text-gray-600"
-          }`}
-        >
-          <span className="relative block">
-            <FunnelIcon className="w-6 h-6" aria-hidden="true" />
-            {/* A filter other than the standard one shows while the section is closed. */}
-            {filtered && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-brand-green" aria-hidden="true" />
-            )}
-          </span>
-          {/* Points down while the section is closed, up while it is open. */}
-          <ChevronDownIcon
-            className={`w-4 h-4 transition-transform ${filtersOpen ? "rotate-180" : ""}`}
-            aria-hidden="true"
-          />
-        </button>
+        <ViewToggle compact={compact} onToggle={toggleCompact} />
+        <FilterButton
+          open={filtersOpen} onToggle={() => setFiltersOpen(!filtersOpen)} filtered={filtered}
+          controls="group-filters" label={t("groupFilter")} activeLabel={t("groupFilterActive")}
+        />
       </div>
 
       {filtersOpen && (
-        <div id="group-filters" className="mb-4 rounded-lg border border-gray-200 bg-white p-3">
-          <div className="flex flex-col sm:flex-row gap-3">
+        <FilterSection id="group-filters" filtered={filtered} onClear={clearFilters}>
+          <FilterDropdown
+            id="group-filter-types"
+            label={t("groupFilterTypes")}
+            summary={filterSummary(typeOptions, filter, { all: t("filterAll"), none: t("filterNone") })}
+            options={typeOptions}
+            selected={filter}
+            onToggle={toggleFilter}
+          />
+          {categoryOptions.length > 0 && (
             <FilterDropdown
-              id="group-filter-types"
-              label={t("groupFilterTypes")}
-              summary={summaryOf(typeOptions, filter, { all: t("groupFilterAll"), none: t("groupFilterNone") })}
-              options={typeOptions}
-              selected={filter}
-              onToggle={toggleFilter}
+              id="group-filter-categories"
+              label={t("filterCategories")}
+              summary={filterSummary(categoryOptions, activeCategories, { none: t("filterAll") })}
+              options={categoryOptions}
+              selected={activeCategories}
+              onToggle={toggleCategory}
             />
-            {categoryOptions.length > 0 && (
-              <FilterDropdown
-                id="group-filter-categories"
-                label={t("groupFilterCategories")}
-                summary={summaryOf(categoryOptions, activeCategories, { none: t("groupFilterAll") })}
-                options={categoryOptions}
-                selected={activeCategories}
-                onToggle={toggleCategory}
-              />
-            )}
-          </div>
-          {filtered && (
-            <div className="mt-3 text-right">
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="bg-transparent border-none p-0 text-sm text-gray-600 underline cursor-pointer hover:text-gray-900"
-              >
-                {t("groupFilterClear")}
-              </button>
-            </div>
           )}
-        </div>
+        </FilterSection>
       )}
 
       {groups.length === 0 ? (

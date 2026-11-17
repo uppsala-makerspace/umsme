@@ -205,6 +205,7 @@ const described = (doc, lookup) => ({
   description: doc.description,
   groupId: doc.groupId || null,
   groupName: lookup.groups.get(doc.groupId) || null,
+  categoryId: doc.categoryId || null,
   categoryName: lookup.categories.get(doc.categoryId) || null,
   language: doc.language || null,
   workshopId: doc.workshopId || null,
@@ -471,8 +472,13 @@ Meteor.methods({
       .map((a) => withGroupWorkshop(a, groupWorkshops));
     const lookup = await lookups(activities);
     const planned = await plannedEventCounts(activities.map((a) => a._id));
+    // The categories the activities have, in the order admin keeps them, for the filter.
+    const used = [...new Set(activities.map((a) => a.categoryId).filter(Boolean))];
+    const categories = (await Categories.find({ _id: { $in: used } }, { sort: { sortOrder: 1, "name.sv": 1 } }).fetchAsync())
+      .map((c) => ({ _id: c._id, name: c.name }));
     return {
       activities: activities.map((a) => ({ ...activityView(a, lookup), plannedEvents: planned.get(a._id) || 0 })),
+      categories,
       canCreateActivity: groups.some((g) => g.edit),
     };
   },

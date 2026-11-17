@@ -185,20 +185,63 @@ test.describe('Activities', () => {
     const wheel = page.getByRole('link', { name: new RegExp(WHEEL) });
     await expect(wheel).toContainText('Ceramics workshop');
     // One at no workshop is the makerspace's.
-    await expect(page.getByRole('main').getByText(new RegExp(`^${en.activityNoWorkshop} ·`)).first()).toBeVisible();
-    const filter = page.getByRole('combobox', { name: en.activitiesWorkshopFilter });
-    await filter.selectOption({ label: 'Ceramics workshop' });
+    const makerspace = page.getByRole('main').getByText(new RegExp(`^${en.activityNoWorkshop} ·`));
+    await expect(makerspace.first()).toBeVisible();
+    const filterButton = page.getByRole('button', { name: /^Filter activities/ });
+    await expect(filterButton).toHaveAttribute('aria-label', en.activitiesFilter);
+    await filterButton.click();
+    await page.getByRole('button', { name: en.filterWorkshops, exact: true }).click();
+    await page.getByRole('checkbox', { name: 'Ceramics workshop' }).check();
     await expect(page).toHaveURL(/\?workshop=/);
     await expect(wheel).toBeVisible();
-    await expect(page.getByRole('main').getByText(new RegExp(`^${en.activityNoWorkshop} ·`))).toHaveCount(0);
-    await filter.selectOption({ label: en.activityNoWorkshop });
+    await expect(makerspace).toHaveCount(0);
+    await expect(filterButton).toHaveAttribute('aria-label', en.activitiesFilterActive);
+    await page.getByRole('checkbox', { name: 'Ceramics workshop' }).uncheck();
+    await page.getByRole('checkbox', { name: en.activityNoWorkshop }).check();
     await expect(wheel).toHaveCount(0);
     // Back from an activity, the choice is still there.
+    await page.keyboard.press('Escape');
     await page.getByRole('main').getByRole('listitem').first().getByRole('link').click();
     await page.goBack();
     await expect(page).toHaveURL(/\?workshop=none$/);
-    await filter.selectOption({ label: en.activitiesAllWorkshops });
+    // The section may still be open from before.
+    const section = page.getByRole('button', { name: /^Filter activities/ });
+    if ((await section.getAttribute('aria-expanded')) !== 'true') await section.click();
+    await page.getByRole('button', { name: en.filterClear }).click();
     await expect(page).toHaveURL(/\/activities$/);
+    await expect(wheel).toBeVisible();
+  });
+
+  test('the activities are searched and filtered by category', async ({ page }) => {
+    await openAs(page, 'member', '/activities');
+    const wheel = page.getByRole('link', { name: new RegExp(WHEEL) });
+    const other = page.getByRole('link', { name: /E2E historik/ });
+    await page.getByRole('searchbox', { name: en.searchActivities }).fill('wheel');
+    await expect(wheel).toBeVisible();
+    await expect(other).toHaveCount(0);
+    await page.getByRole('searchbox', { name: en.searchActivities }).fill('');
+    await page.getByRole('button', { name: /^Filter activities/ }).click();
+    await page.getByRole('button', { name: en.filterCategories, exact: true }).click();
+    await page.getByRole('checkbox', { name: 'Course' }).check();
+    await expect(page).toHaveURL(/category=/);
+    await expect(wheel).toBeVisible();
+    await expect(other).toHaveCount(0);
+  });
+
+  test('the list is detailed or compact, and adding an activity is a +', async ({ page }) => {
+    await openAs(page, 'steering', '/activities');
+    await expect(page.getByRole('link', { name: en.activityNew, exact: true })).toBeVisible();
+    await page.getByRole('button', { name: en.lessInfo }).click();
+    await expect(page.getByRole('button', { name: en.moreInfo })).toBeVisible();
+    await page.getByRole('button', { name: en.moreInfo }).click();
+    await page.getByRole('link', { name: en.activityNew, exact: true }).click();
+    await expect(page.getByRole('heading', { name: en.activityNew })).toBeVisible();
+  });
+
+  test('a member may not add an activity', async ({ page }) => {
+    await openAs(page, 'member', '/activities');
+    await expect(page.getByRole('link', { name: new RegExp(WHEEL) })).toBeVisible();
+    await expect(page.getByRole('link', { name: en.activityNew, exact: true })).toHaveCount(0);
   });
 
   test('going back from an activity lands on the activities', async ({ page }) => {

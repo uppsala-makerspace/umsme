@@ -22,18 +22,18 @@ test.describe('Groups list', () => {
 
     await expect(filterButton(page)).toHaveAttribute('aria-label', en.groupFilter);
     await filterButton(page).click();
-    await expect(dropdown(page, en.groupFilterCategories)).toContainText(en.groupFilterAll);
-    await dropdown(page, en.groupFilterCategories).click();
+    await expect(dropdown(page, en.filterCategories)).toContainText(en.filterAll);
+    await dropdown(page, en.filterCategories).click();
     await page.getByRole('checkbox', { name: 'Premises' }).check();
-    await expect(dropdown(page, en.groupFilterCategories)).toContainText('Premises');
+    await expect(dropdown(page, en.filterCategories)).toContainText('Premises');
     await expect(premises).toBeVisible();
     await expect(page.getByRole('link', { name: new RegExp(GLAZING) })).toHaveCount(0);
     await expect(filterButton(page)).toHaveAttribute('aria-label', en.groupFilterActive);
 
-    await page.getByRole('button', { name: en.groupFilterClear }).click();
+    await page.getByRole('button', { name: en.filterClear }).click();
     await expect(page.getByRole('link', { name: new RegExp(GLAZING) })).toBeVisible();
     await expect(filterButton(page)).toHaveAttribute('aria-label', en.groupFilter);
-    await expect(page.getByRole('button', { name: en.groupFilterClear })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: en.filterClear })).toHaveCount(0);
   });
 
   test('filters by type, marked when off the standard', async ({ page }) => {
