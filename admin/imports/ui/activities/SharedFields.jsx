@@ -8,6 +8,14 @@ import { FormCard } from './FormCard';
 import { ClockField } from '../components/ClockField';
 import { usualMinutes } from '/imports/common/lib/activityValues';
 
+// The languages an activity or an event may be held in (LANGUAGES in activityRules.js).
+const LANGUAGE_OPTIONS = [
+  { value: 'sv', label: 'Swedish' },
+  { value: 'en', label: 'English' },
+  { value: 'svOrEn', label: 'Swedish or English, depending on who comes' },
+  { value: 'svAndEn', label: 'Swedish and English' },
+];
+
 export const native = { select: { native: true }, inputLabel: { shrink: true } };
 
 const yesNo = (value) => (value ? 'yes' : 'no');
@@ -90,6 +98,11 @@ export const SharedFields = ({ values, onChange, inherited = null, event = false
           <TextField label="Category" select fullWidth slotProps={native} value={values.categoryId} onChange={(e) => onChange('categoryId', e.target.value)}>
             <option value="">{none('categoryId', categoryOptions, '(No category)')}</option>
             {categoryOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </TextField>
+          <TextField label="Language" select fullWidth slotProps={native} value={values.language} onChange={(e) => onChange('language', e.target.value)}
+            helperText="Swedish or English, depending on who comes: one language for the whole group (an introduction). Swedish and English: the host speaks either with each one (an open evening).">
+            <option value="">{none('language', LANGUAGE_OPTIONS, '(Not stated)')}</option>
+            {LANGUAGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </TextField>
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>

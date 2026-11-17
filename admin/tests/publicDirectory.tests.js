@@ -357,7 +357,7 @@ describe('publicDirectory', function () {
       {
         _id: 'a1', name: { sv: 'Textilintro', en: 'Textile intro' }, description: { sv: 'Symaskinen.' },
         published: true, categoryId: 'c1', workshopId: 'w1', groupId: 'g2', spaceId: 's1', durationMinutes: 120, membersOnly: true,
-        imageFileId: 'img-a1',
+        imageFileId: 'img-a1', language: 'sv',
       },
       { _id: 'a2', name: { sv: 'Hemlig kurs' }, published: false },
       // Its workshop is forming, so it is not referred to.
@@ -365,12 +365,12 @@ describe('publicDirectory', function () {
     ];
     const EVENTS = [
       { _id: 'e1', activityId: 'a1', start: at('2026-11-01T17:00:00Z'), end: at('2026-11-01T19:00:00Z'), status: 'confirmed' },
-      { _id: 'e2', activityId: 'a1', start: at('2026-11-20T17:00:00Z'), end: at('2026-11-20T19:00:00Z'), status: 'confirmed', spaceId: 's2' },
+      { _id: 'e2', activityId: 'a1', start: at('2026-11-20T17:00:00Z'), end: at('2026-11-20T19:00:00Z'), status: 'confirmed', spaceId: 's2', language: 'en' },
       { _id: 'e3', activityId: 'a1', start: at('2026-11-15T17:00:00Z'), end: at('2026-11-15T19:00:00Z'), status: 'cancelled', name: { sv: 'Extra intro' } },
       { _id: 'e4', activityId: 'a1', start: at('2026-11-16T17:00:00Z'), end: at('2026-11-16T19:00:00Z'), status: 'confirmed', published: false },
       { _id: 'e5', activityId: 'a2', start: at('2026-11-16T17:00:00Z'), end: at('2026-11-16T19:00:00Z'), status: 'confirmed', published: true },
       {
-        _id: 'e6', name: { sv: 'Städdag' }, description: { sv: 'Vi städar.' }, groupId: 'g2', spaceId: 's4',
+        _id: 'e6', name: { sv: 'Städdag' }, description: { sv: 'Vi städar.' }, groupId: 'g2', spaceId: 's4', language: 'sv',
         start: at('2026-11-29T09:00:00Z'), end: at('2026-11-29T14:00:00Z'), status: 'confirmed', published: true, imageFileId: 'img-e6',
       },
       { _id: 'e7', name: { sv: 'Internt möte' }, start: at('2026-11-29T09:00:00Z'), end: at('2026-11-29T10:00:00Z'), status: 'confirmed' },
@@ -392,7 +392,16 @@ describe('publicDirectory', function () {
       assert.deepStrictEqual(intro.space, { spaceId: 'textile_workshop', floor: 'floor2' });
       assert.strictEqual(intro.image, 'https://umsme.example/api/activity/a1/image');
       assert.strictEqual(intro.membersOnly, true);
+      assert.strictEqual(intro.language, 'sv');
       assert.strictEqual(byId(directory().entries, 'glasintro').workshop, undefined);
+    });
+
+    it('gives an event a language only when it differs from the activity', function () {
+      const intro = byId(directory().entries, 'textilintro');
+      const languages = intro.events.map((e) => e.language);
+      assert.ok(languages.includes('en'), 'the event held in English says so');
+      assert.ok(!languages.includes('sv'), 'an event in the activity\'s language says nothing');
+      assert.strictEqual(directory().events.find((e) => e.id.startsWith('staddag')).language, 'sv');
     });
 
     it("shows an activity that names no workshop at its group's, and its events with it", function () {

@@ -136,11 +136,12 @@ export const buildE2e = async ({ people, now }) => {
   await Groups.updateAsync(premisesGroup, { $set: { categoryIds: [premises] } });
   const wheelIntro = {
     name: { sv: 'Drejintroduktion', en: 'Wheel introduction' }, description: { sv: 'Grunderna i drejning.' },
-    groupId: ceramicsGroup, workshopId: ceramics, categoryId: courses, durationMinutes: 120, published: true, hostsPublished: true,
+    groupId: ceramicsGroup, workshopId: ceramics, categoryId: courses, language: 'svOrEn', durationMinutes: 120, published: true, hostsPublished: true,
   };
   wheelIntro._id = await makeActivity(wheelIntro);
   await makeEvent({ activity: wheelIntro, start: at(-10, 18), hostMemberIds: [members.groupLeader._id] });
-  await makeEvent({ activity: wheelIntro, start: at(10, 18), hostMemberIds: [members.groupLeader._id, members.steering._id] });
+  // Decided for English, for those who signed up.
+  await makeEvent({ activity: wheelIntro, start: at(10, 18), hostMemberIds: [members.groupLeader._id, members.steering._id], language: 'en' });
   await makeEvent({ activity: wheelIntro, start: at(20, 18), status: 'cancelled' });
   await makeActivity({ name: { sv: 'E2E edit aktivitet' }, groupId: ceramicsGroup, durationMinutes: 60 });
   await makeActivity({ name: { sv: 'E2E delete aktivitet' } });

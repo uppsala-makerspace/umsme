@@ -332,7 +332,7 @@ export const buildDemo = async ({ random, people, now }) => {
       sv: 'Säkerhet, maskiner och rutiner i träverkstaden. Efter introduktionen får du använda verkstadens handmaskiner.',
       en: 'Safety, machines and routines in the wood workshop. After it you may use the workshop’s hand tools.',
     },
-    groupId: steeringGroups.wood, workshopId: workshops.wood, spaceId: spaces.wood, categoryId: courses,
+    groupId: steeringGroups.wood, workshopId: workshops.wood, spaceId: spaces.wood, categoryId: courses, language: 'svOrEn',
     durationMinutes: 120, startsAt: '18:00', endsAt: '20:00', membersOnly: true, published: true, hostsPublished: true, slackChannel: '#traverkstaden',
     // Held by those who run the workshop, not by every member of the group.
     eventBookers: 'activityEditors',
@@ -348,6 +348,8 @@ export const buildDemo = async ({ random, people, now }) => {
     const eventId = await makeEvent({
       activity: woodIntro, start, hostMemberIds: [personas.groupLeader._id, ...(n % 28 === 0 ? [personas.steering._id] : [])],
       ...(n === 28 ? { status: 'cancelled' } : {}), createdAt: days(n - 20),
+      // One of them decided for English, for those who signed up.
+      ...(n === 42 ? { language: 'en' } : {}),
       ...(n < 0 ? { attendanceClosedAt: new Date(start.getTime() + 3 * 3600000) } : {}),
     });
     const signedUp = (offset) => days(n - offset);
@@ -367,7 +369,7 @@ export const buildDemo = async ({ random, people, now }) => {
   const fika = {
     name: { sv: 'Pysselfika', en: 'Craft fika' },
     description: { sv: 'Ta med ett projekt och fika med andra medlemmar.', en: 'Bring a project and have fika with other members.' },
-    groupId: premisesGroup, spaceId: spaces.big, categoryId: social, durationMinutes: 180, startsAt: '14:00', endsAt: '17:00', membersOnly: false, published: true, hostsPublished: true,
+    groupId: premisesGroup, spaceId: spaces.big, categoryId: social, language: 'svAndEn', durationMinutes: 180, startsAt: '14:00', endsAt: '17:00', membersOnly: false, published: true, hostsPublished: true,
     // Signing up is possible, so that the hosts know roughly how many come.
     registration: 'optional',
   };

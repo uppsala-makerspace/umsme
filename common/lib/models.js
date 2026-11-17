@@ -36,6 +36,8 @@ const activityFields = ({ required }) => ({
   ...bilingual("name", "Name", 100, { optional: !required }),
   ...bilingual("description", "Description", 5000, { textarea: true }),
   categoryId: { label: "Category", type: String, max: 50, optional: true },
+  // The language it is held in (LANGUAGES in activityRules.js). Unset is not stated.
+  language: { label: "Language", type: String, allowedValues: ["sv", "en", "svOrEn", "svAndEn"], optional: true },
   imageFileId: { label: "Image file", type: String, optional: true, autoform: { omit: true } },
   imageMimeType: { label: "Image type", type: String, optional: true, autoform: { omit: true } },
   // Who owns it (may edit); empty is the association's, board and admin only.

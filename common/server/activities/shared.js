@@ -4,7 +4,7 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Categories } from '/imports/common/collections/categories';
 import { Certificates } from '/imports/common/collections/certificates';
-import { REGISTRATIONS, CHECK_INS } from '/imports/common/lib/activityRules';
+import { REGISTRATIONS, CHECK_INS, LANGUAGES } from '/imports/common/lib/activityRules';
 import { parseClock } from '/imports/common/lib/days';
 import { setEntityImage, clearEntityImage } from '/imports/common/server/entityImage';
 import { recordChange } from '/imports/common/server/auditLog';
@@ -36,6 +36,8 @@ const positive = (value, what, { integer = false } = {}) => {
  * stored; on an event null leaves it to the activity (`inherit`).
  */
 export const sharedChanges = async (fields, { inherit }) => {
+  const language = text(fields.language);
+  if (language && !LANGUAGES.includes(language)) throw new Meteor.Error('bad-language', `Unknown language "${language}"`);
   const durationMinutes = positive(fields.durationMinutes, 'The duration', { integer: true });
   if (durationMinutes === 0) throw new Meteor.Error('bad-value', 'The duration must be at least a minute');
   const flag = (value) => (inherit && (value === undefined || value === null) ? null : !!value);
@@ -44,6 +46,7 @@ export const sharedChanges = async (fields, { inherit }) => {
     name: bilingual(fields.name),
     description: bilingual(fields.description),
     categoryId: await exists(Categories, text(fields.categoryId), 'category'),
+    language,
     workshopId: await exists(Workshops, text(fields.workshopId), 'workshop'),
     spaceId: await exists(Spaces, text(fields.spaceId), 'space'),
     slackChannel: text(fields.slackChannel),

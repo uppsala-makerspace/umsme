@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
 import { TextField, SelectField, CheckField, ClockField, Row, Card } from "./fields";
 import { usualMinutes } from "/imports/common/lib/activityValues";
+import { LANGUAGES } from "/imports/common/lib/activityRules";
+import { LANGUAGE_KEYS } from "./languages";
 
 /**
  * A yes/no field: on an activity a checkbox; on an event a choice of yes and
@@ -75,6 +77,11 @@ const SharedFields = ({ values, onChange, choices, inherited = null, event = fal
         <TextField multiline label={t("activityFieldDescriptionEn")} {...text("descriptionEn", "description", "en")} />
         <SelectField id="activity-categoryId" label={t("activityFieldCategory")} value={values.categoryId} onChange={set("categoryId")}
           empty={none("categoryId", choices.categories)} options={options(choices.categories)} />
+        <SelectField id="activity-language" label={t("activityFieldLanguage")} hint={t("activityFieldLanguageHint")} value={values.language} onChange={set("language")}
+          empty={inherited?.language
+            ? t("activityFieldAsActivity", { value: t(LANGUAGE_KEYS[inherited.language]) })
+            : t("activityFieldLanguageNone")}
+          options={LANGUAGES.map((code) => ({ value: code, label: t(LANGUAGE_KEYS[code]) }))} />
         {/* An activity's usual times, without a day: each new event of it starts from them. */}
         {!event && (
           <Row>

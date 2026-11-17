@@ -3,7 +3,7 @@ const at = (d, h, m = 0) => new Date(2026, 10, d, h, m);
 export const intro = {
   _id: "a1", name: { sv: "Introduktion träverkstaden", en: "Wood workshop introduction" },
   description: { sv: "Säkerhet, maskiner och rutiner i **träverkstaden**." },
-  groupId: "g1", groupName: { sv: "Styrgrupp Träverkstaden" }, categoryName: { sv: "Kurs och introduktion" },
+  groupId: "g1", groupName: { sv: "Styrgrupp Träverkstaden" }, categoryName: { sv: "Kurs och introduktion" }, language: "sv",
   workshopId: "w1", workshopName: { sv: "Träverkstaden" }, spaceName: { sv: "Träverkstaden" },
   slackChannel: "traverkstaden", contactEmail: null, durationMinutes: 120, cost: null, membersOnly: true, imageUrl: null,
 };

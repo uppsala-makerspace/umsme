@@ -10,6 +10,11 @@ import { zonedDayAt } from "./days";
 
 export const EVENT_STATUSES = ["awaiting", "confirmed", "cancelled"];
 
+// The language an activity or an event is held in: Swedish, English, one of
+// the two for the whole group as those who come need (an introduction), or
+// both, the host speaking either with each one (an open evening).
+export const LANGUAGES = ["sv", "en", "svOrEn", "svAndEn"];
+
 // Who may create and change an activity's events: every active member of
 // its group, or only those who may change the activity (mayEditActivity).
 export const EVENT_BOOKERS = ["groupMembers", "activityEditors"];
@@ -21,6 +26,7 @@ export const SHARED_FIELDS = [
   "name",
   "description",
   "categoryId",
+  "language",
   "imageFileId",
   "imageMimeType",
   "workshopId",

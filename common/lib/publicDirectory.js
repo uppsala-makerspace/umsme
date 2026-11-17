@@ -180,6 +180,8 @@ export const buildDirectory = ({
     .map((e) => withoutEmpty({
       ...eventTimes(e),
       name: e.name !== activity.name ? bilingual(e.name) : null,
+      // Only when the event is held in another language than the activity.
+      language: e.language !== activity.language ? e.language || null : null,
       space: spaceOf(e.spaceId),
       registration: registrationOf(e),
       ...seatsOf(e, { left: true }),
@@ -196,6 +198,7 @@ export const buildDirectory = ({
       image: imageUrlFor({ doc, kind: "activity" }),
       text: bilingual(doc.description),
       category: categorySlugs.get(doc.categoryId) || null,
+      language: doc.language || null,
       workshop: entryId(doc.workshopId),
       group: entryId(doc.groupId),
       space: spaceOf(doc.spaceId),
@@ -280,6 +283,7 @@ export const buildDirectory = ({
     image: imageUrlFor({ doc: resolveEvent(e, activityById.get(e.activityId)), kind: "event" }),
     text: bilingual(e.description),
     category: categorySlugs.get(e.categoryId) || null,
+    language: e.language || null,
     workshop: entryId(e.workshopId),
     group: entryId(e.groupId),
     space: spaceOf(e.spaceId),

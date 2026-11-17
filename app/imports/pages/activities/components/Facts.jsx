@@ -5,10 +5,11 @@ import { useTranslation } from "react-i18next";
 import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 import Card from "./Card";
+import { LANGUAGE_KEYS } from "./languages";
 
 /**
  * What there is to know about an activity or an event, as short lines:
- * group, category, where, how long, the cost, who it is for, the certificate
+ * group, category, the language, where, how long, the cost, who it is for, the certificate
  * it asks for and the one it gives, and whom to ask.
  */
 const Facts = ({ item, kind, slackTeam, slackChannelIds }) => {
@@ -19,6 +20,7 @@ const Facts = ({ item, kind, slackTeam, slackChannelIds }) => {
       ? <Link to={`/groups/${item.groupId}`} className="text-brand-green no-underline hover:underline">{localized(item.groupName, lang)}</Link>
       : t("activityAssociation")],
     item.categoryName && [t("activityFieldCategory"), localized(item.categoryName, lang)],
+    item.language && [t("activityFieldLanguage"), t(LANGUAGE_KEYS[item.language])],
     item.workshopId && [t("activityFactWorkshop"),
       <Link to={`/workshops/${item.workshopId}`} className="text-brand-green no-underline hover:underline">{localized(item.workshopName, lang)}</Link>],
     item.spaceName && [t("activityFieldSpace"), localized(item.spaceName, lang)],

@@ -28,6 +28,7 @@ const SharedFields = {
   name: Match.Optional(Bilingual),
   description: Match.Optional(Bilingual),
   categoryId: Text,
+  language: Text,
   workshopId: Text,
   spaceId: Text,
   slackChannel: Text,

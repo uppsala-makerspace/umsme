@@ -125,6 +125,7 @@ entry of kind `activity` has fields of its own instead of `status`, `categories`
   "text":  { "sv": "…" },
   "image": "https://umsme.uppsalamakerspace.se/api/activities/<docId>/image?v=…",
   "category": "kurs-och-introduktion",
+  "language": "sv",
   "workshop": "traverkstaden",
   "group": "trivselgruppen",
   "space": { "spaceId": "woodworkshop", "floor": "floor1" },
@@ -137,7 +138,7 @@ entry of kind `activity` has fields of its own instead of `status`, `categories`
     { "start": "2026-11-05T17:00:00.000Z", "end": "2026-11-05T19:00:00.000Z", "status": "confirmed",
       "registration": "required", "seats": 8, "seatsLeft": 3, "hosts": ["Anna", "Bo"] },
     { "start": "2026-11-19T17:00:00.000Z", "end": "2026-11-19T19:00:00.000Z", "status": "cancelled",
-      "registration": "optional",
+      "registration": "optional", "language": "en",
       "name": { "sv": "Extra introduktion" }, "space": { "spaceId": "bigroom", "floor": "floor1" } }
   ]
 }
@@ -146,6 +147,7 @@ entry of kind `activity` has fields of its own instead of `status`, `categories`
 | Field             | Type      | Description |
 | ----------------- | --------- | ----------- |
 | `category`        | string    | `id` of one of the `categories`. |
+| `language`        | string    | The language it is held in: `sv` (Swedish), `en` (English), `svOrEn` (Swedish or English for the whole group, depending on who comes, as at an introduction) or `svAndEn` (both: the host speaks either with each one, as at an open evening). Absent when not stated. |
 | `workshop`        | string    | `id` of the workshop or area of interest it is shown at: its own, or else its group's (that of the steering group the group is, or is an activity group under). Absent for something of the whole association or of a function group that names none, and when that workshop is not published. |
 | `group`           | string    | `id` of the function group that holds it, when that group is published. |
 | `space`           | object    | The room, as `(spaceId, floor)`. |
@@ -159,8 +161,8 @@ entry of kind `activity` has fields of its own instead of `status`, `categories`
 
 Each item in `events` and `pastEvents` has `start` and `end` (ISO 8601, UTC) and `status`,
 `confirmed` or `cancelled`: a cancelled event stays in the list, so that
-whoever planned to come can see it is off. An event has a `name` or a `space`
-only when they differ from the activity's. Every event also has:
+whoever planned to come can see it is off. An event has a `name`, a `space` or a
+`language` only when they differ from the activity's. Every event also has:
 
 | Field          | Type     | Description |
 | -------------- | -------- | ----------- |
@@ -173,7 +175,7 @@ only when they differ from the activity's. Every event also has:
 
 Events that belong to no activity, such as a cleaning day or the annual
 meeting, from now on and soonest first. They describe themselves with the
-fields an activity has (`name`, `text`, `image`, `category`, `workshop`,
+fields an activity has (`name`, `text`, `image`, `category`, `language`, `workshop`,
 `group`, `space`, `cost`, `membersOnly`, `registration`), plus `start`, `end`,
 `status`, `seats` and `seatsLeft` as for an activity's events, and, when set to
 show them, `hosts`.

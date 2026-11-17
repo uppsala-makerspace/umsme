@@ -85,6 +85,19 @@ describe('activities and events', function () {
       await rejects(createActivity({ name: { sv: 'Intro' }, durationMinutes: 1.5 }, { userId }), 'bad-value');
     });
 
+    it('is held in Swedish, English, either as those who come need, or both, or does not say', async function () {
+      const id = await createActivity({ name: { sv: 'Språk' }, language: 'en' }, { userId });
+      assert.strictEqual((await Activities.findOneAsync(id)).language, 'en');
+      const { updatedAt } = await Activities.findOneAsync(id);
+      await updateActivity(id, { name: { sv: 'Språk' }, language: '' }, { userId, expectedUpdatedAt: updatedAt });
+      assert.strictEqual('language' in (await Activities.findOneAsync(id)), false);
+      for (const language of ['sv', 'svOrEn', 'svAndEn']) {
+        await updateActivity(id, { name: { sv: 'Språk' }, language }, { userId });
+        assert.strictEqual((await Activities.findOneAsync(id)).language, language);
+      }
+      await rejects(createActivity({ name: { sv: 'Fel' }, language: 'de' }, { userId }), 'bad-language');
+    });
+
     it('refuses an update on a version someone else changed', async function () {
       const id = await createActivity({ name: { sv: 'Konflikt' } }, { userId });
       await rejects(updateActivity(id, { name: { sv: 'X' } }, { userId, expectedUpdatedAt: new Date(0) }), 'conflict');
@@ -125,6 +138,7 @@ describe('activities and events', function () {
       const event = await Events.findOneAsync(id);
       assert.strictEqual(event.name, undefined);
       assert.strictEqual('membersOnly' in event, false);
+      assert.strictEqual('language' in event, false);
       assert.strictEqual('hostsPublished' in (await Events.findOneAsync(await createEvent({ activityId, start, hostsPublished: null }, member))), false);
       assert.strictEqual(event.hostsPublished, true);
       assert.strictEqual(event.published, false);

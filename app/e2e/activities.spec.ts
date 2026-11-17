@@ -32,6 +32,20 @@ test.describe('Activities', () => {
     await expect(page.getByRole('link', { name: `+ ${en.eventAdd}` })).toHaveCount(0);
   });
 
+  test('tells the language, the activity\'s unless an event says otherwise', async ({ page }) => {
+    await openAs(page, 'member', '/activities');
+    await page.getByRole('link', { name: new RegExp(WHEEL) }).click();
+    const facts = page.getByRole('definition');
+    await expect(page.getByRole('term').filter({ hasText: en.activityFieldLanguage })).toBeVisible();
+    await expect(facts.filter({ hasText: en.languageSwedishOrEnglish })).toBeVisible();
+
+    // The next event is decided for English.
+    await page.goto('/calendar');
+    await page.getByRole('link', { name: new RegExp(WHEEL) }).first().click();
+    await expect(page.getByRole('heading', { name: WHEEL, level: 2 })).toBeVisible();
+    await expect(page.getByRole('definition').filter({ hasText: en.languageEnglish })).toBeVisible();
+  });
+
   test('an event to come may be added to one\'s own calendar', async ({ page }) => {
     await openAs(page, 'member', '/calendar');
     await page.getByRole('link', { name: new RegExp(WHEEL) }).first().click();
