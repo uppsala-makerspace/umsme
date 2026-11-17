@@ -24,6 +24,7 @@ import './ui/expenses';
 import './ui/groups';
 import './ui/workshops';
 import './ui/activities';
+import './ui/categories';
 import './ui/spaces';
 import './ui/storeitems';
 import './ui/accounting';

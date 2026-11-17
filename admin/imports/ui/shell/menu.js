@@ -8,8 +8,7 @@ export const ACCESS_ROLES = [...STAFF_ROLES, 'storage'];
 
 export const MENU = [
   { key: 'members', title: 'Members', items: [['/members', 'All'], ['/history', 'History'], ['/lock', 'Lock'], ['/pending', 'Pending'], ['/reminders', 'Reminders'], ['/excluded', 'Excluded']] },
-  { key: 'operation', title: 'Operation', items: [['/workshops', 'Workshops & areas of interest'], ['/groups', 'Groups'], ['/spaces', 'Spaces'], ['/certificates', 'Certificates'], ['/liability', 'Liability'], ['/storage', 'Storage']] },
-  { key: 'activities', title: 'Activities', items: [['/activities', 'Activities'], ['/events', 'Events'], ['/activities/categories', 'Categories']] },
+  { key: 'operation', title: 'Operation', items: [['/workshops', 'Workshops & areas of interest'], ['/groups', 'Groups'], ['/activities', 'Activities'], ['/events', 'Events'], ['/categories', 'Categories'], ['/spaces', 'Spaces'], ['/certificates', 'Certificates'], ['/liability', 'Liability'], ['/storage', 'Storage']] },
   { key: 'economy', title: 'Economy', items: [['/payments', 'Payments'], ['/storeitems', 'Store items'], ['/expenses', 'Expenses'], ['/expenses/confirm', 'Confirm expenses'], ['/expenses/reimburse', 'Reimburse expenses'], ['/expenses/accounts', 'Expense accounts'], ['/accounting/bankexport', 'Bank export']] },
   { key: 'messages', title: 'Messages', items: [['/mail', 'Mail'], ['/templates', 'Templates'], ['/announcements', 'Announcements']] },
   { key: 'statistics', title: 'Statistics', items: [['/stats', 'Memberships'], ['/revenue', 'Revenue'], ['/activity', 'Activity']] },

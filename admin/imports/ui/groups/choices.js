@@ -3,6 +3,7 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { Groups } from '/imports/common/collections/groups';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
+import { Categories } from '/imports/common/collections/categories';
 import { groupWorkshopIds } from '/imports/common/lib/activityRules';
 
 const FLOORS = { floor1: 'Floor 1', floor2: 'Floor 2' };
@@ -10,19 +11,23 @@ const byName = (a, b) => (a.name?.sv || '').localeCompare(b.name?.sv || '', 'sv'
 
 /**
  * What the group and workshop pages link to and choose among: groups,
- * workshops and spaces, by name, ready to be offered as choices.
+ * workshops, spaces and categories, ready to be offered as choices.
  */
 export const useChoices = () => useTracker(() => {
   const handle = Meteor.subscribe('admin.groupsAndWorkshops.choices');
+  const categoriesHandle = Meteor.subscribe('admin.categories.list');
   const groups = Groups.find({}, { fields: { name: 1, type: 1, parentGroupId: 1 } }).fetch().sort(byName);
   const workshops = Workshops.find({}, { fields: { name: 1, kind: 1, groupId: 1, status: 1 } }).fetch().sort(byName);
   const spaces = Spaces.find({}, { fields: { name: 1, floor: 1 } }).fetch().sort(byName);
   return {
-    loading: !handle.ready(),
+    loading: !handle.ready() || !categoriesHandle.ready(),
     groups,
     workshops,
     spaceOptions: spaces.map((s) => ({ value: s._id, label: `${s.name?.sv || s._id} (${FLOORS[s.floor] || s.floor})`, group: FLOORS[s.floor] })),
     workshopOptions: workshops.map((w) => ({ value: w._id, label: w.name?.sv || w._id, group: w.kind === 'areaOfInterest' ? 'Areas of interest' : 'Workshops' })),
+    categoryOptions: Categories.find().fetch()
+      .sort((a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity) || byName(a, b))
+      .map((c) => ({ value: c._id, label: c.name?.sv || c._id })),
     groupName: (id) => groups.find((g) => g._id === id)?.name?.sv,
     // Group id → the workshop its activities are at when they name none.
     groupWorkshops: groupWorkshopIds(groups, workshops),

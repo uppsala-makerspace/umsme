@@ -34,7 +34,8 @@ import { makeFakeLock } from '../lock';
 import { makeFakeBank } from '../bank';
 import { makeMessageTemplate } from '../documents';
 import { makeStoreItem, makePurchase } from '../shop';
-import { makeCategory, makeActivity, makeEvent, makeRegistration, makeInterest } from '../activities';
+import { makeCategory } from '../categories';
+import { makeActivity, makeEvent, makeRegistration, makeInterest } from '../activities';
 import { PERSONAS, PASSWORD, FIRST_FREE_MID } from './personas';
 import { makeLiabilityVersions, liabilityFields, makePersonas } from './build';
 
@@ -210,13 +211,22 @@ export const buildDemo = async ({ random, people, now }) => {
     return groupId;
   };
 
+  // The website's categories: the kinds of activity first, then the
+  // subjects that workshops, groups and activities share.
+  const courses = await makeCategory('Kurs och introduktion', 'Course and introduction', 1);
+  const social = await makeCategory('Socialt', 'Social', 2);
+  await makeCategory('Öppet hus', 'Open house', 3);
+  const crafts = await makeCategory('Hantverk', 'Crafts', 4);
+  const fabrication = await makeCategory('Digital tillverkning', 'Digital fabrication', 5);
+  const electronics = await makeCategory('Elektronik', 'Electronics', 6);
+
   const workshopDefinitions = [
-    { key: 'wood', sv: 'Träverkstaden', en: 'Wood workshop', tag: 'Trä', status: 'established' },
-    { key: 'metal', sv: 'Metallverkstaden', en: 'Metal workshop', tag: 'Metall', status: 'established' },
-    { key: 'print', sv: '3D-verkstaden', en: '3D workshop', tag: '3D', status: 'established' },
-    { key: 'electronics', sv: 'Elektronikverkstaden', en: 'Electronics workshop', tag: 'Elektronik', status: 'established' },
-    { key: 'ceramics', sv: 'Keramikverkstaden', en: 'Ceramics workshop', tag: 'Keramik', status: 'trial' },
-    { key: 'textiles', sv: 'Textilverkstaden', en: 'Textile workshop', tag: 'Textil', status: 'forming' },
+    { key: 'wood', sv: 'Träverkstaden', en: 'Wood workshop', status: 'established', categoryIds: [crafts] },
+    { key: 'metal', sv: 'Metallverkstaden', en: 'Metal workshop', status: 'established', categoryIds: [crafts] },
+    { key: 'print', sv: '3D-verkstaden', en: '3D workshop', status: 'established', categoryIds: [fabrication] },
+    { key: 'electronics', sv: 'Elektronikverkstaden', en: 'Electronics workshop', status: 'established', categoryIds: [electronics, fabrication] },
+    { key: 'ceramics', sv: 'Keramikverkstaden', en: 'Ceramics workshop', status: 'trial', categoryIds: [crafts] },
+    { key: 'textiles', sv: 'Textilverkstaden', en: 'Textile workshop', status: 'forming', categoryIds: [crafts] },
   ];
   const workshops = {};
   const steeringGroups = {};
@@ -235,7 +245,7 @@ export const buildDemo = async ({ random, people, now }) => {
     steeringGroups[definition.key] = groupId;
     workshops[definition.key] = await Workshops.insertAsync({
       name: { sv: definition.sv, en: definition.en },
-      tag: { sv: definition.tag, en: definition.tag },
+      categoryIds: definition.categoryIds,
       description: {
         sv: `${definition.sv} är öppen för alla labbmedlemmar som gått introduktionen.`,
         en: `The ${definition.en.toLowerCase()} is open to all lab members who have taken the introduction.`,
@@ -249,13 +259,13 @@ export const buildDemo = async ({ random, people, now }) => {
     joinPolicy: 'open', allowJoinRequests: true,
   }, { members: pickMembers(active, 6) });
   workshops.retro = await Workshops.insertAsync({
-    name: { sv: 'Retrodatorer', en: 'Retro computers' }, kind: 'areaOfInterest', status: 'established',
+    name: { sv: 'Retrodatorer', en: 'Retro computers' }, kind: 'areaOfInterest', status: 'established', categoryIds: [electronics],
     groupId: retroGroup, primarySpaceId: spaces.big, createdAt: days(-500),
   });
   const laserGroup = await groupWithMembers({
     name: { sv: 'Laseransvariga', en: 'Laser keepers' }, type: 'responsibility',
     parentGroupId: steeringGroups.wood, responsibleMemberId: personas.steering._id,
-    joinPolicy: 'request-responsible', allowJoinRequests: true,
+    joinPolicy: 'request-responsible', allowJoinRequests: true, categoryIds: [fabrication],
   }, { members: [personas.steering, ...pickMembers(labMembers, 2, [personas.steering._id])] });
   const financeGroup = await groupWithMembers({
     name: { sv: 'Ekonomigruppen', en: 'Finance group' }, type: 'function',
@@ -315,9 +325,6 @@ export const buildDemo = async ({ random, people, now }) => {
     d.setHours(hour, minute, 0, 0);
     return d;
   };
-  const courses = await makeCategory('Kurs och introduktion', 'Course and introduction', 1);
-  const social = await makeCategory('Socialt', 'Social', 2);
-  await makeCategory('Öppet hus', 'Open house', 3);
   const premisesMembers = (await GroupMemberships.find({ groupId: premisesGroup, state: 'active' }).fetchAsync()).map((m) => m.memberId);
   const woodIntro = {
     name: { sv: 'Introduktion träverkstaden', en: 'Wood workshop introduction' },

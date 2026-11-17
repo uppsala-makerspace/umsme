@@ -7,7 +7,6 @@ import {
 import {
   createEvent, updateEvent, removeEvent, setEventImage, removeEventImage,
 } from '/imports/common/server/activities/events';
-import { createCategory, updateCategory, removeCategory } from '/imports/common/server/activities/categories';
 import {
   register, withdraw, takeSeat, markAttended, closeAttendance,
 } from '/imports/common/server/activities/registrations';
@@ -18,7 +17,7 @@ import { ActivityInterests } from '/imports/common/collections/activityInterests
 import { Members } from '/imports/common/collections/members';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 
-// Board and admin: activities, events and categories alike. They may choose
+// Board and admin: activities and events alike. They may choose
 // anyone as a host, so every call here is `isAdminish`.
 const roles = DOMAIN_ROLES.activities;
 const Bilingual = Match.Maybe({ sv: Match.Maybe(String), en: Match.Maybe(String) });
@@ -63,7 +62,6 @@ const EventFields = {
   status: Text,
   googleEventId: Text,
 };
-const CategoryFields = { name: Bilingual, sortOrder: Num };
 
 const image = (setImage, removeImage) => ({
   async upload(docId, imageBase64, mimeType) {
@@ -128,26 +126,6 @@ Meteor.methods({
 
   'events.uploadImage': eventImage.upload,
   'events.removeImage': eventImage.remove,
-
-  async 'activityCategories.create'(fields) {
-    check(fields, CategoryFields);
-    await requireRole(this.userId, roles);
-    return createCategory(fields, { userId: this.userId });
-  },
-
-  async 'activityCategories.update'(docId, fields, expectedUpdatedAt) {
-    check(docId, String);
-    check(fields, CategoryFields);
-    check(expectedUpdatedAt, Match.Maybe(Date));
-    await requireRole(this.userId, roles);
-    await updateCategory(docId, fields, { userId: this.userId, expectedUpdatedAt: expectedUpdatedAt ?? null });
-  },
-
-  async 'activityCategories.remove'(docId) {
-    check(docId, String);
-    await requireRole(this.userId, roles);
-    await removeCategory(docId, { userId: this.userId });
-  },
 
   /** An event's registrations, with the members' names, oldest first. */
   async 'eventRegistrations.list'(eventId) {

@@ -9,6 +9,7 @@ import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { WORKSHOP_KINDS, WORKSHOP_STATUSES } from '/imports/common/lib/groupRules';
 import { recordChange } from '/imports/common/server/auditLog';
 import { text, bilingual, setOrUnset } from '../groups/text';
+import { categoryIdsOf } from '../categories';
 
 /**
  * Workshops (verkstäder) and areas of interest (intresseområden): one
@@ -38,7 +39,7 @@ const changesOf = async (fields) => {
   changes.$set.kind = kind;
   changes.$set.status = status;
   setOrUnset(changes, {
-    tag: bilingual(fields.tag),
+    categoryIds: await categoryIdsOf(fields.categoryIds),
     description: bilingual(fields.description),
     rules: bilingual(fields.rules),
     slackChannel: text(fields.slackChannel),

@@ -2,7 +2,7 @@
  * Shapes the listing published for the public website: the workshops, areas
  * of interest and open groups, the map's spaces, and the link between them;
  * the published activities with their events to come, the published
- * free-standing events, and the categories of activities.
+ * free-standing events, and the categories they are filtered by.
  *
  * Pure: takes documents already read from the database plus URL builders, so
  * the selection rules and the JSON shape can be unit tested without Meteor.
@@ -86,7 +86,7 @@ const spaceLinksFor = (doc, spaceById) => {
  * @param {Array<object>} args.activities  all activities; the published ones are entries
  * @param {Array<object>} args.events      all events; those to come are published, and
  *   an activity's latest past ones (PAST_EVENTS of them)
- * @param {Array<object>} args.categories  all categories of activities
+ * @param {Array<object>} args.categories  all categories, each with its slug
  * @param {Object<string, string>} args.memberNames  member id → name, for the
  *   hosts of events that show them; only the first name is published
  * @param {Date} args.now                  what "to come" is counted from
@@ -131,10 +131,13 @@ export const buildDirectory = ({
   );
   const spaceById = new Map(spaces.map((s) => [s._id, s]));
 
-  const categorySlugs = new Map(
-    withUniqueSlugs(categories.map((c) => ({ _id: c._id, source: c.name?.sv })))
-      .map(({ _id, slug }) => [_id, slug])
-  );
+  // A category's id on the website is its own slug, kept in the database so
+  // that it stays put when the name changes.
+  const categorySlugs = new Map(categories.filter((c) => c.slug).map((c) => [c._id, c.slug]));
+  const categoriesOf = (doc) => {
+    const slugs = (doc.categoryIds || []).map((id) => categorySlugs.get(id)).filter(Boolean);
+    return slugs.length > 0 ? slugs : null;
+  };
   // An event, or an activity, refers to a workshop or group by its entry id,
   // and only to one that is published.
   const entryId = (docId) => (docId ? slugById.get(docId) || null : null);
@@ -218,7 +221,7 @@ export const buildDirectory = ({
       ...(kind === "group" ? { type: doc.type } : { status: doc.status }),
       icon: doc.primarySpaceId ? iconUrlFor(doc.primarySpaceId) : null,
       name: bilingual(doc.name),
-      tag: bilingual(doc.tag),
+      categories: categoriesOf(doc),
       image: imageUrlFor({ doc, kind }),
       // Raw markdown: the website renders it. Truncating here (as the app's
       // markdownExcerpt does for cards) would be wrong for a full page.
@@ -287,7 +290,8 @@ export const buildDirectory = ({
     hosts: hostsOf(e),
   }));
 
-  const exportedCategories = [...categories]
+  const exportedCategories = categories
+    .filter((c) => categorySlugs.has(c._id))
     .sort((a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity))
     .map((c) => withoutEmpty({ id: categorySlugs.get(c._id), name: bilingual(c.name) }));
 

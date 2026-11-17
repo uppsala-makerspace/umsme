@@ -8,7 +8,6 @@ import { ActivityList } from './ActivityList';
 import { ActivityForm } from './ActivityForm';
 import { EventList } from './EventList';
 import { EventForm } from './EventForm';
-import { CategoryList } from './CategoryList';
 import { Participants } from './Participants';
 import { CalendarImport } from './CalendarImport';
 import { resolveEvent, takesRegistrations } from '/imports/common/lib/activityRules';
@@ -16,7 +15,6 @@ import {
   useActivityList, useActivity, useEventList, useEvent, useActivityChoices, useCategories,
   saveActivity, removeActivity, uploadActivityImage, removeActivityImage, activityImageUrl,
   saveEvent, removeEvent, uploadEventImage, removeEventImage, eventImageUrl,
-  saveCategory, removeCategory,
   createActivityFromEvent, matchingEvents, linkEvents, calendarConfigured, calendarPreview, importCalendar,
   groupMembers, interestCount, eventRegistrations, addRegistration, withdrawRegistration, giveSeat, markAttended, closeAttendance,
 } from './data';
@@ -194,36 +192,6 @@ export const EventEditPage = ({ _id }) => {
           />
         );
       })()}
-    />
-  );
-};
-
-/** /activities/categories */
-export const CategoryListPage = () => {
-  const { loading, categories } = useCategories();
-  const { activities } = useActivityList();
-  const { events } = useEventList();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(null);
-  const attempt = async (action) => {
-    setBusy(true);
-    setError(null);
-    try {
-      await action();
-      return true;
-    } catch (e) {
-      setError(e.reason || e.message);
-      return false;
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <CategoryList
-      loading={loading} categories={categories} busy={busy} error={error}
-      usage={(id) => activities.filter((a) => a.categoryId === id).length + events.filter((e) => e.categoryId === id).length}
-      onSave={(values, category) => attempt(() => saveCategory(values, category))}
-      onDelete={(category) => attempt(() => removeCategory(category._id))}
     />
   );
 };

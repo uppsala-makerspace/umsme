@@ -12,7 +12,7 @@ import { uploadImage } from './choices';
 
 export const useGroupList = () => useTracker(() => {
   const handle = Meteor.subscribe('admin.groups.list');
-  return { loading: !handle.ready(), groups: Groups.find({}, { fields: { name: 1, type: 1, allowJoinRequests: 1, joinPolicy: 1 } }).fetch() };
+  return { loading: !handle.ready(), groups: Groups.find({}, { fields: { name: 1, type: 1, allowJoinRequests: 1, joinPolicy: 1, categoryIds: 1 } }).fetch() };
 }, []);
 
 /** One whole group and its memberships; none when there is no id (a new group). */
@@ -35,7 +35,6 @@ const bilingual = (doc, field) => ({ [`${field}Sv`]: doc?.[field]?.sv || '', [`$
 /** The form's values for a group, or empty ones for a new group. */
 export const formValues = (group) => ({
   ...bilingual(group, 'name'),
-  ...bilingual(group, 'tag'),
   ...bilingual(group, 'description'),
   ...bilingual(group, 'rules'),
   type: group?.type || '',
@@ -48,6 +47,7 @@ export const formValues = (group) => ({
   linkedRole: group?.linkedRole || '',
   primarySpaceId: group?.primarySpaceId || '',
   secondarySpaceIds: group?.secondarySpaceIds || [],
+  categoryIds: group?.categoryIds || [],
   relatedWorkshopIds: group?.relatedWorkshopIds || [],
   relatedGroupIds: group?.relatedGroupIds || [],
 });
@@ -55,7 +55,7 @@ export const formValues = (group) => ({
 const pair = (v, field) => ({ sv: v[`${field}Sv`], en: v[`${field}En`] });
 const fieldsFrom = (v) => ({
   name: pair(v, 'name'),
-  tag: pair(v, 'tag'),
+  categoryIds: v.categoryIds,
   description: pair(v, 'description'),
   rules: pair(v, 'rules'),
   type: v.type,

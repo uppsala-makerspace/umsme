@@ -3,6 +3,7 @@ import { fn } from 'storybook/test';
 import { WorkshopForm } from './WorkshopForm';
 
 const groups = [{ _id: 'g1', name: { sv: 'Styrgrupp Keramik' }, type: 'steering' }, { _id: 'g2', name: { sv: 'Styrgrupp Trä' }, type: 'steering' }];
+const categoryOptions = [{ value: 'c1', label: 'Hantverk' }, { value: 'c2', label: 'Elektronik' }];
 const spaceOptions = [
   { value: 's1', label: 'Keramikrummet (Floor 2)', group: 'Floor 2' },
   { value: 's2', label: 'Glasering (Floor 2)', group: 'Floor 2' },
@@ -13,7 +14,7 @@ const ceramics = {
   description: { sv: 'Drejning och glasering.' }, slackChannel: '#keramik', groupId: 'g1', primarySpaceId: 's1', secondarySpaceIds: ['s2'],
 };
 const values = (w) => ({
-  kind: w.kind || 'workshop', nameSv: w.name?.sv || '', nameEn: w.name?.en || '', tagSv: '', tagEn: '',
+  kind: w.kind || 'workshop', nameSv: w.name?.sv || '', nameEn: w.name?.en || '', categoryIds: [],
   descriptionSv: w.description?.sv || '', descriptionEn: '', rulesSv: '', rulesEn: '', status: w.status || 'forming',
   slackChannel: w.slackChannel || '', guidesUrl: '', groupId: w.groupId || '', primarySpaceId: w.primarySpaceId || '',
   secondarySpaceIds: w.secondarySpaceIds || [],
@@ -33,7 +34,7 @@ export default {
   component: WorkshopForm,
   render: (args) => <Editable {...args} />,
   args: {
-    isNew: false, workshop: ceramics, values: values(ceramics), groups, spaceOptions, details,
+    isNew: false, workshop: ceramics, values: values(ceramics), groups, spaceOptions, categoryOptions, details,
     onSave: fn(), onDelete: fn(), onUploadImage: fn(), onRemoveImage: fn(),
   },
 };

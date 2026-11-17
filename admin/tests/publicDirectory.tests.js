@@ -10,7 +10,7 @@ const WORKSHOPS = [
   {
     _id: 'w1',
     name: { sv: 'Textilverkstad', en: 'Textile workshop' },
-    tag: { sv: 'Textil', en: 'Textile' },
+    categoryIds: ['cat-craft', 'cat-gone', 'cat-sewing'],
     description: { sv: 'Symaskin och overlock.', en: 'A sewing machine.' },
     status: 'established',
     primarySpaceId: 's1',
@@ -144,10 +144,17 @@ describe('publicDirectory', function () {
       assert.ok(!('status' in entry));
     });
 
-    it('carries both languages of name, tag and text', function () {
+    it('lists its categories by their slugs, leaving out one that is gone', function () {
+      const categories = [
+        { _id: 'cat-craft', name: { sv: 'Hantverk' }, slug: 'hantverk' },
+        { _id: 'cat-sewing', name: { sv: 'Sömnad' }, slug: 'eget-namn' },
+      ];
+      assert.deepStrictEqual(byId(build({ categories }), 'textilverkstad').categories, ['hantverk', 'eget-namn']);
+    });
+
+    it('carries both languages of name and text', function () {
       const entry = byId(build(), 'textilverkstad');
       assert.deepStrictEqual(entry.name, { sv: 'Textilverkstad', en: 'Textile workshop' });
-      assert.deepStrictEqual(entry.tag, { sv: 'Textil', en: 'Textile' });
       assert.deepStrictEqual(entry.text, {
         sv: 'Symaskin och overlock.',
         en: 'A sewing machine.',
@@ -160,7 +167,7 @@ describe('publicDirectory', function () {
 
     it('omits keys with nothing to say rather than sending null', function () {
       const entry = byId(build(), 'keramikverkstad');
-      for (const key of ['tag', 'text', 'image', 'icon']) {
+      for (const key of ['categories', 'text', 'image', 'icon']) {
         assert.ok(!(key in entry), key);
       }
     });
@@ -343,8 +350,8 @@ describe('publicDirectory', function () {
     const now = new Date('2026-11-10T12:00:00Z');
     const at = (iso) => new Date(iso);
     const CATEGORIES = [
-      { _id: 'c2', name: { sv: 'Socialt', en: 'Social' }, sortOrder: 2 },
-      { _id: 'c1', name: { sv: 'Kurs' }, sortOrder: 1 },
+      { _id: 'c2', name: { sv: 'Socialt', en: 'Social' }, slug: 'socialt', sortOrder: 2 },
+      { _id: 'c1', name: { sv: 'Kurs' }, slug: 'kurs', sortOrder: 1 },
     ];
     const ACTIVITIES = [
       {

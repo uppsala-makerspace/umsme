@@ -3,6 +3,8 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
+import { Categories } from '/imports/common/collections/categories';
+import { withUniqueSlugs } from '/imports/common/lib/slug';
 
 /**
  * One-off data migrations, run at admin startup.
@@ -20,7 +22,6 @@ import { Members } from '/imports/common/collections/members';
 // store; only the route that serves it changes.
 const SHARED_FIELDS = [
   'name',
-  'tag',
   'description',
   'rules',
   'slackChannel',
@@ -133,6 +134,49 @@ const interestGroupsToAreasOfInterest = async () => {
   if (kinded) log(`marked ${kinded} existing workshop(s) as kind "workshop"`);
 };
 
+/**
+ * The activities' categories became the shared categories: the collection
+ * `activityCategories` is renamed `categories`, each category without a slug
+ * gets the one the website already knew it by (from its Swedish name), and the
+ * groups' and workshops' free `tag`, which categories replace, is dropped.
+ *
+ * Raw collections: a category without a slug fails the new schema.
+ */
+export const activityCategoriesToCategories = async () => {
+  const log = (message) => console.log(`[migration] categories: ${message}`);
+  const db = Categories.rawDatabase();
+  const names = (await db.listCollections({}, { nameOnly: true }).toArray()).map((c) => c.name);
+  const categories = Categories.rawCollection();
+  if (names.includes('activityCategories')) {
+    if (!names.includes('categories') || (await categories.countDocuments()) === 0) {
+      if (names.includes('categories')) await db.dropCollection('categories');
+      await db.renameCollection('activityCategories', 'categories');
+      log('renamed activityCategories to categories');
+    } else {
+      log('both activityCategories and categories have documents; left activityCategories as it is');
+    }
+  }
+
+  const all = await categories.find({}, { projection: { name: 1, slug: 1 } }).toArray();
+  if (all.some((c) => !c.slug)) {
+    const taken = new Set(all.filter((c) => c.slug).map((c) => c.slug));
+    const slugs = withUniqueSlugs(all.filter((c) => !c.slug).map((c) => ({ _id: c._id, source: c.name?.sv })));
+    for (const { _id, slug } of slugs) {
+      let unique = slug;
+      for (let n = 2; taken.has(unique); n += 1) unique = `${slug}-${n}`;
+      taken.add(unique);
+      await categories.updateOne({ _id }, { $set: { slug: unique } });
+      log(`gave ${_id} the slug "${unique}"`);
+    }
+  }
+
+  for (const collection of [Groups.rawCollection(), Workshops.rawCollection()]) {
+    const { modifiedCount } = await collection.updateMany({ tag: { $exists: true } }, { $unset: { tag: '' } });
+    if (modifiedCount) log(`dropped the tag of ${modifiedCount} in ${collection.collectionName}`);
+  }
+};
+
 export default async () => {
   await interestGroupsToAreasOfInterest();
+  await activityCategoriesToCategories();
 };

@@ -1,14 +1,15 @@
 import assert from 'assert';
 import { Groups } from '/imports/common/collections/groups';
+import { Workshops } from '/imports/common/collections/workshops';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Members } from '/imports/common/collections/members';
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
-import { ActivityCategories } from '/imports/common/collections/activityCategories';
+import { Categories } from '/imports/common/collections/categories';
 import { AuditLog } from '/imports/common/collections/auditLog';
 import { createActivity, updateActivity, removeActivity } from '/imports/common/server/activities/activities';
 import { createEvent, updateEvent, removeEvent } from '/imports/common/server/activities/events';
-import { createCategory, updateCategory, removeCategory } from '/imports/common/server/activities/categories';
+import { createCategory, updateCategory, removeCategory } from '/imports/common/server/categories';
 
 const prefix = 'acttest-';
 const userId = `${prefix}user`;
@@ -23,7 +24,7 @@ const rejects = (promise, error) => assert.rejects(promise, (e) => e.error === e
 const cleanup = async () => {
   await Events.removeAsync({ createdBy: userId });
   await Activities.removeAsync({ createdBy: userId });
-  await ActivityCategories.removeAsync({ 'name.sv': { $regex: `^${prefix}` } });
+  await Categories.removeAsync({ 'name.sv': { $regex: `^${prefix}` } });
   await GroupMemberships.removeAsync({ memberId: { $regex: `^${prefix}` } });
   await Groups.removeAsync({ 'name.sv': { $regex: `^${prefix}` } });
   await Members.removeAsync({ _id: { $regex: `^${prefix}` } });
@@ -160,14 +161,37 @@ describe('activities and events', function () {
     it('creates, updates, and is not removed while used', async function () {
       const id = await createCategory({ name: { sv: `${prefix}Kurs` }, sortOrder: 2 }, { userId });
       await updateCategory(id, { name: { sv: `${prefix}Kurs`, en: 'Course' } }, { userId });
-      const category = await ActivityCategories.findOneAsync(id);
+      const category = await Categories.findOneAsync(id);
       assert.deepStrictEqual([category.name.en, category.sortOrder], ['Course', undefined]);
       const activityId = await createActivity({ name: { sv: 'Kursen' }, categoryId: id }, { userId });
       await rejects(removeCategory(id, { userId }), 'in-use');
       await Activities.removeAsync(activityId);
       await removeCategory(id, { userId });
-      assert.strictEqual(await ActivityCategories.findOneAsync(id), undefined);
+      assert.strictEqual(await Categories.findOneAsync(id), undefined);
       await rejects(createCategory({ name: { en: 'Course' } }, { userId }), 'bad-name');
+    });
+
+    it('takes its slug from the Swedish name unless given one, unique and well formed', async function () {
+      const id = await createCategory({ name: { sv: `${prefix}Trä & Öppet hus` } }, { userId });
+      assert.strictEqual((await Categories.findOneAsync(id)).slug, `${prefix}tra-oppet-hus`);
+      const own = await createCategory({ name: { sv: `${prefix}Annan` }, slug: `${prefix}egen` }, { userId });
+      assert.strictEqual((await Categories.findOneAsync(own)).slug, `${prefix}egen`);
+      await rejects(createCategory({ name: { sv: `${prefix}Tredje` }, slug: `${prefix}egen` }, { userId }), 'slug-taken');
+      await rejects(createCategory({ name: { sv: `${prefix}Tredje` }, slug: 'Med Mellanslag' }, { userId }), 'bad-slug');
+      // Saving a category again keeps its own slug without colliding with itself.
+      await updateCategory(own, { name: { sv: `${prefix}Annan`, en: 'Other' }, slug: `${prefix}egen` }, { userId });
+      await Categories.removeAsync({ _id: { $in: [id, own] } });
+    });
+
+    it('is not removed while a group or a workshop has it', async function () {
+      const id = await createCategory({ name: { sv: `${prefix}Ämne` } }, { userId });
+      const tagged = await Groups.insertAsync({ name: { sv: `${prefix}Kategoriserad` }, type: 'function', categoryIds: [id] });
+      await rejects(removeCategory(id, { userId }), 'in-use');
+      await Groups.removeAsync(tagged);
+      const workshopId = await Workshops.insertAsync({ name: { sv: `${prefix}Verkstad` }, kind: 'workshop', status: 'forming', categoryIds: [id] });
+      await rejects(removeCategory(id, { userId }), 'in-use');
+      await Workshops.removeAsync(workshopId);
+      await removeCategory(id, { userId });
     });
   });
 });

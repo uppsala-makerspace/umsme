@@ -4,7 +4,7 @@ import { Spaces } from "/imports/common/collections/spaces";
 import { Activities } from "/imports/common/collections/activities";
 import { Events } from "/imports/common/collections/events";
 import { Members } from "/imports/common/collections/members";
-import { ActivityCategories } from "/imports/common/collections/activityCategories";
+import { Categories } from "/imports/common/collections/categories";
 import { adminBaseUrl } from "/imports/common/lib/links";
 import { buildDirectory } from "/imports/common/lib/publicDirectory";
 import { resolveEvent } from "/imports/common/lib/activityRules";
@@ -19,7 +19,7 @@ import {
 /**
  * WebApp.handlers callback serving what the public website builds from: the
  * workshops, areas of interest and open groups, the map's spaces, and the link between them;
- * the published activities and events to come, and the categories of activities.
+ * the published activities and events to come, and the categories.
  * Mounted at /api/public (see the mounting app's server/api/).
  *
  * URL shape:
@@ -85,7 +85,7 @@ export const makePublicDirectoryHandler = () => async (req, res) => {
   const events = await Events.find({
     $or: [{ end: { $gte: now } }, { activityId: { $in: activities.map((a) => a._id) }, end: { $lt: now } }],
   }).fetchAsync();
-  const categories = await ActivityCategories.find({}).fetchAsync();
+  const categories = await Categories.find({}).fetchAsync();
   // The names of the hosts of events that show them, and nothing else about
   // any member; buildDirectory publishes only the first name.
   const activityById = new Map(activities.map((a) => [a._id, a]));

@@ -1,7 +1,7 @@
 // What the stories show: a group, activities, events and categories.
 export const groups = [{ _id: 'g1', name: { sv: 'Styrgrupp Trä' }, type: 'steering' }, { _id: 'g2', name: { sv: 'Fikagruppen' }, type: 'function' }];
 export const groupName = (id) => groups.find((g) => g._id === id)?.name?.sv;
-export const categories = [{ _id: 'c1', name: { sv: 'Introduktion', en: 'Introduction' }, sortOrder: 1 }, { _id: 'c2', name: { sv: 'Socialt', en: 'Social' }, sortOrder: 2 }];
+export const categories = [{ _id: 'c1', name: { sv: 'Introduktion', en: 'Introduction' }, slug: 'introduktion', sortOrder: 1 }, { _id: 'c2', name: { sv: 'Socialt', en: 'Social' }, slug: 'socialt', sortOrder: 2 }];
 export const workshopOptions = [{ value: 'w1', label: 'Träverkstaden' }, { value: 'w2', label: 'Retrodatorer' }];
 export const spaceOptions = [{ value: 's1', label: 'Träverkstaden (Floor 1)' }, { value: 's2', label: 'Stora rummet (Floor 1)' }];
 export const intro = {

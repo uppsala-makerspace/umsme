@@ -51,6 +51,7 @@ export const GroupEditPage = ({ _id }) => {
   const common = {
     values, onChange: setField, busy, error,
     groups: choices.groups, workshopOptions: choices.workshopOptions, spaceOptions: choices.spaceOptions,
+    categoryOptions: choices.categoryOptions,
     roleOptions, responsible, onResponsibleChange, searchMembers,
   };
 

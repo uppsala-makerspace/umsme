@@ -151,9 +151,9 @@ export const eventFields = (v) => ({
 });
 
 /** The form's values for a category. */
-export const categoryValues = (category) => ({ ...bilingual(category, 'name'), sortOrder: numberText(category?.sortOrder) });
+export const categoryValues = (category) => ({ ...bilingual(category, 'name'), slug: category?.slug || '', sortOrder: numberText(category?.sortOrder) });
 
-export const categoryFields = (v) => ({ name: pair(v, 'name'), sortOrder: number(v.sortOrder) });
+export const categoryFields = (v) => ({ name: pair(v, 'name'), slug: v.slug || null, sortOrder: number(v.sortOrder) });
 
 /** An event's name: its own, or its activity's. */
 export const eventName = (event, activity) => event?.name?.sv || activity?.name?.sv || '';

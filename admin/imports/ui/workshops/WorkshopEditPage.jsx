@@ -34,7 +34,7 @@ export const WorkshopEditPage = ({ _id }) => {
     return (
       <WorkshopForm
         isNew values={values} onChange={setField} busy={busy} error={error}
-        groups={groups} spaceOptions={choices.spaceOptions}
+        groups={groups} spaceOptions={choices.spaceOptions} categoryOptions={choices.categoryOptions}
         onSave={() => run(() => saveWorkshop(values, null), { then: (id) => navigate(`/workshop/${id}`) })}
       />
     );
@@ -51,6 +51,7 @@ export const WorkshopEditPage = ({ _id }) => {
       notice={notice}
       groups={groups}
       spaceOptions={choices.spaceOptions}
+      categoryOptions={choices.categoryOptions}
       details={details}
       imageUrl={imageUrl(workshop)}
       uploading={uploading}

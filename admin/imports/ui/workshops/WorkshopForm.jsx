@@ -33,6 +33,7 @@ const TABS = [['details', 'Details'], ['image', 'Image'], ['references', 'Refere
  * @param {{ isNew: boolean, workshop?: object, values: object, onChange: (field, value) => void,
  *           onSave: () => void, busy?: boolean, error?: string, notice?: string,
  *           groups: Array<{ _id, name }>, spaceOptions: Array<{ value, label, group }>,
+ *           categoryOptions?: Array<{ value, label }>,
  *           details?: object,
  *           imageUrl?: string, onUploadImage?: (file) => void, onRemoveImage?: () => void,
  *           uploading?: boolean, onDelete?: () => void, tab?: string, onTab?: (tab) => void }} props
@@ -40,7 +41,7 @@ const TABS = [['details', 'Details'], ['image', 'Image'], ['references', 'Refere
  */
 export const WorkshopForm = ({
   isNew, workshop, values, onChange, onSave, busy = false, error, notice, groups, spaceOptions,
-  details, imageUrl, onUploadImage, onRemoveImage, uploading = false, onDelete, tab = 'details', onTab,
+  categoryOptions = [], details, imageUrl, onUploadImage, onRemoveImage, uploading = false, onDelete, tab = 'details', onTab,
 }) => {
   const shown = TABS.some(([t]) => t === tab) ? tab : 'details';
   const [confirming, setConfirming] = useState(false);
@@ -69,9 +70,12 @@ export const WorkshopForm = ({
         <TextField label="Name (Swedish)" required fullWidth {...text('nameSv')} />
         <TextField label="Name (English)" fullWidth {...text('nameEn')} />
       </Stack>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-        <TextField label="Tag (Swedish)" fullWidth helperText="Short label on the public website" {...text('tagSv')} />
-        <TextField label="Tag (English)" fullWidth {...text('tagEn')} />
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <ChipSelect
+          label="Categories" options={categoryOptions} value={values.categoryIds}
+          onChange={(ids) => onChange('categoryIds', ids)}
+          helperText="What the public website filters by; the list is kept under Categories."
+        />
       </Stack>
       <Stack spacing={2} sx={{ mb: 2 }}>
         <TextField label="Description (Swedish, markdown)" multiline minRows={4} fullWidth {...text('descriptionSv')} />

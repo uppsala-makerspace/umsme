@@ -9,6 +9,7 @@ import { Certificates } from '/imports/common/collections/certificates';
 import { StoreItems } from '/imports/common/collections/storeItems';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { AuditLog } from '/imports/common/collections/auditLog';
+import { Categories } from '/imports/common/collections/categories';
 import '/server/methods/groups';
 import '/server/methods/workshops';
 import '/server/methods/memberLookup';
@@ -162,6 +163,20 @@ describe('groups and workshops', function () {
       const doc = await Workshops.findOneAsync(docId);
       assert.strictEqual(doc.status, 'trial');
       assert.strictEqual('slackChannel' in doc, false);
+    });
+
+    it('keeps its categories, refusing an unknown one', async function () {
+      const categoryId = await Categories.insertAsync({ name: { sv: `${prefix}Ämne` }, slug: `${prefix}amne`, updatedAt: new Date() });
+      try {
+        await assert.rejects(call(board, 'workshops.create', workshop({ categoryIds: ['nope'] })), /not-found/);
+        const docId = await call(board, 'workshops.create', workshop({ categoryIds: [categoryId, categoryId] }));
+        assert.deepStrictEqual((await Workshops.findOneAsync(docId)).categoryIds, [categoryId]);
+        const { updatedAt } = await Workshops.findOneAsync(docId);
+        await call(board, 'workshops.update', docId, workshop({ categoryIds: [] }), updatedAt);
+        assert.strictEqual('categoryIds' in (await Workshops.findOneAsync(docId)), false);
+      } finally {
+        await Categories.removeAsync(categoryId);
+      }
     });
 
     it('counts the steering group and lists the certificates', async function () {

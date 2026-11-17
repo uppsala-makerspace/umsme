@@ -13,8 +13,9 @@ import { DataList } from '../components/DataList';
 import { categoryValues } from '/imports/common/lib/activityValues';
 
 /**
- * The categories of activities, the website's filter: a short list, each
- * added and changed in a dialog. A category in use can not be deleted.
+ * The categories, the website's filter for groups, workshops, areas of
+ * interest, activities and events: a short list, each added and changed in a
+ * dialog. A category in use can not be deleted.
  *
  * @param {{ loading: boolean, categories: object[], usage: (id) => number,
  *           onSave: (values, category|null) => Promise<boolean>, onDelete: (category) => void,
@@ -30,17 +31,18 @@ export const CategoryList = ({ loading, categories, usage, onSave, onDelete, bus
   const columns = [
     { field: 'name', headerName: 'Name', flex: 1, minWidth: 200, valueGetter: (value) => value?.sv || '' },
     { field: 'nameEn', headerName: 'English', flex: 1, minWidth: 160, valueGetter: (value, row) => row.name?.en || '' },
+    { field: 'slug', headerName: 'Slug', flex: 1, minWidth: 140 },
     { field: 'sortOrder', headerName: 'Order', type: 'number', width: 90 },
     { field: 'used', headerName: 'Used by', type: 'number', width: 100, valueGetter: (value, row) => usage(row._id) },
   ];
   return (
     <Box>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" component="h1">Activity categories</Typography>
+        <Typography variant="h4" component="h1">Categories</Typography>
         <Button variant="contained" onClick={() => open(null)}>Add category</Button>
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        What the website filters activities by. Lower order comes first; a click on a row changes it.
+        What the website filters workshops, areas of interest, groups, activities and events by. The slug is the category's id on the website. Lower order comes first; a click on a row changes it.
       </Typography>
       {error && !editing && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <DataList
@@ -56,6 +58,10 @@ export const CategoryList = ({ loading, categories, usage, onSave, onDelete, bus
             <Stack spacing={2} sx={{ pt: 1 }}>
               <TextField label="Name (Swedish)" required autoFocus {...text('nameSv')} />
               <TextField label="Name (English)" {...text('nameEn')} />
+              <TextField
+                label="Slug" {...text('slug')}
+                helperText="Lowercase a–z, digits and hyphens. Left empty, it comes from the Swedish name."
+              />
               <TextField label="Order" slotProps={{ htmlInput: { inputMode: 'numeric' } }} {...text('sortOrder')} />
             </Stack>
           </DialogContent>

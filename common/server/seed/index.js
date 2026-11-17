@@ -23,7 +23,8 @@ export { PRICES, makeMember, pay, payHistory, joinFamily, inviteToFamily } from 
 export { makeLiabilityDocument, makeMessageTemplate } from './documents';
 export { makeStorageWalls, makeStorageUnit, storageLocation } from './storage';
 export { makeStoreItem, makePurchase } from './shop';
-export { makeCategory, makeActivity, makeEvent, makeRegistration, makeInterest } from './activities';
+export { makeActivity, makeEvent, makeRegistration, makeInterest } from './activities';
+export { makeCategory } from './categories';
 
 /**
  * Empty the database and run `build` to fill it.

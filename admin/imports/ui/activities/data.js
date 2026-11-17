@@ -2,17 +2,17 @@ import { Meteor } from 'meteor/meteor';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
-import { ActivityCategories } from '/imports/common/collections/activityCategories';
 import { uploadImage } from '../groups/choices';
-import { activityFields, eventFields, categoryFields } from '/imports/common/lib/activityValues';
+import { activityFields, eventFields } from '/imports/common/lib/activityValues';
+
+export { useCategories } from '../categories/data';
 
 /**
- * Data for the activity, event and category pages: the narrow publications
+ * Data for the activity and event pages: the narrow publications
  * and the methods. The pages' containers use this; the pure components never do.
  */
 
 const byName = (a, b) => (a.name?.sv || '').localeCompare(b.name?.sv || '', 'sv');
-const bySortOrder = (a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity) || byName(a, b);
 
 export const useActivityList = () => useTracker(() => {
   const handle = Meteor.subscribe('admin.activities.list');
@@ -44,11 +44,6 @@ export const useActivityChoices = () => useTracker(() => {
   return { loading: !handle.ready(), activities: Activities.find({}, { fields: { name: 1, groupId: 1 } }).fetch().sort(byName) };
 }, []);
 
-export const useCategories = () => useTracker(() => {
-  const handle = Meteor.subscribe('admin.activityCategories.list');
-  return { loading: !handle.ready(), categories: ActivityCategories.find().fetch().sort(bySortOrder) };
-}, []);
-
 /** Create an activity (resolves to its id), or update one if an activity is given. */
 export const saveActivity = (values, activity) => (activity
   ? Meteor.callAsync('activities.update', activity._id, activityFields(values), activity.updatedAt ?? null)
@@ -66,12 +61,6 @@ export const saveEvent = (values, event) => (event
 export const removeEvent = (docId) => Meteor.callAsync('events.remove', docId);
 export const uploadEventImage = (docId, file) => uploadImage('events.uploadImage', docId, file);
 export const removeEventImage = (docId) => Meteor.callAsync('events.removeImage', docId);
-
-export const saveCategory = (values, category) => (category
-  ? Meteor.callAsync('activityCategories.update', category._id, categoryFields(values), category.updatedAt ?? null)
-  : Meteor.callAsync('activityCategories.create', categoryFields(values)));
-
-export const removeCategory = (docId) => Meteor.callAsync('activityCategories.remove', docId);
 
 export const activityImageUrl = (activity) => (activity?.imageFileId
   ? `/api/activities/${activity._id}/image?v=${encodeURIComponent(activity.imageFileId)}`

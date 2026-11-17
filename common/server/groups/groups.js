@@ -9,6 +9,7 @@ import { GROUP_TYPES, JOIN_POLICIES } from '/imports/common/lib/groupRules';
 import { syncLinkedRoleById } from '/imports/common/server/linkedRoleSync';
 import { recordChange } from '/imports/common/server/auditLog';
 import { text, bilingual, setOrUnset } from './text';
+import { categoryIdsOf } from '../categories';
 
 /**
  * Groups (grupper): steering groups run a workshop or area of interest,
@@ -69,7 +70,7 @@ const changesOf = async (fields, selfId, current) => {
   changes.$set.joinPolicy = joinPolicy;
   changes.$set.allowJoinRequests = fields.allowJoinRequests !== false;
   setOrUnset(changes, {
-    tag: bilingual(fields.tag),
+    categoryIds: await categoryIdsOf(fields.categoryIds),
     description: bilingual(fields.description),
     rules: bilingual(fields.rules),
     slackChannel: text(fields.slackChannel),

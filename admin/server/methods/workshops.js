@@ -11,7 +11,7 @@ const Bilingual = Match.Maybe({ sv: Match.Maybe(String), en: Match.Maybe(String)
 const Id = Match.Maybe(String);
 const WorkshopFields = {
   name: { sv: String, en: Match.Maybe(String) },
-  tag: Match.Optional(Bilingual),
+  categoryIds: Match.Optional([String]),
   description: Match.Optional(Bilingual),
   rules: Match.Optional(Bilingual),
   kind: Match.Optional(String),

@@ -1120,26 +1120,15 @@ export const models = {
       max: 100,
       optional: true,
     },
-    // Short label for the public website's listing (see the /api/public
-    // export). Not the same as the name: "Textilverkstad" vs "Textil".
-    tag: {
-      label: "Tag (public website)",
-      type: Object,
-      blackbox: true,
+    // Categories (the shared list in `categories`), the public website's
+    // filter; activities have one each, this may have several.
+    categoryIds: {
+      label: "Categories",
+      type: Array,
       optional: true,
+      autoform: { omit: true },
     },
-    "tag.sv": {
-      label: "Tag (Swedish)",
-      type: String,
-      max: 40,
-      optional: true,
-    },
-    "tag.en": {
-      label: "Tag (English)",
-      type: String,
-      max: 40,
-      optional: true,
-    },
+    "categoryIds.$": { type: String, autoform: { omit: true } },
     description: {
       label: "Description",
       type: Object,
@@ -1351,26 +1340,15 @@ export const models = {
       max: 100,
       optional: true,
     },
-    // Short label for the public website's listing (see the /api/public
-    // export). Not the same as the name: "Textilverkstad" vs "Textil".
-    tag: {
-      label: "Tag (public website)",
-      type: Object,
-      blackbox: true,
+    // Categories (the shared list in `categories`), the public website's
+    // filter; activities have one each, this may have several.
+    categoryIds: {
+      label: "Categories",
+      type: Array,
       optional: true,
+      autoform: { omit: true },
     },
-    "tag.sv": {
-      label: "Tag (Swedish)",
-      type: String,
-      max: 40,
-      optional: true,
-    },
-    "tag.en": {
-      label: "Tag (English)",
-      type: String,
-      max: 40,
-      optional: true,
-    },
+    "categoryIds.$": { type: String, autoform: { omit: true } },
     description: {
       label: "Description",
       type: Object,
@@ -1965,9 +1943,12 @@ export const models = {
     memberId: { type: String, max: 50 },
     createdAt: { type: Date },
   },
-  // The website's filter for activities, a list board and admin keep.
-  activityCategory: {
+  // The public website's filter, shared by groups, workshops, areas of
+  // interest, activities and events: a list board and admin keep. The slug is
+  // its id on the website, so it stays put when the name changes.
+  category: {
     ...bilingual("name", "Name", 60, { optional: false }),
+    slug: { label: "Slug", type: String, max: 60, regEx: /^[a-z0-9]+(-[a-z0-9]+)*$/ },
     sortOrder: { label: "Sort order", type: Number, optional: true },
     updatedAt: { label: "Updated", type: Date, optional: true },
   },

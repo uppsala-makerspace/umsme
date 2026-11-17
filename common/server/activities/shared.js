@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Groups } from '/imports/common/collections/groups';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
-import { ActivityCategories } from '/imports/common/collections/activityCategories';
+import { Categories } from '/imports/common/collections/categories';
 import { Certificates } from '/imports/common/collections/certificates';
 import { REGISTRATIONS, CHECK_INS } from '/imports/common/lib/activityRules';
 import { parseClock } from '/imports/common/lib/days';
@@ -43,7 +43,7 @@ export const sharedChanges = async (fields, { inherit }) => {
   setOrUnset(changes, {
     name: bilingual(fields.name),
     description: bilingual(fields.description),
-    categoryId: await exists(ActivityCategories, text(fields.categoryId), 'category'),
+    categoryId: await exists(Categories, text(fields.categoryId), 'category'),
     workshopId: await exists(Workshops, text(fields.workshopId), 'workshop'),
     spaceId: await exists(Spaces, text(fields.spaceId), 'space'),
     slackChannel: text(fields.slackChannel),

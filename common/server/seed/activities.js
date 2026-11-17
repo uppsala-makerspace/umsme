@@ -1,12 +1,7 @@
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
-import { ActivityCategories } from '/imports/common/collections/activityCategories';
 import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
 import { ActivityInterests } from '/imports/common/collections/activityInterests';
-
-/** A category of activities. @returns {Promise<string>} its id */
-export const makeCategory = (sv, en, sortOrder) =>
-  ActivityCategories.insertAsync({ name: { sv, ...(en ? { en } : {}) }, sortOrder, updatedAt: new Date() });
 
 /** An activity. @returns {Promise<string>} its id */
 export const makeActivity = ({ createdAt = new Date(), ...fields }) =>

@@ -15,6 +15,7 @@ export const DOMAIN_ROLES = {
   groups: ['admin', 'board'],
   workshops: ['admin', 'board'],
   activities: ['admin', 'board'],
+  categories: ['admin', 'board'],
   memberLookup: ['admin', 'board'],
   certificates: ['admin', 'board'],
   announcements: ['admin', 'board'],

@@ -10,7 +10,7 @@ import { uploadImage } from '../groups/choices';
 
 export const useWorkshopList = () => useTracker(() => {
   const handle = Meteor.subscribe('admin.workshops.list');
-  return { loading: !handle.ready(), workshops: Workshops.find({}, { fields: { name: 1, kind: 1, status: 1, groupId: 1 } }).fetch() };
+  return { loading: !handle.ready(), workshops: Workshops.find({}, { fields: { name: 1, kind: 1, status: 1, groupId: 1, categoryIds: 1 } }).fetch() };
 }, []);
 
 /** One whole workshop; none when there is no id (a new one). */
@@ -26,7 +26,6 @@ const bilingual = (doc, field) => ({ [`${field}Sv`]: doc?.[field]?.sv || '', [`$
 export const formValues = (workshop) => ({
   kind: workshop?.kind || 'workshop',
   ...bilingual(workshop, 'name'),
-  ...bilingual(workshop, 'tag'),
   ...bilingual(workshop, 'description'),
   ...bilingual(workshop, 'rules'),
   status: workshop?.status || 'forming',
@@ -35,13 +34,14 @@ export const formValues = (workshop) => ({
   groupId: workshop?.groupId || '',
   primarySpaceId: workshop?.primarySpaceId || '',
   secondarySpaceIds: workshop?.secondarySpaceIds || [],
+  categoryIds: workshop?.categoryIds || [],
 });
 
 const pair = (v, field) => ({ sv: v[`${field}Sv`], en: v[`${field}En`] });
 const fieldsFrom = (v) => ({
   kind: v.kind,
   name: pair(v, 'name'),
-  tag: pair(v, 'tag'),
+  categoryIds: v.categoryIds,
   description: pair(v, 'description'),
   rules: pair(v, 'rules'),
   status: v.status,

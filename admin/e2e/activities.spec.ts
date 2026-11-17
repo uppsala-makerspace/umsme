@@ -167,18 +167,28 @@ test.describe('Events', () => {
   });
 });
 
-test.describe('Activity categories', () => {
-  test('lists them with their use', async ({ page }) => {
-    await openAs(page, 'admin', '/activities/categories');
+test.describe('Categories', () => {
+  test('lists them with their slug and use', async ({ page }) => {
+    await openAs(page, 'admin', '/categories');
     await expect(rows(page).filter({ hasText: 'Kurs' })).toContainText('Course');
+    await expect(rows(page).filter({ hasText: 'Kurs' })).toContainText('kurs');
   });
 
   test('adds, changes and deletes a category', async ({ page }) => {
-    await openAs(page, 'admin', '/activities/categories');
+    await openAs(page, 'admin', '/categories');
     await action(page, /^add category$/i).click();
     await page.getByRole('dialog').getByRole('textbox', { name: 'Name (Swedish)' }).fill('E2E ny kategori');
     await page.getByRole('dialog').getByRole('button', { name: /^add$/i }).click();
-    await expect(rows(page).filter({ hasText: 'E2E ny kategori' })).toHaveCount(1);
+    // Left empty, the slug comes from the Swedish name.
+    await expect(rows(page).filter({ hasText: 'E2E ny kategori' })).toContainText('e2e-ny-kategori');
+
+    await rows(page).filter({ hasText: 'E2E ny kategori' }).click();
+    await page.getByRole('dialog').getByRole('textbox', { name: 'Slug' }).fill('kurs');
+    await page.getByRole('dialog').getByRole('button', { name: /^save$/i }).click();
+    await expect(page.getByRole('dialog')).toContainText('already has the slug');
+    await page.getByRole('dialog').getByRole('textbox', { name: 'Slug' }).fill('e2e-egen');
+    await page.getByRole('dialog').getByRole('button', { name: /^save$/i }).click();
+    await expect(rows(page).filter({ hasText: 'E2E ny kategori' })).toContainText('e2e-egen');
 
     await rows(page).filter({ hasText: 'E2E edit category' }).click();
     await page.getByRole('dialog').getByRole('textbox', { name: 'Name (English)' }).fill('Edited');
@@ -191,7 +201,7 @@ test.describe('Activity categories', () => {
   });
 
   test('keeps a category in use', async ({ page }) => {
-    await openAs(page, 'admin', '/activities/categories');
+    await openAs(page, 'admin', '/categories');
     await rows(page).filter({ hasText: 'Kurs' }).click();
     await expect(page.getByRole('dialog').getByRole('button', { name: /^delete$/i })).toBeDisabled();
   });

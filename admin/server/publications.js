@@ -14,7 +14,7 @@ import { Groups } from '/imports/common/collections/groups';
 import { Workshops } from '/imports/common/collections/workshops';
 import { Activities } from '/imports/common/collections/activities';
 import { Events } from '/imports/common/collections/events';
-import { ActivityCategories } from '/imports/common/collections/activityCategories';
+import { Categories } from '/imports/common/collections/categories';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { Spaces } from '/imports/common/collections/spaces';
 import { StoreItems } from '/imports/common/collections/storeItems';
@@ -156,7 +156,7 @@ export default () => {
 
   Meteor.publish('admin.groups.list', async function () {
     if (!(await hasRole(this.userId, DOMAIN_ROLES.groups))) return this.ready();
-    return Groups.find({}, { fields: { name: 1, type: 1, allowJoinRequests: 1, joinPolicy: 1, responsibleMemberId: 1, slackChannel: 1, description: 1 } });
+    return Groups.find({}, { fields: { name: 1, type: 1, allowJoinRequests: 1, joinPolicy: 1, responsibleMemberId: 1, slackChannel: 1, description: 1, categoryIds: 1 } });
   });
 
   Meteor.publish('admin.groups.group', async function (docId) {
@@ -174,7 +174,7 @@ export default () => {
 
   Meteor.publish('admin.workshops.list', async function () {
     if (!(await hasRole(this.userId, DOMAIN_ROLES.workshops))) return this.ready();
-    return Workshops.find({}, { fields: { name: 1, kind: 1, status: 1, groupId: 1 } });
+    return Workshops.find({}, { fields: { name: 1, kind: 1, status: 1, groupId: 1, categoryIds: 1 } });
   });
 
   Meteor.publish('admin.workshops.workshop', async function (docId) {
@@ -212,9 +212,9 @@ export default () => {
     return event?.activityId ? [Events.find(docId), Activities.find(event.activityId)] : Events.find(docId);
   });
 
-  Meteor.publish('admin.activityCategories.list', async function () {
-    if (!(await hasRole(this.userId, DOMAIN_ROLES.activities))) return this.ready();
-    return ActivityCategories.find();
+  Meteor.publish('admin.categories.list', async function () {
+    if (!(await hasRole(this.userId, DOMAIN_ROLES.categories))) return this.ready();
+    return Categories.find();
   });
 
   // The certificates, with what the list shows and what choosing a

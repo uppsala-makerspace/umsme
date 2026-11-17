@@ -46,7 +46,7 @@ In a development setup the admin app serves it at
   "palette": { "green": "#5fc86f", "blue": "#5fa8c8", "amber": "#e0b64f",
                "purple": "#b18fd0", "coral": "#e08a6f" },
   "events":     [ /* free-standing events to come */ ],
-  "categories": [ /* the categories of activities */ ]
+  "categories": [ /* the categories everything is filtered by */ ]
 }
 ```
 
@@ -55,7 +55,7 @@ Content type is `application/json; charset=utf-8`.
 ### Conventions
 
 - **Missing values are left out, not set to `null`.** A field with no value is
-  absent from the object, so test for presence (`"tag" in entry`).
+  absent from the object, so test for presence (`"text" in entry`).
 - **Bilingual fields** are objects with `sv` and/or `en`. Either language may be
   missing; the field is absent when both are.
 - **Text is Markdown.** `text` fields are the full, raw Markdown description and
@@ -72,7 +72,7 @@ Content type is `application/json; charset=utf-8`.
   "kind": "workshop",
   "status": "established",
   "name":  { "sv": "Träverkstaden", "en": "Wood workshop" },
-  "tag":   { "sv": "Trä", "en": "Wood" },
+  "categories": ["hantverk"],
   "text":  { "sv": "…", "en": "…" },
   "icon":  "https://umsme.uppsalamakerspace.se/api/spaces/<docId>/icon?v=…",
   "image": "https://umsme.uppsalamakerspace.se/api/workshops/<docId>/image?v=…",
@@ -90,7 +90,7 @@ Content type is `application/json; charset=utf-8`.
 | `status` | string    | Workshops and areas of interest only: `established` or `trial`. |
 | `type`   | string    | Groups only: always `function`. |
 | `name`   | bilingual | Display name. |
-| `tag`    | bilingual | Short label for listings, e.g. "Textil". |
+| `categories` | array | Workshops, areas of interest and groups: the `id`s of their [categories](#categories). Absent when there are none. |
 | `text`   | bilingual | Description in Markdown. |
 | `icon`   | URL       | Icon of the entry's primary space. |
 | `image`  | URL       | The entry's own picture. |
@@ -114,7 +114,7 @@ that does a task for the makerspace as a whole.
 
 An activity is something the makerspace does again and again, such as an
 introduction or a craft evening; its events are the times it happens. An
-entry of kind `activity` has fields of its own instead of `status`, `tag`,
+entry of kind `activity` has fields of its own instead of `status`, `categories`,
 `icon` and the `spaces` array:
 
 ```jsonc
@@ -186,8 +186,11 @@ Their `id` is made from the Swedish name and the day, e.g.
 { "id": "kurs-och-introduktion", "name": { "sv": "Kurs och introduktion", "en": "Course and introduction" } }
 ```
 
-The categories of activities, in the order the makerspace wants them shown,
-for filtering. Their `id`s follow the same rules as entry `id`s.
+The categories, in the order the makerspace wants them shown, for filtering
+workshops, areas of interest, groups, activities and events. An entry may have
+several (`categories`), an activity or event one (`category`). A category's
+`id` is a slug kept in umsme: it is set from the Swedish name when the category
+is made, can be edited in admin, and stays put when the name changes.
 
 ### `spaces`
 

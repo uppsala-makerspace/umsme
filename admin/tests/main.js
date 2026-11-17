@@ -1,5 +1,6 @@
 import assert from "assert";
 import "./accounting.tests";
+import "./categoriesMigration.tests";
 import "./stats.tests";
 import "./expenseApproval.tests";
 import "./expenseBudget.tests";

@@ -11,6 +11,7 @@ const workshopOptions = [
   { value: 'w1', label: 'Keramikverkstaden', group: 'Workshops' },
   { value: 'w2', label: 'Retrodatorer', group: 'Areas of interest' },
 ];
+const categoryOptions = [{ value: 'c1', label: 'Hantverk' }, { value: 'c2', label: 'Elektronik' }];
 const spaceOptions = [{ value: 's1', label: 'Keramikrummet (Floor 2)', group: 'Floor 2' }, { value: 's2', label: 'Stora rummet (Floor 1)', group: 'Floor 1' }];
 const roleOptions = [{ value: 'board', label: 'board' }, { value: 'storage', label: 'storage' }];
 const gustav = { _id: 'm1', name: 'Gustav Gruppledare', mid: '1001' };
@@ -22,7 +23,7 @@ const steering = {
   slackChannel: '#keramik', responsibleMemberId: 'm1', allowJoinRequests: false, joinPolicy: 'request-any',
 };
 const values = (g) => ({
-  nameSv: g.name?.sv || '', nameEn: '', tagSv: '', tagEn: '', descriptionSv: g.description?.sv || '', descriptionEn: '',
+  nameSv: g.name?.sv || '', nameEn: '', categoryIds: [], descriptionSv: g.description?.sv || '', descriptionEn: '',
   rulesSv: '', rulesEn: '', type: g.type || '', parentGroupId: g.parentGroupId || '', slackChannel: g.slackChannel || '',
   guidesUrl: '', responsibleMemberId: g.responsibleMemberId || '', allowJoinRequests: g.allowJoinRequests !== false,
   joinPolicy: g.joinPolicy || 'request-responsible', linkedRole: '', primarySpaceId: '', secondarySpaceIds: [],
@@ -57,7 +58,7 @@ export default {
   component: GroupForm,
   render: (args) => <Editable {...args} />,
   args: {
-    isNew: false, group: steering, values: values(steering), groups, workshopOptions, spaceOptions, roleOptions,
+    isNew: false, group: steering, values: values(steering), groups, workshopOptions, spaceOptions, categoryOptions, roleOptions,
     responsible: gustav, searchMembers, members, references: inUse,
     onSave: fn(), onDelete: fn(), onUploadImage: fn(), onRemoveImage: fn(),
     onAddMember: fn(), onApprove: fn(), onReject: fn(), onRemoveMember: fn(),

@@ -3,7 +3,7 @@ import { check, Match } from "meteor/check";
 import { Roles } from "meteor/roles";
 import { Activities } from "/imports/common/collections/activities";
 import { Events } from "/imports/common/collections/events";
-import { ActivityCategories } from "/imports/common/collections/activityCategories";
+import { Categories } from "/imports/common/collections/categories";
 import { Groups } from "/imports/common/collections/groups";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Workshops } from "/imports/common/collections/workshops";
@@ -193,7 +193,7 @@ const names = async (collection, ids) => {
 /** Names of what activities and events refer to, looked up once for a list. */
 const lookups = async (docs) => ({
   groups: await names(Groups, docs.map((d) => d.groupId)),
-  categories: await names(ActivityCategories, docs.map((d) => d.categoryId)),
+  categories: await names(Categories, docs.map((d) => d.categoryId)),
   workshops: await names(Workshops, docs.map((d) => d.workshopId)),
   spaces: await names(Spaces, docs.map((d) => d.spaceId)),
   certificates: await names(Certificates, docs.flatMap((d) => [d.requiredCertificateId, d.targetCertificateId])),
@@ -575,7 +575,7 @@ Meteor.methods({
     ).fetchAsync()).filter((a) => who.adminish || mayBookEventOf({
       activity: a, mayEdit: access.get(a.groupId)?.edit, mayBook: access.get(a.groupId)?.book,
     }));
-    const categories = await ActivityCategories.find({}, { sort: { sortOrder: 1, "name.sv": 1 } }).fetchAsync();
+    const categories = await Categories.find({}, { sort: { sortOrder: 1, "name.sv": 1 } }).fetchAsync();
     const workshops = await Workshops.find({}, { fields: { name: 1, kind: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
     const spaces = await Spaces.find({}, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync();
     const certificates = await Certificates.find({}, { fields: { name: 1 }, sort: { "name.sv": 1 } }).fetchAsync();

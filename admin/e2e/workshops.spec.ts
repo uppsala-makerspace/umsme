@@ -59,12 +59,15 @@ test.describe('Workshops and areas of interest', () => {
     await field(page, 'Description (Swedish, markdown)').fill('En verkstad för test.');
     await field(page, 'Slack channel').fill('#e2e-verkstad');
     await page.getByRole('combobox', { name: 'Status' }).selectOption('trial');
+    await page.getByRole('combobox', { name: 'Categories' }).fill('kur');
+    await page.getByRole('listbox').getByRole('option', { name: 'Kurs' }).click();
     await saveButton(page).click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/E2E edit verkstad|^Workshops/);
 
     await openWorkshop(page, 'E2E edit verkstad');
     await expect(field(page, 'Description (Swedish, markdown)')).toHaveValue('En verkstad för test.');
     await expect(field(page, 'Slack channel')).toHaveValue('#e2e-verkstad');
+    await expect(page.getByRole('button', { name: 'Kurs Remove Kurs' })).toBeVisible();
   });
 
   test('sets the steering group and the spaces, on save', async ({ page }) => {
