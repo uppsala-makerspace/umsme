@@ -19,3 +19,4 @@ import './workshops';
 import './store';
 import './activities';
 import './impersonation';
+import './emails';

@@ -12,7 +12,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Section } from '../components/Section';
 
-const Side = ({ title, member }) => (
+export const Side = ({ title, member }) => (
   <Box sx={{ flex: 1 }}>
     <Typography variant="subtitle1" component="h3">{title}: <Link href={`/member/${member._id}`}>{member.name}</Link> <Typography component="span" variant="body2" color="text.secondary">{member.mid}</Typography></Typography>
     <Typography variant="body2">{member.email}</Typography>
@@ -24,7 +24,7 @@ const Side = ({ title, member }) => (
   </Box>
 );
 
-const Rows = ({ rows }) => (
+export const Rows = ({ rows }) => (
   <Table size="small" sx={{ width: 'auto', mb: 2 }}>
     <TableBody>{rows.map(([a, b]) => <TableRow key={a}><TableCell>{a}</TableCell><TableCell align="right">{b}</TableCell></TableRow>)}</TableBody>
   </Table>

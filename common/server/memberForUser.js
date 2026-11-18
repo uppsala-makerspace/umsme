@@ -17,5 +17,10 @@ import { normalizedEmails } from '/imports/common/lib/memberMatch';
 export const memberForUser = async (user) => {
   const emails = normalizedEmails(user, { verifiedOnly: true });
   if (emails.length === 0) return null;
-  return Members.findOneAsync({ email: { $in: emails } });
+  // Should two verified addresses each find a member, the one first on the
+  // account wins, the same every time (merging the accounts and members of
+  // one person removes the case).
+  const found = await Members.find({ email: { $in: emails } }).fetchAsync();
+  if (found.length <= 1) return found[0];
+  return emails.map((email) => found.find((m) => m.email === email)).find(Boolean);
 };

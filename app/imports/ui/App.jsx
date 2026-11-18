@@ -45,6 +45,8 @@ const MessageDetail = lazyWithRetry(() => import('/imports/pages/messages/detail
 const Tool = lazyWithRetry(() => import('/imports/pages/tool'));
 const ToolDetail = lazyWithRetry(() => import('/imports/pages/tool/detail'));
 const Settings = lazyWithRetry(() => import('/imports/pages/settings'));
+const Emails = lazyWithRetry(() => import('/imports/pages/emails'));
+const MergeAccount = lazyWithRetry(() => import('/imports/pages/mergeAccount'));
 const Expenses = lazyWithRetry(() => import('/imports/pages/expenses/list'));
 const ExpenseDetail = lazyWithRetry(() => import('/imports/pages/expenses/detail'));
 const ExpenseNew = lazyWithRetry(() => import('/imports/pages/expenses/new'));
@@ -116,6 +118,8 @@ export const App = () => {
             <Route path="/tool" element={<Tool />} />
             <Route path="/tool/:id" element={<ToolDetail />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/account/emails" element={<Emails />} />
+            <Route path="/merge-account/:token" element={<MergeAccount />} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/expenses/new" element={<ExpenseNew />} />
             <Route path="/expenses/:expenseId" element={<ExpenseDetail />} />

@@ -44,6 +44,36 @@ Email verification is the gate between "authenticated user" and "linked member."
 - **OAuth signups**: Treated as pre-verified (the `Accounts.onLogin` hook sets `verified: true`).
 - **Custom reset-password URL**: Configured as `Meteor.absoluteUrl('resetPassword/${token}')` so the app's client-side router handles the token.
 
+## 3b. Several Email Addresses
+
+An account may have several addresses (`user.emails`). The member adds,
+verifies, removes them and picks the primary one on **My account → Email
+addresses** (`/account/emails`, methods `emails.*` in
+`app/server/methods/emails.js`):
+
+- Every verified address signs in and finds the member.
+- The primary address is first on the account and is the member's `email`,
+  where mail goes. Only a verified address can become primary; making one
+  primary also moves pending family invitations to it.
+- The primary address, and the last verified one, cannot be removed.
+- An address that belongs to another account is refused with `email-taken`.
+
+## 3c. Merging Accounts on Request
+
+When an address belongs to another account, the member can ask to merge that
+account into their own (`emails.requestMerge`). A link valid for a day is
+mailed to that address (`common/server/users/mergeRequests.js`); the token is
+stored hashed in `accountMergeRequests` and works once, for those two accounts.
+Opening it shows what will happen (`/merge-account/:token`), and confirming
+merges the accounts and their members (`mergeUsers`, see `docs/data-model.md`,
+5b), keeping the requesting account and the member with memberships.
+
+Whoever reads that mailbox could already take the other account over with a
+password reset, so the link is proof enough. Only the plain case is merged on
+the member's word: a staff role on either account, a member in a family,
+storage conflicts or two different Google accounts leave it to an admin, and
+the refusal is written to the audit log.
+
 ## 4. User-to-Member Linking
 
 Users and Members are **separate collections** with no foreign key. The link is established at runtime by matching email addresses.

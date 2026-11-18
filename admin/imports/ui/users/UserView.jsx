@@ -54,7 +54,19 @@ export const UserView = ({ detail, values, onChange, onSave, busy = false, error
         <Stack spacing={2} sx={{ maxWidth: 500 }}>
           <TextField label="Username" value={values.username} onChange={(e) => onChange('username', e.target.value)} autoComplete="off" />
           <TextField label="Email" type="email" value={values.email} onChange={(e) => onChange('email', e.target.value)} autoComplete="off"
-            helperText={user.emails?.[0] && !user.emails[0].verified ? 'Not verified' : undefined} />
+            helperText={user.emails?.[0] && !user.emails[0].verified ? 'Not verified' : 'The primary address'} />
+          {user.emails?.length > 1 && (
+            <Box>
+              <Typography variant="body2" color="text.secondary">Other addresses, which sign in too when verified:</Typography>
+              <Box component="ul" sx={{ pl: 2.5, my: 0.5 }}>
+                {user.emails.slice(1).map((e) => (
+                  <Typography component="li" variant="body2" key={e.address}>
+                    {e.address}{!e.verified && <Typography component="span" variant="body2" color="text.secondary"> (not verified)</Typography>}
+                  </Typography>
+                ))}
+              </Box>
+            </Box>
+          )}
           <Box><Button type="submit" variant="contained" disabled={busy}>Save</Button></Box>
         </Stack>
       </Box>

@@ -15,6 +15,11 @@ import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
+import { Events } from '/imports/common/collections/events';
+import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
+import { ActivityInterests } from '/imports/common/collections/activityInterests';
+import { HOLDING, PENDING } from '/imports/common/lib/activityRules';
+import { recordChange } from '/imports/common/server/auditLog';
 import {
   StorageUnits, StorageRequests, StorageOffers, StorageEvents,
 } from '/imports/common/collections/storage';
@@ -73,7 +78,26 @@ const FIELD_MOVES = [
 const ARRAY_MOVES = [
   { collection: Certificates, field: 'certifiers', label: 'Certificates as certifier' },
   { collection: ExpenseAccounts, field: 'approverMemberIds', label: 'Expense accounts as approver' },
+  { collection: Events, field: 'hostMemberIds', label: 'Events as host' },
 ];
+
+// Rows unique per member and something else ({eventId, memberId},
+// {activityId, memberId}): where both members have one, only one is kept.
+const PAIRED_MOVES = [
+  { collection: EventRegistrations, key: 'eventId', label: 'Event registrations' },
+  { collection: ActivityInterests, key: 'activityId', label: 'Activity interests' },
+];
+
+// The better of two registrations to the same event: a seat before the
+// queue, the queue before one that is over or withdrawn.
+const registrationRank = (r) => (HOLDING.includes(r.state) ? 2 : PENDING.includes(r.state) ? 1 : 0);
+
+const pairCollisions = async ({ collection, key }, sourceId, destId) => {
+  const destRows = await collection.find({ memberId: destId }).fetchAsync();
+  const destByKey = new Map(destRows.map((r) => [r[key], r]));
+  const sourceRows = await collection.find({ memberId: sourceId, [key]: { $in: [...destByKey.keys()] } }).fetchAsync();
+  return sourceRows.map((source) => ({ source, dest: destByKey.get(source[key]) }));
+};
 
 const fmt = (date) => (date ? date.toISOString().slice(0, 10) : '–');
 
@@ -181,9 +205,11 @@ const membersSummary = async (member) => ({
  *
  * @param {object} source member to remove
  * @param {object} dest member to keep
+ * @param {{accountsMerged?: boolean}} [options] accountsMerged: the accounts
+ *   are merged as well, so no account loses its member
  * @return {Promise<{source, dest, moves: Array<{label, count}>, blockers: string[], warnings: string[]}>}
  */
-export const planMemberMerge = async (source, dest) => {
+export const planMemberMerge = async (source, dest, { accountsMerged = false } = {}) => {
   const blockers = [];
   const warnings = [];
 
@@ -214,6 +240,13 @@ export const planMemberMerge = async (source, dest) => {
     moves.push({ label: 'Group memberships merged, both were in the same group', count: collisions.length });
   }
 
+  for (const paired of PAIRED_MOVES) {
+    const collisions2 = await pairCollisions(paired, source._id, dest._id);
+    const rows = await paired.collection.find({ memberId: source._id }).countAsync() - collisions2.length;
+    if (rows > 0) moves.push({ label: paired.label, count: rows });
+    if (collisions2.length > 0) moves.push({ label: `${paired.label} merged, both had one`, count: collisions2.length });
+  }
+
   const sourceMemberships = await Memberships.find({ mid: source._id }).fetchAsync();
   const destMemberships = await Memberships.find({ mid: dest._id }).fetchAsync();
   for (const s of sourceMemberships) {
@@ -230,7 +263,8 @@ export const planMemberMerge = async (source, dest) => {
     warnings.push(`The family will have ${dependents} members, more than the ${MAX_FAMILY_DEPENDENTS} allowed.`);
   }
 
-  if (source.email && source.email !== dest.email) {
+  // Not when the accounts are merged too: the kept account then has both emails.
+  if (!accountsMerged && source.email && source.email !== dest.email) {
     const accounts = await Meteor.users.find(userSelectorForMember(source), { fields: { emails: 1 } }).fetchAsync();
     for (const account of accounts) {
       if (dest.email && normalizedEmails(account).includes(dest.email)) continue;
@@ -252,10 +286,12 @@ export const planMemberMerge = async (source, dest) => {
 /**
  * Move everything from source to dest and remove source.
  *
+ * @param {{userId?: string, accountsMerged?: boolean}} [options] userId: who
+ *   merges, for the audit log
  * @return {Promise<object>} the plan that was carried out
  */
-export const mergeMembers = async (source, dest) => {
-  const plan = await planMemberMerge(source, dest);
+export const mergeMembers = async (source, dest, { userId = null, accountsMerged = false } = {}) => {
+  const plan = await planMemberMerge(source, dest, { accountsMerged });
   if (plan.blockers.length > 0) {
     throw new Meteor.Error('merge-blocked', plan.blockers.join(' '));
   }
@@ -280,6 +316,20 @@ export const mergeMembers = async (source, dest) => {
     affectedGroups.add(row.groupId);
   }
   await GroupMemberships.updateAsync({ memberId: source._id }, { $set: { memberId: dest._id } }, { multi: true });
+
+  // One registration per event and one interest per activity: the better
+  // registration is kept (a seat given back is counted off the event).
+  for (const paired of PAIRED_MOVES) {
+    for (const { source: s, dest: d } of await pairCollisions(paired, source._id, dest._id)) {
+      const keepSource = paired.collection === EventRegistrations && registrationRank(s) > registrationRank(d);
+      const dropped = keepSource ? d : s;
+      await paired.collection.removeAsync(dropped._id);
+      if (paired.collection === EventRegistrations && HOLDING.includes(dropped.state)) {
+        await Events.updateAsync(dropped.eventId, { $inc: { seatsTaken: -1 } });
+      }
+    }
+    await paired.collection.updateAsync({ memberId: source._id }, { $set: { memberId: dest._id } }, { multi: true });
+  }
 
   for (const { collection, field } of FIELD_MOVES) {
     await collection.updateAsync({ [field]: source._id }, { $set: { [field]: dest._id } }, { multi: true });
@@ -306,6 +356,10 @@ export const mergeMembers = async (source, dest) => {
   });
 
   await Members.removeAsync(source._id);
+  await recordChange({
+    userId, domain: 'members', action: 'merge', docId: dest._id,
+    after: { mergedFrom: source._id, mergedMid: source.mid, moves: plan.moves, copies: plan.copies },
+  });
 
   await updateMember(await Members.findOneAsync(dest._id));
   await reconcileStorageState({ ownerIds: [dest._id] });

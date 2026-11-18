@@ -8,6 +8,7 @@
  * The storage fixtures are positional: tests look for units by name, 1001 to
  * 1006, and each storage lifecycle owns its own units.
  */
+import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { StorageUnits, StorageRequests, StorageOffers } from '/imports/common/collections/storage';
 import { daysFromNow } from '../dates';
@@ -36,7 +37,8 @@ import { Messages } from '/imports/common/collections/messages';
 import { Expenses } from '/imports/common/collections/expenses';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { ExpenseBudgets } from '/imports/common/collections/expenseBudgets';
-import { PERSONAS, E2E_PERSONAS, e2eLoginToken } from './personas';
+import { PERSONAS, E2E_PERSONAS, e2eLoginToken, E2E_MERGE_TOKEN } from './personas';
+import { AccountMergeRequests } from '/imports/common/collections/accountMergeRequests';
 import { makeLiabilityVersions, makePersonas } from './build';
 import { makeUser } from '../accounts';
 
@@ -70,6 +72,15 @@ export const buildE2e = async ({ people, now }) => {
   for (const [key, userId] of Object.entries(userIds)) {
     await Accounts._insertLoginToken(userId, { token: e2eLoginToken(key), when: now });
   }
+
+  // Email addresses: a second verified one for the email tests, and a request
+  // to merge merge-other into merge-requester with a known token (the mail
+  // with the link is never sent in tests).
+  await Meteor.users.updateAsync(userIds.emailsOwner, { $push: { emails: { address: 'emails-owner-work@example.org', verified: true } } });
+  await AccountMergeRequests.insertAsync({
+    fromUserId: userIds.mergeRequester, toUserId: userIds.mergeOther, address: members.mergeOther.email,
+    tokenHash: Accounts._hashLoginToken(E2E_MERGE_TOKEN), createdAt: now, expiresAt: days(1),
+  });
 
   // Web shop: an item that has been bought (so it cannot be deleted), one with
   // a buyer-set price, and one each for the admin tests that edit and delete.
@@ -408,6 +419,11 @@ export const buildE2e = async ({ people, now }) => {
   // Two members for the admin console to merge, one into the other.
   await ownMember('915', 'E2E merge source');
   await ownMember('916', 'E2E merge destination', null);
+  // Two accounts of one person for the admin test that merges accounts: the
+  // kept one's member has not paid, the other one's has.
+  await ownMember('917', 'E2E merge kept account', null);
+  await ownMember('918', 'E2E merge removed account');
+  for (const mid of ['917', '918']) await makeUser({ email: `e2e-${mid}@example.org`, password: 'password123' });
 
   // Logins of their own for the user tests: roles, password, rename, delete.
   for (const purpose of ['roles', 'password', 'rename', 'delete']) {

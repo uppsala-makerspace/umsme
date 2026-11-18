@@ -13,3 +13,5 @@ export const removeUser = (userId) => Meteor.callAsync('users.remove', userId);
 export const setPassword = (userId, password) => Meteor.callAsync('setUserPassword', userId, password);
 /** Resolves to the new account's id. */
 export const createUser = (username, password) => Meteor.callAsync('serverCreateUser', username, password);
+export const mergePreview = (userId, address, keptMemberId) => Meteor.callAsync('users.mergePreview', userId, address, keptMemberId || null);
+export const mergeUser = (userId, address, keptMemberId) => Meteor.callAsync('users.merge', userId, address, keptMemberId || null);

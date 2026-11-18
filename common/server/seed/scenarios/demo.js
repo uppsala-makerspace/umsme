@@ -152,6 +152,15 @@ export const buildDemo = async ({ random, people, now }) => {
   }
   log(`${bulk.length} other members`);
 
+  // One person, two accounts: Maja's paid membership is on member@, and she
+  // signed up again as maja.ny@ without paying. Merge maja.ny@ into member@
+  // (or the other way) on the account page in admin, or ask from maja.ny@'s
+  // My account → Email addresses by adding member@example.org. Maja's account
+  // also has a second, verified address.
+  await makeMember({ mid: nextMid(), name: 'Maja Medlem', email: 'maja.ny@example.org' });
+  await makeUser({ email: 'maja.ny@example.org', password: PASSWORD });
+  await Meteor.users.updateAsync(loginUserIds.member, { $push: { emails: { address: 'maja.jobb@example.org', verified: true } } });
+
   const allMembers = await Members.find().fetchAsync();
   const isActive = (m) => m.member && m.member > now && !m.excluded;
   const hasLab = (m) => m.lab && m.lab > now && !m.excluded;

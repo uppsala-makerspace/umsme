@@ -474,7 +474,7 @@ when it is later, and board acceptance (`registered`). The destination's own
 values always win. Anything else on the source member is lost; move it by hand
 first.
 
-The fields moved are listed in `admin/server/memberMerge.js`: membership `mid`,
+The fields moved are listed in `common/server/members/merge.js`: membership `mid`,
 `member` on payments, initiated payments and messages, comment `about`,
 `infamily` on members and invites, attestation `memberId`/`certifierId`
 (dropping a source attestation for a certificate the destination already has),
@@ -482,10 +482,27 @@ certificate `certifiers[]`, test attempts, expense `memberId`/`confirmedBy`/
 `rejectedBy`/`reimbursedBy`, budget `setBy`, expense account
 `approverMemberIds[]`, group `responsibleMemberId`, group membership
 `memberId`/`approvedBy` (keeping the active row when both are in a group),
-door unlock `memberid`, and storage `owner`/`member`.
+door unlock `memberid`, storage `owner`/`member`, event registration and
+activity interest `memberId` (keeping one row per event and activity, the
+registration that holds a seat first) and event `hostMemberIds[]`. The merge is
+written to the audit log as well.
 
 **A new field that stores a member `_id` must be added there**, or merging leaves
 it pointing at a removed member.
+
+### Merging accounts
+
+One person with two login accounts is merged from the account's page in admin
+(**Merge another account into this one**, admins only) or by the member
+themselves (see `docs/auth-and-roles.md`, section 3c). `mergeUsers` in
+`common/server/users/merge.js` gives the kept account every address of both
+(verified if verified on either), the other account's Google or Facebook login
+and password where it has none, its sessions (whoever is signed in as it is
+signed in as the kept account after a reload), push subscriptions, roles,
+comments and the `createdBy`/storage actor fields, then deletes it. If the two
+accounts find different members, those are merged first, with the member that
+has memberships kept by default. Two different Google accounts, the bare
+`admin` login and one's own account block it.
 
 ## 6. Key Enums
 

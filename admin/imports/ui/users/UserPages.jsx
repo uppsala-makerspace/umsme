@@ -7,7 +7,10 @@ import { CommentsFor } from '../comments/CommentsFor';
 import { UserList } from './UserList';
 import { UserAdd } from './UserAdd';
 import { UserView } from './UserView';
-import { userPage, userDetail, updateUser, setUserRole, removeUser, setPassword, createUser } from './data';
+import { UserMerge } from './UserMerge';
+import {
+  userPage, userDetail, updateUser, setUserRole, removeUser, setPassword, createUser, mergePreview, mergeUser,
+} from './data';
 
 const userValues = (detail) => ({ username: detail?.user.username || '', email: detail?.user.emails?.[0]?.address || '' });
 
@@ -41,6 +44,22 @@ export const UserViewPage = ({ _id }) => {
   const doc = useMemo(() => detail && { _id, ...detail }, [detail]);
   const { values, setField, run, busy, error, setError, notice, setNotice } = useEditor({ doc, loading: !detail, toValues: userValues, version: (d) => d });
   const load = () => userDetail(_id).then(setDetail, (e) => (e.error === 'not-found' ? setMissing(true) : setError(e.reason || e.message)));
+  // Merging another account into this one (admins only).
+  const [mergePlan, setMergePlan] = useState(null);
+  const [merged, setMerged] = useState(null);
+  const [mergeBusy, setMergeBusy] = useState(false);
+  const [mergeError, setMergeError] = useState(null);
+  const merging = async (action) => {
+    setMergeBusy(true);
+    setMergeError(null);
+    try {
+      await action();
+    } catch (e) {
+      setMergeError(e.reason || e.message);
+    } finally {
+      setMergeBusy(false);
+    }
+  };
   useEffect(() => { load(); }, [_id]);
   if (missing) return <Typography>There is no such user.</Typography>;
   if (!detail) return <Typography color="text.secondary">{error || 'Loading…'}</Typography>;
@@ -57,7 +76,23 @@ export const UserViewPage = ({ _id }) => {
         },
         remove: () => run(() => removeUser(_id), { then: () => navigate('/users') }),
       }}
-      after={<CommentsFor about={_id} />}
+      after={(
+        <>
+          {detail.canSetRoles && (
+            <UserMerge
+              plan={mergePlan} done={merged} busy={mergeBusy} error={mergeError}
+              onEdit={() => { setMergePlan(null); setMerged(null); setMergeError(null); }}
+              onPreview={(address, keptMemberId) => merging(async () => { setMerged(null); setMergePlan(await mergePreview(_id, address, keptMemberId)); })}
+              onMerge={(address, keptMemberId) => merging(async () => {
+                setMerged(await mergeUser(_id, address, keptMemberId));
+                setMergePlan(null);
+                await load();
+              })}
+            />
+          )}
+          <CommentsFor about={_id} />
+        </>
+      )}
     />
   );
 };

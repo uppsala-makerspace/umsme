@@ -29,6 +29,8 @@ export const READ_ONLY_METHODS = new Set([
   "getMessagesAndAnnouncements",
   "getMessageDetail",
   "getNotificationPrefs",
+  "emails.list",
+  "emails.mergeRequestInfo",
   "texts.termsOfPurchaseMembership",
   "texts.termsOfPurchaseStore",
   "data.rooms",

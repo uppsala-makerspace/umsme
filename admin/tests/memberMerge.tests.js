@@ -12,7 +12,11 @@ import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
 import { StorageUnits } from '/imports/common/collections/storage';
-import { planMemberMerge, mergeMembers } from '/server/memberMerge';
+import { Events } from '/imports/common/collections/events';
+import { EventRegistrations } from '/imports/common/collections/eventRegistrations';
+import { ActivityInterests } from '/imports/common/collections/activityInterests';
+import { AuditLog } from '/imports/common/collections/auditLog';
+import { planMemberMerge, mergeMembers } from '/imports/common/server/members/merge';
 
 const prefix = 'mmtest-';
 const SOURCE = `${prefix}source`;
@@ -27,11 +31,13 @@ const raw = (collection) => collection.rawCollection();
 const collections = [
   Members, Memberships, Payments, initiatedPayments, Messages, Comments, Attestations,
   Certificates, ExpenseAccounts, GroupMemberships, DoorUnlocks, StorageUnits,
+  Events, EventRegistrations, ActivityInterests,
 ];
 
 const cleanup = async () => {
   for (const c of collections) await raw(c).deleteMany({ _id: { $regex: `^${prefix}` } });
   await raw(Comments).deleteMany({ about: { $regex: `^${prefix}` } });
+  await raw(AuditLog).deleteMany({ docId: { $regex: `^${prefix}` } });
   await Meteor.users.removeAsync({ _id: { $regex: `^${prefix}` } });
 };
 
@@ -142,6 +148,53 @@ describe('member merge', function () {
     const dest = await member(DEST);
     assert.ok(dest.lab > inDays(299));
     assert.ok(await Comments.findOneAsync({ about: DEST, text: /Merged member mm-1/ }));
+  });
+
+  it('moves registrations, interests and hosting, keeping one registration per event', async function () {
+    await raw(Events).insertMany([
+      { _id: `${prefix}ev-both`, seatsTaken: 2, hostMemberIds: [SOURCE, OTHER] },
+      { _id: `${prefix}ev-source`, seatsTaken: 1 },
+    ]);
+    await raw(EventRegistrations).insertMany([
+      // Both registered to the same event: the source has the seat, the destination queues.
+      { _id: `${prefix}reg-s`, eventId: `${prefix}ev-both`, memberId: SOURCE, state: 'approved' },
+      { _id: `${prefix}reg-d`, eventId: `${prefix}ev-both`, memberId: DEST, state: 'queued' },
+      { _id: `${prefix}reg-only`, eventId: `${prefix}ev-source`, memberId: SOURCE, state: 'approved' },
+    ]);
+    await raw(ActivityInterests).insertMany([
+      { _id: `${prefix}int-s`, activityId: `${prefix}act`, memberId: SOURCE },
+      { _id: `${prefix}int-d`, activityId: `${prefix}act`, memberId: DEST },
+    ]);
+    const plan = await planMemberMerge(await member(SOURCE), await member(DEST));
+    const count = (label) => plan.moves.find((m) => m.label === label)?.count;
+    assert.strictEqual(count('Event registrations'), 1);
+    assert.strictEqual(count('Event registrations merged, both had one'), 1);
+    assert.strictEqual(count('Events as host'), 1);
+    await mergeMembers(await member(SOURCE), await member(DEST), { userId: `${prefix}admin` });
+    const regs = await EventRegistrations.find({ memberId: DEST }).fetchAsync();
+    assert.deepStrictEqual(regs.map((r) => r._id).sort(), [`${prefix}reg-only`, `${prefix}reg-s`]);
+    // The queued one dropped took no seat; the event keeps its count.
+    assert.strictEqual((await Events.findOneAsync(`${prefix}ev-both`)).seatsTaken, 2);
+    assert.deepStrictEqual((await Events.findOneAsync(`${prefix}ev-both`)).hostMemberIds, [DEST, OTHER]);
+    assert.strictEqual(await ActivityInterests.find({ activityId: `${prefix}act` }).countAsync(), 1);
+    assert.ok(await AuditLog.findOneAsync({ domain: 'members', action: 'merge', docId: DEST, userId: `${prefix}admin` }));
+  });
+
+  it('gives a seat back when the dropped registration held one', async function () {
+    await raw(Events).insertOne({ _id: `${prefix}ev-both`, seatsTaken: 2 });
+    await raw(EventRegistrations).insertMany([
+      { _id: `${prefix}reg-s`, eventId: `${prefix}ev-both`, memberId: SOURCE, state: 'approved' },
+      { _id: `${prefix}reg-d`, eventId: `${prefix}ev-both`, memberId: DEST, state: 'approved' },
+    ]);
+    await mergeMembers(await member(SOURCE), await member(DEST));
+    assert.strictEqual(await EventRegistrations.find({ eventId: `${prefix}ev-both` }).countAsync(), 1);
+    assert.strictEqual((await Events.findOneAsync(`${prefix}ev-both`)).seatsTaken, 1);
+  });
+
+  it('does not warn about the account when the accounts are merged too', async function () {
+    await Meteor.users.insertAsync({ _id: `${prefix}user`, emails: [{ address: 'source@example.com', verified: true }] });
+    const plan = await planMemberMerge(await member(SOURCE), await member(DEST), { accountsMerged: true });
+    assert.ok(!plan.warnings.some((w) => w.includes('source@example.com')));
   });
 
   it('warns about an account that only finds the source by email', async function () {

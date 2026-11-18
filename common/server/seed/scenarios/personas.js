@@ -119,6 +119,15 @@ const E2E_ONLY = [
   { key: 'storageQueue', email: at('storage-queue'), name: 'Kim Kö',
     description: 'waiting in the storage queue',
     payments: [['memberLab', -30]] },
+  { key: 'emailsOwner', email: at('emails-owner'), name: 'Emil Epost',
+    description: 'has a second verified address, emails-owner-work@example.org, for the email tests',
+    payments: [['memberBase', -30]] },
+  { key: 'mergeRequester', email: at('merge-requester'), name: 'Mira Nykonto',
+    description: 'a second account of Paula Betald, without memberships; has asked to merge merge-other into it',
+  },
+  { key: 'mergeOther', email: at('merge-other'), name: 'Paula Betald',
+    description: 'the same person\'s first account, with the paid member, which the merge test merges into merge-requester',
+    payments: [['memberLab', -30]] },
 ];
 
 /** Member numbers from 101, in list order, for everyone who is a member. */
@@ -133,6 +142,9 @@ const withMids = (people, first) => {
  * through the login page.
  */
 export const e2eLoginToken = (key) => `e2e-login-token-${key}`;
+
+/** The token of the e2e scenario's request to merge merge-other into merge-requester. */
+export const E2E_MERGE_TOKEN = 'e2e-merge-token';
 
 const memberCount = (people) => people.filter((person) => person.member !== false).length;
 

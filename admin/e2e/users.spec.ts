@@ -65,4 +65,21 @@ test.describe('Users', () => {
     await expect(page).toHaveURL(/\/user\//);
     await expect(field(page, 'Username')).toHaveValue('e2e-new-user');
   });
+
+  test('merges another account into one, and their members', async ({ page }) => {
+    await openUser(page, 'e2e-917@example.org');
+    await page.getByLabel('Email of the other account (deleted)').fill('E2E-918@example.org');
+    await page.getByRole('button', { name: 'Preview', exact: true }).click();
+    // The paid member is kept by default.
+    await expect(page.getByRole('radio', { name: /Keep E2E merge removed account \(918/ })).toBeChecked();
+    await page.getByRole('button', { name: 'Merge', exact: true }).click();
+    await page.getByRole('button', { name: /Yes, merge and delete e2e-918@example.org/ }).click();
+    await expect(page.getByText(/Merged e2e-918@example.org into this account, and member 917 into 918/)).toBeVisible();
+    // This account has both addresses and finds the kept member.
+    await expect(page.getByText('e2e-918@example.org').first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Member: E2E merge removed account/ })).toBeVisible();
+    await openAs(page, 'admin', '/users');
+    await search(page, 'e2e-918@example.org');
+    await expect(rows(page).filter({ hasText: 'e2e-918@example.org' })).toHaveCount(0);
+  });
 });

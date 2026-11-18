@@ -5,6 +5,7 @@ import { Members } from "/imports/common/collections/members";
 import { Messages } from "/imports/common/collections/messages";
 import { Announcements } from "/imports/common/collections/announcements";
 import { NotificationCategory, messageTypeToCategory } from "/imports/common/lib/notificationCategories";
+import { verifiedUserSelectorForMember } from "/imports/common/lib/memberMatch";
 
 const PUSH_BODY_MAX = 140;
 
@@ -84,10 +85,12 @@ const sendCategoryPush = async (member, category, id, subjectSv, bodySv, subject
     if (member.notificationPrefs?.[category] === false) return;
     if (!member.email) return;
 
-    const user = await Meteor.users.findOneAsync({ "emails.address": member.email });
-    if (!user) return;
+    // Every account with the member's email verified, whatever its case.
+    const userIds = (await Meteor.users.find(verifiedUserSelectorForMember(member), { fields: { _id: 1 } }).fetchAsync())
+      .map((u) => u._id);
+    if (userIds.length === 0) return;
 
-    const subs = await PushSubs.find({ userId: user._id }).fetchAsync();
+    const subs = await PushSubs.find({ userId: { $in: userIds } }).fetchAsync();
     if (subs.length === 0) return;
 
     const payload = {

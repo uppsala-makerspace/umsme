@@ -102,6 +102,9 @@ const Account = ({ member, memberships, familyMembers, familyInvites = [], statu
           </Button>
         </Link>
       )}
+      <Link to="/account/emails" className="w-full block no-underline text-center">
+        <Button variant="secondary" fullWidth>{t("emailsLink")}</Button>
+      </Link>
       <div className="flex flex-col gap-3">
         {member.infamily && paying && (
           <div className="flex flex-col gap-1">

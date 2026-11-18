@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Roles } from 'meteor/roles';
 import { check, Match } from 'meteor/check';
 import { Members } from '/imports/common/collections/members';
-import { planMemberMerge, mergeMembers } from '../memberMerge';
+import { planMemberMerge, mergeMembers } from '/imports/common/server/members/merge';
 import { reminderStateOf } from '/imports/common/server/members/memberList';
 import { requireRole, DOMAIN_ROLES } from '/imports/common/server/authz';
 import {
@@ -44,6 +44,7 @@ Meteor.methods({
     return mergeMembers(
       await memberByNumber(sourceMid, 'source'),
       await memberByNumber(destMid, 'destination'),
+      { userId: Meteor.userId() },
     );
   },
 
