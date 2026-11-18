@@ -26,7 +26,7 @@ const requireMember = async () => {
 };
 
 // Group summary for the workshop page's group lists: active member count and
-// the caller's own membership state, like groups.list provides.
+// the caller's own membership state and responsibility, like groups.list provides.
 const groupSummary = async (groupDoc, memberId) => ({
   _id: groupDoc._id,
   name: groupDoc.name,
@@ -38,6 +38,7 @@ const groupSummary = async (groupDoc, memberId) => ({
   myState:
     (await GroupMemberships.findOneAsync({ groupId: groupDoc._id, memberId }))
       ?.state || null,
+  myIsResponsible: groupDoc.responsibleMemberId === memberId,
 });
 
 const publicWorkshopFields = (workshop) => ({

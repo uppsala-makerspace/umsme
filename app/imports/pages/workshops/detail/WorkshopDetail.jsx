@@ -18,6 +18,7 @@ import { localized } from "/imports/common/lib/groupRules";
 import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
 import AreaOfInterestTag from "../../../components/AreaOfInterestTag";
+import { MembershipChip } from "../../../components/GroupCard";
 import WorkshopCalendar from "../../activities/components/WorkshopCalendar";
 
 // One group row in the "get involved" / "related groups" lists, in the same
@@ -41,20 +42,16 @@ const GroupRow = ({ group, highlighted }) => {
           <span className="flex items-center gap-2 font-semibold leading-snug">
             {localized(group.name, lang)}
             <GroupTypeTag type={group.type} />
-            {group.myState === "active" && (
-              <span className="inline-block text-xs font-semibold rounded-full py-0.5 px-2 bg-green-100 text-green-800">
-                {t("memberChip")}
-              </span>
-            )}
-            {group.myState === "pending" && (
-              <span className="inline-block text-xs font-semibold rounded-full py-0.5 px-2 bg-amber-100 text-amber-800">
-                {t("pendingChip")}
-              </span>
-            )}
           </span>
-          <span className="block text-xs text-gray-500 mt-0.5">
-            {group.memberCount}{" "}
-            {group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}
+          {/* One's own relation to the group at the bottom right, as on the groups list. */}
+          <span className="flex flex-wrap items-center gap-1.5 text-xs text-gray-500 mt-0.5">
+            <span>
+              {group.memberCount}{" "}
+              {group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}
+            </span>
+            <span className="ml-auto">
+              <MembershipChip myState={group.myState} myIsResponsible={group.myIsResponsible} />
+            </span>
           </span>
         </div>
         <span className="text-gray-400 text-xl ml-2">&rarr;</span>

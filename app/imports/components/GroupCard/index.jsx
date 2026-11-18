@@ -32,15 +32,21 @@ export const MembershipChip = ({ myState, myIsResponsible }) => {
 };
 
 /**
- * Group preview card: image banner, name with type tag (and membership chip
- * when the caller's state is known), member count and categories, and a truncated
- * description excerpt in detailed mode. Used by the group list and the map's
- * space popup.
+ * Group preview card: image banner, name with type tag, member count and
+ * categories, and a truncated description excerpt in detailed mode. The
+ * membership chip, when the caller's state is known, sits at the bottom
+ * right: beside the excerpt's last line, or on the member count's line when
+ * there is no excerpt. Used by the group list and the map's space popup.
  */
 const GroupCard = ({ group, compact = false }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const excerpt = compact ? "" : markdownExcerpt(localized(group.description, lang), 110);
+  const chip = (group.myState || group.myIsResponsible) && (
+    <span className="ml-auto flex-shrink-0">
+      <MembershipChip myState={group.myState} myIsResponsible={group.myIsResponsible} />
+    </span>
+  );
   return (
     <li className="mb-3 rounded-lg bg-white border border-gray-200 overflow-hidden list-none">
       <Link
@@ -59,9 +65,8 @@ const GroupCard = ({ group, compact = false }) => {
             <span className="flex items-center gap-2 font-semibold leading-snug">
               {localized(group.name, lang)}
               <GroupTypeTag type={group.type} />
-              <MembershipChip myState={group.myState} myIsResponsible={group.myIsResponsible} />
             </span>
-            {(typeof group.memberCount === "number" || group.categories?.length > 0) && (
+            {(typeof group.memberCount === "number" || group.categories?.length > 0 || (!excerpt && chip)) && (
               <span className="flex flex-wrap items-center gap-1.5 text-xs text-gray-500 mt-0.5">
                 {typeof group.memberCount === "number" && (
                   <span>
@@ -77,10 +82,16 @@ const GroupCard = ({ group, compact = false }) => {
                     {localized(category.name, lang)}
                   </span>
                 ))}
+                {/* One's own relation to the group, at the bottom right: here when
+                    there is no description below. */}
+                {!excerpt && chip}
               </span>
             )}
             {excerpt && (
-              <span className="block text-sm text-gray-500 mt-1">{excerpt}</span>
+              <span className="flex items-end gap-2 mt-1">
+                <span className="text-sm text-gray-500 flex-1">{excerpt}</span>
+                {chip}
+              </span>
             )}
           </div>
           <span className="text-gray-400 text-xl ml-2">&rarr;</span>

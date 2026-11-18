@@ -113,7 +113,10 @@ export const buildE2e = async ({ people, now }) => {
   await member(glazingGroup, 'discounted');
   const premisesGroup = await group({ name: { sv: 'Lokalgruppen', en: 'Premises group' }, type: 'function', joinPolicy: 'request-any' });
   await member(premisesGroup, 'board');
-  const requestsGroup = await group({ name: { sv: 'E2E requests group' }, type: 'function', responsibleMemberId: members.groupLeader._id });
+  const requestsGroup = await group({
+    name: { sv: 'E2E requests group' }, type: 'function', responsibleMemberId: members.groupLeader._id,
+    description: { sv: 'En grupp med förfrågningar att godkänna och avslå, och en beskrivning som syns i listan.' },
+  });
   await member(requestsGroup, 'groupLeader');
   await member(requestsGroup, 'discounted');
   await member(requestsGroup, 'base', 'pending');
