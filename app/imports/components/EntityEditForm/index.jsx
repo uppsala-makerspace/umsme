@@ -18,6 +18,8 @@ const textareaStyles =
  * @param {string} imageUrl    Current image URL (null when none)
  * @param {object} values      { descriptionSv, descriptionEn, rulesSv, rulesEn, slackChannel, guidesUrl }
  * @param {boolean} showGuidesUrl  Whether to show the guides URL field (workshops)
+ * @param {boolean} showMemberLimits  Whether to show the wanted number of members (groups);
+ *                  values.minMembers and values.maxMembers, empty for no limit
  * @param {boolean} saving
  * @param {function} onSave        (patch) => void
  * @param {function} onImageSelect ({ base64, mimeType }) => void
@@ -28,6 +30,7 @@ const EntityEditForm = ({
   imageUrl,
   values,
   showGuidesUrl,
+  showMemberLimits,
   saving,
   onSave,
   onImageSelect,
@@ -40,6 +43,8 @@ const EntityEditForm = ({
   const [rulesEn, setRulesEn] = useState(values?.rulesEn || "");
   const [slackChannel, setSlackChannel] = useState(values?.slackChannel || "");
   const [guidesUrl, setGuidesUrl] = useState(values?.guidesUrl || "");
+  const [minMembers, setMinMembers] = useState(values?.minMembers || "");
+  const [maxMembers, setMaxMembers] = useState(values?.maxMembers || "");
 
   const handleFile = (event) => {
     const file = event.target.files?.[0];
@@ -60,6 +65,10 @@ const EntityEditForm = ({
       rules: { sv: rulesSv, en: rulesEn },
       slackChannel,
       ...(showGuidesUrl ? { guidesUrl } : {}),
+      ...(showMemberLimits ? {
+        minMembers: String(minMembers).trim() === "" ? null : Number(minMembers),
+        maxMembers: String(maxMembers).trim() === "" ? null : Number(maxMembers),
+      } : {}),
     });
   };
 
@@ -170,6 +179,30 @@ const EntityEditForm = ({
         />
       )}
 
+      {showMemberLimits && (
+        <div className="mb-4">
+          <div className="flex gap-3">
+            <Input
+              id="minMembers"
+              label={t("groupMinMembers")}
+              inputMode="numeric"
+              value={minMembers}
+              onChange={(e) => setMinMembers(e.target.value)}
+              className="flex-1"
+            />
+            <Input
+              id="maxMembers"
+              label={t("groupMaxMembers")}
+              inputMode="numeric"
+              value={maxMembers}
+              onChange={(e) => setMaxMembers(e.target.value)}
+              className="flex-1"
+            />
+          </div>
+          <p className="text-gray-500 mt-0 text-sm">{t("groupMemberLimitsHint")}</p>
+        </div>
+      )}
+
       <div className="mb-8">
         <Button fullWidth disabled={saving} onClick={handleSave}>
           {saving ? t("saving") : t("save")}
@@ -189,8 +222,11 @@ EntityEditForm.propTypes = {
     rulesEn: PropTypes.string,
     slackChannel: PropTypes.string,
     guidesUrl: PropTypes.string,
+    minMembers: PropTypes.string,
+    maxMembers: PropTypes.string,
   }),
   showGuidesUrl: PropTypes.bool,
+  showMemberLimits: PropTypes.bool,
   saving: PropTypes.bool,
   onSave: PropTypes.func,
   onImageSelect: PropTypes.func,
@@ -202,6 +238,7 @@ EntityEditForm.defaultProps = {
   imageUrl: null,
   values: {},
   showGuidesUrl: false,
+  showMemberLimits: false,
   saving: false,
   onSave: () => {},
   onImageSelect: () => {},

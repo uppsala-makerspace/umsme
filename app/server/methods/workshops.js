@@ -6,6 +6,7 @@ import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { Certificates } from "/imports/common/collections/certificates";
 import { Spaces } from "/imports/common/collections/spaces";
 import { StoreItems } from "/imports/common/collections/storeItems";
+import { staffingOf } from "/imports/common/lib/groupRules";
 import { activityLinks, activitiesAtSelector, upcomingEventsAt } from "./activities";
 import { workshopImageUrlFor, spaceIconUrlFor } from "/imports/common/server/workshopImage";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
@@ -27,19 +28,24 @@ const requireMember = async () => {
 
 // Group summary for the workshop page's group lists: active member count and
 // the caller's own membership state and responsibility, like groups.list provides.
-const groupSummary = async (groupDoc, memberId) => ({
-  _id: groupDoc._id,
-  name: groupDoc.name,
-  type: groupDoc.type,
-  memberCount: await GroupMemberships.find({
+const groupSummary = async (groupDoc, memberId) => {
+  const memberCount = await GroupMemberships.find({
     groupId: groupDoc._id,
     state: "active",
-  }).countAsync(),
-  myState:
-    (await GroupMemberships.findOneAsync({ groupId: groupDoc._id, memberId }))
-      ?.state || null,
-  myIsResponsible: groupDoc.responsibleMemberId === memberId,
-});
+  }).countAsync();
+  return {
+    _id: groupDoc._id,
+    name: groupDoc.name,
+    type: groupDoc.type,
+    memberCount,
+    // Looking for members, or full (staffingOf in common/lib/groupRules.js).
+    staffing: staffingOf(groupDoc, memberCount),
+    myState:
+      (await GroupMemberships.findOneAsync({ groupId: groupDoc._id, memberId }))
+        ?.state || null,
+    myIsResponsible: groupDoc.responsibleMemberId === memberId,
+  };
+};
 
 const publicWorkshopFields = (workshop) => ({
   _id: workshop._id,

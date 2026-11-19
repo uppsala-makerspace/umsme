@@ -48,4 +48,28 @@ test.describe('Groups list', () => {
     await page.getByRole('checkbox', { name: en.groupTypeResponsibility }).check();
     await expect(filterButton(page)).toHaveAttribute('aria-label', en.groupFilter);
   });
+
+  test('says which groups look for members and which are full', async ({ page }) => {
+    await openAs(page, 'member', '/groups');
+    await expect(page.getByRole('link', { name: new RegExp(PREMISES) })).toContainText(en.groupSeekingBadge);
+    await expect(page.getByRole('link', { name: new RegExp(GLAZING) })).toContainText(en.groupFullBadge);
+    await page.getByRole('link', { name: new RegExp(PREMISES) }).click();
+    await expect(page.getByText(en.groupSeeking)).toBeVisible();
+  });
+
+  test('the workshop page says it too', async ({ page }) => {
+    await openAs(page, 'member', '/workshops');
+    await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
+    const glazing = page.getByRole('listitem').filter({ hasText: GLAZING }).filter({ hasText: /\d+ members?/ });
+    await expect(glazing).toContainText(en.groupFullBadge);
+  });
+
+  test('the group responsible sets the member limits', async ({ page }) => {
+    await openAs(page, 'groupLeader', '/groups');
+    await page.getByRole('link', { name: /E2E requests group/ }).click();
+    await page.getByRole('link', { name: en.edit }).click();
+    await page.getByLabel(en.groupMinMembers).fill('5');
+    await page.getByRole('button', { name: en.save }).click();
+    await expect(page.getByText(en.groupSeeking)).toBeVisible();
+  });
 });

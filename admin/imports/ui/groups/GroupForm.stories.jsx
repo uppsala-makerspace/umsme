@@ -23,7 +23,7 @@ const steering = {
   slackChannel: '#keramik', responsibleMemberId: 'm1', allowJoinRequests: false, joinPolicy: 'request-any',
 };
 const values = (g) => ({
-  nameSv: g.name?.sv || '', nameEn: '', categoryIds: [], descriptionSv: g.description?.sv || '', descriptionEn: '',
+  nameSv: g.name?.sv || '', nameEn: '', categoryIds: [], minMembers: '', maxMembers: '', descriptionSv: g.description?.sv || '', descriptionEn: '',
   rulesSv: '', rulesEn: '', type: g.type || '', parentGroupId: g.parentGroupId || '', slackChannel: g.slackChannel || '',
   guidesUrl: '', responsibleMemberId: g.responsibleMemberId || '', allowJoinRequests: g.allowJoinRequests !== false,
   joinPolicy: g.joinPolicy || 'request-responsible', linkedRole: '', primarySpaceId: '', secondarySpaceIds: [],

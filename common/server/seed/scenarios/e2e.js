@@ -109,9 +109,11 @@ export const buildE2e = async ({ people, now }) => {
   await member(ceramicsGroup, 'steering');
   // An activity group under the ceramics steering group, whose activities the
   // steering group's members may create.
-  const glazingGroup = await group({ name: { sv: 'Glasyrgruppen', en: 'Glazing group' }, type: 'responsibility', parentGroupId: ceramicsGroup });
+  // Full: one member of at most one.
+  const glazingGroup = await group({ name: { sv: 'Glasyrgruppen', en: 'Glazing group' }, type: 'responsibility', parentGroupId: ceramicsGroup, maxMembers: 1 });
   await member(glazingGroup, 'discounted');
-  const premisesGroup = await group({ name: { sv: 'Lokalgruppen', en: 'Premises group' }, type: 'function', joinPolicy: 'request-any' });
+  // Looking for members: one of at least three.
+  const premisesGroup = await group({ name: { sv: 'Lokalgruppen', en: 'Premises group' }, type: 'function', joinPolicy: 'request-any', minMembers: 3 });
   await member(premisesGroup, 'board');
   const requestsGroup = await group({
     name: { sv: 'E2E requests group' }, type: 'function', responsibleMemberId: members.groupLeader._id,

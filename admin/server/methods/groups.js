@@ -15,6 +15,8 @@ const Id = Match.Maybe(String);
 const GroupFields = {
   name: { sv: String, en: Match.Maybe(String) },
   categoryIds: Match.Optional([String]),
+  minMembers: Match.Optional(Match.Maybe(Number)),
+  maxMembers: Match.Optional(Match.Maybe(Number)),
   description: Match.Optional(Bilingual),
   rules: Match.Optional(Bilingual),
   type: String,

@@ -129,6 +129,12 @@ export const GroupForm = ({
         label="Members may ask to join"
       />
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Members wanted, at least" fullWidth slotProps={{ htmlInput: { inputMode: 'numeric' } }} {...text('minMembers')}
+          helperText="Below it, the app says the group is looking for members. Empty: no lower limit." />
+        <TextField label="Members, at most" fullWidth slotProps={{ htmlInput: { inputMode: 'numeric' } }} {...text('maxMembers')}
+          helperText="From it on, the app says the group is full; joining is still possible. Empty: no upper limit." />
+      </Stack>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
         <TextField label="Join policy" select fullWidth slotProps={native} {...text('joinPolicy')}
           helperText="Who approves requests to join.">
           {JOIN_POLICIES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}

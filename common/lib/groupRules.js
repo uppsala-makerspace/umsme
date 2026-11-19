@@ -29,6 +29,42 @@ export const JOIN_POLICIES = ["open", "request-any", "request-responsible"];
 export const canRequestToJoin = (group) => group?.allowJoinRequests !== false;
 
 /**
+ * Whether a group is looking for members or is full, from the limits it has
+ * set: "seeking" below minMembers, "full" at maxMembers or more, otherwise
+ * null. Only shown; joining is not refused.
+ *
+ * @param {{minMembers?: number, maxMembers?: number}} group
+ * @param {number} memberCount its active members
+ * @return {"seeking"|"full"|null}
+ */
+export const staffingOf = (group, memberCount) => {
+  if (group?.maxMembers && memberCount >= group.maxMembers) return "full";
+  if (group?.minMembers && memberCount < group.minMembers) return "seeking";
+  return null;
+};
+
+/**
+ * The member limits as given in a form, checked: whole numbers of at least
+ * one, the upper not below the lower. Null for a limit left empty.
+ *
+ * @return {{minMembers: number|null, maxMembers: number|null, error: string|null}}
+ */
+export const memberLimits = (minMembers, maxMembers) => {
+  const read = (value) => (value === undefined || value === null || value === "" ? null : Number(value));
+  const min = read(minMembers);
+  const max = read(maxMembers);
+  for (const value of [min, max]) {
+    if (value !== null && (!Number.isInteger(value) || value < 1)) {
+      return { minMembers: min, maxMembers: max, error: "The member limits must be whole numbers of at least 1" };
+    }
+  }
+  if (min !== null && max !== null && max < min) {
+    return { minMembers: min, maxMembers: max, error: "The upper member limit cannot be below the lower one" };
+  }
+  return { minMembers: min, maxMembers: max, error: null };
+};
+
+/**
  * Whether a member may edit a group's descriptive fields — and, for a steering
  * group, its workshop's.
  *

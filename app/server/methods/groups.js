@@ -9,7 +9,7 @@ import { activityLinks, mayCreateActivityFor } from "./activities";
 import { ExpenseAccounts } from "/imports/common/collections/expenseAccounts";
 import { syncLinkedRole } from "/imports/common/server/linkedRoleSync";
 import { groupImageUrlFor } from "/imports/common/server/workshopImage";
-import { canRequestToJoin, mayEditGroup } from "/imports/common/lib/groupRules";
+import { canRequestToJoin, mayEditGroup, staffingOf, memberLimits } from "/imports/common/lib/groupRules";
 import { setEntityImage, clearEntityImage } from "/imports/common/server/entityImage";
 import { publishManagerEvent, ManagerEventType } from "/imports/common/server/managerEvents";
 import {
@@ -94,6 +94,10 @@ const groupSummary = async (group, memberId) => {
     parentGroupId: group.parentGroupId,
     imageUrl: groupImageUrlFor(group),
     memberCount,
+    minMembers: group.minMembers ?? null,
+    maxMembers: group.maxMembers ?? null,
+    // Looking for members, or full (staffingOf in common/lib/groupRules.js).
+    staffing: staffingOf(group, memberCount),
     myState: myMembership?.state || null,
     myIsResponsible: group.responsibleMemberId === memberId,
     myCanEdit: mayEditGroup({
@@ -542,7 +546,12 @@ Meteor.methods({
       throw new Meteor.Error("not-authorized", "You may not edit this group");
     }
     const p = patch || {};
+    // The member limits, when the form sends them; empty is no limit.
+    const sendsLimits = "minMembers" in p || "maxMembers" in p;
+    const limits = memberLimits(p.minMembers, p.maxMembers);
+    if (sendsLimits && limits.error) throw new Meteor.Error("bad-limits", limits.error);
     await applyWhitelistedUpdate(Groups, groupId, {
+      ...(sendsLimits ? { minMembers: limits.minMembers, maxMembers: limits.maxMembers } : {}),
       "description.sv": p.description?.sv,
       "description.en": p.description?.en,
       "rules.sv": p.rules?.sv,

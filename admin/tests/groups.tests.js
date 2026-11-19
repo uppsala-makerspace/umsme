@@ -75,6 +75,15 @@ describe('groups and workshops', function () {
       assert.strictEqual((await AuditLog.findOneAsync({ docId })).action, 'create');
     });
 
+    it('keeps the member limits, refusing an upper one below the lower', async function () {
+      const docId = await call(board, 'groups.create', group({ minMembers: 2, maxMembers: 6 }));
+      const doc = await Groups.findOneAsync(docId);
+      assert.deepStrictEqual([doc.minMembers, doc.maxMembers], [2, 6]);
+      await call(board, 'groups.update', docId, group({ minMembers: null, maxMembers: 6 }), doc.updatedAt);
+      assert.strictEqual('minMembers' in (await Groups.findOneAsync(docId)), false);
+      await assert.rejects(call(board, 'groups.create', group({ minMembers: 6, maxMembers: 2 })), /bad-limits/);
+    });
+
     it('refuses the treasurer', async function () {
       await assert.rejects(call(treasurer, 'groups.create', group()), /not-authorized/);
     });

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import GroupTypeTag from "/imports/components/GroupTypeTag";
+import StaffingBadge from "/imports/components/StaffingBadge";
 import { localized } from "/imports/common/lib/groupRules";
 import { markdownExcerpt } from "/imports/utils/markdown";
 
@@ -74,6 +75,7 @@ const GroupCard = ({ group, compact = false }) => {
                     {group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}
                   </span>
                 )}
+                <StaffingBadge staffing={group.staffing} />
                 {(group.categories || []).map((category) => (
                   <span
                     key={category._id}

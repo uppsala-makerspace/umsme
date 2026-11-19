@@ -48,6 +48,8 @@ export const formValues = (group) => ({
   primarySpaceId: group?.primarySpaceId || '',
   secondarySpaceIds: group?.secondarySpaceIds || [],
   categoryIds: group?.categoryIds || [],
+  minMembers: group?.minMembers ? String(group.minMembers) : '',
+  maxMembers: group?.maxMembers ? String(group.maxMembers) : '',
   relatedWorkshopIds: group?.relatedWorkshopIds || [],
   relatedGroupIds: group?.relatedGroupIds || [],
 });
@@ -56,6 +58,9 @@ const pair = (v, field) => ({ sv: v[`${field}Sv`], en: v[`${field}En`] });
 const fieldsFrom = (v) => ({
   name: pair(v, 'name'),
   categoryIds: v.categoryIds,
+  // Empty is no limit; anything else is checked on the server.
+  minMembers: String(v.minMembers ?? '').trim() === '' ? null : Number(v.minMembers),
+  maxMembers: String(v.maxMembers ?? '').trim() === '' ? null : Number(v.maxMembers),
   description: pair(v, 'description'),
   rules: pair(v, 'rules'),
   type: v.type,

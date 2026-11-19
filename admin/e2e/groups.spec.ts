@@ -65,12 +65,16 @@ test.describe('Groups', () => {
     await openGroup(page, 'E2E edit group');
     await field(page, 'Description (Swedish, markdown)').fill('En grupp för test.');
     await field(page, 'Slack channel').fill('#e2e-grupp');
+    await field(page, 'Members wanted, at least').fill('2');
+    await field(page, 'Members, at most').fill('8');
     await saveButton(page).click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/E2E edit group|^Groups$/);
 
     await openGroup(page, 'E2E edit group');
     await expect(field(page, 'Description (Swedish, markdown)')).toHaveValue('En grupp för test.');
     await expect(field(page, 'Slack channel')).toHaveValue('#e2e-grupp');
+    await expect(field(page, 'Members wanted, at least')).toHaveValue('2');
+    await expect(field(page, 'Members, at most')).toHaveValue('8');
   });
 
   test('sets the links and the responsible, on save', async ({ page }) => {

@@ -7,6 +7,8 @@ import {
   WrenchScrewdriverIcon,
   BookOpenIcon,
   ClipboardDocumentListIcon,
+  UserPlusIcon,
+  NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 import MainContent from "../../../components/MainContent";
 import Loader from "../../../components/Loader";
@@ -97,6 +99,7 @@ const GroupDetail = ({
     : undefined;
 
   const joinLabel = group.joinPolicy === "open" ? t("joinGroup") : t("requestJoinGroup");
+  const closedToRequests = group.myState === null && group.canRequestToJoin === false;
 
   return (
     <MainContent>
@@ -151,9 +154,26 @@ const GroupDetail = ({
 
       {/* Own membership actions. The join button is disabled without an
           active makerspace membership (the server enforces the same rule). */}
-      <section className="mb-6">
-        {group.myState === null && group.canRequestToJoin === false && (
-          <p className="p-3 rounded-lg bg-gray-50 border border-gray-200 text-gray-600 text-sm m-0">
+      {/* One's membership in a white box under a heading: whether the group
+          looks for members or is full, whether it takes requests, and what
+          one can do (join, withdraw, leave). */}
+      <section className="mb-6 p-4 rounded-lg bg-white border border-gray-200">
+        <h3 className="text-base font-bold mt-0 mb-3">{t("groupMembershipHeading")}</h3>
+        {/* Whether the group is looking for members or full, from its limits. */}
+        {group.staffing === "seeking" && (
+          <p className="flex items-center gap-2 mt-0 mb-3 font-semibold text-orange-600">
+            <UserPlusIcon className="w-6 h-6 flex-shrink-0" aria-hidden="true" />
+            {t("groupSeeking")}
+          </p>
+        )}
+        {group.staffing === "full" && (
+          <p className="flex items-center gap-2 mt-0 mb-3 font-semibold text-gray-700">
+            <NoSymbolIcon className="w-6 h-6 flex-shrink-0" aria-hidden="true" />
+            {t("groupFull")}
+          </p>
+        )}
+        {closedToRequests && (
+          <p className="text-gray-600 text-sm m-0">
             {t("groupClosedToRequests")}
           </p>
         )}
@@ -180,6 +200,9 @@ const GroupDetail = ({
               {t("withdrawRequest")}
             </button>
           </div>
+        )}
+        {group.myState === "active" && !group.myIsResponsible && (
+          <p className="text-gray-700 text-sm mt-0 mb-3">{t("groupYouAreMember")}</p>
         )}
         {group.myState === "active" && !group.myIsResponsible && (
           <button

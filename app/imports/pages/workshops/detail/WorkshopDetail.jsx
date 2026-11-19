@@ -19,6 +19,7 @@ import { getSlackChannelUrl } from "/imports/utils/slack";
 import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
 import AreaOfInterestTag from "../../../components/AreaOfInterestTag";
 import { MembershipChip } from "../../../components/GroupCard";
+import StaffingBadge from "../../../components/StaffingBadge";
 import WorkshopCalendar from "../../activities/components/WorkshopCalendar";
 
 // One group row in the "get involved" / "related groups" lists, in the same
@@ -49,6 +50,7 @@ const GroupRow = ({ group, highlighted }) => {
               {group.memberCount}{" "}
               {group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}
             </span>
+            <StaffingBadge staffing={group.staffing} />
             <span className="ml-auto">
               <MembershipChip myState={group.myState} myIsResponsible={group.myIsResponsible} />
             </span>

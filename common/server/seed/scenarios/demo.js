@@ -275,6 +275,8 @@ export const buildDemo = async ({ random, people, now }) => {
     name: { sv: 'Laseransvariga', en: 'Laser keepers' }, type: 'responsibility',
     parentGroupId: steeringGroups.wood, responsibleMemberId: personas.steering._id,
     joinPolicy: 'request-responsible', allowJoinRequests: true, categoryIds: [fabrication],
+    // Full: three keepers of at most three.
+    maxMembers: 3,
   }, { members: [personas.steering, ...pickMembers(labMembers, 2, [personas.steering._id])] });
   const financeGroup = await groupWithMembers({
     name: { sv: 'Ekonomigruppen', en: 'Finance group' }, type: 'function',
@@ -283,6 +285,8 @@ export const buildDemo = async ({ random, people, now }) => {
   const premisesGroup = await groupWithMembers({
     name: { sv: 'Lokalgruppen', en: 'Premises group' }, type: 'function',
     joinPolicy: 'request-any', allowJoinRequests: true,
+    // Looking for members: five of at least eight.
+    minMembers: 8,
   }, { members: pickMembers(active, 5), pending: pickMembers(active, 1) });
   log(`${Object.keys(workshops).length} workshops and areas of interest`);
 

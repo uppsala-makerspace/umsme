@@ -5,9 +5,42 @@ import {
   GROUP_TYPES,
   isAreaOfInterest,
   workshopCompleteness,
+  staffingOf,
+  memberLimits,
 } from '/imports/common/lib/groupRules';
 
 describe('Group rules', function () {
+  describe('staffingOf', function () {
+    it('is looking for members below the lower limit and full from the upper one', function () {
+      const group = { minMembers: 3, maxMembers: 6 };
+      assert.strictEqual(staffingOf(group, 2), 'seeking');
+      assert.strictEqual(staffingOf(group, 3), null);
+      assert.strictEqual(staffingOf(group, 5), null);
+      assert.strictEqual(staffingOf(group, 6), 'full');
+      assert.strictEqual(staffingOf(group, 9), 'full');
+    });
+
+    it('says nothing without limits', function () {
+      assert.strictEqual(staffingOf({}, 0), null);
+      assert.strictEqual(staffingOf({ maxMembers: 4 }, 0), null);
+    });
+  });
+
+  describe('memberLimits', function () {
+    it('reads empty as no limit', function () {
+      assert.deepStrictEqual(memberLimits('', null), { minMembers: null, maxMembers: null, error: null });
+      assert.deepStrictEqual(memberLimits(2, '5'), { minMembers: 2, maxMembers: 5, error: null });
+    });
+
+    it('refuses fractions, zero and an upper limit below the lower', function () {
+      assert.ok(memberLimits(1.5, null).error);
+      assert.ok(memberLimits(0, null).error);
+      assert.ok(memberLimits(null, 'x').error);
+      assert.ok(memberLimits(5, 3).error);
+      assert.strictEqual(memberLimits(3, 3).error, null);
+    });
+  });
+
   describe('mayEditGroup', function () {
     const may = (args) => mayEditGroup({ isResponsible: false, membershipState: null, ...args });
 

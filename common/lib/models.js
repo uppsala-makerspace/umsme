@@ -1240,6 +1240,11 @@ export const models = {
       autoform: { omit: true },
     },
     "relatedGroupIds.$": { type: String, autoform: { omit: true } },
+    // How many active members the group wants: below minMembers it is looking
+    // for members, at maxMembers or more it is full (staffingOf in
+    // groupRules.js). Shown to members, never enforced on joining.
+    minMembers: { label: "Members wanted, at least", type: Number, min: 1, optional: true },
+    maxMembers: { label: "Members, at most", type: Number, min: 1, optional: true },
     // Whether members may ask to join at all. Separate from joinPolicy, which
     // says who approves: a steering group is closed to requests but still needs
     // a policy naming who may add people to it.

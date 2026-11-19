@@ -96,8 +96,11 @@ export default () => {
               rulesEn: group.rules?.en || "",
               slackChannel: group.slackChannel || "",
               guidesUrl: group.guidesUrl || "",
+              minMembers: group.minMembers ? String(group.minMembers) : "",
+              maxMembers: group.maxMembers ? String(group.maxMembers) : "",
             }}
             showGuidesUrl={group.type === "function"}
+            showMemberLimits
             saving={saving}
             onSave={handleSave}
             onImageSelect={handleImageSelect}

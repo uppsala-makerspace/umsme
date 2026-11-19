@@ -5,7 +5,7 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { Spaces } from '/imports/common/collections/spaces';
 import { Members } from '/imports/common/collections/members';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
-import { GROUP_TYPES, JOIN_POLICIES } from '/imports/common/lib/groupRules';
+import { GROUP_TYPES, JOIN_POLICIES, memberLimits } from '/imports/common/lib/groupRules';
 import { syncLinkedRoleById } from '/imports/common/server/linkedRoleSync';
 import { recordChange } from '/imports/common/server/auditLog';
 import { text, bilingual, setOrUnset } from './text';
@@ -56,6 +56,8 @@ const changesOf = async (fields, selfId, current) => {
       throw new Meteor.Error('steering-in-use', 'A workshop or responsibility group depends on this steering group; it must stay one');
     }
   }
+  const limits = memberLimits(fields.minMembers, fields.maxMembers);
+  if (limits.error) throw new Meteor.Error('bad-limits', limits.error);
   const responsibleMemberId = text(fields.responsibleMemberId);
   await exists(Members, [responsibleMemberId], 'member');
   const relatedGroupIds = (await exists(Groups, fields.relatedGroupIds || [], 'group')).filter((id) => id !== selfId);
@@ -80,6 +82,8 @@ const changesOf = async (fields, selfId, current) => {
     responsibleMemberId,
     relatedGroupIds,
     relatedWorkshopIds,
+    minMembers: limits.minMembers,
+    maxMembers: limits.maxMembers,
     primarySpaceId,
     secondarySpaceIds,
   });
