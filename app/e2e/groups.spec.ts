@@ -72,4 +72,32 @@ test.describe('Groups list', () => {
     await page.getByRole('button', { name: en.save }).click();
     await expect(page.getByText(en.groupSeeking)).toBeVisible();
   });
+
+});
+
+// The admin role edits every group, workshop and area of interest without
+// being in it; board does not.
+test.describe('Editing as admin', () => {
+  test('admin edits a group she is not in', async ({ page }) => {
+    await openAs(page, 'admin', '/groups');
+    await page.getByRole('link', { name: new RegExp(GLAZING) }).click();
+    await page.getByRole('link', { name: en.edit }).click();
+    await page.getByLabel(en.descriptionEn).fill('Glazes, edited by admin.');
+    await page.getByRole('button', { name: en.save }).click();
+    await expect(page.getByText('Glazes, edited by admin.')).toBeVisible();
+  });
+
+  test('admin edits a workshop whose group she is not in', async ({ page }) => {
+    await openAs(page, 'admin', '/workshops');
+    await page.getByRole('link', { name: /Ceramics workshop/ }).first().click();
+    await page.getByRole('link', { name: en.edit }).click();
+    await expect(page.getByLabel(en.descriptionSv)).toBeVisible();
+  });
+
+  test('board, in the group but not its responsible, does not', async ({ page }) => {
+    await openAs(page, 'board', '/groups');
+    await page.getByRole('link', { name: new RegExp(PREMISES) }).click();
+    await expect(page.getByText(en.groupSeeking)).toBeVisible();
+    await expect(page.getByRole('link', { name: en.edit, exact: true })).toHaveCount(0);
+  });
 });

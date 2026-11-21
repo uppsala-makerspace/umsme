@@ -17,6 +17,7 @@ import {
   isActiveMember,
   isGroupResponsible,
   canEditGroup,
+  isAdminUser,
   applyWhitelistedUpdate,
   spacesMapView,
 } from "./utils";
@@ -72,7 +73,7 @@ const canApprove = async (group, member) => {
 const canRemoveMembers = async (group, member) =>
   isGroupResponsible(member, group) || (await isAdminish());
 
-const groupSummary = async (group, memberId) => {
+const groupSummary = async (group, memberId, { isAdmin = false } = {}) => {
   const memberCount = await GroupMemberships.find({
     groupId: group._id,
     state: "active",
@@ -101,6 +102,7 @@ const groupSummary = async (group, memberId) => {
     myState: myMembership?.state || null,
     myIsResponsible: group.responsibleMemberId === memberId,
     myCanEdit: mayEditGroup({
+      isAdmin,
       isResponsible: group.responsibleMemberId === memberId,
       groupType: group.type,
       membershipState: myMembership?.state || null,
@@ -117,6 +119,7 @@ Meteor.methods({
    */
   "groups.list": async () => {
     const member = await requireMember();
+    const isAdmin = await isAdminUser();
     const groups = await Groups.find({}, { sort: { "name.sv": 1 } }).fetchAsync();
     // Each group's categories, named, for the list's tags and its filter.
     const categoryById = new Map(
@@ -125,7 +128,7 @@ Meteor.methods({
     const result = [];
     for (const group of groups) {
       result.push({
-        ...(await groupSummary(group, member._id)),
+        ...(await groupSummary(group, member._id, { isAdmin })),
         categories: (group.categoryIds || [])
           .map((id) => categoryById.get(id))
           .filter(Boolean)
@@ -141,10 +144,11 @@ Meteor.methods({
   "groups.myGroups": async () => {
     const member = await requireMember();
     const memberships = await GroupMemberships.find({ memberId: member._id }).fetchAsync();
+    const isAdmin = await isAdminUser();
     const result = [];
     for (const membership of memberships) {
       const group = await Groups.findOneAsync(membership.groupId);
-      if (group) result.push(await groupSummary(group, member._id));
+      if (group) result.push(await groupSummary(group, member._id, { isAdmin }));
     }
     return result;
   },
@@ -157,7 +161,8 @@ Meteor.methods({
     const member = await requireMember();
     const group = await getGroup(groupId);
 
-    const summary = await groupSummary(group, member._id);
+    const isAdmin = await isAdminUser();
+    const summary = await groupSummary(group, member._id, { isAdmin });
 
     const activeCaller = await isActiveMember(member);
 
@@ -212,7 +217,7 @@ Meteor.methods({
       { sort: { "name.sv": 1 } }
     ).fetchAsync();
     for (const relatedGroup of relatedGroupDocs) {
-      relatedGroups.push(await groupSummary(relatedGroup, member._id));
+      relatedGroups.push(await groupSummary(relatedGroup, member._id, { isAdmin }));
     }
 
     // The group's workshop: directly for steering groups, via the parent

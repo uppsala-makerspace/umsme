@@ -328,6 +328,15 @@ export const findMemberForUser = async () => {
 };
 
 /**
+ * Whether the caller has the admin role (not board), which may edit every
+ * group, workshop and area of interest in the app.
+ */
+export const isAdminUser = async () => {
+  const userId = Meteor.userId();
+  return !!userId && (await Roles.userIsInRoleAsync(userId, "admin"));
+};
+
+/**
  * Whether the member is the responsible (gruppansvarig) of a group. Basis for
  * the group-responsible editing methods (a group's responsible may edit its
  * descriptive fields, no admin role required).
@@ -337,11 +346,13 @@ export const isGroupResponsible = (member, group) =>
 
 /**
  * Whether the member may edit a group's descriptive fields: its responsible, or
- * anyone in it when it is a steering group. See mayEditGroup for the rule; this
+ * anyone in it when it is a steering group, and the admin role. See mayEditGroup for the rule; this
  * only supplies it with the caller's membership.
  */
 export const canEditGroup = async (member, group) => {
-  if (!member || !group) return false;
+  if (!group) return false;
+  if (await isAdminUser()) return true;
+  if (!member) return false;
   if (isGroupResponsible(member, group)) return true;
   if (group.type !== 'steering') return false; // no lookup for the common case
   const membership = await GroupMemberships.findOneAsync({
@@ -357,11 +368,13 @@ export const canEditGroup = async (member, group) => {
 
 /**
  * Whether the member may edit a workshop: decided by its own group, which a
- * steering group links to via groupId. Responsibility subgroups' responsibles do
- * not edit the workshop.
+ * steering group links to via groupId, and by the admin role whatever its group.
+ * Responsibility subgroups' responsibles do not edit the workshop.
  */
 export const canEditWorkshop = async (member, workshop) => {
-  if (!member || !workshop?.groupId) return false;
+  if (!workshop) return false;
+  if (await isAdminUser()) return true;
+  if (!member || !workshop.groupId) return false;
   const group = await Groups.findOneAsync(workshop.groupId);
   return canEditGroup(member, group);
 };

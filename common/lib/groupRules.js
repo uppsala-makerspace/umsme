@@ -73,12 +73,13 @@ export const memberLimits = (minMembers, maxMembers) => {
  * may be changed is unaffected: description, rules, Slack channel, guides link
  * and image, never name, status, spaces or who is responsible.
  *
- * A pending request is not membership.
+ * A pending request is not membership. The admin role may edit every group,
+ * without being in it (not board).
  *
- * @param {{isResponsible: boolean, groupType: string, membershipState: string|null}} args
+ * @param {{isAdmin?: boolean, isResponsible: boolean, groupType: string, membershipState: string|null}} args
  */
-export const mayEditGroup = ({ isResponsible, groupType, membershipState }) =>
-  !!isResponsible || (groupType === "steering" && membershipState === "active");
+export const mayEditGroup = ({ isAdmin = false, isResponsible, groupType, membershipState }) =>
+  !!isAdmin || !!isResponsible || (groupType === "steering" && membershipState === "active");
 
 // Localised field access with Swedish fallback: {sv, en} -> string.
 export const localized = (field, lang) =>

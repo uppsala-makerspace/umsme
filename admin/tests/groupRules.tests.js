@@ -50,6 +50,12 @@ describe('Group rules', function () {
       }
     });
 
+    it('lets the admin role edit whatever the type, without being in it', function () {
+      for (const groupType of GROUP_TYPES) {
+        assert.strictEqual(may({ isAdmin: true, groupType }), true, groupType);
+      }
+    });
+
     it('lets any member of a steering group edit', function () {
       assert.strictEqual(may({ groupType: 'steering', membershipState: 'active' }), true);
     });

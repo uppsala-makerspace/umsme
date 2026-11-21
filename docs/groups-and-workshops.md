@@ -58,8 +58,11 @@ description, rules, Slack channel, guides link and image of the workshop or
 area of interest it runs. A responsibility group's members cannot edit the
 workshop, and neither can its responsible.
 
-Admin and the board can edit everything. Only they can change name, type,
-status, spaces, who is responsible, and how members get in.
+Admin and the board can edit everything in the admin application. Only they
+can change name, type, status, spaces, who is responsible, and how members get
+in. In the app, the admin role (not board) may also edit every group, workshop
+and area of interest the way its responsible does, without being in the group
+(`isAdminUser` in `app/server/methods/utils.js`).
 
 ## Membership
 
