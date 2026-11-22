@@ -218,8 +218,11 @@ export const buildE2e = async ({ people, now }) => {
   const kiln = await certificate({
     name: { sv: 'Keramikugn', en: 'Ceramics kiln' }, description: { sv: 'Får bränna i ugnen.' },
     workshopId: ceramics, certifiers: [members.steering._id], defaultValidityDays: 365,
+    machines: ['ugn1', 'ugn2'], machineRole: 'user',
   });
   await attest(kiln, 'member', { endDate: days(335) });
+  // The member's tag, for the RFID exports.
+  await Members.updateAsync(members.member._id, { $set: { rfid: '03D73B99' } });
   const wheel = await certificate({ name: { sv: 'Drejskiva', en: 'Pottery wheel' }, workshopId: ceramics, prerequisites: [kiln] });
   // An activity whose events ask for the wheel certificate, which nobody holds.
   const wheelCourse = {
@@ -248,7 +251,7 @@ export const buildE2e = async ({ people, now }) => {
   });
   await makeRegistration(glazingTalk, members.quarterly._id, { at: days(-3) });
   await Attestations.insertAsync({ certificateId: glazing, memberId: members.quarterly._id, startDate: days(-1), attempt: 1 });
-  for (const purpose of ['edit', 'links', 'delete', 'mandatory', 'grant']) {
+  for (const purpose of ['edit', 'links', 'delete', 'mandatory', 'grant', 'machines']) {
     await certificate({ name: { sv: `E2E ${purpose} certificate` } });
   }
   const revoke = await certificate({ name: { sv: 'E2E revoke certificate' } });

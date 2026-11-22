@@ -8,11 +8,12 @@ const prerequisiteOptions = [{ value: 'c1', label: 'Introduktion' }, { value: 'c
 const sara = { _id: 'm1', name: 'Sara Styrgrupp', mid: '1002' };
 const people = [sara, { _id: 'm2', name: 'Maja Medlem', mid: '1003' }, { _id: 'm3', name: 'Astrid Admin', mid: '1001' }];
 const searchMembers = async (query) => people.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
-const kiln = { _id: 'c2', name: { sv: 'Keramikugn', en: 'Ceramics kiln' }, workshopId: 'w1', certifiers: ['m1'], prerequisites: ['c1'], defaultValidityDays: 365 };
+const kiln = { _id: 'c2', name: { sv: 'Keramikugn', en: 'Ceramics kiln' }, workshopId: 'w1', certifiers: ['m1'], prerequisites: ['c1'], defaultValidityDays: 365, machines: ['ugn1', 'ugn2'], machineRole: 'user' };
 const values = (c) => ({
   nameSv: c.name?.sv || '', nameEn: c.name?.en || '', descriptionSv: '', descriptionEn: '',
   defaultValidityDays: c.defaultValidityDays ?? '', certifierRole: c.certifierRole || '', workshopId: c.workshopId || '',
   certifiers: c.certifiers || [], prerequisites: c.prerequisites || [],
+  machines: (c.machines || []).join(', '), machineRole: c.machineRole || 'user',
   testId: c.test?.testId || '', maxAttempts: c.test?.maxAttempts ?? 3, maxErrors: c.test?.maxErrors ?? 1,
 });
 const holders = [

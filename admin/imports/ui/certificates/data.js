@@ -40,6 +40,8 @@ export const formValues = (certificate) => ({
   workshopId: certificate?.workshopId || '',
   certifiers: certificate?.certifiers || [],
   prerequisites: certificate?.prerequisites || [],
+  machines: (certificate?.machines || []).join(', '),
+  machineRole: certificate?.machineRole || 'user',
   testId: certificate?.test?.testId || '',
   maxAttempts: certificate?.test?.maxAttempts ?? 3,
   maxErrors: certificate?.test?.maxErrors ?? 1,
@@ -53,6 +55,8 @@ const fieldsFrom = (v) => ({
   workshopId: v.workshopId || null,
   certifiers: v.certifiers,
   prerequisites: v.prerequisites,
+  machines: v.machines.split(',').map((m) => m.trim()).filter(Boolean),
+  machineRole: v.machineRole || null,
   test: v.testId ? { testId: v.testId, maxAttempts: Number(v.maxAttempts), maxErrors: Number(v.maxErrors) } : null,
 });
 

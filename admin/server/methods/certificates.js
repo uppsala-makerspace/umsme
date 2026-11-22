@@ -17,6 +17,8 @@ const CertificateFields = {
   workshopId: Match.Optional(Match.Maybe(String)),
   certifiers: Match.Optional([String]),
   prerequisites: Match.Optional([String]),
+  machines: Match.Optional(Match.Maybe([String])),
+  machineRole: Match.Optional(Match.Maybe(String)),
   test: Match.Optional(Match.Maybe({ testId: String, maxAttempts: Match.Integer, maxErrors: Match.Integer })),
 };
 

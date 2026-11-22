@@ -248,22 +248,58 @@ Equipment that only some members may use (a laser cutter, say) can fetch the
 RFID tags of everyone holding the certificate. The admin app serves:
 
 ```
-GET /api/certificates/<certificateId>/rfid
-GET /api/certificates/<certificateId>/rfid?includeNames
+GET /api/certificates/rfid?apikey=<key>
+GET /api/certificates/<certificateId>/rfid?apikey=<key>
+GET /api/certificates/<certificateId>/rfid?includeNames&apikey=<key>
 ```
 
-The certificate's page in admin links to both.
+The certificate's page in admin (tab Other) lists the addresses.
+
+**API key:** every request needs `apikey` matching `private.rfidApiKey` in
+admin's `settings.json`, compared in constant time. A missing or wrong key
+gives `401` with `{"error": "Invalid API key"}`. Without the setting every
+request is refused, so a forgotten setting never opens the export. The key is
+in the address, so it may end up in nginx's access log; keep the log private,
+or leave the query string out of it for this location.
 
 **Who is included:** members with a confirmed attestation (`certifierId` set)
 that has not expired (no `endDate`, or `endDate` in the future), and a
 non-empty `rfid` on their member record. Pending attestations never count.
 
-**Response without parameters**, unchanged from before `includeNames` existed:
+**Tags** are written in upper case with a dash between each byte,
+`03-D7-3B-99`, whatever the member record holds (`03d73b99`).
+
+### Every certificate's machines
+
+A certificate may list **machines** (`machines`, names of lower case letters,
+digits, `-` and `_`, such as `bandsag1`) and the **role** its holders have on
+them (`machineRole`, `user` or `admin`; `user` when not chosen). Both are set
+on the certificate's Details tab in admin, under "Machines (RFID export)".
+
+`GET /api/certificates/rfid` gives one row per holder's tag and machine, for
+every certificate with machines:
+
+```json
+[
+  { "tag": "03-D7-3B-99", "machine": "bandsag1", "name": "Person 1", "role": "user" },
+  { "tag": "03-D7-3B-99", "machine": "bandsag2", "name": "Person 1", "role": "user" },
+  { "tag": "B3-14-46-99", "machine": "bandsag1", "name": "Person 2", "role": "user" }
+]
+```
+
+- A holder of a certificate with `bandsag1` and `bandsag2` gets a row for each.
+- The same tag, machine and role from two certificates is one row; the same
+  tag and machine in both roles is two rows.
+- Sorted by machine, then name. `name` is `""` for a member without one.
+
+### One certificate
+
+**Response without parameters:**
 
 ```json
 {
   "name": "Laserskärare",
-  "rfids": ["04A1B2C3", "04D4E5F6"]
+  "rfids": ["04-A1-B2-C3", "04-D4-E5-F6"]
 }
 ```
 
@@ -275,10 +311,10 @@ non-empty `rfid` on their member record. Pending attestations never count.
 ```json
 {
   "name": "Laserskärare",
-  "rfids": ["04A1B2C3", "04D4E5F6"],
+  "rfids": ["04-A1-B2-C3", "04-D4-E5-F6"],
   "members": [
-    { "rfid": "04A1B2C3", "name": "Anna Andersson" },
-    { "rfid": "04D4E5F6", "name": "Bo Berg" }
+    { "rfid": "04-A1-B2-C3", "name": "Anna Andersson" },
+    { "rfid": "04-D4-E5-F6", "name": "Bo Berg" }
   ]
 }
 ```
@@ -291,17 +327,13 @@ non-empty `rfid` on their member record. Pending attestations never count.
 `includeNames` is on when present without a value, or set to `true` or `1`.
 `false`, `0` or leaving it out gives the plain form.
 
-**Errors:** `404` with `{"error": "Certificate not found"}` for an unknown
-certificate id, an empty `404` for any other path under `/api/certificates`,
-and `405` for anything but `GET`.
+**Errors:** `401` without the right key, `404` with
+`{"error": "Certificate not found"}` for an unknown certificate id, an empty
+`404` for any other path under `/api/certificates`, and `405` for anything
+but `GET`.
 
-**Access:** the endpoint has no login. It is restricted by an IP allowlist in
-nginx in front of the admin app, so only the equipment's network can reach it.
-With `includeNames` the response holds member names as well as tags, so keep
-that allowlist tight.
-
-The handler is `admin/server/api/certificatesRfid.js`; the response is built by
-`rfidExport` in `common/lib/certificateRfid.js`.
+The handler is `admin/server/api/certificatesRfid.js`; the responses are built
+by `rfidExport` and `machineExport` in `common/lib/certificateRfid.js`.
 
 ## Related Documentation
 

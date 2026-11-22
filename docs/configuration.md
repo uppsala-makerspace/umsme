@@ -46,6 +46,7 @@ Each app has its own `settings.json` (git-ignored). Example files serve as templ
 | `activityCron.enabled` | **Must be explicitly `true`** for the events' scheduled jobs: reminders before an event (24 hours and two hours, to participants and hosts), check-in reminders and deadlines, and the Google calendar sync. Keep unset in dev, like `reminderCron`. |
 | `private.googleCalendar` | The association's Google calendar: import of its events, and events mirrored to it (see section 13). `"fake"` for a stand-in (demo, e2e). |
 | `private.receiptTokenSecret` | Secret for signing receipt-image URLs (see section 12). If unset, a random per-process secret is used. |
+| `private.rfidApiKey` | The key the RFID exports ask for as `?apikey=` (see docs/certificates.md, section 10). Unset: the exports refuse every request. |
 
 Storage walls and units live in the database and are managed on the admin
 storage page; there is no settings entry for them.
@@ -418,7 +419,7 @@ Receipt images are served by an HTTP endpoint (`GET /api/expenses/<id>/receipt?v
 
 Because an `<img>` request carries no login session, the URL is authorized by a signed token minted by a method only after the normal authz check (the owner in the app, an admin/board/treasurer role in admin). The token is an HMAC keyed by `private.receiptTokenSecret`, scoped to the exact photo version and valid for ~48h. **Set `receiptTokenSecret` in production** (a long random string), and use the **same** value across instances if the app is load-balanced; if unset, a random per-process secret is generated at startup (fine for a single instance/dev, but URLs break on restart and across instances).
 
-nginx must proxy `/api/expenses` to both the app and admin upstreams (it already proxies `/api/certificates` for the admin RFID endpoint).
+nginx must proxy `/api/expenses` to both the app and admin upstreams (it already proxies `/api/certificates` for the admin RFID endpoints, which need no IP allowlist since they ask for `private.rfidApiKey`; see docs/certificates.md, section 10).
 
 ### Who can submit expenses (`app/settings.json`)
 

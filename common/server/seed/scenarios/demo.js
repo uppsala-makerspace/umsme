@@ -301,14 +301,17 @@ export const buildDemo = async ({ random, people, now }) => {
     name: { sv: 'Laserskärare', en: 'Laser cutter' }, workshopId: workshops.wood,
     description: { sv: 'Får använda laserskäraren på egen hand.', en: 'May use the laser cutter unsupervised.' },
     prerequisites: [intro], certifiers: [personas.steering._id, personas.groupLeader._id], defaultValidityDays: 730,
+    machines: ['laser1'], machineRole: 'user',
   });
   const welding = await certificate({
     name: { sv: 'Svetsning', en: 'Welding' }, workshopId: workshops.metal,
     prerequisites: [intro], certifiers: pickMembers(labMembers, 2).map((m) => m._id), defaultValidityDays: 730,
+    machines: ['svets1', 'svets2'], machineRole: 'user',
   });
   const kiln = await certificate({
     name: { sv: 'Keramikugn', en: 'Ceramics kiln' }, workshopId: workshops.ceramics,
     prerequisites: [intro], certifiers: pickMembers(labMembers, 1).map((m) => m._id),
+    machines: ['ugn1'], machineRole: 'admin',
   });
   // A pending request has no certifier yet: that is what makes it pending.
   const attest = (certificateId, member, { start, end, certifierId = '__system__', pending = false } = {}) =>
@@ -328,6 +331,13 @@ export const buildDemo = async ({ random, people, now }) => {
   for (const member of pickMembers(introduced, 10)) await attest(welding, member, { end: days(random.int(30, 600)) });
   for (const member of pickMembers(introduced, 6)) await attest(kiln, member);
   await attest(laser, personas.base, { start: days(-1), pending: true });
+  // RFID tags for the lab members and the personas, for the exports of the
+  // machines (GET /api/certificates/rfid). Counted, not random, so the rest of
+  // the seed draws the same numbers.
+  const tagged = [...labMembers, personas.member, personas.steering, personas.groupLeader];
+  for (const [i, member] of tagged.entries()) {
+    await Members.updateAsync(member._id, { $set: { rfid: (0x04a10000 + i).toString(16).toUpperCase().padStart(8, '0') } });
+  }
 
   // --- Activities and events ----------------------------------------------
   // The wood workshop's introduction every other week, with events behind and

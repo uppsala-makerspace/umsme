@@ -66,6 +66,16 @@ test.describe('Certificates', () => {
     await expect(page.getByRole('spinbutton', { name: 'Default validity (days)' })).toHaveValue('90');
   });
 
+  test('sets the machines and the role on them, on save', async ({ page }) => {
+    await openCertificate(page, 'E2E machines certificate');
+    await field(page, 'Machines').fill('Bandsag1, bandsag2 ,bandsag1');
+    await page.getByRole('combobox', { name: 'Role on the machines' }).selectOption('admin');
+    await saveButton(page).click();
+    await openCertificate(page, 'E2E machines certificate');
+    await expect(field(page, 'Machines')).toHaveValue('bandsag1, bandsag2');
+    await expect(page.getByRole('combobox', { name: 'Role on the machines' })).toHaveValue('admin');
+  });
+
   test('shows its workshop, certifiers, prerequisites and holders', async ({ page }) => {
     await openCertificate(page, KILN);
     await expect(page.getByRole('link', { name: /Keramikverkstaden/ })).toBeVisible();
@@ -149,5 +159,34 @@ test.describe('Certificates', () => {
     await page.getByRole('link', { name: 'Maja Medlem' }).first().click();
     await expect(page.getByRole('tab', { name: /^certificates/i, selected: true })).toBeVisible();
     await expect(page.getByRole('link', { name: KILN }).first()).toBeVisible();
+  });
+});
+
+// The RFID exports, for the machines' readers: only with the API key in the
+// settings (settings_demo.json, private.rfidApiKey).
+test.describe('RFID export', () => {
+  const KEY = 'demo-rfid-key';
+
+  test('refuses a request without the key, or with a wrong one', async ({ request }) => {
+    expect((await request.get('/api/certificates/rfid')).status()).toBe(401);
+    expect((await request.get('/api/certificates/rfid?apikey=wrong')).status()).toBe(401);
+  });
+
+  test('gives every certificate\'s machines, a row per tag and machine', async ({ request }) => {
+    const response = await request.get(`/api/certificates/rfid?apikey=${KEY}`);
+    expect(response.status()).toBe(200);
+    const rows = await response.json();
+    for (const machine of ['ugn1', 'ugn2']) {
+      expect(rows).toContainEqual({ tag: '03-D7-3B-99', machine, name: 'Maja Medlem', role: 'user' });
+    }
+  });
+
+  test('gives one certificate\'s tags with the key', async ({ page, request }) => {
+    await openCertificate(page, KILN);
+    const id = page.url().match(/certificate\/([^/?]+)/)![1];
+    expect((await request.get(`/api/certificates/${id}/rfid`)).status()).toBe(401);
+    const body = await (await request.get(`/api/certificates/${id}/rfid?includeNames&apikey=${KEY}`)).json();
+    expect(body.rfids).toContain('03-D7-3B-99');
+    expect(body.members).toContainEqual({ rfid: '03-D7-3B-99', name: 'Maja Medlem' });
   });
 });

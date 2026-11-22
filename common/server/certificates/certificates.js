@@ -35,6 +35,22 @@ const testOf = (test) => {
   return { testId, maxAttempts: test.maxAttempts, maxErrors: test.maxErrors };
 };
 
+/** The roles a certificate may give on its machines. */
+export const MACHINE_ROLES = ['user', 'admin'];
+const MACHINE_NAME = /^[a-z0-9][a-z0-9_-]*$/;
+
+/**
+ * A certificate's machines, trimmed, in lower case and each once, and its role
+ * on them: user unless admin is chosen, and none without machines.
+ */
+export const machinesOf = (machines, role) => {
+  const names = [...new Set((machines || []).map((m) => String(m).trim().toLowerCase()).filter(Boolean))];
+  const bad = names.find((m) => m.length > 60 || !MACHINE_NAME.test(m));
+  if (bad) throw new Meteor.Error('bad-machine', `A machine name is lower case letters, digits, - and _: ${bad}`);
+  if (role && !MACHINE_ROLES.includes(role)) throw new Meteor.Error('bad-machine-role', `The role is ${MACHINE_ROLES.join(' or ')}`);
+  return { machines: names, machineRole: names.length ? role || 'user' : null };
+};
+
 const changesOf = async (fields, selfId) => {
   const sv = text(fields.name?.sv);
   if (!sv) throw new Meteor.Error('bad-name', 'A certificate needs a Swedish name');
@@ -63,6 +79,7 @@ const changesOf = async (fields, selfId) => {
     certifiers,
     prerequisites,
     test: testOf(fields.test),
+    ...machinesOf(fields.machines, fields.machineRole),
   });
   return changes;
 };

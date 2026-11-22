@@ -27,7 +27,7 @@ const TABS = [['details', 'Details'], ['holders', 'Holders'], ['other', 'Other']
  * Add a certificate, or show and edit one in tabs: its details (fields,
  * workshop, certifiers, prerequisites and test, saved with Save), its
  * holders (granting and revoking at once), and the rest: marking it
- * mandatory for membership and the RFID export. Every tab stays put while
+ * mandatory for membership and the RFID export's addresses. Every tab stays put while
  * another shows.
  *
  * @param {{ isNew: boolean, certificate?: object, values: object, onChange: (field, value) => void,
@@ -112,6 +112,16 @@ export const CertificateForm = ({
         )}
       </Box>
 
+      <Typography variant="subtitle1" component="h2" sx={{ mt: 3, mb: 1 }}>Machines (RFID export)</Typography>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <TextField label="Machines" fullWidth {...text('machines')}
+          helperText="Comma separated, e.g. bandsag1, bandsag2. The holders' tags are exported for each machine." />
+        <TextField label="Role on the machines" select sx={{ minWidth: 220 }} slotProps={native} {...text('machineRole')}>
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+        </TextField>
+      </Stack>
+
       <Typography variant="subtitle1" component="h2" sx={{ mt: 3, mb: 1 }}>Test</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
         Awarded by passing a test in the app instead of by a certifier.
@@ -183,10 +193,15 @@ export const CertificateForm = ({
                   : <Typography variant="body2" color="text.secondary">Another certificate is already mandatory.</Typography>}
             </TabPart>
             <TabPart title="RFID export">
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>JSON list of RFID tags for members with a valid attestation; access is restricted by an IP allowlist in nginx.</Typography>
-              <Stack direction="row" spacing={2}>
-                <Link href={rfid} target="_blank" rel="noopener noreferrer">Open RFID JSON</Link>
-                <Link href={`${rfid}?includeNames`} target="_blank" rel="noopener noreferrer">Open RFID JSON with names</Link>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                JSON list of RFID tags for members with a valid attestation. Every request needs the API key
+                from the settings (private.rfidApiKey) as ?apikey=…; without it the answer is 401.
+              </Typography>
+              <Stack spacing={0.5}>
+                <Typography variant="body2" component="code">{rfid}?apikey=…</Typography>
+                <Typography variant="body2" component="code">{rfid}?includeNames&amp;apikey=…</Typography>
+                <Typography variant="body2" component="code">/api/certificates/rfid?apikey=…</Typography>
+                <Typography variant="body2" color="text.secondary">The last one is every certificate's machines at once, one row per tag and machine.</Typography>
               </Stack>
             </TabPart>
           </TabPanel>

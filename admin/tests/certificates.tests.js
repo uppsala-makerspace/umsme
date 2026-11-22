@@ -59,6 +59,22 @@ describe('certificates', function () {
     await assert.rejects(call(board, 'certificates.update', docId, certificate(), before), /conflict/);
   });
 
+  it('keeps the machines in lower case and once, user unless admin, and none without machines', async function () {
+    const docId = await call(board, 'certificates.create', certificate({ machines: [' Bandsag1', 'bandsag1', 'bandsag2'] }));
+    let doc = await Certificates.findOneAsync(docId);
+    assert.deepStrictEqual(doc.machines, ['bandsag1', 'bandsag2']);
+    assert.strictEqual(doc.machineRole, 'user');
+    await call(board, 'certificates.update', docId, certificate({ machines: [], machineRole: 'admin' }), doc.updatedAt);
+    doc = await Certificates.findOneAsync(docId);
+    assert.strictEqual('machines' in doc, false);
+    assert.strictEqual('machineRole' in doc, false);
+  });
+
+  it('refuses a bad machine name or role', async function () {
+    await assert.rejects(call(board, 'certificates.create', certificate({ machines: ['band såg'] })), /bad-machine/);
+    await assert.rejects(call(board, 'certificates.create', certificate({ machines: ['m1'], machineRole: 'owner' })), /bad-machine-role/);
+  });
+
   it('refuses the treasurer', async function () {
     await assert.rejects(call(treasurer, 'certificates.create', certificate()), /not-authorized/);
   });

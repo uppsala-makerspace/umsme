@@ -791,6 +791,22 @@ export const models = {
         options: getRoleOptions,
       },
     },
+    // The machines whose RFID readers let the certificate's holders in, and
+    // in what role (common/lib/certificateRfid.js, machineExport).
+    machines: {
+      label: "Machines",
+      type: Array,
+      optional: true,
+      autoform: { omit: true },
+    },
+    "machines.$": { type: String, max: 60, regEx: /^[a-z0-9][a-z0-9_-]*$/ },
+    machineRole: {
+      label: "Role on the machines",
+      type: String,
+      optional: true,
+      allowedValues: ["user", "admin"],
+      autoform: { omit: true },
+    },
     // Workshop (verkstad) this certificate belongs to, e.g. the laser
     // certificate under the wood workshop. Picked in admin, so omitted here.
     workshopId: {

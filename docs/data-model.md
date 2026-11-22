@@ -208,6 +208,8 @@ Defines a type of certification that members can earn (e.g., safety training, ma
 | `prerequisites` | Array of String | `_id` references to other Certificates that must be held first |
 | `certifiers` | Array of String | `_id` references to Members who can grant this certificate |
 | `certifierRole` | String (max 100) | Meteor role that grants certifier access |
+| `machines` | [String] | Machines whose readers let holders in, e.g. `bandsag1` (RFID export) |
+| `machineRole` | String | `user` or `admin`, the holders' role on the machines |
 | `mandatory` | Boolean | If true, this certificate is required for membership. Only one certificate can be mandatory at a time (enforced by deny rules). |
 
 **Deny rules**: Mandatory certificates cannot be deleted. The mandatory flag cannot be removed, and a second certificate cannot be marked mandatory while one already exists.
