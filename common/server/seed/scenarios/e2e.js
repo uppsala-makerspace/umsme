@@ -130,7 +130,16 @@ export const buildE2e = async ({ people, now }) => {
     name: { sv: 'Keramikverkstaden', en: 'Ceramics workshop' }, kind: 'workshop', status: 'established',
     primarySpaceId: ceramicsRoom, groupId: ceramicsGroup, createdAt: now,
   });
-  await Workshops.insertAsync({ name: { sv: 'Retrodatorer', en: 'Retro computers' }, kind: 'areaOfInterest', status: 'trial', createdAt: now });
+  const retro = await Workshops.insertAsync({ name: { sv: 'Retrodatorer', en: 'Retro computers' }, kind: 'areaOfInterest', status: 'trial', createdAt: now });
+  // A group where every member approves, related to the area of interest, with
+  // a request waiting for its member discounted: the red marks on the home
+  // page, the groups list and the area's page. No test approves it.
+  const approvalsGroup = await group({
+    name: { sv: 'E2E godkännandegrupp', en: 'E2E approvals group' }, type: 'function', joinPolicy: 'request-any',
+    relatedWorkshopIds: [retro],
+  });
+  await member(approvalsGroup, 'discounted');
+  await member(approvalsGroup, 'expiring', 'pending');
   await Workshops.insertAsync({ name: { sv: 'E2E edit verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E links verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });
   await Workshops.insertAsync({ name: { sv: 'E2E delete verkstad' }, kind: 'workshop', status: 'forming', createdAt: now });

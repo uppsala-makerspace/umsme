@@ -10,16 +10,27 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
  * A disabled card is rendered grayed out and without its link. `badge`
  * renders a counter bubble in the card's top-right corner (hidden when
  * falsy/zero): green, or red (`badgeTone="red"`) for what waits on the reader.
+ * `alert` adds a red counter of its own before the badge, for what waits on
+ * the reader beside what the green one counts; `alertLabel` names it.
  */
-const InfoCard = ({ to, href, Icon, title, subtitle, disabled, badge, badgeTone = "green" }) => {
+const bubble = "min-w-5 h-5 px-1 rounded-full text-white text-xs font-bold flex items-center justify-center";
+
+const InfoCard = ({ to, href, Icon, title, subtitle, disabled, badge, badgeTone = "green", alert, alertLabel }) => {
   const external = !disabled && !!href && href.startsWith("http");
   const content = (
     <>
-      {badge > 0 && (
-        <span className={`absolute top-3 right-3 min-w-5 h-5 px-1 rounded-full text-white text-xs font-bold flex items-center justify-center ${
-          badgeTone === "red" ? "bg-red-600" : "bg-brand-green"
-        }`}>
-          {badge}
+      {(badge > 0 || alert > 0) && (
+        <span className="absolute top-3 right-3 flex items-center gap-1">
+          {alert > 0 && (
+            <span className={`${bubble} bg-red-600`} aria-label={alertLabel} title={alertLabel}>
+              {alert}
+            </span>
+          )}
+          {badge > 0 && (
+            <span className={`${bubble} ${badgeTone === "red" ? "bg-red-600" : "bg-brand-green"}`}>
+              {badge}
+            </span>
+          )}
         </span>
       )}
       <Icon

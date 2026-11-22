@@ -2,6 +2,7 @@ import assert from 'assert';
 import {
   canRequestToJoin,
   mayEditGroup,
+  mayApproveAsMember,
   GROUP_TYPES,
   isAreaOfInterest,
   workshopCompleteness,
@@ -38,6 +39,25 @@ describe('Group rules', function () {
       assert.ok(memberLimits(null, 'x').error);
       assert.ok(memberLimits(5, 3).error);
       assert.strictEqual(memberLimits(3, 3).error, null);
+    });
+  });
+
+  describe('mayApproveAsMember', function () {
+    const may = (args) => mayApproveAsMember({ isResponsible: false, membershipState: null, ...args });
+
+    it('lets only the responsible approve where only they do', function () {
+      assert.strictEqual(may({ joinPolicy: 'request-responsible', isResponsible: true }), true);
+      assert.strictEqual(may({ joinPolicy: 'request-responsible', membershipState: 'active' }), false);
+    });
+
+    it('lets every active member approve where every member does, not a pending one', function () {
+      assert.strictEqual(may({ joinPolicy: 'request-any', membershipState: 'active' }), true);
+      assert.strictEqual(may({ joinPolicy: 'request-any', membershipState: 'pending' }), false);
+      assert.strictEqual(may({ joinPolicy: 'request-any', isResponsible: true }), false);
+    });
+
+    it('has nothing to approve in a group taking no requests', function () {
+      assert.strictEqual(may({ joinPolicy: 'open', isResponsible: true, membershipState: 'active' }), false);
     });
   });
 

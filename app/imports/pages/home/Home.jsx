@@ -31,10 +31,11 @@ import { daysBetween } from "/imports/common/lib/dateUtils";
  * @param {function} onAcceptInvite callback to accept family invite
  * @param {function} onDeclineInvite callback to decline family invite
  * @param {Date|null} liabilityDate date of approved liability (null if not approved)
+ * @param {number} groupsToApprove join requests waiting for the member's approval, red on the Groups card
  * @param {boolean} liabilityOutdated whether the approved liability is outdated
  * @returns {React.JSX.Element}
  */
-export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, expensesAllowed, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement, groupCount, myGroupCount, activityCount, expensesToApprove }) => {
+export default ({ loading, memberName, memberStatus, verified, invite, onAcceptInvite, onDeclineInvite, liabilityDate, liabilityOutdated, isFamily, registered, excluded, expensesAllowed, hasNewMessages, messageCount, announcementCount, latestMessageDate, latestAnnouncementDate, hasNewMessage, hasNewAnnouncement, groupCount, myGroupCount, groupsToApprove, activityCount, expensesToApprove }) => {
   const { t, i18n } = useTranslation();
 
   if (loading) {
@@ -128,6 +129,8 @@ export default ({ loading, memberName, memberStatus, verified, invite, onAcceptI
               : undefined
           }
           badge={myGroupCount}
+          alert={groupsToApprove}
+          alertLabel={t("groupRequestsToApprove", { n: groupsToApprove })}
         />
         <InfoCard to="/tool" Icon={MagnifyingGlassIcon} title={t("viewTools")} />
         <InfoCard

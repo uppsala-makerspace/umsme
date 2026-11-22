@@ -81,6 +81,21 @@ export const memberLimits = (minMembers, maxMembers) => {
 export const mayEditGroup = ({ isAdmin = false, isResponsible, groupType, membershipState }) =>
   !!isAdmin || !!isResponsible || (groupType === "steering" && membershipState === "active");
 
+/**
+ * Whether a member approves a group's join requests by what they are in it,
+ * leaving aside the admin and board roles: its responsible where only they
+ * approve ("request-responsible"), any active member where every member does
+ * ("request-any", or none set); as canApprove has it. The basis
+ * for the red marks on the home page and the group cards, which count the
+ * requests of request-* groups only; who may approve is canApprove in
+ * app/server/methods/groups.js, which also asks for an active membership.
+ *
+ * @param {{joinPolicy: string, isResponsible: boolean, membershipState: string|null}} args
+ */
+export const mayApproveAsMember = ({ joinPolicy, isResponsible, membershipState }) =>
+  joinPolicy === "request-responsible" ? !!isResponsible
+    : joinPolicy !== "open" && membershipState === "active";
+
 // Localised field access with Swedish fallback: {sv, en} -> string.
 export const localized = (field, lang) =>
   (field && (field[lang] || field.sv)) || "";

@@ -12,6 +12,7 @@ const sampleGroups = [
     categories: [{ _id: "c1", name: { sv: "Hantverk", en: "Crafts" }, sortOrder: 4 }],
     myState: "active",
     myIsResponsible: false,
+    myRequestsToApprove: 2,
   },
   {
     _id: "grp2",
@@ -45,6 +46,7 @@ const sampleGroups = [
     memberCount: 8,
     myState: "active",
     myIsResponsible: true,
+    myRequestsToApprove: 1,
   },
   {
     _id: "grp5",

@@ -101,3 +101,34 @@ test.describe('Editing as admin', () => {
     await expect(page.getByRole('link', { name: en.edit, exact: true })).toHaveCount(0);
   });
 });
+
+// Join requests waiting for one's approval, where one is the responsible or,
+// where every member approves, a member: red on the home page's Groups card,
+// on the group's card in the list and on the area of interest's page.
+test.describe('Requests to approve', () => {
+  const APPROVALS = 'E2E approvals group';
+  const toApprove = (n: number) => en.groupRequestsToApprove.replace('{{n}}', String(n));
+
+  test('the home page counts them in red', async ({ page }) => {
+    await openAs(page, 'discounted', '/');
+    await expect(page.getByLabel(toApprove(1))).toHaveText('1');
+  });
+
+  test('the group\'s card says how many, not the cards where only the responsible approves', async ({ page }) => {
+    await openAs(page, 'discounted', '/groups');
+    await expect(page.getByRole('link', { name: new RegExp(APPROVALS) })).toContainText(en.groupRequestsOne);
+    await expect(page.getByRole('link', { name: /E2E requests group/ })).not.toContainText(en.groupRequestsOne);
+  });
+
+  test('the area of interest\'s page says it too', async ({ page }) => {
+    await openAs(page, 'discounted', '/workshops');
+    await page.getByRole('button', { name: en.areasOfInterest }).click();
+    await page.getByRole('link', { name: /Retro computers/ }).first().click();
+    await expect(page.getByRole('link', { name: new RegExp(APPROVALS) })).toContainText(en.groupRequestsOne);
+  });
+
+  test('admin, who may approve anywhere, gets no mark for a group she is not in', async ({ page }) => {
+    await openAs(page, 'admin', '/groups');
+    await expect(page.getByRole('link', { name: new RegExp(APPROVALS) })).not.toContainText(en.groupRequestsOne);
+  });
+});

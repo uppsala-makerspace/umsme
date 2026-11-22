@@ -81,6 +81,7 @@ export default () => {
       hasNewAnnouncement={hasNewAnnouncement}
       groupCount={memberInfo?.groupCounts?.total}
       myGroupCount={memberInfo?.groupCounts?.mine}
+      groupsToApprove={memberInfo?.groupCounts?.toApprove}
       activityCount={memberInfo?.activityCount}
       expensesToApprove={memberInfo?.expensesToApprove}
     />

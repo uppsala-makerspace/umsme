@@ -16,6 +16,7 @@ import {
   canSeeWorkshopRevenue,
   applyWhitelistedUpdate,
   spacesMapView,
+  requestsToApprove,
 } from "./utils";
 
 const requireMember = async () => {
@@ -28,7 +29,7 @@ const requireMember = async () => {
 
 // Group summary for the workshop page's group lists: active member count and
 // the caller's own membership state and responsibility, like groups.list provides.
-const groupSummary = async (groupDoc, memberId) => {
+const groupSummary = async (groupDoc, memberId, toApprove = new Map()) => {
   const memberCount = await GroupMemberships.find({
     groupId: groupDoc._id,
     state: "active",
@@ -44,6 +45,8 @@ const groupSummary = async (groupDoc, memberId) => {
       (await GroupMemberships.findOneAsync({ groupId: groupDoc._id, memberId }))
         ?.state || null,
     myIsResponsible: groupDoc.responsibleMemberId === memberId,
+    // Join requests waiting for the caller's approval (requestsToApprove).
+    myRequestsToApprove: toApprove.get(groupDoc._id) || 0,
   };
 };
 
@@ -107,18 +110,19 @@ Meteor.methods({
 
     // The responsible steering group and its responsibility subgroups, for
     // the "get involved" list.
+    const toApprove = await requestsToApprove(member);
     let group = null;
     const responsibilityGroups = [];
     if (workshop.groupId) {
       const groupDoc = await Groups.findOneAsync(workshop.groupId);
       if (groupDoc) {
-        group = await groupSummary(groupDoc, member._id);
+        group = await groupSummary(groupDoc, member._id, toApprove);
         const children = await Groups.find(
           { parentGroupId: groupDoc._id },
           { sort: { "name.sv": 1 } }
         ).fetchAsync();
         for (const child of children) {
-          responsibilityGroups.push(await groupSummary(child, member._id));
+          responsibilityGroups.push(await groupSummary(child, member._id, toApprove));
         }
       }
     }
@@ -131,7 +135,7 @@ Meteor.methods({
       { sort: { "name.sv": 1 } }
     ).fetchAsync();
     for (const relatedGroup of related) {
-      relatedGroups.push(await groupSummary(relatedGroup, member._id));
+      relatedGroups.push(await groupSummary(relatedGroup, member._id, toApprove));
     }
 
     const certificates = (

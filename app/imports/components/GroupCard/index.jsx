@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import GroupTypeTag from "/imports/components/GroupTypeTag";
 import StaffingBadge from "/imports/components/StaffingBadge";
+import RequestsBadge from "/imports/components/RequestsBadge";
 import { localized } from "/imports/common/lib/groupRules";
 import { markdownExcerpt } from "/imports/utils/markdown";
 
@@ -36,15 +37,17 @@ export const MembershipChip = ({ myState, myIsResponsible }) => {
  * Group preview card: image banner, name with type tag, member count and
  * categories, and a truncated description excerpt in detailed mode. The
  * membership chip, when the caller's state is known, sits at the bottom
- * right: beside the excerpt's last line, or on the member count's line when
+ * right, with a red badge before it for requests waiting for their approval: beside the excerpt's last line, or on the member count's line when
  * there is no excerpt. Used by the group list and the map's space popup.
  */
 const GroupCard = ({ group, compact = false }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "sv";
   const excerpt = compact ? "" : markdownExcerpt(localized(group.description, lang), 110);
+  // One's relation to the group, and the requests waiting for one's approval in red.
   const chip = (group.myState || group.myIsResponsible) && (
-    <span className="ml-auto flex-shrink-0">
+    <span className="ml-auto flex-shrink-0 flex items-center gap-1.5">
+      <RequestsBadge count={group.myRequestsToApprove} />
       <MembershipChip myState={group.myState} myIsResponsible={group.myIsResponsible} />
     </span>
   );

@@ -4,12 +4,14 @@ import { Navigate, useParams } from "react-router-dom";
 import { useSignedIn } from "../../activities/components/useSignedIn";
 import Layout from "/imports/components/Layout/Layout";
 import { AppDataContext } from "/imports/context/AppDataContext";
+import { MemberInfoContext } from "/imports/context/MemberInfoContext";
 import GroupDetail from "./GroupDetail.jsx";
 
 export default () => {
   const { groupId } = useParams();
   const { user, userId, loggingIn } = useSignedIn();
   const { slackChannels } = useContext(AppDataContext);
+  const { refetch: refetchMemberInfo } = useContext(MemberInfoContext);
   const slackTeam = Meteor.settings?.public?.slack?.team;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
@@ -40,6 +42,8 @@ export default () => {
       setActionError(null);
       await Meteor.callAsync(method, ...args);
       await fetchData();
+      // The home page's counts on the Groups card: one's groups, and the requests to approve.
+      await refetchMemberInfo?.();
     } catch (err) {
       console.error(`Error in ${method}:`, err);
       setActionError(err.reason || err.message);

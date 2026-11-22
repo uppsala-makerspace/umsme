@@ -10,7 +10,7 @@ import { memberStatus } from "/imports/common/lib/utils";
 import { REVIEWER_ROLES, approvableAccountIds, assignedAccountIds } from "/imports/common/lib/expenseApproval";
 import { memberForUser } from "/imports/common/server/memberForUser";
 import { spaceIconUrlFor } from "/imports/common/server/workshopImage";
-import { mayEditGroup } from "/imports/common/lib/groupRules";
+import { mayEditGroup, mayApproveAsMember } from "/imports/common/lib/groupRules";
 
 /** The groups the member is an active (approved) member of. */
 export const myActiveGroupIds = async (member) => {
@@ -293,6 +293,41 @@ export const hasPaidMembership = async (member) => {
  */
 export const isActiveMember = async (member) =>
   (await isMemberRegistered(member)) && (await hasPaidMembership(member));
+
+/**
+ * The join requests waiting for this member's approval, by group id: in the
+ * groups they are responsible for, and in those where every active member
+ * approves and they are one (mayApproveAsMember). Not the admin and board
+ * roles' right to approve everywhere. None unless the member is active, as
+ * approving needs that.
+ *
+ * @return {Promise<Map<string, number>>} group id -> pending requests, only those with any
+ */
+export const requestsToApprove = async (member) => {
+  const counts = new Map();
+  if (!member || !(await isActiveMember(member))) return counts;
+  const memberships = await GroupMemberships.find(
+    { memberId: member._id, state: "active" }, { fields: { groupId: 1 } },
+  ).fetchAsync();
+  const groups = await Groups.find(
+    { $or: [{ responsibleMemberId: member._id }, { _id: { $in: memberships.map((m) => m.groupId) } }] },
+    { fields: { joinPolicy: 1, responsibleMemberId: 1 } },
+  ).fetchAsync();
+  const activeIn = new Set(memberships.map((m) => m.groupId));
+  const groupIds = groups
+    .filter((g) => mayApproveAsMember({
+      joinPolicy: g.joinPolicy,
+      isResponsible: g.responsibleMemberId === member._id,
+      membershipState: activeIn.has(g._id) ? "active" : null,
+    }))
+    .map((g) => g._id);
+  if (!groupIds.length) return counts;
+  const pending = await GroupMemberships.find(
+    { groupId: { $in: groupIds }, state: "pending", memberId: { $ne: member._id } }, { fields: { groupId: 1 } },
+  ).fetchAsync();
+  for (const { groupId } of pending) counts.set(groupId, (counts.get(groupId) || 0) + 1);
+  return counts;
+};
 
 export const findForUser = async () => {
   let user;

@@ -145,6 +145,7 @@ export const MemberPayingWithGroups = {
     liabilityOutdated: false,
     groupCount: 12,
     myGroupCount: 3,
+    groupsToApprove: 2,
     activityCount: 8,
     expensesAllowed: true,
     expensesToApprove: 2,

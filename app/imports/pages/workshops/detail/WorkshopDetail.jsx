@@ -20,6 +20,7 @@ import WorkshopStatusBadge from "../components/WorkshopStatusBadge";
 import AreaOfInterestTag from "../../../components/AreaOfInterestTag";
 import { MembershipChip } from "../../../components/GroupCard";
 import StaffingBadge from "../../../components/StaffingBadge";
+import RequestsBadge from "../../../components/RequestsBadge";
 import WorkshopCalendar from "../../activities/components/WorkshopCalendar";
 
 // One group row in the "get involved" / "related groups" lists, in the same
@@ -51,7 +52,8 @@ const GroupRow = ({ group, highlighted }) => {
               {group.memberCount === 1 ? t("memberSingular") : t("memberPlural")}
             </span>
             <StaffingBadge staffing={group.staffing} />
-            <span className="ml-auto">
+            <span className="ml-auto flex items-center gap-1.5">
+              <RequestsBadge count={group.myRequestsToApprove} />
               <MembershipChip myState={group.myState} myIsResponsible={group.myIsResponsible} />
             </span>
           </span>

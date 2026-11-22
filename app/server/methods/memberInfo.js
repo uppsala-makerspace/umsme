@@ -6,7 +6,7 @@ import { Groups } from "/imports/common/collections/groups";
 import { Activities } from "/imports/common/collections/activities";
 import { GroupMemberships } from "/imports/common/collections/groupMemberships";
 import { memberStatus } from '/imports/common/lib/utils';
-import { findMemberForUser, findForUser, expenseAccessAllowed, reviewAccountIdsFor } from "/server/methods/utils";
+import { findMemberForUser, findForUser, expenseAccessAllowed, reviewAccountIdsFor, requestsToApprove } from "/server/methods/utils";
 import { Expenses } from "/imports/common/collections/expenses";
 import Invites from "/imports/common/collections/Invites";
 import { Accounts } from "meteor/accounts-base";
@@ -115,6 +115,8 @@ Meteor.methods({
         memberId: member._id,
         state: "active",
       }).countAsync(),
+      // Join requests waiting for this member's approval, for the red count.
+      toApprove: [...(await requestsToApprove(member)).values()].reduce((a, b) => a + b, 0),
     };
 
     // And the number of activities, for the Activities card.
