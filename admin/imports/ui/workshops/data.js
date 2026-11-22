@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { useTracker } from 'meteor/react-meteor-data';
+import { Roles } from 'meteor/roles';
 import { Workshops } from '/imports/common/collections/workshops';
 import { uploadImage } from '../groups/choices';
 
@@ -10,7 +11,10 @@ import { uploadImage } from '../groups/choices';
 
 export const useWorkshopList = () => useTracker(() => {
   const handle = Meteor.subscribe('admin.workshops.list');
-  return { loading: !handle.ready(), workshops: Workshops.find({}, { fields: { name: 1, kind: 1, status: 1, groupId: 1, categoryIds: 1 } }).fetch() };
+  // Only for admin and board, as the publication: the treasurer has the names
+  // too, from the choices on the expense accounts, which are not this list.
+  const allowed = !!Meteor.userId() && Roles.userIsInRole(Meteor.userId(), ['admin', 'board']);
+  return { loading: !handle.ready(), workshops: allowed ? Workshops.find({}, { fields: { name: 1, kind: 1, status: 1, groupId: 1, categoryIds: 1 } }).fetch() : [] };
 }, []);
 
 /** One whole workshop; none when there is no id (a new one). */

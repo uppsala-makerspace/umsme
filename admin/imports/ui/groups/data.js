@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { useTracker } from 'meteor/react-meteor-data';
+import { Roles } from 'meteor/roles';
 import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { getLinkableRoleOptions } from '/imports/common/lib/models';
@@ -12,7 +13,10 @@ import { uploadImage } from './choices';
 
 export const useGroupList = () => useTracker(() => {
   const handle = Meteor.subscribe('admin.groups.list');
-  return { loading: !handle.ready(), groups: Groups.find({}, { fields: { name: 1, type: 1, allowJoinRequests: 1, joinPolicy: 1, categoryIds: 1 } }).fetch() };
+  // Only for admin and board, as the publication: the treasurer has the names
+  // too, from the choices on the expense accounts, which are not this list.
+  const allowed = !!Meteor.userId() && Roles.userIsInRole(Meteor.userId(), ['admin', 'board']);
+  return { loading: !handle.ready(), groups: allowed ? Groups.find({}, { fields: { name: 1, type: 1, allowJoinRequests: 1, joinPolicy: 1, categoryIds: 1 } }).fetch() : [] };
 }, []);
 
 /** One whole group and its memberships; none when there is no id (a new group). */
