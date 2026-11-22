@@ -7,7 +7,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 4,
+  workers: 8,
   reporter: [['html', { outputFolder: '/tmp/playwright-report' }]],
   outputDir: '/tmp/playwright-results',
   use: {
