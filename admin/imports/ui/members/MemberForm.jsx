@@ -6,6 +6,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { DateField } from '../components/DateField';
+import { toDateInput, fromDateInput } from '../liability/dates';
 import { formatRfid, RFID_MAX } from '/imports/common/lib/rfid';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
@@ -16,7 +17,9 @@ export const memberValues = (member) => ({
   bankName: member?.bankName || '', bankClearing: member?.bankClearing || '', bankAccountNumber: member?.bankAccountNumber || '',
   bankAccountHolder: member?.bankAccountHolder || '', email: member?.email || '', lock: member?.lock || '',
   youth: !!member?.youth, liability: !!member?.liability,
-  liabilityDate: member?.liabilityDate ? new Date(member.liabilityDate).toLocaleDateString('sv-SE') : '',
+  // The liability version's date, midnight UTC as the version itself has it:
+  // the app and the doors want the very same instant.
+  liabilityDate: toDateInput(member?.liabilityDate),
   mobile: member?.mobile || '',
 });
 
@@ -24,7 +27,7 @@ export const memberValues = (member) => ({
 export const memberFields = (v) => ({
   ...v,
   birthyear: v.birthyear === '' ? null : Number(v.birthyear),
-  liabilityDate: v.liabilityDate ? new Date(`${v.liabilityDate}T00:00:00`) : null,
+  liabilityDate: fromDateInput(v.liabilityDate),
 });
 
 /**

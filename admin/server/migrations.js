@@ -3,6 +3,7 @@ import { Workshops } from '/imports/common/collections/workshops';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
 import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
+import { LiabilityDocuments } from '/imports/common/collections/liabilityDocuments';
 import { Categories } from '/imports/common/collections/categories';
 import { withUniqueSlugs } from '/imports/common/lib/slug';
 import { formatRfid, RFID_PATTERN } from '/imports/common/lib/rfid';
@@ -199,8 +200,37 @@ export const rfidWithDashes = async () => {
   if (fixed) console.log(`[migration] rfid: wrote ${fixed} RFID tags with dashes`);
 };
 
+/**
+ * Members whose liability date a save in admin's member form moved to local
+ * midnight (a couple of hours before the version's midnight UTC), so that the
+ * app asked them to approve again and the doors stayed shut: put back on the
+ * version's own date. Only dates within twelve hours of a version, and not on
+ * one, are touched.
+ */
+export const liabilityDatesOnVersions = async () => {
+  const versions = (await LiabilityDocuments.rawCollection().find({}, { projection: { date: 1 } }).toArray())
+    .map((d) => d.date).filter(Boolean);
+  if (!versions.length) return;
+  const HALF_DAY = 12 * 60 * 60 * 1000;
+  const raw = Members.rawCollection();
+  const members = await raw.find(
+    { liabilityDate: { $exists: true, $nin: versions } },
+    { projection: { liabilityDate: 1 } },
+  ).toArray();
+  let fixed = 0;
+  for (const { _id, liabilityDate } of members) {
+    if (!(liabilityDate instanceof Date)) continue;
+    const version = versions.find((v) => Math.abs(v.getTime() - liabilityDate.getTime()) < HALF_DAY);
+    if (!version) continue;
+    await raw.updateOne({ _id }, { $set: { liabilityDate: version } });
+    fixed += 1;
+  }
+  if (fixed) console.log(`[migration] liability: put ${fixed} members' approval back on the version's date`);
+};
+
 export default async () => {
   await interestGroupsToAreasOfInterest();
   await activityCategoriesToCategories();
   await rfidWithDashes();
+  await liabilityDatesOnVersions();
 };

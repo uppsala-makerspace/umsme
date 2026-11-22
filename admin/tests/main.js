@@ -2,6 +2,7 @@ import assert from "assert";
 import "./accounting.tests";
 import "./categoriesMigration.tests";
 import "./rfid.tests";
+import "./liabilityDates.tests";
 import "./userMerge.tests";
 import "./mergeRequests.tests";
 import "./stats.tests";
