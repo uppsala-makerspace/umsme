@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { models } from "/imports/common/lib/models";
+import { formatRfid, RFID_MAX } from "/imports/common/lib/rfid";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import MainContent from "../../components/MainContent";
@@ -20,7 +21,6 @@ export default ({ onSubmit, showBank = false, initialName = "", initialMobile = 
   const nameMaxLength = models.member.name.max;
   const mobileMaxLength = models.member.mobile.max;
 
-  const rfidMaxLength = models.member.rfid.max;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -91,11 +91,12 @@ export default ({ onSubmit, showBank = false, initialName = "", initialMobile = 
         label={`${t("rfid")} ***`}
         id="rfid"
         type="text"
-        placeholder="A1B2C3D4"
+        placeholder="A1-B2-C3-D4"
         value={rfid}
-        onChange={(e) => setRfid(e.target.value.toUpperCase())}
-        maxLength={rfidMaxLength}
-        pattern="([0-9A-Fa-f]{2})+"
+        onChange={(e) => setRfid(formatRfid(e.target.value))}
+        maxLength={RFID_MAX}
+        pattern="[0-9A-F]{2}(-[0-9A-F]{2})*"
+        hint={t("rfidFormatHint")}
       />
 
       {showBank && (

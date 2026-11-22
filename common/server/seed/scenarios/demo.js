@@ -9,6 +9,7 @@
  */
 import { Meteor } from 'meteor/meteor';
 import { Members } from '/imports/common/collections/members';
+import { formatRfid } from '/imports/common/lib/rfid';
 import { Payments } from '/imports/common/collections/payments';
 import { Groups } from '/imports/common/collections/groups';
 import { GroupMemberships } from '/imports/common/collections/groupMemberships';
@@ -336,7 +337,7 @@ export const buildDemo = async ({ random, people, now }) => {
   // the seed draws the same numbers.
   const tagged = [...labMembers, personas.member, personas.steering, personas.groupLeader];
   for (const [i, member] of tagged.entries()) {
-    await Members.updateAsync(member._id, { $set: { rfid: (0x04a10000 + i).toString(16).toUpperCase().padStart(8, '0') } });
+    await Members.updateAsync(member._id, { $set: { rfid: formatRfid((0x04a10000 + i).toString(16).padStart(8, '0')) } });
   }
 
   // --- Activities and events ----------------------------------------------

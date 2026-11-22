@@ -6,6 +6,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { DateField } from '../components/DateField';
+import { formatRfid, RFID_MAX } from '/imports/common/lib/rfid';
 
 const native = { select: { native: true }, inputLabel: { shrink: true } };
 
@@ -52,7 +53,8 @@ export const MemberForm = ({ values, onChange, onSave, member, busy = false, sub
           </TextField>
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <TextField label="RFID" fullWidth {...text('rfid')} />
+          <TextField label="RFID" fullWidth value={values.rfid ?? ''} onChange={(e) => onChange('rfid', formatRfid(e.target.value))}
+            slotProps={{ htmlInput: { maxLength: RFID_MAX } }} helperText="Bytes in hex, e.g. 03-D7-3B-99; the dashes are added as you type." />
           <TextField label="Lock" fullWidth helperText="The member's username on the door lock" {...text('lock')} />
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>

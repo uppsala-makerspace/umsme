@@ -7,12 +7,14 @@ import React from "react";
  * @param {string} props.label - Optional label text
  * @param {string} props.id - Input id (links label via htmlFor)
  * @param {string} props.error - Optional error message
+ * @param {string} props.hint - Optional help under the field, linked by aria-describedby
  * @param {string} props.className - Additional classes on wrapper div
  */
 export default function Input({
   label,
   id,
   error,
+  hint,
   className = "",
   ...props
 }) {
@@ -34,7 +36,10 @@ export default function Input({
           {label}
         </label>
       )}
-      <input id={id} className={inputStyles} {...props} />
+      <input id={id} className={inputStyles} aria-describedby={hint && id ? `${id}-hint` : undefined} {...props} />
+      {hint && (
+        <p id={id ? `${id}-hint` : undefined} className="text-gray-500 mt-1 text-sm">{hint}</p>
+      )}
       {error && (
         <p className="text-red-500 mt-1 text-sm">{error}</p>
       )}

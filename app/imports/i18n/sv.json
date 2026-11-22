@@ -104,6 +104,7 @@
   "number": "Telefonnummer",
   "rfid": "RFID-tagg",
   "rfidExplanation": "En RFID-tagg används om du har fått certifiering att använda maskiner som kräver upplåsning.",
+  "rfidFormatHint": "Skriv eller klistra in taggens nummer, t.ex. 03D73B99. Bindestrecken sätts in automatiskt.",
   "bankAccountSection": "Bankkonto",
   "bankAccountHint": "Används för att betala ut dina utlägg. Ange siffrorna precis som din bank visar dem.",
   "bankName": "Bank",

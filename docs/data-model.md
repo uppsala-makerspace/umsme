@@ -99,7 +99,7 @@ The central entity representing a makerspace member.
 | `mobile` | String (max 20) | Phone number |
 | `birthyear` | Number | Year of birth |
 | `gender` | String | `male`, `female`, or `undisclosed` |
-| `rfid` | String (max 20) | RFID tag hex string for physical access |
+| `rfid` | String (max 29) | RFID tag, the bytes in hex with a dash between, e.g. `03-D7-3B-99` (`common/lib/rfid.js`); formatted as it is typed, and on the server |
 | `member` | Date | **Denormalized**: membership expiry date (derived from Memberships) |
 | `lab` | Date | **Denormalized**: lab membership expiry date (derived from Memberships) |
 | `family` | Boolean | **Denormalized**: whether current membership is a family plan |

@@ -57,6 +57,17 @@ describe('members', function () {
     await assert.rejects(call(treasurer, 'members.update', docId, { name: 'X' }, null), /not-authorized/);
   });
 
+  it('stores the RFID tag with dashes however it is typed, and none as none', async function () {
+    const docId = await member({});
+    let doc = await Members.findOneAsync(docId);
+    await call(board, 'members.update', docId, { name: doc.name, rfid: '03:d7:3b:99' }, doc.updatedAt ?? null);
+    doc = await Members.findOneAsync(docId);
+    assert.strictEqual(doc.rfid, '03-D7-3B-99');
+    await assert.rejects(call(board, 'members.update', docId, { name: doc.name, rfid: '03d73' }, doc.updatedAt ?? null), /bad-rfid/);
+    await call(board, 'members.update', docId, { name: doc.name, rfid: '' }, doc.updatedAt ?? null);
+    assert.strictEqual('rfid' in (await Members.findOneAsync(docId)), false);
+  });
+
   it('puts drifted dates right, and says they had drifted', async function () {
     const docId = await member({ member: new Date(Date.now() - 400 * DAY) });
     await Memberships.insertAsync({ mid: docId, amount: 200, start: new Date(), type: 'member', discount: false, family: false, memberend: new Date(Date.now() + 300 * DAY) });

@@ -128,6 +128,9 @@ const E2E_ONLY = [
   { key: 'mergeOther', email: at('merge-other'), name: 'Paula Betald',
     description: 'the same person\'s first account, with the paid member, which the merge test merges into merge-requester',
     payments: [['memberLab', -30]] },
+  { key: 'rfidOwner', email: at('rfid-owner'), name: 'Rita Tagg',
+    description: 'a member without an RFID tag, whose profile the RFID test gives one',
+    payments: [['memberBase', -30]] },
 ];
 
 /** Member numbers from 101, in list order, for everyone who is a member. */

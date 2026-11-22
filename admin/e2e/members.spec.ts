@@ -65,6 +65,15 @@ test.describe('Members', () => {
     await expect(field(page, 'Mobile')).toHaveValue('0701234905');
   });
 
+  test('writes the RFID tag with dashes as it is typed, and saves it so', async ({ page }) => {
+    await openMember(page, '919');
+    await field(page, 'RFID').fill('0a:1b:2c:3d');
+    await expect(field(page, 'RFID')).toHaveValue('0A-1B-2C-3D');
+    await saveButton(page).click();
+    await openMember(page, '919');
+    await expect(field(page, 'RFID')).toHaveValue('0A-1B-2C-3D');
+  });
+
   test('puts dates out of step with the memberships right', async ({ page }) => {
     await openMember(page, '913');
     await expect(page.getByText(/not in sync/i)).toBeVisible();

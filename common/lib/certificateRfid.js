@@ -8,6 +8,8 @@
  * Pure: plain objects in, plain objects out, so it can be unit tested.
  */
 
+import { formatRfid } from "./rfid";
+
 /**
  * Whether a query parameter turns a flag on. Present without a value
  * (`?includeNames`), `true` or `1` mean on; absent, `false` or `0` mean off.
@@ -21,15 +23,8 @@ export const flagParam = (value) => {
   return v === "" || v === "true" || v === "1";
 };
 
-/**
- * A tag as the readers want it: upper case, a dash between each byte.
- * "03d73b99" gives "03-D7-3B-99".
- *
- * @param {string} rfid - as stored on the member, hex without separators
- * @returns {string}
- */
-export const formatTag = (rfid) =>
-  (String(rfid || "").replace(/[^0-9a-fA-F]/g, "").toUpperCase().match(/.{1,2}/g) || []).join("-");
+/** A tag as the readers want it, 03-D7-3B-99, from either way it is stored. */
+export { formatRfid as formatTag };
 
 /**
  * Build the response body.
@@ -43,11 +38,11 @@ export const rfidExport = (certificate, members, { includeNames = false } = {}) 
   const withTag = members.filter((m) => m.rfid);
   const body = {
     name: certificate?.name?.sv || certificate?.name?.en || "",
-    rfids: withTag.map((m) => formatTag(m.rfid)),
+    rfids: withTag.map((m) => formatRfid(m.rfid)),
   };
   if (includeNames) {
     body.members = withTag
-      .map((m) => ({ rfid: formatTag(m.rfid), name: m.name || "" }))
+      .map((m) => ({ rfid: formatRfid(m.rfid), name: m.name || "" }))
       .sort((a, b) => a.name.localeCompare(b.name, "sv"));
   }
   return body;
@@ -69,7 +64,7 @@ export const machineExport = (certificates, holdersByCertificate) => {
     const role = certificate.machineRole || "user";
     for (const holder of holdersByCertificate[certificate._id] || []) {
       if (!holder.rfid) continue;
-      const tag = formatTag(holder.rfid);
+      const tag = formatRfid(holder.rfid);
       for (const machine of certificate.machines || []) {
         const key = [tag, machine, role].join("\n");
         if (!rows.has(key)) rows.set(key, { tag, machine, name: holder.name || "", role });

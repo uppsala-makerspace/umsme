@@ -5,6 +5,7 @@ import { ExpenseAccounts } from '/imports/common/collections/expenseAccounts';
 import { Members } from '/imports/common/collections/members';
 import { Categories } from '/imports/common/collections/categories';
 import { withUniqueSlugs } from '/imports/common/lib/slug';
+import { formatRfid, RFID_PATTERN } from '/imports/common/lib/rfid';
 
 /**
  * One-off data migrations, run at admin startup.
@@ -176,7 +177,30 @@ export const activityCategoriesToCategories = async () => {
   }
 };
 
+/**
+ * Members' RFID tags as they are now stored, 03-D7-3B-99, from the hex without
+ * dashes they were kept as. An empty tag is removed; one that cannot be made
+ * whole (an odd number of digits) is left and named in the log.
+ */
+export const rfidWithDashes = async () => {
+  const raw = Members.rawCollection();
+  const members = await raw.find(
+    { rfid: { $exists: true, $not: RFID_PATTERN } },
+    { projection: { rfid: 1 } },
+  ).toArray();
+  let fixed = 0;
+  for (const { _id, rfid } of members) {
+    const tag = formatRfid(rfid);
+    if (!tag) await raw.updateOne({ _id }, { $unset: { rfid: '' } });
+    else if (RFID_PATTERN.test(tag)) await raw.updateOne({ _id }, { $set: { rfid: tag } });
+    else { console.log(`[migration] rfid: RFID tag of member ${_id} left as it is: ${rfid}`); continue; }
+    fixed += 1;
+  }
+  if (fixed) console.log(`[migration] rfid: wrote ${fixed} RFID tags with dashes`);
+};
+
 export default async () => {
   await interestGroupsToAreasOfInterest();
   await activityCategoriesToCategories();
+  await rfidWithDashes();
 };

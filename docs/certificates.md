@@ -267,7 +267,10 @@ that has not expired (no `endDate`, or `endDate` in the future), and a
 non-empty `rfid` on their member record. Pending attestations never count.
 
 **Tags** are written in upper case with a dash between each byte,
-`03-D7-3B-99`, whatever the member record holds (`03d73b99`).
+`03-D7-3B-99`, as the member record stores them. The profile in the app and
+the member form in admin write a tag so as it is typed or pasted, the server
+does the same before saving (`formatRfid` in `common/lib/rfid.js`), and a
+migration rewrote the tags stored before as hex without dashes.
 
 ### Every certificate's machines
 

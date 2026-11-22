@@ -222,7 +222,7 @@ export const buildE2e = async ({ people, now }) => {
   });
   await attest(kiln, 'member', { endDate: days(335) });
   // The member's tag, for the RFID exports.
-  await Members.updateAsync(members.member._id, { $set: { rfid: '03D73B99' } });
+  await Members.updateAsync(members.member._id, { $set: { rfid: '03-D7-3B-99' } });
   const wheel = await certificate({ name: { sv: 'Drejskiva', en: 'Pottery wheel' }, workshopId: ceramics, prerequisites: [kiln] });
   // An activity whose events ask for the wheel certificate, which nobody holds.
   const wheelCourse = {
@@ -431,6 +431,7 @@ export const buildE2e = async ({ people, now }) => {
   // kept one's member has not paid, the other one's has.
   await ownMember('917', 'E2E merge kept account', null);
   await ownMember('918', 'E2E merge removed account');
+  await ownMember('919', 'E2E rfid member');
   for (const mid of ['917', '918']) await makeUser({ email: `e2e-${mid}@example.org`, password: 'password123' });
 
   // Logins of their own for the user tests: roles, password, rename, delete.

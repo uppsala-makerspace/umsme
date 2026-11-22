@@ -104,6 +104,7 @@
   "number": "Phone number",
   "rfid": "RFID tag",
   "rfidExplanation": "An RFID tag is used if you have received certification to use machines that require unlocking.",
+  "rfidFormatHint": "Type or paste the tag's number, e.g. 03D73B99. The dashes are added as you type.",
   "bankAccountSection": "Bank account",
   "bankAccountHint": "Used to reimburse your expenses. Enter the numbers exactly as your bank shows them.",
   "bankName": "Bank",

@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { Members } from "/imports/common/collections/members";
 import { findForUser } from "/server/methods/utils";
+import { normalizeRfid, RFID_PATTERN } from "/imports/common/lib/rfid";
 
 Meteor.methods({
   async createOrUpdateProfile({name, mobile, birthyear, gender, rfid, bankName, bankClearing, bankAccountNumber, bankAccountHolder}) {
@@ -14,6 +15,11 @@ Meteor.methods({
     if (!name || !name.trim())
       throw new Meteor.Error("name-required", "Name is required");
 
+    // The tag as it is stored, 03-D7-3B-99 (common/lib/rfid.js); none is no tag.
+    const tag = normalizeRfid(rfid);
+    if (tag && !RFID_PATTERN.test(tag))
+      throw new Meteor.Error("bad-rfid", "An RFID tag is whole bytes in hex, e.g. 03-D7-3B-99");
+
     // Bank fields are only present when the profile showed the bank section
     // (expense-allowed members). Only persist keys that were provided, so a
     // regular profile save never clobbers existing bank details.
@@ -24,7 +30,10 @@ Meteor.methods({
     if (bankAccountHolder !== undefined) bankFields.bankAccountHolder = bankAccountHolder;
 
     if (member) {
-      await Members.updateAsync(member._id, {$set: {name, mobile, birthyear, gender, rfid, ...bankFields}});
+      await Members.updateAsync(member._id, {
+        $set: {name, mobile, birthyear, gender, ...(tag ? { rfid: tag } : {}), ...bankFields},
+        ...(tag ? {} : { $unset: { rfid: "" } }),
+      });
     } else {
       let mid;
       let foundUniqeId = false;
@@ -40,7 +49,7 @@ Meteor.methods({
         mid,
         birthyear,
         gender,
-        rfid,
+        ...(tag ? { rfid: tag } : {}),
         ...bankFields
       };
       await Members.insertAsync(newMember);

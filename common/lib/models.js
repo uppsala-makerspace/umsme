@@ -1,3 +1,5 @@
+import { RFID_PATTERN, RFID_MAX } from "./rfid";
+
 export const getRoleOptions = () => {
   if (typeof Meteor !== 'undefined' && Meteor.roles) {
     return Meteor.roles.find().map(role => ({
@@ -124,7 +126,7 @@ export const models = {
       label: "Year of birth", type: Number, optional: true
     },
     gender: { label: "Gender", type: String, optional: true, allowedValues: ["male", "female", "undisclosed"] },
-    rfid: { label: "RFID", type: String, max: 20, optional: true, regEx: /^([0-9A-Fa-f]{2})+$/ },
+    rfid: { label: "RFID", type: String, max: RFID_MAX, optional: true, regEx: RFID_PATTERN },
     bankName: { label: "Bank", type: String, max: 100, optional: true },
     bankClearing: { label: "Clearing number", type: String, max: 6, optional: true },
     bankAccountNumber: { label: "Account number", type: String, max: 20, optional: true },

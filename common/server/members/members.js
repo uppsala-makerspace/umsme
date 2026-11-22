@@ -7,6 +7,7 @@ import Invites from '/imports/common/collections/Invites';
 import { memberStatus, updateMember } from '/imports/common/lib/utils';
 import { userSelectorForMember } from '/imports/common/lib/memberMatch';
 import { recordChange } from '/imports/common/server/auditLog';
+import { normalizeRfid, RFID_PATTERN } from '/imports/common/lib/rfid';
 
 /**
  * Members as admin keeps them: adding one, their details, registration and
@@ -40,6 +41,12 @@ const detailsOf = (fields) => {
     else $set[field] = field === 'email' ? value.toLowerCase() : value;
   }
   if ('name' in $unset) throw new Meteor.Error('bad-name', 'A member needs a name');
+  // The tag as it is stored, 03-D7-3B-99, however it was typed (common/lib/rfid.js).
+  if ('rfid' in $set) {
+    $set.rfid = normalizeRfid($set.rfid);
+    if (!$set.rfid) { delete $set.rfid; $unset.rfid = ''; }
+    else if (!RFID_PATTERN.test($set.rfid)) throw new Meteor.Error('bad-rfid', 'An RFID tag is whole bytes in hex, e.g. 03-D7-3B-99');
+  }
   return { $set, $unset };
 };
 
