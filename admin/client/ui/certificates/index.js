@@ -1,7 +1,9 @@
-import { reactRoute } from '../../react/reactRoute';
-import { CertificateListPage } from '/imports/ui/certificates/CertificateListPage';
-import { CertificateEditPage } from '/imports/ui/certificates/CertificateEditPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/certificates', 'certificates', CertificateListPage);
-reactRoute('/certificates/add', 'addcertificate', CertificateEditPage);
-reactRoute('/certificate/:_id', 'certificateview', CertificateEditPage);
+// Each page is loaded when first shown (lazyPage).
+const certificateListPage = () => import('/imports/ui/certificates/CertificateListPage');
+const certificateEditPage = () => import('/imports/ui/certificates/CertificateEditPage');
+
+reactRoute('/certificates', 'certificates', lazyPage(certificateListPage, 'CertificateListPage'));
+reactRoute('/certificates/add', 'addcertificate', lazyPage(certificateEditPage, 'CertificateEditPage'));
+reactRoute('/certificate/:_id', 'certificateview', lazyPage(certificateEditPage, 'CertificateEditPage'));

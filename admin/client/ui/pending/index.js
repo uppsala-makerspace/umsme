@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { PendingMembersPage } from '/imports/ui/pending/PendingMembersPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/pending', 'pending', PendingMembersPage);
+// Each page is loaded when first shown (lazyPage).
+const pendingMembersPage = () => import('/imports/ui/pending/PendingMembersPage');
+
+reactRoute('/pending', 'pending', lazyPage(pendingMembersPage, 'PendingMembersPage'));

@@ -1,7 +1,9 @@
-import { reactRoute } from '../../react/reactRoute';
-import { ActivityPage, DoorStatsMoved, DoorUnlocksMoved } from '/imports/ui/doors/ActivityPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/activity', 'activity', ActivityPage);
+// Each page is loaded when first shown (lazyPage).
+const activityPage = () => import('/imports/ui/doors/ActivityPage');
+
+reactRoute('/activity', 'activity', lazyPage(activityPage, 'ActivityPage'));
 // The pages the Activity page replaced, for bookmarks.
-reactRoute('/door', 'door', DoorStatsMoved);
-reactRoute('/doorunlocks', 'doorunlocks', DoorUnlocksMoved);
+reactRoute('/door', 'door', lazyPage(activityPage, 'DoorStatsMoved'));
+reactRoute('/doorunlocks', 'doorunlocks', lazyPage(activityPage, 'DoorUnlocksMoved'));

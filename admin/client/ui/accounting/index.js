@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { BankExportPage } from '/imports/ui/accounting/BankExportPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/accounting/bankexport', 'bankexport', BankExportPage);
+// Each page is loaded when first shown (lazyPage).
+const bankExportPage = () => import('/imports/ui/accounting/BankExportPage');
+
+reactRoute('/accounting/bankexport', 'bankexport', lazyPage(bankExportPage, 'BankExportPage'));

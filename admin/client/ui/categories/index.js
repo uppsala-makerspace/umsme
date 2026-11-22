@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { CategoryListPage } from '/imports/ui/categories/CategoryListPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/categories', 'categories', CategoryListPage);
+// Each page is loaded when first shown (lazyPage).
+const categoryListPage = () => import('/imports/ui/categories/CategoryListPage');
+
+reactRoute('/categories', 'categories', lazyPage(categoryListPage, 'CategoryListPage'));

@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { RemindersPage } from '/imports/ui/members/RemindersPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/reminders', 'reminders', RemindersPage);
+// Each page is loaded when first shown (lazyPage).
+const remindersPage = () => import('/imports/ui/members/RemindersPage');
+
+reactRoute('/reminders', 'reminders', lazyPage(remindersPage, 'RemindersPage'));

@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { LockSyncPage } from '/imports/ui/lock/LockSyncPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/lock', 'lock', LockSyncPage);
+// Each page is loaded when first shown (lazyPage).
+const lockSyncPage = () => import('/imports/ui/lock/LockSyncPage');
+
+reactRoute('/lock', 'lock', lazyPage(lockSyncPage, 'LockSyncPage'));

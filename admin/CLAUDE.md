@@ -93,6 +93,10 @@ together with the router in `client/react/App.jsx`.
   files). Storybook renders with the MUI theme and `CssBaseline`, as admin
   does. Pages are routed with `reactRoute(path, name, Page)` from
   `client/react/reactRoute.js`; the route's parameters are the page's props.
+  Each page is loaded when first shown, not at startup:
+  `reactRoute('/x', 'x', lazyPage(() => import('/imports/ui/x/XPage'), 'XPage'))`
+  in `client/ui/<module>/index.js`, never a static import of a page there,
+  which would put it back in the startup bundle.
 - Lists: always `DataList` (`imports/ui/components/DataList.jsx`), MUI X
   DataGrid with search, sorting and paging set up the same everywhere, with
   columns from the helpers in `columns.jsx` where they fit. Give it

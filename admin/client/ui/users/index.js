@@ -1,6 +1,8 @@
-import { reactRoute } from '../../react/reactRoute';
-import { UsersPage, UserAddPage, UserViewPage } from '/imports/ui/users/UserPages';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/users', 'users', UsersPage);
-reactRoute('/users/add', 'usersadd', UserAddPage);
-reactRoute('/user/:_id', 'userview', UserViewPage);
+// Each page is loaded when first shown (lazyPage).
+const userPages = () => import('/imports/ui/users/UserPages');
+
+reactRoute('/users', 'users', lazyPage(userPages, 'UsersPage'));
+reactRoute('/users/add', 'usersadd', lazyPage(userPages, 'UserAddPage'));
+reactRoute('/user/:_id', 'userview', lazyPage(userPages, 'UserViewPage'));

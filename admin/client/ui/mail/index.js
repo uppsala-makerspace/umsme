@@ -1,6 +1,8 @@
-import { reactRoute } from '../../react/reactRoute';
-import { MailsPage, MailViewPage, SendMailPage } from '/imports/ui/mail/MailPages';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/mail', 'mails', MailsPage);
-reactRoute('/mail/send', 'sendmail', SendMailPage);
-reactRoute('/mail/:_id', 'mailview', MailViewPage);
+// Each page is loaded when first shown (lazyPage).
+const mailPages = () => import('/imports/ui/mail/MailPages');
+
+reactRoute('/mail', 'mails', lazyPage(mailPages, 'MailsPage'));
+reactRoute('/mail/send', 'sendmail', lazyPage(mailPages, 'SendMailPage'));
+reactRoute('/mail/:_id', 'mailview', lazyPage(mailPages, 'MailViewPage'));

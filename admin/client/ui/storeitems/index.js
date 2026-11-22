@@ -1,7 +1,9 @@
-import { reactRoute } from '../../react/reactRoute';
-import { StoreItemListPage } from '/imports/ui/storeItems/StoreItemListPage';
-import { StoreItemEditPage } from '/imports/ui/storeItems/StoreItemEditPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/storeitems', 'storeitems', StoreItemListPage);
-reactRoute('/storeitems/add', 'addstoreitem', StoreItemEditPage);
-reactRoute('/storeitem/:_id', 'storeitemview', StoreItemEditPage);
+// Each page is loaded when first shown (lazyPage).
+const storeItemListPage = () => import('/imports/ui/storeItems/StoreItemListPage');
+const storeItemEditPage = () => import('/imports/ui/storeItems/StoreItemEditPage');
+
+reactRoute('/storeitems', 'storeitems', lazyPage(storeItemListPage, 'StoreItemListPage'));
+reactRoute('/storeitems/add', 'addstoreitem', lazyPage(storeItemEditPage, 'StoreItemEditPage'));
+reactRoute('/storeitem/:_id', 'storeitemview', lazyPage(storeItemEditPage, 'StoreItemEditPage'));

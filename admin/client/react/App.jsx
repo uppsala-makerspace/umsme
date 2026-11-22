@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component, Suspense, useEffect, useState } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { Roles } from 'meteor/roles';
@@ -7,11 +7,13 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { BrowserRouter, Routes, Route, Outlet, matchPath, useLocation, useNavigate as useRouterNavigate, useParams } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
+import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
 import { theme } from '/imports/ui/theme';
 import { NavigationContext, SearchContext } from '/imports/ui/navigation';
 import { AdminShell } from '/imports/ui/shell/AdminShell';
 import { SignIn } from '/imports/ui/shell/SignIn';
+import { PageLoadError } from '/imports/ui/shell/PageLoadError';
 import { routes } from './reactRoute';
 
 const known = (pathname) => routes.some((r) => matchPath(r.path, pathname));
@@ -39,6 +41,29 @@ const useLinkClicks = (navigate) => useEffect(() => {
 
 const reason = (e) => (e.error === 403 ? 'Wrong username or password, or no access to the administration system.' : e.reason || e.message);
 
+/**
+ * Catches a page that could not be loaded (lazyPage in reactRoute.js marks
+ * the error) and offers a reload; any other error goes on up as before. App
+ * keys it by the path, so another page tries afresh.
+ */
+class PageLoadBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  render() {
+    const { error } = this.state;
+    if (!error) return this.props.children;
+    if (!error.pageLoad) throw error;
+    return <PageLoadError onReload={() => window.location.reload()} />;
+  }
+}
+
 /** The signed-in account, its roles, and signing in and out. */
 const Shell = () => {
   const { pathname } = useLocation();
@@ -65,7 +90,12 @@ const Shell = () => {
       onSignOut={() => Meteor.logout()}
       onChangePassword={(current, next) => Accounts.changePassword(current, next)}
     >
-      <Outlet />
+      {/* Each page is loaded when first shown: a thin bar while it is. */}
+      <PageLoadBoundary key={pathname}>
+        <Suspense fallback={<LinearProgress aria-label="Loading the page" />}>
+          <Outlet />
+        </Suspense>
+      </PageLoadBoundary>
     </AdminShell>
   );
 };

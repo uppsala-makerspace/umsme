@@ -1,7 +1,9 @@
-import { reactRoute } from '../../react/reactRoute';
-import { SpaceListPage } from '/imports/ui/spaces/SpaceListPage';
-import { SpaceEditPage } from '/imports/ui/spaces/SpaceEditPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/spaces', 'spaces', SpaceListPage);
-reactRoute('/spaces/add', 'addspace', SpaceEditPage);
-reactRoute('/space/:_id', 'spaceview', SpaceEditPage);
+// Each page is loaded when first shown (lazyPage).
+const spaceListPage = () => import('/imports/ui/spaces/SpaceListPage');
+const spaceEditPage = () => import('/imports/ui/spaces/SpaceEditPage');
+
+reactRoute('/spaces', 'spaces', lazyPage(spaceListPage, 'SpaceListPage'));
+reactRoute('/spaces/add', 'addspace', lazyPage(spaceEditPage, 'SpaceEditPage'));
+reactRoute('/space/:_id', 'spaceview', lazyPage(spaceEditPage, 'SpaceEditPage'));

@@ -1,5 +1,7 @@
-import { reactRoute } from '../../react/reactRoute';
-import { MembershipAddPage, MembershipViewPage } from '/imports/ui/payments/MembershipPages';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/memberships/add', 'addmembership', MembershipAddPage);
-reactRoute('/membership/:_id', 'memberview', MembershipViewPage);
+// Each page is loaded when first shown (lazyPage).
+const membershipPages = () => import('/imports/ui/payments/MembershipPages');
+
+reactRoute('/memberships/add', 'addmembership', lazyPage(membershipPages, 'MembershipAddPage'));
+reactRoute('/membership/:_id', 'memberview', lazyPage(membershipPages, 'MembershipViewPage'));

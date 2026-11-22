@@ -1,12 +1,14 @@
-import { reactRoute } from '../../react/reactRoute';
-import { ExpensesPage, ConfirmQueuePage, ReimburseQueuePage } from '/imports/ui/expenses/ExpenseListPages';
-import { ExpenseViewPage } from '/imports/ui/expenses/ExpenseViewPage';
-import { ExpenseAccountListPage, ExpenseAccountEditPage } from '/imports/ui/expenses/ExpenseAccountPages';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/expenses', 'expenses', ExpensesPage);
-reactRoute('/expenses/confirm', 'expensesConfirm', ConfirmQueuePage);
-reactRoute('/expenses/reimburse', 'expensesReimburse', ReimburseQueuePage);
-reactRoute('/expense/:_id', 'expenseview', ExpenseViewPage);
-reactRoute('/expenses/accounts', 'expenseaccounts', ExpenseAccountListPage);
-reactRoute('/expenses/accounts/add', 'addexpenseaccount', ExpenseAccountEditPage);
-reactRoute('/expenseaccount/:_id', 'expenseaccountview', ExpenseAccountEditPage);
+// Each page is loaded when first shown (lazyPage).
+const expenseListPages = () => import('/imports/ui/expenses/ExpenseListPages');
+const expenseViewPage = () => import('/imports/ui/expenses/ExpenseViewPage');
+const expenseAccountPages = () => import('/imports/ui/expenses/ExpenseAccountPages');
+
+reactRoute('/expenses', 'expenses', lazyPage(expenseListPages, 'ExpensesPage'));
+reactRoute('/expenses/confirm', 'expensesConfirm', lazyPage(expenseListPages, 'ConfirmQueuePage'));
+reactRoute('/expenses/reimburse', 'expensesReimburse', lazyPage(expenseListPages, 'ReimburseQueuePage'));
+reactRoute('/expense/:_id', 'expenseview', lazyPage(expenseViewPage, 'ExpenseViewPage'));
+reactRoute('/expenses/accounts', 'expenseaccounts', lazyPage(expenseAccountPages, 'ExpenseAccountListPage'));
+reactRoute('/expenses/accounts/add', 'addexpenseaccount', lazyPage(expenseAccountPages, 'ExpenseAccountEditPage'));
+reactRoute('/expenseaccount/:_id', 'expenseaccountview', lazyPage(expenseAccountPages, 'ExpenseAccountEditPage'));

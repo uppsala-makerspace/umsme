@@ -1,8 +1,10 @@
-import { reactRoute } from '../../react/reactRoute';
-import { AnnouncementListPage } from '/imports/ui/announcements/AnnouncementListPage';
-import { AnnouncementEditPage } from '/imports/ui/announcements/AnnouncementEditPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/announcements', 'announcements', AnnouncementListPage);
-reactRoute('/announcements/new', 'announcementNew', AnnouncementEditPage);
-reactRoute('/announcement/:_id', 'announcementView', AnnouncementEditPage);
-reactRoute('/announcement/:_id/edit', 'announcementEdit', AnnouncementEditPage);
+// Each page is loaded when first shown (lazyPage).
+const announcementListPage = () => import('/imports/ui/announcements/AnnouncementListPage');
+const announcementEditPage = () => import('/imports/ui/announcements/AnnouncementEditPage');
+
+reactRoute('/announcements', 'announcements', lazyPage(announcementListPage, 'AnnouncementListPage'));
+reactRoute('/announcements/new', 'announcementNew', lazyPage(announcementEditPage, 'AnnouncementEditPage'));
+reactRoute('/announcement/:_id', 'announcementView', lazyPage(announcementEditPage, 'AnnouncementEditPage'));
+reactRoute('/announcement/:_id/edit', 'announcementEdit', lazyPage(announcementEditPage, 'AnnouncementEditPage'));

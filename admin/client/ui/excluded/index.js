@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { ExcludedPage } from '/imports/ui/members/ExcludedPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/excluded', 'excluded', ExcludedPage);
+// Each page is loaded when first shown (lazyPage).
+const excludedPage = () => import('/imports/ui/members/ExcludedPage');
+
+reactRoute('/excluded', 'excluded', lazyPage(excludedPage, 'ExcludedPage'));

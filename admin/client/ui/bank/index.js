@@ -1,6 +1,8 @@
-import { reactRoute } from '../../react/reactRoute';
-import { PaymentsPage } from '/imports/ui/payments/PaymentsPage';
-import { PaymentViewPage } from '/imports/ui/payments/PaymentViewPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/payments', 'payments', PaymentsPage);
-reactRoute('/payment/:_id', 'payment', PaymentViewPage);
+// Each page is loaded when first shown (lazyPage).
+const paymentsPage = () => import('/imports/ui/payments/PaymentsPage');
+const paymentViewPage = () => import('/imports/ui/payments/PaymentViewPage');
+
+reactRoute('/payments', 'payments', lazyPage(paymentsPage, 'PaymentsPage'));
+reactRoute('/payment/:_id', 'payment', lazyPage(paymentViewPage, 'PaymentViewPage'));

@@ -1,7 +1,9 @@
-import { reactRoute } from '../../react/reactRoute';
-import { LiabilityListPage } from '/imports/ui/liability/LiabilityListPage';
-import { LiabilityEditPage } from '/imports/ui/liability/LiabilityEditPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/liability', 'liability', LiabilityListPage);
-reactRoute('/liability/add', 'addliability', LiabilityEditPage);
-reactRoute('/liability/:_id', 'liabilityview', LiabilityEditPage);
+// Each page is loaded when first shown (lazyPage).
+const liabilityListPage = () => import('/imports/ui/liability/LiabilityListPage');
+const liabilityEditPage = () => import('/imports/ui/liability/LiabilityEditPage');
+
+reactRoute('/liability', 'liability', lazyPage(liabilityListPage, 'LiabilityListPage'));
+reactRoute('/liability/add', 'addliability', lazyPage(liabilityEditPage, 'LiabilityEditPage'));
+reactRoute('/liability/:_id', 'liabilityview', lazyPage(liabilityEditPage, 'LiabilityEditPage'));

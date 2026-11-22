@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { StoragePage } from '/imports/ui/storage/StoragePage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/storage', 'storage', StoragePage);
+// Each page is loaded when first shown (lazyPage).
+const storagePage = () => import('/imports/ui/storage/StoragePage');
+
+reactRoute('/storage', 'storage', lazyPage(storagePage, 'StoragePage'));

@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { AdminConsolePage } from '/imports/ui/console/AdminConsolePage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/admin', 'admin', AdminConsolePage);
+// Each page is loaded when first shown (lazyPage).
+const adminConsolePage = () => import('/imports/ui/console/AdminConsolePage');
+
+reactRoute('/admin', 'admin', lazyPage(adminConsolePage, 'AdminConsolePage'));

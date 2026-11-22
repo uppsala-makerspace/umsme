@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { StatisticsPage } from '/imports/ui/stats/StatisticsPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/stats', 'statistics', StatisticsPage);
+// Each page is loaded when first shown (lazyPage).
+const statisticsPage = () => import('/imports/ui/stats/StatisticsPage');
+
+reactRoute('/stats', 'statistics', lazyPage(statisticsPage, 'StatisticsPage'));

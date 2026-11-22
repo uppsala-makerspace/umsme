@@ -1,4 +1,6 @@
-import { reactRoute } from '../../react/reactRoute';
-import { HistoryPage } from '/imports/ui/stats/HistoryPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/history', 'history', HistoryPage);
+// Each page is loaded when first shown (lazyPage).
+const historyPage = () => import('/imports/ui/stats/HistoryPage');
+
+reactRoute('/history', 'history', lazyPage(historyPage, 'HistoryPage'));

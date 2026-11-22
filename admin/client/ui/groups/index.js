@@ -1,7 +1,9 @@
-import { reactRoute } from '../../react/reactRoute';
-import { GroupListPage } from '/imports/ui/groups/GroupListPage';
-import { GroupEditPage } from '/imports/ui/groups/GroupEditPage';
+import { reactRoute, lazyPage } from '../../react/reactRoute';
 
-reactRoute('/groups', 'groups', GroupListPage);
-reactRoute('/groups/add', 'addgroup', GroupEditPage);
-reactRoute('/group/:_id', 'groupview', GroupEditPage);
+// Each page is loaded when first shown (lazyPage).
+const groupListPage = () => import('/imports/ui/groups/GroupListPage');
+const groupEditPage = () => import('/imports/ui/groups/GroupEditPage');
+
+reactRoute('/groups', 'groups', lazyPage(groupListPage, 'GroupListPage'));
+reactRoute('/groups/add', 'addgroup', lazyPage(groupEditPage, 'GroupEditPage'));
+reactRoute('/group/:_id', 'groupview', lazyPage(groupEditPage, 'GroupEditPage'));
