@@ -61,20 +61,25 @@ test.describe('Door visits', () => {
     await page.getByRole('link', { name: 'Activity' }).click();
     await expect(page.getByRole('heading', { name: /^activity$/i, level: 1 })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Door statistics', selected: true })).toBeVisible();
-    await page.getByLabel('Month').click();
+    await page.getByRole('combobox', { name: 'Month' }).click();
     await page.getByRole('option', { name: month }).click();
     await expect(page.getByText(new RegExp(`^${month}: \\d+ visits? by \\d+ members?, on average [\\d,]+ visits per day$`))).toBeVisible();
     await expect(page.getByRole('img', { name: 'Visits per day' })).toBeVisible();
     await expect(page.getByRole('img', { name: 'Average visits per weekday' })).toBeVisible();
     await expect(page.getByRole('img', { name: 'Door openings per hour of the day' })).toBeVisible();
+    await expect(page.getByRole('img', { name: 'How often members came in a month', exact: true })).toBeVisible();
+    await expect(page.getByRole('img', { name: 'How often members came in a year' })).toHaveCount(0);
   });
 
   test('counts visits or unique members per month', async ({ page }) => {
     await openAs(page, 'admin', '/activity');
-    await page.getByRole('button', { name: 'Per month', exact: true }).click();
-    await page.getByLabel('Year').click();
+    await page.getByRole('button', { name: 'Year', exact: true }).click();
+    await page.getByRole('combobox', { name: 'Year' }).click();
     await page.getByRole('option', { name: year, exact: true }).click();
     await expect(page.getByRole('img', { name: 'Visits per month' })).toBeVisible();
+    await expect(page.getByRole('img', { name: 'How often members came in a month on average', exact: true })).toBeVisible();
+    await expect(page.getByRole('img', { name: 'How often members came in a year' })).toBeVisible();
+    await expect(page.getByText(new RegExp(`came on [\\d,]+ days? in ${year}\\.$`))).toBeVisible();
     await expect(page.getByRole('img', { name: 'Average visits per weekday' })).toBeVisible();
     await expect(page.getByRole('img', { name: 'Door openings per hour of the day' })).toBeVisible();
     await page.getByRole('button', { name: 'Unique members', exact: true }).click();
@@ -84,14 +89,15 @@ test.describe('Door visits', () => {
 
   test('charts per quarter and per year', async ({ page }) => {
     await openAs(page, 'admin', '/activity');
-    await page.getByRole('button', { name: 'Per quarter', exact: true }).click();
+    await page.getByRole('button', { name: 'All quarters', exact: true }).click();
     await expect(page.getByRole('img', { name: 'Visits per quarter' })).toBeVisible();
-    await page.getByRole('button', { name: 'Per year', exact: true }).click();
+    await page.getByRole('button', { name: 'All years', exact: true }).click();
     await expect(page.getByRole('img', { name: 'Visits per year' })).toBeVisible();
     // No average, weekdays or hours per quarter or year.
     await expect(page.getByText(/on average/)).toHaveCount(0);
     await expect(page.getByRole('img', { name: 'Average visits per weekday' })).toHaveCount(0);
     await expect(page.getByRole('img', { name: 'Door openings per hour of the day' })).toHaveCount(0);
+    await expect(page.getByRole('img', { name: 'How often members came in a month' })).toHaveCount(0);
   });
 
   test('the treasurer does not see them', async ({ page }) => {

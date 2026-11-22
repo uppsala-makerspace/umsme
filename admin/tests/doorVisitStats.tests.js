@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { DoorUnlocks } from '/imports/common/collections/doorunlocks';
-import { doorVisitStats, memberDays, weekdayAverages, hourlyOpenings } from '/imports/common/server/doors/visitStats';
+import { doorVisitStats, memberDays, weekdayAverages, hourlyOpenings, visitFrequency, yearFrequency, median } from '/imports/common/server/doors/visitStats';
 
 // The test's openings are in 2099, and `now` too, so that the day and month
 // views see only them; the quarter and year views reach back to the first
@@ -131,6 +131,75 @@ describe('door visit statistics', function () {
     const rows = weekdayAverages('2099-03-02', '2099-03-09', { '2099-03-02': 4 });
     assert.deepStrictEqual(rows[0], { weekday: 'Mon', days: 2, visits: 4, average: 2 });
     assert.deepStrictEqual(rows[6], { weekday: 'Sun', days: 1, visits: 0, average: 0 });
+  });
+
+  it('counts how often members came in a month, every step from one day up', function () {
+    const rows = [
+      { day: '2099-05-01', memberid: 'x' }, { day: '2099-05-02', memberid: 'x' }, { day: '2099-05-03', memberid: 'x' },
+      { day: '2099-05-01', memberid: 'y' },
+      { day: '2099-06-01', memberid: 'x' },
+      { day: '2099-07-01', memberid: 'z' },
+    ];
+    assert.deepStrictEqual(visitFrequency(rows, ['2099-05']), [
+      { times: 1, members: 1 }, { times: 2, members: 0 }, { times: 3, members: 1 },
+    ]);
+    // On average over May and June: x once in June too; July is left out.
+    assert.deepStrictEqual(visitFrequency(rows, ['2099-05', '2099-06']), [
+      { times: 1, members: 1 }, { times: 2, members: 0 }, { times: 3, members: 0.5 },
+    ]);
+    assert.deepStrictEqual(visitFrequency(rows, []), []);
+    assert.deepStrictEqual(visitFrequency([], ['2099-05']), []);
+  });
+
+  it('gives how often members came in the month shown, or on average over the year\'s months that are over', async function () {
+    // March: B on one day, A on two.
+    const march = await doorVisitStats({ view: 'day', month: '2099-03', now });
+    assert.deepStrictEqual(march.frequency, {
+      months: ['2099-03'], rows: [{ times: 1, members: 1 }, { times: 2, members: 1 }], median: 1.5,
+    });
+    // Up to May (June is going on), from the first opening on: January when
+    // another suite left openings before 2099, March when these are the first.
+    // Once B in March and A in April, twice A in March, ten times A in May.
+    const year = await doorVisitStats({ view: 'month', year: 2099, now });
+    const { months } = year.frequency;
+    assert.ok(['2099-01', '2099-03'].includes(months[0]), months[0]);
+    assert.deepStrictEqual(months.slice(-3), ['2099-03', '2099-04', '2099-05']);
+    const n = months.length;
+    const rows = year.frequency.rows;
+    assert.strictEqual(rows.length, 10);
+    assert.deepStrictEqual([rows[0], rows[1], rows[9]], [
+      { times: 1, members: 2 / n }, { times: 2, members: 1 / n }, { times: 10, members: 1 / n },
+    ]);
+    assert.ok(rows.slice(2, 9).every((r) => r.members === 0));
+    // Of the member-months 1 (B, March), 2 (A, March), 1 (A, April) and 10 (A, May).
+    assert.strictEqual(year.frequency.median, 1.5);
+    assert.strictEqual((await doorVisitStats({ view: 'quarter', now })).frequency, undefined, 'not per quarter or year');
+  });
+
+  it('counts how often members came in a year, in steps', async function () {
+    const rows = [
+      ...Array.from({ length: 4 }, (_, i) => ({ day: `2099-01-0${i + 1}`, memberid: 'x' })),
+      { day: '2099-01-01', memberid: 'y' },
+      ...Array.from({ length: 120 }, (_, i) => ({ day: `day${i}`, memberid: 'z' })),
+    ];
+    const { steps, median: middle } = yearFrequency(rows);
+    assert.strictEqual(middle, 4, 'of 1, 4 and 120 days');
+    assert.strictEqual(steps.length, 8);
+    assert.deepStrictEqual(steps.map((st) => st.members), [1, 0, 1, 0, 0, 0, 0, 1]);
+    assert.deepStrictEqual(steps[2], { from: 3, to: 5, members: 1 });
+    assert.deepStrictEqual(steps[7], { from: 101, to: null, members: 1 });
+
+    // 2099 up to now: A on 13 days (11–20), B on one.
+    const year = await doorVisitStats({ view: 'month', year: 2099, now });
+    assert.deepStrictEqual(year.yearFrequency.steps.map((st) => st.members), [1, 0, 0, 0, 1, 0, 0, 0]);
+    assert.strictEqual(year.yearFrequency.median, 7, 'of 1 and 13 days');
+    assert.strictEqual((await doorVisitStats({ view: 'day', month: '2099-03', now })).yearFrequency, undefined, 'only per year');
+  });
+
+  it('takes the median, the mean of the middle two for an even count', function () {
+    assert.strictEqual(median([5, 1, 3]), 3);
+    assert.strictEqual(median([4, 1, 3, 2]), 2.5);
+    assert.strictEqual(median([]), null);
   });
 
   it('has nothing for a month after now', async function () {

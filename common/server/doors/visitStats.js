@@ -112,6 +112,71 @@ export const hourlyOpenings = async (fromDay, toDay) => {
   return hours.map((h) => ({ ...h, average: h.openings / days }));
 };
 
+/** The median of numbers, the mean of the two middle ones for an even count; null for none. */
+export const median = (values) => {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+};
+
+/** How many days each member came in each month of `months`: "YYYY-MM memberid" -> days. */
+const daysPerMemberMonth = (rows, months) => {
+  const counted = new Set(months);
+  const daysOf = new Map();
+  for (const { day, memberid } of rows) {
+    const month = day.slice(0, 7);
+    if (!counted.has(month)) continue;
+    const key = `${month} ${memberid}`;
+    daysOf.set(key, (daysOf.get(key) || 0) + 1);
+  }
+  return daysOf;
+};
+
+/**
+ * How often members came in a month: for n = 1, 2, … the number of members
+ * who came on n days of a month, averaged over `months` ("YYYY-MM"), so for
+ * one month the count itself. From 1 to the highest n there is, steps
+ * without members included as 0. Days outside `months` are left out.
+ *
+ * @param {{ day: string, memberid: string }[]} rows - member-days, as memberDays gives them
+ * @param {string[]} months
+ * @returns {{ times: number, members: number }[]}
+ */
+export const visitFrequency = (rows, months) => {
+  if (!months.length) return [];
+  const daysOf = daysPerMemberMonth(rows, months);
+  const members = [];
+  for (const days of daysOf.values()) members[days] = (members[days] || 0) + 1;
+  return Array.from({ length: Math.max(0, members.length - 1) }, (_, i) => ({
+    times: i + 1,
+    members: (members[i + 1] || 0) / months.length,
+  }));
+};
+
+/** The steps of how often members came in a year: from and to days, both included; the last open. */
+export const YEAR_FREQUENCY_STEPS = [[1, 1], [2, 2], [3, 5], [6, 10], [11, 20], [21, 50], [51, 100], [101, null]];
+
+/**
+ * How often members came in a year: for each step of YEAR_FREQUENCY_STEPS the
+ * members who came on that many days of the rows given (the year's, or the
+ * part of it that has passed). Every step is there, without members too.
+ * Also the median member's days, of those who came.
+ *
+ * @param {{ day: string, memberid: string }[]} rows - member-days, as memberDays gives them
+ * @returns {{ steps: { from: number, to: number|null, members: number }[], median: number|null }}
+ */
+export const yearFrequency = (rows) => {
+  const daysOf = new Map();
+  for (const { memberid } of rows) daysOf.set(memberid, (daysOf.get(memberid) || 0) + 1);
+  const steps = YEAR_FREQUENCY_STEPS.map(([from, to]) => ({ from, to, members: 0 }));
+  for (const days of daysOf.values()) {
+    const step = steps.find((st) => days >= st.from && (st.to === null || days <= st.to));
+    step.members += 1;
+  }
+  return { steps, median: median([...daysOf.values()]) };
+};
+
 /**
  * The member-days with an opening between two days (Swedish time), both
  * included: [{ day: '2026-10-01', memberid }].
@@ -148,7 +213,10 @@ export const memberDays = async ({ fromDay, toDay }) => {
  *   current one when left out.
  * Per day and per month also the average visits per weekday, and the
  * average door openings per hour of the day, over the days shown (the
- * month's, or the year's, up to today).
+ * month's, or the year's, up to today); and how often members came in a
+ * month (visitFrequency): in the month shown, or on average over the year's
+ * months that are over; per month also how often they came in the year, up
+ * to today (yearFrequency).
  *
  * The average per bar is over the bars shown, except an unfinished month,
  * quarter or year (the one today is in), which would pull it down; per day it
@@ -160,6 +228,8 @@ export const memberDays = async ({ fromDay, toDay }) => {
  *   average: { visits: number, unique: number, over: number },
  *   weekdays?: { weekday: string, days: number, visits: number, average: number }[],
  *   hours?: { hour: number, openings: number, average: number }[],
+ *   frequency?: { months: string[], rows: { times: number, members: number }[], median: number|null },
+ *   yearFrequency?: { steps: { from: number, to: number|null, members: number }[], median: number|null },
  *   available: { months: string[], years: number[] } }>}  `available`: what
  *   can be chosen, from the first opening to now, newest first
  */
@@ -206,7 +276,8 @@ export const doorVisitStats = async ({ view, month, year, now = new Date() }) =>
   const everyone = new Set();
   let visits = 0;
   const visitsOnDay = {};
-  for (const { day, memberid } of await memberDays({ fromDay, toDay })) {
+  const rows = await memberDays({ fromDay, toDay });
+  for (const { day, memberid } of rows) {
     visitsOnDay[day] = (visitsOnDay[day] || 0) + 1;
     const bar = bars[barOf(day)];
     if (!bar) continue;
@@ -223,6 +294,17 @@ export const doorVisitStats = async ({ view, month, year, now = new Date() }) =>
   const mean = (field) => (averaged.length ? averaged.reduce((sum, bar) => sum + bar[field], 0) / averaged.length : 0);
 
   const months = monthsBetween(firstDay.slice(0, 7), thisMonth).reverse();
+  // How often members came in a month: the month shown, or the year's months
+  // that are over (from the first opening on), the current one only when
+  // there are none.
+  let frequencyMonths = [];
+  if (view === 'day') frequencyMonths = [result.month];
+  else if (view === 'month' && keys.length) {
+    const fromMonth = [keys[0], firstDay.slice(0, 7)].sort()[1];
+    const ofYear = keys.filter((m) => m >= fromMonth);
+    const over = ofYear.filter((m) => m !== thisMonth);
+    frequencyMonths = over.length ? over : ofYear;
+  }
   return {
     ...result,
     bars: shown,
@@ -231,6 +313,13 @@ export const doorVisitStats = async ({ view, month, year, now = new Date() }) =>
     ...(view === 'day' || view === 'month' ? {
       weekdays: weekdayAverages(fromDay, toDay, visitsOnDay),
       hours: await hourlyOpenings(fromDay, toDay),
+      frequency: {
+        months: frequencyMonths,
+        rows: visitFrequency(rows, frequencyMonths),
+        // The median member's days in a month: of every member's days in each month counted.
+        median: median([...daysPerMemberMonth(rows, frequencyMonths).values()]),
+      },
+      ...(view === 'month' ? { yearFrequency: yearFrequency(rows) } : {}),
     } : {}),
     available: { months, years: [...new Set(months.map((m) => Number(m.slice(0, 4))))] },
   };

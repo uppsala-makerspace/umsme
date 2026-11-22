@@ -11,7 +11,7 @@ import { ChartCanvas } from '../components/ChartCanvas';
 import { TabPart, TabToolbar } from '../components/PageTabs';
 import { monthLabel, monthName, quarterLabel, quarterName, dayLabel } from '../periods';
 
-const VIEWS = { day: 'Per day', month: 'Per month', quarter: 'Per quarter', year: 'Per year' };
+const VIEWS = { day: 'Month', month: 'Year', quarter: 'All quarters', year: 'All years' };
 const UNITS = { day: 'day', month: 'month', quarter: 'quarter', year: 'year' };
 const COUNTS = { visits: 'Visits', unique: 'Unique members' };
 
@@ -22,6 +22,8 @@ const number = (n) => n.toLocaleString('sv-SE');
 const PALETTE = {
   purple: { borderColor: 'rgb(153, 102, 255)', backgroundColor: 'rgba(153, 102, 255, 0.5)' },
   orange: { borderColor: 'rgb(255, 159, 64)', backgroundColor: 'rgba(255, 159, 64, 0.5)' },
+  teal: { borderColor: 'rgb(75, 192, 192)', backgroundColor: 'rgba(75, 192, 192, 0.5)' },
+  red: { borderColor: 'rgb(255, 99, 132)', backgroundColor: 'rgba(255, 99, 132, 0.5)' },
 };
 // An average to one decimal below ten ("2,4"), whole above ("450").
 const average = (n) => n.toLocaleString('sv-SE', { maximumFractionDigits: n < 10 ? 1 : 0 });
@@ -93,6 +95,82 @@ const HourChart = ({ stats }) => {
   );
 };
 
+/** The median of those who came, in words: "the member in the middle … came on 3 days in October 2026". */
+const Median = ({ value, of }) => (value === null || value === undefined ? null : (
+  <Typography variant="body1" sx={{ mb: 1 }}>
+    <strong>Median:</strong> the member in the middle of those who came, came on {average(value)} {value === 1 ? 'day' : 'days'} {of}.
+  </Typography>
+));
+
+/**
+ * How often members came in a month: the members who came on one day, two
+ * days and so on, in the month shown, or on average over the year's months
+ * that are over.
+ */
+const FrequencyChart = ({ stats }) => {
+  const { rows, months, median } = stats.frequency;
+  const config = useMemo(() => ({
+    type: 'bar',
+    data: {
+      labels: rows.map((r) => String(r.times)),
+      datasets: [{ label: 'Members', data: rows.map((r) => Math.round(r.members * 10) / 10), borderWidth: 2, ...PALETTE.teal }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Days in the month' } },
+        y: { beginAtZero: true, title: { display: true, text: 'Members' } },
+      },
+    },
+  }), [rows]);
+  const title = stats.view === 'day' ? 'How often members came in a month' : 'How often members came in a month on average';
+  return (
+    <TabPart title={title} sx={{ mt: 4 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        {stats.view === 'day'
+          ? `Members by the number of days they came in ${monthName(stats.month)}.`
+          : `Members by the number of days they came in a month, on average over ${months.length} ${months.length === 1 ? 'month' : 'months'} of ${stats.year}; the month going on is left out when there are others.`}
+      </Typography>
+      <Median value={median} of={stats.view === 'day' ? `in ${monthName(stats.month)}` : 'in a month'} />
+      <ChartCanvas config={config} label={title} height={240} />
+    </TabPart>
+  );
+};
+
+/** A step of how often members came in a year: "1", "3–5", "101+". */
+const stepLabel = ({ from, to }) => (to === null ? `${from}+` : from === to ? String(from) : `${from}–${to}`);
+
+/** How often members came in the year shown: the members by the number of days, in steps. */
+const YearFrequencyChart = ({ stats }) => {
+  const { steps, median } = stats.yearFrequency;
+  const config = useMemo(() => ({
+    type: 'bar',
+    data: {
+      labels: steps.map(stepLabel),
+      datasets: [{ label: 'Members', data: steps.map((st) => st.members), borderWidth: 2, ...PALETTE.red }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Days in the year' } },
+        y: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: 'Members' } },
+      },
+    },
+  }), [steps]);
+  const thisYear = stats.bars.length < 12;
+  return (
+    <TabPart title="How often members came in a year" sx={{ mt: 4 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        Members by the number of days they came in {stats.year}{thisYear ? ', so far' : ''}.
+      </Typography>
+      <Median value={median} of={`in ${stats.year}`} />
+      <ChartCanvas config={config} label="How often members came in a year" height={240} />
+    </TabPart>
+  );
+};
+
 /** What the chart shows, in words: "October 2026", "2026", "Q2 2026 – Q4 2026". */
 const periodName = (stats) => {
   const { view, bars } = stats;
@@ -114,7 +192,8 @@ const periodName = (stats) => {
  *
  * @param {{ stats?: { view, month?, year?, bars: {key, visits, unique}[], total: {visits, unique},
  *   average: {visits, unique, over}, weekdays?: {weekday, days, visits, average}[],
- *   hours?: {hour, openings, average}[],
+ *   hours?: {hour, openings, average}[], frequency?: { months: string[], rows: {times, members}[] },
+ *   frequency.median, yearFrequency?: { steps: {from, to, members}[], median },
  *   available: { months: string[], years: number[] } },
  *   query: { view: 'day'|'month'|'quarter'|'year', month?: string, year?: number },
  *   onQuery: (query) => void, count: 'visits'|'unique', onCount: (count) => void,
@@ -208,6 +287,8 @@ export const DoorStats = ({ stats, query, onQuery, count, onCount, loading = fal
           </TabPart>
           {stats.total.visits > 0 && stats.weekdays && <WeekdayChart stats={stats} />}
           {stats.total.visits > 0 && stats.hours && stats.weekdays && <HourChart stats={stats} />}
+          {stats.total.visits > 0 && stats.frequency?.rows.length > 0 && <FrequencyChart stats={stats} />}
+          {stats.total.visits > 0 && stats.yearFrequency && <YearFrequencyChart stats={stats} />}
         </>
       )}
     </Box>

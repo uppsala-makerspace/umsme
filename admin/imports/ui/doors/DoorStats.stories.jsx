@@ -8,6 +8,12 @@ const WithCount = (args) => {
   return <DoorStats {...args} count={count} onCount={setCount} />;
 };
 
+// Many come once or twice a month, a few nearly every day.
+const frequency = (scale) => [31, 18, 11, 8, 6, 4, 3, 3, 2, 2, 1, 1, 0, 1, 0, 1]
+  .map((members, i) => ({ times: i + 1, members: Math.round(members * scale * 10) / 10 }));
+
+const YEAR_STEPS = [[1, 1], [2, 2], [3, 5], [6, 10], [11, 20], [21, 50], [51, 100], [101, null]].map(([from, to]) => ({ from, to }));
+
 export default {
   title: 'Doors/DoorStats',
   component: DoorStats,
@@ -49,14 +55,14 @@ const years = [['2025', 1040, 97], ['2026', 2829, 121]].map(([key, visits, uniqu
 export const PerDay = {
   args: {
     query: { view: 'day', month: '2026-10' },
-    stats: { view: 'day', month: '2026-10', bars: days, total: { visits: sum(days, 'visits'), unique: 58 }, average: average(days), weekdays: weekdays(31 / 7), hours: hours(31), available },
+    stats: { view: 'day', month: '2026-10', bars: days, total: { visits: sum(days, 'visits'), unique: 58 }, average: average(days), weekdays: weekdays(31 / 7), hours: hours(31), frequency: { months: ['2026-10'], rows: frequency(1), median: 2 }, available },
   },
 };
 
 export const PerMonth = {
   args: {
     query: { view: 'month', year: 2026 },
-    stats: { view: 'month', year: 2026, bars: months, total: { visits: sum(months, 'visits'), unique: 121 }, average: average(months, true), weekdays: weekdays(319 / 7), hours: hours(319), available },
+    stats: { view: 'month', year: 2026, bars: months, total: { visits: sum(months, 'visits'), unique: 121 }, average: average(months, true), weekdays: weekdays(319 / 7), hours: hours(319), frequency: { months: ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'], rows: frequency(1.3), median: 2.5 }, yearFrequency: { steps: [38, 17, 22, 14, 12, 10, 5, 3].map((members, i) => ({ ...YEAR_STEPS[i], members })), median: 4 }, available },
   },
 };
 
